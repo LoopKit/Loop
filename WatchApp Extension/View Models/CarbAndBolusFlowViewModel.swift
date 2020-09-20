@@ -29,7 +29,6 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
 
     // MARK: - Other state
     let interactionStartDate = Date()
-    private let carbEntrySyncIdentifier = UUID().uuidString
     private var carbEntryUnderConsideration: NewCarbEntry?
     private var contextUpdateObservation: AnyObject?
     private var hasSentConfirmationMessage = false
@@ -108,13 +107,13 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         recommendedBolusAmount = nil
     }
 
-    func recommendBolus(forGrams grams: Int, eatenAt carbEntryDate: Date, absorptionTime carbAbsorptionTime: CarbAbsorptionTime) {
+    func recommendBolus(forGrams grams: Int, eatenAt carbEntryDate: Date, absorptionTime carbAbsorptionTime: CarbAbsorptionTime, lastEntryDate: Date) {
         let entry = NewCarbEntry(
+            date: lastEntryDate,
             quantity: HKQuantity(unit: .gram(), doubleValue: Double(grams)),
             startDate: carbEntryDate,
             foodType: nil,
-            absorptionTime: absorptionTime(for: carbAbsorptionTime),
-            syncIdentifier: UUID().uuidString
+            absorptionTime: absorptionTime(for: carbAbsorptionTime)
         )
 
         guard entry.quantity.doubleValue(for: .gram()) > 0 else {

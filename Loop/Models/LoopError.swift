@@ -68,9 +68,6 @@ enum MissingDataErrorDetail: String, Codable {
 }
 
 enum LoopError: Error {
-    // A bolus failed to start
-    case bolusCommand(SetBolusError)
-
     // Missing or unexpected configuration values
     case configurationError(ConfigurationErrorDetail)
 
@@ -104,9 +101,7 @@ extension LoopError: Codable {
             }
         } else {
             let container = try decoder.container(keyedBy: CodableKeys.self)
-            if let bolusCommand = try container.decodeIfPresent(BolusCommand.self, forKey: .bolusCommand) {
-                self = .bolusCommand(bolusCommand.setBolusError)
-            } else if let configurationError = try container.decodeIfPresent(ConfigurationError.self, forKey: .configurationError) {
+            if let configurationError = try container.decodeIfPresent(ConfigurationError.self, forKey: .configurationError) {
                 self = .configurationError(configurationError.configurationErrorDetail)
             } else if let missingDataError = try container.decodeIfPresent(MissingDataError.self, forKey: .missingDataError) {
                 self = .missingDataError(missingDataError.missingDataErrorDetail)
@@ -129,9 +124,6 @@ extension LoopError: Codable {
         case .connectionError:
             var container = encoder.singleValueContainer()
             try container.encode(CodableKeys.connectionError.rawValue)
-        case .bolusCommand(let setBolusError):
-            var container = encoder.container(keyedBy: CodableKeys.self)
-            try container.encode(BolusCommand(setBolusError: setBolusError), forKey: .bolusCommand)
         case .configurationError(let configurationErrorDetail):
             var container = encoder.container(keyedBy: CodableKeys.self)
             try container.encode(ConfigurationError(configurationErrorDetail: configurationErrorDetail), forKey: .configurationError)
@@ -151,10 +143,6 @@ extension LoopError: Codable {
             var container = encoder.container(keyedBy: CodableKeys.self)
             try container.encode(InvalidData(details: details), forKey: .invalidData)
         }
-    }
-    
-    private struct BolusCommand: Codable {
-        let setBolusError: SetBolusError
     }
     
     private struct ConfigurationError: Codable {
@@ -210,8 +198,6 @@ extension LoopError: LocalizedError {
         formatter.unitsStyle = .full
 
         switch self {
-        case .bolusCommand(let error):
-            return error.errorDescription
         case .configurationError(let details):
             return String(format: NSLocalizedString("Configuration Error: %1$@", comment: "The error message displayed for configuration errors. (1: configuration error details)"), details.localized())
         case .connectionError:

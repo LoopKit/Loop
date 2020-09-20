@@ -34,10 +34,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         return window?.rootViewController as? RootNavigationController
     }
     
-    private var isAfterFirstUnlock: Bool {
+    private func isAfterFirstUnlock() -> Bool {
         let fileManager = FileManager.default
         do {
-            let documentDirectory = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor:nil, create:false)
+            let documentDirectory = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
             let fileURL = documentDirectory.appendingPathComponent("protection.test")
             guard fileManager.fileExists(atPath: fileURL.path) else {
                 let contents = Data("unimportant".utf8)
@@ -59,7 +59,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
 
         bluetoothStateManager = BluetoothStateManager()
         alertManager = AlertManager(rootViewController: rootViewController, expireAfter: Bundle.main.localCacheDuration ?? .days(1))
-        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager)
+        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager, rootViewController: rootViewController)
 
         let statusTableViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         
@@ -85,6 +85,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         if let notification = notificationOption as? [String: AnyObject] {
             deviceDataManager?.handleRemoteNotification(notification)
         }
+        
+        launchOptions = nil
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -93,7 +95,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         
         log.default("didFinishLaunchingWithOptions %{public}@", String(describing: launchOptions))
         
-        guard isAfterFirstUnlock else {
+        guard isAfterFirstUnlock() else {
             log.default("Launching before first unlock; pausing launch...")
             return false
         }
@@ -101,7 +103,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         finishLaunch(application: application)
 
         window?.tintColor = .loopAccent
-                
+                        
         return true
     }
 

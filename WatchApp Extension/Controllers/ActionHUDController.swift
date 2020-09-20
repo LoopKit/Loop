@@ -10,6 +10,7 @@ import WatchKit
 import WatchConnectivity
 import LoopKit
 import LoopCore
+import SwiftUI
 
 
 final class ActionHUDController: HUDInterfaceController {
@@ -20,9 +21,9 @@ final class ActionHUDController: HUDInterfaceController {
     @IBOutlet var overrideButtonImage: WKInterfaceImage!
     @IBOutlet var overrideButtonBackground: WKInterfaceGroup!
 
-    private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor)
+    private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor, onIconColor: .darkCarbsColor, offIconColor: .carbsColor)
 
-    private lazy var overrideButtonGroup = ButtonGroup(button: overrideButton, image: overrideButtonImage, background: overrideButtonBackground, onBackgroundColor: .overrideColor, offBackgroundColor: .darkOverrideColor)
+    private lazy var overrideButtonGroup = ButtonGroup(button: overrideButton, image: overrideButtonImage, background: overrideButtonBackground, onBackgroundColor: .overrideColor, offBackgroundColor: .darkOverrideColor, onIconColor: .darkOverrideColor, offIconColor: .overrideColor)
 
     @IBOutlet var overrideButtonLabel: WKInterfaceLabel! {
         didSet {
@@ -113,12 +114,11 @@ final class ActionHUDController: HUDInterfaceController {
         guard let range = loopManager.settings.preMealTargetRange else {
             return
         }
-
-        presentOnOffActionSheet(
-            title: NSLocalizedString("Pre-Meal", comment: "Title for sheet to enable/disable pre-meal on watch"),
-            message: formattedGlucoseRangeString(from: range),
-            onSelection: setPreMealEnabled
-        )
+        
+        let buttonToSelect = loopManager.settings.preMealOverride?.isActive() == true ? SelectedButton.on : SelectedButton.off
+        let viewModel = OnOffSelectionViewModel(title: NSLocalizedString("Pre-Meal", comment: "Title for sheet to enable/disable pre-meal on watch"), message: formattedGlucoseRangeString(from: range), onSelection: setPreMealEnabled, selectedButton: buttonToSelect, selectedButtonTint: .carbsColor)
+        
+        presentController(withName: OnOffSelectionController.className, context: viewModel)
     }
 
     func setPreMealEnabled(_ isPreMealEnabled: Bool) {
@@ -182,14 +182,19 @@ final class ActionHUDController: HUDInterfaceController {
                 ? sendOverride(nil)
                 : presentController(withName: OverrideSelectionController.className, context: self as OverrideSelectionControllerDelegate)
         } else if let range = loopManager.settings.legacyWorkoutTargetRange {
-            presentOnOffActionSheet(
+            let buttonToSelect = loopManager.settings.nonPreMealOverrideEnabled() == true ? SelectedButton.on : SelectedButton.off
+            
+            let viewModel = OnOffSelectionViewModel(
                 title: NSLocalizedString("Workout", comment: "Title for sheet to enable/disable workout mode on watch"),
                 message: formattedGlucoseRangeString(from: range),
                 onSelection: { isWorkoutEnabled in
                     let override = isWorkoutEnabled ? self.loopManager.settings.legacyWorkoutOverride(for: .infinity) : nil
                     self.sendOverride(override)
-                }
+                },
+                selectedButton: buttonToSelect,
+                selectedButtonTint: .glucose
             )
+            presentController(withName: OnOffSelectionController.className, context: viewModel)
         }
     }
 
@@ -252,31 +257,6 @@ final class ActionHUDController: HUDInterfaceController {
                 )
             }
         }
-    }
-
-    private func presentOnOffActionSheet(
-        title: String,
-        message: String?,
-        onSelection setEnabled: @escaping (_ isEnabled: Bool) -> Void
-    ) {
-        presentAlert(
-            withTitle: title,
-            message: message,
-            preferredStyle: .actionSheet,
-            actions: [
-                WKAlertAction(
-                    title: NSLocalizedString("On", comment: "Button text for enabling temporary correction range"),
-                    style: .default,
-                    handler: { setEnabled(true) }
-                ),
-
-                WKAlertAction(
-                    title: NSLocalizedString("Off", comment: "Button text for disabling temporary correction range"),
-                    style: .default,
-                    handler: { setEnabled(false) }
-                )
-            ]
-        )
     }
 }
 

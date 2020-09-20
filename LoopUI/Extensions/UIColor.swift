@@ -34,13 +34,11 @@ extension UIColor {
     
     @nonobjc public static let cellBackgroundColor = secondarySystemBackground
     
-    @nonobjc public static let cobTintColor = carbs
+    @nonobjc public static let carbTintColor = carbs
     
     @nonobjc static let critical = systemRed
     
     @nonobjc public static let destructive = critical
-
-    @nonobjc public static let doseTintColor = insulin
     
     @nonobjc public static let freshColor = fresh
 
@@ -50,7 +48,7 @@ extension UIColor {
     
     @nonobjc public static let invalid = critical
 
-    @nonobjc public static let iobTintColor = insulin
+    @nonobjc public static let insulinTintColor = insulin
     
     @nonobjc public static let pumpStatusNormal = insulin
     

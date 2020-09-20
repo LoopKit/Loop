@@ -80,34 +80,20 @@ extension NotificationManager {
 
     // MARK: - Notifications
 
-    static func sendBolusFailureNotification(for error: Error, units: Double, at startDate: Date) {
+    static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date) {
         let notification = UNMutableNotificationContent()
 
         notification.title = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")
 
         let sentenceFormat = NSLocalizedString("%@.", comment: "Appends a full-stop to a statement")
 
-        switch error {
-        case let error as SetBolusError:
-            notification.subtitle = error.errorDescriptionWithUnits(units)
+        notification.subtitle = error.errorDescription ?? "Bolus Failure"
 
-            let body = [error.failureReason, error.recoverySuggestion].compactMap({ $0 }).map({
-                String(format: sentenceFormat, $0)
-            }).joined(separator: " ")
+        let body = [error.failureReason, error.recoverySuggestion].compactMap({ $0 }).map({
+            String(format: sentenceFormat, $0)
+        }).joined(separator: " ")
 
-            notification.body = body
-        case let error as LocalizedError:
-            if let subtitle = error.errorDescription {
-                notification.subtitle = subtitle
-            }
-            let message = [error.failureReason, error.recoverySuggestion].compactMap({ $0 }).map({
-                String(format: sentenceFormat, $0)
-            }).joined(separator: "\n")
-            notification.body = message.isEmpty ? String(describing: error) : message
-        default:
-            notification.body = error.localizedDescription
-        }
-
+        notification.body = body
         notification.sound = .default
 
         if startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5) {

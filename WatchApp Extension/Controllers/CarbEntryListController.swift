@@ -40,6 +40,7 @@ class CarbEntryListController: WKInterfaceController, IdentifiableClass {
 
     override func awake(withContext context: Any?) {
         table.setNumberOfRows(0, withRowType: TextRowController.className)
+        loopManager.requestCarbBackfill()
         reloadCarbEntries()
         updateActiveCarbs()
     }
@@ -56,6 +57,7 @@ class CarbEntryListController: WKInterfaceController, IdentifiableClass {
             NotificationCenter.default.addObserver(forName: LoopDataManager.didUpdateContextNotification, object: loopManager, queue: nil) { [weak self] (note) in
                 DispatchQueue.main.async {
                     self?.updateActiveCarbs()
+                    self?.loopManager.requestCarbBackfill()
                 }
             }
         ]

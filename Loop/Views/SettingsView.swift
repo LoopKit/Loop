@@ -8,13 +8,25 @@
 
 import LoopKit
 import LoopKitUI
+import MockKit
 import SwiftUI
 
 public struct SettingsView: View, HorizontalSizeClassOverride {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appName) private var appName
+    @Environment(\.carbTintColor) private var carbTintColor
+    @Environment(\.glucoseTintColor) private var glucoseTintColor
+    @Environment(\.guidanceColors) private var guidanceColors
+    @Environment(\.insulinTintColor) private var insulinTintColor
 
     @ObservedObject var viewModel: SettingsViewModel
+
+    @State private var pumpChooserIsPresented: Bool = false
+    @State private var cgmChooserIsPresented: Bool = false
+    @State private var serviceChooserIsPresented: Bool = false
+    @State private var therapySettingsIsPresented: Bool = false
+    @State private var deletePumpDataAlertIsPresented = false
+    @State private var deleteCGMDataAlertIsPresented = false
 
     public init(viewModel: SettingsViewModel) {
         self.viewModel = viewModel
@@ -29,6 +41,12 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
                 }
                 therapySettingsSection
                 deviceSettingsSection
+                if viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice {
+                    deleteDataSection
+                }
+                if viewModel.servicesViewModel.showServices {
+                    servicesSection
+                }
                 supportSection
             }
             .listStyle(GroupedListStyle())
@@ -43,7 +61,7 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
 extension SettingsView {
         
     private var dismissButton: some View {
-        Button(action: { self.dismiss() }) {
+        Button(action: dismiss) {
             Text("Done").bold()
         }
     }
@@ -59,7 +77,7 @@ extension SettingsView {
     private var alertPermissionsSection: some View {
         Section {
             NavigationLink(destination:
-                NotificationsCriticalAlertPermissionsView(mode: .flow, viewModel: NotificationsCriticalAlertPermissionsViewModel()))
+                NotificationsCriticalAlertPermissionsView(mode: .flow, viewModel: viewModel.notificationsCriticalAlertPermissionsViewModel))
             {
                 HStack {
                     Text(NSLocalizedString("Alert Permissions", comment: "Alert Permissions button text"))
@@ -75,17 +93,26 @@ extension SettingsView {
         
     private var therapySettingsSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
-            return NavigationLink(destination: TherapySettingsView(viewModel: TherapySettingsViewModel(mode: .settings,
-                                                                                                       therapySettings: viewModel.therapySettings,
-                                                                                                       supportedInsulinModelSettings: viewModel.supportedInsulinModelSettings,
-                                                                                                       pumpSupportedIncrements: viewModel.pumpSupportedIncrements,
-                                                                                                       syncPumpSchedule: viewModel.syncPumpSchedule,
-                                                                                                       didSave: viewModel.didSave))) {
-                LargeButton(action: { },
+            LargeButton(action: { self.therapySettingsIsPresented = true },
                             includeArrow: false,
                             imageView: AnyView(Image("Therapy Icon")),
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
+                .sheet(isPresented: $therapySettingsIsPresented) {
+                    TherapySettingsView(
+                        viewModel: TherapySettingsViewModel(mode: .settings,
+                                                            therapySettings: self.viewModel.therapySettings,
+                                                            supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
+                                                            pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
+                                                            syncPumpSchedule: self.viewModel.syncPumpSchedule,
+                                                            chartColors: .primary,
+                                                            didSave: self.viewModel.didSave))
+                        .environment(\.dismiss, self.dismiss)
+                        .environment(\.appName, self.appName)
+                        .environment(\.carbTintColor, self.carbTintColor)
+                        .environment(\.glucoseTintColor, self.glucoseTintColor)
+                        .environment(\.guidanceColors, self.guidanceColors)
+                        .environment(\.insulinTintColor, self.insulinTintColor)
             }
         }
     }
@@ -97,42 +124,138 @@ extension SettingsView {
         }
     }
     
+    @ViewBuilder
     private var pumpSection: some View {
-        if viewModel.pumpManagerSettingsViewModel.isSetUp {
-            // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            return LargeButton(action: { self.dismiss(); self.viewModel.pumpManagerSettingsViewModel.onTapped() },
-                               imageView: deviceImage(uiImage: viewModel.pumpManagerSettingsViewModel.image),
-                               label: viewModel.pumpManagerSettingsViewModel.name,
-                               descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
+        if viewModel.pumpManagerSettingsViewModel.isSetUp() {
+            LargeButton(action: self.viewModel.pumpManagerSettingsViewModel.didTap,
+                        includeArrow: false,
+                        imageView: deviceImage(uiImage: viewModel.pumpManagerSettingsViewModel.image()),
+                        label: viewModel.pumpManagerSettingsViewModel.name(),
+                        descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
         } else {
-            // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            return LargeButton(action: { self.dismiss(); self.viewModel.pumpManagerSettingsViewModel.onTapped() },
-                               imageView: AnyView(plusImage),
-                               label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
-                               descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
+            LargeButton(action: { self.pumpChooserIsPresented = true },
+                        includeArrow: false,
+                        imageView: AnyView(plusImage),
+                        label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
+                        descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
+                .actionSheet(isPresented: $pumpChooserIsPresented) {
+                    ActionSheet(title: Text("Add Pump", comment: "The title of the pump chooser in settings"), buttons: pumpChoices)
+            }
         }
     }
     
-    private var cgmSection: some View {
-        if viewModel.cgmManagerSettingsViewModel.isSetUp {
-            // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            return LargeButton(action: { self.dismiss(); self.viewModel.cgmManagerSettingsViewModel.onTapped() },
-                               imageView: deviceImage(uiImage: viewModel.cgmManagerSettingsViewModel.image),
-                               label: viewModel.cgmManagerSettingsViewModel.name,
-                               descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
-        } else {
-            // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            return LargeButton(action: { self.dismiss(); self.viewModel.cgmManagerSettingsViewModel.onTapped() },
-                               imageView: AnyView(plusImage),
-                               label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
-                               descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
+    private var pumpChoices: [ActionSheet.Button] {
+        var result = viewModel.pumpManagerSettingsViewModel.availableDevices.map { availableDevice in
+            ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+                self.viewModel.pumpManagerSettingsViewModel.didTapAdd(availableDevice)
+            }
         }
+        result.append(.cancel())
+        return result
+    }
+    
+    @ViewBuilder
+    private var cgmSection: some View {
+        if viewModel.cgmManagerSettingsViewModel.isSetUp() {
+            LargeButton(action: self.viewModel.cgmManagerSettingsViewModel.didTap,
+                        includeArrow: false,
+                        imageView: deviceImage(uiImage: viewModel.cgmManagerSettingsViewModel.image()),
+                        label: viewModel.cgmManagerSettingsViewModel.name(),
+                        descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
+        } else {
+            LargeButton(action: { self.cgmChooserIsPresented = true },
+                        includeArrow: false,
+                        imageView: AnyView(plusImage),
+                        label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
+                        descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
+                .actionSheet(isPresented: $cgmChooserIsPresented) {
+                    ActionSheet(title: Text("Add CGM", comment: "The title of the CGM chooser in settings"), buttons: cgmChoices)
+            }
+        }
+    }
+    
+    private var cgmChoices: [ActionSheet.Button] {
+        var result = viewModel.cgmManagerSettingsViewModel.availableDevices.map { availableDevice in
+            ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+                self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
+            }
+        }
+        result.append(.cancel())
+        return result
+    }
+    
+    private var servicesSection: some View {
+        Section(header: SectionHeader(label: NSLocalizedString("Accounts", comment: "The title of the accounts section in settings"))) {
+            ForEach(viewModel.servicesViewModel.activeServices().indices, id: \.self) { index in
+                LargeButton(action: { self.viewModel.servicesViewModel.didTapService(index) },
+                            includeArrow: false,
+                            imageView: self.serviceImage(uiImage: (self.viewModel.servicesViewModel.activeServices()[index] as! ServiceUI).image),
+                            label: self.viewModel.servicesViewModel.activeServices()[index].localizedTitle,
+                            descriptiveText: "")
+            }
+            if viewModel.servicesViewModel.inactiveServices().count > 0 {
+                LargeButton(action: { self.serviceChooserIsPresented = true },
+                            includeArrow: false,
+                            imageView: AnyView(plusImage),
+                            label: NSLocalizedString("Add Account", comment: "The title of the add account button in settings"),
+                            descriptiveText: NSLocalizedString("Tap here to set up a Account", comment: "The descriptive text of the add account button in settings"))
+                    .actionSheet(isPresented: $serviceChooserIsPresented) {
+                        ActionSheet(title: Text("Add Account", comment: "The title of the add account action sheet in settings"), buttons: serviceChoices)
+                }
+            }
+        }
+    }
+    
+    private var serviceChoices: [ActionSheet.Button] {
+        var result = viewModel.servicesViewModel.inactiveServices().map { availableService in
+            ActionSheet.Button.default(Text(availableService.localizedTitle)) {
+                self.viewModel.servicesViewModel.didTapAddService(availableService)
+            }
+        }
+        result.append(.cancel())
+        return result
+    }
+    
+    private var deleteDataSection: some View {
+        Section {
+            if viewModel.pumpManagerSettingsViewModel.isTestingDevice {
+                Button(action: { self.deletePumpDataAlertIsPresented.toggle() }) {
+                    HStack {
+                        Spacer()
+                        Text("Delete Testing Pump Data").accentColor(.destructive)
+                        Spacer()
+                    }
+                }
+                .alert(isPresented: $deletePumpDataAlertIsPresented) {
+                    makeDeleteAlert(for: self.viewModel.pumpManagerSettingsViewModel)
+                }
+            }
+            if viewModel.cgmManagerSettingsViewModel.isTestingDevice {
+                Button(action: { self.deleteCGMDataAlertIsPresented.toggle() }) {
+                    HStack {
+                        Spacer()
+                        Text("Delete Testing CGM Data").accentColor(.destructive)
+                        Spacer()
+                    }
+                }
+                .alert(isPresented: $deleteCGMDataAlertIsPresented) {
+                    makeDeleteAlert(for: self.viewModel.cgmManagerSettingsViewModel)
+                }
+            }
+        }
+    }
+    
+    private func makeDeleteAlert(for model: DeviceViewModel) -> SwiftUI.Alert {
+        return SwiftUI.Alert(title: Text("Delete Testing Data"),
+                             message: Text("Are you sure you want to delete all your \(model.name()) Data?\n(This action is not reversible)"),
+                             primaryButton: .cancel(),
+                             secondaryButton: .destructive(Text("Delete"), action: model.deleteTestingDataFunc()))
     }
     
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
-            NavigationLink(destination: Text("Support")) {
-                Text(NSLocalizedString("Support", comment: "The title of the support section in settings"))
+            NavigationLink(destination: SupportScreenView(didTapIssueReport: viewModel.didTapIssueReport)) {
+                Text(NSLocalizedString("Support", comment: "The title of the support item in settings"))
             }
         }
     }
@@ -141,7 +264,8 @@ extension SettingsView {
         Image(systemName: "plus.circle")
             .resizable()
             .scaledToFit()
-            .accentColor(.blue)
+            .accentColor(Color(.systemGray))
+            .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
     }
     
     private func deviceImage(uiImage: UIImage?) -> AnyView {
@@ -153,6 +277,10 @@ extension SettingsView {
         } else {
             return AnyView(Spacer())
         }
+    }
+    
+    private func serviceImage(uiImage: UIImage?) -> AnyView {
+        return deviceImage(uiImage: uiImage)
     }
 }
 
@@ -166,9 +294,9 @@ fileprivate struct LargeButton: View {
 
     // TODO: The design doesn't show this, but do we need to consider different values here for different size classes?
     static let spacing: CGFloat = 15
-    static let imageWidth: CGFloat = 48
-    static let imageHeight: CGFloat = 48
-    static let topBottomPadding: CGFloat = 20
+    static let imageWidth: CGFloat = 60
+    static let imageHeight: CGFloat = 60
+    static let topBottomPadding: CGFloat = 10
     
     public var body: some View {
         Button(action: action) {
@@ -192,18 +320,41 @@ fileprivate struct LargeButton: View {
     }
 }
 
+fileprivate class FakeService1: Service {
+    static var localizedTitle: String = "Service 1"
+    static var serviceIdentifier: String = "FakeService1"
+    var serviceDelegate: ServiceDelegate?
+    var rawState: RawStateValue = [:]
+    required init?(rawState: RawStateValue) {}
+    convenience init() { self.init(rawState: [:])! }
+    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+}
+fileprivate class FakeService2: Service {
+    static var localizedTitle: String = "Service 2"
+    static var serviceIdentifier: String = "FakeService2"
+    var serviceDelegate: ServiceDelegate?
+    var rawState: RawStateValue = [:]
+    required init?(rawState: RawStateValue) {}
+    convenience init() { self.init(rawState: [:])! }
+    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+}
+fileprivate let servicesViewModel = ServicesViewModel(showServices: true,
+                                                      availableServices: { [FakeService1().available, FakeService2().available] },
+                                                      activeServices: { [FakeService1()] })
 public struct SettingsView_Previews: PreviewProvider {
     public static var previews: some View {
         let viewModel = SettingsViewModel(appNameAndVersion: "Loop v1.2",
                                           notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
                                           cgmManagerSettingsViewModel: DeviceViewModel(),
+                                          servicesViewModel: servicesViewModel,
                                           therapySettings: TherapySettings(),
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true),
                                           pumpSupportedIncrements: nil,
                                           syncPumpSchedule: nil,
                                           sensitivityOverridesEnabled: false,
-                                          initialDosingEnabled: true)
+                                          initialDosingEnabled: true,
+                                          delegate: nil)
         return Group {
             SettingsView(viewModel: viewModel)
                 .colorScheme(.light)
@@ -212,8 +363,8 @@ public struct SettingsView_Previews: PreviewProvider {
             
             SettingsView(viewModel: viewModel)
                 .colorScheme(.dark)
-                .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
-                .previewDisplayName("XS Max dark")
+                .previewDevice(PreviewDevice(rawValue: "iPhone 11 Pro Max"))
+                .previewDisplayName("11 Pro dark")
         }
     }
 }

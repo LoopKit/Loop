@@ -62,22 +62,20 @@ class LoopDataManager {
 
         let healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInLocalDirectory()
-        
-        let absorptionTimes = LoopSettings.defaultCarbAbsorptionTimes
-        let cacheDuration = absorptionTimes.slow * 2
 
         carbStore = CarbStore(
             healthStore: healthStore,
-            observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
+            observeHealthKitSamplesFromOtherApps: false,
             cacheStore: cacheStore,
-            cacheLength: cacheDuration,
-            defaultAbsorptionTimes: absorptionTimes,
-            observationInterval: cacheDuration,
-            syncVersion: 0
+            cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
+            defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
+            observationInterval: 0,     // No longer use HealthKit as source of recent carbs
+            syncVersion: 0,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
-            observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
+            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: .hours(4)
         )
@@ -119,7 +117,27 @@ extension LoopDataManager {
             NotificationCenter.default.post(name: LoopDataManager.didUpdateContextNotification, object: self)
         }
     }
-    
+
+    func requestCarbBackfill() {
+        dispatchPrecondition(condition: .onQueue(.main))
+
+        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -carbStore.maximumAbsorptionTimeInterval))
+        let userInfo = CarbBackfillRequestUserInfo(startDate: start)
+        WCSession.default.sendCarbBackfillRequestMessage(userInfo) { (result) in
+            switch result {
+            case .success(let context):
+                self.carbStore.setSyncCarbObjects(context.objects) { (error) in
+                    if let error = error {
+                        self.log.error("Failure setting carb backfill: %{public}@", String(describing: error))
+                    }
+                }
+            case .failure:
+                // Already logged
+                break
+            }
+        }
+    }
+
     @discardableResult
     func requestGlucoseBackfillIfNecessary() -> Bool {
         dispatchPrecondition(condition: .onQueue(.main))
@@ -147,13 +165,12 @@ extension LoopDataManager {
                 DispatchQueue.main.async {
                     self.lastGlucoseBackfill = .staleGlucoseCutoff
                 }
-                break
             }
         }
 
         return true
     }
-    
+
     func requestContextUpdate() {
         try? WCSession.default.sendContextRequestMessage(WatchContextRequestUserInfo(), completionHandler: { (result) in
             DispatchQueue.main.async {

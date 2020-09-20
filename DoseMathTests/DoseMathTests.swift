@@ -411,19 +411,21 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testHighAndFalling() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_falling")
+        
+        let insulinModel = WalshInsulinModel(actionDuration: insulinActionDuration, delay: 0)
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
-            model: walshInsulinModel,
+            model: insulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
             lastTempBasal: nil
         )
 
-        XCTAssertEqual(1.60, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.425, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
     

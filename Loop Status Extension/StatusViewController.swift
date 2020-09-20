@@ -23,7 +23,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             hudView.loopCompletionHUD.stateColors = .loopStatus
             hudView.cgmStatusHUD.stateColors = .cgmStatus
             hudView.cgmStatusHUD.tintColor = .label
-            hudView.pumpStatusHUD.tintColor = .doseTintColor
+            hudView.pumpStatusHUD.tintColor = .insulinTintColor
             hudView.backgroundColor = .clear
 
             // given the reduced width of the widget, allow for tighter spacing
@@ -43,7 +43,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 axisLabel: .axisLabelColor,
                 grid: .gridColor,
                 glucoseTint: .glucoseTintColor,
-                doseTint: .doseTintColor
+                insulinTint: .insulinTintColor
             ),
             settings: {
                 var settings = ChartSettings()
@@ -75,14 +75,14 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     lazy var glucoseStore = GlucoseStore(
         healthStore: healthStore,
-        observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
+        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
         cacheStore: cacheStore,
         observationEnabled: false
     )
 
     lazy var doseStore = DoseStore(
         healthStore: healthStore,
-        observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
+        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
         cacheStore: cacheStore,
         observationEnabled: false,
         defaultInsulinModelSetting: defaults?.insulinModelSettings,
@@ -92,11 +92,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     
     let absorptionTimes = LoopSettings.defaultCarbAbsorptionTimes
     lazy var carbStore = CarbStore(healthStore: healthStore,
-                                   observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
+                                   observeHealthKitSamplesFromOtherApps: false,
                                    cacheStore: cacheStore,
-                                   cacheLength: TimeInterval(days: 1),
+                                   cacheLength: .hours(24),
                                    defaultAbsorptionTimes: absorptionTimes,
-                                   observationInterval: absorptionTimes.slow * 2)
+                                   observationInterval: 0,
+                                   provenanceIdentifier: HKSource.default().bundleIdentifier)
     
     private var pluginManager: PluginManager = {
         let containingAppFrameworksURL = Bundle.main.privateFrameworksURL?.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Frameworks")

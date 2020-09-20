@@ -7,84 +7,6 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Settings-->
-        <scene sceneID="lFu-dL-RU5">
-            <objects>
-                <tableViewController id="4cb-Yq-02o" customClass="SettingsTableViewController" customModule="Loop" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="MhB-bL-wBN">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="ConfigTableViewCell" textLabel="5TX-kX-nBo" detailTextLabel="m9c-SQ-djE" style="IBUITableViewCellStyleValue1" id="0EG-OG-YuT">
-                                <rect key="frame" x="0.0" y="55.5" width="375" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="0EG-OG-YuT" id="af2-sZ-CY0">
-                                    <rect key="frame" x="0.0" y="0.0" width="348" height="44"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Pump ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" id="5TX-kX-nBo">
-                                            <rect key="frame" x="16" y="12" width="65" height="20.5"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Tap to set" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" id="m9c-SQ-djE">
-                                            <rect key="frame" x="264.5" y="12" width="75.5" height="20.5"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                </tableViewCellContentView>
-                                <color key="backgroundColor" cocoaTouchSystemColor="tableCellGroupedBackgroundColor"/>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="4cb-Yq-02o" id="KZ7-dm-dst"/>
-                            <outlet property="delegate" destination="4cb-Yq-02o" id="VIi-cT-TDQ"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Settings" id="dmB-PQ-B44">
-                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="done" id="UQ4-6W-0S2">
-                            <connections>
-                                <segue destination="VsH-x7-Sqg" kind="unwind" unwindAction="unwindFromSettings:" id="Uee-6M-6sQ"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
-                    <connections>
-                        <outlet property="devicesSectionTitleView" destination="ywS-mm-GoX" id="7tF-Zf-Op2"/>
-                    </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="ymW-vT-DZk" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="VsH-x7-Sqg" userLabel="Exit" sceneMemberID="exit"/>
-                <view contentMode="scaleToFill" id="ywS-mm-GoX">
-                    <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <subviews>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="DEVICES" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DyC-Sv-qP8">
-                            <rect key="frame" x="27" y="28" width="55" height="16"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                            <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="onC-e2-eI7">
-                            <rect key="frame" x="560" y="26" width="20" height="20"/>
-                        </activityIndicatorView>
-                    </subviews>
-                    <constraints>
-                        <constraint firstItem="DyC-Sv-qP8" firstAttribute="leading" secondItem="ywS-mm-GoX" secondAttribute="leadingMargin" constant="7" id="Lrm-2T-snm"/>
-                        <constraint firstItem="onC-e2-eI7" firstAttribute="trailing" secondItem="ywS-mm-GoX" secondAttribute="trailingMargin" id="bKI-Pq-Ocv"/>
-                        <constraint firstItem="onC-e2-eI7" firstAttribute="centerY" secondItem="DyC-Sv-qP8" secondAttribute="centerY" id="qVw-36-UJh"/>
-                        <constraint firstItem="DyC-Sv-qP8" firstAttribute="bottom" secondItem="ywS-mm-GoX" secondAttribute="bottomMargin" id="yah-t1-9b2"/>
-                    </constraints>
-                </view>
-            </objects>
-            <point key="canvasLocation" x="1652" y="1979.4602698650676"/>
-        </scene>
         <!--Predicted Glucose-->
         <scene sceneID="iWG-eJ-SCc">
             <objects>
@@ -287,9 +209,9 @@
                                         <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="6T4-P6-RWt">
                                             <rect key="frame" x="133" y="167" width="109" height="50"/>
                                             <subviews>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7dr-6C-JSN" customClass="CircleMaskView" customModule="Loop" customModuleProvider="target">
+                                                <view alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7dr-6C-JSN" customClass="CircleMaskView" customModule="Loop" customModuleProvider="target">
                                                     <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
-                                                    <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="backgroundColor" name="carbs"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" secondItem="7dr-6C-JSN" secondAttribute="height" multiplier="1:1" id="OpK-4E-9Q6"/>
                                                     </constraints>
@@ -357,7 +279,7 @@
                                                         <stackView opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="xsa-fa-q0Q">
                                                             <rect key="frame" x="29.5" y="0.0" width="197.5" height="59.5"/>
                                                             <subviews>
-                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="g COB" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SQx-au-ZcM">
+                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="g Active Carbs" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SQx-au-ZcM">
                                                                     <rect key="frame" x="0.0" y="0.0" width="197.5" height="9.5"/>
                                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                     <nil key="textColor"/>
@@ -433,32 +355,32 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="HkK-Uz-ji1">
-                                            <rect key="frame" x="16" y="64" width="359" height="2"/>
+                                            <rect key="frame" x="16" y="66" width="359" height="0.0"/>
                                             <color key="progressTintColor" red="0.5568627451" green="0.56078431370000004" blue="0.57647058819999997" alpha="0.40000000000000002" colorSpace="custom" customColorSpace="sRGB"/>
                                             <color key="trackTintColor" red="0.5568627451" green="0.56078431370000004" blue="0.57647058819999997" alpha="0.050000000000000003" colorSpace="custom" customColorSpace="sRGB"/>
                                         </progressView>
                                         <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.40000000000000002" translatesAutoresizingMaskIntoConstraints="NO" id="Mxi-br-Hti">
-                                            <rect key="frame" x="16" y="64" width="359" height="2"/>
+                                            <rect key="frame" x="16" y="66" width="359" height="0.0"/>
                                             <color key="progressTintColor" name="carbs"/>
                                             <color key="trackTintColor" red="0.5568627451" green="0.56078431370000004" blue="0.57647058819999997" alpha="0.050000000000000003" colorSpace="custom" customColorSpace="sRGB"/>
                                         </progressView>
                                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="vg9-bq-Hwf">
-                                            <rect key="frame" x="16" y="11" width="343" height="45"/>
+                                            <rect key="frame" x="16" y="11" width="343" height="47"/>
                                             <subviews>
                                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="u18-by-vQw">
-                                                    <rect key="frame" x="0.0" y="0.0" width="343" height="45"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="325" height="47"/>
                                                     <subviews>
                                                         <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BbA-hn-OkN">
-                                                            <rect key="frame" x="0.0" y="0.0" width="343" height="20.5"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="325" height="21.5"/>
                                                             <subviews>
                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ufi-Kj-33k">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="299" height="20.5"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="281" height="21.5"/>
                                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
                                                                 </label>
                                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" horizontalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Detail" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aCb-Qs-bpu">
-                                                                    <rect key="frame" x="299" y="0.0" width="44" height="20.5"/>
+                                                                    <rect key="frame" x="281" y="0.0" width="44" height="21.5"/>
                                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                                     <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                                                                     <nil key="highlightedColor"/>
@@ -466,16 +388,16 @@
                                                             </subviews>
                                                         </stackView>
                                                         <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xqU-HU-BMs">
-                                                            <rect key="frame" x="0.0" y="24.5" width="343" height="20.5"/>
+                                                            <rect key="frame" x="0.0" y="25.5" width="325" height="21.5"/>
                                                             <subviews>
                                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Krd-Aa-ret">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="299" height="20.5"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="281" height="21.5"/>
                                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                                     <color key="textColor" name="carbs"/>
                                                                     <nil key="highlightedColor"/>
                                                                 </label>
                                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" horizontalHuggingPriority="251" text="Detail" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J7x-W5-gwo">
-                                                                    <rect key="frame" x="299" y="0.0" width="44" height="20.5"/>
+                                                                    <rect key="frame" x="281" y="0.0" width="44" height="21.5"/>
                                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                                     <color key="textColor" name="carbs"/>
                                                                     <nil key="highlightedColor"/>
@@ -484,6 +406,14 @@
                                                         </stackView>
                                                     </subviews>
                                                 </stackView>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="chevron.right" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="Qpe-RL-FEi">
+                                                    <rect key="frame" x="333" y="2" width="10" height="43.5"/>
+                                                    <color key="tintColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="52" id="abe-9O-iY1"/>
+                                                        <constraint firstAttribute="width" constant="10" id="iWT-I9-g9V"/>
+                                                    </constraints>
+                                                </imageView>
                                             </subviews>
                                         </stackView>
                                     </subviews>
@@ -671,7 +601,7 @@
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="d5h-bj-8ek"/>
                         <barButtonItem image="settings" id="PHJ-4n-qiF">
                             <connections>
-                                <segue destination="Fr0-ut-OuL" kind="presentation" identifier="SettingsTableViewController" id="JAY-Kf-UMv"/>
+                                <action selector="onSettingsTapped:" destination="1zR-tC-i50" id="eJt-wB-R9Z"/>
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
@@ -767,13 +697,10 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Fr0-ut-OuL" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="5cJ-yb-cD1">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="56"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="4cb-Yq-02o" kind="relationship" relationship="rootViewController" id="6BC-rd-2iw"/>
-                    </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hu2-qg-8CR" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -985,18 +912,19 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="gBt-AH-FnE"/>
-        <segue reference="viB-eQ-p7y"/>
+        <segue reference="urz-4S-c6I"/>
+        <segue reference="UnO-ql-F0K"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="Oval Selection" width="21" height="21"/>
         <image name="Pre-Meal" width="29" height="29"/>
         <image name="bolus" width="22" height="24"/>
         <image name="carbs" width="29" height="29"/>
+        <image name="chevron.right" catalog="system" width="96" height="128"/>
         <image name="settings" width="25" height="40"/>
         <image name="workout" width="30" height="29"/>
         <namedColor name="carbs">
-            <color red="0.3880000114440918" green="0.85500001907348633" blue="0.2199999988079071" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.66699999570846558" blue="0.22400000691413879" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

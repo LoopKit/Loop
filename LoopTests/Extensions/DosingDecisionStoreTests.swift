@@ -289,6 +289,7 @@ class StoredDosingDecisionCodableTests: XCTestCase {
   "pumpManagerStatus" : {
     "basalDeliveryState" : "initiatingTempBasal",
     "bolusState" : "none",
+    "deliveryIsUncertain" : false,
     "device" : {
       "firmwareVersion" : "Device Firmware Version",
       "hardwareVersion" : "Device Hardware Version",

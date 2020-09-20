@@ -156,11 +156,7 @@ extension UserDefaults {
     
     public var lastBedtimeQuery: Date? {
         get {
-            if let rawValue = object(forKey: Key.lastBedtimeQuery.rawValue) as? Date {
-                return rawValue
-            } else {
-                return nil
-            }
+            return object(forKey: Key.lastBedtimeQuery.rawValue) as? Date
         }
         set {
             set(newValue, forKey: Key.lastBedtimeQuery.rawValue)
@@ -169,11 +165,7 @@ extension UserDefaults {
     
     public var bedtime: Date? {
         get {
-            if let rawValue = object(forKey: Key.bedtime.rawValue) as? Date {
-                return rawValue
-            } else {
-                return nil
-            }
+            return object(forKey: Key.bedtime.rawValue) as? Date
         }
         set {
             set(newValue, forKey: Key.bedtime.rawValue)

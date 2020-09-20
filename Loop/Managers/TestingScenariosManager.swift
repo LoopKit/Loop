@@ -200,7 +200,8 @@ extension TestingScenariosManagerRequirements {
             }
 
             let instance = scenario.instantiate()
-            self.deviceManager.loopManager.carbStore.addCarbEntries(instance.carbEntries) { result in
+
+            self.deviceManager.carbStore.addCarbEntries(instance.carbEntries) { result in
                 switch result {
                 case .success(_):
                     pumpManager.reservoirFillFraction = 1.0
@@ -232,7 +233,7 @@ extension TestingScenariosManagerRequirements {
                     return
                 }
 
-                self.deviceManager.loopManager.carbStore.deleteAllCarbEntries(completion: completion)
+                self.deviceManager.carbStore.deleteAllCarbEntries(completion: completion)
             }
         }
     }
@@ -253,12 +254,12 @@ private extension CarbStore {
 
         addCarbEntry(entry) { individualResult in
             switch individualResult {
-            case .success(let storedEntry):
+            case .success(let entry):
                 let remainder = entries.dropFirst()
                 self.addCarbEntries(remainder) { collectiveResult in
                     switch collectiveResult {
-                    case .success(let storedEntries):
-                        completion(.success([storedEntry] + storedEntries))
+                    case .success(let entries):
+                        completion(.success([entry] + entries))
                     case .failure(let error):
                         completion(.failure(error))
                     }
@@ -271,10 +272,10 @@ private extension CarbStore {
 
     /// Errors if getting carb entries errors, or if deleting any individual entry errors.
     func deleteAllCarbEntries(completion: @escaping (CarbStoreError?) -> Void) {
-        getCarbEntries(start: .distantPast) { result in
+        getCarbEntries() { result in
             switch result {
-            case .success(let storedEntries):
-                self.deleteCarbEntries(storedEntries[...], completion: completion)
+            case .success(let entries):
+                self.deleteCarbEntries(entries[...], completion: completion)
             case .failure(let error):
                 completion(error)
             }

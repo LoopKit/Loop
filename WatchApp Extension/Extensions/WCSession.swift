@@ -92,6 +92,39 @@ extension WCSession {
         })
     }
 
+    func sendCarbBackfillRequestMessage(_ userInfo: CarbBackfillRequestUserInfo, completionHandler: @escaping (WCSessionMessageResult<WatchHistoricalCarbs>) -> Void) {
+        log.default("sendCarbBackfillRequestMessage: since %{public}@", String(describing: userInfo.startDate))
+
+        // Backfill is optional so we ignore any errors
+        guard activationState == .activated else {
+            log.error("sendCarbBackfillRequestMessage failed: not activated")
+            completionHandler(.failure(.activation))
+            return
+        }
+
+        guard isReachable else {
+            log.error("sendCarbBackfillRequestMessage failed: not reachable")
+            completionHandler(.failure(.reachability))
+            return
+        }
+
+        sendMessage(userInfo.rawValue,
+                    replyHandler: { reply in
+                        if let context = WatchHistoricalCarbs(rawValue: reply as WatchHistoricalCarbs.RawValue) {
+                            log.default("sendCarbBackfillRequestMessage succeeded with %d samples", context.objects.count)
+                            completionHandler(.success(context))
+                        } else {
+                            log.error("sendCarbBackfillRequestMessage failed: could not decode reply %{public}@", reply)
+                            completionHandler(.failure(.decoding))
+                        }
+        },
+                    errorHandler: { error in
+                        log.error("sendCarbBackfillRequestMessage error: %{public}@", String(describing: error))
+                        completionHandler(.failure(.send(error)))
+        }
+        )
+    }
+
     func sendGlucoseBackfillRequestMessage(_ userInfo: GlucoseBackfillRequestUserInfo, completionHandler: @escaping (WCSessionMessageResult<WatchHistoricalGlucose>) -> Void) {
         log.default("sendGlucoseBackfillRequestMessage: since %{public}@", String(describing: userInfo.startDate))
 

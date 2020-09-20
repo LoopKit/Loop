@@ -32,7 +32,10 @@ final class BolusEntryViewModel: ObservableObject {
     enum Notice: Equatable {
         case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
         case staleGlucoseData
+        case stalePumpData
     }
+
+    @Environment(\.authenticate) var authenticate
 
     // MARK: - State
 
@@ -69,10 +72,16 @@ final class BolusEntryViewModel: ObservableObject {
     private let log = OSLog(category: "BolusEntryViewModel")
     private var cancellables: Set<AnyCancellable> = []
 
+    private var pumpManagerRefreshCompletion: (() -> Void)?
+    private var isPumpDataStale: Bool {
+        // "borrowed" from LoopDataManager
+        Date().timeIntervalSince(dataManager.doseStore.lastAddedPumpData) <= dataManager.loopManager.settings.inputDataRecencyInterval
+    }
+    
     let chartManager: ChartsManager = {
-        let predictedGlucoseChart = PredictedGlucoseChart()
+        let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil)
         predictedGlucoseChart.glucoseDisplayRange = BolusEntryViewModel.defaultGlucoseDisplayRange
-        return ChartsManager(colors: .default, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
+        return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
     
     // MARK: - External Insulin
@@ -121,6 +130,7 @@ final class BolusEntryViewModel: ObservableObject {
         observeEnteredBolusChanges()
         observeEnteredManualGlucoseChanges()
         observeElapsedTime()
+        observeRecommendedBolusChanges()
         observeInsulinModelChanges()
         observeDoseDateChanges()
 
@@ -152,6 +162,12 @@ final class BolusEntryViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.update() }
             .store(in: &cancellables)
+        
+        // Look for Loop starting, and assume that if it started after assertCurrentPumpData that we want to call pumpManagerRefreshCompletion
+        NotificationCenter.default
+            .publisher(for: .LoopRunning, object: dataManager.loopManager)
+            .sink { [weak self] _ in self?.pumpManagerRefreshCompletion?(); self?.pumpManagerRefreshCompletion = nil }
+            .store(in: &cancellables)
     }
 
     private func observeEnteredBolusChanges() {
@@ -162,6 +178,16 @@ final class BolusEntryViewModel: ObservableObject {
                 self?.dataManager.loopManager.getLoopState { manager, state in
                     self?.updatePredictedGlucoseValues(from: state)
                 }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func observeRecommendedBolusChanges() {
+        $recommendedBolus
+            .removeDuplicates()
+            .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.setRecommendedBolus()
             }
             .store(in: &cancellables)
     }
@@ -181,7 +207,9 @@ final class BolusEntryViewModel: ObservableObject {
                         self?.updateGlucoseChartValues()
                     })
 
-                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                    self?.ensurePumpDataIsFresh { [weak self] in
+                        self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -237,10 +265,9 @@ final class BolusEntryViewModel: ObservableObject {
         return recommendedBolus.doubleValue(for: .internationalUnit()) > 0
     }
 
-    func acceptRecommendedBolus() {
+    func setRecommendedBolus() {
         guard isBolusRecommended else { return }
         enteredBolus = recommendedBolus!
-
         dataManager.loopManager.getLoopState { [weak self] manager, state in
             self?.updatePredictedGlucoseValues(from: state)
         }
@@ -257,7 +284,7 @@ final class BolusEntryViewModel: ObservableObject {
             return
         }
 
-        guard enteredBolus < maximumBolus else {
+        guard enteredBolus <= maximumBolus else {
             presentAlert(.maxBolusExceeded)
             return
         }
@@ -267,7 +294,28 @@ final class BolusEntryViewModel: ObservableObject {
                 presentAlert(.manualGlucoseEntryOutOfAcceptableRange)
                 return
             }
+        }
 
+        // Authenticate the bolus before saving anything
+        if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
+            let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString)
+            authenticate(message) {
+                switch $0 {
+                case .success:
+                    self.continueSaving(onSuccess: completion)
+                case .failure:
+                    break
+                }
+            }
+        } else if potentialCarbEntry != nil  { // Allow user to save carbs without bolusing
+            self.continueSaving(onSuccess: completion)
+        } else {
+            completion()
+        }
+    }
+    
+    private func continueSaving(onSuccess completion: @escaping () -> Void) {
+        if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
             dataManager.loopManager.addGlucose([manualGlucoseSample]) { result in
                 DispatchQueue.main.async {
@@ -300,7 +348,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func saveCarbsAndDeliverBolus(onSuccess completion: @escaping () -> Void) {
         guard let carbEntry = potentialCarbEntry else {
-            authenticateAndDeliverBolus(onSuccess: completion)
+            deliverBolus(onSuccess: completion)
             return
         }
 
@@ -318,7 +366,7 @@ final class BolusEntryViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    self.authenticateAndDeliverBolus(onSuccess: completion)
+                    self.deliverBolus(onSuccess: completion)
                 case .failure(let error):
                     self.isInitiatingSaveOrBolus = false
                     self.presentAlert(.carbEntryPersistenceFailure)
@@ -328,7 +376,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func authenticateAndDeliverBolus(onSuccess completion: @escaping () -> Void) {
+    private func deliverBolus(onSuccess completion: @escaping () -> Void) {
         let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
         guard bolusVolume > 0 else {
             completion()
@@ -336,28 +384,8 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         isInitiatingSaveOrBolus = true
-
-        let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) else {
-            dataManager.enactBolus(units: bolusVolume)
-            completion()
-            return
-        }
-
-        context.evaluatePolicy(
-            .deviceOwnerAuthentication,
-            localizedReason: String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString),
-            reply: { success, error in
-                DispatchQueue.main.async {
-                    if success {
-                        self.dataManager.enactBolus(units: bolusVolume)
-                        completion()
-                    } else {
-                        self.isInitiatingSaveOrBolus = false
-                    }
-                }
-            }
-        )
+        dataManager.enactBolus(units: bolusVolume)
+        completion()
     }
 
     private func presentAlert(_ alert: Alert) {
@@ -456,7 +484,7 @@ final class BolusEntryViewModel: ObservableObject {
         dispatchPrecondition(condition: .onQueue(.main))
 
         if isManualGlucoseEntryEnabled,
-            let latestGlucose = dataManager.loopManager.glucoseStore.latestGlucose,
+            let latestGlucose = dataManager.glucoseStore.latestGlucose,
             Date().timeIntervalSince(latestGlucose.startDate) <= dataManager.loopManager.settings.inputDataRecencyInterval
         {
             isManualGlucoseEntryEnabled = false
@@ -467,7 +495,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateStoredGlucoseValues() {
-        dataManager.loopManager.glucoseStore.getCachedGlucoseSamples(start: chartDateInterval.start) { [weak self] values in
+        dataManager.glucoseStore.getCachedGlucoseSamples(start: chartDateInterval.start, end: nil) { [weak self] values in
             DispatchQueue.main.async {
                 self?.storedGlucoseValues = values
                 self?.updateGlucoseChartValues()
@@ -528,7 +556,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateActiveInsulin() {
-        dataManager.loopManager.doseStore.insulinOnBoard(at: Date()) { [weak self] result in
+        dataManager.doseStore.insulinOnBoard(at: Date()) { [weak self] result in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
@@ -544,19 +572,19 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func updateFromLoopState() {
         dataManager.loopManager.getLoopState { [weak self] manager, state in
-            guard let self = self else { return }
-
-            self.updatePredictedGlucoseValues(from: state)
-            self.updateCarbsOnBoard(from: state)
-            self.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
-            DispatchQueue.main.async {
-                self.updateSettings()
+            self?.updatePredictedGlucoseValues(from: state)
+            self?.updateCarbsOnBoard(from: state)
+            self?.ensurePumpDataIsFresh { [weak self] in
+                self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
+                DispatchQueue.main.async {
+                    self?.updateSettings()
+                }
             }
         }
     }
 
     private func updateCarbsOnBoard(from state: LoopState) {
-        dataManager.loopManager.carbStore.carbsOnBoard(at: Date(), effectVelocities: state.insulinCounteractionEffects) { result in
+        dataManager.carbStore.carbsOnBoard(at: Date(), effectVelocities: state.insulinCounteractionEffects) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let carbValue):
@@ -568,10 +596,19 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
+    private func ensurePumpDataIsFresh(then completion: @escaping () -> Void) {
+        guard let pumpManager = dataManager.pumpManager, !isPumpDataStale else {
+            completion()
+            return
+        }
+        pumpManagerRefreshCompletion = completion
+        pumpManager.assertCurrentPumpData()
+    }
+    
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let recommendedBolus: HKQuantity
+        let recommendedBolus: HKQuantity?
         let notice: Notice?
         do {
             if let recommendation = try computeBolusRecommendation(from: state) {
@@ -589,11 +626,13 @@ final class BolusEntryViewModel: ObservableObject {
                 notice = nil
             }
         } catch {
-            recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+            recommendedBolus = nil
 
             switch error {
             case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld:
                 notice = .staleGlucoseData
+            case LoopError.pumpDataTooOld:
+                notice = .stalePumpData
             default:
                 notice = nil
             }
@@ -639,7 +678,7 @@ final class BolusEntryViewModel: ObservableObject {
         dispatchPrecondition(condition: .onQueue(.main))
 
         let settings = dataManager.loopManager.settings
-        glucoseUnit = settings.glucoseUnit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+        glucoseUnit = settings.glucoseUnit ?? dataManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
 
         targetGlucoseSchedule = settings.glucoseTargetRangeSchedule
         preMealOverride = settings.preMealOverride
@@ -687,3 +726,53 @@ final class BolusEntryViewModel: ObservableObject {
 extension BolusEntryViewModel.Alert: Identifiable {
     var id: Self { self }
 }
+
+// MARK: Helpers
+extension BolusEntryViewModel {
+    
+    var isManualGlucosePromptVisible: Bool {
+        activeNotice == .staleGlucoseData && !isManualGlucoseEntryEnabled
+    }
+    
+    var isNoticeVisible: Bool {
+        if activeNotice == nil {
+            return false
+        } else if activeNotice != .staleGlucoseData {
+            return true
+        } else {
+            return !isManualGlucoseEntryEnabled
+        }
+    }
+    
+    private var hasBolusEntryReadyToDeliver: Bool {
+        enteredBolus.doubleValue(for: .internationalUnit()) != 0
+    }
+
+    private var hasDataToSave: Bool {
+        enteredManualGlucose != nil || potentialCarbEntry != nil
+    }
+
+    enum ButtonChoice { case manualGlucoseEntry, actionButton }
+    var primaryButton: ButtonChoice {
+        if !isManualGlucosePromptVisible { return .actionButton }
+        if hasBolusEntryReadyToDeliver { return .actionButton }
+        return .manualGlucoseEntry
+    }
+    
+    enum ActionButtonAction {
+        case saveWithoutBolusing
+        case saveAndDeliver
+        case enterBolus
+        case deliver
+    }
+    
+    var actionButtonAction: ActionButtonAction {
+        switch (hasDataToSave, hasBolusEntryReadyToDeliver) {
+        case (true, true): return .saveAndDeliver
+        case (true, false): return .saveWithoutBolusing
+        case (false, true): return .deliver
+        case (false, false): return .enterBolus
+        }
+    }
+}
+
