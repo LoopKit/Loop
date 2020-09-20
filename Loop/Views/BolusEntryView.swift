@@ -57,11 +57,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             }
             .keyboardAware()
             .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
-            .navigationBarTitle(
-                self.viewModel.potentialCarbEntry == nil
-                    ? Text("Bolus", comment: "Title for bolus entry screen")
-                    : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
-            )
+            .navigationBarTitle(self.title)
                 .supportedInterfaceOrientations(.portrait)
                 .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
                 .onReceive(self.viewModel.$enteredBolus) { updatedBolusEntry in
@@ -83,7 +79,10 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         if viewModel.isLoggingDose {
             return Text("Log Dose", comment: "Title for dose logging screen")
         }
-        return viewModel.potentialCarbEntry == nil ? Text("Bolus", comment: "Title for bolus entry screen") : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
+        if viewModel.potentialCarbEntry == nil {
+            return Text("Bolus", comment: "Title for bolus entry screen")
+        }
+        return Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
     }
 
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
@@ -421,6 +420,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     return Text("Enter Bolus", comment: "Button text to begin entering a bolus")
                 case .deliver:
                     return Text("Deliver", comment: "Button text to deliver a bolus")
+                case .logging:
+                    return Text("Log Dose", comment: "Button text to log a dose")
                 }
             }
         )

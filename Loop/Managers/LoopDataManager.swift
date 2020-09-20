@@ -85,7 +85,6 @@ final class LoopDataManager {
 
         self.dosingDecisionStore = dosingDecisionStore
 
-        // ANNA FIXME: need to change dose store init to have `defaultinsulinmodelsetting`
         self.now = now
 
         self.settingsStore = settingsStore

@@ -266,7 +266,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     func setRecommendedBolus() {
-        guard isBolusRecommended else { return }
+        guard isBolusRecommended, !isLoggingDose else { return }
         enteredBolus = recommendedBolus!
         dataManager.loopManager.getLoopState { [weak self] manager, state in
             self?.updatePredictedGlucoseValues(from: state)
@@ -764,9 +764,14 @@ extension BolusEntryViewModel {
         case saveAndDeliver
         case enterBolus
         case deliver
+        case logging
     }
     
     var actionButtonAction: ActionButtonAction {
+        if isLoggingDose {
+            return .logging
+        }
+        
         switch (hasDataToSave, hasBolusEntryReadyToDeliver) {
         case (true, true): return .saveAndDeliver
         case (true, false): return .saveWithoutBolusing
