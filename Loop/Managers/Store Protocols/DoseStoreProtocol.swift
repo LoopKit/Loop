@@ -13,7 +13,7 @@ protocol DoseStoreProtocol: AnyObject {
     // MARK: settings
     var basalProfile: LoopKit.BasalRateSchedule? { get set }
     
-    var insulinModel: LoopKit.InsulinModel? { get set }
+    var defaultInsulinModelSetting: LoopKit.InsulinModelSettings? { get set }
     
     var insulinSensitivitySchedule: LoopKit.InsulinSensitivitySchedule? { get set }
     
@@ -39,6 +39,8 @@ protocol DoseStoreProtocol: AnyObject {
     
     var pumpEventQueryAfterDate: Date { get }
     
+    var longestEffectDuration: TimeInterval { get set }
+    
     // MARK: dose management
     func resetPumpData(completion: ((_ error: DoseStore.DoseStoreError?) -> Void)?)
     
@@ -53,6 +55,8 @@ protocol DoseStoreProtocol: AnyObject {
     func executeDoseQuery(fromQueryAnchor queryAnchor: DoseStore.QueryAnchor?, limit: Int, completion: @escaping (DoseStore.DoseQueryResult) -> Void)
     
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
+    
+    func logOutsideDoseEvents(_ doses: [DoseEntry], completion: @escaping (_ error: Error?) -> Void)
     
     // MARK: IOB and insulin effect
     func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)

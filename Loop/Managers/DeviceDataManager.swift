@@ -194,7 +194,7 @@ final class DeviceDataManager {
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModel: UserDefaults.appGroup?.insulinModelSettings?.model,
+            defaultInsulinModelSetting: UserDefaults.appGroup?.insulinModelSettings,
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,

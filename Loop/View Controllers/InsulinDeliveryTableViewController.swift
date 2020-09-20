@@ -28,9 +28,11 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
     @IBOutlet weak var dataSourceSegmentedControl: UISegmentedControl!
     
+    public var enableDeleteAllButton: Bool = true
+    
     var deviceManager: DeviceDataManager? {
         didSet {
-            doseStore = deviceManager?.loopManager.doseStore
+            doseStore = deviceManager?.doseStore
         }
     }
 
@@ -116,7 +118,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     public override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
 
-        if editing {
+        if editing && enableDeleteAllButton {
             let item = UIBarButtonItem(
                 title: NSLocalizedString("Delete All", comment: "Button title to delete all objects"),
                 style: .plain,
