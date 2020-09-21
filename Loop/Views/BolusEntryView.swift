@@ -201,10 +201,11 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                         .foregroundColor(Color(.secondaryLabel))
                 }
             }
-            .onAppear {
-                // After the row is first made visible, make the text field the first responder
-                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(10)) {
-                    self.isManualGlucoseEntryRowVisible = true
+            .onKeyboardStateChange { state in
+                if state.animationDuration > 0 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + state.animationDuration) {
+                         self.isManualGlucoseEntryRowVisible = true
+                    }
                 }
             }
         }
