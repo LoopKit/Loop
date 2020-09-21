@@ -300,7 +300,6 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         )
     }
     private var datePicker: some View {
-        // ANNA TODO: check this works as intended
         // Allow 6 hours before & after due to longest DIA
         ExpandableDateListPicker(
             with: viewModel.selectedDoseDate,
@@ -409,7 +408,6 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
                 }
             },
-            // ANNA FIXME: add dose logging label to actionButtonAction
             label: {
                 switch viewModel.actionButtonAction {
                 case .saveWithoutBolusing:
