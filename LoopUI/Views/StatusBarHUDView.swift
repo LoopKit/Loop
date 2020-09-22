@@ -24,16 +24,19 @@ public class StatusBarHUDView: UIView, NibLoadable {
             if adjustViewsForNarrowDisplay != oldValue {
                 cgmStatusHUD.adjustViewsForNarrowDisplay = adjustViewsForNarrowDisplay
                 pumpStatusHUD.adjustViewsForNarrowDisplay = adjustViewsForNarrowDisplay
-                if adjustViewsForNarrowDisplay {
-                    containerView.spacing = 8.0
-                } else {
-                    containerView.spacing = 16.0
-                }
+                containerView.spacing = adjustViewsForNarrowDisplay ? 8.0 : 16.0
             }
         }
     }
 
-    public override init(frame: CGRect) {
+    override public var bounds: CGRect {
+        didSet {
+            // need to adjust for narrow display. The labels in the status bar need more space when the bounds width is less than 350 points.
+            adjustViewsForNarrowDisplay = bounds.width < 350
+        }
+    }
+    
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setup()
     }
