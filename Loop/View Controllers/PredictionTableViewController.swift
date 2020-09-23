@@ -94,7 +94,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         }
     }
 
-    let glucoseChart = PredictedGlucoseChart()
+    let glucoseChart = PredictedGlucoseChart(yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
 
     override func createChartsManager() -> ChartsManager {
         return ChartsManager(colors: .primary, settings: .default, charts: [glucoseChart], traitCollection: traitCollection)
