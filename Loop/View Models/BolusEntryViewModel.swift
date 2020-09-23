@@ -104,6 +104,12 @@ final class BolusEntryViewModel: ObservableObject {
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
 
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: nil) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.updateChartDateInterval()
+            }
+        }
+        
         observeLoopUpdates()
         observeEnteredBolusChanges()
         observeEnteredManualGlucoseChanges()
