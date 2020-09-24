@@ -103,7 +103,7 @@ final class BolusEntryViewModel: ObservableObject {
         self.originalCarbEntry = originalCarbEntry
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
-        
+
         observeLoopUpdates()
         observeEnteredBolusChanges()
         observeEnteredManualGlucoseChanges()
