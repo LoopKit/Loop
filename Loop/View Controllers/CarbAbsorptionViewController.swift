@@ -121,17 +121,16 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         let size = currentContext.newSize ?? self.tableView.bounds.size
         let availableWidth = size.width - self.charts.fixedHorizontalMargin
         let totalHours = floor(Double(availableWidth / minimumSegmentWidth))
-        let pastHours = totalHours - 1 // keep 1 hour for presenting current data and looking into the future
 
         var components = DateComponents()
         components.minute = 0
-        let date = Date(timeIntervalSinceNow: -TimeInterval(hours: max(1, pastHours)))
+        let date = Date(timeIntervalSinceNow: -TimeInterval(hours: max(1, totalHours)))
         let chartStartDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
         if charts.startDate != chartStartDate {
             currentContext.formUnion(RefreshContext.all)
         }
         charts.startDate = chartStartDate
-        charts.updateEndDate(chartStartDate.addingTimeInterval(.hours(totalHours)))
+        charts.updateEndDate(chartStartDate.addingTimeInterval(.hours(totalHours+1))) // allow 1 hour for presenting current data and looking into the future
 
         let midnight = Calendar.current.startOfDay(for: Date())
         let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -deviceManager.carbStore.maximumAbsorptionTimeInterval))
