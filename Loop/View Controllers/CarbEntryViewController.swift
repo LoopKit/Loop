@@ -219,6 +219,9 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             cell.titleLabel.text = NSLocalizedString("Date", comment: "Title of the carb entry date picker cell")
             cell.datePicker.isEnabled = isSampleEditable
             cell.datePicker.datePickerMode = .dateAndTime
+            if #available(iOS 14.0, *) {
+                cell.datePicker.preferredDatePickerStyle = .wheels
+            }
             cell.datePicker.maximumDate = Date(timeIntervalSinceNow: maximumDateFutureInterval)
             cell.datePicker.minuteInterval = 1
             cell.date = date
