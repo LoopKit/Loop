@@ -34,8 +34,8 @@ extension ChartAxisValuesStaticGenerator {
             /// The first axis value will be less than or equal to the first scalar value, aligned with the desired multiple
             var firstValue = first - (first.truncatingRemainder(dividingBy: multiple))
             /// The last axis value will be greater than or equal to the last scalar value, aligned with the desired multiple
-            let isLastAMutiple = last.truncatingRemainder(dividingBy: multiple) == 0
-            var lastValue = isLastAMutiple ? last : last + (abs(multiple - last.truncatingRemainder(dividingBy: multiple)))
+            let remainder = last.truncatingRemainder(dividingBy: multiple)
+            var lastValue = remainder == 0 ? last : last + (multiple - remainder)
             var segmentSize = multiple
             
             /// If there should be a padding segment added when a scalar value falls on the first or last axis value, adjust the first and last axis values
