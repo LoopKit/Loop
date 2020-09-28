@@ -70,11 +70,7 @@ public class PredictedGlucoseChart: GlucoseChart, ChartProviding {
     private var predictedGlucoseSoftBounds: PredictedGlucoseBounds?
     
     private let yAxisStepSizeMGDLOverride: Double?
-    
-    private var maxYAxisValue: ChartAxisValue?
-    
-    private var minYAxisValue: ChartAxisValue?
-    
+        
     private var maxYAxisSegmentCount: Double {
         // when a glucose value is below the predicted glucose minimum soft bound, allow for more y-axis segments
         return glucoseValueBelowSoftBoundsMinimum() ? 5 : 4
@@ -136,27 +132,8 @@ extension PredictedGlucoseChart {
                 targetOverrideDurationPoints = []
             }
         }
-
-        let points = [
-            glucosePoints, predictedGlucosePoints,
-            preMealOverridePoints, preMealOverrideDurationPoints,
-            targetGlucosePoints, targetOverridePoints,
-            glucoseDisplayRangePoints
-        ].flatMap { $0 }
-
-        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesUsingLinearSegmentStep(chartPoints: points,
-            minSegmentCount: 2,
-            maxSegmentCount: maxYAxisSegmentCount,
-            multiple: glucoseUnit == .milligramsPerDeciliter ? (yAxisStepSizeMGDLOverride ?? 25) : 1,
-            axisValueGenerator: {
-                ChartAxisValueDouble($0, labelSettings: axisLabelSettings)
-            },
-            addPaddingSegmentIfEdge: false
-        )
-
-        minYAxisValue = yAxisValues.first
-        maxYAxisValue = yAxisValues.last
         
+        let yAxisValues = determineYAxisValues(axisLabelSettings: axisLabelSettings)
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: colors.axisLine, labelSpaceReservationMode: .fixed(labelsWidthY))
 
         let coordsSpace = ChartCoordsSpaceLeftBottomSingleAxis(chartSettings: chartSettings, chartFrame: frame, xModel: xAxisModel, yModel: yAxisModel)
@@ -261,6 +238,32 @@ extension PredictedGlucoseChart {
             layers: layers.compactMap { $0 }
         )
     }
+    
+    private func determineYAxisValues(axisLabelSettings: ChartLabelSettings? = nil) -> [ChartAxisValue] {
+        let points = [
+            glucosePoints, predictedGlucosePoints,
+            preMealOverridePoints, preMealOverrideDurationPoints,
+            targetGlucosePoints, targetOverridePoints,
+            glucoseDisplayRangePoints
+        ].flatMap { $0 }
+
+        let axisValueGenerator: ChartAxisValueStaticGenerator
+        if let axisLabelSettings = axisLabelSettings {
+            axisValueGenerator = { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }
+        } else {
+            axisValueGenerator = { ChartAxisValueDouble($0) }
+        }
+        
+        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesUsingLinearSegmentStep(chartPoints: points,
+            minSegmentCount: 2,
+            maxSegmentCount: maxYAxisSegmentCount,
+            multiple: glucoseUnit == .milligramsPerDeciliter ? (yAxisStepSizeMGDLOverride ?? 25) : 1,
+            axisValueGenerator: axisValueGenerator,
+            addPaddingSegmentIfEdge: false
+        )
+        
+        return yAxisValues
+    }
 }
 
 extension PredictedGlucoseChart {
@@ -286,7 +289,9 @@ extension PredictedGlucoseChart {
             return nil
         }
         
-        if let maxYAxisValue = maxYAxisValue,
+        let yAxisValues = determineYAxisValues()
+        
+        if let maxYAxisValue = yAxisValues.last,
             maxYAxisValue.scalar > glucosePointMaximum.y.scalar
         {
             return HKQuantity(unit: glucoseUnit, doubleValue: maxYAxisValue.scalar)
@@ -300,7 +305,9 @@ extension PredictedGlucoseChart {
             return nil
         }
         
-        if let minYAxisValue = minYAxisValue,
+        let yAxisValues = determineYAxisValues()
+        
+        if let minYAxisValue = yAxisValues.first,
             minYAxisValue.scalar < glucosePointMinimum.y.scalar
         {
             return HKQuantity(unit: glucoseUnit, doubleValue: minYAxisValue.scalar)
