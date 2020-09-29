@@ -422,6 +422,8 @@
 		B40D07C7251A89D500C1C6D7 /* GlucoseDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */; };
 		B42C951424A3C76000857C73 /* CGMStatusHUDViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */; };
 		B43DA44124D9C12100CAFF4E /* DismissibleHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */; };
+		B44251B3252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44251B2252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift */; };
+		B44251B62523578300605937 /* PredictedGlucoseChartTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44251B52523578300605937 /* PredictedGlucoseChartTests.swift */; };
 		B47A791C2508009E006C0E11 /* ChartAxisValuesStaticGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47A791B2508009E006C0E11 /* ChartAxisValuesStaticGenerator.swift */; };
 		B48B0BAC24900093009A48DE /* PumpStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */; };
 		B490A03F24D0550F00F509FA /* GlucoseRangeCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B490A03E24D0550F00F509FA /* GlucoseRangeCategory.swift */; };
@@ -1274,6 +1276,8 @@
 		B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGMStatusHUDViewModel.swift; sourceTree = "<group>"; };
 		B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationsCriticalAlertPermissionsViewModel.swift; sourceTree = "<group>"; };
 		B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissibleHostingController.swift; sourceTree = "<group>"; };
+		B44251B2252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisValuesStaticGeneratorTests.swift; sourceTree = "<group>"; };
+		B44251B52523578300605937 /* PredictedGlucoseChartTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictedGlucoseChartTests.swift; sourceTree = "<group>"; };
 		B47A791B2508009E006C0E11 /* ChartAxisValuesStaticGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisValuesStaticGenerator.swift; sourceTree = "<group>"; };
 		B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpStatusHUDView.swift; sourceTree = "<group>"; };
 		B490A03C24D04F9400F509FA /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
@@ -1597,7 +1601,6 @@
 				B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */,
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
-				E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */,
 				4F526D601DF8D9A900A04910 /* NetBasal.swift */,
 				438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */,
 				C165B8CD23302C5D0004112E /* RemoteCommand.swift */,
@@ -1969,10 +1972,10 @@
 		43F78D2C1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXGroup;
 			children = (
-				E9C58A7624DB510500487A17 /* Fixtures */,
+				B44251B42523576B00605937 /* Charts */,
 				A9E6DFE4246A0418005B1A1C /* Extensions */,
+				E9C58A7624DB510500487A17 /* Fixtures */,
 				1DA7A83F24476E8C008257F0 /* Managers */,
-				E93E86AC24DDE02C00FF40C8 /* Mock Stores */,
 				A9E6DFED246A0460005B1A1C /* Models */,
 				B4BC56362518DE8800373647 /* ViewModels */,
 				43E2D90F1D20C581004DA55F /* Info.plist */,
@@ -2296,6 +2299,7 @@
 			isa = PBXGroup;
 			children = (
 				A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */,
+				B44251B2252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift */,
 				A9E6DFE7246A043C005B1A1C /* DoseStoreTests.swift */,
 				A9A63F8C246B261100588D5B /* DosingDecisionStoreTests.swift */,
 				A985464C251448300099C1A6 /* OutputStreamTests.swift */,
@@ -2320,6 +2324,14 @@
 				B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */,
 			);
 			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		B44251B42523576B00605937 /* Charts */ = {
+			isa = PBXGroup;
+			children = (
+				B44251B52523578300605937 /* PredictedGlucoseChartTests.swift */,
+			);
+			path = Charts;
 			sourceTree = "<group>";
 		};
 		B4BC56362518DE8800373647 /* ViewModels */ = {
@@ -2714,7 +2726,7 @@
 					43776F8B1B8022E90074EA36 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2736,7 +2748,7 @@
 					43A943711B926B7B0051FA24 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 0800;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -2749,7 +2761,7 @@
 					43A9437D1B926B7B0051FA24 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -2804,7 +2816,7 @@
 					4F70C1DB1DE8DCA7006380B7 = {
 						CreatedOnToolsVersion = 8.1;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -3550,12 +3562,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
+				B44251B3252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
 				A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */,
 				A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */,
 				A985464D251448300099C1A6 /* OutputStreamTests.swift in Sources */,
 				A9A63F8D246B261100588D5B /* DosingDecisionStoreTests.swift in Sources */,
 				A9E6DFEF246A0474005B1A1C /* LoopErrorTests.swift in Sources */,
+				B44251B62523578300605937 /* PredictedGlucoseChartTests.swift in Sources */,
 				A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */,
 				A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */,
 				A9DF02CD24F72BC800B7C988 /* PersistenceControllerTestCase.swift in Sources */,
