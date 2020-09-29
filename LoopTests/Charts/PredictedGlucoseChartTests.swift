@@ -38,7 +38,7 @@ class PredictedGlucoseChartTests: XCTestCase {
         predictedGlucoseChart.setPredictedGlucoseValues(predictedGlucoseValues)
         let predictedGlucosePoints = predictedGlucoseChart.predictedGlucosePoints
         XCTAssertEqual(predictedGlucosePoints[0].y.scalar, 40)
-        XCTAssertEqual(predictedGlucosePoints[1].y.scalar, 
+        XCTAssertEqual(predictedGlucosePoints[1].y.scalar, 40)
         XCTAssertEqual(predictedGlucosePoints[2].y.scalar, 280)
         XCTAssertEqual(predictedGlucosePoints[3].y.scalar, 380)
         XCTAssertEqual(predictedGlucosePoints[4].y.scalar, 400)
