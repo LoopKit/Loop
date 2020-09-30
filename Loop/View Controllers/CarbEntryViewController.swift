@@ -484,7 +484,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         }
 
         let viewModel = BolusEntryViewModel(
-            dataManager: deviceManager,
+            delegate: deviceManager,
             originalCarbEntry: originalCarbEntry,
             potentialCarbEntry: updatedEntry,
             selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji

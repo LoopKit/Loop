@@ -1145,7 +1145,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     @IBAction func unwindFromSettings(_ segue: UIStoryboardSegue) {}
 
     @IBAction func presentBolusScreen() {
-        let viewModel = BolusEntryViewModel(dataManager: deviceManager)
+        let viewModel = BolusEntryViewModel(delegate: deviceManager)
         let bolusEntryView = BolusEntryView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
