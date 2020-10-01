@@ -22,9 +22,20 @@ class GlucloserLogging {
     dateFormatter.timeZone = TimeZone.autoupdatingCurrent
   }
   
-  public func saveInsulin(dateTime: Date, units: Double) {
+  public func saveBasal(dateTime: Date,
+                        unitsPerHour: Double,
+                        for duration: TimeInterval) {
     let dateTimeS = dateFormatter.string(from: dateTime)
-    guard let url =  URL(string: "https://auth.glucloser.com/log/insulin?dateTime=\(dateTimeS)&units=\(units)") else {
+    guard let url =  URL(string: "https://auth.glucloser.com/log/basal?dateTime=\(dateTimeS)&units=\(unitsPerHour)&duration=\(duration)") else {
+      return
+    }
+    let task = urlSession.dataTask(with: url)
+    task.resume()
+  }
+  
+  public func saveBolus(dateTime: Date, units: Double) {
+    let dateTimeS = dateFormatter.string(from: dateTime)
+    guard let url =  URL(string: "https://auth.glucloser.com/log/bolus?dateTime=\(dateTimeS)&units=\(units)") else {
       return
     }
     let task = urlSession.dataTask(with: url)
@@ -48,3 +59,4 @@ class GlucloserLogging {
     task.resume()
   }
 }
+

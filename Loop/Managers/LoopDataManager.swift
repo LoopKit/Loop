@@ -598,7 +598,7 @@ extension LoopDataManager {
             completion?()
         }
       let units = dose.programmedUnits
-      GlucloserLogging.shared.saveInsulin(dateTime: dose.startDate,
+      GlucloserLogging.shared.saveBolus(dateTime: dose.startDate,
                                           units: units)
     }
 

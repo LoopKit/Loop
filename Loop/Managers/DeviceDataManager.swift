@@ -683,6 +683,10 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             completion: { result in
                 switch result {
                 case .success(let doseEntry):
+                  GlucloserLogging.shared.saveBasal(
+                    dateTime: basal.date,
+                    unitsPerHour: basal.recommendation.unitsPerHour,
+                    for: basal.recommendation.duration)
                     completion(.success(doseEntry))
                 case .failure(let error):
                     completion(.failure(error))
