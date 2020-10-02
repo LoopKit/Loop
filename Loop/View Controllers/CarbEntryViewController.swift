@@ -344,7 +344,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             case .date:
                 let cell = tableView.dequeueReusableCell(withIdentifier: DateAndDurationSteppableTableViewCell.className) as! DateAndDurationSteppableTableViewCell
             
-                cell.titleLabel.text = NSLocalizedString("Date", comment: "Title of the carb entry date picker cell")
+                cell.titleLabel.text = NSLocalizedString("Time", comment: "Title of the carb entry date picker cell")
                 cell.datePicker.isEnabled = isSampleEditable
                 cell.datePicker.datePickerMode = .dateAndTime
                 cell.datePicker.maximumDate = date.addingTimeInterval(.hours(1))
