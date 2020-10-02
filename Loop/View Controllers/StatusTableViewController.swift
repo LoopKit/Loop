@@ -1273,6 +1273,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: deviceManager.criticalEventLogExportManager),
+                                          adverseEventReportViewModel: AdverseEventReportViewModel(pumpStatus: deviceManager.pumpManager?.status, cgmDevice: deviceManager.cgmManager?.device),
                                           therapySettings: deviceManager.loopManager.therapySettings,
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                                           pumpSupportedIncrements: pumpSupportedIncrements,

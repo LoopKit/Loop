@@ -255,7 +255,8 @@ extension SettingsView {
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
             NavigationLink(destination: SupportScreenView(didTapIssueReport: viewModel.didTapIssueReport,
-                                                          criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel))
+                                                          criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel,
+                                                          adverseEventReportViewModel: self.viewModel.adverseEventReportViewModel))
             {
                 Text(NSLocalizedString("Support", comment: "The title of the support item in settings"))
             }
@@ -351,6 +352,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           cgmManagerSettingsViewModel: DeviceViewModel(),
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
+                                          adverseEventReportViewModel: AdverseEventReportViewModel(),
                                           therapySettings: TherapySettings(),
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true),
                                           pumpSupportedIncrements: nil,

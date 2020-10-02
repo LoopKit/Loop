@@ -80,6 +80,7 @@ public class SettingsViewModel: ObservableObject {
     var cgmManagerSettingsViewModel: DeviceViewModel
     var servicesViewModel: ServicesViewModel
     var criticalEventLogExportViewModel: CriticalEventLogExportViewModel
+    var adverseEventReportViewModel: AdverseEventReportViewModel
     var therapySettings: TherapySettings
     let supportedInsulinModelSettings: SupportedInsulinModelSettings
     let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
@@ -94,6 +95,7 @@ public class SettingsViewModel: ObservableObject {
                 cgmManagerSettingsViewModel: DeviceViewModel,
                 servicesViewModel: ServicesViewModel,
                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
+                adverseEventReportViewModel: AdverseEventReportViewModel,
                 therapySettings: TherapySettings,
                 supportedInsulinModelSettings: SupportedInsulinModelSettings,
                 pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
@@ -108,6 +110,7 @@ public class SettingsViewModel: ObservableObject {
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel
         self.criticalEventLogExportViewModel = criticalEventLogExportViewModel
+        self.adverseEventReportViewModel = adverseEventReportViewModel
         self.therapySettings = therapySettings
         self.supportedInsulinModelSettings = supportedInsulinModelSettings
         self.pumpSupportedIncrements = pumpSupportedIncrements

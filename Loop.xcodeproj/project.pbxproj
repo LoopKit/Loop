@@ -426,6 +426,8 @@
 		B43DA44124D9C12100CAFF4E /* DismissibleHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */; };
 		B44251B3252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44251B2252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift */; };
 		B44251B62523578300605937 /* PredictedGlucoseChartTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44251B52523578300605937 /* PredictedGlucoseChartTests.swift */; };
+		B45E704D25275023000C0E68 /* AdverseEventReportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45E704C25275023000C0E68 /* AdverseEventReportViewModel.swift */; };
+		B45E704F25277EA2000C0E68 /* AdverseEventReportViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45E704E25277EA2000C0E68 /* AdverseEventReportViewModelTests.swift */; };
 		B47A791C2508009E006C0E11 /* ChartAxisValuesStaticGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47A791B2508009E006C0E11 /* ChartAxisValuesStaticGenerator.swift */; };
 		B48B0BAC24900093009A48DE /* PumpStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */; };
 		B490A03F24D0550F00F509FA /* GlucoseRangeCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B490A03E24D0550F00F509FA /* GlucoseRangeCategory.swift */; };
@@ -1282,6 +1284,8 @@
 		B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissibleHostingController.swift; sourceTree = "<group>"; };
 		B44251B2252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisValuesStaticGeneratorTests.swift; sourceTree = "<group>"; };
 		B44251B52523578300605937 /* PredictedGlucoseChartTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictedGlucoseChartTests.swift; sourceTree = "<group>"; };
+		B45E704C25275023000C0E68 /* AdverseEventReportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdverseEventReportViewModel.swift; sourceTree = "<group>"; };
+		B45E704E25277EA2000C0E68 /* AdverseEventReportViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdverseEventReportViewModelTests.swift; sourceTree = "<group>"; };
 		B47A791B2508009E006C0E11 /* ChartAxisValuesStaticGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisValuesStaticGenerator.swift; sourceTree = "<group>"; };
 		B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpStatusHUDView.swift; sourceTree = "<group>"; };
 		B490A03C24D04F9400F509FA /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
@@ -1922,25 +1926,22 @@
 			children = (
 				897A5A9524C2175B00C4E71D /* BolusEntryView.swift */,
 				C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */,
+				C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */,
 				43B260481ED248FB008CAA77 /* CarbEntryTableViewCell.swift */,
 				431A8C3F1EC6E8AB00823B9C /* CircleMaskView.swift */,
 				A9A056B224B93C62007CF06D /* CriticalEventLogExportView.swift */,
 				43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */,
 				430D85881F44037000AF2D4F /* HUDViewTableViewCell.swift */,
 				1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */,
-				B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */,
 				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
+				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
 				89CAB36224C8FE95009EE3CE /* PredictedGlucoseChartView.swift */,
 				438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */,
-				1D49795724E7289700948F05 /* ServicesViewModel.swift */,
+				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
-				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
+				1DD0B76624EC77AC008A2DC3 /* SupportScreenView.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
-				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
-				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
-				C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */,
-				1DD0B76624EC77AC008A2DC3 /* SupportScreenView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2239,8 +2240,12 @@
 		897A5A9724C22DCE00C4E71D /* View Models */ = {
 			isa = PBXGroup;
 			children = (
+				B45E704C25275023000C0E68 /* AdverseEventReportViewModel.swift */,
 				897A5A9824C22DE800C4E71D /* BolusEntryViewModel.swift */,
 				A9A056B424B94123007CF06D /* CriticalEventLogExportViewModel.swift */,
+				B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */,
+				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
+				1D49795724E7289700948F05 /* ServicesViewModel.swift */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";
@@ -2342,8 +2347,9 @@
 		B4BC56362518DE8800373647 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				B4BC56372518DEA900373647 /* CGMStatusHUDViewModelTests.swift */,
+				B45E704E25277EA2000C0E68 /* AdverseEventReportViewModelTests.swift */,
 				1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */,
+				B4BC56372518DEA900373647 /* CGMStatusHUDViewModelTests.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -3370,6 +3376,7 @@
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
 				4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
+				B45E704D25275023000C0E68 /* AdverseEventReportViewModel.swift in Sources */,
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
 				1DD0B76724EC77AC008A2DC3 /* SupportScreenView.swift in Sources */,
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
@@ -3593,6 +3600,7 @@
 				E98A55F324EDD9530008715D /* MockSettingsStore.swift in Sources */,
 				A9E6DFE6246A042E005B1A1C /* CarbStoreTests.swift in Sources */,
 				A9DAE7D02332D77F006AE942 /* LoopTests.swift in Sources */,
+				B45E704F25277EA2000C0E68 /* AdverseEventReportViewModelTests.swift in Sources */,
 				E93E86B024DDE1BD00FF40C8 /* MockGlucoseStore.swift in Sources */,
 				1DFE9E172447B6270082C280 /* UserNotificationAlertPresenterTests.swift in Sources */,
 				B4BC56382518DEA900373647 /* CGMStatusHUDViewModelTests.swift in Sources */,
