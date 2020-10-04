@@ -178,7 +178,7 @@ final class NightscoutDataManager {
             recommendedBolus = state.recommendedBolus?.recommendation.amount
 
             let carbsOnBoard = state.carbsOnBoard
-            let predictedGlucose = state.predictedGlucose
+            let predictedGlucose = state.predictedGlucoseIncludingPendingInsulin
             let recommendedTempBasal = state.recommendedTempBasal
 
             manager.doseStore.insulinOnBoard(at: Date()) { (result) in
@@ -426,15 +426,20 @@ final class NightscoutDataManager {
         } else {
             deviceStr = "loop://unknowndevice"
         }
+
         let direction: String? = {
             switch sensorState?.trendType {
             case .up?:
+                return "FortyFiveUp"
+            case .upUp?:
                 return "SingleUp"
-            case .upUp?, .upUpUp?:
+            case .upUpUp?:
                 return "DoubleUp"
             case .down?:
+                return "FortyFiveDown"
+            case .downDown?:
                 return "SingleDown"
-            case .downDown?, .downDownDown?:
+            case .downDownDown?:
                 return "DoubleDown"
             case .flat?:
                 return "Flat"

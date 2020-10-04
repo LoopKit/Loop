@@ -151,6 +151,9 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: footerView.primaryButton.titleLabel?.text, style: .plain, target: self, action: #selector(continueButtonPressed))
         navigationItem.rightBarButtonItem?.isEnabled = false
+        
+        // Sets text for back button on bolus screen
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: NSLocalizedString("Carb Entry", comment: "Back button text for bolus screen to return to carb entry screen"), style: .plain, target: nil, action: nil)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -216,6 +219,11 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             cell.titleLabel.text = NSLocalizedString("Date", comment: "Title of the carb entry date picker cell")
             cell.datePicker.isEnabled = isSampleEditable
             cell.datePicker.datePickerMode = .dateAndTime
+            #if swift(>=5.2)
+                if #available(iOS 14.0, *) {
+                    cell.datePicker.preferredDatePickerStyle = .wheels
+                }
+            #endif
             cell.datePicker.maximumDate = Date(timeIntervalSinceNow: maximumDateFutureInterval)
             cell.datePicker.minuteInterval = 1
             cell.date = date

@@ -353,8 +353,10 @@ final class StatusTableViewController: ChartsTableViewController {
             if currentContext.contains(.carbs) {
                 reloadGroup.enter()
                 manager.carbStore.getCarbsOnBoardValues(start: startDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? state.insulinCounteractionEffects : nil) { (values) in
-                    cobValues = values
-                    reloadGroup.leave()
+                    DispatchQueue.main.async {
+                        cobValues = values
+                        reloadGroup.leave()
+                    }
                 }
             }
 
@@ -364,49 +366,57 @@ final class StatusTableViewController: ChartsTableViewController {
         if currentContext.contains(.glucose) {
             reloadGroup.enter()
             self.deviceManager.loopManager.glucoseStore.getCachedGlucoseSamples(start: startDate) { (values) -> Void in
-                glucoseValues = values
-                reloadGroup.leave()
+                DispatchQueue.main.async {
+                    glucoseValues = values
+                    reloadGroup.leave()
+                }
             }
         }
 
         if currentContext.contains(.insulin) {
             reloadGroup.enter()
             deviceManager.loopManager.doseStore.getInsulinOnBoardValues(start: startDate) { (result) -> Void in
-                switch result {
-                case .failure(let error):
-                    self.log.error("DoseStore failed to get insulin on board values: %{public}@", String(describing: error))
-                    retryContext.update(with: .insulin)
-                    iobValues = []
-                case .success(let values):
-                    iobValues = values
+                DispatchQueue.main.async {
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("DoseStore failed to get insulin on board values: %{public}@", String(describing: error))
+                        retryContext.update(with: .insulin)
+                        iobValues = []
+                    case .success(let values):
+                        iobValues = values
+                    }
+                    reloadGroup.leave()
                 }
-                reloadGroup.leave()
             }
 
             reloadGroup.enter()
             deviceManager.loopManager.doseStore.getNormalizedDoseEntries(start: startDate) { (result) -> Void in
-                switch result {
-                case .failure(let error):
-                    self.log.error("DoseStore failed to get normalized dose entries: %{public}@", String(describing: error))
-                    retryContext.update(with: .insulin)
-                    doseEntries = []
-                case .success(let doses):
-                    doseEntries = doses
+                DispatchQueue.main.async {
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("DoseStore failed to get normalized dose entries: %{public}@", String(describing: error))
+                        retryContext.update(with: .insulin)
+                        doseEntries = []
+                    case .success(let doses):
+                        doseEntries = doses
+                    }
+                    reloadGroup.leave()
                 }
-                reloadGroup.leave()
             }
 
             reloadGroup.enter()
             deviceManager.loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())) { (result) in
-                switch result {
-                case .failure:
-                    retryContext.update(with: .insulin)
-                    totalDelivery = nil
-                case .success(let total):
-                    totalDelivery = total.value
-                }
+                DispatchQueue.main.async {
+                    switch result {
+                    case .failure:
+                        retryContext.update(with: .insulin)
+                        totalDelivery = nil
+                    case .success(let total):
+                        totalDelivery = total.value
+                    }
 
-                reloadGroup.leave()
+                    reloadGroup.leave()
+                }
             }
         }
 
@@ -487,6 +497,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: unit),
                         at: glucose.startDate,
                         unit: unit,
+                        staleGlucoseAge: self.deviceManager.loopManager.settings.inputDataRecencyInterval,
                         sensor: self.deviceManager.sensorState
                     )
                 }
@@ -1258,13 +1269,23 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     @objc private func showLastError(_: Any) {
+        var error: Error? = nil
         // First, check whether we have a device error after the most recent completion date
         if let deviceError = deviceManager.lastError,
             deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
         {
-            self.present(UIAlertController(with: deviceError.error), animated: true)
+            error = deviceError.error
         } else if let lastLoopError = lastLoopError {
-            self.present(UIAlertController(with: lastLoopError), animated: true)
+            error = lastLoopError
+        }
+
+        if error != nil {
+            let alertController = UIAlertController(with: error!)
+            let manualLoopAction = UIAlertAction(title: NSLocalizedString("Retry", comment: "The button text for attempting a manual loop"), style: .default, handler: { _ in
+                self.deviceManager.refreshDeviceData()
+            })
+            alertController.addAction(manualLoopAction)
+            present(alertController, animated: true)
         }
     }
 

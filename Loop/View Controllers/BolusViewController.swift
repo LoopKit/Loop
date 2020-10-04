@@ -105,6 +105,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             switch configuration {
             case .manualCorrection:
                 title = NSLocalizedString("Bolus", comment: "Title text for bolus screen (manual correction)")
+                navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
             case .newCarbEntry, .updatedCarbEntry:
                 title = NSLocalizedString("Meal Bolus", comment: "Title text for bolus screen following a carb entry")
             }
