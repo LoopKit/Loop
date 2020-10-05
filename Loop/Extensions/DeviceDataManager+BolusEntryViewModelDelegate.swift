@@ -43,15 +43,14 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
         pumpManager?.ensureCurrentPumpData(completion: completion)
     }
     
-    var isGlucoseDataStale: Bool {
-        guard let latestGlucose = glucoseStore.latestGlucose else { return true }
-        return Date().timeIntervalSince(latestGlucose.startDate) <= loopManager.settings.inputDataRecencyInterval
+    var mostRecentGlucoseDataDate: Date? {
+        return glucoseStore.latestGlucose?.startDate
     }
     
-    var isPumpDataStale: Bool {
-        return Date().timeIntervalSince(doseStore.lastAddedPumpData) <= loopManager.settings.inputDataRecencyInterval
+    var mostRecentPumpDataDate: Date? {
+        return doseStore.lastAddedPumpData
     }
-    
+
     var isPumpConfigured: Bool {
         return pumpManager != nil
     }
@@ -66,6 +65,10 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
     
     var settings: LoopSettings {
         return loopManager.settings
+    }
+
+    func setPreMealOverride(_ preMealOverride: TemporaryScheduleOverride?) {
+        loopManager.settings.preMealOverride = preMealOverride
     }
     
 }

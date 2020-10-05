@@ -15,13 +15,7 @@ import XCTest
 @testable import Loop
 
 class BolusEntryViewModelTests: XCTestCase {
-    override static func setUp() {
-        TimeZone.ReferenceType.default = TimeZone(abbreviation: "GMT")!
-    }
-    override static func tearDown() {
-        TimeZone.ReferenceType.default = TimeZone.current
-    }
-    
+   
     static let now = Date.distantFuture
     static let exampleStartDate = now - .hours(2)
     static let exampleEndDate = now - .hours(1)
@@ -45,33 +39,42 @@ class BolusEntryViewModelTests: XCTestCase {
     static let exampleBolusQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: 1.0)
     static let noBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
 
+    static let mockUUID = UUID()
+
+    static let exampleScheduleOverrideSettings = TemporaryScheduleOverrideSettings(unit: .millimolesPerLiter, targetRange: nil, insulinNeedsScaleFactor: nil)
+    static let examplePreMealOverride = TemporaryScheduleOverride(context: .preMeal, settings: exampleScheduleOverrideSettings, startDate: exampleStartDate, duration: .indefinite, enactTrigger: .local, syncIdentifier: mockUUID)
+    static let exampleCustomScheduleOverride = TemporaryScheduleOverride(context: .custom, settings: exampleScheduleOverrideSettings, startDate: exampleStartDate, duration: .indefinite, enactTrigger: .local, syncIdentifier: mockUUID)
+    
     var bolusEntryViewModel: BolusEntryViewModel!
     fileprivate var delegate: MockBolusEntryViewModelDelegate!
     var now: Date = BolusEntryViewModelTests.now
     
     let mockOriginalCarbEntry = StoredCarbEntry(uuid: UUID(), provenanceIdentifier: "provenanceIdentifier", syncIdentifier: "syncIdentifier", syncVersion: 0, startDate: BolusEntryViewModelTests.exampleStartDate, quantity: BolusEntryViewModelTests.exampleCarbQuantity, foodType: "foodType", absorptionTime: 1, createdByCurrentApp: true, userCreatedDate: BolusEntryViewModelTests.now, userUpdatedDate: BolusEntryViewModelTests.now)
     let mockPotentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: BolusEntryViewModelTests.exampleStartDate, foodType: "foodType", absorptionTime: 1)
-    let mockUUID = UUID().uuidString
+    let mockUUID = BolusEntryViewModelTests.mockUUID.uuidString
     let queue = DispatchQueue(label: "BolusEntryViewModelTests")
     var saveAndDeliverSuccess = false
     
     override func setUpWithError() throws {
         now = Self.now
         delegate = MockBolusEntryViewModelDelegate()
+        delegate.mostRecentGlucoseDataDate = now
+        delegate.mostRecentPumpDataDate = now
         saveAndDeliverSuccess = false
         setUpViewModel()
     }
     
-    func setUpViewModel(originalCarbEntry: StoredCarbEntry? = nil, potentialCarbEntry: NewCarbEntry? = nil) {
+    func setUpViewModel(originalCarbEntry: StoredCarbEntry? = nil, potentialCarbEntry: NewCarbEntry? = nil, selectedCarbAbsorptionTimeEmoji: String? = nil) {
         bolusEntryViewModel = BolusEntryViewModel(delegate: delegate,
                                                   now: { self.now },
                                                   screenWidth: 512,
                                                   debounceIntervalMilliseconds: 0,
                                                   authenticateOverride: authenticateOverride,
                                                   uuidProvider: { self.mockUUID },
+                                                  timeZone: TimeZone(abbreviation: "GMT")!,
                                                   originalCarbEntry: originalCarbEntry,
                                                   potentialCarbEntry: potentialCarbEntry,
-                                                  selectedCarbAbsorptionTimeEmoji: nil)
+                                                  selectedCarbAbsorptionTimeEmoji: selectedCarbAbsorptionTimeEmoji)
         bolusEntryViewModel.maximumBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 10)
     }
 
@@ -111,7 +114,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
 
     // MARK: updating state
-
+    
     func testUpdateDisableManualGlucoseEntryIfNecessary() throws {
         bolusEntryViewModel.isManualGlucoseEntryEnabled = true
         bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
@@ -121,6 +124,16 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(.glucoseNoLongerStale, bolusEntryViewModel.activeAlert)
     }
     
+    func testUpdateDisableManualGlucoseEntryIfNecessaryStaleGlucose() throws {
+        delegate.mostRecentGlucoseDataDate = Date.distantPast
+        bolusEntryViewModel.isManualGlucoseEntryEnabled = true
+        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        try triggerLoopStateUpdated(with: MockLoopState())
+        XCTAssertTrue(bolusEntryViewModel.isManualGlucoseEntryEnabled)
+        XCTAssertEqual(Self.exampleManualGlucoseQuantity, bolusEntryViewModel.enteredManualGlucose)
+        XCTAssertNil(bolusEntryViewModel.activeAlert)
+    }
+
     func testUpdateGlucoseValues() throws {
         XCTAssertEqual(0, bolusEntryViewModel.glucoseValues.count)
         try triggerLoopStateUpdatedWithDataAndWait()
@@ -168,6 +181,69 @@ class BolusEntryViewModelTests: XCTestCase {
                        bolusEntryViewModel.predictedGlucoseValues.map {
                         PredictedGlucoseValue(startDate: $0.startDate, quantity: $0.quantity)
         })
+    }
+    
+    func testUpdateSettings() throws {
+        XCTAssertNil(bolusEntryViewModel.preMealOverride)
+        XCTAssertNil(bolusEntryViewModel.scheduleOverride)
+        XCTAssertNil(bolusEntryViewModel.targetGlucoseSchedule)
+        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
+        let newGlucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .millimolesPerLiter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 100, maxValue: 110)),
+            RepeatingScheduleValue(startTime: TimeInterval(28800), value: DoubleRange(minValue: 90, maxValue: 100)),
+            RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: 100, maxValue: 110))
+        ], timeZone: .utcTimeZone)!
+        var newSettings = LoopSettings(dosingEnabled: true,
+                                       glucoseTargetRangeSchedule: newGlucoseTargetRangeSchedule,
+                                       maximumBasalRatePerHour: 1.0,
+                                       maximumBolus: 10.0,
+                                       suspendThreshold: GlucoseThreshold(unit: .milligramsPerDeciliter, value: 100.0))
+        let settings = TemporaryScheduleOverrideSettings(unit: .millimolesPerLiter, targetRange: nil, insulinNeedsScaleFactor: nil)
+        newSettings.preMealOverride = TemporaryScheduleOverride(context: .preMeal, settings: settings, startDate: Self.exampleStartDate, duration: .indefinite, enactTrigger: .local, syncIdentifier: UUID())
+        newSettings.scheduleOverride = TemporaryScheduleOverride(context: .custom, settings: settings, startDate: Self.exampleStartDate, duration: .indefinite, enactTrigger: .local, syncIdentifier: UUID())
+        delegate.settings = newSettings
+        try triggerLoopStateUpdatedWithDataAndWait()
+        waitOnMain()
+
+        XCTAssertEqual(newSettings.preMealOverride, bolusEntryViewModel.preMealOverride)
+        XCTAssertEqual(newSettings.scheduleOverride, bolusEntryViewModel.scheduleOverride)
+        XCTAssertEqual(newGlucoseTargetRangeSchedule, bolusEntryViewModel.targetGlucoseSchedule)
+        XCTAssertEqual(.millimolesPerLiter, bolusEntryViewModel.glucoseUnit)
+    }
+
+    func testUpdateSettingsWithCarbs() throws {
+        setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
+        XCTAssertNil(bolusEntryViewModel.preMealOverride)
+        XCTAssertNil(bolusEntryViewModel.scheduleOverride)
+        XCTAssertNil(bolusEntryViewModel.targetGlucoseSchedule)
+        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
+        let newGlucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .millimolesPerLiter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 100, maxValue: 110)),
+            RepeatingScheduleValue(startTime: TimeInterval(28800), value: DoubleRange(minValue: 90, maxValue: 100)),
+            RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: 100, maxValue: 110))
+        ], timeZone: .utcTimeZone)!
+        var newSettings = LoopSettings(dosingEnabled: true,
+                                       glucoseTargetRangeSchedule: newGlucoseTargetRangeSchedule,
+                                       maximumBasalRatePerHour: 1.0,
+                                       maximumBolus: 10.0,
+                                       suspendThreshold: GlucoseThreshold(unit: .milligramsPerDeciliter, value: 100.0))
+        newSettings.preMealOverride = Self.examplePreMealOverride
+        newSettings.scheduleOverride = Self.exampleCustomScheduleOverride
+        delegate.preMealOverride = Self.examplePreMealOverride
+        delegate.settings = newSettings
+        try triggerLoopStateUpdatedWithDataAndWait()
+        waitOnMain()
+        
+        // Pre-meal override should be ignored if we have carbs (LOOP-1964), and cleared in settings
+        XCTAssertNil(delegate.preMealOverride)
+        XCTAssertNil(bolusEntryViewModel.preMealOverride)
+        XCTAssertEqual(newSettings.scheduleOverride, bolusEntryViewModel.scheduleOverride)
+        XCTAssertEqual(newGlucoseTargetRangeSchedule, bolusEntryViewModel.targetGlucoseSchedule)
+        XCTAssertEqual(.millimolesPerLiter, bolusEntryViewModel.glucoseUnit)
+        
+        // ... but restored if we cancel without bolusing
+        bolusEntryViewModel = nil
+        XCTAssertEqual(Self.examplePreMealOverride, delegate.preMealOverride)
     }
     
     func testManualGlucoseChangesPredictedGlucoseValues() throws {
@@ -309,22 +385,6 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertNil(bolusEntryViewModel.activeNotice)
     }
 
-    func testRecommendedBolusClearsEnteredBolusThenSetsIt() throws {
-        XCTAssertNil(bolusEntryViewModel.recommendedBolus)
-        bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
-        let mockState = MockLoopState()
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
-        delegate.cachedGlucoseSamplesResponse = [StoredGlucoseSample(sample: Self.exampleCGMGlucoseSample)]
-        try triggerLoopStateUpdated(with: mockState)
-        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 0.0), bolusEntryViewModel.enteredBolus)
-        // Now, through the magic of `observeRecommendedBolusChanges` and the recommendedBolus publisher it should update to 1.234.
-        // However, due to the weird complexities of the number of times BolusEntryViewModel hops on and
-        // off `DispatchQueue.main` we need to wait on main twice to make this test reliable.
-        waitOnMain()
-        waitOnMain()
-        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 1.234), bolusEntryViewModel.enteredBolus)
-    }
-
     func testUpdateDoesNotRefreshPumpIfDataIsFresh() throws {
         XCTAssertFalse(bolusEntryViewModel.isRefreshingPump)
         try triggerLoopStateUpdatedWithDataAndWait()
@@ -333,7 +393,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
 
     func testUpdateIsRefreshingPump() throws {
-        delegate.isPumpDataStale = true
+        delegate.mostRecentPumpDataDate = Date.distantPast
         XCTAssertFalse(bolusEntryViewModel.isRefreshingPump)
         try triggerLoopStateUpdatedWithDataAndWait()
         XCTAssertTrue(bolusEntryViewModel.isRefreshingPump)
@@ -345,7 +405,19 @@ class BolusEntryViewModelTests: XCTestCase {
         waitOnMain()
         XCTAssertFalse(bolusEntryViewModel.isRefreshingPump)
     }
-    
+        
+    func testRecommendedBolusSetsEnteredBolus() throws {
+        XCTAssertNil(bolusEntryViewModel.recommendedBolus)
+        bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
+        let mockState = MockLoopState()
+        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
+        // Now, through the magic of `observeRecommendedBolusChanges` and the recommendedBolus publisher it should update to 1.234.  But we have to wait twice on main to make this reliable...
+        waitOnMain()
+        waitOnMain()
+        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 1.234), bolusEntryViewModel.enteredBolus)
+    }
+
     // MARK: save data and bolus delivery
 
     func testDeliverBolusOnly() throws {
@@ -453,7 +525,7 @@ class BolusEntryViewModelTests: XCTestCase {
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
         // manualGlucoseSample updates asynchronously on main
         waitOnMain()
-        
+                
         try saveAndDeliver(BolusEntryViewModelTests.exampleBolusQuantity)
         
         let addCarbEntryCompletion = try XCTUnwrap(delegate.addCarbEntryCompletion)
@@ -467,6 +539,36 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
         XCTAssertEqual(now, delegate.enactedBolusDate)
         XCTAssertTrue(saveAndDeliverSuccess)
+    }
+    
+    func testSaveCarbAndBolusClearsSavedPreMealOverride() throws {
+        setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
+        // set up user specified pre-meal override
+        let newGlucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .millimolesPerLiter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 100, maxValue: 110)),
+            RepeatingScheduleValue(startTime: TimeInterval(28800), value: DoubleRange(minValue: 90, maxValue: 100)),
+            RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: 100, maxValue: 110))
+        ], timeZone: .utcTimeZone)!
+        var newSettings = LoopSettings(dosingEnabled: true,
+                                       glucoseTargetRangeSchedule: newGlucoseTargetRangeSchedule,
+                                       maximumBasalRatePerHour: 1.0,
+                                       maximumBolus: 10.0,
+                                       suspendThreshold: GlucoseThreshold(unit: .milligramsPerDeciliter, value: 100.0))
+        newSettings.preMealOverride = Self.examplePreMealOverride
+        newSettings.scheduleOverride = Self.exampleCustomScheduleOverride
+        delegate.settings = newSettings
+        try triggerLoopStateUpdatedWithDataAndWait()
+        waitOnMain()
+
+        try saveAndDeliver(BolusEntryViewModelTests.exampleBolusQuantity)
+        let addCarbEntryCompletion = try XCTUnwrap(delegate.addCarbEntryCompletion)
+        addCarbEntryCompletion(.success(()))
+        waitOnMain()
+        XCTAssertTrue(saveAndDeliverSuccess)
+
+        // ... make sure the "restoring" of the saved pre-meal override does not happen
+        bolusEntryViewModel = nil
+        XCTAssertNil(delegate.preMealOverride)
     }
 
     func testSaveManualGlucoseAndCarbAndBolus() throws {
@@ -505,17 +607,32 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual("10", bolusEntryViewModel.maximumBolusAmountString)
     }
     
+    func testCarbEntryAmountAndEmojiStringNil() throws {
+        XCTAssertNil(bolusEntryViewModel.carbEntryAmountAndEmojiString)
+    }
+    
     func testCarbEntryAmountAndEmojiString() throws {
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
 
         XCTAssertEqual("234 g foodType", bolusEntryViewModel.carbEntryAmountAndEmojiString)
     }
     
-    func testCarbEntryAmountAndEmojiString2() throws {
+    func testCarbEntryAmountAndEmojiStringNoFoodType() throws {
         let potentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: Self.exampleStartDate, foodType: nil, absorptionTime: 1)
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: potentialCarbEntry)
 
         XCTAssertEqual("234 g", bolusEntryViewModel.carbEntryAmountAndEmojiString)
+    }
+    
+    func testCarbEntryAmountAndEmojiStringWithEmoji() throws {
+        let potentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: Self.exampleStartDate, foodType: nil, absorptionTime: 1)
+        setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: potentialCarbEntry, selectedCarbAbsorptionTimeEmoji: "😀")
+
+        XCTAssertEqual("234 g 😀", bolusEntryViewModel.carbEntryAmountAndEmojiString)
+    }
+    
+    func testCarbEntryDateAndAbsorptionTimeStringNil() throws {
+        XCTAssertNil(bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
     }
     
     func testCarbEntryDateAndAbsorptionTimeString() throws {
@@ -695,6 +812,7 @@ fileprivate class MockLoopState: LoopState {
 }
 
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
+
     var loopStateCallBlock: ((LoopState) -> Void)?
     func withLoopState(do block: @escaping (LoopState) -> Void) {
         loopStateCallBlock = block
@@ -745,9 +863,9 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         ensureCurrentPumpDataCompletion = completion
     }
     
-    var isGlucoseDataStale: Bool = false
+    var mostRecentGlucoseDataDate: Date?
     
-    var isPumpDataStale: Bool = false
+    var mostRecentPumpDataDate: Date?
     
     var isPumpConfigured: Bool = true
     
@@ -756,18 +874,18 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     var insulinModel: InsulinModel? = MockInsulinModel()
     
     var settings: LoopSettings = LoopSettings()
+    
+    var preMealOverride : TemporaryScheduleOverride?
+    func setPreMealOverride(_ preMealOverride: TemporaryScheduleOverride?) {
+        self.preMealOverride = preMealOverride
+    }
+
 }
 
-
 fileprivate struct MockInsulinModel: InsulinModel {
-    func percentEffectRemaining(at time: TimeInterval) -> Double {
-        0
-    }
-    
+    func percentEffectRemaining(at time: TimeInterval) -> Double { 0 }
     var effectDuration: TimeInterval = 0
-    
     var delay: TimeInterval = 0
-    
     var debugDescription: String = ""
 }
 
