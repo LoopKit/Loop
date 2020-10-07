@@ -97,14 +97,14 @@ extension BluetoothStateManager {
     }
     
     public static var bluetoothOffHighlight: DeviceStatusHighlight {
-        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Bluetooth Off", comment: "Message to the user to that the bluetooth is off"))
+        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Bluetooth\nOff", comment: "Message to the user to that the bluetooth is off"))
     }
     
     public static var bluetoothEnableHighlight: DeviceStatusHighlight {
-        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Enable Bluetooth", comment: "Message to the user to enable bluetooth"))
+        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Enable\nBluetooth", comment: "Message to the user to enable bluetooth"))
     }
     
     public static var bluetoothUnavailableHighlight: DeviceStatusHighlight {
-        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Bluetooth Unavailable", comment: "Message to the user that bluetooth is unavailable to the app"))
+        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Bluetooth\nUnavailable", comment: "Message to the user that bluetooth is unavailable to the app"))
     }
 }

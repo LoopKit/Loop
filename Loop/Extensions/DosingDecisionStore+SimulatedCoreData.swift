@@ -124,6 +124,18 @@ fileprivate extension StoredDosingDecision {
                                                   pumpBatteryChargeRemaining: 3.5,
                                                   basalDeliveryState: .initiatingTempBasal,
                                                   bolusState: .none)
+        let notificationSettings = NotificationSettings(authorizationStatus: .authorized,
+                                                        soundSetting: .enabled,
+                                                        badgeSetting: .enabled,
+                                                        alertSetting: .enabled,
+                                                        notificationCenterSetting: .enabled,
+                                                        lockScreenSetting: .enabled,
+                                                        carPlaySetting: .enabled,
+                                                        alertStyle: .banner,
+                                                        showPreviewsSetting: .always,
+                                                        criticalAlertSetting: .enabled,
+                                                        providesAppNotificationSettings: true,
+                                                        announcementSetting: .enabled)
         let deviceSettings = StoredDosingDecision.DeviceSettings(name: "Device Name",
                                                                  systemName: "Device System Name",
                                                                  systemVersion: "Device System Version",
@@ -144,19 +156,9 @@ fileprivate extension StoredDosingDecision {
                                     recommendedTempBasal: recommendedTempBasal,
                                     recommendedBolus: recommendedBolus,
                                     pumpManagerStatus: pumpManagerStatus,
-                                    notificationSettings: historicalNotificationSettings,
+                                    notificationSettings: notificationSettings,
                                     deviceSettings: deviceSettings,
                                     errors: nil,
                                     syncIdentifier: UUID().uuidString)
     }
 }
-
-fileprivate let historicalNotificationSettingsBase64 = "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05TS2V" +
-    "5ZWRBcmNoaXZlctEICVRyb290gAGjCwwgVSRudWxs3g0ODxAREhMUFRYXGBkaGxsbGxscHBwdHhsfHBtcYmFkZ2VTZXR0aW5nXxATYXV0aG9yaXphdGlvblN0YXR" +
-    "1c1xzb3VuZFNldHRpbmdfEBlub3RpZmljYXRpb25DZW50ZXJTZXR0aW5nXxAUY3JpdGljYWxBbGVydFNldHRpbmdfEBNzaG93UHJldmlld3NTZXR0aW5nXxAPZ3J" +
-    "vdXBpbmdTZXR0aW5nXmNhclBsYXlTZXR0aW5nXxAfcHJvdmlkZXNBcHBOb3RpZmljYXRpb25TZXR0aW5nc1YkY2xhc3NfEBFsb2NrU2NyZWVuU2V0dGluZ1phbGV" +
-    "ydFN0eWxlXxATYW5ub3VuY2VtZW50U2V0dGluZ1xhbGVydFNldHRpbmcQAhAACIACEAHSISIjJFokY2xhc3NuYW1lWCRjbGFzc2VzXxAWVU5Ob3RpZmljYXRpb25" +
-    "TZXR0aW5nc6IlJl8QFlVOTm90aWZpY2F0aW9uU2V0dGluZ3NYTlNPYmplY3QACAARABoAJAApADIANwBJAEwAUQBTAFcAXQB6AIcAnQCqAMYA3QDzAQUBFAE2AT0" +
-"BUQFcAXIBfwGBAYMBhAGGAYgBjQGYAaEBugG9AdYAAAAAAAACAQAAAAAAAAAnAAAAAAAAAAAAAAAAAAAB3w=="
-fileprivate let historicalNotificationSettingsData = Data(base64Encoded: historicalNotificationSettingsBase64)!
-fileprivate let historicalNotificationSettings = try! NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(historicalNotificationSettingsData) as! UNNotificationSettings

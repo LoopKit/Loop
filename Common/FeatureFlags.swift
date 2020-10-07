@@ -11,6 +11,7 @@ import Foundation
 let FeatureFlags = FeatureFlagConfiguration()
 
 struct FeatureFlagConfiguration: Decodable {
+    let cgmManagerCategorizeManualGlucoseRangeEnabled: Bool
     let criticalAlertsEnabled: Bool
     let deleteAllButtonEnabled: Bool
     let fiaspInsulinModelEnabled: Bool
@@ -26,6 +27,12 @@ struct FeatureFlagConfiguration: Decodable {
     let walshInsulinModelEnabled: Bool
 
     fileprivate init() {
+        #if CGM_MANAGER_CATEGORIZE_GLUCOSE_RANGE_ENABLED
+        self.cgmManagerCategorizeManualGlucoseRangeEnabled = true
+        #else
+        self.cgmManagerCategorizeManualGlucoseRangeEnabled = false
+        #endif
+        
         #if CRITICAL_ALERTS_ENABLED
         self.criticalAlertsEnabled = true
         #else
@@ -119,6 +126,7 @@ struct FeatureFlagConfiguration: Decodable {
 extension FeatureFlagConfiguration : CustomDebugStringConvertible {
     var debugDescription: String {
         return [
+            "* cgmManagerCategorizeManualGlucoseRangeEnabled: \(cgmManagerCategorizeManualGlucoseRangeEnabled)",
             "* criticalAlertsEnabled: \(criticalAlertsEnabled)",
             "* deleteAllButtonEnabled: \(deleteAllButtonEnabled)",
             "* fiaspInsulinModelEnabled: \(fiaspInsulinModelEnabled)",

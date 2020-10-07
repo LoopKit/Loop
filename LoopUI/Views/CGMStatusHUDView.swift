@@ -34,7 +34,7 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         }
     }
     
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setup()
     }
@@ -47,17 +47,29 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
     override func setup() {
         super.setup()
         statusHighlightView.setIconPosition(.right)
-        viewModel = CGMStatusHUDViewModel(staleGlucoseValueHandler: { self.glucoseValueHUD.glucoseLabel.text = $0 })
+        viewModel = CGMStatusHUDViewModel(staleGlucoseValueHandler: { [weak self] in
+            self?.updateDisplay()
+        })
     }
     
-    public override func tintColorDidChange() {
+    override public func tintColorDidChange() {
         super.tintColorDidChange()
         
         glucoseValueHUD.tintColor = viewModel.glucoseValueTintColor
         glucoseTrendHUD.tintColor = viewModel.glucoseTrendTintColor
     }
 
+    override public func presentStatusHighlight(_ statusHighlight: DeviceStatusHighlight?) {
+        viewModel.statusHighlight = statusHighlight
+        super.presentStatusHighlight(viewModel.statusHighlight)
+    }
+    
     override func presentStatusHighlight() {
+        defer {
+            // when the status highlight is updated, the trend icon may also need to be updated
+            updateTrendIcon()
+        }
+        
         guard statusStackView.arrangedSubviews.contains(glucoseValueHUD),
             statusStackView.arrangedSubviews.contains(glucoseTrendHUD) else
         {
@@ -74,10 +86,15 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
     }
     
     override public func dismissStatusHighlight() {
+        defer {
+            // when the status highlight is updated, the trend icon may also need to be updated
+            updateTrendIcon()
+        }
+        
         guard statusStackView.arrangedSubviews.contains(statusHighlightView) else {
             return
         }
-        
+
         super.dismissStatusHighlight()
         
         statusStackView.addArrangedSubview(glucoseValueHUD)
@@ -85,26 +102,35 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         glucoseValueHUD.isHidden = false
         glucoseTrendHUD.isHidden = false
     }
-    
+        
     public func setGlucoseQuantity(_ glucoseQuantity: Double,
                                    at glucoseStartDate: Date,
                                    unit: HKUnit,
                                    staleGlucoseAge: TimeInterval,
-                                   sensor: SensorDisplayable?)
+                                   glucoseDisplay: GlucoseDisplayable?,
+                                   wasUserEntered: Bool)
     {
         viewModel.setGlucoseQuantity(glucoseQuantity,
                                      at: glucoseStartDate,
                                      unit: unit,
                                      staleGlucoseAge: staleGlucoseAge,
-                                     sensor: sensor)
+                                     glucoseDisplay: glucoseDisplay,
+                                     isManualGlucose: wasUserEntered)
         
+        updateDisplay()
+    }
+    
+    func updateDisplay() {
         glucoseValueHUD.glucoseLabel.text = viewModel.glucoseValueString
         glucoseValueHUD.unitLabel.text = viewModel.unitsString
         glucoseValueHUD.tintColor = viewModel.glucoseValueTintColor
-        
-        glucoseTrendHUD.setTrend(viewModel.trend)
-        glucoseTrendHUD.tintColor = viewModel.glucoseTrendTintColor
+        presentStatusHighlight(viewModel.statusHighlight)
         
         accessibilityValue = viewModel.accessibilityString
+    }
+    
+    func updateTrendIcon() {
+        glucoseTrendHUD.setIcon(viewModel.glucoseTrendIcon)
+        glucoseTrendHUD.tintColor = viewModel.glucoseTrendTintColor
     }
 }

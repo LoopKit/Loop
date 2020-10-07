@@ -13,7 +13,7 @@ public class CGMStatusHUDViewModel {
     
     static let staleGlucoseRepresentation: String = "---"
     
-    var trend: GlucoseTrend? = nil
+    var trend: GlucoseTrend?
     
     var unitsString: String = "–"
     
@@ -25,7 +25,33 @@ public class CGMStatusHUDViewModel {
     
     var glucoseTrendTintColor: UIColor = .glucoseTintColor
     
-    var staleGlucoseValueHandler: (String) -> Void
+    var glucoseTrendIcon: UIImage? {
+        guard let manualGlucoseTrendIconOverride = manualGlucoseTrendIconOverride else {
+            return trend?.image ?? UIImage(systemName: "questionmark.circle")
+        }
+        return manualGlucoseTrendIconOverride
+    }
+    
+    var manualGlucoseTrendIconOverride: UIImage?
+    
+    private var storedStatusHighlight: DeviceStatusHighlight?
+    
+    var statusHighlight: DeviceStatusHighlight? {
+        get {
+            guard manualGlucoseTrendIconOverride == nil else {
+                // if there is an icon override for a manual glucose, don't provide the stored status highlight
+                return nil
+            }
+            return storedStatusHighlight
+        }
+        set {
+            storedStatusHighlight = newValue
+            if manualGlucoseTrendIconOverride != nil {
+                // If there is an icon override for a manual glucose, it displays the current status highlight icon
+                setManualGlucoseTrendIconOverride()
+            }
+        }
+    }
     
     var isVisible: Bool = true {
         didSet {
@@ -57,7 +83,12 @@ public class CGMStatusHUDViewModel {
             stalenessTimer == nil
         {
             stalenessTimer = Timer(fire: fireDate, interval: 0, repeats: false) { (_) in
-                self.staleGlucoseValueHandler(CGMStatusHUDViewModel.staleGlucoseRepresentation)
+                self.glucoseValueString = CGMStatusHUDViewModel.staleGlucoseRepresentation
+                self.glucoseValueTintColor = .label
+                self.trend = nil
+                self.glucoseTrendTintColor = .glucoseTintColor
+                self.manualGlucoseTrendIconOverride = nil
+                self.staleGlucoseValueHandler()
             }
             RunLoop.main.add(stalenessTimer!, forMode: .default)
         }
@@ -65,7 +96,9 @@ public class CGMStatusHUDViewModel {
     
     private lazy var timeFormatter = DateFormatter(timeStyle: .short)
     
-    init(staleGlucoseValueHandler: @escaping (String) -> Void) {
+    var staleGlucoseValueHandler: () -> Void
+    
+    init(staleGlucoseValueHandler: @escaping () -> Void) {
         self.staleGlucoseValueHandler = staleGlucoseValueHandler
     }
     
@@ -73,20 +106,27 @@ public class CGMStatusHUDViewModel {
                             at glucoseStartDate: Date,
                             unit: HKUnit,
                             staleGlucoseAge: TimeInterval,
-                            sensor: SensorDisplayable?)
+                            glucoseDisplay: GlucoseDisplayable?,
+                            isManualGlucose: Bool)
     {
         var accessibilityStrings = [String]()
+        
+        // reset state
+        manualGlucoseTrendIconOverride = nil
+        trend = nil
         
         let time = timeFormatter.string(from: glucoseStartDate)
         
         isStaleAt = glucoseStartDate.addingTimeInterval(staleGlucoseAge)
         let glucoseValueCurrent = Date() < isStaleAt!
         
+        glucoseValueTintColor = glucoseDisplay?.glucoseRangeCategory?.glucoseColor ?? .label
+        
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         if let valueString = numberFormatter.string(from: glucoseQuantity) {
             if glucoseValueCurrent {
                 startStalenessTimerIfNeeded()
-                switch sensor?.glucoseValueType {
+                switch glucoseDisplay?.glucoseRangeCategory {
                 case .some(.belowRange):
                     glucoseValueString = LocalizedString("LOW", comment: "String displayed instead of a glucose value below the CGM range")
                 case .some(.aboveRange):
@@ -96,21 +136,28 @@ public class CGMStatusHUDViewModel {
                 }
             } else {
                 glucoseValueString = CGMStatusHUDViewModel.staleGlucoseRepresentation
+                glucoseValueTintColor = .label
             }
             accessibilityStrings.append(String(format: LocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
         
-        if let trend = sensor?.trendType, glucoseValueCurrent {
+        if isManualGlucose, glucoseValueCurrent {
+            // a manual glucose value presents any status highlight icon instead of a trend icon
+            setManualGlucoseTrendIconOverride()
+        } else if let trend = glucoseDisplay?.trendType, glucoseValueCurrent {
             self.trend = trend
+            glucoseTrendTintColor = glucoseDisplay?.glucoseRangeCategory?.trendColor ?? .glucoseTintColor
             accessibilityStrings.append(trend.localizedDescription)
         } else {
-            trend = nil
+            glucoseTrendTintColor = .glucoseTintColor
         }
-        
-        glucoseValueTintColor = sensor?.glucoseValueType?.glucoseColor ?? .label
-        glucoseTrendTintColor = sensor?.glucoseValueType?.trendColor ?? .glucoseTintColor
-        
+                
         unitsString = unit.localizedShortUnitString
         accessibilityString = accessibilityStrings.joined(separator: ", ")
+    }
+    
+    func setManualGlucoseTrendIconOverride() {
+        manualGlucoseTrendIconOverride = storedStatusHighlight?.image ?? UIImage(systemName: "questionmark.circle")
+        glucoseTrendTintColor = storedStatusHighlight?.color ?? .glucoseTintColor
     }
 }
