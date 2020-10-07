@@ -498,6 +498,8 @@ private extension DeviceDataManager {
                                                     soundVendor: pumpManager)
             
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, rootViewController: rootViewController)
+        } else {
+            deliveryUncertaintyAlertManager = nil
         }
     }
 
