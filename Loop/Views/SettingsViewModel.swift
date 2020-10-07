@@ -79,10 +79,11 @@ public class SettingsViewModel: ObservableObject {
     var pumpManagerSettingsViewModel: DeviceViewModel
     var cgmManagerSettingsViewModel: DeviceViewModel
     var servicesViewModel: ServicesViewModel
+    var criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     var therapySettings: TherapySettings
     let supportedInsulinModelSettings: SupportedInsulinModelSettings
-    let pumpSupportedIncrements: PumpSupportedIncrements?
-    let syncPumpSchedule: PumpManager.SyncSchedule?
+    let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
+    let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
 
     lazy private var cancellables = Set<AnyCancellable>()
@@ -92,10 +93,11 @@ public class SettingsViewModel: ObservableObject {
                 pumpManagerSettingsViewModel: DeviceViewModel,
                 cgmManagerSettingsViewModel: DeviceViewModel,
                 servicesViewModel: ServicesViewModel,
+                criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
                 therapySettings: TherapySettings,
                 supportedInsulinModelSettings: SupportedInsulinModelSettings,
-                pumpSupportedIncrements: PumpSupportedIncrements?,
-                syncPumpSchedule: PumpManager.SyncSchedule?,
+                pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
+                syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
                 delegate: SettingsViewModelDelegate?
@@ -105,6 +107,7 @@ public class SettingsViewModel: ObservableObject {
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel
+        self.criticalEventLogExportViewModel = criticalEventLogExportViewModel
         self.therapySettings = therapySettings
         self.supportedInsulinModelSettings = supportedInsulinModelSettings
         self.pumpSupportedIncrements = pumpSupportedIncrements
@@ -112,7 +115,7 @@ public class SettingsViewModel: ObservableObject {
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.dosingEnabled = initialDosingEnabled
         self.delegate = delegate
-
+        
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
         notificationsCriticalAlertPermissionsViewModel.objectWillChange.sink { [weak self] in
             self?.objectWillChange.send()

@@ -53,6 +53,22 @@ import LoopKitUI
         }
     }
     
+    public var adjustViewsForNarrowDisplay: Bool = false {
+        didSet {
+            if adjustViewsForNarrowDisplay != oldValue {
+                NSLayoutConstraint.activate([
+                    statusHighlightView.icon.widthAnchor.constraint(equalToConstant: 26),
+                    statusHighlightView.icon.heightAnchor.constraint(equalToConstant: 26),
+                ])
+            } else {
+                NSLayoutConstraint.activate([
+                    statusHighlightView.icon.widthAnchor.constraint(equalToConstant: 34),
+                    statusHighlightView.icon.heightAnchor.constraint(equalToConstant: 34),
+                ])
+            }
+        }
+    }
+    
     public func resetProgress() {
         progressView.isHidden = true
         progressView.progress = 0

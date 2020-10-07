@@ -58,7 +58,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         UIDevice.current.isBatteryMonitoringEnabled = true
 
         bluetoothStateManager = BluetoothStateManager()
-        alertManager = AlertManager(rootViewController: rootViewController, expireAfter: Bundle.main.localCacheDuration ?? .days(1))
+        alertManager = AlertManager(rootViewController: rootViewController, expireAfter: Bundle.main.localCacheDuration)
         deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager, rootViewController: rootViewController)
 
         let statusTableViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
@@ -76,8 +76,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         OrientationLock.deviceOrientationController = self
 
         NotificationManager.authorize(delegate: self)
-
-
+        
         rootViewController.pushViewController(statusTableViewController, animated: false)
 
         let notificationOption = launchOptions?[.remoteNotification]
@@ -86,6 +85,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
             deviceDataManager?.handleRemoteNotification(notification)
         }
         
+        scheduleBackgroundTasks()
+
         launchOptions = nil
     }
 
@@ -95,6 +96,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         
         log.default("didFinishLaunchingWithOptions %{public}@", String(describing: launchOptions))
         
+        registerBackgroundTasks()
+
         guard isAfterFirstUnlock() else {
             log.default("Launching before first unlock; pausing launch...")
             return false
@@ -103,7 +106,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         finishLaunch(application: application)
 
         window?.tintColor = .loopAccent
-                        
+
         return true
     }
 
@@ -189,6 +192,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
 
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         supportedInterfaceOrientations
+    }
+
+    // MARK: - Background Tasks
+
+    private func registerBackgroundTasks() {
+        if DeviceDataManager.registerCriticalEventLogHistoricalExportBackgroundTask({ self.deviceDataManager.handleCriticalEventLogHistoricalExportBackgroundTask($0) }) {
+            log.debug("Critical event log export background task registered")
+        } else {
+            log.error("Critical event log export background task not registered")
+        }
+    }
+
+    private func scheduleBackgroundTasks() {
+        deviceDataManager.scheduleCriticalEventLogHistoricalExportBackgroundTask()
     }
 }
 
