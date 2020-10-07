@@ -1386,7 +1386,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
         {
             self.present(UIAlertController(with: deviceError.error), animated: true)
         } else if let lastLoopError = lastLoopError {
-            self.present(UIAlertController(with: lastLoopError), animated: true)
+            let alertController = UIAlertController(with: lastLoopError)
+            let manualLoopAction = UIAlertAction(title: NSLocalizedString("Retry", comment: "The button text for attempting a manual loop"), style: .default, handler: { _ in
+                self.deviceManager.refreshDeviceData()
+            })
+            alertController.addAction(manualLoopAction)
+            present(alertController, animated: true)
         }
     }
 
