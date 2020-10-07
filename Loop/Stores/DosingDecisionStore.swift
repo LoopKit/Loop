@@ -74,8 +74,12 @@ extension StoredDosingDecision: Codable {
                   predictedGlucose: try container.decodeIfPresent([PredictedGlucoseValue].self, forKey: .predictedGlucose),
                   predictedGlucoseIncludingPendingInsulin: try container.decodeIfPresent([PredictedGlucoseValue].self, forKey: .predictedGlucoseIncludingPendingInsulin),
                   lastReservoirValue: try container.decodeIfPresent(LastReservoirValue.self, forKey: .lastReservoirValue),
+                  manualGlucose: try container.decodeIfPresent(SimpleGlucoseValue.self, forKey: .manualGlucose),
+                  originalCarbEntry: try container.decodeIfPresent(StoredCarbEntry.self, forKey: .originalCarbEntry),
+                  carbEntry: try container.decodeIfPresent(StoredCarbEntry.self, forKey: .carbEntry),
                   recommendedTempBasal: try container.decodeIfPresent(TempBasalRecommendationWithDate.self, forKey: .recommendedTempBasal),
                   recommendedBolus: try container.decodeIfPresent(BolusRecommendationWithDate.self, forKey: .recommendedBolus),
+                  requestedBolus: try container.decodeIfPresent(Double.self, forKey: .requestedBolus),
                   pumpManagerStatus: try container.decodeIfPresent(PumpManagerStatus.self, forKey: .pumpManagerStatus),
                   notificationSettings: try container.decodeIfPresent(NotificationSettings.self, forKey: .notificationSettings),
                   deviceSettings: try container.decodeIfPresent(DeviceSettings.self, forKey: .deviceSettings),
@@ -94,8 +98,12 @@ extension StoredDosingDecision: Codable {
         try container.encodeIfPresent(predictedGlucose, forKey: .predictedGlucose)
         try container.encodeIfPresent(predictedGlucoseIncludingPendingInsulin, forKey: .predictedGlucoseIncludingPendingInsulin)
         try container.encodeIfPresent(lastReservoirValue, forKey: .lastReservoirValue)
+        try container.encodeIfPresent(manualGlucose, forKey: .manualGlucose)
+        try container.encodeIfPresent(originalCarbEntry, forKey: .originalCarbEntry)
+        try container.encodeIfPresent(carbEntry, forKey: .carbEntry)
         try container.encodeIfPresent(recommendedTempBasal, forKey: .recommendedTempBasal)
         try container.encodeIfPresent(recommendedBolus, forKey: .recommendedBolus)
+        try container.encodeIfPresent(requestedBolus, forKey: .requestedBolus)
         try container.encodeIfPresent(pumpManagerStatus, forKey: .pumpManagerStatus)
         try container.encodeIfPresent(notificationSettings, forKey: .notificationSettings)
         try container.encodeIfPresent(deviceSettings, forKey: .deviceSettings)
@@ -192,8 +200,12 @@ extension StoredDosingDecision: Codable {
         case predictedGlucose
         case predictedGlucoseIncludingPendingInsulin
         case lastReservoirValue
+        case manualGlucose
+        case originalCarbEntry
+        case carbEntry
         case recommendedTempBasal
         case recommendedBolus
+        case requestedBolus
         case pumpManagerStatus
         case notificationSettings
         case deviceSettings

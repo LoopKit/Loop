@@ -51,6 +51,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     let mockOriginalCarbEntry = StoredCarbEntry(uuid: UUID(), provenanceIdentifier: "provenanceIdentifier", syncIdentifier: "syncIdentifier", syncVersion: 0, startDate: BolusEntryViewModelTests.exampleStartDate, quantity: BolusEntryViewModelTests.exampleCarbQuantity, foodType: "foodType", absorptionTime: 1, createdByCurrentApp: true, userCreatedDate: BolusEntryViewModelTests.now, userUpdatedDate: BolusEntryViewModelTests.now)
     let mockPotentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: BolusEntryViewModelTests.exampleStartDate, foodType: "foodType", absorptionTime: 1)
+    let mockFinalCarbEntry = StoredCarbEntry(uuid: UUID(), provenanceIdentifier: "provenanceIdentifier", syncIdentifier: "syncIdentifier", syncVersion: 1, startDate: BolusEntryViewModelTests.exampleStartDate, quantity: BolusEntryViewModelTests.exampleCarbQuantity, foodType: "foodType", absorptionTime: 1, createdByCurrentApp: true, userCreatedDate: BolusEntryViewModelTests.now, userUpdatedDate: BolusEntryViewModelTests.now)
     let mockUUID = BolusEntryViewModelTests.mockUUID.uuidString
     let queue = DispatchQueue(label: "BolusEntryViewModelTests")
     var saveAndDeliverSuccess = false
@@ -435,6 +436,9 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
+        XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(requestedBolus: 1.0))
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
     }
     
     struct MockError: Error {}
@@ -453,6 +457,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertFalse(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
+        XCTAssertTrue(delegate.bolusDosingDecisionsAdded.isEmpty)
     }
     
     private func saveAndDeliver(_ bolus: HKQuantity, file: StaticString = #file, line: UInt = #line) throws {
@@ -478,6 +483,10 @@ class BolusEntryViewModelTests: XCTestCase {
         waitOnMain()
 
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
+        XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now),
+                                                                                        requestedBolus: 0.0))
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
         XCTAssertNil(delegate.enactedBolusDate)
         XCTAssertTrue(saveAndDeliverSuccess)
@@ -490,13 +499,20 @@ class BolusEntryViewModelTests: XCTestCase {
         delegate.addGlucoseCompletion?(.success([MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now)]))
         waitOnMain()
         let addCarbEntryCompletion = try XCTUnwrap(delegate.addCarbEntryCompletion)
-        addCarbEntryCompletion(.success(()))
+        addCarbEntryCompletion(.success(mockFinalCarbEntry))
         waitOnMain()
 
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertEqual(1, delegate.carbEntriesAdded.count)
-        XCTAssertEqual(mockPotentialCarbEntry, delegate.carbEntriesAdded.first?.0)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(originalCarbEntry: mockOriginalCarbEntry,
+                                                                                        carbEntry: mockFinalCarbEntry,
+                                                                                        requestedBolus: 0.0))
         XCTAssertEqual(mockOriginalCarbEntry, delegate.carbEntriesAdded.first?.1)
+        XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(originalCarbEntry: mockOriginalCarbEntry,
+                                                                                        carbEntry: mockFinalCarbEntry,
+                                                                                        requestedBolus: 0.0))
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
         XCTAssertNil(delegate.enactedBolusDate)
         XCTAssertTrue(saveAndDeliverSuccess)
@@ -516,6 +532,10 @@ class BolusEntryViewModelTests: XCTestCase {
         waitOnMain()
         
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
+        XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now),
+                                                                                        requestedBolus: 1.0))
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
         XCTAssertEqual(now, delegate.enactedBolusDate)
         XCTAssertTrue(saveAndDeliverSuccess)
@@ -529,13 +549,18 @@ class BolusEntryViewModelTests: XCTestCase {
         try saveAndDeliver(BolusEntryViewModelTests.exampleBolusQuantity)
         
         let addCarbEntryCompletion = try XCTUnwrap(delegate.addCarbEntryCompletion)
-        addCarbEntryCompletion(.success(()))
+        addCarbEntryCompletion(.success(mockFinalCarbEntry))
         waitOnMain()
         
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertEqual(1, delegate.carbEntriesAdded.count)
         XCTAssertEqual(mockPotentialCarbEntry, delegate.carbEntriesAdded.first?.0)
         XCTAssertEqual(mockOriginalCarbEntry, delegate.carbEntriesAdded.first?.1)
+        XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(originalCarbEntry: mockOriginalCarbEntry,
+                                                                                        carbEntry: mockFinalCarbEntry,
+                                                                                        requestedBolus: 1.0))
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
         XCTAssertEqual(now, delegate.enactedBolusDate)
         XCTAssertTrue(saveAndDeliverSuccess)
@@ -562,7 +587,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
         try saveAndDeliver(BolusEntryViewModelTests.exampleBolusQuantity)
         let addCarbEntryCompletion = try XCTUnwrap(delegate.addCarbEntryCompletion)
-        addCarbEntryCompletion(.success(()))
+        addCarbEntryCompletion(.success(mockFinalCarbEntry))
         waitOnMain()
         XCTAssertTrue(saveAndDeliverSuccess)
 
@@ -586,12 +611,18 @@ class BolusEntryViewModelTests: XCTestCase {
         waitOnMain()
         
         let addCarbEntryCompletion = try XCTUnwrap(delegate.addCarbEntryCompletion)
-        addCarbEntryCompletion(.success(()))
+        addCarbEntryCompletion(.success(mockFinalCarbEntry))
         waitOnMain()
 
         XCTAssertEqual(1, delegate.carbEntriesAdded.count)
         XCTAssertEqual(mockPotentialCarbEntry, delegate.carbEntriesAdded.first?.0)
         XCTAssertEqual(mockOriginalCarbEntry, delegate.carbEntriesAdded.first?.1)
+        XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now),
+                                                                                        originalCarbEntry: mockOriginalCarbEntry,
+                                                                                        carbEntry: mockFinalCarbEntry,
+                                                                                        requestedBolus: 1.0))
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
         XCTAssertEqual(now, delegate.enactedBolusDate)
         XCTAssertTrue(saveAndDeliverSuccess)
@@ -826,12 +857,17 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     }
     
     var carbEntriesAdded = [(NewCarbEntry, StoredCarbEntry?)]()
-    var addCarbEntryCompletion: ((Result<Void>) -> Void)?
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<Void>) -> Void) {
+    var addCarbEntryCompletion: ((Result<StoredCarbEntry>) -> Void)?
+    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
         carbEntriesAdded.append((carbEntry, replacingEntry))
         addCarbEntryCompletion = completion
     }
     
+    var bolusDosingDecisionsAdded = [(BolusDosingDecision, Date)]()
+    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
+        bolusDosingDecisionsAdded.append((bolusDosingDecision, date))
+    }
+
     var enactedBolusUnits: Double?
     var enactedBolusDate: Date?
     func enactBolus(units: Double, at startDate: Date, completion: @escaping (Error?) -> Void) {
@@ -897,5 +933,31 @@ fileprivate struct MockGlucoseValue: GlucoseValue {
 fileprivate extension TimeInterval {
     static func milliseconds(_ milliseconds: Double) -> TimeInterval {
         return milliseconds / 1000
+    }
+}
+
+extension BolusDosingDecision: Equatable {
+    init(manualGlucose: GlucoseValue? = nil, originalCarbEntry: StoredCarbEntry? = nil, carbEntry: StoredCarbEntry? = nil, requestedBolus: Double? = nil) {
+        self.init()
+        self.manualGlucose = manualGlucose
+        self.originalCarbEntry = originalCarbEntry
+        self.carbEntry = carbEntry
+        self.requestedBolus = requestedBolus
+    }
+
+    public static func ==(lhs: BolusDosingDecision, rhs: BolusDosingDecision) -> Bool {
+        return lhs.insulinOnBoard == rhs.insulinOnBoard &&
+            lhs.carbsOnBoard == rhs.carbsOnBoard &&
+            lhs.scheduleOverride == rhs.scheduleOverride &&
+            lhs.glucoseTargetRangeSchedule == rhs.glucoseTargetRangeSchedule &&
+            lhs.glucoseTargetRangeScheduleApplyingOverrideIfActive == rhs.glucoseTargetRangeScheduleApplyingOverrideIfActive &&
+            lhs.predictedGlucoseIncludingPendingInsulin == rhs.predictedGlucoseIncludingPendingInsulin &&
+            lhs.manualGlucose?.startDate == rhs.manualGlucose?.startDate &&
+            lhs.manualGlucose?.endDate == rhs.manualGlucose?.endDate &&
+            lhs.manualGlucose?.quantity == rhs.manualGlucose?.quantity &&
+            lhs.originalCarbEntry == rhs.originalCarbEntry &&
+            lhs.carbEntry == rhs.carbEntry &&
+            lhs.recommendedBolus == rhs.recommendedBolus &&
+            lhs.requestedBolus == rhs.requestedBolus
     }
 }

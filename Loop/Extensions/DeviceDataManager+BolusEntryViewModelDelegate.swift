@@ -20,8 +20,12 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
         loopManager.addGlucose(samples, completion: completion)
     }
     
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<Void>) -> Void) {
+    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
         loopManager.addCarbEntry(carbEntry, replacing: replacingEntry, completion: completion)
+    }
+
+    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
+        loopManager.storeBolusDosingDecision(bolusDosingDecision, withDate: date)
     }
 
     /// func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
