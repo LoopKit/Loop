@@ -1766,28 +1766,16 @@ extension StatusTableViewController: BluetoothStateManagerObserver {
     }
 }
 
-private class DelegateShim: CGMManagerSetupViewControllerDelegate {
-    let completion: (CGMManager?) -> Void
-    init(completion: @escaping (CGMManager?) -> Void) {
-        self.completion = completion
-    }
-    func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
-        self.completion(cgmManager)
-    }
-}
 
 extension StatusTableViewController {
     fileprivate func setupCGMManager(_ identifier: String) {
-        deviceManager.maybeSetupCGMManager(identifier) { cgmManagerType, setupCompletion in
+        deviceManager.maybeSetupCGMManager(identifier) { cgmManagerType in
             if var setupViewController = cgmManagerType.setupViewController(glucoseTintColor: .glucoseTintColor, guidanceColors: .default) {
-                let shim = DelegateShim {
-                    setupCompletion($0)
-                }
-                setupViewController.setupDelegate = shim
+                setupViewController.setupDelegate = deviceManager
                 setupViewController.completionDelegate = self
                 show(setupViewController, sender: self)
             } else {
-                setupCompletion(cgmManagerType.init(rawState: [:]))
+                deviceManager.cgmManager = cgmManagerType.init(rawState: [:])
             }
         }
     }

@@ -355,14 +355,12 @@ final class DeviceDataManager {
     }
     
     public typealias SetupCGMCompletion = (CGMManager?) -> Void
-    public func maybeSetupCGMManager(_ identifier: String, setupClosure: (CGMManagerUI.Type, @escaping SetupCGMCompletion) -> Void) {
+    public func maybeSetupCGMManager(_ identifier: String, setupClosure: (CGMManagerUI.Type) -> Void) {
         if identifier == pumpManager?.managerIdentifier, let cgmManager = pumpManager as? CGMManager {
             // We have a pump that is a CGM!
             self.cgmManager = cgmManager
         } else if let cgmManagerType = cgmManagerTypeByIdentifier(identifier) {
-            setupClosure(cgmManagerType) {
-                self.cgmManager = $0
-            }
+            setupClosure(cgmManagerType)
         }
     }
     
@@ -660,7 +658,12 @@ extension DeviceDataManager: CGMManagerDelegate {
         // return string unique to this instance of the CGMManager
         return UUID().uuidString
     }
+}
 
+extension DeviceDataManager: CGMManagerSetupViewControllerDelegate {
+    func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
+        self.cgmManager = cgmManager
+    }
 }
 
 
