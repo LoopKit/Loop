@@ -1380,13 +1380,19 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     @objc private func showLastError(_: Any) {
+        let error: Error?
         // First, check whether we have a device error after the most recent completion date
         if let deviceError = deviceManager.lastError,
             deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
         {
-            self.present(UIAlertController(with: deviceError.error), animated: true)
+            error = deviceError.error
         } else if let lastLoopError = lastLoopError {
-            let alertController = UIAlertController(with: lastLoopError)
+            error = lastLoopError
+        } else {
+            error = nil
+        }
+        if let error = error {
+            let alertController = UIAlertController(with: error)
             let manualLoopAction = UIAlertAction(title: NSLocalizedString("Retry", comment: "The button text for attempting a manual loop"), style: .default, handler: { _ in
                 self.deviceManager.refreshDeviceData()
             })
