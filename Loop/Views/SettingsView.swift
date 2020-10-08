@@ -189,7 +189,7 @@ extension SettingsView {
     }
     
     private var servicesSection: some View {
-        Section(header: SectionHeader(label: NSLocalizedString("Accounts", comment: "The title of the accounts section in settings"))) {
+        Section(header: SectionHeader(label: NSLocalizedString("Services", comment: "The title of the services section in settings"))) {
             ForEach(viewModel.servicesViewModel.activeServices().indices, id: \.self) { index in
                 LargeButton(action: { self.viewModel.servicesViewModel.didTapService(index) },
                             includeArrow: true,
@@ -201,10 +201,10 @@ extension SettingsView {
                 LargeButton(action: { self.serviceChooserIsPresented = true },
                             includeArrow: false,
                             imageView: AnyView(plusImage),
-                            label: NSLocalizedString("Add Account", comment: "The title of the add account button in settings"),
-                            descriptiveText: NSLocalizedString("Tap here to set up a Account", comment: "The descriptive text of the add account button in settings"))
+                            label: NSLocalizedString("Add Service", comment: "The title of the add service button in settings"),
+                            descriptiveText: NSLocalizedString("Tap here to set up a Service", comment: "The descriptive text of the add service button in settings"))
                     .actionSheet(isPresented: $serviceChooserIsPresented) {
-                        ActionSheet(title: Text("Add Account", comment: "The title of the add account action sheet in settings"), buttons: serviceChoices)
+                        ActionSheet(title: Text("Add Service", comment: "The title of the add service action sheet in settings"), buttons: serviceChoices)
                 }
             }
         }
