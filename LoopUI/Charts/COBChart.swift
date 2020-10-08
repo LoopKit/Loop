@@ -8,6 +8,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopKitUI
 import SwiftCharts
 
 
@@ -54,10 +55,10 @@ public extension COBChart {
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
         // The COB area
-        let lineModel = ChartLineModel(chartPoints: cobPoints, lineColor: UIColor.COBTintColor, lineWidth: 2, animDuration: 0, animDelay: 0)
+        let lineModel = ChartLineModel(chartPoints: cobPoints, lineColor: UIColor.carbTintColor, lineWidth: 2, animDuration: 0, animDelay: 0)
         let cobLine = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
 
-        let cobArea = ChartPointsFillsLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, fills: [ChartPointsFill(chartPoints: cobPoints, fillColor: UIColor.COBTintColor.withAlphaComponent(0.5))])
+        let cobArea = ChartPointsFillsLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, fills: [ChartPointsFill(chartPoints: cobPoints, fillColor: UIColor.carbTintColor.withAlphaComponent(0.5))])
 
         // Grid lines
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
@@ -68,7 +69,7 @@ public extension COBChart {
                 yAxisLayer: yAxisLayer,
                 axisLabelSettings: axisLabelSettings,
                 chartPoints: cobPoints,
-                tintColor: UIColor.COBTintColor,
+                tintColor: UIColor.carbTintColor,
                 gestureRecognizer: gestureRecognizer
             )
         }

@@ -39,7 +39,7 @@ final class StatusExtensionDataManager {
     }
     
     private func update() {
-        guard let unit = (deviceManager.loopManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
+        guard let unit = (deviceManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
             return
         }
 
@@ -106,18 +106,25 @@ final class StatusExtensionDataManager {
             context.batteryPercentage = dataManager.pumpManager?.status.pumpBatteryChargeRemaining
             context.reservoirCapacity = dataManager.pumpManager?.pumpReservoirCapacity
 
-            if let sensorInfo = dataManager.sensorState {
-                context.sensor = SensorDisplayableContext(
-                    isStateValid: sensorInfo.isStateValid,
-                    stateDescription: sensorInfo.stateDescription,
-                    trendType: sensorInfo.trendType,
-                    isLocal: sensorInfo.isLocal
+            if let glucoseDisplay = dataManager.glucoseDisplay(for: dataManager.glucoseStore.latestGlucose) {
+                context.glucoseDisplay = GlucoseDisplayableContext(
+                    isStateValid: glucoseDisplay.isStateValid,
+                    stateDescription: glucoseDisplay.stateDescription,
+                    trendType: glucoseDisplay.trendType,
+                    isLocal: glucoseDisplay.isLocal,
+                    glucoseRangeCategory: glucoseDisplay.glucoseRangeCategory
                 )
             }
             
             if let pumpManagerHUDProvider = dataManager.pumpManagerHUDProvider {
-                context.pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValueFromHUDProvider(pumpManagerHUDProvider))
+                context.pumpManagerHUDViewContext = PumpManagerHUDViewContext(pumpManagerHUDViewRawValue: PumpManagerHUDViewRawValueFromHUDProvider(pumpManagerHUDProvider))
             }
+            
+            context.pumpStatusHighlightContext = DeviceStatusHighlightContext(from: dataManager.pumpStatusHighlight)
+            context.pumpLifecycleProgressContext = DeviceLifecycleProgressContext(from: dataManager.pumpLifecycleProgress)
+
+            context.cgmStatusHighlightContext = DeviceStatusHighlightContext(from: dataManager.cgmStatusHighlight)
+            context.cgmLifecycleProgressContext = DeviceLifecycleProgressContext(from: dataManager.cgmLifecycleProgress)
 
             completionHandler(context)
         }

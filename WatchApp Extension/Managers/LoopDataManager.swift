@@ -31,6 +31,15 @@ class LoopDataManager {
         }
     }
 
+    // Main queue only
+    var supportedBolusVolumes = UserDefaults.standard.supportedBolusVolumes {
+        didSet {
+            UserDefaults.standard.supportedBolusVolumes = supportedBolusVolumes
+            needsDidUpdateContextNotification = true
+            sendDidUpdateContextNotificationIfNecessary()
+        }
+    }
+
     private let log = OSLog(category: "LoopDataManager")
 
     // Main queue only
@@ -56,12 +65,17 @@ class LoopDataManager {
 
         carbStore = CarbStore(
             healthStore: healthStore,
+            observeHealthKitSamplesFromOtherApps: false,
             cacheStore: cacheStore,
+            cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
             defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
-            syncVersion: 0
+            observationInterval: 0,     // No longer use HealthKit as source of recent carbs
+            syncVersion: 0,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
+            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: .hours(4)
         )
@@ -84,25 +98,6 @@ extension LoopDataManager {
         }
     }
 
-    func addConfirmedBolus(_ bolus: SetBolusUserInfo) {
-        dispatchPrecondition(condition: .onQueue(.main))
-
-        activeContext?.iob = (activeContext?.iob ?? 0) + bolus.value
-    }
-
-    func addConfirmedCarbEntry(_ entry: NewCarbEntry) {
-        carbStore.addCarbEntry(entry) { (result) in
-            switch result {
-            case .success(let entry):
-                DispatchQueue.main.async {
-                    self.activeContext?.cob = (self.activeContext?.cob ?? 0) + entry.quantity.doubleValue(for: .gram())
-                }
-            case .failure(let error):
-                self.log.error("Error adding entry to carbStore: %{public}@", String(describing: error))
-            }
-        }
-    }
-
     func sendDidUpdateContextNotificationIfNecessary() {
         dispatchPrecondition(condition: .onQueue(.main))
 
@@ -111,7 +106,27 @@ extension LoopDataManager {
             NotificationCenter.default.post(name: LoopDataManager.didUpdateContextNotification, object: self)
         }
     }
-    
+
+    func requestCarbBackfill() {
+        dispatchPrecondition(condition: .onQueue(.main))
+
+        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -carbStore.maximumAbsorptionTimeInterval))
+        let userInfo = CarbBackfillRequestUserInfo(startDate: start)
+        WCSession.default.sendCarbBackfillRequestMessage(userInfo) { (result) in
+            switch result {
+            case .success(let context):
+                self.carbStore.setSyncCarbObjects(context.objects) { (error) in
+                    if let error = error {
+                        self.log.error("Failure setting carb backfill: %{public}@", String(describing: error))
+                    }
+                }
+            case .failure:
+                // Already logged
+                break
+            }
+        }
+    }
+
     @discardableResult
     func requestGlucoseBackfillIfNecessary() -> Bool {
         dispatchPrecondition(condition: .onQueue(.main))
@@ -139,11 +154,23 @@ extension LoopDataManager {
                 DispatchQueue.main.async {
                     self.lastGlucoseBackfill = .staleGlucoseCutoff
                 }
-                break
             }
         }
 
         return true
+    }
+
+    func requestContextUpdate() {
+        try? WCSession.default.sendContextRequestMessage(WatchContextRequestUserInfo(), completionHandler: { (result) in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let context):
+                    self.updateContext(context)
+                case .failure:
+                    break
+                }
+            }
+        })
     }
 }
 
@@ -158,6 +185,7 @@ extension LoopDataManager {
             let chartData = GlucoseChartData(
                 unit: activeContext.preferredGlucoseUnit,
                 correctionRange: self.settings.glucoseTargetRangeSchedule,
+                preMealOverride: self.settings.preMealOverride,
                 scheduleOverride: self.settings.scheduleOverride,
                 historicalGlucose: samples,
                 predictedGlucose: activeContext.predictedGlucose?.values

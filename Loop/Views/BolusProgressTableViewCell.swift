@@ -15,6 +15,12 @@ import MKRingProgressView
 
 public class BolusProgressTableViewCell: UITableViewCell {
     @IBOutlet weak var progressLabel: UILabel!
+    
+    @IBOutlet weak var tapToStopLabel: UILabel! {
+        didSet {
+            tapToStopLabel.text = NSLocalizedString("Tap to Stop", comment: "Message presented in the status row instructing the user to tap this row to stop a bolus")
+        }
+    }
 
     @IBOutlet weak var stopSquare: UIView! {
         didSet {
@@ -95,7 +101,7 @@ public class BolusProgressTableViewCell: UITableViewCell {
 
         if let deliveredUnits = deliveredUnits {
             let deliveredUnitsQuantity = HKQuantity(unit: unit, doubleValue: deliveredUnits)
-            let deliveredUnitsString = quantityFormatter.string(from: deliveredUnitsQuantity, for: unit) ?? ""
+            let deliveredUnitsString = quantityFormatter.string(from: deliveredUnitsQuantity, for: unit, includeUnit: false) ?? ""
 
             progressLabel.text = String(format: NSLocalizedString("Bolused %1$@ of %2$@", comment: "The format string for bolus progress. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)
 

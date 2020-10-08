@@ -7,6 +7,7 @@
 
 import Foundation
 import LoopKit
+import LoopKitUI
 import SwiftCharts
 
 public class CarbEffectChart: GlucoseChart, ChartProviding {
@@ -73,7 +74,7 @@ extension CarbEffectChart {
 
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
-        let carbFillColor = UIColor.COBTintColor.withAlphaComponent(0.8)
+        let carbFillColor = UIColor.carbTintColor.withAlphaComponent(0.5)
         let carbBlendMode: CGBlendMode
         if #available(iOSApplicationExtension 13.0, iOS 13.0, *) {
             switch traitCollection.userInterfaceStyle {
@@ -93,7 +94,7 @@ extension CarbEffectChart {
             xAxis: xAxisLayer.axis,
             yAxis: yAxisLayer.axis,
             fills: [
-                ChartPointsFill(chartPoints: carbEffectPoints, fillColor: UIColor.secondaryLabelColor.withAlphaComponent(0.5)),
+                ChartPointsFill(chartPoints: carbEffectPoints, fillColor: UIColor.secondaryLabel.withAlphaComponent(0.5)),
                 ChartPointsFill(chartPoints: insulinCounteractionEffectPoints, fillColor: carbFillColor, blendMode: carbBlendMode)
             ]
         )
@@ -124,7 +125,7 @@ extension CarbEffectChart {
                 yAxisLayer: yAxisLayer,
                 axisLabelSettings: axisLabelSettings,
                 chartPoints: allCarbEffectPoints,
-                tintColor: UIColor.COBTintColor,
+                tintColor: UIColor.carbTintColor,
                 gestureRecognizer: gestureRecognizer
             )
         }

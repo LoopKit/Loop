@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import HealthKit
 import WatchKit
+import LoopKit
 
 private let textInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
 
@@ -117,15 +118,50 @@ final class ComplicationChartManager {
     }
 
     private func drawOverridesIfNeeded(in context: CGContext, using scaler: GlucoseChartScaler) {
-        guard
-            let override = data?.activeScheduleOverride,
-            let overrideHashable = TemporaryScheduleOverrideHashable(override)
-        else {
-            return
+        let overrideColor = UIColor.glucose.withAlphaComponent(0.4).cgColor
+        let extendedOverrideColor = UIColor.glucose.withAlphaComponent(0.25).cgColor
+        let spannedInterval = scaler.dates
+
+        func drawOverride(
+            _ override: TemporaryScheduleOverride,
+            pushingStartTo startDate: Date? = nil,
+            extendingToChartEnd shouldExtendToChartEnd: Bool
+        ) {
+            var override = override
+            if let startDate = startDate {
+                guard startDate < override.endDate else {
+                    return
+                }
+
+                override.activeInterval = DateInterval(start: startDate, end: override.endDate)
+            }
+
+            guard let overrideHashable = TemporaryScheduleOverrideHashable(override) else {
+                return
+            }
+
+            context.setFillColor(overrideColor)
+            let overrideRect = scaler.rect(for: overrideHashable, unit: unit)
+            context.fill(overrideRect)
+
+            if spannedInterval.end > override.endDate, shouldExtendToChartEnd {
+                var extendedOverride = override
+                extendedOverride.duration = .finite(spannedInterval.end.timeIntervalSince(override.startDate))
+                // Target range already known to be non-nil
+                let extendedOverrideHashable = TemporaryScheduleOverrideHashable(extendedOverride)!
+                let extendedOverrideRect = scaler.rect(for: extendedOverrideHashable, unit: unit)
+                context.setFillColor(extendedOverrideColor)
+                context.fill(extendedOverrideRect)
+            }
         }
-        context.setFillColor(UIColor.glucose.withAlphaComponent(0.4).cgColor)
-        let overrideRect = scaler.rect(for: overrideHashable, unit: unit)
-        context.fill(overrideRect)
+
+        if let preMealOverride = data?.activePreMealOverride {
+            drawOverride(preMealOverride, extendingToChartEnd: true)
+        }
+
+        if let override = data?.activeScheduleOverride {
+            drawOverride(override, pushingStartTo: data?.activePreMealOverride?.endDate, extendingToChartEnd: data?.activePreMealOverride == nil)
+        }
     }
 
     private func drawHistoricalGlucose(in context: CGContext, using scaler: GlucoseChartScaler) {

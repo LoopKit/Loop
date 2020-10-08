@@ -1,0 +1,14 @@
+//
+//  Version.xcconfig
+//  Loop
+//
+//  Created by Darin Krauss on 1/30/20.
+//  Copyright © 2020 LoopKit Authors. All rights reserved.
+//
+
+// Version [DEFAULT]
+LOOP_MARKETING_VERSION = 1.10.1
+CURRENT_PROJECT_VERSION = 57
+
+// Optional override
+#include? "VersionOverride.xcconfig"

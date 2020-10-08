@@ -4,4 +4,7 @@ github "i-schuetz/SwiftCharts" == 0.6.5
 github "LoopKit/dexcom-share-client-swift" "dev"
 github "LoopKit/G4ShareSpy" "dev"
 github "ps2/rileylink_ios" "dev"
+github "ps2/NightscoutService" "dev"
 github "LoopKit/Amplitude-iOS" "decreepify"
+github "LoopKit/MKRingProgressView" "appex-safe"
+github "dexman/Minizip" "master"

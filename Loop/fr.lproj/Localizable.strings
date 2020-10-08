@@ -78,17 +78,20 @@
    Title text for button to set up a new pump */
 "Add Pump" = "Ajouter une pompe";
 
-/* The title of the Amplitude service */
-"Amplitude" = "Amplitude";
+/* Title text for button to set up a service */
+"Add Service" = "Add Service";
+
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
+
+/* The title of the section containing algorithm settings */
+"Algorithm Settings" = "Paramètres de l'algorithme";
 
 /* Subtitle of Rapid-Acting – Children preset */
 "An adjustment to the adult model based on empirical effects in children." = "Un ajustement au modèle adulte basé sur des effets empiriques chez les enfants.";
-
-/* The title of the amplitude API key credential */
-"API Key" = "API Key";
-
-/* The title of the nightscout API secret credential */
-"API Secret" = "API Secret";
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Voulez-vous vraiment supprimer ce CGM ?";
@@ -190,6 +193,15 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Surcharge personnalisée";
 
+/* Button title to delete CGM */
+"Delete CGM" = "Supprimer CGM";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Supprimer le compte";
+
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Token client";
 
@@ -244,9 +256,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Momentum de glucose";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Indéfiniment";
 
@@ -282,9 +291,6 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Chargement...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "Echec Loop";
 
@@ -300,8 +306,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Effets de momentum";
 
-/* The title of the Nightscout service */
-"Nightscout" = "Nightscout";
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "Attention Requise";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Pas d'appareil connecté, ou échec durant la connectionà l'appareil";
@@ -386,9 +392,6 @@
 
 /* Format fragment for a start time */
 "since %@" = "depuis %@";
-
-/* The title of the nightscout site URL credential */
-"Site URL" = "URL du site";
 
 /* The format for the description of a temporary override start date */
 "starting at %@" = "commence à %@";

@@ -9,7 +9,7 @@
 import Foundation
 import LoopKit
 
-enum ConfigurationErrorDetail {
+enum ConfigurationErrorDetail: String, Codable {
     case pumpManager
     case basalRateSchedule
     case insulinModel
@@ -29,7 +29,7 @@ enum ConfigurationErrorDetail {
     }
 }
 
-enum MissingDataErrorDetail {
+enum MissingDataErrorDetail: String, Codable {
     case glucose
     case reservoir
     case momentumEffect
@@ -68,9 +68,6 @@ enum MissingDataErrorDetail {
 }
 
 enum LoopError: Error {
-    // A bolus failed to start
-    case bolusCommand(SetBolusError)
-
     // Missing or unexpected configuration values
     case configurationError(ConfigurationErrorDetail)
 
@@ -93,6 +90,96 @@ enum LoopError: Error {
     case invalidData(details: String)
 }
 
+extension LoopError: Codable {
+    public init(from decoder: Decoder) throws {
+        if let string = try? decoder.singleValueContainer().decode(String.self) {
+            switch string {
+            case CodableKeys.connectionError.rawValue:
+                self = .connectionError
+            default:
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "invalid enumeration"))
+            }
+        } else {
+            let container = try decoder.container(keyedBy: CodableKeys.self)
+            if let configurationError = try container.decodeIfPresent(ConfigurationError.self, forKey: .configurationError) {
+                self = .configurationError(configurationError.configurationErrorDetail)
+            } else if let missingDataError = try container.decodeIfPresent(MissingDataError.self, forKey: .missingDataError) {
+                self = .missingDataError(missingDataError.missingDataErrorDetail)
+            } else if let glucoseTooOld = try container.decodeIfPresent(GlucoseTooOld.self, forKey: .glucoseTooOld) {
+                self = .glucoseTooOld(date: glucoseTooOld.date)
+            } else if let pumpDataTooOld = try container.decodeIfPresent(PumpDataTooOld.self, forKey: .pumpDataTooOld) {
+                self = .pumpDataTooOld(date: pumpDataTooOld.date)
+            } else if let recommendationExpired = try container.decodeIfPresent(RecommendationExpired.self, forKey: .recommendationExpired) {
+                self = .recommendationExpired(date: recommendationExpired.date)
+            } else if let invalidData = try container.decodeIfPresent(InvalidData.self, forKey: .invalidData) {
+                self = .invalidData(details: invalidData.details)
+            } else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "invalid enumeration"))
+            }
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case .connectionError:
+            var container = encoder.singleValueContainer()
+            try container.encode(CodableKeys.connectionError.rawValue)
+        case .configurationError(let configurationErrorDetail):
+            var container = encoder.container(keyedBy: CodableKeys.self)
+            try container.encode(ConfigurationError(configurationErrorDetail: configurationErrorDetail), forKey: .configurationError)
+        case .missingDataError(let missingDataErrorDetail):
+            var container = encoder.container(keyedBy: CodableKeys.self)
+            try container.encode(MissingDataError(missingDataErrorDetail: missingDataErrorDetail), forKey: .missingDataError)
+        case .glucoseTooOld(let date):
+            var container = encoder.container(keyedBy: CodableKeys.self)
+            try container.encode(GlucoseTooOld(date: date), forKey: .glucoseTooOld)
+        case .pumpDataTooOld(let date):
+            var container = encoder.container(keyedBy: CodableKeys.self)
+            try container.encode(PumpDataTooOld(date: date), forKey: .pumpDataTooOld)
+        case .recommendationExpired(let date):
+            var container = encoder.container(keyedBy: CodableKeys.self)
+            try container.encode(RecommendationExpired(date: date), forKey: .recommendationExpired)
+        case .invalidData(let details):
+            var container = encoder.container(keyedBy: CodableKeys.self)
+            try container.encode(InvalidData(details: details), forKey: .invalidData)
+        }
+    }
+    
+    private struct ConfigurationError: Codable {
+        let configurationErrorDetail: ConfigurationErrorDetail
+    }
+    
+    private struct MissingDataError: Codable {
+        let missingDataErrorDetail: MissingDataErrorDetail
+    }
+    
+    private struct GlucoseTooOld: Codable {
+        let date: Date
+    }
+    
+    private struct PumpDataTooOld: Codable {
+        let date: Date
+    }
+    
+    private struct RecommendationExpired: Codable {
+        let date: Date
+    }
+    
+    private struct InvalidData: Codable {
+        let details: String
+    }
+    
+    private enum CodableKeys: String, CodingKey {
+        case bolusCommand
+        case configurationError
+        case connectionError
+        case missingDataError
+        case glucoseTooOld
+        case pumpDataTooOld
+        case recommendationExpired
+        case invalidData
+    }
+}
 
 extension LoopError: LocalizedError {
 
@@ -111,8 +198,6 @@ extension LoopError: LocalizedError {
         formatter.unitsStyle = .full
 
         switch self {
-        case .bolusCommand(let error):
-            return error.errorDescription
         case .configurationError(let details):
             return String(format: NSLocalizedString("Configuration Error: %1$@", comment: "The error message displayed for configuration errors. (1: configuration error details)"), details.localized())
         case .connectionError:

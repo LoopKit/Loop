@@ -9,12 +9,38 @@
 // This is automatically disambiguated by development team, but you may choose to change this to
 // support running multiple apps simultaneously.
 MAIN_APP_BUNDLE_IDENTIFIER = com.${DEVELOPMENT_TEAM}.loopkit
+
+// Application name [DEFAULT]
 MAIN_APP_DISPLAY_NAME = Loop
 
-LOOP_MARKETING_VERSION = 2.3.0
-
+// Appication icon [DEFAULT]
 APPICON_NAME = AppIcon
 
-// Optional workspace configuration overrides
-#include? "../LoopConfigOverride.xcconfig"
+// Features [DEFAULT]
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)
 
+// General [DEFAULT]
+LOOP_LOCAL_CACHE_DURATION_DAYS = 1
+
+// Entitlements [DEFAULT]
+LOOP_ENTITLEMENTS = Loop/Loop.entitlements
+
+// Code signing and provisioning [DEFAULT]
+LOOP_CODE_SIGN_IDENTITY_DEBUG = Apple Development
+LOOP_CODE_SIGN_IDENTITY_RELEASE = Apple Development
+LOOP_CODE_SIGN_STYLE = Automatic
+LOOP_DEVELOPMENT_TEAM =
+LOOP_PROVISIONING_PROFILE_SPECIFIER_DEBUG =
+LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION_DEBUG =
+LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_DEBUG =
+LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION_DEBUG =
+LOOP_PROVISIONING_PROFILE_SPECIFIER_RELEASE =
+LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION_RELEASE =
+LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_RELEASE =
+LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION_RELEASE =
+
+// Version [DEFAULT]
+#include? "Version.xcconfig"
+
+// Optional overrides
+#include? "LoopOverride.xcconfig"

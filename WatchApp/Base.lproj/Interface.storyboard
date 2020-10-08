@@ -1,128 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14865.1" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="16097.2" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch38"/>
     <dependencies>
-        <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14819.2"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14642"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="16012"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
     </dependencies>
     <scenes>
-        <!--AddCarbsInterfaceController-->
-        <scene sceneID="hZK-vD-D34">
+        <!--CarbAndBolusFlowController-->
+        <scene sceneID="wDd-ld-Qg8">
             <objects>
-                <controller identifier="AddCarbsInterfaceController" hidesWhenLoading="NO" fullBounds="YES" id="zh0-gB-D44" customClass="AddCarbsInterfaceController" customModule="WatchApp_Extension">
-                    <items>
-                        <group width="1" height="1" alignment="left" layout="vertical" spacing="1" id="uPt-Z4-ngs">
-                            <items>
-                                <group width="1" alignment="left" layout="vertical" spacing="3" id="hwe-wE-KAr">
-                                    <items>
-                                        <group width="1" height="0.25" alignment="left" spacing="0.0" id="WLN-cX-0wl">
-                                            <items>
-                                                <group width="22" height="22" alignment="left" verticalAlignment="center" radius="11" id="J90-Xm-Znp">
-                                                    <items>
-                                                        <button width="22" height="22" alignment="left" verticalAlignment="center" accessibilityLabel="Subtract" title="−" id="Dh9-HV-fXy">
-                                                            <color key="titleColor" name="carbs"/>
-                                                            <color key="backgroundColor" name="carbs-dark"/>
-                                                            <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
-                                                            <connections>
-                                                                <action selector="decrement" destination="zh0-gB-D44" id="FdO-GD-e1m"/>
-                                                            </connections>
-                                                        </button>
-                                                    </items>
-                                                </group>
-                                                <label height="37" alignment="center" text="--" id="CWt-7U-cnK">
-                                                    <color key="textColor" name="carbs"/>
-                                                    <fontDescription key="font" style="UICTFontTextStyleTitle1"/>
-                                                </label>
-                                                <group width="22" height="22" alignment="right" verticalAlignment="center" radius="11" id="6ip-X6-F2J">
-                                                    <items>
-                                                        <button width="22" height="22" alignment="right" verticalAlignment="center" accessibilityLabel="Add" title="+" id="eu3-pj-GH3">
-                                                            <color key="titleColor" name="carbs"/>
-                                                            <color key="backgroundColor" name="carbs-dark"/>
-                                                            <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
-                                                            <connections>
-                                                                <action selector="increment" destination="zh0-gB-D44" id="6yb-Y8-oKu"/>
-                                                            </connections>
-                                                        </button>
-                                                    </items>
-                                                </group>
-                                            </items>
-                                        </group>
-                                        <label alignment="center" text="10:09 AM" id="Ury-of-vQg">
-                                            <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
-                                            <fontDescription key="font" type="system" pointSize="15"/>
-                                        </label>
-                                        <separator alignment="left" id="psX-Zk-dTM">
-                                            <color key="color" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        </separator>
-                                    </items>
-                                    <gestureRecognizers>
-                                        <tapGestureRecognizer id="ZKu-em-Fme">
-                                            <connections>
-                                                <action selector="toggleInputMode" destination="zh0-gB-D44" id="iNJ-Rq-8w7"/>
-                                            </connections>
-                                        </tapGestureRecognizer>
-                                    </gestureRecognizers>
-                                </group>
-                                <group width="1" height="0.25" alignment="center" spacing="0.0" id="XMa-yL-87D">
-                                    <items>
-                                        <button width="0.33000000000000002" height="1" alignment="left" title="🍭" id="gAn-qe-OvX">
-                                            <fontDescription key="font" type="system" pointSize="25"/>
-                                            <variation key="device=watch42mm">
-                                                <fontDescription key="font" type="system" pointSize="30"/>
-                                            </variation>
-                                            <connections>
-                                                <action selector="setAbsorptionTimeFast" destination="zh0-gB-D44" id="Eoj-WC-Fod"/>
-                                            </connections>
-                                        </button>
-                                        <button width="0.33000000000000002" height="1" alignment="left" title="🌮" id="0fo-Z3-hTi">
-                                            <color key="backgroundColor" name="carbs"/>
-                                            <fontDescription key="font" type="system" pointSize="25"/>
-                                            <variation key="device=watch42mm">
-                                                <fontDescription key="font" type="system" pointSize="30"/>
-                                            </variation>
-                                            <connections>
-                                                <action selector="setAbsorptionTimeMedium" destination="zh0-gB-D44" id="GXY-aa-sz8"/>
-                                            </connections>
-                                        </button>
-                                        <button width="0.33000000000000002" height="1" alignment="left" title="🍕" id="dPF-QZ-sh6">
-                                            <fontDescription key="font" type="system" pointSize="25"/>
-                                            <variation key="device=watch42mm">
-                                                <fontDescription key="font" type="system" pointSize="30"/>
-                                            </variation>
-                                            <connections>
-                                                <action selector="setAbsorptionTimeSlow" destination="zh0-gB-D44" id="qa3-FG-c9F"/>
-                                            </connections>
-                                        </button>
-                                    </items>
-                                </group>
-                                <group width="1" alignment="center" verticalAlignment="bottom" id="Qa8-MQ-ht1">
-                                    <items>
-                                        <button width="1" height="40" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
-                                            <color key="backgroundColor" name="carbs"/>
-                                            <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
-                                            <connections>
-                                                <action selector="save" destination="zh0-gB-D44" id="yLR-xy-bGK"/>
-                                            </connections>
-                                        </button>
-                                    </items>
-                                    <variation key="device=watch40mm" radius="20" widthAdjustment="-8"/>
-                                    <variation key="device=watch44mm" radius="20" widthAdjustment="-8"/>
-                                </group>
-                            </items>
-                            <variation key="device=watch40mm" heightAdjustment="-2"/>
-                            <variation key="device=watch44mm" heightAdjustment="-4"/>
-                        </group>
-                    </items>
-                    <connections>
-                        <outlet property="absorptionButtonA" destination="gAn-qe-OvX" id="mMN-LG-P3Q"/>
-                        <outlet property="absorptionButtonB" destination="0fo-Z3-hTi" id="bPH-HR-eTF"/>
-                        <outlet property="absorptionButtonC" destination="dPF-QZ-sh6" id="KfE-KO-HcS"/>
-                        <outlet property="dateLabel" destination="Ury-of-vQg" id="tRT-Eb-SVK"/>
-                        <outlet property="valueLabel" destination="CWt-7U-cnK" id="hJE-ER-FQy"/>
-                    </connections>
-                </controller>
+                <hostingController identifier="CarbAndBolusFlowController" id="YfQ-6P-aH4" customClass="CarbAndBolusFlowController" customModule="WatchApp_Extension"/>
             </objects>
             <point key="canvasLocation" x="38" y="370"/>
         </scene>
@@ -143,10 +31,6 @@
                                         <group width="1" height="26" alignment="left" id="iTE-zh-bqi">
                                             <items>
                                                 <label height="1" alignment="left" hidden="YES" textAlignment="center" id="MHD-Is-5mK">
-                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
-                                                </label>
-                                                <label height="1" alignment="right" hidden="YES" textAlignment="center" id="0zU-nK-BWD">
-                                                    <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
                                             </items>
@@ -262,7 +146,6 @@
                     </items>
                     <variation key="device=watch38mm" spacing="5"/>
                     <connections>
-                        <outlet property="eventualGlucoseLabel" destination="0zU-nK-BWD" id="0V7-RE-Lnr"/>
                         <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>
                         <outlet property="loopHUDImage" destination="Q7C-xN-eH8" id="CIe-B3-umI"/>
                         <outlet property="overrideButton" destination="dYe-c2-Sfm" id="m7H-fY-Cxg"/>
@@ -277,101 +160,6 @@
                 </controller>
             </objects>
             <point key="canvasLocation" x="38" y="769"/>
-        </scene>
-        <!--BolusInterfaceController-->
-        <scene sceneID="vCl-Xb-hzF">
-            <objects>
-                <controller identifier="BolusInterfaceController" hidesWhenLoading="NO" fullBounds="YES" id="zTm-yH-n4A" customClass="BolusInterfaceController" customModule="WatchApp_Extension">
-                    <items>
-                        <group width="1" height="1" alignment="center" layout="overlap" id="f4B-Xl-RAL">
-                            <items>
-                                <group width="1" alignment="left" verticalAlignment="bottom" layout="overlap" id="TJG-4y-oRT" userLabel="Confirmation">
-                                    <items>
-                                        <spriteKitScene height="105" alignment="left" scene="BolusConfirmationScene" id="51w-wc-Ew6">
-                                            <variation key="device=watch44mm" height="115"/>
-                                        </spriteKitScene>
-                                        <label width="1" alignment="center" verticalAlignment="bottom" text="Turn Digital Crown to bolus" textAlignment="center" numberOfLines="2" id="Xcr-jO-0IQ">
-                                            <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                            <variation key="device=watch44mm" widthAdjustment="-19"/>
-                                        </label>
-                                    </items>
-                                </group>
-                                <group width="1" height="1" alignment="left" layout="vertical" spacing="1" id="PJO-Ol-ya8">
-                                    <items>
-                                        <group width="1" alignment="left" spacing="0.0" id="xP1-tZ-vSS">
-                                            <items>
-                                                <group width="22" height="22" alignment="left" verticalAlignment="center" radius="11" id="d24-et-2S4">
-                                                    <items>
-                                                        <button width="22" height="22" alignment="left" verticalAlignment="center" accessibilityLabel="Subtract" title="−" id="hjF-xr-cwO">
-                                                            <color key="titleColor" name="insulin"/>
-                                                            <color key="backgroundColor" name="insulin-dark"/>
-                                                            <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
-                                                            <connections>
-                                                                <action selector="decrement" destination="zTm-yH-n4A" id="x1a-xC-bev"/>
-                                                            </connections>
-                                                        </button>
-                                                    </items>
-                                                </group>
-                                                <label height="37" alignment="center" text="0.000" textAlignment="center" id="mpK-zY-UvA">
-                                                    <color key="textColor" name="insulin"/>
-                                                    <fontDescription key="font" style="UICTFontTextStyleTitle1"/>
-                                                </label>
-                                                <group width="22" height="22" alignment="right" verticalAlignment="center" radius="11" id="JXe-b7-7Ef">
-                                                    <items>
-                                                        <button width="22" height="22" alignment="right" verticalAlignment="center" accessibilityLabel="Add" title="+" id="DZc-Gn-RLu">
-                                                            <color key="titleColor" name="insulin"/>
-                                                            <color key="backgroundColor" name="insulin-dark"/>
-                                                            <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
-                                                            <connections>
-                                                                <action selector="increment" destination="zTm-yH-n4A" id="eef-M6-523"/>
-                                                            </connections>
-                                                        </button>
-                                                    </items>
-                                                </group>
-                                            </items>
-                                        </group>
-                                        <label alignment="center" text="UNITS" textAlignment="center" numberOfLines="3" id="rV7-d9-n6u">
-                                            <color key="textColor" name="insulin"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
-                                        </label>
-                                        <label height="41" alignment="center" textAlignment="center" numberOfLines="2" id="lDp-Dk-msn">
-                                            <color key="textColor" name="insulin"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleBody"/>
-                                        </label>
-                                        <group width="1" alignment="center" verticalAlignment="bottom" id="8jd-ZY-t1c">
-                                            <items>
-                                                <button width="1" height="40" alignment="left" title="Bolus" id="Qsq-p5-1J0">
-                                                    <color key="backgroundColor" name="insulin"/>
-                                                    <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
-                                                    <connections>
-                                                        <action selector="confirm" destination="zTm-yH-n4A" id="ET2-d7-XZK"/>
-                                                    </connections>
-                                                </button>
-                                            </items>
-                                            <variation key="device=watch40mm" radius="20" widthAdjustment="-8"/>
-                                            <variation key="device=watch44mm" radius="20" widthAdjustment="-8"/>
-                                        </group>
-                                    </items>
-                                    <variation key="device=watch40mm" heightAdjustment="-2"/>
-                                    <variation key="device=watch44mm" heightAdjustment="-4"/>
-                                </group>
-                            </items>
-                        </group>
-                    </items>
-                    <connections>
-                        <outlet property="bolusButton" destination="8jd-ZY-t1c" id="3Kd-Ww-QCV"/>
-                        <outlet property="bolusConfirmationHelpText" destination="Xcr-jO-0IQ" id="ZyV-pg-0xb"/>
-                        <outlet property="bolusConfirmationInterfaceScene" destination="51w-wc-Ew6" id="LRV-ba-MVg"/>
-                        <outlet property="decrementButton" destination="d24-et-2S4" id="jeJ-WQ-iPr"/>
-                        <outlet property="incremementButton" destination="JXe-b7-7Ef" id="O37-g7-qlY"/>
-                        <outlet property="recommendedValueLabel" destination="lDp-Dk-msn" id="B0r-C8-lMN"/>
-                        <outlet property="unitLabel" destination="rV7-d9-n6u" id="xbA-qU-5LG"/>
-                        <outlet property="valueLabel" destination="mpK-zY-UvA" id="pM7-ih-eRu"/>
-                    </connections>
-                </controller>
-            </objects>
-            <point key="canvasLocation" x="342" y="370"/>
         </scene>
         <!--Loop-->
         <scene sceneID="3Z2-ZE-636">
@@ -467,7 +255,6 @@
                     </menu>
                     <variation key="device=watch38mm" spacing="5"/>
                     <connections>
-                        <outlet property="eventualGlucoseLabel" destination="yl8-ZP-c3l" id="PTg-ax-ppQ"/>
                         <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
                         <outlet property="glucoseScene" destination="9BI-AC-l6c" id="O4a-P8-cHI"/>
                         <outlet property="loopHUDImage" destination="ifw-dh-btK" id="Bc0-er-dfe"/>
@@ -598,7 +385,15 @@
             </objects>
             <point key="canvasLocation" x="706" y="370"/>
         </scene>
+        <!--OnOffSelectionController-->
+        <scene sceneID="ZRh-QV-fVl">
+            <objects>
+                <hostingController identifier="OnOffSelectionController" id="xhP-v4-5Vx" customClass="OnOffSelectionController" customModule="WatchApp_Extension"/>
+            </objects>
+            <point key="canvasLocation" x="369" y="370"/>
+        </scene>
     </scenes>
+    <color key="tintColor" red="0.29803921570000003" green="0.85098039219999999" blue="0.3921568627" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
     <resources>
         <image name="1-hour-graph" width="70" height="70"/>
         <image name="2-hour-graph" width="70" height="70"/>
@@ -609,29 +404,28 @@
         <image name="pre-meal" width="44" height="44"/>
         <image name="workout" width="44" height="44"/>
         <namedColor name="carbs">
-            <color red="0.3880000114440918" green="0.85500001907348633" blue="0.2199999988079071" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.66699999570846558" blue="0.22400000691413879" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="carbs-dark">
-            <color red="0.070000000298023224" green="0.11999999731779099" blue="0.039999999105930328" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.66699999570846558" blue="0.22400000691413879" alpha="0.15000000596046448" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="insulin">
-            <color red="1" green="0.58399999141693115" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.33300000429153442" green="0.41200000047683716" blue="0.94900000095367432" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="insulin-dark">
-            <color red="1" green="0.58399999141693115" blue="0.0" alpha="0.15000000596046448" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.33300000429153442" green="0.41200000047683716" blue="0.94900000095367432" alpha="0.15000000596046448" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="insulin-notification-background">
-            <color red="1" green="0.58399999141693115" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.33300000429153442" green="0.41200000047683716" blue="0.94900000095367432" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="separator">
             <color red="0.72200000286102295" green="0.72200000286102295" blue="0.72200000286102295" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="workout">
-            <color red="0.31000000238418579" green="0.67799997329711914" blue="0.97299998998641968" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.46700000762939453" green="0.36500000953674316" blue="0.79600000381469727" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="workout-dark">
-            <color red="0.019999999552965164" green="0.10000000149011612" blue="0.14000000059604645" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.46700000762939453" green="0.36500000953674316" blue="0.79600000381469727" alpha="0.15000000596046448" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
-    <color key="tintColor" red="0.29803921570000003" green="0.85098039219999999" blue="0.3921568627" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
 </document>
