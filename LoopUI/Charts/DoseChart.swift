@@ -65,8 +65,14 @@ public extension DoseChart {
         
         let points = generateDosePoints(startDate: startDate)
 
-        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(points.basal + points.bolus + doseDisplayRangePoints, minSegmentCount: 2, maxSegmentCount: 3, multiple: log(2) / 2, axisValueGenerator: { ChartAxisValueDoubleLog(screenLocDouble: $0, formatter: integerFormatter, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
-
+        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesUsingLinearSegmentStep(
+            chartPoints: points.basal + points.bolus + doseDisplayRangePoints,
+            minSegmentCount: 2,
+            maxSegmentCount: 3,
+            multiple: log(2) / 2,
+            axisValueGenerator: { ChartAxisValueDoubleLog(screenLocDouble: $0, formatter: integerFormatter, labelSettings: axisLabelSettings) },
+            addPaddingSegmentIfEdge: true)
+        
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: colors.axisLine, labelSpaceReservationMode: .fixed(labelsWidthY))
 
         let coordsSpace = ChartCoordsSpaceLeftBottomSingleAxis(chartSettings: chartSettings, chartFrame: frame, xModel: xAxisModel, yModel: yAxisModel)
