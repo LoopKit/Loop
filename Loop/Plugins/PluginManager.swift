@@ -1,5 +1,5 @@
 //
-//  LoopPlugins.swift
+//  PluginManager.swift
 //  Loop
 //
 //  Created by Pete Schwamb on 7/24/19.
@@ -20,10 +20,19 @@ class PluginManager {
 
         if let pluginsURL = pluginsURL {
             do {
-                for pluginURL in try FileManager.default.contentsOfDirectory(at: pluginsURL, includingPropertiesForKeys: nil).filter{$0.path.hasSuffix(".framework")} {
-                    if let bundle = Bundle(url: pluginURL), bundle.isLoopPlugin {
-                        print("Found loop plugin at \(pluginURL)")
-                        bundles.append(bundle)
+                for pluginURL in try FileManager.default.contentsOfDirectory(at: pluginsURL, includingPropertiesForKeys: nil).filter({$0.path.hasSuffix(".framework")}) {
+                    if let bundle = Bundle(url: pluginURL) {
+                        if bundle.isLoopPlugin {
+                            print("Found loop plugin at \(pluginURL)")
+                            bundles.append(bundle)
+                        }
+                        if bundle.isLoopExtension {
+                            print("Found Loop Extension at \(pluginURL)...loading")
+                            try bundle.loadAndReturnError()
+                            if let principalClass = bundle.principalClass as? NSObject.Type  {
+                                _ = principalClass.init()
+                            }
+                        }
                     }
                 }
             } catch let error {
@@ -150,5 +159,9 @@ extension Bundle {
             object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String != nil ||
             object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String != nil ||
             object(forInfoDictionaryKey: LoopPluginBundleKey.serviceIdentifier.rawValue) as? String != nil
+    }
+    
+    var isLoopExtension: Bool {
+        return object(forInfoDictionaryKey: LoopPluginBundleKey.extensionIdentifier.rawValue) as? String != nil
     }
 }

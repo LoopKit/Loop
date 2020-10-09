@@ -217,8 +217,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                     } else {
                         self?.hasSentConfirmationMessage = true
 
-                        let loopManager = ExtensionDelegate.shared().loopManager
-                        if let carbEntry = bolus.carbEntry {
+                        if bolus.carbEntry != nil {
                             if bolus.value == 0 {
                                 // Notify for a successful carb entry (sans bolus)
                                 WKInterfaceDevice.current().play(.success)
