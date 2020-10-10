@@ -28,10 +28,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
 
-    private var preferredUnit: HKUnit? {
-        return deviceManager.glucoseStore.preferredUnit
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -90,7 +86,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
                 DispatchQueue.main.async {
                     self?.log.debug("[reloadData] for HealthKit unit preference change")
-                    self?.unitPreferencesDidChange(to: self?.preferredUnit)
+                    self?.preferredGlucoseUnit = self?.deviceManager.glucoseStore.preferredUnit
+                    self?.unitPreferencesDidChange(to: self?.preferredGlucoseUnit)
                     self?.refreshContext = RefreshContext.all
                 }
             }
@@ -1123,7 +1120,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case let vc as CarbAbsorptionViewController:
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
-            vc.preferredGlucoseUnit = preferredUnit
+            vc.preferredGlucoseUnit = preferredGlucoseUnit
         case let vc as CarbEntryViewController:
             vc.deviceManager = deviceManager
             vc.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
@@ -1145,7 +1142,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             vc.delegate = self
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
-            vc.preferredGlucoseUnit = preferredUnit
+            vc.preferredGlucoseUnit = preferredGlucoseUnit
         default:
             break
         }
@@ -1307,7 +1304,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func onCGMTapped() {
-        guard let unit = preferredUnit,
+        guard let unit = preferredGlucoseUnit,
             let cgmManager = deviceManager.cgmManager as? CGMManagerUI else {
             // assert?
             return
