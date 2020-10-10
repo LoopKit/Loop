@@ -143,6 +143,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
             }
         }
 
+        if let overrideIntent = userActivity.interaction?.intent as? EnableOverridePresetIntent {
+            // Lowercase the names so we can still find overrides if the capitalization is different
+            guard let overrideName = overrideIntent.overrideName?.lowercased(), let preset = deviceDataManager?.loopManager.settings.overridePresets.first(where: {$0.name.lowercased() == overrideName}) else {
+                log.default("Couldn't find %{public}@ override when restoring override", String(describing: overrideIntent.overrideName))
+                return false
+            }
+            
+            log.default("Restoring %{public}@ intent", userActivity.activityType)
+            deviceDataManager?.loopManager.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
+            return true
+        }
+        
+        
+
         switch userActivity.activityType {
         case NSUserActivity.newCarbEntryActivityType,
              NSUserActivity.viewLoopStatusActivityType:

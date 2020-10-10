@@ -4,6 +4,10 @@
 <dict>
 	<key>AppGroupIdentifier</key>
 	<string>$(APP_GROUP_IDENTIFIER)</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.loopkit.background-task.critical-event-log.historical-export</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -59,6 +63,7 @@
 	<string>Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
+		<string>EnableOverridePresetIntent</string>
 		<string>NewCarbEntry</string>
 		<string>NewCarbEntryIntent</string>
 		<string>ViewLoopStatus</string>
@@ -102,10 +107,6 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.loopkit.background-task.critical-event-log.historical-export</string>
 	</array>
 </dict>
 </plist>

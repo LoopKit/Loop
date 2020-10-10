@@ -5,13 +5,15 @@
 	<key>INEnums</key>
 	<array/>
 	<key>INIntentDefinitionModelVersion</key>
-	<string>1.0</string>
+	<string>1.1</string>
+	<key>INIntentDefinitionNamespace</key>
+	<string>wqYaJi</string>
 	<key>INIntentDefinitionSystemVersion</key>
-	<string>18G87</string>
+	<string>19G2021</string>
 	<key>INIntentDefinitionToolsBuildVersion</key>
-	<string>10G8</string>
+	<string>11E801a</string>
 	<key>INIntentDefinitionToolsVersion</key>
-	<string>10.3</string>
+	<string>11.7</string>
 	<key>INIntents</key>
 	<array>
 		<dict>
@@ -21,8 +23,6 @@
 			<string>Add a carb entry to Loop</string>
 			<key>INIntentDescriptionID</key>
 			<string>yc02Yq</string>
-			<key>INIntentLastParameterTag</key>
-			<integer>0</integer>
 			<key>INIntentName</key>
 			<string>NewCarbEntry</string>
 			<key>INIntentParameterCombinations</key>
@@ -31,10 +31,6 @@
 				<dict>
 					<key>INIntentParameterCombinationIsPrimary</key>
 					<true/>
-					<key>INIntentParameterCombinationSubtitle</key>
-					<string></string>
-					<key>INIntentParameterCombinationSubtitleID</key>
-					<string>bOiZXO</string>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<false/>
 					<key>INIntentParameterCombinationTitle</key>
@@ -43,51 +39,134 @@
 					<string>OcNxIj</string>
 				</dict>
 			</dict>
-			<key>INIntentParameters</key>
-			<array/>
 			<key>INIntentResponse</key>
 			<dict>
 				<key>INIntentResponseCodes</key>
 				<array>
 					<dict>
-						<key>INIntentResponseCodeFormatString</key>
-						<string></string>
-						<key>INIntentResponseCodeFormatStringID</key>
-						<string>SP7STY</string>
-						<key>INIntentResponseCodeName</key>
-						<string>failure</string>
-						<key>INIntentResponseCodeSuccess</key>
-						<false/>
-					</dict>
-					<dict>
-						<key>INIntentResponseCodeFormatString</key>
-						<string></string>
-						<key>INIntentResponseCodeFormatStringID</key>
-						<string>I1DB3p</string>
 						<key>INIntentResponseCodeName</key>
 						<string>success</string>
 						<key>INIntentResponseCodeSuccess</key>
 						<true/>
 					</dict>
+					<dict>
+						<key>INIntentResponseCodeName</key>
+						<string>failure</string>
+					</dict>
 				</array>
-				<key>INIntentResponseLastParameterTag</key>
-				<integer>0</integer>
-				<key>INIntentResponseParameters</key>
-				<array/>
 			</dict>
-			<key>INIntentRestrictions</key>
-			<integer>0</integer>
 			<key>INIntentTitle</key>
 			<string>Add Carb Entry</string>
 			<key>INIntentTitleID</key>
 			<string>80eo5o</string>
 			<key>INIntentType</key>
 			<string>Custom</string>
-			<key>INIntentUserConfirmationRequired</key>
-			<false/>
 			<key>INIntentVerb</key>
 			<string>Add</string>
 		</dict>
+		<dict>
+			<key>INIntentCategory</key>
+			<string>generic</string>
+			<key>INIntentConfigurable</key>
+			<true/>
+			<key>INIntentDescription</key>
+			<string>Enable an override preset in Loop</string>
+			<key>INIntentDescriptionID</key>
+			<string>wFBsru</string>
+			<key>INIntentLastParameterTag</key>
+			<integer>1</integer>
+			<key>INIntentManagedParameterCombinations</key>
+			<dict>
+				<key>overrideName</key>
+				<dict>
+					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
+					<true/>
+					<key>INIntentParameterCombinationUpdatesLinked</key>
+					<true/>
+				</dict>
+			</dict>
+			<key>INIntentName</key>
+			<string>EnableOverridePreset</string>
+			<key>INIntentParameterCombinations</key>
+			<dict>
+				<key>overrideName</key>
+				<dict>
+					<key>INIntentParameterCombinationSubtitle</key>
+					<string>Enable an override preset in Loop</string>
+					<key>INIntentParameterCombinationSubtitleID</key>
+					<string>47ZoxX</string>
+					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
+					<true/>
+					<key>INIntentParameterCombinationTitle</key>
+					<string>Enable Override Preset</string>
+					<key>INIntentParameterCombinationTitleID</key>
+					<string>hd3s1A</string>
+				</dict>
+			</dict>
+			<key>INIntentParameters</key>
+			<array>
+				<dict>
+					<key>INIntentParameterDisplayName</key>
+					<string>Override Name</string>
+					<key>INIntentParameterDisplayNameID</key>
+					<string>2d5OXC</string>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>1</integer>
+					<key>INIntentParameterMetadata</key>
+					<dict>
+						<key>INIntentParameterMetadataCapitalization</key>
+						<string>None</string>
+					</dict>
+					<key>INIntentParameterName</key>
+					<string>overrideName</string>
+					<key>INIntentParameterPromptDialogs</key>
+					<array>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Which override preset should I enable?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>udLXZk</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Primary</string>
+						</dict>
+					</array>
+					<key>INIntentParameterSupportsResolution</key>
+					<true/>
+					<key>INIntentParameterTag</key>
+					<integer>1</integer>
+					<key>INIntentParameterType</key>
+					<string>String</string>
+				</dict>
+			</array>
+			<key>INIntentResponse</key>
+			<dict>
+				<key>INIntentResponseCodes</key>
+				<array>
+					<dict>
+						<key>INIntentResponseCodeName</key>
+						<string>success</string>
+						<key>INIntentResponseCodeSuccess</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>INIntentResponseCodeName</key>
+						<string>failure</string>
+					</dict>
+				</array>
+			</dict>
+			<key>INIntentTitle</key>
+			<string>Enable Override Preset</string>
+			<key>INIntentTitleID</key>
+			<string>YjMvDb</string>
+			<key>INIntentType</key>
+			<string>Custom</string>
+			<key>INIntentVerb</key>
+			<string>Do</string>
+		</dict>
 	</array>
+	<key>INTypes</key>
+	<array/>
 </dict>
 </plist>

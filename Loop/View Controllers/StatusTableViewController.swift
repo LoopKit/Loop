@@ -1707,6 +1707,19 @@ extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
         deviceManager.loopManager.settings.scheduleOverride = override
     }
 
+    func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmPreset preset: TemporaryScheduleOverridePreset) {
+        let intent = EnableOverridePresetIntent()
+        intent.overrideName = preset.name
+
+        let interaction = INInteraction(intent: intent, response: nil)
+        interaction.donate { (error) in
+            if let error = error {
+                os_log(.error, "Failed to donate intent: %{public}@", String(describing: error))
+            }
+        }
+        deviceManager.loopManager.settings.scheduleOverride = preset.createOverride(enactTrigger: .local)
+    }
+
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didCancelOverride override: TemporaryScheduleOverride) {
         deviceManager.loopManager.settings.scheduleOverride = nil
     }
