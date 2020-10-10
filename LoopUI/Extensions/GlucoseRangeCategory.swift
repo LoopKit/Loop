@@ -1,5 +1,5 @@
 //
-//  GlucoseValueType.swift
+//  GlucoseRangeCategory.swift
 //  LoopUI
 //
 //  Created by Nathaniel Hamming on 2020-07-28.
@@ -8,7 +8,7 @@
 
 import LoopKit
 
-extension GlucoseValueType {
+extension GlucoseRangeCategory {
     public var glucoseColor: UIColor {
         switch self {
         case .normal, .high:

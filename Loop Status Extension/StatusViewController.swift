@@ -25,7 +25,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             hudView.cgmStatusHUD.tintColor = .label
             hudView.pumpStatusHUD.tintColor = .insulinTintColor
             hudView.backgroundColor = .clear
-
+            
             // given the reduced width of the widget, allow for tighter spacing
             hudView.containerView.spacing = 6.0
         }
@@ -58,7 +58,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             traitCollection: traitCollection
         )
 
-        charts.predictedGlucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
+        let glucoseMGDLDisplayBound: (lower: Double, upper: Double) = FeatureFlags.predictedGlucoseChartClampEnabled ? (80, 240) : (100, 175)
+        charts.predictedGlucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.lower)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.upper)
 
         return charts
     }()
@@ -299,7 +300,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                     at: lastGlucose.startDate,
                     unit: unit,
                     staleGlucoseAge: recencyInterval,
-                    sensor: context.sensor
+                    glucoseDisplay: context.glucoseDisplay,
+                    wasUserEntered: lastGlucose.wasUserEntered
                 )
             }
 

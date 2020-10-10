@@ -122,7 +122,7 @@ fileprivate extension StoredSettings {
                               maximumBolus: 10.0,
                               suspendThreshold: GlucoseThreshold(unit: .milligramsPerDeciliter, value: 75.0),
                               deviceToken: UUID().uuidString,
-                              insulinModel: StoredSettings.InsulinModel(modelType: .rapidAdult, actionDuration: .hours(6), peakActivity: .hours(3)),
+                              insulinModel: StoredInsulinModel(modelType: .rapidAdult, actionDuration: .hours(6), peakActivity: .hours(3)),
                               basalRateSchedule: basalRateSchedule,
                               insulinSensitivitySchedule: insulinSensitivitySchedule,
                               carbRatioSchedule: carbRatioSchedule,

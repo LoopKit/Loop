@@ -29,8 +29,8 @@ public final class GlucoseTrendHUDView: BaseHUDView {
         
         trendIcon.tintColor = tintColor
     }
-
-    public func setTrend(_ trend: GlucoseTrend?) {
-        trendIcon.image = trend?.image ?? UIImage(systemName: "questionmark.circle")
+    
+    public func setIcon(_ icon: UIImage?) {
+        trendIcon.image = icon ?? UIImage(systemName: "questionmark.circle")
     }
 }

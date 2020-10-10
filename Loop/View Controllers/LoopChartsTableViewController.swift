@@ -79,6 +79,10 @@ extension Set where Element == RefreshContext {
 /// Abstract class providing boilerplate setup for chart-based table view controllers
 /// The logic is split between Loop and LoopKit because the DeviceDataManager is a Loop-specific concept
 open class LoopChartsTableViewController: ChartsTableViewController {
-    weak var deviceManager: DeviceDataManager!
+    weak var deviceManager: DeviceDataManager! {
+        didSet {
+            self.preferredGlucoseUnit = deviceManager.glucoseStore.preferredUnit
+        }
+    }
 }
 

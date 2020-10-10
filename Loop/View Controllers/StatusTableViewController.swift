@@ -28,14 +28,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
 
-    private var preferredUnit: HKUnit? {
-        return deviceManager.glucoseStore.preferredUnit
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        statusCharts.glucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
+        let glucoseMGDLDisplayBound: (lower: Double, upper: Double) = FeatureFlags.predictedGlucoseChartClampEnabled ? (80, 240) : (100, 175)
+        statusCharts.glucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.lower)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.upper)
 
         registerPumpManager()
 
@@ -89,7 +86,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
                 DispatchQueue.main.async {
                     self?.log.debug("[reloadData] for HealthKit unit preference change")
-                    self?.unitPreferencesDidChange(to: self?.preferredUnit)
+                    self?.preferredGlucoseUnit = self?.deviceManager.glucoseStore.preferredUnit
+                    self?.unitPreferencesDidChange(to: self?.preferredGlucoseUnit)
                     self?.refreshContext = RefreshContext.all
                 }
             }
@@ -126,6 +124,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
             refreshContext.formUnion(RefreshContext.all)
         }
     }
+    
+    private func navigateToOnboardingIfNecessary() {
+        let therapySettings = deviceManager.loopManager.therapySettings
+        
+        if !therapySettings.isComplete, let firstService = deviceManager.pluginManager.availableServices.first {
+            setupService(withIdentifier: firstService.identifier)
+        }
+    }
 
     private var appearedOnce = false
 
@@ -148,14 +154,19 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     DispatchQueue.main.async {
                         self.log.debug("[reloadData] after HealthKit authorization")
                         self.reloadData()
+                        self.navigateToOnboardingIfNecessary()
                     }
                 }
+            } else {
+                self.navigateToOnboardingIfNecessary()
             }
         }
 
         onscreen = true
 
         deviceManager.analyticsServicesManager.didDisplayStatusScreen()
+        
+        deviceManager.checkDeliveryUncertaintyState()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -513,9 +524,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                                             at: glucose.startDate,
                                                             unit: unit,
                                                             staleGlucoseAge: self.deviceManager.loopManager.settings.inputDataRecencyInterval,
-                                                            sensor: self.deviceManager.sensorState)
+                                                            glucoseDisplay: self.deviceManager.glucoseDisplay(for: glucose),
+                                                            wasUserEntered: glucose.wasUserEntered)
                 }
-
                 hudView.cgmStatusHUD.presentStatusHighlight(self.deviceManager.cgmStatusHighlight)
                 hudView.cgmStatusHUD.lifecycleProgress = self.deviceManager.cgmLifecycleProgress
 
@@ -1109,7 +1120,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case let vc as CarbAbsorptionViewController:
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
-            vc.preferredGlucoseUnit = preferredUnit
+            vc.preferredGlucoseUnit = preferredGlucoseUnit
         case let vc as CarbEntryViewController:
             vc.deviceManager = deviceManager
             vc.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
@@ -1131,7 +1142,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             vc.delegate = self
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
-            vc.preferredGlucoseUnit = preferredUnit
+            vc.preferredGlucoseUnit = preferredGlucoseUnit
         default:
             break
         }
@@ -1142,7 +1153,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     @IBAction func unwindFromSettings(_ segue: UIStoryboardSegue) {}
 
     @IBAction func presentBolusScreen() {
-        let viewModel = BolusEntryViewModel(dataManager: deviceManager)
+        let viewModel = BolusEntryViewModel(delegate: deviceManager)
         let bolusEntryView = BolusEntryView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
@@ -1250,10 +1261,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
             didTapAddDevice: { [weak self] in
                 self?.setupCGMManager($0.identifier)
         })
-        let pumpSupportedIncrements = deviceManager.pumpManager.map {
-            PumpSupportedIncrements(basalRates: $0.supportedBasalRates,
-                                    bolusVolumes: $0.supportedBolusVolumes,
-                                    maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
+        let pumpSupportedIncrements = { [weak self] in
+            self?.deviceManager.pumpManager.map {
+                PumpSupportedIncrements(basalRates: $0.supportedBasalRates,
+                                        bolusVolumes: $0.supportedBolusVolumes,
+                                        maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
+            }
+        }
+        let syncBasalRateSchedule = { [weak self] in
+            self?.deviceManager.pumpManager?.syncBasalRateSchedule
         }
         let servicesViewModel = ServicesViewModel(showServices: FeatureFlags.includeServicesInSettingsEnabled,
                                                   availableServices: { [weak self] in self?.deviceManager.servicesManager.availableServices ?? [] },
@@ -1264,10 +1280,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           servicesViewModel: servicesViewModel,
+                                          criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: deviceManager.criticalEventLogExportManager),
                                           therapySettings: deviceManager.loopManager.therapySettings,
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                                           pumpSupportedIncrements: pumpSupportedIncrements,
-                                          syncPumpSchedule: deviceManager.pumpManager?.syncBasalRateSchedule,
+                                          syncPumpSchedule: syncBasalRateSchedule,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           delegate: self
@@ -1287,7 +1304,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func onCGMTapped() {
-        guard let unit = preferredUnit,
+        guard let unit = preferredGlucoseUnit,
             let cgmManager = deviceManager.cgmManager as? CGMManagerUI else {
             // assert?
             return
@@ -1360,13 +1377,24 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     @objc private func showLastError(_: Any) {
+        let error: Error?
         // First, check whether we have a device error after the most recent completion date
         if let deviceError = deviceManager.lastError,
             deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
         {
-            self.present(UIAlertController(with: deviceError.error), animated: true)
+            error = deviceError.error
         } else if let lastLoopError = lastLoopError {
-            self.present(UIAlertController(with: lastLoopError), animated: true)
+            error = lastLoopError
+        } else {
+            error = nil
+        }
+        if let error = error {
+            let alertController = UIAlertController(with: error)
+            let manualLoopAction = UIAlertAction(title: NSLocalizedString("Retry", comment: "The button text for attempting a manual loop"), style: .default, handler: { _ in
+                self.deviceManager.refreshDeviceData()
+            })
+            alertController.addAction(manualLoopAction)
+            present(alertController, animated: true)
         }
     }
 
@@ -1468,6 +1496,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 self.presentSimulatedCoreDataMenu()
             })
         }
+        actionSheet.addAction(UIAlertAction(title: "Remove Exports Directory", style: .default) { _ in
+            if let error = self.deviceManager.removeExportsDirectory() {
+                self.presentError(error)
+            }
+        })
         if FeatureFlags.mockTherapySettingsEnabled {
             actionSheet.addAction(UIAlertAction(title: "Mock Therapy Settings", style: .default) { _ in
                 let settings = TherapySettings.mockTherapySettings
@@ -1736,28 +1769,16 @@ extension StatusTableViewController: BluetoothStateManagerObserver {
     }
 }
 
-private class DelegateShim: CGMManagerSetupViewControllerDelegate {
-    let completion: (CGMManager?) -> Void
-    init(completion: @escaping (CGMManager?) -> Void) {
-        self.completion = completion
-    }
-    func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
-        self.completion(cgmManager)
-    }
-}
 
 extension StatusTableViewController {
     fileprivate func setupCGMManager(_ identifier: String) {
-        deviceManager.maybeSetupCGMManager(identifier) { cgmManagerType, setupCompletion in
+        deviceManager.maybeSetupCGMManager(identifier) { cgmManagerType in
             if var setupViewController = cgmManagerType.setupViewController(glucoseTintColor: .glucoseTintColor, guidanceColors: .default) {
-                let shim = DelegateShim {
-                    setupCompletion($0)
-                }
-                setupViewController.setupDelegate = shim
+                setupViewController.setupDelegate = deviceManager
                 setupViewController.completionDelegate = self
                 show(setupViewController, sender: self)
             } else {
-                setupCompletion(cgmManagerType.init(rawState: [:]))
+                deviceManager.cgmManager = cgmManagerType.init(rawState: [:])
             }
         }
     }
@@ -1845,18 +1866,32 @@ extension StatusTableViewController: ServicesViewModelDelegate {
     }
 
     fileprivate func didTapService(_ serviceUI: ServiceUI) {
-        var settings = serviceUI.settingsViewController(chartColors: .primary, carbTintColor: .carbTintColor, glucoseTintColor: .glucoseTintColor, guidanceColors: .default, insulinTintColor: .insulinTintColor)
-        settings.serviceSettingsDelegate = self
-        settings.completionDelegate = self
-        show(settings, sender: self)
+        if let glucoseUnit = deviceManager.preferredGlucoseUnit {
+            var settings = serviceUI.settingsViewController(currentTherapySettings: deviceManager.loopManager.therapySettings, preferredGlucoseUnit: glucoseUnit, chartColors: .primary, carbTintColor: .carbTintColor, glucoseTintColor: .glucoseTintColor, guidanceColors: .default, insulinTintColor: .insulinTintColor)
+            settings.serviceSettingsDelegate = self
+            settings.completionDelegate = self
+            show(settings, sender: self)
+        }
     }
 
     fileprivate func setupService(withIdentifier identifier: String) {
         guard let serviceUIType = deviceManager.servicesManager.serviceUITypeByIdentifier(identifier) else {
             return
         }
-
-        if var setupViewController = serviceUIType.setupViewController() {
+        
+        guard let preferredGlucoseUnit = deviceManager.glucoseStore.preferredUnit else {
+            return
+        }
+        
+        if var setupViewController = serviceUIType.setupViewController(
+            currentTherapySettings: deviceManager.loopManager.therapySettings,
+            preferredGlucoseUnit: preferredGlucoseUnit,
+            chartColors: .primary,
+            carbTintColor: .carbTintColor,
+            glucoseTintColor: .glucoseTintColor,
+            guidanceColors: .default,
+            insulinTintColor: .insulinTintColor)
+        {
             setupViewController.serviceSetupDelegate = self
             setupViewController.completionDelegate = self
             show(setupViewController, sender: self)
