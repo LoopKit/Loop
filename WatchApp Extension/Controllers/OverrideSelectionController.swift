@@ -56,6 +56,7 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
 
     override func didAppear() {
         super.didAppear()
+        updateActivityForEnableOverride()
     }
 
     override func didDeactivate() {
@@ -66,5 +67,11 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
         let preset = presets[rowIndex]
         delegate?.overrideSelectionController(self, didSelectPreset: preset)
         dismiss()
+    }
+}
+
+extension OverrideSelectionController: NSUserActivityDelegate {
+    func updateActivityForEnableOverride() {
+        update(.forDidEnableOverrideOnWatch())
     }
 }
