@@ -40,6 +40,9 @@
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 мин сравнение предсказанной гликемии с действительной, продолжено с угасанием 60 мин";
 
+/* Subtitle of Lyumjev preset */
+"A model based on the published absorption of Lyumjev insulin." = "модель, основанная на опубликованных данных усвоения LYUMJEV инсулина.";
+
 /* Subtitle of Fiasp preset */
 "A model based on the published absorption of Fiasp insulin." = "модель, основанная на опубликованных данных усвоения FIASP инсулина.";
 
@@ -266,6 +269,9 @@
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Ну удалось успешно  замкнуть цикл/контур в %@";
+
+/* Title of insulin model preset */
+"Lyumjev" = "Lyumjev";
 
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Пропущены данные: %1$@";

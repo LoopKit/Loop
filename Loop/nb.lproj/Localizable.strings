@@ -43,6 +43,9 @@
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min sammenligning av glukose-prediksjon vs faktisk, fortsatt med forfall over 60 min.";
 
+/* Subtitle of Lyumjev preset */
+"A model based on the published absorption of Lyumjev insulin." = "En modell basert på publiserte data for absorpsjon av Lyumjev insulin.";
+
 /* Subtitle of Fiasp preset */
 "A model based on the published absorption of Fiasp insulin." = "En modell basert på publiserte data for absorpsjon av Fiasp insulin.";
 
@@ -269,6 +272,9 @@
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop har ikke kjørt vellykket på %@";
+
+/* Title of insulin model preset */
+"Lyumjev" = "Lyumjev";
 
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Mangler data: %1$@";

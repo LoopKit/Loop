@@ -40,6 +40,9 @@
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "Comparación de glucosa actual contra la predicha en 30 minutos, continuada con decaimiento sobre 60 minutos.";
 
+/* Subtitle of Lyumjev preset */
+"A model based on the published absorption of Lyumjev insulin." = "Un modelo basado en la publicación de la absorción de insulina Lyumjev.";
+
 /* Subtitle of Fiasp preset */
 "A model based on the published absorption of Fiasp insulin." = "Un modelo basado en la publicación de la absorción de insulina Fiasp.";
 
@@ -286,6 +289,9 @@
 
 /* The title of the loggly service */
 "Loggly" = "Loggly";
+
+/* Title of insulin model preset */
+"Lyumjev" = "Lyumjev";
 
 /* The notification title for a loop failure */
 "Loop Failure" = "Falla del Loop";

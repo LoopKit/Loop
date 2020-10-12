@@ -61,6 +61,10 @@ public extension COBChart {
 
         // Grid lines
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
+        
+        let currentTimeValue = ChartAxisValueDate(date: Date(), formatter: { _ in "" })
+        let currentTimeSettings = ChartGuideLinesLayerSettings(linesColor: .COBTintColor, linesWidth: 0.5)
+        let currentTimeLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: currentTimeSettings, axisValuesX: [currentTimeValue], axisValuesY: [])
 
         if gestureRecognizer != nil {
             cobChartCache = ChartPointsTouchHighlightLayerViewCache(
@@ -75,6 +79,7 @@ public extension COBChart {
 
         let layers: [ChartLayer?] = [
             gridLayer,
+            currentTimeLayer,
             xAxisLayer,
             yAxisLayer,
             cobChartCache?.highlightLayer,
