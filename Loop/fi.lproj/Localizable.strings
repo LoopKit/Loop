@@ -43,6 +43,9 @@
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min vertailu ennustetun ja todellisen glukoosin välillä, hiipuen 60 min kuluessa";
 
+/* Subtitle of Lyumjev preset */
+"A model based on the published absorption of Lyumjev insulin." = "Perustuu Lyumjev-insuliinin julkaistuun imeytymismalliin.";
+
 /* Subtitle of Fiasp preset */
 "A model based on the published absorption of Fiasp insulin." = "Perustuu Fiasp-insuliinin julkaistuun imeytymismalliin.";
 
@@ -295,6 +298,9 @@
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Häiriö Loopin toiminnassa %@";
+
+/* Title of insulin model preset */
+"Lyumjev" = "Lyumjev";
 
 /* Title text for bolus screen following a carb entry */
 "Meal Bolus" = "Ateriabolus";

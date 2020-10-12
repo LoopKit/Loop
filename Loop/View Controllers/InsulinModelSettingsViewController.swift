@@ -62,7 +62,8 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
         WalshInsulinModel(actionDuration: .hours(6)),
         ExponentialInsulinModelPreset.humalogNovologAdult,
         ExponentialInsulinModelPreset.humalogNovologChild,
-        ExponentialInsulinModelPreset.fiasp
+        ExponentialInsulinModelPreset.fiasp,
+        ExponentialInsulinModelPreset.lyumjev,
     ]
 
     private var selectedModelIndex: Int? {
