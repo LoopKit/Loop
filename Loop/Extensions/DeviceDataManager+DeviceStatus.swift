@@ -91,5 +91,11 @@ extension DeviceDataManager {
             return .setupNewPump
         }
     }
+    
+    var isGlucoseValueStale: Bool {
+        guard let latestGlucoseDataDate = glucoseStore.latestGlucose?.startDate else { return true }
+
+        return Date().timeIntervalSince(latestGlucoseDataDate) > loopManager.settings.inputDataRecencyInterval
+    }
 }
 

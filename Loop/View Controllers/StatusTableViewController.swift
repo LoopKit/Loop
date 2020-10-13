@@ -599,6 +599,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case bolusing(dose: DoseEntry)
         case cancelingBolus
         case pumpSuspended(resuming: Bool)
+        case recommendManualGlucoseEntry
 
         var hasRow: Bool {
             switch self {
@@ -625,6 +626,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             statusRowMode = .pumpSuspended(resuming: true)
         } else if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
             statusRowMode = .bolusing(dose: dose)
+        } else if deviceManager.isGlucoseValueStale {
+            statusRowMode = .recommendManualGlucoseEntry
         } else if let (recommendation: tempBasal, date: date) = recommendedTempBasal {
             statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
         } else if let scheduleOverride = deviceManager.loopManager.settings.scheduleOverride,
@@ -921,6 +924,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     }
                     cell.selectionStyle = .default
                     return cell
+                case .recommendManualGlucoseEntry:
+                    let cell = getTitleSubtitleCell()
+                    cell.titleLabel.text = NSLocalizedString("No Recent Glucose", comment: "The title of the cell indicating that there is no recent glucose")
+                    cell.subtitleLabel.text = NSLocalizedString("Tap to Add", comment: "The subtitle of the cell displaying an action to add a manually measurement glucose value")
+                    cell.selectionStyle = .default
+                    let imageView = UIImageView(image: UIImage(named: "drop.circle"))
+                    imageView.tintColor = .glucoseTintColor
+                    cell.accessoryView = imageView
+                    return cell
                 }
             }
         }
@@ -1067,7 +1079,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                             }
                         }
                     }
-
+                case .recommendManualGlucoseEntry:
+                    presentBolusEntryView(enableManualGlucoseEntry: true)
                 default:
                     break
                 }
@@ -1145,7 +1158,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
     @IBAction func unwindFromSettings(_ segue: UIStoryboardSegue) {}
 
     @IBAction func presentBolusScreen() {
-        let viewModel = BolusEntryViewModel(delegate: deviceManager)
+        presentBolusEntryView()
+    }
+    
+    func presentBolusEntryView(enableManualGlucoseEntry: Bool = false) {
+        let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
         let bolusEntryView = BolusEntryView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)

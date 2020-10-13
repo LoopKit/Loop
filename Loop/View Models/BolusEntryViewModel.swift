@@ -163,7 +163,8 @@ final class BolusEntryViewModel: ObservableObject {
         timeZone: TimeZone? = nil,
         originalCarbEntry: StoredCarbEntry? = nil,
         potentialCarbEntry: NewCarbEntry? = nil,
-        selectedCarbAbsorptionTimeEmoji: String? = nil
+        selectedCarbAbsorptionTimeEmoji: String? = nil,
+        isManualGlucoseEntryEnabled: Bool = false
     ) {
         self.delegate = delegate
         self.now = now
@@ -182,6 +183,8 @@ final class BolusEntryViewModel: ObservableObject {
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
 
+        self.isManualGlucoseEntryEnabled = isManualGlucoseEntryEnabled
+        
         self.chartDateInterval = DateInterval(start: Date(timeInterval: .hours(-1), since: now()), duration: .hours(7))
         
         self.dosingDecision.originalCarbEntry = originalCarbEntry
