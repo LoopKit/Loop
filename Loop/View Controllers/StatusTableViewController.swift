@@ -1498,6 +1498,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 self.deviceManager.loopManager.insulinModelSettings = settings.insulinModelSettings
             })
         }
+        actionSheet.addAction(UIAlertAction(title: "Crash the App", style: .destructive) { _ in
+            fatalError("Test Crash")
+        })
 
         actionSheet.addCancelAction()
         present(actionSheet, animated: true)
