@@ -7,3 +7,4 @@ github "LoopKit/dexcom-share-client-swift" "e59763001a100816761e3480697c228fc2ce
 github "i-schuetz/SwiftCharts" "0.6.5"
 github "ps2/rileylink_ios" "7876b86701bb9ba4703be0a37af6cbb0c04e21f0"
 github "dexman/Minizip" "6be834b517aedb2b3b51e997a1244af738bb41f8"
+github "instacart/TrueTime.swift" "5.1.0"
