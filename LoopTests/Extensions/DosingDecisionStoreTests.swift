@@ -52,33 +52,7 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
       "systemName" : "Device System Name",
       "systemVersion" : "Device System Version"
     },
-    "errors" : [
-      {
-        "carbStoreError" : "notConfigured"
-      },
-      {
-        "doseStoreError" : "configurationError"
-      },
-      {
-        "loopError" : "connectionError"
-      },
-      {
-        "pumpManagerError" : {
-          "configuration" : {
-
-          }
-        }
-      },
-      {
-        "unknownError" : {
-          "errorDescription" : "StoredDosingDecision.errors.errorDescription",
-          "failureReason" : "StoredDosingDecision.errors.failureReason",
-          "helpAnchor" : "StoredDosingDecision.errors.helpAnchor",
-          "recoverySuggestion" : "StoredDosingDecision.errors.recoverySuggestion"
-        }
-      }
-    ],
-    "glucoseTargetRangeSchedule" : {
+    "effectiveGlucoseTargetRangeSchedule" : {
       "override" : {
         "end" : "2020-05-14T23:12:17Z",
         "start" : "2020-05-14T21:12:17Z",
@@ -121,7 +95,33 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
         }
       }
     },
-    "glucoseTargetRangeScheduleApplyingOverrideIfActive" : {
+    "errors" : [
+      {
+        "carbStoreError" : "notConfigured"
+      },
+      {
+        "doseStoreError" : "configurationError"
+      },
+      {
+        "loopError" : "connectionError"
+      },
+      {
+        "pumpManagerError" : {
+          "configuration" : {
+
+          }
+        }
+      },
+      {
+        "unknownError" : {
+          "errorDescription" : "StoredDosingDecision.errors.errorDescription",
+          "failureReason" : "StoredDosingDecision.errors.failureReason",
+          "helpAnchor" : "StoredDosingDecision.errors.helpAnchor",
+          "recoverySuggestion" : "StoredDosingDecision.errors.recoverySuggestion"
+        }
+      }
+    ],
+    "glucoseTargetRangeSchedule" : {
       "override" : {
         "end" : "2020-05-14T23:12:17Z",
         "start" : "2020-05-14T21:12:17Z",
@@ -460,33 +460,7 @@ class StoredDosingDecisionCodableTests: XCTestCase {
     "systemName" : "Device System Name",
     "systemVersion" : "Device System Version"
   },
-  "errors" : [
-    {
-      "carbStoreError" : "notConfigured"
-    },
-    {
-      "doseStoreError" : "configurationError"
-    },
-    {
-      "loopError" : "connectionError"
-    },
-    {
-      "pumpManagerError" : {
-        "configuration" : {
-
-        }
-      }
-    },
-    {
-      "unknownError" : {
-        "errorDescription" : "StoredDosingDecision.errors.errorDescription",
-        "failureReason" : "StoredDosingDecision.errors.failureReason",
-        "helpAnchor" : "StoredDosingDecision.errors.helpAnchor",
-        "recoverySuggestion" : "StoredDosingDecision.errors.recoverySuggestion"
-      }
-    }
-  ],
-  "glucoseTargetRangeSchedule" : {
+  "effectiveGlucoseTargetRangeSchedule" : {
     "override" : {
       "end" : "2020-05-14T23:12:17Z",
       "start" : "2020-05-14T21:12:17Z",
@@ -529,7 +503,33 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       }
     }
   },
-  "glucoseTargetRangeScheduleApplyingOverrideIfActive" : {
+  "errors" : [
+    {
+      "carbStoreError" : "notConfigured"
+    },
+    {
+      "doseStoreError" : "configurationError"
+    },
+    {
+      "loopError" : "connectionError"
+    },
+    {
+      "pumpManagerError" : {
+        "configuration" : {
+
+        }
+      }
+    },
+    {
+      "unknownError" : {
+        "errorDescription" : "StoredDosingDecision.errors.errorDescription",
+        "failureReason" : "StoredDosingDecision.errors.failureReason",
+        "helpAnchor" : "StoredDosingDecision.errors.helpAnchor",
+        "recoverySuggestion" : "StoredDosingDecision.errors.recoverySuggestion"
+      }
+    }
+  ],
+  "glucoseTargetRangeSchedule" : {
     "override" : {
       "end" : "2020-05-14T23:12:17Z",
       "start" : "2020-05-14T21:12:17Z",
@@ -753,7 +753,7 @@ extension StoredDosingDecision: Equatable {
             lhs.carbsOnBoard == rhs.carbsOnBoard &&
             lhs.scheduleOverride == rhs.scheduleOverride &&
             lhs.glucoseTargetRangeSchedule == rhs.glucoseTargetRangeSchedule &&
-            lhs.glucoseTargetRangeScheduleApplyingOverrideIfActive == rhs.glucoseTargetRangeScheduleApplyingOverrideIfActive &&
+            lhs.effectiveGlucoseTargetRangeSchedule == rhs.effectiveGlucoseTargetRangeSchedule &&
             lhs.predictedGlucose == rhs.predictedGlucose &&
             lhs.predictedGlucoseIncludingPendingInsulin == rhs.predictedGlucoseIncludingPendingInsulin &&
             lhs.lastReservoirValue == rhs.lastReservoirValue &&
@@ -842,7 +842,7 @@ fileprivate extension StoredDosingDecision {
                                                               override: GlucoseRangeSchedule.Override(value: DoubleRange(minValue: 105.0, maxValue: 115.0),
                                                                                                       start: dateFormatter.date(from: "2020-05-14T21:12:17Z")!,
                                                                                                       end: dateFormatter.date(from: "2020-05-14T23:12:17Z")!))
-        let glucoseTargetRangeScheduleApplyingOverrideIfActive = GlucoseRangeSchedule(rangeSchedule: DailyQuantitySchedule(unit: .milligramsPerDeciliter,
+        let effectiveGlucoseTargetRangeSchedule = GlucoseRangeSchedule(rangeSchedule: DailyQuantitySchedule(unit: .milligramsPerDeciliter,
                                                                                                                            dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: DoubleRange(minValue: 100.0, maxValue: 110.0)),
                                                                                                                                         RepeatingScheduleValue(startTime: .hours(7), value: DoubleRange(minValue: 90.0, maxValue: 100.0)),
                                                                                                                                         RepeatingScheduleValue(startTime: .hours(21), value: DoubleRange(minValue: 110.0, maxValue: 120.0))],
@@ -946,7 +946,7 @@ fileprivate extension StoredDosingDecision {
                                     carbsOnBoard: carbsOnBoard,
                                     scheduleOverride: scheduleOverride,
                                     glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
-                                    glucoseTargetRangeScheduleApplyingOverrideIfActive: glucoseTargetRangeScheduleApplyingOverrideIfActive,
+                                    effectiveGlucoseTargetRangeSchedule: effectiveGlucoseTargetRangeSchedule,
                                     predictedGlucose: predictedGlucose,
                                     predictedGlucoseIncludingPendingInsulin: predictedGlucoseIncludingPendingInsulin,
                                     lastReservoirValue: lastReservoirValue,

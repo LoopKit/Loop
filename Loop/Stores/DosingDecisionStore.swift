@@ -70,7 +70,7 @@ extension StoredDosingDecision: Codable {
                   carbsOnBoard: try container.decodeIfPresent(CarbValue.self, forKey: .carbsOnBoard),
                   scheduleOverride: try container.decodeIfPresent(TemporaryScheduleOverride.self, forKey: .scheduleOverride),
                   glucoseTargetRangeSchedule: try container.decodeIfPresent(GlucoseRangeSchedule.self, forKey: .glucoseTargetRangeSchedule),
-                  glucoseTargetRangeScheduleApplyingOverrideIfActive: try container.decodeIfPresent(GlucoseRangeSchedule.self, forKey: .glucoseTargetRangeScheduleApplyingOverrideIfActive),
+                  effectiveGlucoseTargetRangeSchedule: try container.decodeIfPresent(GlucoseRangeSchedule.self, forKey: .effectiveGlucoseTargetRangeSchedule),
                   predictedGlucose: try container.decodeIfPresent([PredictedGlucoseValue].self, forKey: .predictedGlucose),
                   predictedGlucoseIncludingPendingInsulin: try container.decodeIfPresent([PredictedGlucoseValue].self, forKey: .predictedGlucoseIncludingPendingInsulin),
                   lastReservoirValue: try container.decodeIfPresent(LastReservoirValue.self, forKey: .lastReservoirValue),
@@ -94,7 +94,7 @@ extension StoredDosingDecision: Codable {
         try container.encodeIfPresent(carbsOnBoard, forKey: .carbsOnBoard)
         try container.encodeIfPresent(scheduleOverride, forKey: .scheduleOverride)
         try container.encodeIfPresent(glucoseTargetRangeSchedule, forKey: .glucoseTargetRangeSchedule)
-        try container.encodeIfPresent(glucoseTargetRangeScheduleApplyingOverrideIfActive, forKey: .glucoseTargetRangeScheduleApplyingOverrideIfActive)
+        try container.encodeIfPresent(effectiveGlucoseTargetRangeSchedule, forKey: .effectiveGlucoseTargetRangeSchedule)
         try container.encodeIfPresent(predictedGlucose, forKey: .predictedGlucose)
         try container.encodeIfPresent(predictedGlucoseIncludingPendingInsulin, forKey: .predictedGlucoseIncludingPendingInsulin)
         try container.encodeIfPresent(lastReservoirValue, forKey: .lastReservoirValue)
@@ -196,7 +196,7 @@ extension StoredDosingDecision: Codable {
         case carbsOnBoard
         case scheduleOverride
         case glucoseTargetRangeSchedule
-        case glucoseTargetRangeScheduleApplyingOverrideIfActive
+        case effectiveGlucoseTargetRangeSchedule
         case predictedGlucose
         case predictedGlucoseIncludingPendingInsulin
         case lastReservoirValue

@@ -630,7 +630,7 @@ extension LoopDataManager {
                                                                   carbsOnBoard: state.carbsOnBoard,
                                                                   scheduleOverride: self.settings.scheduleOverride,
                                                                   glucoseTargetRangeSchedule: self.settings.glucoseTargetRangeSchedule,
-                                                                  glucoseTargetRangeScheduleApplyingOverrideIfActive: self.settings.glucoseTargetRangeScheduleApplyingOverrideIfActive,
+                                                                  effectiveGlucoseTargetRangeSchedule: self.settings.effectiveGlucoseTargetRangeSchedule(),
                                                                   predictedGlucose: state.predictedGlucose,
                                                                   predictedGlucoseIncludingPendingInsulin: state.predictedGlucoseIncludingPendingInsulin,
                                                                   lastReservoirValue: StoredDosingDecision.LastReservoirValue(self.doseStore.lastReservoirValue),
@@ -653,7 +653,7 @@ extension LoopDataManager {
                                                   carbsOnBoard: bolusDosingDecision.carbsOnBoard,
                                                   scheduleOverride: bolusDosingDecision.scheduleOverride,
                                                   glucoseTargetRangeSchedule: bolusDosingDecision.glucoseTargetRangeSchedule,
-                                                  glucoseTargetRangeScheduleApplyingOverrideIfActive: bolusDosingDecision.glucoseTargetRangeScheduleApplyingOverrideIfActive,
+                                                  effectiveGlucoseTargetRangeSchedule: bolusDosingDecision.effectiveGlucoseTargetRangeSchedule,
                                                   predictedGlucoseIncludingPendingInsulin: bolusDosingDecision.predictedGlucoseIncludingPendingInsulin,
                                                   manualGlucose: bolusDosingDecision.manualGlucose.map { SimpleGlucoseValue($0) },
                                                   originalCarbEntry: bolusDosingDecision.originalCarbEntry,
@@ -1149,7 +1149,7 @@ extension LoopDataManager {
         let pendingInsulin = try getPendingInsulin()
         let shouldIncludePendingInsulin = pendingInsulin > 0
         let prediction = try predictGlucoseFromManualGlucose(glucose, potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin)
-        return try recommendBolus(forPrediction: prediction)
+        return try recommendBolus(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
     }
 
     /// - Throws: LoopError.missingDataError
@@ -1164,7 +1164,7 @@ extension LoopDataManager {
         let pendingInsulin = try getPendingInsulin()
         let shouldIncludePendingInsulin = pendingInsulin > 0
         let prediction = try predictGlucose(using: .all, potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin)
-        return try recommendBolusValidatingDataRecency(forPrediction: prediction)
+        return try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
     }
 
     /// - Throws:
@@ -1172,7 +1172,8 @@ extension LoopDataManager {
     ///     - LoopError.glucoseTooOld
     ///     - LoopError.pumpDataTooOld
     ///     - LoopError.configurationError
-    fileprivate func recommendBolusValidatingDataRecency<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample]) throws -> BolusRecommendation? {
+    fileprivate func recommendBolusValidatingDataRecency<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
+                                                                               consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> BolusRecommendation? {
         guard let glucose = glucoseStore.latestGlucose else {
             throw LoopError.missingDataError(.glucose)
         }
@@ -1200,13 +1201,14 @@ extension LoopDataManager {
             throw LoopError.missingDataError(.insulinEffect)
         }
 
-        return try recommendBolus(forPrediction: predictedGlucose)
+        return try recommendBolus(forPrediction: predictedGlucose, consideringPotentialCarbEntry: potentialCarbEntry)
     }
-
+    
     /// - Throws: LoopError.configurationError
-    private func recommendBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample]) throws -> BolusRecommendation? {
+    private func recommendBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
+                                                      consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> BolusRecommendation? {
         guard
-            let glucoseTargetRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive,
+            let glucoseTargetRange = settings.effectiveGlucoseTargetRangeSchedule(consideringPotentialCarbEntry: potentialCarbEntry),
             let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
             let maxBolus = settings.maximumBolus,
             let model = insulinModelSettings?.model
@@ -1338,7 +1340,7 @@ extension LoopDataManager {
 
         guard
             let maxBasal = settings.maximumBasalRatePerHour,
-            let glucoseTargetRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive,
+            let glucoseTargetRange = settings.effectiveGlucoseTargetRangeSchedule(),
             let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
             let basalRates = basalRateScheduleApplyingOverrideHistory,
             let maxBolus = settings.maximumBolus,

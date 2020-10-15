@@ -65,9 +65,6 @@ protocol BolusEntryViewModelDelegate: class {
     
     ///
     var settings: LoopSettings { get }
-    
-    ///
-    func setPreMealOverride(_ preMealOverride: TemporaryScheduleOverride?)
 }
 
 final class BolusEntryViewModel: ObservableObject {
@@ -196,12 +193,6 @@ final class BolusEntryViewModel: ObservableObject {
         observeRecommendedBolusChanges()
 
         update()
-    }
-    
-    deinit {
-        if let savedPreMealOverride = savedPreMealOverride {
-            delegate?.setPreMealOverride(savedPreMealOverride)
-        }
     }
     
     private func observeLoopUpdates() {
@@ -733,15 +724,7 @@ final class BolusEntryViewModel: ObservableObject {
 
         targetGlucoseSchedule = delegate?.settings.glucoseTargetRangeSchedule
         // Pre-meal override should be ignored if we have carbs (LOOP-1964)
-        if potentialCarbEntry != nil {
-            if let preMealOverrideSettings = delegate?.settings.preMealOverride {
-                savedPreMealOverride = preMealOverrideSettings
-            }
-            delegate?.setPreMealOverride(nil)
-            preMealOverride = nil
-        } else {
-            preMealOverride = delegate?.settings.preMealOverride
-        }
+        preMealOverride = potentialCarbEntry == nil ? delegate?.settings.preMealOverride : nil
         scheduleOverride = delegate?.settings.scheduleOverride
 
         if preMealOverride?.hasFinished() == true {
@@ -759,9 +742,9 @@ final class BolusEntryViewModel: ObservableObject {
         dosingDecision.scheduleOverride = preMealOverride ?? scheduleOverride
         dosingDecision.glucoseTargetRangeSchedule = targetGlucoseSchedule
         if scheduleOverride != nil || preMealOverride != nil {
-            dosingDecision.glucoseTargetRangeScheduleApplyingOverrideIfActive = delegate?.settings.glucoseTargetRangeScheduleApplyingOverrideIfActive
+            dosingDecision.effectiveGlucoseTargetRangeSchedule = delegate?.settings.effectiveGlucoseTargetRangeSchedule(consideringPotentialCarbEntry: potentialCarbEntry)
         } else {
-            dosingDecision.glucoseTargetRangeScheduleApplyingOverrideIfActive = nil
+            dosingDecision.effectiveGlucoseTargetRangeSchedule = nil
         }
     }
 

@@ -13,7 +13,7 @@ struct BolusDosingDecision {
     var carbsOnBoard: CarbValue?
     var scheduleOverride: TemporaryScheduleOverride?
     var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
-    var glucoseTargetRangeScheduleApplyingOverrideIfActive: GlucoseRangeSchedule?
+    var effectiveGlucoseTargetRangeSchedule: GlucoseRangeSchedule?
     var predictedGlucoseIncludingPendingInsulin: [PredictedGlucoseValue]?
     var manualGlucose: GlucoseValue?
     var originalCarbEntry: StoredCarbEntry?
