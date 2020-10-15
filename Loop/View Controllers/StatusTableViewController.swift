@@ -194,7 +194,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
-    private var bolusState = PumpManagerStatus.BolusState.none {
+    private var bolusState: PumpManagerStatus.BolusState = .noBolus {
         didSet {
             if oldValue != bolusState {
                 // Bolus starting
@@ -219,7 +219,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
     }
 
-    public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .active(Date()) {
+    public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil {
         didSet {
             if oldValue != basalDeliveryState {
                 log.debug("New basalDeliveryState: %@", String(describing: basalDeliveryState))
@@ -251,11 +251,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func registerPumpManager() {
-        if let pumpManager = deviceManager.pumpManager {
-            self.basalDeliveryState = pumpManager.status.basalDeliveryState
-            pumpManager.removeStatusObserver(self)
-            pumpManager.addStatusObserver(self, queue: .main)
-        }
+        self.basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
+        self.bolusState = deviceManager.pumpManager?.status.bolusState ?? .noBolus
+        deviceManager.pumpManager?.removeStatusObserver(self)
+        deviceManager.pumpManager?.addStatusObserver(self, queue: .main)
     }
 
     private lazy var statusCharts = StatusChartsManager(colors: .primary, settings: .default, traitCollection: self.traitCollection)
@@ -344,7 +343,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             // Net basal rate HUD
             let netBasal: NetBasal?
             if let basalSchedule = manager.basalRateScheduleApplyingOverrideHistory {
-                netBasal = basalDeliveryState.getNetBasal(basalSchedule: basalSchedule, settings: manager.settings)
+                netBasal = basalDeliveryState?.getNetBasal(basalSchedule: basalSchedule, settings: manager.settings)
             } else {
                 netBasal = nil
             }
@@ -1693,7 +1692,7 @@ extension StatusTableViewController: DoseProgressObserver {
             // Bolus ended
             self.bolusProgressReporter = nil
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                self.bolusState = .none
+                self.bolusState = .noBolus
                 self.reloadData(animated: true)
             })
         }

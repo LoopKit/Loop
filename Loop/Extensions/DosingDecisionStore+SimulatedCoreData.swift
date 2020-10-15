@@ -123,7 +123,7 @@ fileprivate extension StoredDosingDecision {
                                                                    udiDeviceIdentifier: "Device UDI Device Identifier"),
                                                   pumpBatteryChargeRemaining: 3.5,
                                                   basalDeliveryState: .initiatingTempBasal,
-                                                  bolusState: .none)
+                                                  bolusState: .noBolus)
         let notificationSettings = NotificationSettings(authorizationStatus: .authorized,
                                                         soundSetting: .enabled,
                                                         badgeSetting: .enabled,
