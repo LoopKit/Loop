@@ -39,7 +39,9 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
                 if viewModel.showWarning {
                     alertPermissionsSection
                 }
-                therapySettingsSection
+                if viewModel.pumpManagerSettingsViewModel.isSetUp() {
+                    therapySettingsSection
+                }
                 deviceSettingsSection
                 if viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice {
                     deleteDataSection
@@ -71,6 +73,7 @@ extension SettingsView {
             Toggle(isOn: $viewModel.dosingEnabled) {
                 Text(NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell"))
             }
+            .disabled(!viewModel.pumpManagerSettingsViewModel.isSetUp() || !viewModel.cgmManagerSettingsViewModel.isSetUp())
         }
     }
     
@@ -94,7 +97,7 @@ extension SettingsView {
     private var therapySettingsSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
             LargeButton(action: { self.therapySettingsIsPresented = true },
-                            includeArrow: false,
+                            includeArrow: true,
                             imageView: AnyView(Image("Therapy Icon")),
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
@@ -102,6 +105,7 @@ extension SettingsView {
                     TherapySettingsView(
                         viewModel: TherapySettingsViewModel(mode: .settings,
                                                             therapySettings: self.viewModel.therapySettings,
+                                                            glucoseUnit: self.viewModel.therapySettings.glucoseUnit!,
                                                             supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
                                                             pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
@@ -128,7 +132,7 @@ extension SettingsView {
     private var pumpSection: some View {
         if viewModel.pumpManagerSettingsViewModel.isSetUp() {
             LargeButton(action: self.viewModel.pumpManagerSettingsViewModel.didTap,
-                        includeArrow: false,
+                        includeArrow: true,
                         imageView: deviceImage(uiImage: viewModel.pumpManagerSettingsViewModel.image()),
                         label: viewModel.pumpManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
@@ -158,7 +162,7 @@ extension SettingsView {
     private var cgmSection: some View {
         if viewModel.cgmManagerSettingsViewModel.isSetUp() {
             LargeButton(action: self.viewModel.cgmManagerSettingsViewModel.didTap,
-                        includeArrow: false,
+                        includeArrow: true,
                         imageView: deviceImage(uiImage: viewModel.cgmManagerSettingsViewModel.image()),
                         label: viewModel.cgmManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
@@ -185,10 +189,10 @@ extension SettingsView {
     }
     
     private var servicesSection: some View {
-        Section(header: SectionHeader(label: NSLocalizedString("Accounts", comment: "The title of the accounts section in settings"))) {
+        Section(header: SectionHeader(label: NSLocalizedString("Services", comment: "The title of the services section in settings"))) {
             ForEach(viewModel.servicesViewModel.activeServices().indices, id: \.self) { index in
                 LargeButton(action: { self.viewModel.servicesViewModel.didTapService(index) },
-                            includeArrow: false,
+                            includeArrow: true,
                             imageView: self.serviceImage(uiImage: (self.viewModel.servicesViewModel.activeServices()[index] as! ServiceUI).image),
                             label: self.viewModel.servicesViewModel.activeServices()[index].localizedTitle,
                             descriptiveText: "")
@@ -197,10 +201,10 @@ extension SettingsView {
                 LargeButton(action: { self.serviceChooserIsPresented = true },
                             includeArrow: false,
                             imageView: AnyView(plusImage),
-                            label: NSLocalizedString("Add Account", comment: "The title of the add account button in settings"),
-                            descriptiveText: NSLocalizedString("Tap here to set up a Account", comment: "The descriptive text of the add account button in settings"))
+                            label: NSLocalizedString("Add Service", comment: "The title of the add service button in settings"),
+                            descriptiveText: NSLocalizedString("Tap here to set up a Service", comment: "The descriptive text of the add service button in settings"))
                     .actionSheet(isPresented: $serviceChooserIsPresented) {
-                        ActionSheet(title: Text("Add Account", comment: "The title of the add account action sheet in settings"), buttons: serviceChoices)
+                        ActionSheet(title: Text("Add Service", comment: "The title of the add service action sheet in settings"), buttons: serviceChoices)
                 }
             }
         }
@@ -254,7 +258,9 @@ extension SettingsView {
     
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
-            NavigationLink(destination: SupportScreenView(didTapIssueReport: viewModel.didTapIssueReport)) {
+            NavigationLink(destination: SupportScreenView(didTapIssueReport: viewModel.didTapIssueReport,
+                                                          criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel))
+            {
                 Text(NSLocalizedString("Support", comment: "The title of the support item in settings"))
             }
         }
@@ -348,6 +354,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
                                           cgmManagerSettingsViewModel: DeviceViewModel(),
                                           servicesViewModel: servicesViewModel,
+                                          criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
                                           therapySettings: TherapySettings(),
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true),
                                           pumpSupportedIncrements: nil,

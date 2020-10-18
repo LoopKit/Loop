@@ -106,13 +106,13 @@ final class StatusExtensionDataManager {
             context.batteryPercentage = dataManager.pumpManager?.status.pumpBatteryChargeRemaining
             context.reservoirCapacity = dataManager.pumpManager?.pumpReservoirCapacity
 
-            if let sensorInfo = dataManager.sensorState {
-                context.sensor = SensorDisplayableContext(
-                    isStateValid: sensorInfo.isStateValid,
-                    stateDescription: sensorInfo.stateDescription,
-                    trendType: sensorInfo.trendType,
-                    isLocal: sensorInfo.isLocal,
-                    glucoseValueType: sensorInfo.glucoseValueType
+            if let glucoseDisplay = dataManager.glucoseDisplay(for: dataManager.glucoseStore.latestGlucose) {
+                context.glucoseDisplay = GlucoseDisplayableContext(
+                    isStateValid: glucoseDisplay.isStateValid,
+                    stateDescription: glucoseDisplay.stateDescription,
+                    trendType: glucoseDisplay.trendType,
+                    isLocal: glucoseDisplay.isLocal,
+                    glucoseRangeCategory: glucoseDisplay.glucoseRangeCategory
                 )
             }
             

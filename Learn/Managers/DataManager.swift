@@ -40,7 +40,7 @@ final class DataManager {
             observationInterval: 0,
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
-            provenanceIdentifier: Bundle.main.bundleIdentifier!
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
 
         doseStore = DoseStore(

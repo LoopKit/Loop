@@ -20,12 +20,12 @@ struct NetBasalContext {
     let end: Date?
 }
 
-struct SensorDisplayableContext: SensorDisplayable {
+struct GlucoseDisplayableContext: GlucoseDisplayable {
     let isStateValid: Bool
     let stateDescription: String
     let trendType: GlucoseTrend?
     let isLocal: Bool
-    let glucoseValueType: GlucoseValueType?
+    let glucoseRangeCategory: GlucoseRangeCategory?
 }
 
 struct GlucoseContext: GlucoseValue {
@@ -128,15 +128,15 @@ extension NetBasalContext: RawRepresentable {
     }
 }
 
-extension SensorDisplayableContext: RawRepresentable {
+extension GlucoseDisplayableContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
-    init(_ other: SensorDisplayable) {
+    init(_ other: GlucoseDisplayable) {
         isStateValid = other.isStateValid
         stateDescription = other.stateDescription
         isLocal = other.isLocal
         trendType = other.trendType
-        glucoseValueType = other.glucoseValueType
+        glucoseRangeCategory = other.glucoseRangeCategory
     }
 
     init?(rawValue: RawValue) {
@@ -158,10 +158,10 @@ extension SensorDisplayableContext: RawRepresentable {
             trendType = nil
         }
         
-        if let glucoseValueRawValue = rawValue["glucoseValueType"] as? GlucoseValueType.RawValue {
-            glucoseValueType = GlucoseValueType(rawValue: glucoseValueRawValue)
+        if let glucoseRangeCategoryRawValue = rawValue["glucoseRangeCategory"] as? GlucoseRangeCategory.RawValue {
+            glucoseRangeCategory = GlucoseRangeCategory(rawValue: glucoseRangeCategoryRawValue)
         } else {
-            glucoseValueType = nil
+            glucoseRangeCategory = nil
         }
     }
     
@@ -172,7 +172,7 @@ extension SensorDisplayableContext: RawRepresentable {
             "isLocal": isLocal
         ]
         raw["trendType"] = trendType?.rawValue
-        raw["glucoseValueType"] = glucoseValueType?.rawValue
+        raw["glucoseRangeCategory"] = glucoseRangeCategory?.rawValue
 
         return raw
     }
@@ -287,7 +287,7 @@ struct StatusExtensionContext: RawRepresentable {
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
     var reservoirCapacity: Double?
-    var sensor: SensorDisplayableContext?
+    var glucoseDisplay: GlucoseDisplayableContext?
     var pumpManagerHUDViewContext: PumpManagerHUDViewContext?
     var pumpStatusHighlightContext: DeviceStatusHighlightContext?
     var pumpLifecycleProgressContext: DeviceLifecycleProgressContext?
@@ -313,8 +313,8 @@ struct StatusExtensionContext: RawRepresentable {
         batteryPercentage = rawValue["batteryPercentage"] as? Double
         reservoirCapacity = rawValue["reservoirCapacity"] as? Double
 
-        if let rawValue = rawValue["sensor"] as? SensorDisplayableContext.RawValue {
-            sensor = SensorDisplayableContext(rawValue: rawValue)
+        if let rawValue = rawValue["glucoseDisplay"] as? GlucoseDisplayableContext.RawValue {
+            glucoseDisplay = GlucoseDisplayableContext(rawValue: rawValue)
         }
         
         if let rawPumpManagerHUDViewContext = rawValue["pumpManagerHUDViewContext"] as? PumpManagerHUDViewContext.RawValue {
@@ -348,7 +348,7 @@ struct StatusExtensionContext: RawRepresentable {
         raw["netBasal"] = netBasal?.rawValue
         raw["batteryPercentage"] = batteryPercentage
         raw["reservoirCapacity"] = reservoirCapacity
-        raw["sensor"] = sensor?.rawValue
+        raw["glucoseDisplay"] = glucoseDisplay?.rawValue
         raw["pumpManagerHUDViewContext"] = pumpManagerHUDViewContext?.rawValue
         raw["pumpStatusHighlightContext"] = pumpStatusHighlightContext?.rawValue
         raw["pumpLifecycleProgressContext"] = pumpLifecycleProgressContext?.rawValue

@@ -637,7 +637,7 @@ extension LoopDataManager {
                                                                   recommendedTempBasal: StoredDosingDecision.TempBasalRecommendationWithDate(state.recommendedTempBasal),
                                                                   recommendedBolus: StoredDosingDecision.BolusRecommendationWithDate(state.recommendedBolus),
                                                                   pumpManagerStatus: self.delegate?.pumpManagerStatus,
-                                                                  notificationSettings: notificationSettings,
+                                                                  notificationSettings: NotificationSettings(notificationSettings),
                                                                   deviceSettings: UIDevice.current.deviceSettings,
                                                                   errors: [error, state.error, insulinOnBoardError].compactMap { $0 })
                         self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
@@ -664,7 +664,7 @@ extension LoopDataManager {
                                       maximumBolus: loopSettings.maximumBolus,
                                       suspendThreshold: loopSettings.suspendThreshold,
                                       deviceToken: loopSettings.deviceToken?.hexadecimalString,
-                                      insulinModel: appGroup.insulinModelSettings.map { StoredSettings.InsulinModel($0) },
+                                      insulinModel: appGroup.insulinModelSettings.map { StoredInsulinModel($0) },
                                       basalRateSchedule: appGroup.basalRateSchedule,
                                       insulinSensitivitySchedule: appGroup.insulinSensitivitySchedule,
                                       carbRatioSchedule: appGroup.carbRatioSchedule,
@@ -1790,6 +1790,23 @@ private extension StoredDosingDecision.BolusRecommendationWithDate {
             return nil
         }
         self.init(recommendation: bolusRecommendationDate.recommendation, date: bolusRecommendationDate.date)
+    }
+}
+
+private extension NotificationSettings {
+    init(_ notificationSettings: UNNotificationSettings) {
+        self.init(authorizationStatus: NotificationSettings.AuthorizationStatus(notificationSettings.authorizationStatus),
+                  soundSetting: NotificationSettings.NotificationSetting(notificationSettings.soundSetting),
+                  badgeSetting: NotificationSettings.NotificationSetting(notificationSettings.badgeSetting),
+                  alertSetting: NotificationSettings.NotificationSetting(notificationSettings.alertSetting),
+                  notificationCenterSetting: NotificationSettings.NotificationSetting(notificationSettings.notificationCenterSetting),
+                  lockScreenSetting: NotificationSettings.NotificationSetting(notificationSettings.lockScreenSetting),
+                  carPlaySetting: NotificationSettings.NotificationSetting(notificationSettings.carPlaySetting),
+                  alertStyle: NotificationSettings.AlertStyle(notificationSettings.alertStyle),
+                  showPreviewsSetting: NotificationSettings.ShowPreviewsSetting(notificationSettings.showPreviewsSetting),
+                  criticalAlertSetting: NotificationSettings.NotificationSetting(notificationSettings.criticalAlertSetting),
+                  providesAppNotificationSettings: notificationSettings.providesAppNotificationSettings,
+                  announcementSetting: NotificationSettings.NotificationSetting(notificationSettings.announcementSetting))
     }
 }
 
