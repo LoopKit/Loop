@@ -10,24 +10,24 @@ import Foundation
 import Intents
 
 class OverrideIntentHandler: NSObject, EnableOverridePresetIntentHandling {
-    lazy var defaults = UserDefaults.appGroup
+    lazy var defaults = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
     
     func containsOverrideName(name: String) -> Bool {
         let lowercasedName = name.lowercased()
         
-        if let defaults = self.defaults, defaults.intentExtensionInfo.first(where: {$0.lowercased() == lowercasedName}) != nil {
+        if let defaults = self.defaults, defaults.intentExtensionInfo?.overridePresetNames?.first(where: {$0.lowercased() == lowercasedName}) != nil {
             return true
         }
         return false
     }
     
     func handle(intent: EnableOverridePresetIntent, completion: @escaping (EnableOverridePresetIntentResponse) -> Void) {
-        guard let overrideName = intent.overrideName?.lowercased(), containsOverrideName(name: overrideName) else {
+        guard let defaults = self.defaults, let overrideName = intent.overrideName?.lowercased(), containsOverrideName(name: overrideName) else {
             completion(EnableOverridePresetIntentResponse(code: .failure, userActivity: nil))
             return
         }
         
-        UserDefaults.appGroup.intentExtensionInfo.presetNameToSet = overrideName
+        defaults.intentExtensionInfo?.presetNameToSet = overrideName
 //        loopManager.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
         completion(EnableOverridePresetIntentResponse(code: .success, userActivity: nil))
     }
