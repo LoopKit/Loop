@@ -2296,6 +2296,7 @@
 				43BFF0C31E4659E700FF19A9 /* UIColor+HIG.swift */,
 				4344628D20A7ADD100C4BE6F /* UserDefaults+CGM.swift */,
 				A9C62D8123316FF500535612 /* UserDefaults+Services.swift */,
+				E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2622,7 +2623,6 @@
 				E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */,
 				E9B07F80253BBA6500BAD8F8 /* Info.plist */,
 				E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */,
-				E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */,
 			);
 			path = "Loop Intent Extension";
 			sourceTree = "<group>";
