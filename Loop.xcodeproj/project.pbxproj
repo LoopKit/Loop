@@ -266,7 +266,7 @@
 		4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */; };
 		4F70C1E41DE8DCA7006380B7 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */; };
 		4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */; };
+		4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */; };
 		4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; };
@@ -515,6 +515,10 @@
 		E93E86CC24E2E02200FF40C8 /* high_and_stable_predicted_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C724E2E02200FF40C8 /* high_and_stable_predicted_glucose.json */; };
 		E93E86CD24E2E02200FF40C8 /* high_and_stable_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C824E2E02200FF40C8 /* high_and_stable_counteraction_effect.json */; };
 		E93E86CE24E2E02200FF40C8 /* high_and_stable_momentum_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C924E2E02200FF40C8 /* high_and_stable_momentum_effect.json */; };
+		E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
+		E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
+		E942DF34253BF87F00AC532D /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
+		E942DF47253BF87F00AC532D /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
 		E95D380124EADE7C005E2F50 /* DoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */; };
 		E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */; };
 		E95D380524EADF78005E2F50 /* GlucoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */; };
@@ -525,6 +529,17 @@
 		E98A55F524EEE15A0008715D /* OnOffSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F424EEE15A0008715D /* OnOffSelectionController.swift */; };
 		E98A55F724EEE1E10008715D /* OnOffSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F624EEE1E10008715D /* OnOffSelectionView.swift */; };
 		E98A55F924EEFC200008715D /* OnOffSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F824EEFC200008715D /* OnOffSelectionViewModel.swift */; };
+		E9B07F7F253BBA6500BAD8F8 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */; };
+		E9B07F87253BBA6500BAD8F8 /* IntentsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B07F86253BBA6500BAD8F8 /* IntentsUI.framework */; };
+		E9B07F8A253BBA6500BAD8F8 /* IntentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B07F89253BBA6500BAD8F8 /* IntentViewController.swift */; };
+		E9B07F8D253BBA6500BAD8F8 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9B07F8B253BBA6500BAD8F8 /* MainInterface.storyboard */; };
+		E9B07F91253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E9B07F85253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E9B07F94253BBA6500BAD8F8 /* Loop Intent Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E9B07FEE253BBC7100BAD8F8 /* OverrideIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */; };
+		E9B08016253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
+		E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
+		E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
+		E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
 		E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB27AA23B85C3500FB4987 /* SleepStore.swift */; };
 		E9C00EF224C6221B00628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
@@ -630,6 +645,83 @@
 			remoteGlobalIDString = 43D9001A21EB209400AF44BF;
 			remoteInfo = "LoopCore-watchOS";
 		};
+		E942DE1F253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 430157F71C7EC03B00B64B63;
+			remoteInfo = "LoopKit Example";
+		};
+		E942DE21253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 43D8FDCB1C728FDF0073BE78;
+			remoteInfo = LoopKit;
+		};
+		E942DE23253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A9E675F022713F4700E25293;
+			remoteInfo = "LoopKit-watchOS";
+		};
+		E942DE25253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 43D8FDD51C728FDF0073BE78;
+			remoteInfo = LoopKitTests;
+		};
+		E942DE27253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1DEE230124A676A300693C32;
+			remoteInfo = LoopKitHostedTests;
+		};
+		E942DE29253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 43BA7154201E484D0058961E;
+			remoteInfo = LoopKitUI;
+		};
+		E942DE2B253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 89D2047221CC7BD7001238CC;
+			remoteInfo = MockKit;
+		};
+		E942DE2D253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 89D2048F21CC7C12001238CC;
+			remoteInfo = MockKitUI;
+		};
+		E942DE2F253BE1DE00AC532D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 892A5D34222F03CB008961AB;
+			remoteInfo = LoopTestingKit;
+		};
+		E9B07F8F253BBA6500BAD8F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E9B07F84253BBA6500BAD8F8;
+			remoteInfo = "Loop Intent ExtensionUI";
+		};
+		E9B07F92253BBA6500BAD8F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E9B07F7B253BBA6500BAD8F8;
+			remoteInfo = "Loop Intent Extension";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -706,6 +798,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				E9B07F91253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex in Embed App Extensions */,
+				E9B07F94253BBA6500BAD8F8 /* Loop Intent Extension.appex in Embed App Extensions */,
 				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
@@ -936,7 +1030,7 @@
 		4F70C1E31DE8DCA7006380B7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		4F70C1E51DE8DCA7006380B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4F70C1FD1DE8E662006380B7 /* Loop Status Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Status Extension.entitlements"; sourceTree = "<group>"; };
-		4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionDataManager.swift; sourceTree = "<group>"; };
+		4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionDataManager.swift; sourceTree = "<group>"; };
 		4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionContext.swift; sourceTree = "<group>"; };
 		4F75288B1DFE1DC600C322D6 /* LoopUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LoopUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F75288D1DFE1DC600C322D6 /* LoopUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoopUI.h; sourceTree = "<group>"; };
@@ -1371,6 +1465,9 @@
 		E93E86C724E2E02200FF40C8 /* high_and_stable_predicted_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_predicted_glucose.json; sourceTree = "<group>"; };
 		E93E86C824E2E02200FF40C8 /* high_and_stable_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_counteraction_effect.json; sourceTree = "<group>"; };
 		E93E86C924E2E02200FF40C8 /* high_and_stable_momentum_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_momentum_effect.json; sourceTree = "<group>"; };
+		E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LoopKit.xcodeproj; path = ../LoopKit/LoopKit.xcodeproj; sourceTree = "<group>"; };
+		E942DE31253BE1E200AC532D /* LoopKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LoopKit; path = ../LoopKit; sourceTree = "<group>"; };
+		E942DE6D253BE5E100AC532D /* Loop Intent Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Intent Extension.entitlements"; sourceTree = "<group>"; };
 		E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStoreProtocol.swift; sourceTree = "<group>"; };
@@ -1381,6 +1478,17 @@
 		E98A55F424EEE15A0008715D /* OnOffSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionController.swift; sourceTree = "<group>"; };
 		E98A55F624EEE1E10008715D /* OnOffSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionView.swift; sourceTree = "<group>"; };
 		E98A55F824EEFC200008715D /* OnOffSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionViewModel.swift; sourceTree = "<group>"; };
+		E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Intent Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
+		E9B07F80253BBA6500BAD8F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E9B07F85253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Intent ExtensionUI.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9B07F86253BBA6500BAD8F8 /* IntentsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IntentsUI.framework; path = System/Library/Frameworks/IntentsUI.framework; sourceTree = SDKROOT; };
+		E9B07F89253BBA6500BAD8F8 /* IntentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentViewController.swift; sourceTree = "<group>"; };
+		E9B07F8C253BBA6500BAD8F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		E9B07F8E253BBA6500BAD8F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideIntentHandler.swift; sourceTree = "<group>"; };
+		E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+LoopIntents.swift"; sourceTree = "<group>"; };
+		E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentExtensionInfo.swift; sourceTree = "<group>"; };
 		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 		E9C00EEF24C620EF00628F35 /* LoopSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettings.swift; sourceTree = "<group>"; };
 		E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopSettings+Loop.swift"; sourceTree = "<group>"; };
@@ -1498,6 +1606,21 @@
 				4FB76FB01E8C3E8000B39636 /* SwiftCharts.framework in Frameworks */,
 				43C05CBA21EBEAD8006FB252 /* LoopCore.framework in Frameworks */,
 				43FCEEBE22220CE70013DD30 /* LoopKitUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9B07F79253BBA6500BAD8F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9B07F82253BBA6500BAD8F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9B07F87253BBA6500BAD8F8 /* IntentsUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1632,6 +1755,8 @@
 				43F78D2C1C8FC58F002152D1 /* LoopTests */,
 				43E2D8D21D20BF42004DA55F /* DoseMathTests */,
 				43D9FFA321EA9A0C00AF44BF /* Learn */,
+				E9B07F7D253BBA6500BAD8F8 /* Loop Intent Extension */,
+				E9B07F88253BBA6500BAD8F8 /* Loop Intent ExtensionUI */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
@@ -1652,6 +1777,8 @@
 				43D9FFA221EA9A0C00AF44BF /* Learn.app */,
 				43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */,
 				43D9002A21EB209400AF44BF /* LoopCore.framework */,
+				E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */,
+				E9B07F85253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1968,7 +2095,7 @@
 				A9C62D852331703000535612 /* Service.swift */,
 				A9C62D872331703000535612 /* ServicesManager.swift */,
 				43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */,
-				4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */,
+				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
 				89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
@@ -2146,6 +2273,7 @@
 				A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */,
 				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
 				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
+				E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2279,6 +2407,8 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E942DE31253BE1E200AC532D /* LoopKit */,
+				E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */,
 				C1EBB080252590C7000D9680 /* Minizip.framework */,
 				4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */,
 				43A8EC6E210E622600A81379 /* CGMBLEKitUI.framework */,
@@ -2300,6 +2430,7 @@
 				4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */,
 				438A95A71D8B9B24009D12E1 /* CGMBLEKit.framework */,
 				43F78D4B1C914197002152D1 /* LoopKit.framework */,
+				E9B07F86253BBA6500BAD8F8 /* IntentsUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2456,6 +2587,22 @@
 			path = high_and_stable;
 			sourceTree = "<group>";
 		};
+		E942DE14253BE1DE00AC532D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E942DE20253BE1DE00AC532D /* LoopKit Example.app */,
+				E942DE22253BE1DE00AC532D /* LoopKit.framework */,
+				E942DE24253BE1DE00AC532D /* LoopKit.framework */,
+				E942DE26253BE1DE00AC532D /* LoopKitTests.xctest */,
+				E942DE28253BE1DE00AC532D /* LoopKitHostedTests.xctest */,
+				E942DE2A253BE1DE00AC532D /* LoopKitUI.framework */,
+				E942DE2C253BE1DE00AC532D /* MockKit.framework */,
+				E942DE2E253BE1DE00AC532D /* MockKitUI.framework */,
+				E942DE30253BE1DE00AC532D /* LoopTestingKit.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		E95D37FF24EADE68005E2F50 /* Store Protocols */ = {
 			isa = PBXGroup;
 			children = (
@@ -2466,6 +2613,28 @@
 				E98A55EE24EDD6E60008715D /* DosingDecisionStoreProtocol.swift */,
 			);
 			path = "Store Protocols";
+			sourceTree = "<group>";
+		};
+		E9B07F7D253BBA6500BAD8F8 /* Loop Intent Extension */ = {
+			isa = PBXGroup;
+			children = (
+				E942DE6D253BE5E100AC532D /* Loop Intent Extension.entitlements */,
+				E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */,
+				E9B07F80253BBA6500BAD8F8 /* Info.plist */,
+				E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */,
+				E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */,
+			);
+			path = "Loop Intent Extension";
+			sourceTree = "<group>";
+		};
+		E9B07F88253BBA6500BAD8F8 /* Loop Intent ExtensionUI */ = {
+			isa = PBXGroup;
+			children = (
+				E9B07F89253BBA6500BAD8F8 /* IntentViewController.swift */,
+				E9B07F8B253BBA6500BAD8F8 /* MainInterface.storyboard */,
+				E9B07F8E253BBA6500BAD8F8 /* Info.plist */,
+			);
+			path = "Loop Intent ExtensionUI";
 			sourceTree = "<group>";
 		};
 		E9C58A7624DB510500487A17 /* Fixtures */ = {
@@ -2541,6 +2710,8 @@
 				43A943931B926B7B0051FA24 /* PBXTargetDependency */,
 				4F70C1E71DE8DCA7006380B7 /* PBXTargetDependency */,
 				43D9FFD521EAE05D00AF44BF /* PBXTargetDependency */,
+				E9B07F90253BBA6500BAD8F8 /* PBXTargetDependency */,
+				E9B07F93253BBA6500BAD8F8 /* PBXTargetDependency */,
 			);
 			name = Loop;
 			productName = Loop;
@@ -2719,13 +2890,47 @@
 			productReference = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9B07F9A253BBA6500BAD8F8 /* Build configuration list for PBXNativeTarget "Loop Intent Extension" */;
+			buildPhases = (
+				E9B07F78253BBA6500BAD8F8 /* Sources */,
+				E9B07F79253BBA6500BAD8F8 /* Frameworks */,
+				E9B07F7A253BBA6500BAD8F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Loop Intent Extension";
+			productName = "Loop Intent Extension";
+			productReference = E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		E9B07F84253BBA6500BAD8F8 /* Loop Intent ExtensionUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9B07F99253BBA6500BAD8F8 /* Build configuration list for PBXNativeTarget "Loop Intent ExtensionUI" */;
+			buildPhases = (
+				E9B07F81253BBA6500BAD8F8 /* Sources */,
+				E9B07F82253BBA6500BAD8F8 /* Frameworks */,
+				E9B07F83253BBA6500BAD8F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Loop Intent ExtensionUI";
+			productName = "Loop Intent ExtensionUI";
+			productReference = E9B07F85253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		43776F841B8022E90074EA36 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1010;
+				LastSwiftUpdateCheck = 1200;
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "LoopKit Authors";
 				TargetAttributes = {
@@ -2838,6 +3043,14 @@
 						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 					};
+					E9B07F7B253BBA6500BAD8F8 = {
+						CreatedOnToolsVersion = 12.0.1;
+						ProvisioningStyle = Automatic;
+					};
+					E9B07F84253BBA6500BAD8F8 = {
+						CreatedOnToolsVersion = 12.0.1;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Loop" */;
@@ -2867,6 +3080,12 @@
 			mainGroup = 43776F831B8022E90074EA36;
 			productRefGroup = 43776F8D1B8022E90074EA36 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E942DE14253BE1DE00AC532D /* Products */;
+					ProjectRef = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				43776F8B1B8022E90074EA36 /* Loop */,
@@ -2880,9 +3099,77 @@
 				43E2D8D01D20BF42004DA55F /* DoseMathTests */,
 				43E2D90A1D20C581004DA55F /* LoopTests */,
 				432CF87720D8B8380066B889 /* Cartfile */,
+				E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */,
+				E9B07F84253BBA6500BAD8F8 /* Loop Intent ExtensionUI */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		E942DE20253BE1DE00AC532D /* LoopKit Example.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "LoopKit Example.app";
+			remoteRef = E942DE1F253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E942DE22253BE1DE00AC532D /* LoopKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = LoopKit.framework;
+			remoteRef = E942DE21253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E942DE24253BE1DE00AC532D /* LoopKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = LoopKit.framework;
+			remoteRef = E942DE23253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E942DE26253BE1DE00AC532D /* LoopKitTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = LoopKitTests.xctest;
+			remoteRef = E942DE25253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E942DE28253BE1DE00AC532D /* LoopKitHostedTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = LoopKitHostedTests.xctest;
+			remoteRef = E942DE27253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E942DE2A253BE1DE00AC532D /* LoopKitUI.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = LoopKitUI.framework;
+			remoteRef = E942DE29253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E942DE2C253BE1DE00AC532D /* MockKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MockKit.framework;
+			remoteRef = E942DE2B253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E942DE2E253BE1DE00AC532D /* MockKitUI.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MockKitUI.framework;
+			remoteRef = E942DE2D253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E942DE30253BE1DE00AC532D /* LoopTestingKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = LoopTestingKit.framework;
+			remoteRef = E942DE2F253BE1DE00AC532D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		43776F8A1B8022E90074EA36 /* Resources */ = {
@@ -3038,6 +3325,21 @@
 				4F2C15951E09BF3C00E160D4 /* HUDView.xib in Resources */,
 				B4E96D5D248A82A2002DABAD /* StatusBarHUDView.xib in Resources */,
 				B4E96D59248A7F9A002DABAD /* StatusHighlightHUDView.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9B07F7A253BBA6500BAD8F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9B07F83253BBA6500BAD8F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9B07F8D253BBA6500BAD8F8 /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3332,6 +3634,7 @@
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
+				E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */,
 				C148CEE724FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
 				1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */,
@@ -3360,10 +3663,11 @@
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				43511CE221FD80E400566C63 /* RetrospectiveCorrection.swift in Sources */,
 				1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */,
+				E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				A9C62D8223316FF600535612 /* UserDefaults+Services.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
-				4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */,
+				4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
 				1DD0B76724EC77AC008A2DC3 /* SupportScreenView.swift in Sources */,
@@ -3671,6 +3975,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E9B07F78253BBA6500BAD8F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */,
+				E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */,
+				E9B07FEE253BBC7100BAD8F8 /* OverrideIntentHandler.swift in Sources */,
+				E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */,
+				E9B08016253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */,
+				E942DF34253BF87F00AC532D /* Intents.intentdefinition in Sources */,
+				E9B07F7F253BBA6500BAD8F8 /* IntentHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9B07F81253BBA6500BAD8F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E942DF47253BF87F00AC532D /* Intents.intentdefinition in Sources */,
+				E9B07F8A253BBA6500BAD8F8 /* IntentViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -3738,6 +4065,16 @@
 			isa = PBXTargetDependency;
 			target = 43D9001A21EB209400AF44BF /* LoopCore-watchOS */;
 			targetProxy = C117ED70232EDB3200DA57CD /* PBXContainerItemProxy */;
+		};
+		E9B07F90253BBA6500BAD8F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E9B07F84253BBA6500BAD8F8 /* Loop Intent ExtensionUI */;
+			targetProxy = E9B07F8F253BBA6500BAD8F8 /* PBXContainerItemProxy */;
+		};
+		E9B07F93253BBA6500BAD8F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */;
+			targetProxy = E9B07F92253BBA6500BAD8F8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -4102,6 +4439,14 @@
 				7D23667E21250CAC0028B67D /* Base */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		E9B07F8B253BBA6500BAD8F8 /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E9B07F8C253BBA6500BAD8F8 /* Base */,
+			);
+			name = MainInterface.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -4708,6 +5053,146 @@
 			};
 			name = Release;
 		};
+		E9B07F95253BBA6500BAD8F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_ENTITLEMENTS = "Loop Intent Extension/Loop Intent Extension.entitlements";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 57;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 2.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com..loopkit.Loop.Loop-Intent-Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E9B07F96253BBA6500BAD8F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_ENTITLEMENTS = "Loop Intent Extension/Loop Intent Extension.entitlements";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 57;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 2.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com..loopkit.Loop.Loop-Intent-Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		E9B07F97253BBA6500BAD8F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 57;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				INFOPLIST_FILE = "Loop Intent ExtensionUI/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 2.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com..loopkit.Loop.Loop-Intent-ExtensionUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E9B07F98253BBA6500BAD8F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 57;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				INFOPLIST_FILE = "Loop Intent ExtensionUI/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 2.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com..loopkit.Loop.Loop-Intent-ExtensionUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -4815,6 +5300,24 @@
 			buildConfigurations = (
 				4F7528901DFE1DC600C322D6 /* Debug */,
 				4F7528911DFE1DC600C322D6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E9B07F99253BBA6500BAD8F8 /* Build configuration list for PBXNativeTarget "Loop Intent ExtensionUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9B07F97253BBA6500BAD8F8 /* Debug */,
+				E9B07F98253BBA6500BAD8F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E9B07F9A253BBA6500BAD8F8 /* Build configuration list for PBXNativeTarget "Loop Intent Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9B07F95253BBA6500BAD8F8 /* Debug */,
+				E9B07F96253BBA6500BAD8F8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

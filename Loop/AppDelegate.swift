@@ -77,6 +77,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
 
         NotificationManager.authorize(delegate: self)
         
+        INPreferences.requestSiriAuthorization {
+                _ in
+            // ANNA TODO: do we need to do anything with the auth info?
+        }
+        
         rootViewController.pushViewController(statusTableViewController, animated: false)
 
         let notificationOption = launchOptions?[.remoteNotification]
@@ -142,20 +147,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
                 return true
             }
         }
-
-        if let overrideIntent = userActivity.interaction?.intent as? EnableOverridePresetIntent {
-            // Lowercase the names so we can still find overrides if the capitalization is different
-            guard let overrideName = overrideIntent.overrideName?.lowercased(), let preset = deviceDataManager?.loopManager.settings.overridePresets.first(where: {$0.name.lowercased() == overrideName}) else {
-                log.default("Couldn't find %{public}@ override when restoring override", String(describing: overrideIntent.overrideName))
-                return false
-            }
-            
-            log.default("Restoring %{public}@ intent", userActivity.activityType)
-            deviceDataManager?.loopManager.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
-            return true
-        }
-        
-        
 
         switch userActivity.activityType {
         case NSUserActivity.newCarbEntryActivityType,
