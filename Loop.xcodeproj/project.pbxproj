@@ -517,6 +517,8 @@
 		E93E86CE24E2E02200FF40C8 /* high_and_stable_momentum_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C924E2E02200FF40C8 /* high_and_stable_momentum_effect.json */; };
 		E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
 		E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
+		E942DF34253BF87F00AC532D /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
+		E942DF47253BF87F00AC532D /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
 		E95D380124EADE7C005E2F50 /* DoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */; };
 		E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */; };
 		E95D380524EADF78005E2F50 /* GlucoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */; };
@@ -533,8 +535,6 @@
 		E9B07F8D253BBA6500BAD8F8 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9B07F8B253BBA6500BAD8F8 /* MainInterface.storyboard */; };
 		E9B07F91253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E9B07F85253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E9B07F94253BBA6500BAD8F8 /* Loop Intent Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		E9B07FC0253BBAF200BAD8F8 /* Intents+Extension.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FBF253BBAF200BAD8F8 /* Intents+Extension.intentdefinition */; };
-		E9B07FC1253BBAF200BAD8F8 /* Intents+Extension.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FBF253BBAF200BAD8F8 /* Intents+Extension.intentdefinition */; };
 		E9B07FEE253BBC7100BAD8F8 /* OverrideIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */; };
 		E9B08016253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
 		E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
@@ -1486,7 +1486,6 @@
 		E9B07F89253BBA6500BAD8F8 /* IntentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentViewController.swift; sourceTree = "<group>"; };
 		E9B07F8C253BBA6500BAD8F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		E9B07F8E253BBA6500BAD8F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E9B07FBF253BBAF200BAD8F8 /* Intents+Extension.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = "Intents+Extension.intentdefinition"; sourceTree = "<group>"; };
 		E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideIntentHandler.swift; sourceTree = "<group>"; };
 		E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+LoopIntents.swift"; sourceTree = "<group>"; };
 		E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentExtensionInfo.swift; sourceTree = "<group>"; };
@@ -2622,7 +2621,6 @@
 				E942DE6D253BE5E100AC532D /* Loop Intent Extension.entitlements */,
 				E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */,
 				E9B07F80253BBA6500BAD8F8 /* Info.plist */,
-				E9B07FBF253BBAF200BAD8F8 /* Intents+Extension.intentdefinition */,
 				E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */,
 				E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */,
 			);
@@ -3984,9 +3982,9 @@
 				E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */,
 				E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */,
 				E9B07FEE253BBC7100BAD8F8 /* OverrideIntentHandler.swift in Sources */,
-				E9B07FC0253BBAF200BAD8F8 /* Intents+Extension.intentdefinition in Sources */,
 				E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */,
 				E9B08016253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */,
+				E942DF34253BF87F00AC532D /* Intents.intentdefinition in Sources */,
 				E9B07F7F253BBA6500BAD8F8 /* IntentHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3995,7 +3993,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E9B07FC1253BBAF200BAD8F8 /* Intents+Extension.intentdefinition in Sources */,
+				E942DF47253BF87F00AC532D /* Intents.intentdefinition in Sources */,
 				E9B07F8A253BBA6500BAD8F8 /* IntentViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

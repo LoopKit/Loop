@@ -65,6 +65,7 @@
 	<string>Loop uses Siri to allow you to set override presets with your voice.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
+		<string>EnableOverridePresetIntent</string>
 		<string>NewCarbEntry</string>
 		<string>NewCarbEntryIntent</string>
 		<string>ViewLoopStatus</string>

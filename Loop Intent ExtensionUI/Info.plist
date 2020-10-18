@@ -27,6 +27,7 @@
 			<key>IntentsSupported</key>
 			<array>
 				<string>EnableOverridePresetIntent</string>
+				<string>NewCarbEntryIntent</string>
 			</array>
 		</dict>
 		<key>NSExtensionMainStoryboard</key>
