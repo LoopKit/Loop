@@ -50,17 +50,15 @@ final class ExtensionDataManager {
         }
         
         createIntentsContext { (info) in
-            if let info = info {
+            if let info = info, self.defaults?.intentExtensionInfo?.overridePresetNames != info.overridePresetNames {
                 self.defaults?.intentExtensionInfo = info
             }
         }
     }
     
     private func createIntentsContext(_ completion: @escaping (_ context: IntentExtensionInfo?) -> Void) {
-        var info = IntentExtensionInfo()
-        
         let presets = deviceManager.loopManager.settings.overridePresets
-        info.overridePresetNames = presets.map { $0.name }
+        let info = IntentExtensionInfo(overridePresetNames: presets.map { $0.name })
         completion(info)
     }
 

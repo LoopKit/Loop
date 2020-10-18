@@ -12,20 +12,21 @@ struct IntentExtensionInfo: RawRepresentable {
     typealias RawValue = [String: Any]
 
     var overridePresetNames: [String]?
-    var presetNameToSet: String?
     
     init() { }
     
     init(rawValue: RawValue) {
         overridePresetNames = rawValue["overridePresetNames"] as? [String]
-        presetNameToSet = rawValue["presetNameToSet"] as? String
+    }
+    
+    init(overridePresetNames: [String]?) {
+        self.overridePresetNames = overridePresetNames
     }
     
     var rawValue: RawValue {
         var raw: RawValue = [:]
         
         raw["overridePresetNames"] = overridePresetNames
-        raw["presetNameToSet"] = presetNameToSet
         
         return raw
     }

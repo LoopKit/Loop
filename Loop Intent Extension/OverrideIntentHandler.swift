@@ -26,10 +26,10 @@ class OverrideIntentHandler: NSObject, EnableOverridePresetIntentHandling {
             completion(EnableOverridePresetIntentResponse(code: .failure, userActivity: nil))
             return
         }
-        
-        defaults.intentExtensionInfo?.presetNameToSet = overrideName
-//        loopManager.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
-        completion(EnableOverridePresetIntentResponse(code: .success, userActivity: nil))
+
+        defaults.intentExtensionOverrideToSet = overrideName
+        // Continue in app because the UserDefaults KVO doesn't work in the background
+        completion(EnableOverridePresetIntentResponse(code: .continueInApp, userActivity: nil))
     }
     
     func resolveOverrideName(for intent: EnableOverridePresetIntent, with completion: @escaping (INStringResolutionResult) -> Void) {
