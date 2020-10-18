@@ -1296,7 +1296,7 @@ final class StatusTableViewController: ChartsTableViewController {
         if error != nil {
             let alertController = UIAlertController(with: error!)
             let manualLoopAction = UIAlertAction(title: NSLocalizedString("Retry", comment: "The button text for attempting a manual loop"), style: .default, handler: { _ in
-                self.deviceManager.loopManager.loop()
+                self.deviceManager.refreshDeviceData()
             })
             alertController.addAction(manualLoopAction)
             present(alertController, animated: true)
