@@ -135,27 +135,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         log.default(#function)
 
-        if #available(iOS 12.0, *) {
-            if userActivity.activityType == NewCarbEntryIntent.className {
-                log.default("Restoring %{public}@ intent", userActivity.activityType)
-                rootViewController.restoreUserActivityState(.forNewCarbEntry())
-                return true
-            }
-        }
-
-        if let overrideIntent = userActivity.interaction?.intent as? EnableOverridePresetIntent {
-            // Lowercase the names so we can still find overrides if the capitalization is different
-            guard let overrideName = overrideIntent.overrideName?.lowercased(), let preset = deviceDataManager?.loopManager.settings.overridePresets.first(where: {$0.name.lowercased() == overrideName}) else {
-                log.default("Couldn't find %{public}@ override when restoring override", String(describing: overrideIntent.overrideName))
-                return false
-            }
-            
-            log.default("Restoring %{public}@ intent", userActivity.activityType)
-            deviceDataManager?.loopManager.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
-            return true
-        }
-        
-        
+        // ANNA TODO: figure out why this doesn't work
+//        if #available(iOS 12.0, *) {
+//            if userActivity.activityType == NewCarbEntryIntent.className {
+//                log.default("Restoring %{public}@ intent", userActivity.activityType)
+//                rootViewController.restoreUserActivityState(.forNewCarbEntry())
+//                return true
+//            }
+//        }
 
         switch userActivity.activityType {
         case NSUserActivity.newCarbEntryActivityType,

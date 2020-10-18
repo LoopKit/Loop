@@ -1,5 +1,5 @@
 //
-//  StatusExtensionDataManager.swift
+//  ExtensionDataManager.swift
 //  Loop
 //
 //  Created by Bharat Mediratta on 11/25/16.
@@ -11,7 +11,7 @@ import UIKit
 import LoopKit
 
 
-final class StatusExtensionDataManager {
+final class ExtensionDataManager {
     unowned let deviceManager: DeviceDataManager
 
     init(deviceDataManager: DeviceDataManager) {
@@ -43,14 +43,28 @@ final class StatusExtensionDataManager {
             return
         }
 
-        createContext(glucoseUnit: unit) { (context) in
+        createStatusContext(glucoseUnit: unit) { (context) in
             if let context = context {
                 self.defaults?.statusExtensionContext = context
             }
         }
+        
+        createIntentsContext { (info) in
+            if let info = info {
+                self.defaults?.intentExtensionInfo = info
+            }
+        }
+    }
+    
+    private func createIntentsContext(_ completion: @escaping (_ context: IntentExtensionInfo?) -> Void) {
+        var info = IntentExtensionInfo()
+        
+        let presets = deviceManager.loopManager.settings.overridePresets
+        info.overridePresetNames = presets.map { $0.name }
+        completion(info)
     }
 
-    private func createContext(glucoseUnit: HKUnit, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
+    private func createStatusContext(glucoseUnit: HKUnit, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
 
         let basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
 
@@ -132,7 +146,7 @@ final class StatusExtensionDataManager {
 }
 
 
-extension StatusExtensionDataManager: CustomDebugStringConvertible {
+extension ExtensionDataManager: CustomDebugStringConvertible {
     var debugDescription: String {
         return [
             "## StatusExtensionDataManager",
