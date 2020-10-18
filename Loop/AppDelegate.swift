@@ -140,14 +140,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         log.default(#function)
 
-        // ANNA TODO: figure out why this doesn't work
-//        if #available(iOS 12.0, *) {
-//            if userActivity.activityType == NewCarbEntryIntent.className {
-//                log.default("Restoring %{public}@ intent", userActivity.activityType)
-//                rootViewController.restoreUserActivityState(.forNewCarbEntry())
-//                return true
-//            }
-//        }
+        if #available(iOS 12.0, *) {
+            if userActivity.activityType == NewCarbEntryIntent.className {
+                log.default("Restoring %{public}@ intent", userActivity.activityType)
+                rootViewController.restoreUserActivityState(.forNewCarbEntry())
+                return true
+            }
+        }
 
         switch userActivity.activityType {
         case NSUserActivity.newCarbEntryActivityType,
