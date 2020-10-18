@@ -515,8 +515,6 @@
 		E93E86CC24E2E02200FF40C8 /* high_and_stable_predicted_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C724E2E02200FF40C8 /* high_and_stable_predicted_glucose.json */; };
 		E93E86CD24E2E02200FF40C8 /* high_and_stable_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C824E2E02200FF40C8 /* high_and_stable_counteraction_effect.json */; };
 		E93E86CE24E2E02200FF40C8 /* high_and_stable_momentum_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C924E2E02200FF40C8 /* high_and_stable_momentum_effect.json */; };
-		E942DE77253BE63E00AC532D /* LoopCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */; };
-		E942DE78253BE63E00AC532D /* LoopCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
 		E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		E95D380124EADE7C005E2F50 /* DoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */; };
@@ -535,8 +533,8 @@
 		E9B07F8D253BBA6500BAD8F8 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9B07F8B253BBA6500BAD8F8 /* MainInterface.storyboard */; };
 		E9B07F91253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E9B07F85253BBA6500BAD8F8 /* Loop Intent ExtensionUI.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E9B07F94253BBA6500BAD8F8 /* Loop Intent Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		E9B07FC0253BBAF200BAD8F8 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FBF253BBAF200BAD8F8 /* Intents.intentdefinition */; };
-		E9B07FC1253BBAF200BAD8F8 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FBF253BBAF200BAD8F8 /* Intents.intentdefinition */; };
+		E9B07FC0253BBAF200BAD8F8 /* Intents+Extension.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FBF253BBAF200BAD8F8 /* Intents+Extension.intentdefinition */; };
+		E9B07FC1253BBAF200BAD8F8 /* Intents+Extension.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FBF253BBAF200BAD8F8 /* Intents+Extension.intentdefinition */; };
 		E9B07FEE253BBC7100BAD8F8 /* OverrideIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */; };
 		E9B08016253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
 		E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
@@ -710,13 +708,6 @@
 			remoteGlobalIDString = 892A5D34222F03CB008961AB;
 			remoteInfo = LoopTestingKit;
 		};
-		E942DE79253BE63E00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
-			remoteInfo = LoopCore;
-		};
 		E9B07F8F253BBA6500BAD8F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -812,17 +803,6 @@
 				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E942DE7B253BE63E00AC532D /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				E942DE78253BE63E00AC532D /* LoopCore.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -1506,7 +1486,7 @@
 		E9B07F89253BBA6500BAD8F8 /* IntentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentViewController.swift; sourceTree = "<group>"; };
 		E9B07F8C253BBA6500BAD8F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		E9B07F8E253BBA6500BAD8F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E9B07FBF253BBAF200BAD8F8 /* Intents.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Intents.intentdefinition; sourceTree = "<group>"; };
+		E9B07FBF253BBAF200BAD8F8 /* Intents+Extension.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = "Intents+Extension.intentdefinition"; sourceTree = "<group>"; };
 		E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideIntentHandler.swift; sourceTree = "<group>"; };
 		E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+LoopIntents.swift"; sourceTree = "<group>"; };
 		E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentExtensionInfo.swift; sourceTree = "<group>"; };
@@ -1634,7 +1614,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E942DE77253BE63E00AC532D /* LoopCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2643,7 +2622,7 @@
 				E942DE6D253BE5E100AC532D /* Loop Intent Extension.entitlements */,
 				E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */,
 				E9B07F80253BBA6500BAD8F8 /* Info.plist */,
-				E9B07FBF253BBAF200BAD8F8 /* Intents.intentdefinition */,
+				E9B07FBF253BBAF200BAD8F8 /* Intents+Extension.intentdefinition */,
 				E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */,
 				E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */,
 			);
@@ -2920,12 +2899,10 @@
 				E9B07F78253BBA6500BAD8F8 /* Sources */,
 				E9B07F79253BBA6500BAD8F8 /* Frameworks */,
 				E9B07F7A253BBA6500BAD8F8 /* Resources */,
-				E942DE7B253BE63E00AC532D /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				E942DE7A253BE63E00AC532D /* PBXTargetDependency */,
 			);
 			name = "Loop Intent Extension";
 			productName = "Loop Intent Extension";
@@ -4007,7 +3984,7 @@
 				E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */,
 				E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */,
 				E9B07FEE253BBC7100BAD8F8 /* OverrideIntentHandler.swift in Sources */,
-				E9B07FC0253BBAF200BAD8F8 /* Intents.intentdefinition in Sources */,
+				E9B07FC0253BBAF200BAD8F8 /* Intents+Extension.intentdefinition in Sources */,
 				E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */,
 				E9B08016253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */,
 				E9B07F7F253BBA6500BAD8F8 /* IntentHandler.swift in Sources */,
@@ -4018,7 +3995,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E9B07FC1253BBAF200BAD8F8 /* Intents.intentdefinition in Sources */,
+				E9B07FC1253BBAF200BAD8F8 /* Intents+Extension.intentdefinition in Sources */,
 				E9B07F8A253BBA6500BAD8F8 /* IntentViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4090,11 +4067,6 @@
 			isa = PBXTargetDependency;
 			target = 43D9001A21EB209400AF44BF /* LoopCore-watchOS */;
 			targetProxy = C117ED70232EDB3200DA57CD /* PBXContainerItemProxy */;
-		};
-		E942DE7A253BE63E00AC532D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
-			targetProxy = E942DE79253BE63E00AC532D /* PBXContainerItemProxy */;
 		};
 		E9B07F90253BBA6500BAD8F8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

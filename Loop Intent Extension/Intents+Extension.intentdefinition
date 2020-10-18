@@ -139,7 +139,7 @@
 				</array>
 			</dict>
 			<key>INIntentTitle</key>
-			<string>Enable Override Preset</string>
+			<string>Enable Insulin Preset</string>
 			<key>INIntentTitleID</key>
 			<string>USCd8o</string>
 			<key>INIntentType</key>

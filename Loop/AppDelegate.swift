@@ -77,6 +77,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
 
         NotificationManager.authorize(delegate: self)
         
+        INPreferences.requestSiriAuthorization {
+                _ in
+            // ANNA TODO: do we need to do anything with the auth info?
+        }
+        
         rootViewController.pushViewController(statusTableViewController, animated: false)
 
         let notificationOption = launchOptions?[.remoteNotification]
