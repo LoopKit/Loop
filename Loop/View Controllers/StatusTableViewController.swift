@@ -1139,6 +1139,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
             vc.presets = deviceManager.loopManager.settings.overridePresets
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
+            vc.overrideHistory = deviceManager.loopManager.overrideHistory.getEvents()
             vc.delegate = self
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
