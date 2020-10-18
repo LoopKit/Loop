@@ -77,10 +77,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
 
         NotificationManager.authorize(delegate: self)
         
-        INPreferences.requestSiriAuthorization {
-                _ in
-            // ANNA TODO: do we need to do anything with the auth info?
-        }
+        // This only requests authorization if needed
+        INPreferences.requestSiriAuthorization { _ in }
         
         rootViewController.pushViewController(statusTableViewController, animated: false)
 
