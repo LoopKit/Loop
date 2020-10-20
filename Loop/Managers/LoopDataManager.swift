@@ -46,6 +46,9 @@ final class LoopDataManager {
     
     private var overrideObserver: NSKeyValueObservation? = nil
 
+    // FIXME: avoid error accessing LDM in the status extension when the closure is initalized
+    private var didSetUp = false
+
     deinit {
         for observer in notificationObservers {
             NotificationCenter.default.removeObserver(observer)
@@ -93,18 +96,19 @@ final class LoopDataManager {
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
-        overrideObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.initial, .new], changeHandler: { (defaults, change) in
-            guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
+        overrideObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.initial, .new], changeHandler: {[weak self] (defaults, change) in
+            guard let setUp = self?.didSetUp, setUp, let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
+                self?.didSetUp = true
                 return
             }
 
-            guard let preset = settings.overridePresets.first(where: {$0.name.lowercased() == name}) else {
-                self.logger.error("Override Intent: Unable to find override name)")
+            guard let preset = self?.settings.overridePresets.first(where: {$0.name.lowercased() == name}) else {
+                self?.logger.error("Override Intent: Unable to find override named '%s'", String(describing: name))
                 return
             }
-
-            self.logger.default("Override Intent: setting override named '%s'", String(describing: name))
-            self.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
+            
+            self?.logger.default("Override Intent: setting override named '%s'", String(describing: name))
+            self?.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
             // Remove the override from UserDefaults so we don't set it multiple times
             appGroup.intentExtensionOverrideToSet = nil
         })
