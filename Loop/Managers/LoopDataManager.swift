@@ -96,12 +96,12 @@ final class LoopDataManager {
         // Observe changes
         notificationObservers = [
             NotificationCenter.default.addObserver(
-                forName: CarbStore.carbEntriesDidUpdate,
+                forName: CarbStore.carbEntriesDidChange,
                 object: self.carbStore,
                 queue: nil
             ) { (note) -> Void in
                 self.dataAccessQueue.async {
-                    self.logger.default("Received notification of carb entries updating")
+                    self.logger.default("Received notification of carb entries changing")
 
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
@@ -454,17 +454,17 @@ extension LoopDataManager {
 
 // MARK: - Intake
 extension LoopDataManager {
-    /// Adds and stores glucose data
+    /// Adds and stores glucose samples
     ///
     /// - Parameters:
     ///   - samples: The new glucose samples to store
     ///   - completion: A closure called once upon completion
     ///   - result: The stored glucose values
-    func addGlucose(
+    func addGlucoseSamples(
         _ samples: [NewGlucoseSample],
-        completion: ((_ result: Result<[GlucoseValue]>) -> Void)? = nil
+        completion: ((_ result: Swift.Result<[StoredGlucoseSample], Error>) -> Void)? = nil
     ) {
-        glucoseStore.addGlucose(samples) { (result) in
+        glucoseStore.addGlucoseSamples(samples) { (result) in
             self.dataAccessQueue.async {
                 switch result {
                 case .success(let samples):
@@ -748,8 +748,14 @@ extension LoopDataManager {
         // Fetch glucose effects as far back as we want to make retroactive analysis
         var latestGlucoseDate: Date?
         updateGroup.enter()
-        glucoseStore.getCachedGlucoseSamples(start: Date(timeInterval: -settings.inputDataRecencyInterval, since: now()), end: nil) { (values) in
-            latestGlucoseDate = values.last?.startDate
+        glucoseStore.getGlucoseSamples(start: Date(timeInterval: -settings.inputDataRecencyInterval, since: now()), end: nil) { (result) in
+            switch result {
+            case .failure(let error):
+                self.logger.error("Failure getting glucose samples: %{public}@", String(describing: error))
+                latestGlucoseDate = nil
+            case .success(let samples):
+                latestGlucoseDate = samples.last?.startDate
+            }
             updateGroup.leave()
         }
         _ = updateGroup.wait(timeout: .distantFuture)
@@ -765,8 +771,14 @@ extension LoopDataManager {
 
         if glucoseMomentumEffect == nil {
             updateGroup.enter()
-            glucoseStore.getRecentMomentumEffect { (effects) -> Void in
-                self.glucoseMomentumEffect = effects
+            glucoseStore.getRecentMomentumEffect { (result) -> Void in
+                switch result {
+                case .failure(let error):
+                    self.logger.error("Failure getting recent momentum effect: %{public}@", String(describing: error))
+                    self.glucoseMomentumEffect = nil
+                case .success(let effects):
+                    self.glucoseMomentumEffect = effects
+                }
                 updateGroup.leave()
             }
         }
@@ -807,8 +819,13 @@ extension LoopDataManager {
         if nextEffectDate < lastGlucoseDate, let insulinEffect = insulinEffect {
             updateGroup.enter()
             self.logger.debug("Fetching counteraction effects after %{public}@", String(describing: nextEffectDate))
-            glucoseStore.getCounteractionEffects(start: nextEffectDate, end: nil, to: insulinEffect) { (velocities) in
-                self.insulinCounteractionEffects.append(contentsOf: velocities)
+            glucoseStore.getCounteractionEffects(start: nextEffectDate, end: nil, to: insulinEffect) { (result) in
+                switch result {
+                case .failure(let error):
+                    self.logger.error("Failure getting counteraction effects: %{public}@", String(describing: error))
+                case .success(let velocities):
+                    self.insulinCounteractionEffects.append(contentsOf: velocities)
+                }
                 self.insulinCounteractionEffects = self.insulinCounteractionEffects.filterDateRange(earliestEffectDate, nil)
 
                 updateGroup.leave()
@@ -1087,14 +1104,18 @@ extension LoopDataManager {
         var insulinCounteractionEffects = self.insulinCounteractionEffects
         if nextEffectDate < glucose.date, let insulinEffect = insulinEffect {
             updateGroup.enter()
-            glucoseStore.getCachedGlucoseSamples(start: nextEffectDate, end: nil) { samples in
-                var samples = samples
-                let manualSample = StoredGlucoseSample(sample: glucose.quantitySample)
-                let insertionIndex = samples.partitioningIndex(where: { manualSample.startDate < $0.startDate })
-                samples.insert(manualSample, at: insertionIndex)
-                let velocities = self.glucoseStore.counteractionEffects(for: samples, to: insulinEffect)
-
-                insulinCounteractionEffects.append(contentsOf: velocities)
+            glucoseStore.getGlucoseSamples(start: nextEffectDate, end: nil) { result in
+                switch result {
+                case .failure(let error):
+                    self.logger.error("Failure getting glucose samples: %{public}@", String(describing: error))
+                case .success(let samples):
+                    var samples = samples
+                    let manualSample = StoredGlucoseSample(sample: glucose.quantitySample)
+                    let insertionIndex = samples.partitioningIndex(where: { manualSample.startDate < $0.startDate })
+                    samples.insert(manualSample, at: insertionIndex)
+                    let velocities = self.glucoseStore.counteractionEffects(for: samples, to: insulinEffect)
+                    insulinCounteractionEffects.append(contentsOf: velocities)
+                }
                 insulinCounteractionEffects = insulinCounteractionEffects.filterDateRange(earliestEffectDate, nil)
 
                 updateGroup.leave()

@@ -78,7 +78,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         healthStore: healthStore,
         observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
         cacheStore: cacheStore,
-        observationEnabled: false
+        observationEnabled: false,
+        provenanceIdentifier: HKSource.default().bundleIdentifier
     )
 
     lazy var doseStore = DoseStore(
@@ -220,8 +221,13 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         charts.maxEndDate = charts.startDate.addingTimeInterval(TimeInterval(hours: 3))
 
         group.enter()
-        glucoseStore.getCachedGlucoseSamples(start: charts.startDate) { (result) in
-            glucose = result
+        glucoseStore.getGlucoseSamples(start: charts.startDate) { (result) in
+            switch result {
+            case .failure:
+                glucose = []
+            case .success(let samples):
+                glucose = samples
+            }
             group.leave()
         }
 

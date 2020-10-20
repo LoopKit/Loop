@@ -209,7 +209,8 @@ final class DeviceDataManager {
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            observationInterval: .hours(24)
+            observationInterval: .hours(24),
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
         self.dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
@@ -323,7 +324,7 @@ final class DeviceDataManager {
         case .newData(let values):
             log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
 
-            loopManager.addGlucose(values) { result in
+            loopManager.addGlucoseSamples(values) { result in
                 self.log.default("Asserting current pump data")
                 self.pumpManager?.ensureCurrentPumpData(completion: nil)
             }
@@ -955,7 +956,7 @@ extension DeviceDataManager {
         }
 
         let predicate = HKQuery.predicateForObjects(from: [testingCGMManager.testingDevice])
-        glucoseStore.purgeGlucoseSamples(matchingCachePredicate: nil, healthKitPredicate: predicate) { success, count, error in
+        glucoseStore.purgeAllGlucoseSamples(healthKitPredicate: predicate) { error in
             completion?(error)
         }
     }

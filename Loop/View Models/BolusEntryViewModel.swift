@@ -23,8 +23,7 @@ protocol BolusEntryViewModelDelegate: class {
     func withLoopState(do block: @escaping (LoopState) -> Void)
 
     ///
-    func addGlucose(_ samples: [NewGlucoseSample],
-                    completion: ((_ result: Result<[GlucoseValue]>) -> Void)?)
+    func addGlucoseSamples(_ samples: [NewGlucoseSample], completion: ((_ result: Swift.Result<[StoredGlucoseSample], Error>) -> Void)?)
     
     ///
     func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry? ,
@@ -37,7 +36,7 @@ protocol BolusEntryViewModelDelegate: class {
     func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
 
     ///
-    func getCachedGlucoseSamples(start: Date, end: Date?, completion: @escaping (_ samples: [StoredGlucoseSample]) -> Void)
+    func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
     ///
     func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)
@@ -341,7 +340,7 @@ final class BolusEntryViewModel: ObservableObject {
     private func continueSaving(onSuccess completion: @escaping () -> Void) {
         if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
-            delegate?.addGlucose([manualGlucoseSample]) { result in
+            delegate?.addGlucoseSamples([manualGlucoseSample]) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let glucoseValues):
@@ -515,10 +514,17 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateStoredGlucoseValues() {
-        delegate?.getCachedGlucoseSamples(start: chartDateInterval.start, end: nil) { [weak self] values in
+        delegate?.getGlucoseSamples(start: chartDateInterval.start, end: nil) { [weak self] result in
             DispatchQueue.main.async {
-                self?.storedGlucoseValues = values
-                self?.updateGlucoseChartValues()
+                guard let self = self else { return }
+                switch result {
+                case .failure(let error):
+                    self.log.error("Failure getting glucose samples: %{public}@", String(describing: error))
+                    self.storedGlucoseValues = []
+                case .success(let samples):
+                    self.storedGlucoseValues = samples
+                }
+                self.updateGlucoseChartValues()
             }
         }
     }

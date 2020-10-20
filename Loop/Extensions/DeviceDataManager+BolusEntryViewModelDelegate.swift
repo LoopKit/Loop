@@ -16,8 +16,8 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
         loopManager.getLoopState { block($1) }
     }
     
-    func addGlucose(_ samples: [NewGlucoseSample], completion: ((Result<[GlucoseValue]>) -> Void)?) {
-        loopManager.addGlucose(samples, completion: completion)
+    func addGlucoseSamples(_ samples: [NewGlucoseSample], completion: ((Swift.Result<[StoredGlucoseSample], Error>) -> Void)?) {
+        loopManager.addGlucoseSamples(samples, completion: completion)
     }
     
     func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
@@ -31,8 +31,8 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
     /// func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
     /// is already implemented in DeviceDataManager
     
-    func getCachedGlucoseSamples(start: Date, end: Date?, completion: @escaping ([StoredGlucoseSample]) -> Void) {
-        glucoseStore.getCachedGlucoseSamples(start: start, end: end, completion: completion)
+    func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
+        glucoseStore.getGlucoseSamples(start: start, end: end, completion: completion)
     }
     
     func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {

@@ -263,14 +263,20 @@ final class WatchDataManager: NSObject {
             
             if let glucose = glucose {
                 updateGroup.enter()
-                self.deviceManager.glucoseStore.getCachedGlucoseSamples(start: glucose.startDate, end: nil) { (samples) in
-                    if let sample = samples.last {
-                        context.glucose = sample.quantity
-                        context.glucoseDate = sample.startDate
-                        context.glucoseIsDisplayOnly = sample.isDisplayOnly
-                        context.glucoseWasUserEntered = sample.wasUserEntered
-                        context.glucoseSyncIdentifier = sample.syncIdentifier
+                self.deviceManager.glucoseStore.getGlucoseSamples(start: glucose.startDate, end: nil) { (result) in
+                    var sample: StoredGlucoseSample?
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("Failure getting glucose samples: %{public}@", String(describing: error))
+                        sample = nil
+                    case .success(let samples):
+                        sample = samples.last
                     }
+                    context.glucose = sample?.quantity
+                    context.glucoseDate = sample?.startDate
+                    context.glucoseIsDisplayOnly = sample?.isDisplayOnly
+                    context.glucoseWasUserEntered = sample?.wasUserEntered
+                    context.glucoseSyncIdentifier = sample?.syncIdentifier
                     updateGroup.leave()
                 }
             }
@@ -437,8 +443,14 @@ extension WatchDataManager: WCSessionDelegate {
             }
         case GlucoseBackfillRequestUserInfo.name?:
             if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message) {
-                deviceManager.glucoseStore.getCachedGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1), end: nil) { (values) in
-                    replyHandler(WatchHistoricalGlucose(with: values).rawValue)
+                deviceManager.glucoseStore.getSyncGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1)) { (result) in
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("Failure getting sync glucose objects: %{public}@", String(describing: error))
+                        replyHandler([:])
+                    case .success(let samples):
+                        replyHandler(WatchHistoricalGlucose(samples: samples).rawValue)
+                    }
                 }
             } else {
                 replyHandler([:])

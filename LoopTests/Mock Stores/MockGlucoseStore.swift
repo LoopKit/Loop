@@ -46,55 +46,50 @@ class MockGlucoseStore: GlucoseStoreProtocol {
         completion(.success(true))
     }
     
-    func addGlucose(_ glucose: NewGlucoseSample, completion: @escaping (GlucoseStoreResult<GlucoseValue>) -> Void) {
+    func addGlucoseSamples(_ values: [NewGlucoseSample], completion: @escaping (Result<[StoredGlucoseSample], Error>) -> Void) {
         // Using the dose store error because we don't need to create GlucoseStore errors just for the mock store
         completion(.failure(DoseStore.DoseStoreError.configurationError))
     }
     
-    func addGlucose(_ values: [NewGlucoseSample], completion: @escaping (GlucoseStoreResult<[GlucoseValue]>) -> Void) {
-        // Using the dose store error because we don't need to create GlucoseStore errors just for the mock store
-        completion(.failure(DoseStore.DoseStoreError.configurationError))
-    }
-    
-    func getCachedGlucoseSamples(start: Date, end: Date?, completion: @escaping ([StoredGlucoseSample]) -> Void) {
-        completion([latestGlucose as! StoredGlucoseSample])
+    func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (Result<[StoredGlucoseSample], Error>) -> Void) {
+        completion(.success([latestGlucose as! StoredGlucoseSample]))
     }
     
     func generateDiagnosticReport(_ completion: @escaping (String) -> Void) {
         completion("")
     }
     
-    func purgeGlucoseSamples(matchingCachePredicate cachePredicate: NSPredicate?, healthKitPredicate: NSPredicate, completion: @escaping (Bool, Int, Error?) -> Void) {
+    func purgeAllGlucoseSamples(healthKitPredicate: NSPredicate, completion: @escaping (Error?) -> Void) {
         // Using the dose store error because we don't need to create GlucoseStore errors just for the mock store
-        completion(false, 0, DoseStore.DoseStoreError.configurationError)
+        completion(DoseStore.DoseStoreError.configurationError)
     }
     
     func executeGlucoseQuery(fromQueryAnchor queryAnchor: GlucoseStore.QueryAnchor?, limit: Int, completion: @escaping (GlucoseStore.GlucoseQueryResult) -> Void) {
         // Using the dose store error because we don't need to create GlucoseStore errors just for the mock store
-        completion(.failure( DoseStore.DoseStoreError.configurationError))
+        completion(.failure(DoseStore.DoseStoreError.configurationError))
     }
     
     func counteractionEffects<Sample>(for samples: [Sample], to effects: [GlucoseEffect]) -> [GlucoseEffectVelocity] where Sample : GlucoseSampleValue {
         return [] // TODO: check if we'll ever want to test this
     }
     
-    func getRecentMomentumEffect(_ completion: @escaping (_ effects: [GlucoseEffect]) -> Void) {
+    func getRecentMomentumEffect(_ completion: @escaping (_ effects: Result<[GlucoseEffect], Error>) -> Void) {
         let fixture: [JSONDictionary] = loadFixture(momentumEffectToLoad)
         let dateFormatter = ISO8601DateFormatter.localTimeDate()
 
-        return completion(fixture.map {
+        return completion(.success(fixture.map {
             return GlucoseEffect(startDate: dateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue: $0["amount"] as! Double))
             }
-        )
+        ))
     }
     
-    func getCounteractionEffects(start: Date, end: Date? = nil, to effects: [GlucoseEffect], _ completion: @escaping (_ effects: [GlucoseEffectVelocity]) -> Void) {
+    func getCounteractionEffects(start: Date, end: Date? = nil, to effects: [GlucoseEffect], _ completion: @escaping (_ effects: Result<[GlucoseEffectVelocity], Error>) -> Void) {
         let fixture: [JSONDictionary] = loadFixture(counteractionEffectToLoad)
         let dateFormatter = ISO8601DateFormatter.localTimeDate()
 
-        return completion(fixture.map {
+        return completion(.success(fixture.map {
             return GlucoseEffectVelocity(startDate: dateFormatter.date(from: $0["startDate"] as! String)!, endDate: dateFormatter.date(from: $0["endDate"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["value"] as! Double))
-        })
+        }))
     }
 }
 

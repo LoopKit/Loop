@@ -26,7 +26,8 @@ class BolusEntryViewModelTests: XCTestCase {
                          quantity: exampleManualGlucoseQuantity,
                          start: exampleStartDate,
                          end: exampleEndDate)
-    
+    static let exampleManualStoredGlucoseSample = StoredGlucoseSample(sample: exampleManualGlucoseSample)
+
     static let exampleCGMGlucoseQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100.4)
     static let exampleCGMGlucoseSample =
         HKQuantitySample(type: HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
@@ -474,13 +475,13 @@ class BolusEntryViewModelTests: XCTestCase {
 
         let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
         XCTAssertEqual([expectedGlucoseSample], delegate.glucoseSamplesAdded)
-        
-        delegate.addGlucoseCompletion?(.success([MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now)]))
+
+        delegate.addGlucoseCompletion?(.success([Self.exampleManualStoredGlucoseSample]))
         waitOnMain()
 
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
         XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
-        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now),
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: Self.exampleManualStoredGlucoseSample,
                                                                                         requestedBolus: 0.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
@@ -492,7 +493,7 @@ class BolusEntryViewModelTests: XCTestCase {
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
 
         try saveAndDeliver(BolusEntryViewModelTests.noBolus)
-        delegate.addGlucoseCompletion?(.success([MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now)]))
+        delegate.addGlucoseCompletion?(.success([Self.exampleManualStoredGlucoseSample]))
         waitOnMain()
         let addCarbEntryCompletion = try XCTUnwrap(delegate.addCarbEntryCompletion)
         addCarbEntryCompletion(.success(mockFinalCarbEntry))
@@ -524,12 +525,12 @@ class BolusEntryViewModelTests: XCTestCase {
         let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
         XCTAssertEqual([expectedGlucoseSample], delegate.glucoseSamplesAdded)
         
-        delegate.addGlucoseCompletion?(.success([MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now)]))
+        delegate.addGlucoseCompletion?(.success([Self.exampleManualStoredGlucoseSample]))
         waitOnMain()
         
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
         XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
-        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now),
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: Self.exampleManualStoredGlucoseSample,
                                                                                         requestedBolus: 1.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
@@ -602,7 +603,7 @@ class BolusEntryViewModelTests: XCTestCase {
         let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
         XCTAssertEqual([expectedGlucoseSample], delegate.glucoseSamplesAdded)
         
-        delegate.addGlucoseCompletion?(.success([MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now)]))
+        delegate.addGlucoseCompletion?(.success([Self.exampleManualStoredGlucoseSample]))
         waitOnMain()
         
         let addCarbEntryCompletion = try XCTUnwrap(delegate.addCarbEntryCompletion)
@@ -613,7 +614,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(mockPotentialCarbEntry, delegate.carbEntriesAdded.first?.0)
         XCTAssertEqual(mockOriginalCarbEntry, delegate.carbEntriesAdded.first?.1)
         XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
-        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: MockGlucoseValue(quantity: Self.exampleManualGlucoseQuantity, startDate: now),
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0, BolusDosingDecision(manualGlucose: Self.exampleManualStoredGlucoseSample,
                                                                                         originalCarbEntry: mockOriginalCarbEntry,
                                                                                         carbEntry: mockFinalCarbEntry,
                                                                                         requestedBolus: 1.0))
@@ -767,7 +768,7 @@ class BolusEntryViewModelTests: XCTestCase {
 extension BolusEntryViewModelTests {
     
     func triggerLoopStateUpdatedWithDataAndWait(with state: LoopState = MockLoopState(), function: String = #function) throws {
-        delegate.cachedGlucoseSamplesResponse = [StoredGlucoseSample(sample: Self.exampleCGMGlucoseSample)]
+        delegate.getGlucoseSamplesResponse = [StoredGlucoseSample(sample: Self.exampleCGMGlucoseSample)]
         try triggerLoopStateUpdated(with: state)
         waitOnMain()
     }
@@ -845,8 +846,8 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     }
     
     var glucoseSamplesAdded = [NewGlucoseSample]()
-    var addGlucoseCompletion: ((Result<[GlucoseValue]>) -> Void)?
-    func addGlucose(_ samples: [NewGlucoseSample], completion: ((Result<[GlucoseValue]>) -> Void)?) {
+    var addGlucoseCompletion: ((Swift.Result<[StoredGlucoseSample], Error>) -> Void)?
+    func addGlucoseSamples(_ samples: [NewGlucoseSample], completion: ((Swift.Result<[StoredGlucoseSample], Error>) -> Void)?) {
         glucoseSamplesAdded.append(contentsOf: samples)
         addGlucoseCompletion = completion
     }
@@ -870,9 +871,9 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         enactedBolusDate = startDate
     }
     
-    var cachedGlucoseSamplesResponse: [StoredGlucoseSample] = []
-    func getCachedGlucoseSamples(start: Date, end: Date?, completion: @escaping ([StoredGlucoseSample]) -> Void) {
-        completion(cachedGlucoseSamplesResponse)
+    var getGlucoseSamplesResponse: [StoredGlucoseSample] = []
+    func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
+        completion(.success(getGlucoseSamplesResponse))
     }
     
     var insulinOnBoardResult: DoseStoreResult<InsulinValue>?
