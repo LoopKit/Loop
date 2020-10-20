@@ -36,6 +36,8 @@ class TrustedTimeChecker {
 
     init(_ alertManager: AlertManager) {
         ntpClient = TrueTimeClient.sharedInstance
+        // TrueTimeClient is a bit chatty.  This squelches all of its logging.
+        ntpClient.logCallback = { _ in }
         ntpClient.start()
         self.alertManager = alertManager
         NotificationCenter.default.addObserver(forName: UIApplication.significantTimeChangeNotification,
@@ -45,7 +47,7 @@ class TrustedTimeChecker {
     }
     
     private func checkTrustedTime() {
-        ntpClient.fetchIfNeeded { [weak self] result in
+        ntpClient.fetchIfNeeded(completion: { [weak self] result in
             guard let self = self else { return }
             switch result {
             case let .success(referenceTime):
@@ -61,7 +63,7 @@ class TrustedTimeChecker {
             case let .failure(error):
                 self.log.error("applicationSignificantTimeChange: Error getting NTP time: %@", error.localizedDescription)
             }
-        }
+        })
     }
 
     private func issueTimeChangedAlert() {
