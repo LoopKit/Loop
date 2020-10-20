@@ -1,15 +1,15 @@
 {
   "images" : [
     {
+      "filename" : "loop-stale-open@42mm.png",
       "idiom" : "watch",
-      "filename" : "loop-fresh@42mm.png",
       "scale" : "2x"
     },
     {
+      "filename" : "loop-stale-open@38mm.png",
       "idiom" : "watch",
-      "filename" : "loop-fresh@38mm.png",
-      "screen-width" : "<=145",
-      "scale" : "2x"
+      "scale" : "2x",
+      "screen-width" : "<=145"
     },
     {
       "idiom" : "watch",
@@ -28,7 +28,7 @@
     }
   ],
   "info" : {
-    "version" : 1,
-    "author" : "xcode"
+    "author" : "xcode",
+    "version" : 1
   }
 }

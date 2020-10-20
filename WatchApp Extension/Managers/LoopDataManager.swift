@@ -202,7 +202,7 @@ extension LoopDataManager {
                 preMealOverride: self.settings.preMealOverride,
                 scheduleOverride: self.settings.scheduleOverride,
                 historicalGlucose: historicalGlucose,
-                predictedGlucose: activeContext.predictedGlucose?.values
+                predictedGlucose: (activeContext.isClosedLoop ?? false) ? activeContext.predictedGlucose?.values : nil
             )
             completion(chartData)
         }
