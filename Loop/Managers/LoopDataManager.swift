@@ -44,7 +44,7 @@ final class LoopDataManager {
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
     
-    private var overrideObserver: NSKeyValueObservation? = nilå
+    private var overrideObserver: NSKeyValueObservation? = nil
 
     deinit {
         for observer in notificationObservers {
