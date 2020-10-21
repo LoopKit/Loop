@@ -76,12 +76,12 @@ public class SettingsViewModel: ObservableObject {
         delegate?.didTapIssueReport
     }
 
-    var pumpManagerSettingsViewModel: DeviceViewModel
-    var cgmManagerSettingsViewModel: DeviceViewModel
-    var servicesViewModel: ServicesViewModel
-    var criticalEventLogExportViewModel: CriticalEventLogExportViewModel
-    var adverseEventReportViewModel: AdverseEventReportViewModel
-    var therapySettings: TherapySettings
+    let pumpManagerSettingsViewModel: DeviceViewModel
+    let cgmManagerSettingsViewModel: DeviceViewModel
+    let servicesViewModel: ServicesViewModel
+    let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
+    let adverseEventReportViewModel: AdverseEventReportViewModel
+    let therapySettings: () -> TherapySettings
     let supportedInsulinModelSettings: SupportedInsulinModelSettings
     let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
     let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
@@ -96,7 +96,7 @@ public class SettingsViewModel: ObservableObject {
                 servicesViewModel: ServicesViewModel,
                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
                 adverseEventReportViewModel: AdverseEventReportViewModel,
-                therapySettings: TherapySettings,
+                therapySettings: @escaping () -> TherapySettings,
                 supportedInsulinModelSettings: SupportedInsulinModelSettings,
                 pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
                 syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?,

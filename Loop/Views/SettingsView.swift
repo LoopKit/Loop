@@ -101,7 +101,7 @@ extension SettingsView {
                 .sheet(isPresented: $therapySettingsIsPresented) {
                     TherapySettingsView(
                         viewModel: TherapySettingsViewModel(mode: .settings,
-                                                            therapySettings: self.viewModel.therapySettings,
+                                                            therapySettings: self.viewModel.therapySettings(),
                                                             supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
                                                             pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
@@ -353,7 +353,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
                                           adverseEventReportViewModel: AdverseEventReportViewModel(),
-                                          therapySettings: TherapySettings(),
+                                          therapySettings: { TherapySettings() },
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true),
                                           pumpSupportedIncrements: nil,
                                           syncPumpSchedule: nil,
