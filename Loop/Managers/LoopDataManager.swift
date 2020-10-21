@@ -44,10 +44,7 @@ final class LoopDataManager {
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
     
-    private var overrideObserver: NSKeyValueObservation? = nil
-
-    // FIXME: avoid error accessing LDM in the status extension when the closure is initalized
-    private var didSetUp = false
+    private var overrideObserver: NSKeyValueObservation? = nilå
 
     deinit {
         for observer in notificationObservers {
@@ -96,9 +93,8 @@ final class LoopDataManager {
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
-        overrideObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.initial, .new], changeHandler: {[weak self] (defaults, change) in
-            guard let setUp = self?.didSetUp, setUp, let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
-                self?.didSetUp = true
+        overrideObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
+            guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
                 return
             }
 
