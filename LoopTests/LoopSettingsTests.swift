@@ -15,6 +15,9 @@ class LoopSettingsTests: XCTestCase {
     private let preMealRange = DoubleRange(minValue: 80, maxValue: 80)
     private let targetRange = DoubleRange(minValue: 95, maxValue: 105)
     
+    private var alertIdentifier: Alert.Identifier!
+    private var alert: Alert!
+    
     private lazy var settings: LoopSettings = {
         var settings = LoopSettings()
         settings.preMealTargetRange = preMealRange
@@ -119,5 +122,27 @@ class LoopSettingsTests: XCTestCase {
 
         let actualOverrideRange = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: overrideStart.addingTimeInterval(2 /* hours */ * 60 * 60))
         XCTAssertEqual(actualOverrideRange, overrideTargetRange)
+    }
+    
+    func testWorkoutOverrideReminder() {
+        settings.alertManager = self
+        settings.legacyWorkoutTargetRange = DoubleRange(minValue: 120, maxValue: 150)
+        settings.enableLegacyWorkoutOverride(for: .infinity)
+        XCTAssertEqual(settings.scheduleOverride!.context, .legacyWorkout)
+        XCTAssertTrue(settings.scheduleOverride!.duration.isInfinite)
+        XCTAssertEqual(alert, settings.workoutOverrideReminderAlert)
+        
+        settings.clearOverride()
+        XCTAssertEqual(alertIdentifier, LoopSettings.workoutOverrideReminderAlertIdentifier)
+    }
+}
+
+extension LoopSettingsTests: AlertPresenter {
+    func issueAlert(_ alert: Alert) {
+        self.alert = alert
+    }
+    
+    func retractAlert(identifier: Alert.Identifier) {
+        alertIdentifier = identifier
     }
 }

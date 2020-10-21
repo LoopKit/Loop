@@ -121,7 +121,26 @@ public class AlertStore {
                 let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
                 fetchRequest.predicate =  NSCompoundPredicate(andPredicateWithSubpredicates: [
                     NSPredicate(format: "acknowledgedDate == nil"),
-                    NSPredicate(format: "retractedDate == nil")
+                    NSPredicate(format: "retractedDate == nil"),
+                ])
+                fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "modificationCounter", ascending: true) ]
+                let result = try self.managedObjectContext.fetch(fetchRequest)
+                completion(.success(result))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    public func lookupAllAcknowledgedUnretractedRepeatingAlerts(completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
+        managedObjectContext.perform {
+            do {
+                let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+                let repeatingTrigger = Alert.Trigger.repeating(repeatInterval: 0)
+                fetchRequest.predicate =  NSCompoundPredicate(andPredicateWithSubpredicates: [
+                    NSPredicate(format: "acknowledgedDate != nil"),
+                    NSPredicate(format: "retractedDate == nil"),
+                    NSPredicate(format: "triggerType == \(repeatingTrigger.storedType)")
                 ])
                 fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "modificationCounter", ascending: true) ]
                 let result = try self.managedObjectContext.fetch(fetchRequest)
