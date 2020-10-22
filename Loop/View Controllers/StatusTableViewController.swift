@@ -506,7 +506,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let cobValues = cobValues {
                 charts.setCOBValues(cobValues)
             }
-            if let index = charts.cob.cobPoints.closestIndex(priorTo: 	Date()) {
+            if let index = charts.cob.cobPoints.closestIndex(priorTo: Date()) {
                 self.currentCOBDescription = String(describing: charts.cob.cobPoints[index].y)
             } else {
                 self.currentCOBDescription = nil

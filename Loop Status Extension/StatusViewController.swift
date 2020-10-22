@@ -92,15 +92,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule
     )
     
-    let absorptionTimes = LoopSettings.defaultCarbAbsorptionTimes
-    lazy var carbStore = CarbStore(healthStore: healthStore,
-                                   observeHealthKitSamplesFromOtherApps: false,
-                                   cacheStore: cacheStore,
-                                   cacheLength: .hours(24),
-                                   defaultAbsorptionTimes: absorptionTimes,
-                                   observationInterval: 0,
-                                   provenanceIdentifier: HKSource.default().bundleIdentifier)
-    
     private var pluginManager: PluginManager = {
         let containingAppFrameworksURL = Bundle.main.privateFrameworksURL?.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Frameworks")
         return PluginManager(pluginsURL: containingAppFrameworksURL)
@@ -189,7 +180,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
         var activeInsulin: Double?
         let carbUnit = HKUnit.gram()
-        var activeCarbs: HKQuantity?
         var glucose: [StoredGlucoseSample] = []
 
         group.enter()
@@ -202,18 +192,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
             group.leave()
         }
-        
-        group.enter()
-        carbStore.carbsOnBoard(at: Date()) { (result) in
-            switch result {
-            case .success(let cobValue):
-                activeCarbs = cobValue.quantity
-            case .failure:
-                activeCarbs = nil
-            }
-            group.leave()
-        }
-
+    
         charts.startDate = Calendar.current.nextDate(after: Date(timeIntervalSinceNow: .minutes(-5)), matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? Date()
 
         // Showing the whole history plus full prediction in the glucose plot
@@ -263,8 +242,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 let numberFormatter = NumberFormatter()
 
                 numberFormatter.numberStyle = .decimal
-                numberFormatter.minimumFractionDigits = 1
-                numberFormatter.maximumFractionDigits = 1
+                numberFormatter.minimumFractionDigits = 2
+                numberFormatter.maximumFractionDigits = 2
                 
                 return numberFormatter
             }()
@@ -284,8 +263,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             let carbsFormatter = QuantityFormatter()
             carbsFormatter.setPreferredNumberFormatter(for: carbUnit)
 
-            if let activeCarbs = activeCarbs,
-                let activeCarbsNumberString = carbsFormatter.string(from: activeCarbs, for: carbUnit)
+            if let carbsOnBoard = context.carbsOnBoard,
+               let activeCarbsNumberString = carbsFormatter.string(from: HKQuantity(unit: carbUnit, doubleValue: carbsOnBoard), for: carbUnit)
             {
                 self.activeCarbsAmountLabel.text = String(format: NSLocalizedString("%1$@", comment: "The subtitle format describing the grams of active carbs.  (1: localized carb value description)"), activeCarbsNumberString)
             } else {
