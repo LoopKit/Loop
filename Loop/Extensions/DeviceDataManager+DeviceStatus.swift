@@ -8,6 +8,7 @@
 
 import LoopKit
 import LoopKitUI
+import LoopCore
 
 extension DeviceDataManager {
     var cgmStatusHighlight: DeviceStatusHighlight? {
@@ -95,7 +96,7 @@ extension DeviceDataManager {
     var isGlucoseValueStale: Bool {
         guard let latestGlucoseDataDate = glucoseStore.latestGlucose?.startDate else { return true }
 
-        return Date().timeIntervalSince(latestGlucoseDataDate) > loopManager.settings.inputDataRecencyInterval
+        return Date().timeIntervalSince(latestGlucoseDataDate) > LoopCoreConstants.inputDataRecencyInterval
     }
 }
 

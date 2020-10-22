@@ -56,6 +56,12 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
         }
     }
     
+    private var closedLoopToggleState: Binding<Bool> {
+        Binding(
+            get: { self.viewModel.isClosedLoopAllowed && self.viewModel.closedLoopPreference },
+            set: { self.viewModel.closedLoopPreference = $0 }
+        )
+    }
 }
 
 extension SettingsView {
@@ -68,9 +74,15 @@ extension SettingsView {
     
     private var loopSection: some View {
         Section(header: SectionHeader(label: viewModel.appNameAndVersion)) {
-            Toggle(isOn: $viewModel.dosingEnabled) {
-                Text(NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell"))
+            Toggle(isOn: closedLoopToggleState) {
+                VStack(alignment: .leading) {
+                    Text(NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell"))
+                    if !viewModel.isClosedLoopAllowed {
+                        DescriptiveText(label: NSLocalizedString("Closed Loop requires an active CGM Sensor Session", comment: "The description text for the looping enabled switch cell when closed loop is not allowed"))
+                    }
+                }
             }
+            .disabled(!viewModel.isClosedLoopAllowed)
         }
     }
     
@@ -344,8 +356,16 @@ fileprivate class FakeService2: Service {
 fileprivate let servicesViewModel = ServicesViewModel(showServices: true,
                                                       availableServices: { [FakeService1().available, FakeService2().available] },
                                                       activeServices: { [FakeService1()] })
+
+
+fileprivate class FakeClosedLoopAllowedPublisher {
+    @Published var mockIsClosedLoopAllowed: Bool = false
+}
+
 public struct SettingsView_Previews: PreviewProvider {
+    
     public static var previews: some View {
+        let fakeClosedLoopAllowedPublisher = FakeClosedLoopAllowedPublisher()
         let viewModel = SettingsViewModel(appNameAndVersion: "Loop v1.2",
                                           notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
@@ -359,6 +379,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           syncPumpSchedule: nil,
                                           sensitivityOverridesEnabled: false,
                                           initialDosingEnabled: true,
+                                          isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
                                           delegate: nil)
         return Group {
             SettingsView(viewModel: viewModel)

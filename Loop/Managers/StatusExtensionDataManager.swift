@@ -82,6 +82,8 @@ final class StatusExtensionDataManager {
             #endif
 
             context.lastLoopCompleted = lastLoopCompleted
+            
+            context.isClosedLoop = dataManager.isClosedLoop
 
             // Drop the first element in predictedGlucose because it is the currentGlucose
             // and will have a different interval to the next element

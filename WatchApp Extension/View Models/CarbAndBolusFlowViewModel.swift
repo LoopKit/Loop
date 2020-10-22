@@ -177,7 +177,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func absorptionTime(for carbAbsorptionTime: CarbAbsorptionTime) -> TimeInterval {
-        let defaultTimes = LoopSettings.defaultCarbAbsorptionTimes
+        let defaultTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
 
         switch carbAbsorptionTime {
         case .fast:

@@ -57,9 +57,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }(),
             traitCollection: traitCollection
         )
-
-        let glucoseMGDLDisplayBound: (lower: Double, upper: Double) = FeatureFlags.predictedGlucoseChartClampEnabled ? (80, 240) : (100, 175)
-        charts.predictedGlucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.lower)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.upper)
+        
+        if FeatureFlags.predictedGlucoseChartClampEnabled {
+            charts.predictedGlucose.glucoseDisplayRange = ChartConstants.glucoseChartDefaultDisplayBoundClamped
+        } else {
+            charts.predictedGlucose.glucoseDisplayRange = ChartConstants.glucoseChartDefaultDisplayBound
+        }
 
         return charts
     }()
@@ -232,10 +235,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 self.hudView.pumpStatusHUD.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.start)
             }
 
-            self.hudView.loopCompletionHUD.dosingEnabled = defaults.loopSettings?.dosingEnabled ?? false
-
             if let lastCompleted = context.lastLoopCompleted {
                 self.hudView.loopCompletionHUD.lastLoopCompleted = lastCompleted
+            }
+            
+            if let isClosedLoop = context.isClosedLoop {
+                self.hudView.loopCompletionHUD.loopIconClosed = isClosedLoop
             }
 
             let insulinFormatter: NumberFormatter = {
@@ -279,12 +284,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 return
             }
 
-            if let lastGlucose = glucose.last, let recencyInterval = defaults.loopSettings?.inputDataRecencyInterval {
+            if let lastGlucose = glucose.last {
                 self.hudView.cgmStatusHUD.setGlucoseQuantity(
                     lastGlucose.quantity.doubleValue(for: unit),
                     at: lastGlucose.startDate,
                     unit: unit,
-                    staleGlucoseAge: recencyInterval,
+                    staleGlucoseAge: LoopCoreConstants.inputDataRecencyInterval,
                     glucoseDisplay: context.glucoseDisplay,
                     wasUserEntered: lastGlucose.wasUserEntered
                 )

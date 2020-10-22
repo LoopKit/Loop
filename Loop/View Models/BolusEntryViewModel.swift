@@ -19,50 +19,35 @@ import SwiftUI
 
 protocol BolusEntryViewModelDelegate: class {
     
-    ///
     func withLoopState(do block: @escaping (LoopState) -> Void)
 
-    ///
     func addGlucoseSamples(_ samples: [NewGlucoseSample], completion: ((_ result: Swift.Result<[StoredGlucoseSample], Error>) -> Void)?)
     
-    ///
     func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry? ,
                       completion: @escaping (_ result: Result<StoredCarbEntry>) -> Void)
 
-    ///
     func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
-    ///
     func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
 
-    ///
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
-    ///
     func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)
     
-    ///
     func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ result: CarbStoreResult<CarbValue>) -> Void)
     
-    ///
     func ensureCurrentPumpData(completion: @escaping () -> Void)
     
-    ///
     var mostRecentGlucoseDataDate: Date? { get }
     
-    ///
     var mostRecentPumpDataDate: Date? { get }
     
-    ///
     var isPumpConfigured: Bool { get }
     
-    ///
-    var preferredGlucoseUnit: HKUnit? { get }
+    var preferredGlucoseUnit: HKUnit { get }
     
-    ///
     var insulinModel: InsulinModel? { get }
     
-    ///
     var settings: LoopSettings { get }
 }
 
@@ -84,7 +69,7 @@ final class BolusEntryViewModel: ObservableObject {
         case stalePumpData
     }
 
-    @Environment(\.authenticate) var authenticate
+    var authenticate: AuthenticationChallenge = LocalAuthentication.deviceOwnerCheck
 
     // MARK: - State
 
@@ -128,7 +113,7 @@ final class BolusEntryViewModel: ObservableObject {
     let chartManager: ChartsManager = {
         let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
                                                           yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
-        predictedGlucoseChart.glucoseDisplayRange = BolusEntryViewModel.defaultGlucoseDisplayRange
+        predictedGlucoseChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayRangeWide
         return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
 
@@ -137,16 +122,9 @@ final class BolusEntryViewModel: ObservableObject {
     private let now: () -> Date
     private let screenWidth: CGFloat
     private let debounceIntervalMilliseconds: Int
-    private let authenticateOverride: AuthenticationChallenge?
     private let uuidProvider: () -> String
     private let carbEntryDateFormatter: DateFormatter
     
-    // MARK: - Constants
-
-    static let defaultGlucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
-
-    static let validManualGlucoseEntryRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 10)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 600)
-
     // MARK: - Initialization
 
     init(
@@ -154,7 +132,6 @@ final class BolusEntryViewModel: ObservableObject {
         now: @escaping () -> Date = { Date() },
         screenWidth: CGFloat = UIScreen.main.bounds.width,
         debounceIntervalMilliseconds: Int = 400,
-        authenticateOverride: AuthenticationChallenge? = nil,
         uuidProvider: @escaping () -> String = { UUID().uuidString },
         timeZone: TimeZone? = nil,
         originalCarbEntry: StoredCarbEntry? = nil,
@@ -166,7 +143,6 @@ final class BolusEntryViewModel: ObservableObject {
         self.now = now
         self.screenWidth = screenWidth
         self.debounceIntervalMilliseconds = debounceIntervalMilliseconds
-        self.authenticateOverride = authenticateOverride
         self.uuidProvider = uuidProvider
         self.carbEntryDateFormatter = DateFormatter()
         self.carbEntryDateFormatter.dateStyle = .none
@@ -303,7 +279,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         if let manualGlucoseSample = manualGlucoseSample {
-            guard Self.validManualGlucoseEntryRange.contains(manualGlucoseSample.quantity) else {
+            guard LoopConstants.validManualGlucoseEntryRange.contains(manualGlucoseSample.quantity) else {
                 presentAlert(.manualGlucoseEntryOutOfAcceptableRange)
                 return
             }
@@ -312,7 +288,7 @@ final class BolusEntryViewModel: ObservableObject {
         // Authenticate the bolus before saving anything
         if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
             let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString)
-            authenticationChallenge(message) { [weak self] in
+            authenticate(message) { [weak self] in
                 switch $0 {
                 case .success:
                     self?.continueSaving(onSuccess: completion)
@@ -326,14 +302,6 @@ final class BolusEntryViewModel: ObservableObject {
             continueSaving(onSuccess: completion)
         } else {
             completion()
-        }
-    }
-    
-    private func authenticationChallenge(_ message: String, _ completion: @escaping (Swift.Result<Void, Error>) -> Void) {
-        if let authenticateOverride = authenticateOverride {
-            authenticateOverride(message, completion)
-        } else {
-            authenticate(message, completion)
         }
     }
     
@@ -725,13 +693,17 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func updateSettings() {
         dispatchPrecondition(condition: .onQueue(.main))
+        
+        guard let delegate = delegate else {
+            return
+        }
 
-        glucoseUnit = delegate?.settings.glucoseUnit ?? delegate?.preferredGlucoseUnit ?? .milligramsPerDeciliter
+        glucoseUnit = delegate.preferredGlucoseUnit
 
-        targetGlucoseSchedule = delegate?.settings.glucoseTargetRangeSchedule
+        targetGlucoseSchedule = delegate.settings.glucoseTargetRangeSchedule
         // Pre-meal override should be ignored if we have carbs (LOOP-1964)
-        preMealOverride = potentialCarbEntry == nil ? delegate?.settings.preMealOverride : nil
-        scheduleOverride = delegate?.settings.scheduleOverride
+        preMealOverride = potentialCarbEntry == nil ? delegate.settings.preMealOverride : nil
+        scheduleOverride = delegate.settings.scheduleOverride
 
         if preMealOverride?.hasFinished() == true {
             preMealOverride = nil
@@ -741,14 +713,14 @@ final class BolusEntryViewModel: ObservableObject {
             scheduleOverride = nil
         }
 
-        maximumBolus = delegate?.settings.maximumBolus.map { maxBolusAmount in
+        maximumBolus = delegate.settings.maximumBolus.map { maxBolusAmount in
             HKQuantity(unit: .internationalUnit(), doubleValue: maxBolusAmount)
         }
 
         dosingDecision.scheduleOverride = preMealOverride ?? scheduleOverride
         dosingDecision.glucoseTargetRangeSchedule = targetGlucoseSchedule
         if scheduleOverride != nil || preMealOverride != nil {
-            dosingDecision.effectiveGlucoseTargetRangeSchedule = delegate?.settings.effectiveGlucoseTargetRangeSchedule(consideringPotentialCarbEntry: potentialCarbEntry)
+            dosingDecision.effectiveGlucoseTargetRangeSchedule = delegate.settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
         } else {
             dosingDecision.effectiveGlucoseTargetRangeSchedule = nil
         }
@@ -757,15 +729,13 @@ final class BolusEntryViewModel: ObservableObject {
     private func updateChartDateInterval() {
         dispatchPrecondition(condition: .onQueue(.main))
 
-        guard let settings = delegate?.settings else { return }
-
         // How far back should we show data? Use the screen size as a guide.
         let viewMarginInset: CGFloat = 14
         let availableWidth = screenWidth - chartManager.fixedHorizontalMargin - 2 * viewMarginInset
 
-        let totalHours = floor(Double(availableWidth / settings.minimumChartWidthPerHour))
+        let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
         let futureHours = ceil((delegate?.insulinModel?.effectDuration ?? .hours(4)).hours)
-        let historyHours = max(settings.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
+        let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeInterval: -TimeInterval(hours: historyHours), since: now())
         let chartStartDate = Calendar.current.nextDate(
@@ -787,15 +757,13 @@ extension BolusEntryViewModel.Alert: Identifiable {
 extension BolusEntryViewModel {
     
     var isGlucoseDataStale: Bool {
-        guard let settings = delegate?.settings,
-            let latestGlucoseDataDate = delegate?.mostRecentGlucoseDataDate else { return true }
-        return now().timeIntervalSince(latestGlucoseDataDate) > settings.inputDataRecencyInterval
+        guard let latestGlucoseDataDate = delegate?.mostRecentGlucoseDataDate else { return true }
+        return now().timeIntervalSince(latestGlucoseDataDate) > LoopCoreConstants.inputDataRecencyInterval
     }
     
     var isPumpDataStale: Bool {
-        guard let settings = delegate?.settings,
-            let latestPumpDataDate = delegate?.mostRecentPumpDataDate else { return true }
-        return now().timeIntervalSince(latestPumpDataDate) > settings.inputDataRecencyInterval
+        guard let latestPumpDataDate = delegate?.mostRecentPumpDataDate else { return true }
+        return now().timeIntervalSince(latestPumpDataDate) > LoopCoreConstants.inputDataRecencyInterval
     }
 
     var isManualGlucosePromptVisible: Bool {

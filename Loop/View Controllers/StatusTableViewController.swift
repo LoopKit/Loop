@@ -8,6 +8,7 @@
 
 import UIKit
 import HealthKit
+import SwiftUI
 import Intents
 import LoopCore
 import LoopKit
@@ -16,6 +17,7 @@ import LoopTestingKit
 import LoopUI
 import SwiftCharts
 import os.log
+import Combine
 
 
 private extension RefreshContext {
@@ -27,6 +29,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private let log = OSLog(category: "StatusTableViewController")
 
     lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
+    
+    lazy private var cancellables = Set<AnyCancellable>()
 
     private var preferredUnit: HKUnit? {
         return deviceManager.glucoseStore.preferredUnit
@@ -35,8 +39,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let glucoseMGDLDisplayBound: (lower: Double, upper: Double) = FeatureFlags.predictedGlucoseChartClampEnabled ? (80, 240) : (100, 175)
-        statusCharts.glucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.lower)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.upper)
+        if FeatureFlags.predictedGlucoseChartClampEnabled {
+            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
+        } else {
+            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBound
+        }
 
         registerPumpManager()
 
@@ -95,6 +102,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
             }
         ]
+        
+        deviceManager.$isClosedLoop
+            .receive(on: DispatchQueue.main)
+            .sink { self.closedLoopStatusChanged($0) }
+            .store(in: &cancellables)
 
         if let gestureRecognizer = charts.gestureRecognizer {
             tableView.addGestureRecognizer(gestureRecognizer)
@@ -264,14 +276,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func updateChartDateRange() {
-        let settings = deviceManager.loopManager.settings
-
         // How far back should we show data? Use the screen size as a guide.
         let availableWidth = (refreshContext.newSize ?? self.tableView.bounds.size).width - self.charts.fixedHorizontalMargin
 
-        let totalHours = floor(Double(availableWidth / settings.minimumChartWidthPerHour))
+        let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
         let futureHours = ceil((deviceManager.loopManager.insulinModelSettings?.model.effectDuration ?? .hours(4)).hours)
-        let historyHours = max(settings.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
+        let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeIntervalSinceNow: -TimeInterval(hours: historyHours))
         let chartStartDate = Calendar.current.nextDate(after: date, matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? date
@@ -350,7 +360,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             self.log.debug("Update net basal to %{public}@", String(describing: netBasal))
 
             DispatchQueue.main.async {
-                self.hudView?.loopCompletionHUD.dosingEnabled = manager.settings.dosingEnabled
                 self.lastLoopError = lastLoopError
 
                 if let netBasal = netBasal {
@@ -438,6 +447,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 reloadGroup.leave()
             }
         }
+        
+        updatePreMealModeAvailability(allowed: deviceManager.isClosedLoop)
 
         if deviceManager.loopManager.settings.preMealTargetRange == nil {
             preMealMode = nil
@@ -520,7 +531,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     hudView.cgmStatusHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: unit),
                                                             at: glucose.startDate,
                                                             unit: unit,
-                                                            staleGlucoseAge: self.deviceManager.loopManager.settings.inputDataRecencyInterval,
+                                                            staleGlucoseAge: LoopCoreConstants.inputDataRecencyInterval,
                                                             glucoseDisplay: self.deviceManager.glucoseDisplay(for: glucose),
                                                             wasUserEntered: glucose.wasUserEntered)
                 }
@@ -744,13 +755,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
             guard oldValue != preMealMode else {
                 return
             }
-
-            if let preMealMode = preMealMode {
-                toolbarItems![2] = createPreMealButtonItem(selected: preMealMode)
-            } else {
-                toolbarItems![2].isEnabled = false
-            }
+            updatePreMealModeAvailability(allowed: deviceManager.isClosedLoop)
         }
+    }
+    
+    private func updatePreMealModeAvailability(allowed: Bool) {
+        toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
 
     private var workoutMode: Bool? = nil {
@@ -1111,7 +1121,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func restoreUserActivityState(_ activity: NSUserActivity) {
         switch activity.activityType {
         case NSUserActivity.newCarbEntryActivityType:
-            performSegue(withIdentifier: CarbEntryViewController.className, sender: activity)
+            presentCarbEntryScreen(activity)
         default:
             break
         }
@@ -1131,14 +1141,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
             vc.preferredGlucoseUnit = preferredUnit
-        case let vc as CarbEntryViewController:
-            vc.deviceManager = deviceManager
-            vc.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
-            vc.preferredCarbUnit = deviceManager.carbStore.preferredUnit
-
-            if let activity = sender as? NSUserActivity {
-                vc.restoreUserActivityState(activity)
-            }
         case let vc as InsulinDeliveryTableViewController:
             vc.doseStore = deviceManager.doseStore
             vc.hidesBottomBarWhenPushed = true
@@ -1162,20 +1164,56 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     @IBAction func unwindFromSettings(_ segue: UIStoryboardSegue) {}
 
+    @IBAction func userTappedAddCarbs() {
+        presentCarbEntryScreen(nil)
+    }
+
+    func presentCarbEntryScreen(_ activity: NSUserActivity?) {
+        let navigationWrapper: UINavigationController
+        if deviceManager.isClosedLoop {
+            let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
+            
+            carbEntryViewController.deviceManager = deviceManager
+            carbEntryViewController.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
+            carbEntryViewController.preferredCarbUnit = deviceManager.carbStore.preferredUnit
+            if let activity = activity {
+                carbEntryViewController.restoreUserActivityState(activity)
+            }
+            navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
+        } else {
+            let viewModel = SimpleBolusViewModel(delegate: deviceManager)
+            if let activity = activity {
+                viewModel.restoreUserActivityState(activity)
+            }
+            let bolusEntryView = SimpleBolusView(displayMealEntry: true, viewModel: viewModel)
+            let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+            navigationWrapper = UINavigationController(rootViewController: hostingController)
+            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+        }
+        self.present(navigationWrapper, animated: true)
+    }
+
     @IBAction func presentBolusScreen() {
         presentBolusEntryView()
     }
-    
+
     func presentBolusEntryView(enableManualGlucoseEntry: Bool = false) {
-        let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
-        let bolusEntryView = BolusEntryView(viewModel: viewModel)
-        let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+        let hostingController: DismissibleHostingController
+        if deviceManager.isClosedLoop {
+            let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
+            let bolusEntryView = BolusEntryView(viewModel: viewModel)
+            hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+        } else {
+            let viewModel = SimpleBolusViewModel(delegate: deviceManager)
+            let bolusEntryView = SimpleBolusView(displayMealEntry: false, viewModel: viewModel)
+            hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+        }
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
         hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
         self.present(navigationWrapper, animated: true)
     }
-
-    private func createPreMealButtonItem(selected: Bool) -> UIBarButtonItem {
+    
+    private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
         let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(togglePreMealMode(_:)))
         item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
 
@@ -1187,6 +1225,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
 
         item.tintColor = UIColor.carbTintColor
+        item.isEnabled = isEnabled
 
         return item
     }
@@ -1302,9 +1341,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           syncPumpSchedule: syncBasalRateSchedule,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
+                                          isClosedLoopAllowed: deviceManager.$isClosedLoopAllowed,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
-            rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName))
+            rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),
+            isModalInPresentation: false)
         present(hostingController, animated: true)
     }
 
@@ -1327,6 +1368,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var settings = cgmManager.settingsViewController(for: unit, glucoseTintColor: .glucoseTintColor, guidanceColors: .default)
         settings.completionDelegate = self
         show(settings, sender: self)
+    }
+    
+    private func closedLoopStatusChanged(_ isClosedLoop: Bool) {
+        self.updatePreMealModeAvailability(allowed: isClosedLoop)
+        self.hudView?.loopCompletionHUD.loopIconClosed = isClosedLoop
+
     }
 
     // MARK: - HUDs
@@ -1812,9 +1859,7 @@ fileprivate extension UIViewController {
 // MARK: - SettingsViewModel delegation
 extension StatusTableViewController: SettingsViewModelDelegate {
     func dosingEnabledChanged(_ value: Bool) {
-        DispatchQueue.main.async {
-            self.deviceManager.loopManager.settings.dosingEnabled = value
-        }
+        self.deviceManager.loopManager.settings.dosingEnabled = value
     }
 
     func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings) {

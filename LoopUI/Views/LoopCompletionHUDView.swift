@@ -30,9 +30,9 @@ public final class LoopCompletionHUDView: BaseHUDView {
         updateDisplay(nil)
     }
 
-    public var dosingEnabled = false {
+    public var loopIconClosed = false {
         didSet {
-            loopStateView.open = !dosingEnabled
+            loopStateView.open = !loopIconClosed
         }
     }
 
@@ -147,7 +147,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
             accessibilityLabel = LocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
         }
 
-        if dosingEnabled {
+        if loopIconClosed {
             accessibilityHint = LocalizedString("Closed loop", comment: "Accessibility hint describing completion HUD for a closed loop")
         } else {
             accessibilityHint = LocalizedString("Open loop", comment: "Accessbility hint describing completion HUD for an open loop")

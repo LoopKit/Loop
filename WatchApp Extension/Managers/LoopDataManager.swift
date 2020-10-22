@@ -68,7 +68,7 @@ class LoopDataManager {
             observeHealthKitSamplesFromOtherApps: false,
             cacheStore: cacheStore,
             cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
-            defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
+            defaultAbsorptionTimes: LoopCoreConstants.defaultCarbAbsorptionTimes,
             observationInterval: 0,     // No longer use HealthKit as source of recent carbs
             syncVersion: 0,
             provenanceIdentifier: HKSource.default().bundleIdentifier

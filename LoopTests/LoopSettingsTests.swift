@@ -39,10 +39,8 @@ class LoopSettingsTests: XCTestCase {
     func testPreMealOverrideWithPotentialCarbEntry() {
         var settings = self.settings
         let preMealStart = Date()
-        let mockPotentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: BolusEntryViewModelTests.exampleStartDate, foodType: "foodType", absorptionTime: 1)
-
         settings.enablePreMealOverride(at: preMealStart, for: 1 /* hour */ * 60 * 60)
-        let actualRange = settings.effectiveGlucoseTargetRangeSchedule(consideringPotentialCarbEntry: mockPotentialCarbEntry)?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
+        let actualRange = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: true)?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
         XCTAssertEqual(targetRange, actualRange)
     }
 

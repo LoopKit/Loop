@@ -71,12 +71,12 @@ class BolusEntryViewModelTests: XCTestCase {
                                                   now: { self.now },
                                                   screenWidth: 512,
                                                   debounceIntervalMilliseconds: 0,
-                                                  authenticateOverride: authenticateOverride,
                                                   uuidProvider: { self.mockUUID },
                                                   timeZone: TimeZone(abbreviation: "GMT")!,
                                                   originalCarbEntry: originalCarbEntry,
                                                   potentialCarbEntry: potentialCarbEntry,
                                                   selectedCarbAbsorptionTimeEmoji: selectedCarbAbsorptionTimeEmoji)
+        bolusEntryViewModel.authenticate = authenticateOverride
         bolusEntryViewModel.maximumBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 10)
     }
 
@@ -210,7 +210,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(newSettings.preMealOverride, bolusEntryViewModel.preMealOverride)
         XCTAssertEqual(newSettings.scheduleOverride, bolusEntryViewModel.scheduleOverride)
         XCTAssertEqual(newGlucoseTargetRangeSchedule, bolusEntryViewModel.targetGlucoseSchedule)
-        XCTAssertEqual(.millimolesPerLiter, bolusEntryViewModel.glucoseUnit)
+        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
     }
 
     func testUpdateSettingsWithCarbs() throws {
@@ -238,7 +238,7 @@ class BolusEntryViewModelTests: XCTestCase {
         // Pre-meal override should be ignored if we have carbs (LOOP-1964), and cleared in settings
         XCTAssertEqual(newSettings.scheduleOverride, bolusEntryViewModel.scheduleOverride)
         XCTAssertEqual(newGlucoseTargetRangeSchedule, bolusEntryViewModel.targetGlucoseSchedule)
-        XCTAssertEqual(.millimolesPerLiter, bolusEntryViewModel.glucoseUnit)
+        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
         
         // ... but restored if we cancel without bolusing
         bolusEntryViewModel = nil
@@ -901,7 +901,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     
     var isPumpConfigured: Bool = true
     
-    var preferredGlucoseUnit: HKUnit? = .milligramsPerDeciliter
+    var preferredGlucoseUnit: HKUnit = .milligramsPerDeciliter
     
     var insulinModel: InsulinModel? = MockInsulinModel()
     

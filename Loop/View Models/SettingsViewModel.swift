@@ -58,11 +58,6 @@ public class SettingsViewModel: ObservableObject {
     private weak var delegate: SettingsViewModelDelegate?
     
     @Published var appNameAndVersion: String
-    @Published var dosingEnabled: Bool {
-        didSet {
-            delegate?.dosingEnabledChanged(dosingEnabled)
-        }
-    }
     
     var showWarning: Bool {
         notificationsCriticalAlertPermissionsViewModel.showWarning
@@ -86,6 +81,14 @@ public class SettingsViewModel: ObservableObject {
     let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
     let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
+        
+    @Published var isClosedLoopAllowed: Bool
+    
+    var closedLoopPreference: Bool {
+       didSet {
+           delegate?.dosingEnabledChanged(closedLoopPreference)
+       }
+    }
 
     lazy private var cancellables = Set<AnyCancellable>()
 
@@ -102,6 +105,7 @@ public class SettingsViewModel: ObservableObject {
                 syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
+                isClosedLoopAllowed: Published<Bool>.Publisher,
                 delegate: SettingsViewModelDelegate?
     ) {
         self.notificationsCriticalAlertPermissionsViewModel = notificationsCriticalAlertPermissionsViewModel
@@ -116,7 +120,8 @@ public class SettingsViewModel: ObservableObject {
         self.pumpSupportedIncrements = pumpSupportedIncrements
         self.syncPumpSchedule = syncPumpSchedule
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
-        self.dosingEnabled = initialDosingEnabled
+        self.closedLoopPreference = initialDosingEnabled
+        self.isClosedLoopAllowed = false
         self.delegate = delegate
 
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
@@ -132,5 +137,10 @@ public class SettingsViewModel: ObservableObject {
             self?.objectWillChange.send()
         }
         .store(in: &cancellables)
+        
+        isClosedLoopAllowed
+            .assign(to: \.isClosedLoopAllowed, on: self)
+            .store(in: &cancellables)
+        
     }
 }

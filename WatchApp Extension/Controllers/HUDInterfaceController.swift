@@ -7,6 +7,7 @@
 //
 
 import WatchKit
+import LoopCore
 
 class HUDInterfaceController: WKInterfaceController {
     private var activeContextObserver: NSObjectProtocol?
@@ -69,7 +70,7 @@ class HUDInterfaceController: WKInterfaceController {
         if date != nil {
             glucoseLabel.setText("---")
             glucoseLabel.setHidden(false)
-            if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.preferredGlucoseUnit, glucoseDate.timeIntervalSinceNow > -loopManager.settings.inputDataRecencyInterval {
+            if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.preferredGlucoseUnit, glucoseDate.timeIntervalSinceNow > -LoopCoreConstants.inputDataRecencyInterval {
                 let formatter = NumberFormatter.glucoseFormatter(for: unit)
                 
                 if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {

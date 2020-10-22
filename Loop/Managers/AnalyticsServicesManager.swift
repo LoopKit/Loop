@@ -110,10 +110,6 @@ final class AnalyticsServicesManager {
             logEvent("Closed loop enabled change")
         }
 
-        if newValue.retrospectiveCorrectionEnabled != oldValue.retrospectiveCorrectionEnabled {
-            logEvent("Retrospective correction enabled change")
-        }
-
         if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
             if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {
                 self.pumpTimeZoneDidChange()
