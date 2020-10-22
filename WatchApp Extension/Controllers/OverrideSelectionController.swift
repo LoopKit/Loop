@@ -54,11 +54,6 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
         super.willActivate()
     }
 
-    override func didAppear() {
-        super.didAppear()
-        updateActivityForEnableOverride()
-    }
-
     override func didDeactivate() {
         super.didDeactivate()
     }
