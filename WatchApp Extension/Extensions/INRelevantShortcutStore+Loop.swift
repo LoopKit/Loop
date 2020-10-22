@@ -14,19 +14,12 @@ extension INRelevantShortcutStore {
     func registerShortcuts() {
         var shortcuts = [INRelevantShortcut]()
 
-        let carbShortcut = INShortcut(userActivity: .forDidAddCarbEntryOnWatch())
-        let carbRelevantShortcut = INRelevantShortcut(shortcut: carbShortcut)
-        carbRelevantShortcut.shortcutRole = .action
-        carbRelevantShortcut.relevanceProviders = []
+        let shortcut = INShortcut(userActivity: .forDidAddCarbEntryOnWatch())
+        let relevance = INRelevantShortcut(shortcut: shortcut)
+        relevance.shortcutRole = .action
+        relevance.relevanceProviders = []
 
-        shortcuts.append(carbRelevantShortcut)
-        
-        let overrideShortcut = INShortcut(userActivity: .forDidEnableOverrideOnWatch())
-        let overrideRelevantShortcut = INRelevantShortcut(shortcut: overrideShortcut)
-        overrideRelevantShortcut.shortcutRole = .action
-        overrideRelevantShortcut.relevanceProviders = []
-
-        shortcuts.append(overrideRelevantShortcut)
+        shortcuts.append(relevance)
 
         setRelevantShortcuts(shortcuts) { (error) in
             if let error = error {

@@ -30,19 +30,4 @@ extension NSUserActivity {
         activity.title = NSLocalizedString("Add Carb Entry", comment: "Title of the user activity for adding carbs")
         return activity
     }
-    
-    static let didEnableOverrideOnWatchActivityType = "com.loopkit.Loop.EnableOverrideOnWatch"
-
-    class func forDidEnableOverrideOnWatch() -> NSUserActivity {
-        let activity = NSUserActivity(activityType: didEnableOverrideOnWatchActivityType)
-        activity.isEligibleForSearch = true
-        activity.isEligibleForHandoff = false
-        activity.isEligibleForPublicIndexing = false
-        if #available(iOS 12.0, watchOSApplicationExtension 5.0, *) {
-            activity.isEligibleForPrediction = true
-        }
-        activity.requiredUserInfoKeys = []
-        activity.title = NSLocalizedString("Enable Override Preset", comment: "Title of the user activity for enabling an override preset")
-        return activity
-    }
 }

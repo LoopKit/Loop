@@ -69,9 +69,3 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
         dismiss()
     }
 }
-
-extension OverrideSelectionController: NSUserActivityDelegate {
-    func updateActivityForEnableOverride() {
-        update(.forDidEnableOverrideOnWatch())
-    }
-}
