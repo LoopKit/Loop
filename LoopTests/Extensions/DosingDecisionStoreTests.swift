@@ -260,6 +260,9 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
       }
     },
     "scheduleOverride" : {
+      "actualEnd" : {
+        "type" : "natural"
+      },
       "context" : "custom",
       "duration" : {
         "finite" : {
@@ -636,6 +639,9 @@ class StoredDosingDecisionCodableTests: XCTestCase {
     }
   },
   "scheduleOverride" : {
+    "actualEnd" : {
+      "type" : "natural"
+    },
     "context" : "custom",
     "duration" : {
       "finite" : {
