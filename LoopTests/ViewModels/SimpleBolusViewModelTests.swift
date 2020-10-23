@@ -9,6 +9,7 @@
 import XCTest
 import HealthKit
 import LoopKit
+import LoopCore
 @testable import Loop
 
 class SimpleBolusViewModelTests: XCTestCase {
@@ -19,6 +20,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     
     var addedGlucose: [NewGlucoseSample] = []
     var addedCarbEntry: NewCarbEntry?
+    var storedBolusDecision: BolusDosingDecision?
     var enactedBolus: (units: Double, startDate: Date)?
     var currentIOB: InsulinValue = SimpleBolusViewModelTests.noIOB
     var currentRecommendation: Double = 0
@@ -102,7 +104,9 @@ class SimpleBolusViewModelTests: XCTestCase {
         XCTAssertEqual(180, addedGlucose.first?.quantity.doubleValue(for: .milligramsPerDeciliter))
         
         XCTAssertEqual(2.5, enactedBolus?.units)
-
+        
+        XCTAssertEqual(storedBolusDecision?.recommendedBolus?.amount, 2.5)
+        XCTAssertEqual(storedBolusDecision?.carbEntry?.quantity, addedCarbEntry?.quantity)
     }
 }
 
@@ -112,11 +116,24 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         completion(nil)
     }
     
-    func addCarbEntry(_ carbEntry: NewCarbEntry, completion: @escaping (Error?) -> Void) {
+    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
+        
         addedCarbEntry = carbEntry
-        completion(nil)
+        let storedCarbEntry = StoredCarbEntry(
+            uuid: UUID(),
+            provenanceIdentifier: UUID().uuidString,
+            syncIdentifier: UUID().uuidString,
+            syncVersion: 1,
+            startDate: carbEntry.startDate,
+            quantity: carbEntry.quantity,
+            foodType: carbEntry.foodType,
+            absorptionTime: carbEntry.absorptionTime,
+            createdByCurrentApp: true,
+            userCreatedDate: Date(),
+            userUpdatedDate: nil)
+        completion(.success(storedCarbEntry))
     }
-    
+
     func enactBolus(units: Double, at startDate: Date) {
         enactedBolus = (units: units, startDate: startDate)
     }
@@ -125,10 +142,17 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         completion(.success(currentIOB))
     }
     
-    func computeSimpleBolusRecommendation(mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> HKQuantity? {
-        return HKQuantity(unit: .internationalUnit(), doubleValue: currentRecommendation)
+    func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
+        
+        var decision = BolusDosingDecision()
+        decision.recommendedBolus = BolusRecommendation(amount: currentRecommendation, pendingInsulin: 0, notice: .none)
+        return decision
     }
     
+    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
+        storedBolusDecision = bolusDosingDecision
+    }
+
     var preferredGlucoseUnit: HKUnit {
         return .milligramsPerDeciliter
     }
