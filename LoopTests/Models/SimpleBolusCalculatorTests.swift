@@ -84,7 +84,7 @@ class SimpleBolusCalculatorTests: XCTestCase {
         
         XCTAssertEqual(3.56, recommendation.doubleValue(for: .internationalUnit()), accuracy: 0.01)
     }
-
+    
     func testCarbsEntryWithActiveInsulinAndNoGlucose() {
         let recommendation = SimpleBolusCalculator.recommendedInsulin(
             mealCarbs: HKQuantity(unit: .gram(), doubleValue: 20),
@@ -96,4 +96,17 @@ class SimpleBolusCalculatorTests: XCTestCase {
         
         XCTAssertEqual(2, recommendation.doubleValue(for: .internationalUnit()), accuracy: 0.01)
     }
+    
+    func testCarbsEntryWithActiveInsulinAndCarbsAndNoCorrection() {
+        let recommendation = SimpleBolusCalculator.recommendedInsulin(
+            mealCarbs: HKQuantity(unit: .gram(), doubleValue: 20),
+            manualGlucose: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100),
+            activeInsulin: HKQuantity(unit: .internationalUnit(), doubleValue: 4),
+            carbRatioSchedule: carbRatioSchedule,
+            correctionRangeSchedule: correctionRangeSchedule,
+            sensitivitySchedule: sensitivitySchedule)
+        
+        XCTAssertEqual(2, recommendation.doubleValue(for: .internationalUnit()), accuracy: 0.01)
+    }
+
 }
