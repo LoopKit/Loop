@@ -543,9 +543,3 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {}
 }
 
-fileprivate extension UIViewController {
-    /// Argumentless wrapper around `dismiss(animated:)` in order to pass as a selector
-    @objc func dismissWithAnimation() {
-        dismiss(animated: true)
-    }
-}
