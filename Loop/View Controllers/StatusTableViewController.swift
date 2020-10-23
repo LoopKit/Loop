@@ -469,8 +469,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let glucoseSamples = glucoseSamples {
                 self.statusCharts.setGlucoseValues(glucoseSamples)
             }
-            if let predictedGlucoseValues = predictedGlucoseValues {
+            if self.deviceManager.isClosedLoop, let predictedGlucoseValues = predictedGlucoseValues {
                 self.statusCharts.setPredictedGlucoseValues(predictedGlucoseValues)
+            } else {
+                self.statusCharts.setPredictedGlucoseValues([])
             }
             if !FeatureFlags.predictedGlucoseChartClampEnabled,
                 let lastPoint = self.statusCharts.glucose.predictedGlucosePoints.last?.y
@@ -1024,7 +1026,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
-                performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
+                if self.deviceManager.isClosedLoop {
+                    performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
+                }
             case .iob, .dose:
                 performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
             case .cob:
