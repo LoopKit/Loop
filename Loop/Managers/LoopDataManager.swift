@@ -143,12 +143,13 @@ final class LoopDataManager {
     /// Loop-related settings
     ///
     /// These are not thread-safe.
+    
     @Published var settings: LoopSettings {
         didSet {
             guard settings != oldValue else {
                 return
             }
-
+            
             if settings.preMealOverride != oldValue.preMealOverride {
                 // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
                 predictedGlucose = nil
@@ -1660,32 +1661,61 @@ extension LoopDataManager {
         }
     }
     
-    func generateSimpleBolusRecommendation(mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> HKQuantity? {
+    func generateSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
+        
+        var dosingDecision = BolusDosingDecision()
+        
         var activeInsulin: Double? = nil
         let semaphore = DispatchSemaphore(value: 0)
         doseStore.insulinOnBoard(at: Date()) { (result) in
             if case .success(let iobValue) = result {
                 activeInsulin = iobValue.value
+                dosingDecision.insulinOnBoard = iobValue
             }
             semaphore.signal()
         }
         semaphore.wait()
         
         guard let iob = activeInsulin,
+            let suspendThreshold = settings.suspendThreshold?.quantity,
             let carbRatioSchedule = carbStore.carbRatioScheduleApplyingOverrideHistory,
             let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: mealCarbs != nil),
             let sensitivitySchedule = insulinSensitivityScheduleApplyingOverrideHistory
         else {
+            // Settings incomplete; should never get here; remove when therapy settings non-optional
             return nil
         }
         
-        return SimpleBolusCalculator.recommendedInsulin(
+        dosingDecision.effectiveGlucoseTargetRangeSchedule = correctionRangeSchedule
+        dosingDecision.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
+        dosingDecision.scheduleOverride = settings.scheduleOverride
+        
+        var notice: BolusRecommendationNotice? = nil
+        if let manualGlucose = manualGlucose {
+            let glucoseValue = SimpleGlucoseValue(startDate: date, quantity: manualGlucose)
+            dosingDecision.manualGlucose = glucoseValue
+            if manualGlucose < suspendThreshold {
+                notice = .glucoseBelowSuspendThreshold(minGlucose: glucoseValue)
+            } else {
+                let correctionRange = correctionRangeSchedule.quantityRange(at: date)
+                if manualGlucose < correctionRange.lowerBound {
+                    notice = .currentGlucoseBelowTarget(glucose: glucoseValue)
+                }
+            }
+        }
+        
+        let bolusAmount = SimpleBolusCalculator.recommendedInsulin(
             mealCarbs: mealCarbs,
             manualGlucose: manualGlucose,
             activeInsulin: HKQuantity.init(unit: .internationalUnit(), doubleValue: iob),
             carbRatioSchedule: carbRatioSchedule,
             correctionRangeSchedule: correctionRangeSchedule,
-            sensitivitySchedule: sensitivitySchedule)
+            sensitivitySchedule: sensitivitySchedule,
+            at: date)
+        
+        dosingDecision.recommendedBolus = BolusRecommendation(amount: bolusAmount.doubleValue(for: .internationalUnit()), pendingInsulin: 0, notice: notice)
+        
+        return dosingDecision
     }
 }
 

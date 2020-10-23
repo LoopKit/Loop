@@ -20,13 +20,16 @@ protocol SimpleBolusViewModelDelegate: class {
     
     func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Error?) -> Void)
     
-    func addCarbEntry(_ carbEntry: NewCarbEntry, completion: @escaping (Error?) -> Void)
+    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry? ,
+                      completion: @escaping (_ result: Result<StoredCarbEntry>) -> Void)
+
+    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
     func enactBolus(units: Double, at startDate: Date)
 
     func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)
 
-    func computeSimpleBolusRecommendation(mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> HKQuantity?
+    func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision?
 
     var preferredGlucoseUnit: HKUnit { get }
     
@@ -116,6 +119,18 @@ class SimpleBolusViewModel: ObservableObject {
             }
         }
     }
+    
+    private var dosingDecision: BolusDosingDecision? {
+        didSet {
+            if let decision = dosingDecision, let bolusRecommendation = decision.recommendedBolus {
+                recommendation = bolusRecommendation.amount
+            } else {
+                recommendation = nil
+            }
+        }
+    }
+    
+    private var recommendationDate: Date?
 
     private static let doseAmountFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
@@ -175,13 +190,17 @@ class SimpleBolusViewModel: ObservableObject {
         glucoseAmountFormatter = glucoseQuantityFormatter.numberFormatter
         enteredBolusAmount = Self.doseAmountFormatter.string(from: 0.0)!
         updateRecommendation()
+        dosingDecision = BolusDosingDecision()
     }
     
     func updateRecommendation() {
+        let recommendationDate = Date()
         if carbs != nil || glucose != nil {
-            recommendation = delegate.computeSimpleBolusRecommendation(mealCarbs: carbs, manualGlucose: glucose)?.doubleValue(for: .internationalUnit())
+            dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbs, manualGlucose: glucose)
+            self.recommendationDate = recommendationDate
         } else {
-            recommendation = nil
+            dosingDecision = nil
+            self.recommendationDate = nil
         }
     }
     
@@ -257,15 +276,18 @@ class SimpleBolusViewModel: ObservableObject {
                         self?.log.error("Failed to donate intent: %{public}@", String(describing: error))
                     }
                 }
-
+                
                 let carbEntry = NewCarbEntry(date: saveDate, quantity: carbs, startDate: saveDate, foodType: nil, absorptionTime: nil)
-                delegate.addCarbEntry(carbEntry) { error in
+                
+                delegate.addCarbEntry(carbEntry, replacing: nil) { result in
                     DispatchQueue.main.async {
-                        if let error = error {
+                        switch result {
+                        case .failure(let error):
                             self.presentAlert(.carbEntryPersistenceFailure)
                             self.log.error("Failed to add carb entry: %{public}@", String(describing: error))
                             completion(false)
-                        } else {
+                        case .success(let storedEntry):
+                            self.dosingDecision?.carbEntry = storedEntry
                             completion(true)
                         }
                     }
@@ -278,7 +300,19 @@ class SimpleBolusViewModel: ObservableObject {
         func enactBolus() {
             if let bolusVolume = bolus?.doubleValue(for: .internationalUnit()), bolusVolume > 0 {
                 delegate.enactBolus(units: bolusVolume, at: saveDate)
+                dosingDecision?.requestedBolus = bolusVolume
             }
+        }
+        
+        func saveBolusDecision() {
+            if let decision = dosingDecision, let recommendationDate = recommendationDate {
+                delegate.storeBolusDosingDecision(decision, withDate: recommendationDate)
+            }
+        }
+        
+        func finishWithResult(_ success: Bool) {
+            saveBolusDecision()
+            completion(success)
         }
         
         authenticateIfNeeded { (success) in
@@ -289,14 +323,14 @@ class SimpleBolusViewModel: ObservableObject {
                             if success {
                                 enactBolus()
                             }
-                            completion(success)
+                            finishWithResult(success)
                         }
                     } else {
-                        completion(false)
+                        finishWithResult(false)
                     }
                 }
             } else {
-                completion(false)
+                finishWithResult(false)
             }
         }
     }

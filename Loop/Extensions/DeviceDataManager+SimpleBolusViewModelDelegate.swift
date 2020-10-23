@@ -22,23 +22,12 @@ extension DeviceDataManager: SimpleBolusViewModelDelegate {
         }
     }
     
-    func addCarbEntry(_ carbEntry: NewCarbEntry, completion: @escaping (Error?) -> Void) {
-        loopManager.addCarbEntry(carbEntry) { (result) in
-            switch result {
-            case .failure(let error):
-                completion(error)
-            case .success:
-                completion(nil)
-            }
-        }
-    }
-    
     func enactBolus(units: Double, at startDate: Date) {
         enactBolus(units: units, at: startDate) { (_) in }
     }
     
-    func computeSimpleBolusRecommendation(mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> HKQuantity? {
-        return loopManager.generateSimpleBolusRecommendation(mealCarbs: mealCarbs, manualGlucose: manualGlucose)
+    func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
+        return loopManager.generateSimpleBolusRecommendation(at: date, mealCarbs: mealCarbs, manualGlucose: manualGlucose)
     }
     
     var maximumBolus: Double {

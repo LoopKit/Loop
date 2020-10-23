@@ -10,6 +10,7 @@ import SwiftUI
 import LoopKit
 import LoopKitUI
 import HealthKit
+import LoopCore
 
 struct SimpleBolusView: View, HorizontalSizeClassOverride {
 
@@ -314,8 +315,21 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             completion(nil)
         }
         
-        func addCarbEntry(_ carbEntry: NewCarbEntry, completion: @escaping (Error?) -> Void) {
-            completion(nil)
+        func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
+            
+            let storedCarbEntry = StoredCarbEntry(
+                uuid: UUID(),
+                provenanceIdentifier: UUID().uuidString,
+                syncIdentifier: UUID().uuidString,
+                syncVersion: 1,
+                startDate: carbEntry.startDate,
+                quantity: carbEntry.quantity,
+                foodType: carbEntry.foodType,
+                absorptionTime: carbEntry.absorptionTime,
+                createdByCurrentApp: true,
+                userCreatedDate: Date(),
+                userUpdatedDate: nil)
+            completion(.success(storedCarbEntry))
         }
         
         func enactBolus(units: Double, at startDate: Date) {
@@ -325,8 +339,13 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             completion(.success(InsulinValue(startDate: date, value: 2.0)))
         }
         
-        func computeSimpleBolusRecommendation(mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> HKQuantity? {
-            return HKQuantity(unit: .internationalUnit(), doubleValue: 3)
+        func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
+            var decision = BolusDosingDecision()
+            decision.recommendedBolus = BolusRecommendation(amount: 3, pendingInsulin: 0)
+            return decision
+        }
+        
+        func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
         }
         
         var preferredGlucoseUnit: HKUnit {
