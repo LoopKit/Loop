@@ -1,0 +1,67 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+
+desc "Setup for Github Actions"
+lane :setup do
+  setup_project
+end
+
+private_lane :setup_project do
+  create_keychain(
+    name: "githubactions_keychain",
+    password: "password",
+    default_keychain: true,
+    unlock: true,
+    timeout: 3600,
+    lock_when_sleeps: false
+  )
+end
+
+desc "Build for Github Actions"
+private_lane :build do
+match(
+  type: "appstore",
+  readonly: is_ci,
+  keychain_name: "githubactions_keychain",
+  keychain_password: "password"
+)
+
+update_project_provisioning(
+  xcodeproj: ENV["XCODE_PROJ"],
+  profile: ENV["com.glucloser.Loop"],
+target_filter: "Loop",
+  build_configuration: "Release",
+  code_signing_identity: "iPhone Distribution: Nathan Lefler"
+)
+
+build_app(
+  scheme: "Loop",
+  project: ENV["XCODE_PROJ"],
+)
+
+end
+
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    increment_build_number(xcodeproj: "Loop.xcodeproj")
+    build_app(scheme: "Loop")
+    upload_to_testflight
+  end
+end
+
