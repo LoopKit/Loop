@@ -1,0 +1,36 @@
+name: iOS starter workflow
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build and Test default scheme using any available iPhone simulator
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run fastlane setup
+        env:
+          APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+        run: |
+          fastlane setup --verbose
+      - name: Run fastlane build
+        env:
+          MATCH_REPO: ${{ secrets.MATCH_REPO }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASS }}
+          SIGNING_ID: ${{ secrets.SIGNING_ID }}
+          APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+        run: |
+          fastlane compile --verbose
+      - name: Run fastlane deploy
+        env:
+          APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+        run: fastlane deploy --verbose
