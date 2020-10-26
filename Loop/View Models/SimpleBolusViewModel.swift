@@ -63,6 +63,8 @@ class SimpleBolusViewModel: ObservableObject {
 
     @Published var recommendedBolus: String = "0"
     
+    @Published var activeInsulin: String?
+
     @Published var enteredCarbAmount: String = "" {
         didSet {
             if let enteredCarbs = Self.carbAmountFormatter.number(from: enteredCarbAmount)?.doubleValue, enteredCarbs > 0 {
@@ -126,6 +128,12 @@ class SimpleBolusViewModel: ObservableObject {
                 recommendation = bolusRecommendation.amount
             } else {
                 recommendation = nil
+            }
+            
+            if let decision = dosingDecision, let insulinOnBoard = decision.insulinOnBoard, insulinOnBoard.value > 0 {
+                activeInsulin = Self.doseAmountFormatter.string(from: insulinOnBoard.value)
+            } else {
+                activeInsulin = nil
             }
         }
     }

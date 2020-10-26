@@ -151,18 +151,37 @@ struct SimpleBolusView: View, HorizontalSizeClassOverride {
     }
     
     private var recommendedBolusRow: some View {
-        HStack {
-            Text("Recommended Bolus", comment: "Label for recommended bolus row on simple bolus screen")
-            Spacer()
-            HStack(alignment: .firstTextBaseline) {
-                Text(viewModel.recommendedBolus)
-                    .font(.title)
-                    .foregroundColor(Color(.label))
-                    .padding([.top, .bottom], 4)
-                bolusUnitsLabel
+        VStack(alignment: .leading) {
+            HStack {
+                Text("Recommended Bolus", comment: "Label for recommended bolus row on simple bolus screen")
+                Spacer()
+                HStack(alignment: .firstTextBaseline) {
+                    Text(viewModel.recommendedBolus)
+                        .font(.title)
+                        .foregroundColor(Color(.label))
+                        .padding([.top, .bottom], 4)
+                    bolusUnitsLabel
+                }
+            }
+            .padding(.trailing, 8)
+            if let activeInsulin = viewModel.activeInsulin {
+                HStack(alignment: .center, spacing: 3) {
+                    Text("Adjusted for")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    Text("Active Insulin")
+                        .font(.footnote)
+                        .bold()
+                    Text(activeInsulin)
+                        .font(.footnote)
+                        .bold()
+                        .foregroundColor(.secondary)
+                    bolusUnitsLabel
+                        .font(.footnote)
+                        .bold()
+                }
             }
         }
-        .padding(.trailing, 8)
     }
     
     private var bolusEntryRow: some View {
@@ -197,7 +216,7 @@ struct SimpleBolusView: View, HorizontalSizeClassOverride {
             .foregroundColor(Color(.secondaryLabel))
     }
 
-    private var bolusUnitsLabel: some View {
+    private var bolusUnitsLabel: Text {
         Text(QuantityFormatter().string(from: .internationalUnit()))
             .foregroundColor(Color(.secondaryLabel))
     }
