@@ -9,7 +9,7 @@ import UIKit
 
 
 class SettingsImageTableViewCell: UITableViewCell {
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .default, reuseIdentifier: reuseIdentifier)
 
         setup()
@@ -25,7 +25,7 @@ class SettingsImageTableViewCell: UITableViewCell {
         guard let textLabel = textLabel, let imageView = imageView else {
             return
         }
-
+        
         textLabel.adjustsFontForContentSizeCategory = true
         textLabel.font = UIFont.preferredFont(forTextStyle: .body)
         textLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -37,7 +37,7 @@ class SettingsImageTableViewCell: UITableViewCell {
             imageView.topAnchor.constraint(greaterThanOrEqualTo: parent.topAnchor),
             parent.bottomAnchor.constraint(greaterThanOrEqualTo: imageView.bottomAnchor),
             imageView.centerYAnchor.constraint(equalTo: parent.centerYAnchor),
-            textLabel.leadingAnchor.constraintEqualToSystemSpacingAfter(imageView.trailingAnchor, multiplier: 2),
+            textLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: imageView.trailingAnchor, multiplier: 2),
             textLabel.topAnchor.constraint(greaterThanOrEqualTo: parent.topAnchor),
             parent.bottomAnchor.constraint(greaterThanOrEqualTo: textLabel.bottomAnchor),
             parent.trailingAnchor.constraint(equalTo: textLabel.trailingAnchor),

@@ -10,13 +10,14 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopKitUI
 
 
 struct NetBasalContext {
     let rate: Double
     let percentage: Double
     let start: Date
-    let end: Date
+    let end: Date?
 }
 
 struct SensorDisplayableContext: SensorDisplayable {
@@ -26,7 +27,7 @@ struct SensorDisplayableContext: SensorDisplayable {
     let isLocal: Bool
 }
 
-struct GlucoseContext {
+struct GlucoseContext: GlucoseValue {
     let value: Double
     let unit: HKUnit
     let startDate: Date
@@ -55,20 +56,20 @@ extension NetBasalContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
     var rawValue: RawValue {
-        return [
+        var value: RawValue = [
             "rate": rate,
             "percentage": percentage,
-            "start": start,
-            "end": end
+            "start": start
         ]
+        value["end"] = end
+        return value
     }
 
     init?(rawValue: RawValue) {
         guard
             let rate       = rawValue["rate"] as? Double,
             let percentage = rawValue["percentage"] as? Double,
-            let start      = rawValue["start"] as? Date,
-            let end        = rawValue["end"] as? Date
+            let start      = rawValue["start"] as? Date
         else {
             return nil
         }
@@ -76,7 +77,7 @@ extension NetBasalContext: RawRepresentable {
         self.rate = rate
         self.percentage = percentage
         self.start = start
-        self.end = end
+        self.end = rawValue["end"] as? Date
     }
 }
 
@@ -151,6 +152,28 @@ extension PredictedGlucoseContext: RawRepresentable {
     }
 }
 
+struct PumpManagerHUDViewsContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    let pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue
+
+    init(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue) {
+        self.pumpManagerHUDViewsRawValue = pumpManagerHUDViewsRawValue
+    }
+    
+    init?(rawValue: RawValue) {
+        if let pumpManagerHUDViewsRawValue = rawValue["pumpManagerHUDViewsRawValue"] as? PumpManagerHUDViewsRawValue {
+            self.pumpManagerHUDViewsRawValue = pumpManagerHUDViewsRawValue
+        } else {
+            return nil
+        }
+    }
+    
+    var rawValue: RawValue {
+        return ["pumpManagerHUDViewsRawValue": pumpManagerHUDViewsRawValue]
+    }
+}
+
 struct StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 5
@@ -161,6 +184,7 @@ struct StatusExtensionContext: RawRepresentable {
     var batteryPercentage: Double?
     var reservoirCapacity: Double?
     var sensor: SensorDisplayableContext?
+    var pumpManagerHUDViewsContext: PumpManagerHUDViewsContext?
     
     init() { }
     
@@ -184,6 +208,10 @@ struct StatusExtensionContext: RawRepresentable {
         if let rawValue = rawValue["sensor"] as? SensorDisplayableContext.RawValue {
             sensor = SensorDisplayableContext(rawValue: rawValue)
         }
+        
+        if let rawPumpManagerHUDViewsContext = rawValue["pumpManagerHUDViewsContext"] as? PumpManagerHUDViewsContext.RawValue {
+            pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(rawValue: rawPumpManagerHUDViewsContext)
+        }
     }
     
     var rawValue: RawValue {
@@ -197,6 +225,8 @@ struct StatusExtensionContext: RawRepresentable {
         raw["batteryPercentage"] = batteryPercentage
         raw["reservoirCapacity"] = reservoirCapacity
         raw["sensor"] = sensor?.rawValue
+        raw["pumpManagerHUDViewsContext"] = pumpManagerHUDViewsContext?.rawValue
+        
         return raw
     }
 }

@@ -29,14 +29,14 @@ class NightscoutService: ServiceAuthenticationUI {
         credentialFormFields = [
             ServiceCredential(
                 title: NSLocalizedString("Site URL", comment: "The title of the nightscout site URL credential"),
-                placeholder: NSLocalizedString("https://mysite.azurewebsites.net", comment: "The placeholder text for the nightscout site URL credential"),
+                placeholder: NSLocalizedString("https://mysite.herokuapp.com", comment: "The placeholder text for the nightscout site URL credential"),
                 isSecret: false,
                 keyboardType: .URL
             ),
             ServiceCredential(
                 title: NSLocalizedString("API Secret", comment: "The title of the nightscout API secret credential"),
                 placeholder: nil,
-                isSecret: false,
+                isSecret: true,
                 keyboardType: .asciiCapable
             )
         ]

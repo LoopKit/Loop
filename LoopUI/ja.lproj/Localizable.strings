@@ -1,0 +1,33 @@
+/* Format string describing the time interval since the last completion date. (1: The localized date components */
+"%@ ago" = "%@ 前";
+
+/* The format string describing the basal rate. */
+"%@ U" = "%@ U";
+
+/* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
+"%1$@ at %2$@" = "%1$@ - %2$@";
+
+/* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
+"%1$@ units per hour at %2$@" = "%1$@ U/時 @ %2$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/分";
+
+/* Accessibility hint describing completion HUD for a closed loop */
+"Closed loop" = "クローズドループ";
+
+/* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
+"Loop ran %@ ago" = "ループは %@ 前に作動しました";
+
+/* Accessibility label component for glucose HUD describing an invalid state */
+"Needs attention" = "注意が必要です";
+
+/* Accessbility hint describing completion HUD for an open loop */
+"Open loop" = "オープンループ";
+
+/* Accessibility value for an unknown value */
+"Unknown" = "不明";
+
+/* Acessibility label describing completion HUD waiting for first run */
+"Waiting for first run" = "開始待機中";
+

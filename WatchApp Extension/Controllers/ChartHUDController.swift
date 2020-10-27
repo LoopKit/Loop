@@ -15,10 +15,32 @@ import SpriteKit
 import os.log
 
 final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
-    @IBOutlet private weak var tableGroup: WKInterfaceGroup!
-    @IBOutlet private weak var basalLabel: WKInterfaceLabel!
-    @IBOutlet private weak var iobLabel: WKInterfaceLabel!
-    @IBOutlet private weak var cobLabel: WKInterfaceLabel!
+    private enum TableRow: Int, CaseIterable {
+        case iob
+        case cob
+        case netBasal
+        case reservoirVolume
+
+        var title: String {
+            switch self {
+            case .iob:
+                return NSLocalizedString("Active Insulin", comment: "HUD row title for IOB")
+            case .cob:
+                return NSLocalizedString("Active Carbs", comment: "HUD row title for COB")
+            case .netBasal:
+                return NSLocalizedString("Net Basal Rate", comment: "HUD row title for Net Basal Rate")
+            case .reservoirVolume:
+                return NSLocalizedString("Reservoir Volume", comment: "HUD row title for remaining reservoir volume")
+            }
+        }
+
+        var isLast: Bool {
+            return self == TableRow.allCases.last
+        }
+    }
+
+    @IBOutlet private weak var table: WKInterfaceTable!
+
     @IBOutlet private weak var glucoseScene: WKInterfaceSKScene!
     @IBAction private func setChartWindow1Hour() {
         scene.visibleDuration = .hours(2)
@@ -38,19 +60,24 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     private let log = OSLog(category: "ChartHUDController")
     private var hasInitialActivation = false
 
+    private var observers: [Any] = [] {
+        didSet {
+            for observer in oldValue {
+                NotificationCenter.default.removeObserver(observer)
+            }
+        }
+    }
+
     override init() {
         super.init()
 
-        loopManager = ExtensionDelegate.shared().loopManager
-        NotificationCenter.default.addObserver(forName: .GlucoseSamplesDidChange, object: loopManager.glucoseStore, queue: nil) { [weak self] (note) in
-            self?.log.default("Received GlucoseSamplesDidChange notification: %{public}@. Updating chart", String(describing: note.userInfo ?? [:]))
-
-            DispatchQueue.main.async {
-                self?.updateGlucoseChart()
-            }
-        }
-
         glucoseScene.presentScene(scene)
+    }
+
+    override func awake(withContext context: Any?) {
+        super.awake(withContext: context)
+
+        table.setNumberOfRows(TableRow.allCases.count, withRowType: HUDRowController.className)
     }
 
     override func didAppear() {
@@ -76,7 +103,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         if #available(watchOSApplicationExtension 5.0, *) {
             scene.textInsets.left = max(scene.textInsets.left, systemMinimumLayoutMargins.leading)
             scene.textInsets.right = max(scene.textInsets.right, systemMinimumLayoutMargins.trailing)
-            tableGroup.setContentInset(UIEdgeInsets(top: 0, left: systemMinimumLayoutMargins.leading, bottom: 0, right: systemMinimumLayoutMargins.trailing))
         }
     }
 
@@ -90,6 +116,16 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
 
     override func willActivate() {
         super.willActivate()
+
+        observers = [
+            NotificationCenter.default.addObserver(forName: GlucoseStore.glucoseSamplesDidChange, object: loopManager.glucoseStore, queue: nil) { [weak self] (note) in
+                self?.log.default("Received GlucoseSamplesDidChange notification: %{public}@. Updating chart", String(describing: note.userInfo ?? [:]))
+
+                DispatchQueue.main.async {
+                    self?.updateGlucoseChart()
+                }
+            }
+        ]
 
         if glucoseScene.isPaused {
             log.default("willActivate() unpausing")
@@ -111,6 +147,8 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     override func didDeactivate() {
         super.didDeactivate()
 
+        observers = []
+
         log.default("didDeactivate() pausing")
         glucoseScene.isPaused = true
     }
@@ -122,44 +160,24 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             return
         }
 
-        if let activeInsulin = activeContext.activeInsulin {
-            let insulinFormatter: QuantityFormatter = {
-                let insulinFormatter = QuantityFormatter()
-                insulinFormatter.numberFormatter.minimumFractionDigits = 1
-                insulinFormatter.numberFormatter.maximumFractionDigits = 1
+        for row in TableRow.allCases {
+            let cell = table.rowController(at: row.rawValue) as! HUDRowController
+            cell.setTitle(row.title)
+            cell.setIsLastRow(row.isLast)
+            if #available(watchOSApplicationExtension 5.0, *) {
+                cell.setContentInset(systemMinimumLayoutMargins)
+            }
 
-                return insulinFormatter
-            }()
-
-            iobLabel.setText(insulinFormatter.string(from: activeInsulin, for: .internationalUnit()))
-        } else {
-            iobLabel.setText("—")
-        }
-
-        if let carbsOnBoard = activeContext.activeCarbohydrates {
-            let carbFormatter = QuantityFormatter()
-            carbFormatter.numberFormatter.maximumFractionDigits = 0
-
-            cobLabel.setText(carbFormatter.string(from: carbsOnBoard, for: .gram()))
-        } else {
-            cobLabel.setText("—")
-        }
-
-        if let tempBasal = activeContext.lastNetTempBasalDose {
-            let basalFormatter = NumberFormatter()
-            basalFormatter.numberStyle = .decimal
-            basalFormatter.minimumFractionDigits = 1
-            basalFormatter.maximumFractionDigits = 3
-            basalFormatter.positivePrefix = basalFormatter.plusSign
-
-            let unit = NSLocalizedString(
-                "U/hr",
-                comment: "The short unit display string for international units of insulin delivery per hour"
-            )
-
-            basalLabel.setText(basalFormatter.string(from: tempBasal, unit: unit))
-        } else {
-            basalLabel.setText("—")
+            switch row {
+            case .iob:
+                cell.setActiveInsulin(activeContext.activeInsulin)
+            case .cob:
+                cell.setActiveCarbohydrates(activeContext.activeCarbohydrates)
+            case .netBasal:
+                cell.setNetTempBasalDose(activeContext.lastNetTempBasalDose)
+            case .reservoirVolume:
+                cell.setReservoirVolume(activeContext.reservoirVolume)
+            }
         }
 
         if glucoseScene.isPaused {
@@ -170,12 +188,20 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         updateGlucoseChart()
     }
 
-    func updateGlucoseChart() {
+    private func updateGlucoseChart() {
         loopManager.generateChartData { chartData in
             DispatchQueue.main.async {
                 self.scene.data = chartData
                 self.scene.setNeedsUpdate()
             }
         }
+    }
+
+    override func table(_ table: WKInterfaceTable, didSelectRowAt rowIndex: Int) {
+        guard table == self.table, case .cob? = TableRow(rawValue: rowIndex) else {
+            return
+        }
+
+        presentController(withName: CarbEntryListController.className, context: nil)
     }
 }

@@ -1,13 +1,21 @@
 language: objective-c
-osx_image: xcode10
+osx_image: xcode12
 # xcode_sdk: iphonesimulator11
 # xcode_project: Loop.xcodeproj
 # xcode_scheme: Loop
+
+addons:
+  homebrew:
+    packages:
+    - carthage
+    update: true
 before_script:
+    - git config --global protocol.version 1
     - set -o pipefail && xcodebuild -project Loop.xcodeproj -target Cartfile
 script:
     # Build the app target
-    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme Loop build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcpretty
+    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme Loop build CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO | xcpretty
+    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme Learn build CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO | xcpretty
     # Run the test target
-    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme LoopTests -destination 'name=iPhone SE' test | xcpretty
-    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme DoseMathTests -destination 'name=iPhone SE' test | xcpretty
+    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme LoopTests -destination 'name=iPhone 8' test | xcpretty
+    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme DoseMathTests -destination 'name=iPhone 8' test | xcpretty

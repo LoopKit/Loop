@@ -10,6 +10,7 @@ import HealthKit
 import UIKit
 import WatchConnectivity
 import LoopKit
+import LoopCore
 
 final class WatchDataManager: NSObject {
 
@@ -17,7 +18,10 @@ final class WatchDataManager: NSObject {
 
     init(deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
-        self.log = deviceManager.logger.forCategory("WatchDataManager")
+        self.sleepStore = SleepStore (healthStore: deviceManager.loopManager.glucoseStore.healthStore)
+        self.lastBedtimeQuery = UserDefaults.appGroup?.lastBedtimeQuery ?? .distantPast
+        self.bedtime = UserDefaults.appGroup?.bedtime
+        self.log = DiagnosticLogger.shared.forCategory("WatchDataManager")
 
         super.init()
 
@@ -38,6 +42,53 @@ final class WatchDataManager: NSObject {
     }()
 
     private var lastSentSettings: LoopSettings?
+
+    let sleepStore: SleepStore
+    
+    var lastBedtimeQuery: Date {
+        didSet {
+            UserDefaults.appGroup?.lastBedtimeQuery = lastBedtimeQuery
+        }
+    }
+    
+    var bedtime: Date? {
+        didSet {
+            UserDefaults.appGroup?.bedtime = bedtime
+        }
+    }
+    
+    private func updateBedtimeIfNeeded() {
+        let now = Date()
+        let lastUpdateInterval = now.timeIntervalSince(lastBedtimeQuery)
+        let calendar = Calendar.current
+        
+        guard lastUpdateInterval >= TimeInterval(hours: 24) else {
+            // increment the bedtime by 1 day if it's before the current time, but we don't need to make another HealthKit query yet
+            if let bedtime = bedtime, bedtime < now {
+                let hourComponent = calendar.component(.hour, from: bedtime)
+                let minuteComponent = calendar.component(.minute, from: bedtime)
+                
+                if let newBedtime = calendar.nextDate(after: now, matching: DateComponents(hour: hourComponent, minute: minuteComponent), matchingPolicy: .nextTime), newBedtime.timeIntervalSinceNow <= .hours(24) {
+                    self.bedtime = newBedtime
+                }
+            }
+            
+            return
+        }
+
+        sleepStore.getAverageSleepStartTime() {
+            (result) in
+
+            self.lastBedtimeQuery = now
+            
+            switch result {
+                case .success(let bedtime):
+                    self.bedtime = bedtime
+                case .failure:
+                    self.bedtime = nil
+            }
+        }
+    }
 
     @objc private func updateWatch(_ notification: Notification) {
         guard
@@ -96,9 +147,7 @@ final class WatchDataManager: NSObject {
         }
 
         createWatchContext { (context) in
-            if let context = context {
-                self.sendWatchContext(context)
-            }
+            self.sendWatchContext(context)
         }
     }
 
@@ -113,12 +162,13 @@ final class WatchDataManager: NSObject {
         }
 
         let complicationShouldUpdate: Bool
+        updateBedtimeIfNeeded()
 
         if let lastContext = lastComplicationContext,
             let lastGlucose = lastContext.glucose, let lastGlucoseDate = lastContext.glucoseDate,
             let newGlucose = context.glucose, let newGlucoseDate = context.glucoseDate
         {
-            let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate) >= session.complicationUserInfoTransferInterval
+            let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate) >= session.complicationUserInfoTransferInterval(bedtime: bedtime)
             let enoughTrendDrift = abs(newGlucose.doubleValue(for: minTrendUnit) - lastGlucose.doubleValue(for: minTrendUnit)) >= minTrendDrift
 
             complicationShouldUpdate = enoughTimePassed || enoughTrendDrift
@@ -140,11 +190,12 @@ final class WatchDataManager: NSObject {
         }
     }
 
-    private func createWatchContext(_ completion: @escaping (_ context: WatchContext?) -> Void) {
+    private func createWatchContext(_ completion: @escaping (_ context: WatchContext) -> Void) {
         let loopManager = deviceManager.loopManager!
 
         let glucose = loopManager.glucoseStore.latestGlucose
         let reservoir = loopManager.doseStore.lastReservoirValue
+        let basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
 
         loopManager.getLoopState { (manager, state) in
             let updateGroup = DispatchGroup()
@@ -153,12 +204,24 @@ final class WatchDataManager: NSObject {
             context.loopLastRunDate = manager.lastLoopCompleted
             context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
             context.cob = state.carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
-            context.glucoseTrendRawValue = self.deviceManager.cgmManager?.sensorState?.trendType?.rawValue
+            context.glucoseTrendRawValue = self.deviceManager.sensorState?.trendType?.rawValue
 
             context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
 
             if let trend = self.deviceManager.cgmManager?.sensorState?.trendType {
                 context.glucoseTrendRawValue = trend.rawValue
+            }
+            
+            if let glucose = glucose {
+                updateGroup.enter()
+                manager.glucoseStore.getCachedGlucoseSamples(start: glucose.startDate) { (samples) in
+                    if let sample = samples.last {
+                        context.glucose = sample.quantity
+                        context.glucoseDate = sample.startDate
+                        context.glucoseSyncIdentifier = sample.syncIdentifier
+                    }
+                    updateGroup.leave()
+                }
             }
 
             updateGroup.enter()
@@ -172,16 +235,15 @@ final class WatchDataManager: NSObject {
                 updateGroup.leave()
             }
 
-            // Only set this value in the Watch context if there is a temp basal running that hasn't ended yet
-            let date = state.lastTempBasal?.startDate ?? Date()
-            if let scheduledBasal = manager.basalRateSchedule?.between(start: date, end: date).first,
-                let lastTempBasal = state.lastTempBasal,
-                lastTempBasal.endDate > Date() {
-                context.lastNetTempBasalDose =  lastTempBasal.unitsPerHour - scheduledBasal.value
+            if let basalDeliveryState = basalDeliveryState,
+                let basalSchedule = manager.basalRateScheduleApplyingOverrideHistory,
+                let netBasal = basalDeliveryState.getNetBasal(basalSchedule: basalSchedule, settings: manager.settings)
+            {
+                context.lastNetTempBasalDose = netBasal.rate
             }
 
             // Drop the first element in predictedGlucose because it is the current glucose
-            if let predictedGlucose = state.predictedGlucose?.dropFirst(), predictedGlucose.count > 0 {
+            if let predictedGlucose = state.predictedGlucoseIncludingPendingInsulin?.dropFirst(), predictedGlucose.count > 0 {
                 context.predictedGlucose = WatchPredictedGlucose(values: Array(predictedGlucose))
             }
 
@@ -190,26 +252,20 @@ final class WatchDataManager: NSObject {
         }
     }
 
-    private func addCarbEntryFromWatchMessage(_ message: [String: Any], completionHandler: ((_ units: Double?) -> Void)? = nil) {
-        if let carbEntry = CarbEntryUserInfo(rawValue: message) {
-            let newEntry = NewCarbEntry(
-                quantity: HKQuantity(unit: deviceManager.loopManager.carbStore.preferredUnit, doubleValue: carbEntry.value),
-                startDate: carbEntry.startDate,
-                foodType: nil,
-                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(deviceManager.loopManager.carbStore.defaultAbsorptionTimes)
-            )
-
-            deviceManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (result) in
+    private func addCarbEntryFromWatchMessage(_ message: [String: Any], completionHandler: ((_ error: Error?) -> Void)? = nil) {
+        if let carbEntry = CarbEntryUserInfo(rawValue: message)?.carbEntry {
+            deviceManager.loopManager.addCarbEntryAndRecommendBolus(carbEntry) { (result) in
                 switch result {
-                case .success(let recommendation):
-                    AnalyticsManager.shared.didAddCarbsFromWatch(carbEntry.value)
-                    completionHandler?(recommendation?.amount)
+                case .success:
+                    AnalyticsManager.shared.didAddCarbsFromWatch()
+                    completionHandler?(nil)
                 case .failure(let error):
                     self.log.error(error)
-                    completionHandler?(nil)
+                    completionHandler?(error)
                 }
             }
         } else {
+            log.error("Could not add carb entry from unknown message: \(message)")
             completionHandler?(nil)
         }
     }
@@ -220,30 +276,42 @@ extension WatchDataManager: WCSessionDelegate {
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         switch message["name"] as? String {
         case CarbEntryUserInfo.name?:
-            addCarbEntryFromWatchMessage(message) { (units) in
-                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0, maxBolus: self.deviceManager.loopManager.settings.maximumBolus).rawValue)
+            addCarbEntryFromWatchMessage(message) { (_) in
+                self.createWatchContext { (context) in
+                    // Send back the updated prediction and recommended bolus
+                    replyHandler(context.rawValue)
+                }
             }
         case SetBolusUserInfo.name?:
+            // Start the bolus and reply when it's successfully requested
             if let bolus = SetBolusUserInfo(rawValue: message as SetBolusUserInfo.RawValue) {
                 self.deviceManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
                     if error == nil {
                         AnalyticsManager.shared.didSetBolusFromWatch(bolus.value)
                     }
+
+                    // When we've successfully started the bolus, send a new context with our new prediction
+                    self.sendWatchContextIfNeeded()
                 }
             }
 
+            // Reply immediately
             replyHandler([:])
         case LoopSettingsUserInfo.name?:
             if let watchSettings = LoopSettingsUserInfo(rawValue: message)?.settings {
-                // So far we only support watch changes of target range overrides
+                // So far we only support watch changes of temporary schedule overrides
                 var settings = deviceManager.loopManager.settings
-                settings.glucoseTargetRangeSchedule = watchSettings.glucoseTargetRangeSchedule
+                settings.scheduleOverride = watchSettings.scheduleOverride
 
                 // Prevent re-sending these updated settings back to the watch
                 lastSentSettings = settings
                 deviceManager.loopManager.settings = settings
             }
-            replyHandler([:])
+
+            // Since target range affects recommended bolus, send back a new one
+            createWatchContext { (context) in
+                replyHandler(context.rawValue)
+            }
         case GlucoseBackfillRequestUserInfo.name?:
             if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message),
                 let manager = deviceManager.loopManager {
@@ -272,6 +340,8 @@ extension WatchDataManager: WCSessionDelegate {
                 sendWatchContextIfNeeded()
             }
         case .inactive, .notActivated:
+            break
+        @unknown default:
             break
         }
     }
@@ -314,6 +384,9 @@ extension WatchDataManager {
             "## WatchDataManager",
             "lastSentSettings: \(String(describing: lastSentSettings))",
             "lastComplicationContext: \(String(describing: lastComplicationContext))",
+            "lastBedtimeQuery: \(String(describing: lastBedtimeQuery))",
+            "bedtime: \(String(describing: bedtime))",
+            "complicationUserInfoTransferInterval: \(round(watchSession?.complicationUserInfoTransferInterval(bedtime: bedtime).minutes ?? 0)) min"
         ]
 
         if let session = watchSession {
@@ -326,8 +399,8 @@ extension WatchDataManager {
 
         return items.joined(separator: "\n")
     }
-}
 
+}
 
 extension WCSession {
     open override var debugDescription: String {
@@ -342,21 +415,29 @@ extension WCSession {
             "* outstandingUserInfoTransfers: \(outstandingUserInfoTransfers)",
             "* receivedApplicationContext: \(receivedApplicationContext)",
             "* remainingComplicationUserInfoTransfers: \(remainingComplicationUserInfoTransfers)",
-            "* complicationUserInfoTransferInterval: \(round(complicationUserInfoTransferInterval.minutes)) min",
             "* watchDirectoryURL: \(watchDirectoryURL?.absoluteString ?? "nil")",
         ].joined(separator: "\n")
     }
-
-    fileprivate var complicationUserInfoTransferInterval: TimeInterval {
+    
+    fileprivate func complicationUserInfoTransferInterval(bedtime: Date?) -> TimeInterval {
         let now = Date()
-        let timeUntilMidnight: TimeInterval
+        let timeUntilRefresh: TimeInterval
 
         if let midnight = Calendar.current.nextDate(after: now, matching: DateComponents(hour: 0), matchingPolicy: .nextTime) {
-            timeUntilMidnight = midnight.timeIntervalSince(now)
+            // we can have a more frequent refresh rate if we only refresh when it's likely the user is awake (based on HealthKit sleep data)
+            if let nextBedtime = bedtime {
+                let timeUntilBedtime = nextBedtime.timeIntervalSince(now)
+                // if bedtime is before the current time or more than 24 hours away, use midnight instead
+                timeUntilRefresh = (0..<TimeInterval(hours: 24)).contains(timeUntilBedtime) ? timeUntilBedtime : midnight.timeIntervalSince(now)
+            }
+            // otherwise, since (in most cases) the complications allowance refreshes at midnight, base it on the time remaining until midnight
+            else {
+                timeUntilRefresh = midnight.timeIntervalSince(now)
+            }
         } else {
-            timeUntilMidnight = .hours(24)
+            timeUntilRefresh = .hours(24)
         }
-
-        return timeUntilMidnight / Double(remainingComplicationUserInfoTransfers + 1)
+        
+        return timeUntilRefresh / Double(remainingComplicationUserInfoTransfers + 1)
     }
 }

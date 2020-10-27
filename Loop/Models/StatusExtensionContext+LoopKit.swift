@@ -9,17 +9,17 @@ import LoopKit
 
 
 extension NetBasalContext {
-    var tempBasal: DoseEntry? {
-        guard rate != 0 else {
-            return nil
-        }
-
-        return DoseEntry(
-            type: .tempBasal,
-            startDate: start,
-            endDate: end,
-            value: rate,
-            unit: .unitsPerHour
-        )
-    }
+//    var tempBasal: DoseEntry? {
+//        guard rate != 0 else {
+//            return nil
+//        }
+//
+//        return DoseEntry(
+//            type: .tempBasal,
+//            startDate: start,
+//            endDate: end,
+//            value: rate,
+//            unit: .unitsPerHour
+//        )
+//    }
 }

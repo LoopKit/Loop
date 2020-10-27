@@ -9,3 +9,12 @@
 // This is automatically disambiguated by development team, but you may choose to change this to
 // support running multiple apps simultaneously.
 MAIN_APP_BUNDLE_IDENTIFIER = com.${DEVELOPMENT_TEAM}.loopkit
+MAIN_APP_DISPLAY_NAME = Loop
+
+LOOP_MARKETING_VERSION = 2.3.0
+
+APPICON_NAME = AppIcon
+
+// Optional workspace configuration overrides
+#include? "../LoopConfigOverride.xcconfig"
+

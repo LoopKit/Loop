@@ -1,0 +1,33 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Tính tỉ lệ phần trăm của glucose trong một phạm vi nhất định";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Tiếp tục";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Tối đa";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Tối thiểu";
+
+/* Lesson title */
+"Modal Day" = "Ngày chuẩn";
+
+/* Lesson result text for no data */
+"No data available" = "Dữ liệu không tồn tại";
+
+/* Section title for glucose range */
+"Range" = "Phạm vi";
+
+/* Title of config entry */
+"Start Date" = "Ngày bắt đầu";
+
+/* Lesson title */
+"Time in Range" = "Thời gian trong phạm vi kiểm soát";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Hình dung các giá trị glucose thường xuyên nhất theo thời gian trong ngày";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Tuần";
+

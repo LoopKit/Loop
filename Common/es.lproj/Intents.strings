@@ -1,8 +1,9 @@
 /* INIntentTitle */
-"80eo5o" = "Agregar entrada de carbohidratos";
+"80eo5o" = "Agregar Registro de Carbs";
 
 /* INIntentParameterCombinationTitle */
-"OcNxIj" = "Agregar entrada de carbohidratos";
+"OcNxIj" = "Agregar Registro de Carbs";
 
 /* INIntentDescription */
-"yc02Yq" = "";
+"yc02Yq" = "Agregar registro de carbs a Loop";
+

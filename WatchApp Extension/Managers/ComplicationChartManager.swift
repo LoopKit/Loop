@@ -107,7 +107,7 @@ final class ComplicationChartManager {
     }
 
     private func drawTargetRange(in context: CGContext, using scaler: GlucoseChartScaler) {
-        let activeOverride = data?.correctionRange?.activeOverride
+        let activeOverride = data?.activeScheduleOverride
         let targetRangeAlpha: CGFloat = activeOverride != nil ? 0.2 : 0.3
         context.setFillColor(UIColor.glucose.withAlphaComponent(targetRangeAlpha).cgColor)
         data?.correctionRange?.quantityBetween(start: scaler.dates.start, end: scaler.dates.end).forEach { range in
@@ -117,11 +117,14 @@ final class ComplicationChartManager {
     }
 
     private func drawOverridesIfNeeded(in context: CGContext, using scaler: GlucoseChartScaler) {
-        guard let override = data?.correctionRange?.activeOverride else {
+        guard
+            let override = data?.activeScheduleOverride,
+            let overrideHashable = TemporaryScheduleOverrideHashable(override)
+        else {
             return
         }
         context.setFillColor(UIColor.glucose.withAlphaComponent(0.4).cgColor)
-        let overrideRect = scaler.rect(for: override, unit: unit)
+        let overrideRect = scaler.rect(for: overrideHashable, unit: unit)
         context.fill(overrideRect)
     }
 

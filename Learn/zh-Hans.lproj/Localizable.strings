@@ -1,0 +1,33 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "计算在指定范围内的血糖测量值的百分比";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "继续";
+
+/* Placeholder for upper range entry */
+"Maximum" = "最大";
+
+/* Placeholder for lower range entry */
+"Minimum" = "最小";
+
+/* Lesson title */
+"Modal Day" = "Modal Day";
+
+/* Lesson result text for no data */
+"No data available" = "无数据";
+
+/* Section title for glucose range */
+"Range" = "范围";
+
+/* Title of config entry */
+"Start Date" = "开始日期";
+
+/* Lesson title */
+"Time in Range" = "在目标范围的时间";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "全天血糖数据";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "周";
+

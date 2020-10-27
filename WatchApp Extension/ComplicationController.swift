@@ -8,10 +8,13 @@
 
 import ClockKit
 import WatchKit
-
+import LoopCore
+import os.log
 
 final class ComplicationController: NSObject, CLKComplicationDataSource {
     
+    private let log = OSLog(category: "ComplicationController")
+
     // MARK: - Timeline Configuration
     
     func getSupportedTimeTravelDirections(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimeTravelDirections) -> Void) {
@@ -76,11 +79,18 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: (@escaping (CLKComplicationTimelineEntry?) -> Void)) {
         updateChartManagerIfNeeded(completion: {
             let entry: CLKComplicationTimelineEntry?
-
-            if  let context = ExtensionDelegate.shared().loopManager.activeContext,
-                let glucoseDate = context.glucoseDate,
-                glucoseDate.timeIntervalSinceNow.minutes >= -15,
-                let template = CLKComplicationTemplate.templateForFamily(complication.family, from: context, chartGenerator: self.makeChart)
+            
+            let settings = ExtensionDelegate.shared().loopManager.settings
+            let timelineDate = Date()
+            
+            self.log.default("Updating current complication timeline entry")
+            
+            if let context = ExtensionDelegate.shared().loopManager.activeContext,
+                let template = CLKComplicationTemplate.templateForFamily(complication.family,
+                                                                         from: context,
+                                                                         at: timelineDate,
+                                                                         recencyInterval: settings.inputDataRecencyInterval,
+                                                                         chartGenerator: self.makeChart)
             {
                 switch complication.family {
                 case .graphicRectangular:
@@ -88,7 +98,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                 default:
                     template.tintColor = .tintColor
                 }
-                entry = CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)
+                entry = CLKComplicationTimelineEntry(date: timelineDate, complicationTemplate: template)
             } else {
                 entry = nil
             }
@@ -97,26 +107,48 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         })
     }
     
-    func getTimelineEntries(for complication: CLKComplication, before date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
-        // Call the handler with the timeline entries prior to the given date
-        handler(nil)
-    }
-    
     func getTimelineEntries(for complication: CLKComplication, after date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
         updateChartManagerIfNeeded {
             let entries: [CLKComplicationTimelineEntry]?
-
-            if  let context = ExtensionDelegate.shared().loopManager.activeContext,
-                let glucoseDate = context.glucoseDate,
-                glucoseDate.timeIntervalSince(date) > 0,
-                let template = CLKComplicationTemplate.templateForFamily(complication.family, from: context, chartGenerator: self.makeChart)
+            
+            let settings = ExtensionDelegate.shared().loopManager.settings
+            
+            guard let context = ExtensionDelegate.shared().loopManager.activeContext,
+                let glucoseDate = context.glucoseDate else
             {
-                template.tintColor = UIColor.tintColor
-                entries = [CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)]
-            } else {
-                entries = nil
+                handler(nil)
+                return
             }
-
+            
+            var futureChangeDates: [Date] = [
+                // Stale glucose date: just a second after glucose expires
+                glucoseDate + settings.inputDataRecencyInterval + 1,
+            ]
+            
+            if let loopLastRunDate = context.loopLastRunDate {
+                let freshnessCategories = [
+                    LoopCompletionFreshness.fresh,
+                    LoopCompletionFreshness.aging,
+                    LoopCompletionFreshness.stale
+                    ].compactMap( { $0.maxAge })
+                futureChangeDates.append(contentsOf: freshnessCategories.map { loopLastRunDate + $0 + 1})
+            }
+            
+            entries = futureChangeDates.filter { $0 > date }.compactMap({ (futureChangeDate) -> CLKComplicationTimelineEntry? in
+                if let template = CLKComplicationTemplate.templateForFamily(complication.family,
+                                                                            from: context,
+                                                                            at: futureChangeDate,
+                                                                            recencyInterval: settings.inputDataRecencyInterval,
+                                                                            chartGenerator: self.makeChart)
+                {
+                    template.tintColor = UIColor.tintColor
+                    self.log.default("Adding complication timeline entry for date %{public}@", String(describing: futureChangeDate))
+                    return CLKComplicationTimelineEntry(date: futureChangeDate, complicationTemplate: template)
+                } else {
+                    return nil
+                }
+            })
+            
             handler(entries)
         }
     }
@@ -204,6 +236,8 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             } else {
                 return nil
             }
+        @unknown default:
+            return nil
         }
     }
 }

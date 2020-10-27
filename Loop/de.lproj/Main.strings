@@ -25,9 +25,6 @@
 /* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
 "aiu-ZA-zVa.title" = "Bolus";
 
-/* Class = "UILabel"; text = "Title"; ObjectID = "B9F-K3-7RI"; */
-"B9F-K3-7RI.text" = "Titel";
-
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Beschriftung";
 
@@ -47,7 +44,7 @@
 "d3X-AN-tA5.text" = "g insgesamt";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "Zukünftiger Blutzucker wird vorhergesagt, indem die Effekte mehrerer Eingaben kombiniert werden. Verwenden Sie dieses Tool, um zwischen verschiedenen Eingaben zu wählen und sie mit der endgültigen Vorhersage zu vergleichen.";
+"D4C-I2-dhA.text" = "Der Blutzuckerverlauf wird vorhergesagt, indem die Effekte mehrerer Eingaben kombiniert werden. Verwenden Sie dieses Tool, um verschiedene Eingaben ein- und auszuschalten, um zu sehen, wie sie die Vorhersage beeinflussen.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Beschriftung";
@@ -71,13 +68,13 @@
 "hZZ-2S-lrd.title" = "Kohlenhydrat-Effekte";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Beobachtete Blutzuckeränderungen abzüglich der Veränderungen, die aus der Insulinabgabe errechnet wurden, können verwendet werden, um die Kohlenhydratabsorption zu schätzen.";
+"IxU-As-glo.text" = "Die beobachtete Blutzuckerveränderung abzüglich der modellbasierten Veränderung kann verwendet werden, um die Kohlenhydratabsorption abzuschätzen.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Detail";
 
 /* Class = "UILabel"; text = "⚠ Glucose Predicted Below Range"; ObjectID = "k0g-P7-OVN"; */
-"k0g-P7-OVN.text" = "⚠ Blutzucker-Vorhersage außerhalb des Bereichs";
+"k0g-P7-OVN.text" = "⚠ Blutzucker unterhalb Zielbereich vorausgesagt";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
 "k3F-Na-7mn.text" = "Empfohlene Basalrate";
@@ -89,7 +86,7 @@
 "l7l-mw-Oc9.text" = "Beschriftung";
 
 /* Class = "UILabel"; text = "Tap to set"; ObjectID = "m9c-SQ-djE"; */
-"m9c-SQ-djE.text" = "Zum Festlegen antippen";
+"m9c-SQ-djE.text" = "Tippen zum Setzen";
 
 /* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "mVz-dr-xLU"; */
 "mVz-dr-xLU.accessibilityLabel" = "Einheiten";
@@ -107,7 +104,7 @@
 "pi6-Dh-72V.title" = "Insulin-Modell";
 
 /* Class = "UILabel"; text = "An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments."; ObjectID = "PJv-p9-cFe"; */
-"PJv-p9-cFe.text" = "Ein Insulinaktivitätsmodell wird verwendet, um die Wirkungen von Insulin auf den Blutzuckerspiegel abzuschätzen. Ein genaues Modell kann helfen, Insulinstapelung zu verhindern und sichere Korrekturen vorzuschlagen.";
+"PJv-p9-cFe.text" = "Ein Insulinaktivitätsmodell wird verwendet, um die Wirkung von Insulin auf den Blutzuckerspiegel abzuschätzen. Ein genaues Modell kann dazu beitragen, Insulinstapelung zu verhindern und Korrekturen sicher zu empfehlen.";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "voraussichtlich 92 mg/dL";
@@ -131,7 +128,7 @@
 "Wk3-xv-IM5.text" = "4 Stunden";
 
 /* Class = "UIButton"; normalTitle = "Deliver"; ObjectID = "Ya0-9b-ZAS"; */
-"Ya0-9b-ZAS.normalTitle" = "Verwalten";
+"Ya0-9b-ZAS.normalTitle" = "Abgeben";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";

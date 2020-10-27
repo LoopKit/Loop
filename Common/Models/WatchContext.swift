@@ -11,7 +11,7 @@ import HealthKit
 import LoopKit
 
 
-final class WatchContext: NSObject, RawRepresentable {
+final class WatchContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
     private let version = 4
@@ -21,6 +21,7 @@ final class WatchContext: NSObject, RawRepresentable {
     var glucose: HKQuantity?
     var glucoseTrendRawValue: Int?
     var glucoseDate: Date?
+    var glucoseSyncIdentifier: String?
 
     var predictedGlucose: WatchPredictedGlucose?
     var eventualGlucose: HKQuantity? {
@@ -32,12 +33,6 @@ final class WatchContext: NSObject, RawRepresentable {
     var lastNetTempBasalDate: Date?
     var recommendedBolusDose: Double?
 
-    var bolusSuggestion: BolusSuggestionUserInfo? {
-        guard let recommended = recommendedBolusDose else { return nil }
-
-        return BolusSuggestionUserInfo(recommendedBolus: recommended)
-    }
-
     var cob: Double?
     var iob: Double?
     var reservoir: Double?
@@ -46,13 +41,10 @@ final class WatchContext: NSObject, RawRepresentable {
 
     var cgmManagerState: CGMManager.RawStateValue?
 
-    override init() {
-        super.init()
+    init() {
     }
 
     required init?(rawValue: RawValue) {
-        super.init()
-
         guard rawValue["v"] as? Int == version else {
             return nil
         }
@@ -67,6 +59,7 @@ final class WatchContext: NSObject, RawRepresentable {
 
         glucoseTrendRawValue = rawValue["gt"] as? Int
         glucoseDate = rawValue["gd"] as? Date
+        glucoseSyncIdentifier = rawValue["gs"] as? String
         iob = rawValue["iob"] as? Double
         reservoir = rawValue["r"] as? Double
         reservoirPercentage = rawValue["rp"] as? Double
@@ -104,6 +97,7 @@ final class WatchContext: NSObject, RawRepresentable {
 
         raw["gt"] = glucoseTrendRawValue
         raw["gd"] = glucoseDate
+        raw["gs"] = glucoseSyncIdentifier
         raw["iob"] = iob
         raw["ld"] = loopLastRunDate
         raw["r"] = reservoir
@@ -124,5 +118,14 @@ extension WatchContext {
         } else {
             return true
         }
+    }
+}
+
+extension WatchContext {
+    var newGlucoseSample: NewGlucoseSample? {
+        if let quantity = glucose, let date = glucoseDate, let syncIdentifier = glucoseSyncIdentifier {
+            return NewGlucoseSample(date: date, quantity: quantity, isDisplayOnly: false, syncIdentifier: syncIdentifier, syncVersion: 0)
+        }
+        return nil
     }
 }

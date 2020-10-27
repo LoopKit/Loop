@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import LoopCore
 
 
 extension UITableViewCell: IdentifiableClass { }

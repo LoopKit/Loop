@@ -16,13 +16,15 @@ struct GlucoseChartData {
 
     var correctionRange: GlucoseRangeSchedule?
 
+    var scheduleOverride: TemporaryScheduleOverride?
+
     var historicalGlucose: [SampleValue]? {
         didSet {
             historicalGlucoseRange = historicalGlucose?.quantityRange
         }
     }
 
-    private(set) var historicalGlucoseRange: Range<HKQuantity>?
+    private(set) var historicalGlucoseRange: ClosedRange<HKQuantity>?
 
     var predictedGlucose: [SampleValue]? {
         didSet {
@@ -30,18 +32,19 @@ struct GlucoseChartData {
         }
     }
 
-    private(set) var predictedGlucoseRange: Range<HKQuantity>?
+    private(set) var predictedGlucoseRange: ClosedRange<HKQuantity>?
 
-    init(unit: HKUnit?, correctionRange: GlucoseRangeSchedule?, historicalGlucose: [SampleValue]?, predictedGlucose: [SampleValue]?) {
+    init(unit: HKUnit?, correctionRange: GlucoseRangeSchedule?, scheduleOverride: TemporaryScheduleOverride?, historicalGlucose: [SampleValue]?, predictedGlucose: [SampleValue]?) {
         self.unit = unit
         self.correctionRange = correctionRange
+        self.scheduleOverride = scheduleOverride
         self.historicalGlucose = historicalGlucose
         self.historicalGlucoseRange = historicalGlucose?.quantityRange
         self.predictedGlucose = predictedGlucose
         self.predictedGlucoseRange = predictedGlucose?.quantityRange
     }
 
-    func chartableGlucoseRange(from interval: DateInterval) -> Range<HKQuantity> {
+    func chartableGlucoseRange(from interval: DateInterval) -> ClosedRange<HKQuantity> {
         let unit = self.unit ?? .milligramsPerDeciliter
 
         // Defaults
@@ -53,7 +56,7 @@ struct GlucoseChartData {
             max = Swift.max(max, correction.value.upperBound.doubleValue(for: unit))
         }
 
-        if let override = correctionRange?.activeOverrideQuantityRange {
+        if let override = activeScheduleOverride?.settings.targetRange {
             min = Swift.min(min, override.lowerBound.doubleValue(for: unit))
             max = Swift.max(max, override.upperBound.doubleValue(for: unit))
         }
@@ -76,7 +79,14 @@ struct GlucoseChartData {
         let lowerBound = HKQuantity(unit: unit, doubleValue: min)
         let upperBound = HKQuantity(unit: unit, doubleValue: max)
 
-        return lowerBound..<upperBound
+        return lowerBound...upperBound
+    }
+
+    var activeScheduleOverride: TemporaryScheduleOverride? {
+        guard let override = scheduleOverride, override.isActive() else {
+            return nil
+        }
+        return override
     }
 }
 
@@ -95,9 +105,9 @@ private extension HKUnit {
 
     var lowWatermark: Double {
         if self == .milligramsPerDeciliter {
-            return 50.0
+            return 75
         } else {
-            return 3.0
+            return 4
         }
     }
 }

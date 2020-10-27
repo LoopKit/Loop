@@ -10,22 +10,26 @@ import UIKit
 
 
 extension UIColor {
-    static let tintColor = UIColor(red: 76 / 255, green: 217 / 255, blue: 100 / 255, alpha: 1)
+    static let tintColor = UIColor(named: "tint")!
 
-    static let carbsColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
+    static let carbsColor = UIColor(named: "carbs")!
 
     // Equivalent to carbsColor with alpha 0.14 on a black background
-    static let darkCarbsColor = UIColor(red: 0.07, green: 0.12, blue: 0.04, alpha: 1)
+    static let darkCarbsColor = UIColor(named: "carbs-dark")!
 
-    static let glucose = UIColor(red: 79 / 255, green: 173 / 255, blue: 248 / 255, alpha: 1)
+    static let glucose = UIColor(named: "glucose")!
 
     // Equivalent to glucoseColor with alpha 0.14 on a black background
-    static let darkGlucose = UIColor(red: 0.02, green: 0.10, blue: 0.14, alpha: 1)
+    static let darkGlucose = UIColor(named: "glucose-dark")!
 
-    static let workoutColor = glucose
+    static let insulin = UIColor(named: "insulin")!
+
+    static let darkInsulin = UIColor(named: "insulin-dark")!
+
+    static let overrideColor = UIColor(named: "workout")!
 
     // Equivalent to workoutColor with alpha 0.14 on a black background
-    static let darkWorkoutColor = darkGlucose
+    static let darkOverrideColor = UIColor(named: "workout-dark")!
 
     static let disabledButtonColor = UIColor.gray
 
@@ -36,7 +40,11 @@ extension UIColor {
     static let chartNowLine = HIGWhiteColor().withAlphaComponent(0.2)
 
     static let chartPlatter = HIGWhiteColorDark()
-
+   
+    static let agingColor = HIGYellowColor()
+    
+    static let staleColor = HIGRedColor()
+    
     // MARK: - HIG colors
     // See: https://developer.apple.com/watch/human-interface-guidelines/visual-design/#color
 

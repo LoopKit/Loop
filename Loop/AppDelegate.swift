@@ -18,45 +18,92 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    private(set) lazy var deviceManager = DeviceDataManager()
+    private var deviceManager: DeviceDataManager?
 
     private var rootViewController: RootNavigationController! {
         return window?.rootViewController as? RootNavigationController
     }
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        window?.tintColor = UIColor.tintColor
-
+    
+    private var isAfterFirstUnlock: Bool {
+        let fileManager = FileManager.default
+        do {
+            let documentDirectory = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor:nil, create:false)
+            let fileURL = documentDirectory.appendingPathComponent("protection.test")
+            guard fileManager.fileExists(atPath: fileURL.path) else {
+                let contents = Data("unimportant".utf8)
+                try? contents.write(to: fileURL, options: .completeFileProtectionUntilFirstUserAuthentication)
+                // If file doesn't exist, we're at first start, which will be user directed.
+                return true
+            }
+            let contents = try? Data(contentsOf: fileURL)
+            return contents != nil
+        } catch {
+            log.error(error)
+        }
+        return false
+    }
+    
+    private func finishLaunch() {
+        log.default("Finishing launching")
+        
+        deviceManager = DeviceDataManager()
+        
         NotificationManager.authorize(delegate: self)
+ 
+        let mainStatusViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
+        
+        mainStatusViewController.deviceManager = deviceManager
+        
+        rootViewController.pushViewController(mainStatusViewController, animated: false)
+        
+    }
 
-        log.info(#function)
-
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        log.default("didFinishLaunchingWithOptions \(String(describing: launchOptions))")
+        
         AnalyticsManager.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
 
-        rootViewController.rootViewController.deviceManager = deviceManager
+        guard isAfterFirstUnlock else {
+            log.default("Launching before first unlock; pausing launch...")
+            return false
+        }
+
+        finishLaunch()
+
+        let notificationOption = launchOptions?[.remoteNotification]
+        
+        if let notification = notificationOption as? [String: AnyObject] {
+            deviceManager?.handleRemoteNotification(notification)
+        }
 
         return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
+        log.default(#function)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
+        log.default(#function)
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
+        log.default(#function)
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        deviceManager.pumpManager?.updateBLEHeartbeatPreference()
+        deviceManager?.updatePumpManagerBLEHeartbeatPreference()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
+        log.default(#function)
     }
 
     // MARK: - Continuity
 
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]?) -> Void) -> Bool {
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        log.default(#function)
 
         if #available(iOS 12.0, *) {
             if userActivity.activityType == NewCarbEntryIntent.className {
@@ -76,6 +123,40 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             return false
         }
     }
+    
+    // MARK: - Remote notifications
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+        let token = tokenParts.joined()
+        log.default("RemoteNotifications device token: \(token)")
+        deviceManager?.loopManager.settings.deviceToken = deviceToken
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        log.error("Failed to register: \(error)")
+    }
+    
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
+        guard let notification = userInfo as? [String: AnyObject] else {
+            completionHandler(.failed)
+            return
+        }
+      
+        deviceManager?.handleRemoteNotification(notification)
+        completionHandler(.noData)
+    }
+    
+    func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
+        log.default("applicationProtectedDataDidBecomeAvailable")
+        
+        if deviceManager == nil {
+            finishLaunch()
+        }
+    }
+
 }
 
 
@@ -89,7 +170,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             {
                 AnalyticsManager.shared.didRetryBolus()
 
-                deviceManager.enactBolus(units: units, at: startDate) { (_) in
+                deviceManager?.enactBolus(units: units, at: startDate) { (_) in
                     completionHandler()
                 }
                 return
@@ -104,4 +185,5 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.badge, .sound, .alert])
     }
+    
 }

@@ -1,0 +1,33 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Ceci calcule le pourcentage des mesures de glycémie dans une plage spécifique";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Continuer";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Maximum";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Minimum";
+
+/* Lesson title */
+"Modal Day" = "Journée type";
+
+/* Lesson result text for no data */
+"No data available" = "Données indisponibles";
+
+/* Section title for glucose range */
+"Range" = "Plage";
+
+/* Title of config entry */
+"Start Date" = "Date de commencement";
+
+/* Lesson title */
+"Time in Range" = "Temps passé dans la cible";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Visualisation des glycémies les plus fréquentes selon l’heure";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Semaines";
+
