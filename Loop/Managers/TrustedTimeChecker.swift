@@ -36,9 +36,9 @@ class TrustedTimeChecker {
 
     init(_ alertManager: AlertManager) {
         ntpClient = TrueTimeClient.sharedInstance
-        #if DEBUG
-        ntpClient.logCallback = { _ in }    // TrueTimeClient is a bit chatty in DEBUG build. This squelches all of its logging.
-        #endif
+        if ntpClient.responds(to: #selector(setter: TrueTimeClient.logCallback)) {
+            ntpClient.logCallback = { _ in }    // TrueTimeClient is a bit chatty in DEBUG build. This squelches all of its logging.
+        }
         ntpClient.start()
         self.alertManager = alertManager
         NotificationCenter.default.addObserver(forName: UIApplication.significantTimeChangeNotification,
