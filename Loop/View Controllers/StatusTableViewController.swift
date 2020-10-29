@@ -1389,7 +1389,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 return
             }
 
-            let statusTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(showLastError(_:)))
+            let statusTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(showLoopCompletionMessage(_:)))
             hudView.loopCompletionHUD.addGestureRecognizer(statusTapGestureRecognizer)
             hudView.loopCompletionHUD.accessibilityHint = NSLocalizedString("Shows last loop error", comment: "Loop Completion HUD accessibility hint")
 
@@ -1442,6 +1442,21 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
+    @objc private func showLoopCompletionMessage(_: Any) {
+        guard let loopCompletionMessage = hudView?.loopCompletionHUD.loopCompletionMessage else { return }
+        presentLoopCompletionMesage(title: loopCompletionMessage.title, message: loopCompletionMessage.message)
+    }
+    
+    private func presentLoopCompletionMesage(title: String, message: String) {
+        let action = UIAlertAction(title: NSLocalizedString("Dismiss", comment: "The button label of the action used to dismiss an error alert"),
+                                   style: .default)
+        let alertController = UIAlertController(title: title,
+                                                message: message,
+                                                preferredStyle: .alert)
+        alertController.addAction(action)
+        present(alertController, animated: true)
+    }
+    
     @objc private func showLastError(_: Any) {
         // First, check whether we have a device error after the most recent completion date
         if let deviceError = deviceManager.lastError,
