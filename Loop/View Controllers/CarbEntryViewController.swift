@@ -111,9 +111,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     private var shouldDisplayAccurateCarbEntryWarning = false {
         didSet {
             if shouldDisplayAccurateCarbEntryWarning != oldValue {
-                DispatchQueue.main.async {
-                    self.displayAccuracyWarning()
-                }
+                self.displayAccuracyWarning()
             }
         }
     }
@@ -225,15 +223,17 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
             let filteredInsulinCounteractionEffects = state.insulinCounteractionEffects.filterDateRange(startDate, endDate)
 
-            // at least 3 insulin counteraction effects are required to calculate the average
-            guard filteredInsulinCounteractionEffects.count >= 3,
-                let averageInsulinCounteractionEffect = filteredInsulinCounteractionEffects.average(unit: GlucoseEffectVelocity.unit) else
-            {
-                self?.shouldDisplayAccurateCarbEntryWarning = false
-                return
-            }
+            DispatchQueue.main.async {
+                // at least 3 insulin counteraction effects are required to calculate the average
+                guard filteredInsulinCounteractionEffects.count >= 3,
+                    let averageInsulinCounteractionEffect = filteredInsulinCounteractionEffects.average(unit: GlucoseEffectVelocity.unit) else
+                {
+                    self?.shouldDisplayAccurateCarbEntryWarning = false
+                    return
+                }
 
-            self?.shouldDisplayAccurateCarbEntryWarning = averageInsulinCounteractionEffect >= threshold
+                self?.shouldDisplayAccurateCarbEntryWarning = averageInsulinCounteractionEffect >= threshold
+            }
         }
     }
     
