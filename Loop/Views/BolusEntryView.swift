@@ -194,7 +194,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                         font: typedManualGlucoseEntry.wrappedValue == "" ? .preferredFont(forTextStyle: .title1) : .heavy(.title1),
                         textAlignment: .right,
                         keyboardType: .decimalPad,
-                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible
+                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
+                        maxLength: 3
                     )
 
                     Text(QuantityFormatter().string(from: viewModel.glucoseUnit))
@@ -283,7 +284,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     textColor: .loopAccent,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder
+                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
+                    maxLength: 5
                 )
                 
                 bolusUnitsLabel
