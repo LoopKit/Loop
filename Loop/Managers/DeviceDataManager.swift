@@ -252,7 +252,7 @@ final class DeviceDataManager {
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
             settingsStore: settingsStore,
-            alertManager: alertManager
+            alertPresenter: alertManager
         )
         cacheStore.delegate = loopManager
         

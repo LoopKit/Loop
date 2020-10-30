@@ -12,7 +12,7 @@ import LoopKit
 import LoopCore
 
 
-final class LoopDataManager {
+final class LoopDataManager: LoopSettingsAlerterDelegate {
     enum LoopUpdateContext: Int {
         case bolus
         case carbs
@@ -38,6 +38,8 @@ final class LoopDataManager {
     private let logger = DiagnosticLog(category: "LoopDataManager")
 
     private let analyticsServicesManager: AnalyticsServicesManager
+
+    let loopSettingsAlerter: LoopSettingsAlerter
 
     private let now: () -> Date
 
@@ -68,7 +70,7 @@ final class LoopDataManager {
         dosingDecisionStore: DosingDecisionStoreProtocol,
         settingsStore: SettingsStoreProtocol,
         now: @escaping () -> Date = { Date() },
-        alertManager: AlertManager? = nil
+        alertPresenter: AlertPresenter? = nil
     ) {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -92,8 +94,10 @@ final class LoopDataManager {
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
+        loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: alertPresenter)
+        loopSettingsAlerter.delegate = self
+
         overrideHistory.delegate = self
-        self.settings.alertManager = alertManager
 
         // Observe changes
         notificationObservers = [
@@ -143,13 +147,13 @@ final class LoopDataManager {
     /// Loop-related settings
     ///
     /// These are not thread-safe.
-    
+
     @Published var settings: LoopSettings {
         didSet {
             guard settings != oldValue else {
                 return
             }
-            
+
             if settings.preMealOverride != oldValue.preMealOverride {
                 // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
                 predictedGlucose = nil
@@ -163,6 +167,7 @@ final class LoopDataManager {
                 self.carbsOnBoard = nil
                 self.insulinEffect = nil
             }
+
             UserDefaults.appGroup?.loopSettings = settings
             notify(forChange: .preferences)
             analyticsServicesManager.didChangeLoopSettings(from: oldValue, to: settings)
