@@ -32,6 +32,8 @@ protocol BolusEntryViewModelDelegate: class {
     
     ///
     func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
+    
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelSetting: InsulinModelSettings?)
 
     ///
     func getCachedGlucoseSamples(start: Date, end: Date?, completion: @escaping (_ samples: [StoredGlucoseSample]) -> Void)
@@ -212,7 +214,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
     
     var startingPickerIndex: Int {
-        if let pumpInsulinModel = dataManager.loopManager.insulinModelSettings?.model as? ExponentialInsulinModelPreset, let indexToStartOn = insulinModelPickerOptions.firstIndex(of: pumpInsulinModel.title) {
+        if let pumpInsulinModel = delegate?.insulinModel as? ExponentialInsulinModelPreset, let indexToStartOn = insulinModelPickerOptions.firstIndex(of: pumpInsulinModel.title) {
             return indexToStartOn
         }
         
@@ -279,7 +281,7 @@ final class BolusEntryViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.dataManager.loopManager.getLoopState { manager, state in
+                self?.delegate?.withLoopState { [weak self] state in
                     self?.updatePredictedGlucoseValues(from: state)
                 }
             }
@@ -291,7 +293,7 @@ final class BolusEntryViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.dataManager.loopManager.getLoopState { manager, state in
+                self?.delegate?.withLoopState { [weak self] state in
                     self?.updatePredictedGlucoseValues(from: state)
                 }
             }
@@ -359,7 +361,17 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         // Authenticate the bolus before saving anything
-        if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
+        if isLoggingDose && enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
+            let message = String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt to log an insulin dose"), enteredBolusAmountString)
+            authenticationChallenge(message) {
+                switch $0 {
+                case .success:
+                    self.continueSaving(onSuccess: completion)
+                case .failure:
+                    break
+                }
+            }
+        } else if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
             let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString)
             authenticationChallenge(message) {
                 switch $0 {
@@ -387,7 +399,19 @@ final class BolusEntryViewModel: ObservableObject {
     }
     
     private func continueSaving(onSuccess completion: @escaping () -> Void) {
-        if let manualGlucoseSample = manualGlucoseSample {
+        if isLoggingDose {
+            let doseVolume = enteredBolus.doubleValue(for: .internationalUnit())
+            guard doseVolume > 0 else {
+                completion()
+                return
+            }
+            
+            let model = selectedInsulinModel
+            let insulinModelSettings = InsulinModelSettings(model: model!)
+
+            delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinModelSetting: insulinModelSettings)
+            completion()
+        } else if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
             delegate?.addGlucose([manualGlucoseSample]) { result in
                 DispatchQueue.main.async {
@@ -401,18 +425,6 @@ final class BolusEntryViewModel: ObservableObject {
                     }
                 }
             }
-        } else if isLoggingDose {
-            let doseVolume = enteredBolus.doubleValue(for: .internationalUnit())
-            guard doseVolume > 0 else {
-                completion()
-                return
-            }
-            
-            let model = selectedInsulinModel
-            let insulinModelSettings = InsulinModelSettings(model: model!)
-
-            dataManager.loopManager.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinModelSetting: insulinModelSettings)
-            completion()
         } else {
             saveCarbsAndDeliverBolus(onSuccess: completion)
         }

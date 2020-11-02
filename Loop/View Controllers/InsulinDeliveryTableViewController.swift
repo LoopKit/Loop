@@ -139,7 +139,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         tableView.endEditing(true)
 
         let viewModel = BolusEntryViewModel(
-            dataManager: deviceManager,
+            delegate: deviceManager,
             supportedInsulinModels: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled)
         )
         let bolusEntryView = BolusEntryView(viewModel: viewModel)
