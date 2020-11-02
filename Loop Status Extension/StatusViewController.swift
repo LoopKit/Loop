@@ -92,7 +92,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         observationEnabled: false,
         insulinModel: defaults?.insulinModelSettings?.model,
         basalProfile: defaults?.basalRateSchedule,
-        insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule
+        insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule,
+        provenanceIdentifier: HKSource.default().bundleIdentifier
     )
     
     private var pluginManager: PluginManager = {

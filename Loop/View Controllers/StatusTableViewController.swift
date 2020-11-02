@@ -156,12 +156,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
         if !appearedOnce {
             appearedOnce = true
 
-            if deviceManager.authorizationRequired {
-                deviceManager.authorize {
-                    DispatchQueue.main.async {
-                        self.log.debug("[reloadData] after HealthKit authorization")
-                        self.reloadData()
-                    }
+            deviceManager.authorize {
+                DispatchQueue.main.async {
+                    self.log.debug("[reloadData] after HealthKit authorization")
+                    self.reloadData()
                 }
             }
         }
