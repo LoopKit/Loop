@@ -3033,6 +3033,7 @@
 				4F70C1DB1DE8DCA7006380B7 /* Loop Status Extension */,
 				43A943711B926B7B0051FA24 /* WatchApp */,
 				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
+				E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */,
 				43D9FFA121EA9A0C00AF44BF /* Learn */,
 				43D9FFCE21EAE05D00AF44BF /* LoopCore */,
 				43D9001A21EB209400AF44BF /* LoopCore-watchOS */,
@@ -3040,7 +3041,6 @@
 				43E2D8D01D20BF42004DA55F /* DoseMathTests */,
 				43E2D90A1D20C581004DA55F /* LoopTests */,
 				432CF87720D8B8380066B889 /* Cartfile */,
-				E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */,
 			);
 		};
 /* End PBXProject section */
