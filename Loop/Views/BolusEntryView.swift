@@ -191,7 +191,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     DismissibleKeyboardTextField(
                         text: typedManualGlucoseEntry,
                         placeholder: "---",
-                        font: typedManualGlucoseEntry.wrappedValue == "" ? .preferredFont(forTextStyle: .title1) : .heavy(.title1),
+                        font: .heavy(.title1),
                         textAlignment: .right,
                         keyboardType: .decimalPad,
                         shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
