@@ -331,6 +331,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var doseEntries: [DoseEntry]?
         var totalDelivery: Double?
         var cobValues: [CarbValue]?
+        var carbsOnBoard: HKQuantity?
         let startDate = charts.startDate
         let basalDeliveryState = self.basalDeliveryState
 
@@ -386,6 +387,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     }
                     reloadGroup.leave()
                 }
+                carbsOnBoard = state.carbsOnBoard?.quantity
             }
 
             reloadGroup.leave()
@@ -519,6 +521,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
             if let index = charts.cob.cobPoints.closestIndex(priorTo: Date()) {
                 self.currentCOBDescription = String(describing: charts.cob.cobPoints[index].y)
+            } else if let carbsOnBoard = carbsOnBoard {
+                self.currentCOBDescription = self.quantityFormatter.string(from: carbsOnBoard, for: .gram())
             } else {
                 self.currentCOBDescription = nil
             }
