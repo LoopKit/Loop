@@ -647,10 +647,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
         } else if let (recommendation: tempBasal, date: date) = recommendedTempBasal {
             statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
         } else if let scheduleOverride = deviceManager.loopManager.settings.scheduleOverride,
-            scheduleOverride.context != .preMeal && scheduleOverride.context != .legacyWorkout,
             !scheduleOverride.hasFinished()
         {
             statusRowMode = .scheduleOverrideEnabled(scheduleOverride)
+        } else if let premealOverride = deviceManager.loopManager.settings.preMealOverride,
+            !premealOverride.hasFinished()
+        {
+            statusRowMode = .scheduleOverrideEnabled(premealOverride)
         } else {
             statusRowMode = .hidden
         }
@@ -842,6 +845,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 let cell = tableView.dequeueReusableCell(withIdentifier: TitleSubtitleTableViewCell.className, for: indexPath) as! TitleSubtitleTableViewCell
                 cell.selectionStyle = .none
                 cell.backgroundColor = .secondarySystemBackground
+                cell.titleLabel.text = nil
+                cell.subtitleLabel.text = nil
+                cell.accessoryView = nil
                 return cell
             }
 
@@ -850,9 +856,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 switch statusRowMode {
                 case .hidden:
                     let cell = getTitleSubtitleCell()
-                    cell.titleLabel.text = nil
-                    cell.subtitleLabel?.text = nil
-                    cell.accessoryView = nil
                     return cell
                 case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting):
                     let cell = getTitleSubtitleCell()
@@ -868,15 +871,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         let indicatorView = UIActivityIndicatorView(style: .default)
                         indicatorView.startAnimating()
                         cell.accessoryView = indicatorView
-                    } else {
-                        cell.accessoryView = nil
                     }
                     return cell
                 case .scheduleOverrideEnabled(let override):
                     let cell = getTitleSubtitleCell()
                     switch override.context {
-                    case .preMeal, .legacyWorkout:
-                        assertionFailure("Pre-meal and legacy workout modes should not produce status rows")
+                    case .preMeal:
+                        let symbolAttachment = NSTextAttachment()
+                        symbolAttachment.image = UIImage(named: "Pre-Meal-symbol")?.withTintColor(.carbTintColor)
+
+                        let attributedString = NSMutableAttributedString(attachment: symbolAttachment)
+                        attributedString.append(NSAttributedString(string: NSLocalizedString(" Pre-meal Preset", comment: "Status row title for premeal override enabled (leading space is to separate from symbol)")))
+                        cell.titleLabel.attributedText = attributedString
+                    case .legacyWorkout:
+                        let symbolAttachment = NSTextAttachment()
+                        symbolAttachment.image = UIImage(named: "workout-symbol")?.withTintColor(.glucoseTintColor)
+
+                        let attributedString = NSMutableAttributedString(attachment: symbolAttachment)
+                        attributedString.append(NSAttributedString(string: NSLocalizedString(" Workout Preset", comment: "Status row title for workout override enabled (leading space is to separate from symbol)")))
+                        cell.titleLabel.attributedText = attributedString
                     case .preset(let preset):
                         cell.titleLabel.text = String(format: NSLocalizedString("%@ %@", comment: "The format for an active custom preset. (1: preset symbol)(2: preset name)"), preset.symbol, preset.name)
                     case .custom:
@@ -896,12 +909,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a custom preset start date"), startTimeText)
                     }
 
-                    cell.accessoryView = nil
                     return cell
                 case .enactingBolus:
                     let cell = getTitleSubtitleCell()
                     cell.titleLabel.text = NSLocalizedString("Starting Bolus", comment: "The title of the cell indicating a bolus is being sent")
-                    cell.subtitleLabel.text = nil
 
                     let indicatorView = UIActivityIndicatorView(style: .default)
                     indicatorView.startAnimating()
@@ -919,7 +930,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 case .cancelingBolus:
                     let cell = getTitleSubtitleCell()
                     cell.titleLabel.text = NSLocalizedString("Canceling Bolus", comment: "The title of the cell indicating a bolus is being canceled")
-                    cell.subtitleLabel.text = nil
 
                     let indicatorView = UIActivityIndicatorView(style: .default)
                     indicatorView.startAnimating()
@@ -933,9 +943,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         let indicatorView = UIActivityIndicatorView(style: .default)
                         indicatorView.startAnimating()
                         cell.accessoryView = indicatorView
-                        cell.subtitleLabel.text = nil
                     } else {
-                        cell.accessoryView = nil
                         cell.subtitleLabel.text = NSLocalizedString("Tap to Resume", comment: "The subtitle of the cell displaying an action to resume insulin delivery")
                     }
                     cell.selectionStyle = .default
@@ -1255,7 +1263,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
         if preMealMode == true {
             deviceManager.loopManager.settings.clearOverride(matching: .preMeal)
         } else {
-            deviceManager.loopManager.settings.enablePreMealOverride(for: .hours(1))
+            let vc = UIAlertController(premealDurationSelectionHandler: { duration in
+                let startDate = Date()
+                self.deviceManager.loopManager.settings.enablePreMealOverride(at: startDate, for: duration)
+            })
+
+            present(vc, animated: true, completion: nil)
         }
     }
 
