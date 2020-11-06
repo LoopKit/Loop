@@ -387,9 +387,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     }
                     reloadGroup.leave()
                 }
-                carbsOnBoard = state.carbsOnBoard?.quantity
             }
-
+            // always check for cob
+            carbsOnBoard = state.carbsOnBoard?.quantity
+            
             reloadGroup.leave()
         }
 
