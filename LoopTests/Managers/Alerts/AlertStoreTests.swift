@@ -66,17 +66,19 @@ class AlertStoreTests: XCTestCase {
     }
     
     func testStoredAlertSerialization() {
-        let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Self.historicDate)
-        XCTAssertNil(object.acknowledgedDate)
-        XCTAssertNil(object.retractedDate)
-        XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.backgroundContent)
-        XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.foregroundContent)
-        XCTAssertEqual("managerIdentifier2.alertIdentifier2", object.identifier.value)
-        XCTAssertEqual(true, object.isCritical)
-        XCTAssertEqual(Self.historicDate, object.issuedDate)
-        XCTAssertEqual(1, object.modificationCounter)
-        XCTAssertEqual("{\"sound\":{\"name\":\"soundName\"}}", object.sound)
-        XCTAssertEqual(Alert.Trigger.immediate, object.trigger)
+        alertStore.managedObjectContext.performAndWait {
+            let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Self.historicDate)
+            XCTAssertNil(object.acknowledgedDate)
+            XCTAssertNil(object.retractedDate)
+            XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.backgroundContent)
+            XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.foregroundContent)
+            XCTAssertEqual("managerIdentifier2.alertIdentifier2", object.identifier.value)
+            XCTAssertEqual(true, object.isCritical)
+            XCTAssertEqual(Self.historicDate, object.issuedDate)
+            XCTAssertEqual(1, object.modificationCounter)
+            XCTAssertEqual("{\"sound\":{\"name\":\"soundName\"}}", object.sound)
+            XCTAssertEqual(Alert.Trigger.immediate, object.trigger)
+        }
     }
     
     func testQueryAnchorSerialization() {
