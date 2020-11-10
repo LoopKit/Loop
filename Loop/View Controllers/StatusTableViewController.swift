@@ -733,7 +733,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
             }
         case (false, true):
-            self.tableView.insertRows(at: [statusIndexPath], with: animated ? .top : .none)
+            self.tableView.insertRows(at: [statusIndexPath], with: animated ? .bottom : .none)
         case (true, false):
             self.tableView.deleteRows(at: [statusIndexPath], with: animated ? .top : .none)
         default:
@@ -1270,6 +1270,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
         } else {
             let vc = UIAlertController(premealDurationSelectionHandler: { duration in
                 let startDate = Date()
+                
+                guard self.workoutMode != true else {
+                    // allow cell animation when switching between presets
+                    self.deviceManager.loopManager.settings.clearOverride()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        self.deviceManager.loopManager.settings.enablePreMealOverride(at: startDate, for: duration)
+                    }
+                    return
+                }
+                
                 self.deviceManager.loopManager.settings.enablePreMealOverride(at: startDate, for: duration)
             })
 
@@ -1286,6 +1296,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
             } else {
                 let vc = UIAlertController(workoutDurationSelectionHandler: { duration in
                     let startDate = Date()
+                    
+                    guard self.preMealMode != true else {
+                        // allow cell animation when switching between presets
+                        self.deviceManager.loopManager.settings.clearOverride(matching: .preMeal)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            self.deviceManager.loopManager.settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
+                        }
+                        return
+                    }
+                    
                     self.deviceManager.loopManager.settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
                 })
 

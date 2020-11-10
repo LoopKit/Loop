@@ -191,7 +191,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     DismissibleKeyboardTextField(
                         text: typedManualGlucoseEntry,
                         placeholder: "---",
-                        font: .heavy(.title1),
+                        // The heavy title is ending up clipped due to a bug that is fixed in iOS 14.  Uncomment the following when we can build for iOS 14.
+                        font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
                         textAlignment: .right,
                         keyboardType: .decimalPad,
                         shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
