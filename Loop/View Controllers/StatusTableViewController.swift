@@ -184,6 +184,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         refreshContext.update(with: .size(size))
 
+        maybeOpenDebugMenu()
+        
         super.viewWillTransition(to: size, with: coordinator)
     }
 
@@ -1577,6 +1579,35 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
 
     // MARK: - Debug Scenarios and Simulated Core Data
+    
+    var lastOrientation: UIDeviceOrientation?
+    var rotateCount = 0
+    let maxRotationsToTrigger = 6
+    var rotateTimer: Timer?
+    let rotateTimerTimeout = TimeInterval.seconds(2)
+    private func maybeOpenDebugMenu() {
+        guard FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled else {
+            return
+        }
+        // Opens the debug menu if you rotate the phone 6 times (or back & forth 3 times), each rotation within 2 secs.
+        if lastOrientation != UIDevice.current.orientation {
+            if UIDevice.current.orientation == .portrait && rotateCount >= maxRotationsToTrigger-1 {
+                presentDebugMenu()
+                rotateCount = 0
+                rotateTimer?.invalidate()
+                rotateTimer = nil
+            } else {
+                rotateTimer?.invalidate()
+                rotateTimer = Timer.scheduledTimer(withTimeInterval: rotateTimerTimeout, repeats: false) { [weak self] _ in
+                    self?.rotateCount = 0
+                    self?.rotateTimer?.invalidate()
+                    self?.rotateTimer = nil
+                }
+                rotateCount += 1
+            }
+        }
+        lastOrientation = UIDevice.current.orientation
+    }
 
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
         if FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled {
