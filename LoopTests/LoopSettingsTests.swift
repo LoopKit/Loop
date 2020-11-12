@@ -13,23 +13,32 @@ import LoopKit
 
 class LoopSettingsTests: XCTestCase {
     private let preMealRange = DoubleRange(minValue: 80, maxValue: 80)
-
+    private let targetRange = DoubleRange(minValue: 95, maxValue: 105)
+    
     private lazy var settings: LoopSettings = {
         var settings = LoopSettings()
         settings.preMealTargetRange = preMealRange
         settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
             unit: .milligramsPerDeciliter,
-            dailyItems: [.init(startTime: 0, value: DoubleRange(minValue: 95, maxValue: 105))]
+            dailyItems: [.init(startTime: 0, value: targetRange)]
         )
         return settings
     }()
-
+    
     func testPreMealOverride() {
         var settings = self.settings
         let preMealStart = Date()
         settings.enablePreMealOverride(at: preMealStart, for: 1 /* hour */ * 60 * 60)
-        let actualPreMealRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
-        XCTAssertEqual(actualPreMealRange, preMealRange)
+        let actualPreMealRange = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
+        XCTAssertEqual(preMealRange, actualPreMealRange)
+    }
+    
+    func testPreMealOverrideWithPotentialCarbEntry() {
+        var settings = self.settings
+        let preMealStart = Date()
+        settings.enablePreMealOverride(at: preMealStart, for: 1 /* hour */ * 60 * 60)
+        let actualRange = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: true)?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
+        XCTAssertEqual(targetRange, actualRange)
     }
 
     func testScheduleOverride() {
@@ -48,7 +57,7 @@ class LoopSettingsTests: XCTestCase {
             syncIdentifier: UUID()
         )
         settings.scheduleOverride = override
-        let actualOverrideRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: overrideStart.addingTimeInterval(30 /* minutes */ * 60))
+        let actualOverrideRange = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: overrideStart.addingTimeInterval(30 /* minutes */ * 60))
         XCTAssertEqual(actualOverrideRange, overrideTargetRange)
     }
 
@@ -72,11 +81,11 @@ class LoopSettingsTests: XCTestCase {
         )
         settings.scheduleOverride = override
 
-        let actualPreMealRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
+        let actualPreMealRange = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
         XCTAssertEqual(actualPreMealRange, preMealRange)
 
         // The pre-meal range should be projected into the future, despite the simultaneous schedule override
-        let preMealRangeDuringOverride = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: preMealStart.addingTimeInterval(2 /* hours */ * 60 * 60))
+        let preMealRangeDuringOverride = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: preMealStart.addingTimeInterval(2 /* hours */ * 60 * 60))
         XCTAssertEqual(preMealRangeDuringOverride, preMealRange)
     }
 
@@ -106,7 +115,7 @@ class LoopSettingsTests: XCTestCase {
         )
         settings.scheduleOverride = override
 
-        let actualOverrideRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: overrideStart.addingTimeInterval(2 /* hours */ * 60 * 60))
+        let actualOverrideRange = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: overrideStart.addingTimeInterval(2 /* hours */ * 60 * 60))
         XCTAssertEqual(actualOverrideRange, overrideTargetRange)
     }
 }

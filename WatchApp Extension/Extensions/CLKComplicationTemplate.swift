@@ -83,8 +83,6 @@ extension CLKComplicationTemplate {
             tintColor = .agingColor
         case .stale:
             tintColor = .staleColor
-        case .unknown:
-            tintColor = .disabledButtonColor
         }
 
         let glucoseAndTrend = "\(glucoseString)\(trendString)"

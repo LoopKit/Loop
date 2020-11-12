@@ -8,6 +8,7 @@
 
 import os.log
 import Foundation
+import Combine
 import SwiftUI
 import LoopKit
 
@@ -21,21 +22,62 @@ public class CriticalEventLogExportViewModel: ObservableObject, Identifiable, Cr
     @Published var showingSuccess: Bool = false
     @Published var showingShare: Bool = false
     @Published var showingError: Bool = false
-    @Published var progress: Double = 0
+    @Published var progress: Double = 0 {
+        didSet {
+            let now = Date()
+            if self.progressStartDate == nil {
+                self.progressStartDate = now
+            }
+
+            // If no progress in the last few seconds, then means we were backgrounded, so discount that gap (move start forward by same)
+            if let progressLatestDate = self.progressLatestDate {
+                let progressLatestDuration = now.timeIntervalSince(progressLatestDate)
+                if progressLatestDuration > self.progressDurationBackgroundMaximum {
+                    self.progressStartDate! += progressLatestDuration
+                }
+            }
+
+            self.progressLatestDate = now
+
+            // If no progress, then we have no idea when we will finish and bail (prevents divide by zero)
+            guard progress > 0 else {
+                self.remainingDuration = nil
+                return
+            }
+
+            // If we haven't been exporting for long, then remaining duration may be wildly inaccurate so just bail
+            let progressDuration = now.timeIntervalSince(self.progressStartDate!)
+            guard progressDuration > self.progressDurationMinimum else {
+                self.remainingDuration = nil
+                return
+            }
+
+            self.remainingDuration = self.remainingDurationAsString(progressDuration / progress - progressDuration)
+        }
+    }
     @Published var remainingDuration: String?
 
-    var progressStartDate: Date?
-    var progressLatestDate: Date?
-    var progressDuration: TimeInterval = 0
     var activityItems: [UIActivityItemSource] = []
+
+    private var progressPublisher = PassthroughSubject<Double, Never>()
+    private var progressStartDate: Date?
+    private var progressLatestDate: Date?
 
     private let exporterFactory: CriticalEventLogExporterFactory
     private var exporter: CriticalEventLogExporter?
+
+    private var cancellables: Set<AnyCancellable> = []
 
     private let log = OSLog(category: "CriticalEventLogExportManager")
 
     init(exporterFactory: CriticalEventLogExporterFactory) {
         self.exporterFactory = exporterFactory
+
+        progressPublisher
+            .removeDuplicates()
+            .throttle(for: .seconds(0.25), scheduler: RunLoop.main, latest: true)
+            .sink { [weak self] in self?.progress = $0 }
+            .store(in: &cancellables)
     }
 
     func export() {
@@ -47,9 +89,8 @@ public class CriticalEventLogExportViewModel: ObservableObject, Identifiable, Cr
         self.progress = 0
         self.remainingDuration = nil
 
-        self.progressStartDate =  nil
+        self.progressStartDate = nil
         self.progressLatestDate = nil
-        self.progressDuration = 0
         self.activityItems = []
 
         let filename = String(format: NSLocalizedString("Export-%1$@", comment: "The export file name formatted string (1: timestamp)"), self.timestampFormatter.string(from: Date()))
@@ -62,17 +103,18 @@ public class CriticalEventLogExportViewModel: ObservableObject, Identifiable, Cr
 
         exporter.export() { error in
             DispatchQueue.main.async {
+                guard !exporter.isCancelled else {
+                    return
+                }
+
                 if let error = error {
                     self.log.error("Failure during critical event log export: %{public}@", String(describing: error))
-                    if !exporter.isCancelled {
-                        self.showingError = true
-                    }
+                    self.showingError = true
                 } else {
+                    self.progress = 1.0
                     self.activityItems = [CriticalEventLogExportActivityItemSource(url: url)]
                     self.showingSuccess = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-                        self.showingShare = true
-                    }
+                    self.showingShare = true
                 }
             }
         }
@@ -88,39 +130,11 @@ public class CriticalEventLogExportViewModel: ObservableObject, Identifiable, Cr
 
     // MARK: - CriticalEventLogExporterDelegate
 
-    private let progressBackgroundDuration: TimeInterval = .seconds(5)
-    private let durationMinimum: TimeInterval = .seconds(5)
+    private let progressDurationBackgroundMaximum: TimeInterval = .seconds(5)
+    private let progressDurationMinimum: TimeInterval = .seconds(5)
 
     public func exportDidProgress(_ progress: Double) {
-        DispatchQueue.main.async {
-            let now = Date()
-            if self.progressStartDate == nil {
-                self.progressStartDate = now
-            }
-
-            // If no progress in the last few seconds, then means we were backgrounded, so add to progress duration and refresh start date
-            if let progressLatestDate = self.progressLatestDate, now > progressLatestDate.addingTimeInterval(self.progressBackgroundDuration) {
-                self.progressDuration += progressLatestDate.timeIntervalSince(self.progressStartDate!)
-                self.progressStartDate = now
-            }
-
-            self.progress = progress
-            self.progressLatestDate = now
-
-            // If no progress, then we have no idea when we will finish and bail (prevents divide by zero)
-            guard self.progress > 0 else {
-                self.remainingDuration = nil
-                return
-            }
-
-            // If we haven't been exporting for long, then remaining duration may be wildly inaccurate so just bail
-            let duration = self.progressDuration + self.progressLatestDate!.timeIntervalSince(self.progressStartDate!)
-            guard duration > self.durationMinimum else {
-                return
-            }
-
-            self.remainingDuration = self.remainingDurationAsString(duration / self.progress - duration)
-        }
+        progressPublisher.send(progress)
     }
 
     // The default duration formatter formats a duration in the range of X minutes through X minutes and 59 seconds as

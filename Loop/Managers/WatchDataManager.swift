@@ -44,6 +44,14 @@ final class WatchDataManager: NSObject {
     private var lastSentSettings: LoopSettings?
     private var lastSentBolusVolumes: [Double]?
 
+    private var contextDosingDecisions: [Date: BolusDosingDecision] {
+        get { lockedContextDosingDecisions.value }
+        set { lockedContextDosingDecisions.value = newValue }
+    }
+    private var lockedContextDosingDecisions: Locked<[Date: BolusDosingDecision]> = Locked([:])
+
+    private let contextDosingDecisionExpirationDuration: TimeInterval = -.minutes(5)
+
     let sleepStore: SleepStore
     
     var lastBedtimeQuery: Date {
@@ -215,6 +223,8 @@ final class WatchDataManager: NSObject {
     }
 
     private func createWatchContext(recommendingBolusFor potentialCarbEntry: NewCarbEntry? = nil, _ completion: @escaping (_ context: WatchContext) -> Void) {
+        var dosingDecision = BolusDosingDecision()
+
         let loopManager = deviceManager.loopManager!
 
         let glucose = deviceManager.glucoseStore.latestGlucose
@@ -223,34 +233,54 @@ final class WatchDataManager: NSObject {
 
         loopManager.getLoopState { (manager, state) in
             let updateGroup = DispatchGroup()
+
+            let carbsOnBoard = state.carbsOnBoard
+            let recommendedBolus = state.recommendedBolus
+
             let context = WatchContext(glucose: glucose, glucoseUnit: self.deviceManager.glucoseStore.preferredUnit)
             context.reservoir = reservoir?.unitVolume
             context.loopLastRunDate = manager.lastLoopCompleted
-            context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
-            context.cob = state.carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
+            context.recommendedBolusDose = recommendedBolus?.recommendation.amount
+            context.cob = carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
             context.glucoseTrendRawValue = self.deviceManager.glucoseDisplay(for: glucose)?.trendType?.rawValue
 
-            context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
+            dosingDecision.carbsOnBoard = carbsOnBoard
+            dosingDecision.recommendedBolus = recommendedBolus?.recommendation
 
+            context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
+        
+            let settings = self.deviceManager.loopManager.settings
+
+            context.isClosedLoop = settings.dosingEnabled
+            
             if let trend = self.deviceManager.cgmManager?.glucoseDisplay?.trendType {
                 context.glucoseTrendRawValue = trend.rawValue
             }
             
             if let potentialCarbEntry = potentialCarbEntry {
                 context.potentialCarbEntry = potentialCarbEntry
-                context.recommendedBolusDoseConsideringPotentialCarbEntry = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil)?.amount
+                if let recommendedBolusDoseConsideringPotentialCarbEntry = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil) {
+                    context.recommendedBolusDoseConsideringPotentialCarbEntry = recommendedBolusDoseConsideringPotentialCarbEntry.amount
+                    dosingDecision.recommendedBolus = recommendedBolusDoseConsideringPotentialCarbEntry
+                }
             }
             
             if let glucose = glucose {
                 updateGroup.enter()
-                self.deviceManager.glucoseStore.getCachedGlucoseSamples(start: glucose.startDate, end: nil) { (samples) in
-                    if let sample = samples.last {
-                        context.glucose = sample.quantity
-                        context.glucoseDate = sample.startDate
-                        context.glucoseIsDisplayOnly = sample.isDisplayOnly
-                        context.glucoseWasUserEntered = sample.wasUserEntered
-                        context.glucoseSyncIdentifier = sample.syncIdentifier
+                self.deviceManager.glucoseStore.getGlucoseSamples(start: glucose.startDate, end: nil) { (result) in
+                    var sample: StoredGlucoseSample?
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("Failure getting glucose samples: %{public}@", String(describing: error))
+                        sample = nil
+                    case .success(let samples):
+                        sample = samples.last
                     }
+                    context.glucose = sample?.quantity
+                    context.glucoseDate = sample?.startDate
+                    context.glucoseIsDisplayOnly = sample?.isDisplayOnly
+                    context.glucoseWasUserEntered = sample?.wasUserEntered
+                    context.glucoseSyncIdentifier = sample?.syncIdentifier
                     updateGroup.leave()
                 }
             }
@@ -260,8 +290,10 @@ final class WatchDataManager: NSObject {
                 switch result {
                 case .success(let iobValue):
                     context.iob = iobValue.value
+                    dosingDecision.insulinOnBoard = iobValue
                 case .failure:
                     context.iob = nil
+                    dosingDecision.insulinOnBoard = nil
                 }
                 updateGroup.leave()
             }
@@ -273,12 +305,40 @@ final class WatchDataManager: NSObject {
                 context.lastNetTempBasalDose = netBasal.rate
             }
 
-            // Drop the first element in predictedGlucose because it is the current glucose
-            if let predictedGlucose = state.predictedGlucoseIncludingPendingInsulin?.dropFirst(), predictedGlucose.count > 0 {
-                context.predictedGlucose = WatchPredictedGlucose(values: Array(predictedGlucose))
+            if let predictedGlucose = state.predictedGlucoseIncludingPendingInsulin {
+                dosingDecision.predictedGlucoseIncludingPendingInsulin = predictedGlucose
+
+                // Drop the first element in predictedGlucose because it is the current glucose
+                let filteredPredictedGlucose = predictedGlucose.dropFirst()
+                if filteredPredictedGlucose.count > 0 {
+                    context.predictedGlucose = WatchPredictedGlucose(values: Array(filteredPredictedGlucose))
+                }
+            }
+
+            var preMealOverride = settings.preMealOverride
+            if preMealOverride?.hasFinished() == true {
+                preMealOverride = nil
+            }
+
+            var scheduleOverride = settings.scheduleOverride
+            if scheduleOverride?.hasFinished() == true {
+                scheduleOverride = nil
+            }
+
+            dosingDecision.scheduleOverride = preMealOverride ?? scheduleOverride
+            dosingDecision.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
+            if scheduleOverride != nil || preMealOverride != nil {
+                dosingDecision.effectiveGlucoseTargetRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
+            } else {
+                dosingDecision.effectiveGlucoseTargetRangeSchedule = nil
             }
 
             _ = updateGroup.wait(timeout: .distantFuture)
+
+            // Remove any expired context dosing decisions and add new
+            self.contextDosingDecisions = self.contextDosingDecisions.filter { (date, _) in date.timeIntervalSinceNow > self.contextDosingDecisionExpirationDuration }
+            self.contextDosingDecisions[context.creationDate] = dosingDecision
+
             completion(context)
         }
     }
@@ -289,7 +349,17 @@ final class WatchDataManager: NSObject {
             return
         }
 
+        var dosingDecision: BolusDosingDecision
+        if let contextDate = bolus.contextDate, let contextDosingDecision = contextDosingDecisions[contextDate] {
+            dosingDecision = contextDosingDecision
+        } else {
+            dosingDecision = BolusDosingDecision()  // The user saved without waiting for recommendation (no bolus)
+        }
+
         func enactBolus() {
+            dosingDecision.requestedBolus = bolus.value
+            deviceManager.loopManager.storeBolusDosingDecision(dosingDecision, withDate: bolus.startDate)
+
             guard bolus.value > 0 else {
                 // Ensure active carbs is updated in the absence of a bolus
                 sendWatchContextIfNeeded()
@@ -309,7 +379,8 @@ final class WatchDataManager: NSObject {
         if let carbEntry = bolus.carbEntry {
             deviceManager.loopManager.addCarbEntry(carbEntry) { (result) in
                 switch result {
-                case .success:
+                case .success(let storedCarbEntry):
+                    dosingDecision.carbEntry = storedCarbEntry
                     self.deviceManager.analyticsServicesManager.didAddCarbsFromWatch()
                     enactBolus()
                 case .failure(let error):
@@ -317,6 +388,7 @@ final class WatchDataManager: NSObject {
                 }
             }
         } else {
+            dosingDecision.carbEntry = nil
             enactBolus()
         }
     }
@@ -347,6 +419,7 @@ extension WatchDataManager: WCSessionDelegate {
                 var settings = deviceManager.loopManager.settings
                 settings.preMealOverride = watchSettings.preMealOverride
                 settings.scheduleOverride = watchSettings.scheduleOverride
+                settings.indefiniteWorkoutOverrideEnabledDate = watchSettings.indefiniteWorkoutOverrideEnabledDate
 
                 // Prevent re-sending these updated settings back to the watch
                 lastSentSettings = settings
@@ -373,8 +446,14 @@ extension WatchDataManager: WCSessionDelegate {
             }
         case GlucoseBackfillRequestUserInfo.name?:
             if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message) {
-                deviceManager.glucoseStore.getCachedGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1), end: nil) { (values) in
-                    replyHandler(WatchHistoricalGlucose(with: values).rawValue)
+                deviceManager.glucoseStore.getSyncGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1)) { (result) in
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("Failure getting sync glucose objects: %{public}@", String(describing: error))
+                        replyHandler([:])
+                    case .success(let samples):
+                        replyHandler(WatchHistoricalGlucose(samples: samples).rawValue)
+                    }
                 }
             } else {
                 replyHandler([:])

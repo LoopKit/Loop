@@ -25,10 +25,10 @@ extension GlucoseStore {
         var startDate = Calendar.current.startOfDay(for: earliestCacheDate)
         let endDate = Calendar.current.startOfDay(for: historicalEndDate)
         var value = 0.0
-        var simulated = [StoredGlucoseSample]()
+        var simulated = [NewGlucoseSample]()
 
         while startDate < endDate {
-            simulated.append(StoredGlucoseSample.simulated(startDate: startDate, value: simulatedValueBase + simulatedValueAmplitude * sin(value)))
+            simulated.append(NewGlucoseSample.simulated(date: startDate, value: simulatedValueBase + simulatedValueAmplitude * sin(value)))
 
             if simulated.count >= simulatedLimit {
                 if let error = addSimulatedHistoricalGlucoseObjects(samples: simulated) {
@@ -45,10 +45,10 @@ extension GlucoseStore {
         completion(addSimulatedHistoricalGlucoseObjects(samples: simulated))
     }
 
-    private func addSimulatedHistoricalGlucoseObjects(samples: [StoredGlucoseSample]) -> Error? {
+    private func addSimulatedHistoricalGlucoseObjects(samples: [NewGlucoseSample]) -> Error? {
         var addError: Error?
         let semaphore = DispatchSemaphore(value: 0)
-        addGlucoseSamples(samples: samples) { error in
+        addNewGlucoseSamples(samples: samples) { error in
             addError = error
             semaphore.signal()
         }
@@ -61,15 +61,12 @@ extension GlucoseStore {
     }
 }
 
-fileprivate extension StoredGlucoseSample {
-    static func simulated(startDate: Date, value: Double, unit: HKUnit = HKUnit.milligramsPerDeciliter) -> StoredGlucoseSample {
-        return StoredGlucoseSample(sampleUUID: UUID(),
-                                   syncIdentifier: UUID().uuidString,
-                                   syncVersion: 1,
-                                   startDate: startDate,
-                                   quantity: HKQuantity(unit: unit, doubleValue: value),
-                                   isDisplayOnly: false,
-                                   wasUserEntered: false,
-                                   provenanceIdentifier: Bundle.main.bundleIdentifier!)
+fileprivate extension NewGlucoseSample {
+    static func simulated(date: Date, value: Double, unit: HKUnit = HKUnit.milligramsPerDeciliter) -> NewGlucoseSample {
+        return NewGlucoseSample(date: date,
+                                quantity: HKQuantity(unit: unit, doubleValue: value),
+                                isDisplayOnly: false,
+                                wasUserEntered: false,
+                                syncIdentifier: UUID().uuidString)
     }
 }

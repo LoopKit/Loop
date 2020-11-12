@@ -609,6 +609,47 @@ class AlertStoreTests: XCTestCase {
         }
         wait(for: [expect], timeout: 1)
     }
+    
+    func testLookupAllAcknowledgedUnretractedRepeatingAlertsAll() {
+        let expect = self.expectation(description: #function)
+        fillWith(startDate: Self.historicDate, data: [
+            (repeatingAlert, true, false),
+            (repeatingAlert, true, false)
+        ]) {
+            self.alertStore.lookupAllAcknowledgedUnretractedRepeatingAlerts(completion: self.expectSuccess { alerts in
+                XCTAssertEqual(alerts.count, 2)
+                self.assertEqual([self.repeatingAlert, self.repeatingAlert], alerts)
+                expect.fulfill()
+            })
+        }
+        wait(for: [expect], timeout: 1)
+    }
+    
+    func testLookupAllAcknowledgedUnretractedRepeatingAlertsEmpty() {
+        let expect = self.expectation(description: #function)
+        alertStore.lookupAllAcknowledgedUnretractedRepeatingAlerts(completion: expectSuccess { alerts in
+            XCTAssertTrue(alerts.isEmpty)
+            expect.fulfill()
+        })
+        wait(for: [expect], timeout: 1)
+    }
+    
+    func testLookupAllAcknowledgedUnretractedRepeatingAlertsSome() {
+        let expect = self.expectation(description: #function)
+        fillWith(startDate: Self.historicDate, data: [
+            (repeatingAlert, true, true),
+            (repeatingAlert, true, false),
+            (alert1, true, false)
+        ]) {
+            self.alertStore.lookupAllAcknowledgedUnretractedRepeatingAlerts(completion: self.expectSuccess { alerts in
+                XCTAssertEqual(alerts.count, 1)
+                self.assertEqual([self.repeatingAlert], alerts)
+                expect.fulfill()
+            })
+        }
+        wait(for: [expect], timeout: 1)
+    }
+    
 
     private func fillWith(startDate: Date, data: [(alert: Alert, acknowledged: Bool, retracted: Bool)], _ completion: @escaping () -> Void) {
         let increment = 1.0

@@ -82,6 +82,8 @@ final class StatusExtensionDataManager {
             #endif
 
             context.lastLoopCompleted = lastLoopCompleted
+            
+            context.isClosedLoop = dataManager.isClosedLoop
 
             // Drop the first element in predictedGlucose because it is the currentGlucose
             // and will have a different interval to the next element
@@ -126,6 +128,8 @@ final class StatusExtensionDataManager {
             context.cgmStatusHighlightContext = DeviceStatusHighlightContext(from: dataManager.cgmStatusHighlight)
             context.cgmLifecycleProgressContext = DeviceLifecycleProgressContext(from: dataManager.cgmLifecycleProgress)
 
+            context.carbsOnBoard = state.carbsOnBoard?.quantity.doubleValue(for: .gram())
+            
             completionHandler(context)
         }
     }

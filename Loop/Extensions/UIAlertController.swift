@@ -37,7 +37,7 @@ extension UIAlertController {
             })
         }
 
-        let distantFuture = NSLocalizedString("Indefinitely", comment: "The title of a target alert action specifying an indefinitely long workout targets duration")
+        let distantFuture = NSLocalizedString("Until I turn off", comment: "The title of a target alert action specifying an workout targets duration until it is turned off by the user")
         addAction(UIAlertAction(title: distantFuture, style: .default) { _ in
             handler(.infinity)
         })

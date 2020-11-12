@@ -12,7 +12,7 @@ import LoopCore
 extension LoopSettings {
     var enabledEffects: PredictionInputEffect {
         var inputs = PredictionInputEffect.all
-        if !retrospectiveCorrectionEnabled {
+        if !LoopConstants.retrospectiveCorrectionEnabled {
             inputs.remove(.retrospection)
         }
         return inputs

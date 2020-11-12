@@ -55,7 +55,8 @@ final class DataManager {
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
-            observationEnabled: false
+            observationEnabled: false,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
     }
 }

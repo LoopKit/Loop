@@ -58,6 +58,12 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
         }
     }
     
+    private var closedLoopToggleState: Binding<Bool> {
+        Binding(
+            get: { self.viewModel.isClosedLoopAllowed && self.viewModel.closedLoopPreference },
+            set: { self.viewModel.closedLoopPreference = $0 }
+        )
+    }
 }
 
 extension SettingsView {
@@ -70,10 +76,15 @@ extension SettingsView {
     
     private var loopSection: some View {
         Section(header: SectionHeader(label: viewModel.appNameAndVersion)) {
-            Toggle(isOn: $viewModel.dosingEnabled) {
-                Text(NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell"))
+            Toggle(isOn: closedLoopToggleState) {
+                VStack(alignment: .leading) {
+                    Text(NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell"))
+                    if !viewModel.isClosedLoopAllowed {
+                        DescriptiveText(label: NSLocalizedString("Closed Loop requires an active CGM Sensor Session", comment: "The description text for the looping enabled switch cell when closed loop is not allowed"))
+                    }
+                }
             }
-            .disabled(!viewModel.pumpManagerSettingsViewModel.isSetUp() || !viewModel.cgmManagerSettingsViewModel.isSetUp())
+            .disabled(!viewModel.isClosedLoopAllowed)
         }
     }
     
@@ -102,21 +113,23 @@ extension SettingsView {
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
                 .sheet(isPresented: $therapySettingsIsPresented) {
-                    TherapySettingsView(
-                        viewModel: TherapySettingsViewModel(mode: .settings,
-                                                            therapySettings: self.viewModel.therapySettings,
-                                                            glucoseUnit: self.viewModel.therapySettings.glucoseUnit!,
-                                                            supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
-                                                            pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
-                                                            syncPumpSchedule: self.viewModel.syncPumpSchedule,
-                                                            chartColors: .primary,
-                                                            didSave: self.viewModel.didSave))
-                        .environment(\.dismiss, self.dismiss)
-                        .environment(\.appName, self.appName)
-                        .environment(\.carbTintColor, self.carbTintColor)
-                        .environment(\.glucoseTintColor, self.glucoseTintColor)
-                        .environment(\.guidanceColors, self.guidanceColors)
-                        .environment(\.insulinTintColor, self.insulinTintColor)
+                    let therapySettings = self.viewModel.therapySettings()
+                    if let glucoseUnit = therapySettings.glucoseUnit {
+                        TherapySettingsView(
+                            viewModel: TherapySettingsViewModel(mode: .settings,
+                                                                therapySettings: self.viewModel.therapySettings(), glucoseUnit: glucoseUnit,
+                                                                supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
+                                                                pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
+                                                                syncPumpSchedule: self.viewModel.syncPumpSchedule,
+                                                                chartColors: .primary,
+                                                                didSave: self.viewModel.didSave))
+                            .environment(\.dismiss, self.dismiss)
+                            .environment(\.appName, self.appName)
+                            .environment(\.carbTintColor, self.carbTintColor)
+                            .environment(\.glucoseTintColor, self.glucoseTintColor)
+                            .environment(\.guidanceColors, self.guidanceColors)
+                            .environment(\.insulinTintColor, self.insulinTintColor)
+                    }
             }
         }
     }
@@ -259,7 +272,8 @@ extension SettingsView {
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
             NavigationLink(destination: SupportScreenView(didTapIssueReport: viewModel.didTapIssueReport,
-                                                          criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel))
+                                                          criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel,
+                                                          adverseEventReportViewModel: self.viewModel.adverseEventReportViewModel))
             {
                 Text(NSLocalizedString("Support", comment: "The title of the support item in settings"))
             }
@@ -347,20 +361,30 @@ fileprivate class FakeService2: Service {
 fileprivate let servicesViewModel = ServicesViewModel(showServices: true,
                                                       availableServices: { [FakeService1().available, FakeService2().available] },
                                                       activeServices: { [FakeService1()] })
+
+
+fileprivate class FakeClosedLoopAllowedPublisher {
+    @Published var mockIsClosedLoopAllowed: Bool = false
+}
+
 public struct SettingsView_Previews: PreviewProvider {
+    
     public static var previews: some View {
+        let fakeClosedLoopAllowedPublisher = FakeClosedLoopAllowedPublisher()
         let viewModel = SettingsViewModel(appNameAndVersion: "Loop v1.2",
                                           notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
                                           cgmManagerSettingsViewModel: DeviceViewModel(),
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
-                                          therapySettings: TherapySettings(),
+                                          adverseEventReportViewModel: AdverseEventReportViewModel(),
+                                          therapySettings: { TherapySettings() },
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true),
                                           pumpSupportedIncrements: nil,
                                           syncPumpSchedule: nil,
                                           sensitivityOverridesEnabled: false,
                                           initialDosingEnabled: true,
+                                          isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
                                           delegate: nil)
         return Group {
             SettingsView(viewModel: viewModel)

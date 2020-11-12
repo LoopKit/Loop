@@ -194,7 +194,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                         font: typedManualGlucoseEntry.wrappedValue == "" ? .preferredFont(forTextStyle: .title1) : .heavy(.title1),
                         textAlignment: .right,
                         keyboardType: .decimalPad,
-                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible
+                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
+                        maxLength: 3
                     )
 
                     Text(QuantityFormatter().string(from: viewModel.glucoseUnit))
@@ -266,7 +267,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     private var recommendedBolusString: String {
         guard let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) else {
-            return "-"
+            return "—"
         }
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }
@@ -283,7 +284,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     textColor: .loopAccent,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder
+                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
+                    maxLength: 5
                 )
                 
                 bolusUnitsLabel
@@ -418,8 +420,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             )
         case .manualGlucoseEntryOutOfAcceptableRange:
             let formatter = QuantityFormatter(for: viewModel.glucoseUnit)
-            let acceptableLowerBound = formatter.string(from: BolusEntryViewModel.validManualGlucoseEntryRange.lowerBound, for: viewModel.glucoseUnit) ?? String(describing: BolusEntryViewModel.validManualGlucoseEntryRange.lowerBound)
-            let acceptableUpperBound = formatter.string(from: BolusEntryViewModel.validManualGlucoseEntryRange.upperBound, for: viewModel.glucoseUnit) ?? String(describing: BolusEntryViewModel.validManualGlucoseEntryRange.upperBound)
+            let acceptableLowerBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.lowerBound, for: viewModel.glucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.lowerBound)
+            let acceptableUpperBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.upperBound, for: viewModel.glucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.upperBound)
             return SwiftUI.Alert(
                 title: Text("Glucose Entry Out of Range", comment: "Alert title for a manual glucose entry out of range error"),
                 message: Text("A manual glucose entry must be between \(acceptableLowerBound) and \(acceptableUpperBound)", comment: "Alert message for a manual glucose entry out of range error")
