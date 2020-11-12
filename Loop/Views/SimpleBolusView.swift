@@ -316,7 +316,7 @@ struct SimpleBolusView: View, HorizontalSizeClassOverride {
             let suspendThresholdString = QuantityFormatter().string(from: viewModel.suspendThreshold, for: viewModel.glucoseUnit) ?? String(describing: viewModel.suspendThreshold)
             return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text(String(format: NSLocalizedString("Your glucose is below your suspend threshold, %1$@.", comment: "Format string for bolus screen notice when no bolus is recommended due input value below suspend threshold. (1: suspendThreshold)"), suspendThresholdString))
+                caption: Text(String(format: NSLocalizedString("Your glucose is below your glucose safety limit, %1$@.", comment: "Format string for bolus screen notice when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold)"), suspendThresholdString))
             )
         }
     }
