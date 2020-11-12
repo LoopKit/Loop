@@ -108,6 +108,40 @@ class SimpleBolusViewModelTests: XCTestCase {
         XCTAssertEqual(storedBolusDecision?.recommendedBolus?.amount, 2.5)
         XCTAssertEqual(storedBolusDecision?.carbEntry?.quantity, addedCarbEntry?.quantity)
     }
+    
+    func testMealCarbsWithUserOverridingRecommendation() {
+        let viewModel = SimpleBolusViewModel(delegate: self)
+        viewModel.authenticate = { (description, completion) in
+            completion(.success)
+        }
+
+        currentRecommendation = 2.5
+
+        // This triggers a recommendation update
+        viewModel.enteredCarbAmount = "20"
+        
+        XCTAssertEqual("2.5", viewModel.recommendedBolus)
+        XCTAssertEqual("2.5", viewModel.enteredBolusAmount)
+        
+        viewModel.enteredBolusAmount = "0.1"
+
+        let saveExpectation = expectation(description: "Save completion callback")
+
+        viewModel.saveAndDeliver { (success) in
+            saveExpectation.fulfill()
+        }
+
+        waitForExpectations(timeout: 2)
+
+        XCTAssertEqual(20, addedCarbEntry?.quantity.doubleValue(for: .gram()))
+        
+        XCTAssertEqual(0.1, enactedBolus?.units)
+        
+        XCTAssertEqual(0.1, storedBolusDecision?.requestedBolus)
+        XCTAssertEqual(2.5, storedBolusDecision?.recommendedBolus?.amount)
+        XCTAssertEqual(addedCarbEntry?.quantity, storedBolusDecision?.carbEntry?.quantity)
+    }
+
 }
 
 extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {

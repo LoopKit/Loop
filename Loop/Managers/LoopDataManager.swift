@@ -866,9 +866,14 @@ extension LoopDataManager {
             updateGroup.enter()
             carbStore.carbsOnBoard(at: now(), effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
                 switch result {
-                case .failure:
-                    // Failure is expected when there is no carb data
-                    self.carbsOnBoard = nil
+                case .failure(let error):
+                    switch error {
+                    case .noData:
+                        // when there is no data, carbs on board is set to 0
+                        self.carbsOnBoard = CarbValue(startDate: Date(), quantity: HKQuantity(unit: .gram(), doubleValue: 0))
+                    default:
+                        self.carbsOnBoard = nil
+                    }
                 case .success(let value):
                     self.carbsOnBoard = value
                 }

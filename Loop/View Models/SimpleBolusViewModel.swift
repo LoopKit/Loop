@@ -122,21 +122,7 @@ class SimpleBolusViewModel: ObservableObject {
         }
     }
     
-    private var dosingDecision: BolusDosingDecision? {
-        didSet {
-            if let decision = dosingDecision, let bolusRecommendation = decision.recommendedBolus {
-                recommendation = bolusRecommendation.amount
-            } else {
-                recommendation = nil
-            }
-            
-            if let decision = dosingDecision, let insulinOnBoard = decision.insulinOnBoard, insulinOnBoard.value > 0 {
-                activeInsulin = Self.doseAmountFormatter.string(from: insulinOnBoard.value)
-            } else {
-                activeInsulin = nil
-            }
-        }
-    }
+    private var dosingDecision: BolusDosingDecision?
     
     private var recommendationDate: Date?
 
@@ -205,6 +191,17 @@ class SimpleBolusViewModel: ObservableObject {
         let recommendationDate = Date()
         if carbs != nil || glucose != nil {
             dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbs, manualGlucose: glucose)
+            if let decision = dosingDecision, let bolusRecommendation = decision.recommendedBolus {
+                recommendation = bolusRecommendation.amount
+            } else {
+                recommendation = nil
+            }
+            
+            if let decision = dosingDecision, let insulinOnBoard = decision.insulinOnBoard, insulinOnBoard.value > 0, glucose != nil {
+                activeInsulin = Self.doseAmountFormatter.string(from: insulinOnBoard.value)
+            } else {
+                activeInsulin = nil
+            }
             self.recommendationDate = recommendationDate
         } else {
             dosingDecision = nil

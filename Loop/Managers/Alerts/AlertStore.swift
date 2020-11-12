@@ -262,20 +262,30 @@ extension AlertStore {
         return Date(timeIntervalSinceNow: -expireAfter)
     }
 
+    // Must be invoked within NSManagedObjectContext perform or performAndWait block
     private func purgeExpired() {
         purge(before: expireDate)
     }
 
-    func purge(before date: Date, completion: ((Error?) -> Void)? = nil) {
+    func purge(before date: Date, completion: (Error?) -> Void) {
+        var error: Error?
+        self.managedObjectContext.performAndWait {
+            error = purge(before: date)
+        }
+        completion(error)
+    }
+
+    @discardableResult
+    func purge(before date: Date) -> Error? {
         do {
             let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
             fetchRequest.predicate = NSPredicate(format: "issuedDate < %@", date as NSDate)
             let count = try self.managedObjectContext.deleteObjects(matching: fetchRequest)
             self.log.info("Purged %d StoredAlerts", count)
-            completion?(nil)
+            return nil
         } catch let error {
             self.log.error("Unable to purge StoredAlerts: %{public}@", String(describing: error))
-            completion?(error)
+            return error
         }
     }
 }

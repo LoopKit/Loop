@@ -139,7 +139,7 @@ struct SimpleBolusView: View, HorizontalSizeClassOverride {
                     text: $viewModel.enteredGlucoseAmount,
                     placeholder: "---",
                     // The heavy title is ending up clipped due to a bug that is fixed in iOS 14.  Uncomment the following when we can build for iOS 14.
-                    font: .preferredFont(forTextStyle: .title1), // viewModel.enteredGlucoseAmount == "" ? .preferredFont(forTextStyle: .title1) : .heavy(.title1),
+                    font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,
                     maxLength: 3
@@ -316,7 +316,7 @@ struct SimpleBolusView: View, HorizontalSizeClassOverride {
             let suspendThresholdString = QuantityFormatter().string(from: viewModel.suspendThreshold, for: viewModel.glucoseUnit) ?? String(describing: viewModel.suspendThreshold)
             return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text(String(format: NSLocalizedString("Your glucose is below your suspend threshold, %1$@.", comment: "Format string for bolus screen notice when no bolus is recommended due input value below suspend threshold. (1: suspendThreshold)"), suspendThresholdString))
+                caption: Text(String(format: NSLocalizedString("Your glucose is below your glucose safety limit, %1$@.", comment: "Format string for bolus screen notice when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold)"), suspendThresholdString))
             )
         }
     }

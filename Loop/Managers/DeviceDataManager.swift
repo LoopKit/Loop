@@ -222,7 +222,8 @@ final class DeviceDataManager {
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
-            lastPumpEventsReconciliation: pumpManager?.lastReconciliation
+            lastPumpEventsReconciliation: pumpManager?.lastReconciliation,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
         self.glucoseStore = GlucoseStore(

@@ -49,7 +49,8 @@ final class DataManager {
             observationEnabled: false,
             insulinModel: insulinModelSettings?.model,
             basalProfile: basalRateSchedule,
-            insulinSensitivitySchedule: insulinSensitivitySchedule
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
 
         glucoseStore = GlucoseStore(

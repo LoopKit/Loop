@@ -3,7 +3,7 @@
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -546,35 +546,46 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Glucose" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tuw-av-A3x">
-                                            <rect key="frame" x="16" y="11" width="60" height="18"/>
+                                            <rect key="frame" x="16" y="11" width="60" height="20"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Rse-x8-amW">
-                                            <rect key="frame" x="210.5" y="11" width="148.5" height="18"/>
+                                            <rect key="frame" x="195.5" y="11" width="148.5" height="20"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.right" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="xjX-iH-yIb">
+                                            <rect key="frame" x="348" y="14" width="11" height="14"/>
+                                            <color key="tintColor" systemColor="systemGray3Color"/>
+                                            <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="small" weight="semibold"/>
+                                        </imageView>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ADL-hs-cfT" customClass="ChartContainerView" customModule="LoopKitUI">
-                                            <rect key="frame" x="0.0" y="29" width="375" height="171"/>
+                                            <rect key="frame" x="0.0" y="31" width="375" height="169"/>
                                         </view>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="ADL-hs-cfT" firstAttribute="leading" secondItem="lS6-Qa-Lw7" secondAttribute="leading" id="1ij-2X-KyF"/>
                                         <constraint firstItem="tuw-av-A3x" firstAttribute="top" secondItem="lS6-Qa-Lw7" secondAttribute="topMargin" id="44W-RH-eAs"/>
+                                        <constraint firstItem="xjX-iH-yIb" firstAttribute="centerY" secondItem="Rse-x8-amW" secondAttribute="centerY" id="5Z9-md-6yt"/>
                                         <constraint firstItem="ADL-hs-cfT" firstAttribute="top" secondItem="tuw-av-A3x" secondAttribute="bottom" id="8SG-FW-fas"/>
                                         <constraint firstItem="Rse-x8-amW" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="tuw-av-A3x" secondAttribute="trailing" constant="8" symbolic="YES" id="Bsw-mW-hJf"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="Rse-x8-amW" secondAttribute="trailing" id="czt-v0-TsI"/>
+                                        <constraint firstItem="xjX-iH-yIb" firstAttribute="leading" secondItem="Rse-x8-amW" secondAttribute="trailing" constant="4" id="ObE-zJ-3d1"/>
+                                        <constraint firstItem="xjX-iH-yIb" firstAttribute="height" secondItem="Rse-x8-amW" secondAttribute="height" priority="750" id="XNh-mJ-TRk"/>
+                                        <constraint firstItem="xjX-iH-yIb" firstAttribute="height" secondItem="tuw-av-A3x" secondAttribute="height" id="dS4-vP-fnc"/>
                                         <constraint firstAttribute="bottom" secondItem="ADL-hs-cfT" secondAttribute="bottom" id="fvX-sU-gU0"/>
                                         <constraint firstItem="tuw-av-A3x" firstAttribute="leading" secondItem="lS6-Qa-Lw7" secondAttribute="leadingMargin" id="guP-wu-vVB"/>
                                         <constraint firstItem="Rse-x8-amW" firstAttribute="top" secondItem="lS6-Qa-Lw7" secondAttribute="topMargin" id="ivh-Mp-auR"/>
                                         <constraint firstAttribute="trailing" secondItem="ADL-hs-cfT" secondAttribute="trailing" id="lGX-Kb-VrF"/>
+                                        <constraint firstItem="xjX-iH-yIb" firstAttribute="centerY" secondItem="tuw-av-A3x" secondAttribute="centerY" priority="750" id="q3l-TD-m8S"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="xjX-iH-yIb" secondAttribute="trailing" id="vbh-fd-u8Q"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>
                                     <outlet property="chartContentView" destination="ADL-hs-cfT" id="RhA-6H-bW1"/>
+                                    <outlet property="rightArrowHint" destination="xjX-iH-yIb" id="t2y-Si-vqU"/>
                                     <outlet property="subtitleLabel" destination="Rse-x8-amW" id="ud0-fJ-Pcw"/>
                                     <outlet property="titleLabel" destination="tuw-av-A3x" id="clh-H1-JJe"/>
                                 </connections>
@@ -910,6 +921,9 @@
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray3Color">
+            <color red="0.7803921568627451" green="0.7803921568627451" blue="0.80000000000000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

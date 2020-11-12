@@ -191,7 +191,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     DismissibleKeyboardTextField(
                         text: typedManualGlucoseEntry,
                         placeholder: "---",
-                        font: typedManualGlucoseEntry.wrappedValue == "" ? .preferredFont(forTextStyle: .title1) : .heavy(.title1),
+                        // The heavy title is ending up clipped due to a bug that is fixed in iOS 14.  Uncomment the following when we can build for iOS 14.
+                        font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
                         textAlignment: .right,
                         keyboardType: .decimalPad,
                         shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
@@ -333,7 +334,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             let suspendThresholdString = QuantityFormatter().string(from: suspendThreshold, for: viewModel.glucoseUnit) ?? String(describing: suspendThreshold)
             return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text("Your glucose is below or predicted to go below your suspend threshold, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below suspend threshold")
+                caption: Text("Your glucose is below or predicted to go below your glucose safety limit, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit")
             )
         case .staleGlucoseData:
             return WarningView(
