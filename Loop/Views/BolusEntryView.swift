@@ -268,7 +268,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     private var recommendedBolusString: String {
         guard let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) else {
-            return "—"
+            return "–"
         }
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }

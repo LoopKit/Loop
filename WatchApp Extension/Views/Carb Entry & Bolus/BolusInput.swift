@@ -70,7 +70,7 @@ struct BolusInput: View {
         if isComputingRecommendedAmount {
             return Text("REC: Calculating...", comment: "Indicator that recommended bolus computation is in progress on Apple Watch")
         } else {
-            let valueString = recommendedAmount.map { value in Self.recommendedAmountFormatter.string(from: value) ?? String(value) } ?? "—"
+            let valueString = recommendedAmount.map { value in Self.recommendedAmountFormatter.string(from: value) ?? String(value) } ?? "–"
             return Text("REC: \(valueString) U", comment: "Recommended bolus amount label on Apple Watch")
         }
     }
