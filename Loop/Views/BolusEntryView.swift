@@ -262,6 +262,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 bolusUnitsLabel
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var recommendedBolusString: String {
@@ -285,10 +286,10 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     keyboardType: .decimalPad,
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder
                 )
-                
                 bolusUnitsLabel
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var bolusUnitsLabel: some View {
