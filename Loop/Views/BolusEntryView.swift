@@ -452,6 +452,7 @@ struct LabeledQuantity: View {
                 .foregroundColor(Color(.secondaryLabel))
                 .fixedSize(horizontal: true, vertical: false)
         }
+        .accessibilityElement(children: .combine)
         .font(.subheadline)
         .modifier(LabelBackground())
     }
