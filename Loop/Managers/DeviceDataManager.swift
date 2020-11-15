@@ -419,15 +419,30 @@ extension DeviceDataManager: PumpManagerDelegate {
         }
         lastBLEDrivenUpdate = Date()
 
-        cgmManager?.fetchNewDataIfNeeded { (result) in
-            if case .newData = result {
-                AnalyticsManager.shared.didFetchNewCGMData()
-            }
-
-            if let manager = self.cgmManager {
-                self.queue.async {
-                    self.processCGMResult(manager, result: result)
+        refreshCGM()
+    }
+    
+    private func refreshCGM(_ completion: (() -> Void)? = nil) {
+        if let cgmManager = cgmManager {
+            cgmManager.fetchNewDataIfNeeded { (result) in
+                if case .newData = result {
+                    AnalyticsManager.shared.didFetchNewCGMData()
                 }
+
+                self.queue.async {
+                    self.processCGMResult(cgmManager, result: result)
+                    completion?()
+                }
+            }
+        } else {
+            completion?()
+        }
+    }
+    
+    func refreshDeviceData() {
+        refreshCGM() {
+            self.queue.async {
+                self.pumpManager?.assertCurrentPumpData()
             }
         }
     }
