@@ -76,9 +76,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         OrientationLock.deviceOrientationController = self
 
         NotificationManager.authorize(delegate: self)
-        
-        // This only requests authorization if needed
-        INPreferences.requestSiriAuthorization { _ in }
+
+        if INPreferences.siriAuthorizationStatus() == .notDetermined {
+            INPreferences.requestSiriAuthorization { _ in }
+        }
         
         rootViewController.pushViewController(statusTableViewController, animated: false)
 
