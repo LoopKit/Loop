@@ -77,7 +77,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
 
         NotificationManager.authorize(delegate: self)
 
-        if INPreferences.siriAuthorizationStatus() == .notDetermined {
+        if FeatureFlags.siriEnabled && INPreferences.siriAuthorizationStatus() == .notDetermined {
             INPreferences.requestSiriAuthorization { _ in }
         }
         
