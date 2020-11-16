@@ -1263,3 +1263,21 @@ fileprivate extension FileManager {
 
 extension GlucoseStore : CGMStalenessMonitorDelegate { }
 
+
+//MARK: - SupportInfoProvider protocol conformance
+
+extension DeviceDataManager: SupportInfoProvider {
+    public var pumpStatus: PumpManagerStatus? {
+        return pumpManager?.status
+    }
+    
+    public var cgmDevice: HKDevice? {
+        return cgmManager?.device
+    }
+    
+    public func generateIssueReport(completion: @escaping (String) -> Void) {
+        generateDiagnosticReport(completion)
+    }
+    
+    
+}

@@ -1389,14 +1389,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: deviceManager.criticalEventLogExportManager),
-                                          adverseEventReportViewModel: AdverseEventReportViewModel(pumpStatus: deviceManager.pumpManager?.status, cgmDevice: deviceManager.cgmManager?.device),
                                           therapySettings: { [weak self] in self?.deviceManager.loopManager.therapySettings ?? TherapySettings() },
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                                           pumpSupportedIncrements: pumpSupportedIncrements,
                                           syncPumpSchedule: syncBasalRateSchedule,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
-                                          isClosedLoopAllowed: deviceManager.$isClosedLoopAllowed,
+                                          isClosedLoopAllowed: deviceManager.$isClosedLoopAllowed, preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
+                                          supportInfoProvider: deviceManager,
+                                          activeServices: deviceManager.servicesManager.activeServices,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),

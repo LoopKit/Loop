@@ -11,6 +11,7 @@ import LoopCore
 import LoopKit
 import LoopKitUI
 import SwiftUI
+import HealthKit
 
 public class DeviceViewModel: ObservableObject {
     public typealias DeleteTestingDataFunc = () -> Void
@@ -70,17 +71,19 @@ public class SettingsViewModel: ObservableObject {
     var didTapIssueReport: ((String) -> Void)? {
         delegate?.didTapIssueReport
     }
-
+    
+    var activeServices: [Service]
     let pumpManagerSettingsViewModel: DeviceViewModel
     let cgmManagerSettingsViewModel: DeviceViewModel
     let servicesViewModel: ServicesViewModel
     let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
-    let adverseEventReportViewModel: AdverseEventReportViewModel
     let therapySettings: () -> TherapySettings
     let supportedInsulinModelSettings: SupportedInsulinModelSettings
     let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
     let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
+    let preferredGlucoseUnit: HKUnit
+    let supportInfoProvider: SupportInfoProvider
         
     @Published var isClosedLoopAllowed: Bool
     
@@ -98,7 +101,6 @@ public class SettingsViewModel: ObservableObject {
                 cgmManagerSettingsViewModel: DeviceViewModel,
                 servicesViewModel: ServicesViewModel,
                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
-                adverseEventReportViewModel: AdverseEventReportViewModel,
                 therapySettings: @escaping () -> TherapySettings,
                 supportedInsulinModelSettings: SupportedInsulinModelSettings,
                 pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
@@ -106,6 +108,9 @@ public class SettingsViewModel: ObservableObject {
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
                 isClosedLoopAllowed: Published<Bool>.Publisher,
+                preferredGlucoseUnit: HKUnit,
+                supportInfoProvider: SupportInfoProvider,
+                activeServices: [Service],
                 delegate: SettingsViewModelDelegate?
     ) {
         self.notificationsCriticalAlertPermissionsViewModel = notificationsCriticalAlertPermissionsViewModel
@@ -114,7 +119,6 @@ public class SettingsViewModel: ObservableObject {
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel
         self.criticalEventLogExportViewModel = criticalEventLogExportViewModel
-        self.adverseEventReportViewModel = adverseEventReportViewModel
         self.therapySettings = therapySettings
         self.supportedInsulinModelSettings = supportedInsulinModelSettings
         self.pumpSupportedIncrements = pumpSupportedIncrements
@@ -122,6 +126,9 @@ public class SettingsViewModel: ObservableObject {
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.closedLoopPreference = initialDosingEnabled
         self.isClosedLoopAllowed = false
+        self.preferredGlucoseUnit = preferredGlucoseUnit
+        self.activeServices = activeServices
+        self.supportInfoProvider = supportInfoProvider
         self.delegate = delegate
         
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)

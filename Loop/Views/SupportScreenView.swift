@@ -9,13 +9,20 @@
 import LoopKit
 import LoopKitUI
 import SwiftUI
+import HealthKit
+
+struct SupportMenuItem: Identifiable {
+    var id: String
+    var menuItemView: AnyView
+}
 
 struct SupportScreenView: View, HorizontalSizeClassOverride {
     @Environment(\.dismiss) private var dismiss
     
     var didTapIssueReport: ((_ title: String) -> Void)?
     var criticalEventLogExportViewModel: CriticalEventLogExportViewModel
-    let adverseEventReportViewModel: AdverseEventReportViewModel
+    let activeServices: [Service]
+    let supportInfoProvider: SupportInfoProvider
     
     @State private var adverseEventReportURLInvalid = false
 
@@ -28,8 +35,10 @@ struct SupportScreenView: View, HorizontalSizeClassOverride {
                     Text("Issue Report", comment: "The title text for the issue report menu item")
                 }
                 
-                adverseEventReport
-                
+                ForEach(supportMenuItems) {
+                    $0.menuItemView
+                }
+        
                 NavigationLink(destination: CriticalEventLogExportView(viewModel: self.criticalEventLogExportViewModel)) {
                     Text(NSLocalizedString("Export Critical Event Logs", comment: "The title of the export critical event logs in support"))
                 }
@@ -40,22 +49,20 @@ struct SupportScreenView: View, HorizontalSizeClassOverride {
         .environment(\.horizontalSizeClass, horizontalOverride)
     }
     
-    private var adverseEventReport: some View {
-        Button(action: {
-            guard let url = self.adverseEventReportViewModel.reportURL else {
-                self.adverseEventReportURLInvalid = true
-                return
-            }
-            
-            UIApplication.shared.open(url)
-        }) {
-            Text("Report an Adverse Event", comment: "The title text for the reporting of an adverse event menu item")
-        }
-        .alert(isPresented: $adverseEventReportURLInvalid) {
-            invalidAdverseEventReportURLAlert
-        }
+    func openURL(_ url: URL) {
+        UIApplication.shared.open(url)
     }
     
+    var supportMenuItems: [SupportMenuItem] {
+        return activeServices.compactMap { (service) -> SupportMenuItem? in
+            if let view = (service as? ServiceUI)?.supportMenuItem(supportInfoProvider: supportInfoProvider, urlHandler: openURL) {
+                return SupportMenuItem(id: service.serviceIdentifier, menuItemView: view)
+            } else {
+                return nil
+            }
+        }
+    }
+        
     private var invalidAdverseEventReportURLAlert: SwiftUI.Alert {
         Alert(title: Text("Invalid Adverse Event Report URL", comment: "Alert title when the adverse event report URL cannot be constructed properly."),
               message: Text("The adverse event report URL could not be constructed properly.", comment: "Alert message when the adverse event report URL cannot be constructed properly."),
@@ -64,8 +71,22 @@ struct SupportScreenView: View, HorizontalSizeClassOverride {
 }
 
 struct SupportScreenView_Previews: PreviewProvider {
+    class MockSupportInfoProvider: SupportInfoProvider {
+        var pumpStatus: PumpManagerStatus? {
+            return nil
+        }
+        
+        var cgmDevice: HKDevice? {
+            return nil
+        }
+        
+        func generateIssueReport(completion: (String) -> Void) {
+            completion("Mock Issue Report")
+        }
+    }
+
     static var previews: some View {
         SupportScreenView(criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
-                          adverseEventReportViewModel: AdverseEventReportViewModel())
+                          activeServices: [], supportInfoProvider: MockSupportInfoProvider())
     }
 }

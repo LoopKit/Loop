@@ -383,22 +383,6 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertNil(bolusEntryViewModel.activeNotice)
     }
 
-    func testRecommendedBolusClearsEnteredBolusThenSetsIt() throws {
-        XCTAssertNil(bolusEntryViewModel.recommendedBolus)
-        bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
-        let mockState = MockLoopState()
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
-        delegate.cachedGlucoseSamplesResponse = [StoredGlucoseSample(sample: Self.exampleCGMGlucoseSample)]
-        try triggerLoopStateUpdated(with: mockState)
-        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 0.0), bolusEntryViewModel.enteredBolus)
-        // Now, through the magic of `observeRecommendedBolusChanges` and the recommendedBolus publisher it should update to 1.234.
-        // However, due to the weird complexities of the number of times BolusEntryViewModel hops on and
-        // off `DispatchQueue.main` we need to wait on main twice to make this test reliable.
-        waitOnMain()
-        waitOnMain()
-        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 1.234), bolusEntryViewModel.enteredBolus)
-    }
-
     func testUpdateDoesNotRefreshPumpIfDataIsFresh() throws {
         XCTAssertFalse(bolusEntryViewModel.isRefreshingPump)
         try triggerLoopStateUpdatedWithDataAndWait()
