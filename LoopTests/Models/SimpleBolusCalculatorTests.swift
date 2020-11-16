@@ -60,6 +60,19 @@ class SimpleBolusCalculatorTests: XCTestCase {
         
         XCTAssertEqual(0.0, recommendation.doubleValue(for: .internationalUnit()), accuracy: 0.01)
     }
+    
+    func testCorrectionRecommendationWithNegativeIOB() {
+        let recommendation = SimpleBolusCalculator.recommendedInsulin(
+            mealCarbs: nil,
+            manualGlucose: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 180),
+            activeInsulin: HKQuantity(unit: .internationalUnit(), doubleValue: -1),
+            carbRatioSchedule: carbRatioSchedule,
+            correctionRangeSchedule: correctionRangeSchedule,
+            sensitivitySchedule: sensitivitySchedule)
+        
+        XCTAssertEqual(0.94, recommendation.doubleValue(for: .internationalUnit()), accuracy: 0.01)
+    }
+
 
     func testCorrectionRecommendationWhenInRange() {
         let recommendation = SimpleBolusCalculator.recommendedInsulin(
