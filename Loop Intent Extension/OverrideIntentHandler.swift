@@ -12,10 +12,27 @@ import Intents
 class OverrideIntentHandler: NSObject, EnableOverridePresetIntentHandling {
     lazy var defaults = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
     
+    var presetOptions: [String]? {
+        guard let defaults = self.defaults, let names = defaults.intentExtensionInfo?.overridePresetNames else {
+            return nil
+        }
+        
+        return names
+    }
+    
+    @available(iOSApplicationExtension 14.0, watchOSApplicationExtension 7.0, *)
+    func provideOverrideNameOptionsCollection(for intent: EnableOverridePresetIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
+        guard let presets = presetOptions else {
+            completion(nil, nil)
+            return
+        }
+        completion(INObjectCollection(items: presets.map { NSString(string: $0) } ), nil)
+    }
+    
     func containsOverrideName(name: String) -> Bool {
         let lowercasedName = name.lowercased()
         
-        if let defaults = self.defaults, defaults.intentExtensionInfo?.overridePresetNames?.first(where: {$0.lowercased() == lowercasedName}) != nil {
+        if presetOptions?.first(where: {$0.lowercased() == lowercasedName}) != nil {
             return true
         }
         return false
