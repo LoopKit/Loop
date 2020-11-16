@@ -1713,6 +1713,8 @@ extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
         intent.overrideName = preset.name
 
         let interaction = INInteraction(intent: intent, response: nil)
+        interaction.identifier = preset.id.uuidString
+        interaction.groupIdentifier = preset.name
         interaction.donate { (error) in
             if let error = error {
                 os_log(.error, "Failed to donate intent: %{public}@", String(describing: error))
