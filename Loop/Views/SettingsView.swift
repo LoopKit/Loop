@@ -76,7 +76,7 @@ extension SettingsView {
     }
     
     private var loopSection: some View {
-        Section(header: SectionHeader(label: viewModel.appNameAndVersion)) {
+        Section(header: SectionHeader(label: viewModel.supportInfoProvider.localizedAppNameAndVersion)) {
             Toggle(isOn: closedLoopToggleState) {
                 VStack(alignment: .leading) {
                     Text(NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell"))
@@ -370,6 +370,8 @@ fileprivate class FakeClosedLoopAllowedPublisher {
 public struct SettingsView_Previews: PreviewProvider {
     
     class MockSupportInfoProvider: SupportInfoProvider {
+        var localizedAppNameAndVersion = "Loop v1.2"
+        
         var pumpStatus: PumpManagerStatus? {
             return nil
         }
@@ -385,8 +387,8 @@ public struct SettingsView_Previews: PreviewProvider {
     
     public static var previews: some View {
         let fakeClosedLoopAllowedPublisher = FakeClosedLoopAllowedPublisher()
-        let viewModel = SettingsViewModel(appNameAndVersion: "Loop v1.2",
-                                          notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
+        let supportInfoProvider = MockSupportInfoProvider()
+        let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
                                           cgmManagerSettingsViewModel: DeviceViewModel(),
                                           servicesViewModel: servicesViewModel,

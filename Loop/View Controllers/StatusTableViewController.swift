@@ -140,8 +140,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private func navigateToOnboardingIfNecessary() {
         let therapySettings = deviceManager.loopManager.therapySettings
         
-        if !therapySettings.isComplete, let firstService = deviceManager.pluginManager.availableServices.first {
-            setupService(withIdentifier: firstService.identifier)
+        guard !therapySettings.isComplete else {
+            return
+        }
+        
+        if let service = deviceManager.servicesManager.activeServices.first as? ServiceUI {
+            showServiceSettings(service)
+        }
+        
+        if let firstAvailableService = deviceManager.pluginManager.availableServices.first {
+            setupService(withIdentifier: firstAvailableService.identifier)
         }
     }
 
@@ -1383,8 +1391,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                                   availableServices: { [weak self] in self?.deviceManager.servicesManager.availableServices ?? [] },
                                                   activeServices: { [weak self] in self?.deviceManager.servicesManager.activeServices ?? [] },
                                                   delegate: self)
-        let viewModel = SettingsViewModel(appNameAndVersion: Bundle.main.localizedNameAndVersion,
-                                          notificationsCriticalAlertPermissionsViewModel: notificationsCriticalAlertPermissionsViewModel,
+        let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: notificationsCriticalAlertPermissionsViewModel,
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           servicesViewModel: servicesViewModel,
@@ -2017,10 +2024,10 @@ extension StatusTableViewController: ServicesViewModelDelegate {
         guard let serviceUI = deviceManager.servicesManager.activeServices.first(where: { $0.serviceIdentifier == identifier }) as? ServiceUI else {
             return
         }
-        didTapService(serviceUI)
+        showServiceSettings(serviceUI)
     }
 
-    fileprivate func didTapService(_ serviceUI: ServiceUI) {
+    fileprivate func showServiceSettings(_ serviceUI: ServiceUI) {
         var settings = serviceUI.settingsViewController(currentTherapySettings: deviceManager.loopManager.therapySettings, preferredGlucoseUnit: deviceManager.preferredGlucoseUnit, chartColors: .primary, carbTintColor: .carbTintColor, glucoseTintColor: .glucoseTintColor, guidanceColors: .default, insulinTintColor: .insulinTintColor)
         settings.serviceSettingsDelegate = self
         settings.completionDelegate = self

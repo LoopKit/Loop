@@ -72,13 +72,12 @@ struct SupportScreenView: View, HorizontalSizeClassOverride {
 
 struct SupportScreenView_Previews: PreviewProvider {
     class MockSupportInfoProvider: SupportInfoProvider {
-        var pumpStatus: PumpManagerStatus? {
-            return nil
-        }
         
-        var cgmDevice: HKDevice? {
-            return nil
-        }
+        var localizedAppNameAndVersion = "Loop v1.2"
+        
+        var pumpStatus: PumpManagerStatus? = nil
+        
+        var cgmDevice: HKDevice? = nil
         
         func generateIssueReport(completion: (String) -> Void) {
             completion("Mock Issue Report")

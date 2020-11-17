@@ -58,8 +58,6 @@ public class SettingsViewModel: ObservableObject {
 
     private weak var delegate: SettingsViewModelDelegate?
     
-    @Published var appNameAndVersion: String
-    
     var showWarning: Bool {
         notificationsCriticalAlertPermissionsViewModel.showWarning
     }
@@ -95,8 +93,7 @@ public class SettingsViewModel: ObservableObject {
 
     lazy private var cancellables = Set<AnyCancellable>()
 
-    public init(appNameAndVersion: String,
-                notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel,
+    public init(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel,
                 pumpManagerSettingsViewModel: DeviceViewModel,
                 cgmManagerSettingsViewModel: DeviceViewModel,
                 servicesViewModel: ServicesViewModel,
@@ -114,7 +111,6 @@ public class SettingsViewModel: ObservableObject {
                 delegate: SettingsViewModelDelegate?
     ) {
         self.notificationsCriticalAlertPermissionsViewModel = notificationsCriticalAlertPermissionsViewModel
-        self.appNameAndVersion = appNameAndVersion
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel

@@ -1267,6 +1267,11 @@ extension GlucoseStore : CGMStalenessMonitorDelegate { }
 //MARK: - SupportInfoProvider protocol conformance
 
 extension DeviceDataManager: SupportInfoProvider {
+    
+    public var localizedAppNameAndVersion: String {
+        return Bundle.main.localizedNameAndVersion
+    }
+    
     public var pumpStatus: PumpManagerStatus? {
         return pumpManager?.status
     }
