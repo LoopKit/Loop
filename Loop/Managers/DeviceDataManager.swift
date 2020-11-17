@@ -679,6 +679,7 @@ extension DeviceDataManager: DeviceManagerDelegate {
 
 // MARK: - UserAlertHandler
 extension DeviceDataManager: AlertPresenter {
+    static let managerIdentifier = "DeviceDataManager"
 
     func issueAlert(_ alert: Alert) {
         alertManager?.issueAlert(alert)
@@ -686,6 +687,22 @@ extension DeviceDataManager: AlertPresenter {
 
     func retractAlert(identifier: Alert.Identifier) {
         alertManager?.retractAlert(identifier: identifier)
+    }
+
+    static var pumpBatteryLowAlertIdentifier: Alert.Identifier {
+        return Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "PumpBatteryLow")
+    }
+
+    public var pumpBatteryLowAlert: Alert {
+        let title = NSLocalizedString("Pump Battery Low", comment: "The notification title for a low pump battery")
+        let body = NSLocalizedString("Change the pump battery immediately", comment: "The notification alert describing a low pump battery")
+        let content = Alert.Content(title: title,
+                                    body: body,
+                                    acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
+        return Alert(identifier: DeviceDataManager.pumpBatteryLowAlertIdentifier,
+                     foregroundContent: content,
+                     backgroundContent: content,
+                     trigger: .immediate)
     }
 }
 
@@ -825,13 +842,15 @@ extension DeviceDataManager: PumpManagerDelegate {
         doseStore.device = status.device
 
         if let newBatteryValue = status.pumpBatteryChargeRemaining {
-            if newBatteryValue == 0 {
-                NotificationManager.sendPumpBatteryLowNotification()
-            } else {
-                NotificationManager.clearPumpBatteryLowNotification()
+
+            if newBatteryValue != oldStatus.pumpBatteryChargeRemaining,
+               newBatteryValue == 0
+            {
+                issueAlert(pumpBatteryLowAlert)
             }
 
             if let oldBatteryValue = oldStatus.pumpBatteryChargeRemaining, newBatteryValue - oldBatteryValue >= LoopConstants.batteryReplacementDetectionThreshold {
+                retractAlert(identifier: DeviceDataManager.pumpBatteryLowAlertIdentifier)
                 analyticsServicesManager.pumpBatteryWasReplaced()
             }
         }

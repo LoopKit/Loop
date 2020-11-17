@@ -3,8 +3,8 @@
     <device id="watch38"/>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="17034"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="17035"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
     </dependencies>
     <scenes>
@@ -218,7 +218,7 @@
                                                         <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
                                                         <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                                     </label>
-                                                    <label alignment="left" text="—" id="CsQ-fc-KLC">
+                                                    <label alignment="left" text="–" id="CsQ-fc-KLC">
                                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
                                                     </label>
@@ -284,7 +284,7 @@
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
-                                        <label alignment="right" verticalAlignment="bottom" text="—" id="Mhe-aR-kQQ">
+                                        <label alignment="right" verticalAlignment="bottom" text="–" id="Mhe-aR-kQQ">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
                                         </label>
                                     </items>
@@ -295,7 +295,7 @@
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
-                                        <label alignment="right" verticalAlignment="bottom" text="—" id="IRi-4t-ESO">
+                                        <label alignment="right" verticalAlignment="bottom" text="–" id="IRi-4t-ESO">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
                                         </label>
                                     </items>

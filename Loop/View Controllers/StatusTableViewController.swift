@@ -1109,10 +1109,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         }
                     }
                 case .scheduleOverrideEnabled(let override):
-                    let vc = AddEditOverrideTableViewController(glucoseUnit: statusCharts.glucose.glucoseUnit)
-                    vc.inputMode = .editOverride(override)
-                    vc.delegate = self
-                    show(vc, sender: tableView.cellForRow(at: indexPath))
+                    switch override.context {
+                    case .preMeal, .legacyWorkout:
+                        break
+                    default:
+                        let vc = AddEditOverrideTableViewController(glucoseUnit: statusCharts.glucose.glucoseUnit)
+                        vc.inputMode = .editOverride(override)
+                        vc.delegate = self
+                        show(vc, sender: tableView.cellForRow(at: indexPath))
+                    }
                 case .bolusing:
                     self.updateHUDandStatusRows(statusRowMode: .cancelingBolus, newSize: nil, animated: true)
                     self.deviceManager.pumpManager?.cancelBolus() { (result) in

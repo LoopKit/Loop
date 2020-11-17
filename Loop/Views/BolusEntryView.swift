@@ -190,7 +190,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 HStack(alignment: .firstTextBaseline) {
                     DismissibleKeyboardTextField(
                         text: typedManualGlucoseEntry,
-                        placeholder: "---",
+                        placeholder: NSLocalizedString("---", comment: "No glucose value representation (3 dashes for mg/dL)"),
                         // The heavy title is ending up clipped due to a bug that is fixed in iOS 14.  Uncomment the following when we can build for iOS 14.
                         font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
                         textAlignment: .right,
@@ -268,7 +268,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     private var recommendedBolusString: String {
         guard let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) else {
-            return "—"
+            return "–"
         }
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }
