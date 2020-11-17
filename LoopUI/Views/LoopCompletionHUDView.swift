@@ -137,11 +137,11 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
                 accessibilityLabel = String(format: LocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
             } else {
-                caption?.text = "—"
+                caption?.text = "–"
                 accessibilityLabel = nil
             }
         } else {
-            caption?.text = "—"
+            caption?.text = "–"
             accessibilityLabel = LocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
         }
 
