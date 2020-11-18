@@ -347,7 +347,7 @@ fileprivate class FakeService1: Service {
     var rawState: RawStateValue = [:]
     required init?(rawState: RawStateValue) {}
     convenience init() { self.init(rawState: [:])! }
-    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle, providesOnboarding: false) }
 }
 fileprivate class FakeService2: Service {
     static var localizedTitle: String = "Service 2"
@@ -356,7 +356,7 @@ fileprivate class FakeService2: Service {
     var rawState: RawStateValue = [:]
     required init?(rawState: RawStateValue) {}
     convenience init() { self.init(rawState: [:])! }
-    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle, providesOnboarding: false) }
 }
 fileprivate let servicesViewModel = ServicesViewModel(showServices: true,
                                                       availableServices: { [FakeService1().available, FakeService2().available] },

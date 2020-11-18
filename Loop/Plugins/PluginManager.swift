@@ -10,6 +10,13 @@ import Foundation
 import LoopKit
 import LoopKitUI
 
+
+public struct AvailableDevice {
+    let identifier: String
+    let localizedTitle: String
+    let providesOnboarding: Bool
+}
+
 typealias AvailableService = AvailableDevice
 
 class PluginManager {
@@ -73,8 +80,8 @@ class PluginManager {
                 let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String else {
                     return nil
             }
-
-            return AvailableDevice(identifier: identifier, localizedTitle: title)
+            
+            return AvailableDevice(identifier: identifier, localizedTitle: title, providesOnboarding: false)
         })
     }
     
@@ -110,7 +117,7 @@ class PluginManager {
                     return nil
             }
             
-            return AvailableDevice(identifier: identifier, localizedTitle: title)
+            return AvailableDevice(identifier: identifier, localizedTitle: title, providesOnboarding: false)
         })
     }
 
@@ -145,8 +152,10 @@ class PluginManager {
                 let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.serviceIdentifier.rawValue) as? String else {
                     return nil
             }
+            
+            let providesOnboarding = (bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.providesOnboarding.rawValue) as? Bool) == true
 
-            return AvailableService(identifier: identifier, localizedTitle: title)
+            return AvailableService(identifier: identifier, localizedTitle: title, providesOnboarding: providesOnboarding)
         })
     }
 

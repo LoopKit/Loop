@@ -144,11 +144,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return
         }
         
-        if let service = deviceManager.servicesManager.activeServices.first as? ServiceUI {
-            showServiceSettings(service)
+        if let onboardingService = deviceManager.servicesManager.activeServices.supportingOnboarding.first {
+            showServiceSettings(onboardingService)
         }
         
-        if let firstAvailableService = deviceManager.pluginManager.availableServices.first {
+        if let firstAvailableService = deviceManager.pluginManager.availableServices.filter { $0.providesOnboarding }.first {
             setupService(withIdentifier: firstAvailableService.identifier)
         }
     }
