@@ -26,7 +26,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     var currentRecommendation: Double = 0
 
     static var noIOB = InsulinValue(startDate: Date(), value: 0)
-    static var someIOB = InsulinValue(startDate: Date(), value: 24)
+    static var someIOB = InsulinValue(startDate: Date(), value: 2.4)
 
     
     override func setUp() {
@@ -142,6 +142,60 @@ class SimpleBolusViewModelTests: XCTestCase {
         XCTAssertEqual(addedCarbEntry?.quantity, storedBolusDecision?.carbEntry?.quantity)
     }
 
+    func testDeleteCarbsRemovesRecommendation() {
+        let viewModel = SimpleBolusViewModel(delegate: self)
+        viewModel.authenticate = { (description, completion) in
+            completion(.success)
+        }
+
+        currentRecommendation = 2.5
+
+        viewModel.enteredCarbAmount = "20"
+
+        XCTAssertEqual("2.5", viewModel.recommendedBolus)
+        XCTAssertEqual("2.5", viewModel.enteredBolusAmount)
+
+        viewModel.enteredCarbAmount = ""
+
+        XCTAssertEqual("-", viewModel.recommendedBolus)
+        XCTAssertEqual("0", viewModel.enteredBolusAmount)
+    }
+
+    func testDeleteCurrentGlucoseRemovesRecommendation() {
+        let viewModel = SimpleBolusViewModel(delegate: self)
+        viewModel.authenticate = { (description, completion) in
+            completion(.success)
+        }
+
+        currentRecommendation = 3.0
+
+        viewModel.enteredGlucoseAmount = "180"
+
+        XCTAssertEqual("3", viewModel.recommendedBolus)
+        XCTAssertEqual("3", viewModel.enteredBolusAmount)
+
+        viewModel.enteredGlucoseAmount = ""
+
+        XCTAssertEqual("-", viewModel.recommendedBolus)
+        XCTAssertEqual("0", viewModel.enteredBolusAmount)
+    }
+
+    func testDeleteCurrentGlucoseRemovesActiveInsulin() {
+        let viewModel = SimpleBolusViewModel(delegate: self)
+        viewModel.authenticate = { (description, completion) in
+            completion(.success)
+        }
+
+        currentIOB = SimpleBolusViewModelTests.someIOB
+
+        viewModel.enteredGlucoseAmount = "180"
+
+        XCTAssertEqual("2.4", viewModel.activeInsulin)
+
+        viewModel.enteredGlucoseAmount = ""
+
+        XCTAssertNil(viewModel.activeInsulin)
+    }
 }
 
 extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
@@ -180,6 +234,7 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         
         var decision = BolusDosingDecision()
         decision.recommendedBolus = BolusRecommendation(amount: currentRecommendation, pendingInsulin: 0, notice: .none)
+        decision.insulinOnBoard = currentIOB
         return decision
     }
     
