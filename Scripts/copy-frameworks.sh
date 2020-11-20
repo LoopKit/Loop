@@ -38,4 +38,8 @@ for COUNTER in $(seq 0 $(($SCRIPT_INPUT_FILE_COUNT - 1))); do
 done
 
 echo "Copy Frameworks with Carthage"
-carthage copy-frameworks
+if [ -n "${GITHUB_ACCESS_TOKEN}" ]; then
+    GITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN carthage copy-frameworks
+else
+    carthage copy-frameworks
+fi
