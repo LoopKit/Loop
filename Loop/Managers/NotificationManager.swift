@@ -21,6 +21,19 @@ struct NotificationManager {
         case bolusStartDate
     }
 
+    //Azure Push Notification
+    static func sendAlertPushNotification(alert: String){
+            let logger = DiagnosticLogger.shared
+            let dateFormatter = DateFormatter()
+            let date = Date()
+            dateFormatter.dateStyle = .full
+            let pushMessage: [String: AnyObject] = [
+                "DeviceName": "Loop" as AnyObject,
+                "TimeStamp": dateFormatter.string(from:date) as AnyObject,
+                "Reason": alert as AnyObject]
+            logger.loopPushNotification(message: pushMessage, loopAlert: true)
+        }
+    
     private static var notificationCategories: Set<UNNotificationCategory> {
         var categories = [UNNotificationCategory]()
 
@@ -97,7 +110,8 @@ struct NotificationManager {
             UserInfoKey.bolusAmount.rawValue: units,
             UserInfoKey.bolusStartDate.rawValue: startDate
         ]
-
+        
+        sendAlertPushNotification(alert: notification.body)
         let request = UNNotificationRequest(
             // Only support 1 bolus notification at once
             identifier: LoopNotificationCategory.bolusFailure.rawValue,
@@ -168,7 +182,8 @@ struct NotificationManager {
         notification.body = NSLocalizedString("Change the pump battery immediately", comment: "The notification alert describing a low pump battery")
         notification.sound = .default
         notification.categoryIdentifier = LoopNotificationCategory.pumpBatteryLow.rawValue
-
+        
+        sendAlertPushNotification(alert: notification.body)
         let request = UNNotificationRequest(
             identifier: LoopNotificationCategory.pumpBatteryLow.rawValue,
             content: notification,
@@ -189,7 +204,8 @@ struct NotificationManager {
         notification.body = NSLocalizedString("Change the pump reservoir now", comment: "The notification alert describing an empty pump reservoir")
         notification.sound = .default
         notification.categoryIdentifier = LoopNotificationCategory.pumpReservoirEmpty.rawValue
-
+        
+        sendAlertPushNotification(alert: notification.body)
         let request = UNNotificationRequest(
             // Not a typo: this should replace any pump reservoir low notifications
             identifier: LoopNotificationCategory.pumpReservoirLow.rawValue,
@@ -223,6 +239,7 @@ struct NotificationManager {
         notification.sound = .default
         notification.categoryIdentifier = LoopNotificationCategory.pumpReservoirLow.rawValue
 
+        sendAlertPushNotification(alert: notification.body)
         let request = UNNotificationRequest(
             identifier: LoopNotificationCategory.pumpReservoirLow.rawValue,
             content: notification,

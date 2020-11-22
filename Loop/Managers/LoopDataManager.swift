@@ -1274,6 +1274,8 @@ extension LoopDataManager {
             self.dataAccessQueue.async {
                 switch result {
                 case .success:
+                    let unit = HKUnit.milligramsPerDeciliter
+                    self.addLoopTempBasalNotification(tempBasal :recommendedTempBasal.recommendation, latestBG : (self.glucoseStore.latestGlucose)!.quantity.doubleValue(for: unit), eventualBG : (self.retrospectiveGlucoseEffect).last!.quantity.doubleValue(for: unit))
                     self.recommendedTempBasal = nil
                     completion(nil)
                 case .failure(let error):
@@ -1282,6 +1284,23 @@ extension LoopDataManager {
             }
         }
     }
+    
+//Azure Push Notification
+func addLoopTempBasalNotification(tempBasal : TempBasalRecommendation, latestBG : Double, eventualBG : Double) {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .full
+                let logger = DiagnosticLogger.shared
+                let date = Date()
+                let pushMessage: [String: AnyObject] = [
+                    "bg":  latestBG as AnyObject,
+                    "temp": "absolute" as AnyObject,
+                    "received": true as AnyObject,
+                    "rate": tempBasal.unitsPerHour as AnyObject,
+                             "duration": tempBasal.duration.minutes as AnyObject,
+                    "timestamp": dateFormatter.string(from: date) as AnyObject,
+                    "eventualBG": round(eventualBG ) as AnyObject]
+                logger.loopPushNotification(message: pushMessage, loopAlert: false);
+        }
 }
 
 
@@ -1351,6 +1370,8 @@ extension LoopState {
     func predictGlucose(using inputs: PredictionInputEffect, includingPendingInsulin: Bool = false) throws -> [GlucoseValue] {
         try predictGlucose(using: inputs, potentialBolus: nil, potentialCarbEntry: nil, replacingCarbEntry: nil, includingPendingInsulin: includingPendingInsulin)
     }
+    
+    
 }
 
 
@@ -1583,4 +1604,5 @@ private extension TemporaryScheduleOverride {
         }
         return abs(basalRateMultiplier - 1.0) >= .ulpOfOne
     }
+   
 }

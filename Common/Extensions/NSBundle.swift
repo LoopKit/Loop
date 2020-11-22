@@ -13,6 +13,18 @@ extension Bundle {
     var shortVersionString: String {
         return object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
     }
+    
+    private var remoteSettingsPath: String? {
+            return Bundle.main.path(forResource: "RemoteSettings", ofType: "plist")
+        }
+        
+        var remoteSettings: [String: String]? {
+            guard let path = remoteSettingsPath else {
+                return nil
+            }
+            
+            return NSDictionary(contentsOfFile: path) as? [String: String]
+        }
 
     var bundleDisplayName: String {
         return object(forInfoDictionaryKey: "CFBundleDisplayName") as! String

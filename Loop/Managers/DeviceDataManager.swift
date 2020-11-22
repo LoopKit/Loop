@@ -298,6 +298,9 @@ extension DeviceDataManager {
                 }
             case .success(let dose):
                 self.loopManager.bolusConfirmed(dose) {
+                    
+                    //Azure Push Notification
+                    NotificationManager.sendAlertPushNotification(alert: String(format:"%.1f", units) + "U Bolus successfully enacted")
                     completion(nil)
                 }
             }

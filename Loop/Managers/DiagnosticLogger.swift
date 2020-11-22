@@ -14,6 +14,8 @@ import LoopKit
 final class DiagnosticLogger {
     private let isSimulator: Bool = TARGET_OS_SIMULATOR != 0
 
+    let AzureAPIHost: String
+    
     var logglyService: LogglyService {
         didSet {
             try! KeychainManager().setLogglyCustomerToken(logglyService.customerToken)
@@ -27,6 +29,11 @@ final class DiagnosticLogger {
     init() {
         remoteLogLevel = isSimulator ? .fault : .info
 
+        // Reading Azure settings
+        let settings = Bundle.main.remoteSettings,
+        AzureAPIHost = settings?["AzureAppServiceURL"]
+        self.AzureAPIHost=AzureAPIHost!
+        
         // Delete the mLab credentials as they're no longer supported
         try! KeychainManager().setMLabDatabaseName(nil, APIKey: nil)
 
@@ -37,9 +44,35 @@ final class DiagnosticLogger {
     func forCategory(_ category: String) -> CategoryLogger {
         return CategoryLogger(logger: self, category: category)
     }
+
+
+func loopPushNotification(message: [String: AnyObject], loopAlert: Bool) {
+
+    if !isSimulator,
+        let messageData = try? JSONSerialization.data(withJSONObject: message, options: []),
+        let URL = NSURL(string: AzureAPIHost),
+        let components = NSURLComponents(url: URL as URL, resolvingAgainstBaseURL: true)
+    {
+        //components.query = "apiKey=\(APIKey)"
+        
+        if let URL = components.url {
+            let request = NSMutableURLRequest(url: URL)
+
+            request.httpMethod = "POST"
+            request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+
+            let task = URLSession.shared.uploadTask(with: request as URLRequest, from: messageData) { (_, _, error) -> Void in
+                if let error = error {
+
+                    NSLog("%s error: %@", error.localizedDescription)
+                }
+            }
+
+            task.resume()
+        }
+    }
+  }
 }
-
-
 extension OSLogType {
     fileprivate var tagName: String {
         switch self {
