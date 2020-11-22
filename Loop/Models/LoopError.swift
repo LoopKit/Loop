@@ -91,6 +91,9 @@ enum LoopError: Error {
 
     // Invalid Data
     case invalidData(details: String)
+    
+    // Pump Suspended
+    case pumpSuspended
 }
 
 
@@ -130,7 +133,8 @@ extension LoopError: LocalizedError {
             return String(format: NSLocalizedString("Recommendation expired: %1$@ old", comment: "The error message when a recommendation has expired. (1: age of recommendation in minutes)"), minutes)
         case .invalidData(let details):
             return String(format: NSLocalizedString("Invalid data: %1$@", comment: "The error message when invalid data was encountered. (1: details of invalid data)"), details)
-
+        case .pumpSuspended:
+            return NSLocalizedString("Pump Suspended", comment: "The error message when loop failed because the pump was encountered.")
         }
     }
 }

@@ -300,7 +300,7 @@ final class StatusTableViewController: ChartsTableViewController {
         reloading = true
 
         let reloadGroup = DispatchGroup()
-        var newRecommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
+        var newRecommendedTempBasal: (recommendation: AutomaticDoseRecommendation, date: Date)?
         var glucoseValues: [StoredGlucoseSample]?
         var predictedGlucoseValues: [GlucoseValue]?
         var iobValues: [InsulinValue]?
@@ -347,7 +347,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 lastLoopCompleted! < Date(timeIntervalSinceNow: .minutes(-6)) ||
                 !manager.settings.dosingEnabled
             {
-                newRecommendedTempBasal = state.recommendedTempBasal
+                newRecommendedTempBasal = state.recommendedAutomaticDose
             }
 
             if currentContext.contains(.carbs) {
@@ -504,7 +504,7 @@ final class StatusTableViewController: ChartsTableViewController {
             }
 
             // Show/hide the table view rows
-            let statusRowMode = self.determineStatusRowMode(recommendedTempBasal: newRecommendedTempBasal)
+            let statusRowMode = self.determineStatusRowMode(recommendedDose: newRecommendedTempBasal)
 
             self.updateHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
 
@@ -569,7 +569,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
     private enum StatusRowMode {
         case hidden
-        case recommendedTempBasal(tempBasal: TempBasalRecommendation, at: Date, enacting: Bool)
+        case recommendedDose(dose: AutomaticDoseRecommendation, at: Date, enacting: Bool)
         case scheduleOverrideEnabled(TemporaryScheduleOverride)
         case enactingBolus
         case bolusing(dose: DoseEntry)
@@ -588,7 +588,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
     private var statusRowMode = StatusRowMode.hidden
 
-    private func determineStatusRowMode(recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? = nil) -> StatusRowMode {
+    private func determineStatusRowMode(recommendedDose: (recommendation: AutomaticDoseRecommendation, date: Date)? = nil) -> StatusRowMode {
         let statusRowMode: StatusRowMode
 
         if case .initiating = bolusState {
@@ -601,8 +601,8 @@ final class StatusTableViewController: ChartsTableViewController {
             statusRowMode = .pumpSuspended(resuming: true)
         } else if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
             statusRowMode = .bolusing(dose: dose)
-        } else if let (recommendation: tempBasal, date: date) = recommendedTempBasal {
-            statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
+        } else if let (recommendation: dose, date: date) = recommendedDose {
+            statusRowMode = .recommendedDose(dose: dose, at: date, enacting: false)
         } else if let scheduleOverride = deviceManager.loopManager.settings.scheduleOverride,
             scheduleOverride.context != .preMeal && scheduleOverride.context != .legacyWorkout,
             !scheduleOverride.hasFinished()
@@ -646,15 +646,15 @@ final class StatusTableViewController: ChartsTableViewController {
         switch (statusWasVisible, statusIsVisible) {
         case (true, true):
             switch (oldStatusRowMode, self.statusRowMode) {
-            case (.recommendedTempBasal(tempBasal: let oldTempBasal, at: let oldDate, enacting: let wasEnacting),
-                  .recommendedTempBasal(tempBasal: let newTempBasal, at: let newDate, enacting: let isEnacting)):
+            case (.recommendedDose(dose: let oldDose, at: let oldDate, enacting: let wasEnacting),
+                  .recommendedDose(dose: let newDose, at: let newDate, enacting: let isEnacting)):
                 // Ensure we have a change
-                guard oldTempBasal != newTempBasal || oldDate != newDate || wasEnacting != isEnacting else {
+                guard oldDose != newDose || oldDate != newDate || wasEnacting != isEnacting else {
                     break
                 }
 
                 // If the rate or date change, reload the row
-                if oldTempBasal != newTempBasal || oldDate != newDate {
+                if oldDose != newDose || oldDate != newDate {
                     self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
                 } else if let cell = tableView.cellForRow(at: statusIndexPath) {
                     // If only the enacting state changed, update the activity indicator
@@ -809,14 +809,28 @@ final class StatusTableViewController: ChartsTableViewController {
                     cell.subtitleLabel?.text = nil
                     cell.accessoryView = nil
                     return cell
-                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting):
+                case .recommendedDose(dose: let dose, at: let date, enacting: let enacting):
                     let cell = getTitleSubtitleCell()
                     let timeFormatter = DateFormatter()
                     timeFormatter.dateStyle = .none
                     timeFormatter.timeStyle = .short
 
-                    cell.titleLabel.text = NSLocalizedString("Recommended Basal", comment: "The title of the cell displaying a recommended temp basal value")
-                    cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ U/hour @ %2$@", comment: "The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: tempBasal.unitsPerHour), number: .decimal), timeFormatter.string(from: date))
+                    //cell.titleLabel.text = NSLocalizedString("Recommended Dose", comment: "The title of the cell displaying a recommended dose")
+                    
+                    var text: String
+
+                    if let basalAdjustment = dose.basalAdjustment, dose.bolusUnits == 0 {
+                        cell.titleLabel.text = NSLocalizedString("Recommended Basal", comment: "The title of the cell displaying a recommended temp basal value")
+                        text = String(format: NSLocalizedString("%1$@ U/hour", comment: "The format for recommended temp basal rate and time. (1: localized rate number)"), NumberFormatter.localizedString(from: NSNumber(value: basalAdjustment.unitsPerHour), number: .decimal))
+                    } else {
+                        let bolusUnitsStr = quantityFormatter.string(from: HKQuantity(unit: .internationalUnit(), doubleValue: dose.bolusUnits), for: .internationalUnit()) ?? ""
+                        cell.titleLabel.text = NSLocalizedString("Recommended Auto-Bolus", comment: "The title of the cell displaying a recommended automatic bolus value")
+                        text = String(format: NSLocalizedString("%1$@ ", comment: "The format for recommended bolus string.  (1: localized bolus volume)" ), bolusUnitsStr)
+                    }
+                    text += String(format: NSLocalizedString(" @ %1$@", comment: "The format for dose recommendation time. (1: localized time)"), timeFormatter.string(from: date))
+                    
+                    cell.subtitleLabel.text = text
+
                     cell.selectionStyle = .default
 
                     if enacting {
@@ -982,10 +996,10 @@ final class StatusTableViewController: ChartsTableViewController {
                 tableView.deselectRow(at: indexPath, animated: true)
 
                 switch statusRowMode {
-                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) where !enacting:
-                    self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
+                case .recommendedDose(dose: let dose, at: let date, enacting: let enacting) where !enacting:
+                    self.updateHUDandStatusRows(statusRowMode: .recommendedDose(dose: dose, at: date, enacting: true), newSize: nil, animated: true)
 
-                    self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
+                    self.deviceManager.loopManager.enactRecommendedDose { (error) in
                         DispatchQueue.main.async {
                             self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
 

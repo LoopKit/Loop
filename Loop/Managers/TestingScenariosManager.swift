@@ -154,14 +154,18 @@ extension TestingScenariosManagerRequirements {
     private func stepForward(_ scenario: TestingScenario, completion: @escaping (TestingScenario) -> Void) {
         deviceManager.loopManager.getLoopState { _, state in
             var scenario = scenario
-            guard let recommendedTemp = state.recommendedTempBasal?.recommendation else {
+            guard let dose = state.recommendedAutomaticDose?.recommendation else {
                 scenario.stepForward(by: .minutes(5))
                 completion(scenario)
                 return
             }
 
-            scenario.stepForward(unitsPerHour: recommendedTemp.unitsPerHour, duration: recommendedTemp.duration)
-            completion(scenario)
+            // TODO: Handle bolus
+
+            if let basalAdjustment = dose.basalAdjustment {
+                scenario.stepForward(unitsPerHour: basalAdjustment.unitsPerHour, duration: basalAdjustment.duration)
+                completion(scenario)
+            }
         }
     }
 
