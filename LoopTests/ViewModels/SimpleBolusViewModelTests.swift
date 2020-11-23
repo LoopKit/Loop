@@ -157,7 +157,7 @@ class SimpleBolusViewModelTests: XCTestCase {
 
         viewModel.enteredCarbAmount = ""
 
-        XCTAssertEqual("-", viewModel.recommendedBolus)
+        XCTAssertEqual("–", viewModel.recommendedBolus)
         XCTAssertEqual("0", viewModel.enteredBolusAmount)
     }
 
@@ -176,7 +176,7 @@ class SimpleBolusViewModelTests: XCTestCase {
 
         viewModel.enteredGlucoseAmount = ""
 
-        XCTAssertEqual("-", viewModel.recommendedBolus)
+        XCTAssertEqual("–", viewModel.recommendedBolus)
         XCTAssertEqual("0", viewModel.enteredBolusAmount)
     }
 

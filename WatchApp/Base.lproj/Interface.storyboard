@@ -184,10 +184,10 @@
                                     <items>
                                         <group width="1" height="26" alignment="left" id="pYI-3J-lxs">
                                             <items>
-                                                <label height="1" alignment="left" hidden="YES" text="---" textAlignment="center" id="Dt1-kz-jMZ">
+                                                <label height="1" alignment="left" hidden="YES" text="– – –" textAlignment="center" id="Dt1-kz-jMZ">
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
-                                                <label height="1" alignment="right" hidden="YES" text="---" textAlignment="center" id="yl8-ZP-c3l">
+                                                <label height="1" alignment="right" hidden="YES" text="– – –" textAlignment="center" id="yl8-ZP-c3l">
                                                     <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>

@@ -26,10 +26,10 @@ class CGMStatusHUDViewModelTests: XCTestCase {
     }
 
     func testInitialization() throws {
-        XCTAssertEqual(CGMStatusHUDViewModel.staleGlucoseRepresentation, "---")
+        XCTAssertEqual(CGMStatusHUDViewModel.staleGlucoseRepresentation, "– – –")
         XCTAssertNil(viewModel.trend)
         XCTAssertEqual(viewModel.unitsString, "–")
-        XCTAssertEqual(viewModel.glucoseValueString, "---")
+        XCTAssertEqual(viewModel.glucoseValueString, "– – –")
         XCTAssertTrue(viewModel.accessibilityString.isEmpty)
         XCTAssertEqual(viewModel.glucoseValueTintColor, .label)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, .glucoseTintColor)
@@ -76,7 +76,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertNil(viewModel.statusHighlight)
-        XCTAssertEqual(viewModel.glucoseValueString, "---")
+        XCTAssertEqual(viewModel.glucoseValueString, "– – –")
         XCTAssertNil(viewModel.trend)
         XCTAssertNotEqual(viewModel.glucoseTrendTintColor, glucoseDisplay.glucoseRangeCategory?.trendColor)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, .glucoseTintColor)
@@ -103,7 +103,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         XCTAssertTrue(staleGlucoseValueHandlerWasCalled)
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertNil(viewModel.statusHighlight)
-        XCTAssertEqual(viewModel.glucoseValueString, "---")
+        XCTAssertEqual(viewModel.glucoseValueString, "– – –")
         XCTAssertNil(viewModel.trend)
         XCTAssertNotEqual(viewModel.glucoseTrendTintColor, glucoseDisplay.glucoseRangeCategory?.trendColor)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, .glucoseTintColor)
