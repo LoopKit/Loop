@@ -7,7 +7,9 @@
 
 import Foundation
 import LoopKit
+import LoopKitUI
 import MockKit
+import MockKitUI
 
 public struct AvailableDevice {
     let identifier: String
@@ -15,11 +17,11 @@ public struct AvailableDevice {
 }
 
 
-let staticPumpManagers: [PumpManager.Type] = [
+let staticPumpManagers: [PumpManagerUI.Type] = [
     MockPumpManager.self,
 ]
 
-let staticPumpManagersByIdentifier: [String: PumpManager.Type] = staticPumpManagers.reduce(into: [:]) { (map, Type) in
+let staticPumpManagersByIdentifier: [String: PumpManagerUI.Type] = staticPumpManagers.reduce(into: [:]) { (map, Type) in
     map[Type.managerIdentifier] = Type
 }
 
