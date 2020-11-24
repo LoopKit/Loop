@@ -800,6 +800,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     private func refreshCGM(_ completion: (() -> Void)? = nil) {        
         guard let cgmManager = cgmManager else {
             completion?()
+            return
         }
 
         cgmManager.fetchNewDataIfNeeded { (result) in

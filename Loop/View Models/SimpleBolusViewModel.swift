@@ -61,7 +61,7 @@ class SimpleBolusViewModel: ObservableObject {
 
     var isNoticeVisible: Bool { return activeNotice != nil }    
 
-    @Published var recommendedBolus: String = "0"
+    @Published var recommendedBolus: String = "–"
     
     @Published var activeInsulin: String?
 
@@ -116,7 +116,7 @@ class SimpleBolusViewModel: ObservableObject {
                 recommendedBolus = recommendationString
                 enteredBolusAmount = recommendationString
             } else {
-                recommendedBolus = NSLocalizedString("-", comment: "String denoting lack of a recommended bolus amount in the simple bolus calculator")
+                recommendedBolus = NSLocalizedString("–", comment: "String denoting lack of a recommended bolus amount in the simple bolus calculator")
                 enteredBolusAmount = Self.doseAmountFormatter.string(from: 0.0)!
             }
         }
@@ -205,6 +205,8 @@ class SimpleBolusViewModel: ObservableObject {
             self.recommendationDate = recommendationDate
         } else {
             dosingDecision = nil
+            recommendation = nil
+            activeInsulin = nil
             self.recommendationDate = nil
         }
     }

@@ -348,6 +348,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var carbsOnBoard: HKQuantity?
         let startDate = charts.startDate
         let basalDeliveryState = self.basalDeliveryState
+        let isClosedLoop = deviceManager.isClosedLoop
 
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
@@ -380,10 +381,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
             }
 
-            // Display a recommended basal change only if we haven't completed recently, or we're in open-loop mode
-            if lastLoopCompleted == nil ||
-                lastLoopCompleted! < Date(timeIntervalSinceNow: .minutes(-6)) ||
-                !manager.settings.dosingEnabled
+            // Display a recommended basal change only if we haven't completed recently and we are in closed loop mode
+            if (lastLoopCompleted == nil ||
+                lastLoopCompleted! < Date(timeIntervalSinceNow: .minutes(-6))) &&
+                isClosedLoop
             {
                 newRecommendedTempBasal = state.recommendedTempBasal
             }
