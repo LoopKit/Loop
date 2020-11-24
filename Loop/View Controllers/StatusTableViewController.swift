@@ -146,9 +146,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         
         if let onboardingService = deviceManager.servicesManager.activeServices.supportingOnboarding.first {
             showServiceSettings(onboardingService)
-        }
-        
-        if let firstAvailableService = deviceManager.pluginManager.availableServices.filter { $0.providesOnboarding }.first {
+        } else if let firstAvailableService = (deviceManager.pluginManager.availableServices.filter { $0.providesOnboarding }.first) {
             setupService(withIdentifier: firstAvailableService.identifier)
         }
     }
@@ -169,16 +167,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
         if !appearedOnce {
             appearedOnce = true
 
-            if deviceManager.authorizationRequired {
-                deviceManager.authorize {
-                    DispatchQueue.main.async {
-                        self.log.debug("[reloadData] after HealthKit authorization")
-                        self.reloadData()
-                        self.navigateToOnboardingIfNecessary()
-                    }
+            deviceManager.authorizeHealthStore {
+                DispatchQueue.main.async {
+                    self.log.debug("[reloadData] after HealthKit authorization")
+                    self.reloadData()
+                    self.navigateToOnboardingIfNecessary()
                 }
-            } else {
-                self.navigateToOnboardingIfNecessary()
             }
         }
 
@@ -1407,7 +1401,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           syncPumpSchedule: syncBasalRateSchedule,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
-                                          isClosedLoopAllowed: deviceManager.$isClosedLoopAllowed, preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
+                                          isClosedLoopAllowed: deviceManager.$isClosedLoopAllowed,
+                                          preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
                                           supportInfoProvider: deviceManager,
                                           activeServices: deviceManager.servicesManager.activeServices,
                                           delegate: self)

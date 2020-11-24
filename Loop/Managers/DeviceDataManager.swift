@@ -448,7 +448,7 @@ final class DeviceDataManager {
     }
     
     // Get HealthKit authorization for all of the stores
-    func authorize(_ completion: @escaping () -> Void) {
+    func authorizeHealthStore(_ completion: @escaping () -> Void) {
         // Authorize all types at once for simplicity
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
@@ -797,20 +797,20 @@ extension DeviceDataManager: PumpManagerDelegate {
         refreshCGM()
     }
     
-    private func refreshCGM(_ completion: (() -> Void)? = nil) {
-        if let cgmManager = cgmManager {
-            cgmManager.fetchNewDataIfNeeded { (result) in
-                if case .newData = result {
-                    self.analyticsServicesManager.didFetchNewCGMData()
-                }
-
-                self.queue.async {
-                    self.processCGMReadingResult(cgmManager, readingResult: result)
-                    completion?()
-                }
-            }
-        } else {
+    private func refreshCGM(_ completion: (() -> Void)? = nil) {        
+        guard let cgmManager = cgmManager else {
             completion?()
+        }
+
+        cgmManager.fetchNewDataIfNeeded { (result) in
+            if case .newData = result {
+                self.analyticsServicesManager.didFetchNewCGMData()
+            }
+
+            self.queue.async {
+                self.processCGMReadingResult(cgmManager, readingResult: result)
+                completion?()
+            }
         }
     }
     
