@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="16097.2" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="17156" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch38"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="16012"/>
+        <deployment identifier="watchOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="17035"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
     </dependencies>
     <scenes>
@@ -48,8 +49,8 @@
                                     <items>
                                         <group width="0.5" alignment="left" layout="vertical" id="wJu-fl-xhv">
                                             <items>
-                                                <button alignment="center" id="5iF-jW-tC8">
-                                                    <group key="contentGroup" width="60" height="60" alignment="left" radius="30" id="C7f-Mo-eUU">
+                                                <button alignment="center" id="5iF-jW-tC8" userLabel="Carbs Button">
+                                                    <group key="contentGroup" width="60" height="60" alignment="left" radius="30" id="C7f-Mo-eUU" userLabel="Carbs Button Background">
                                                         <items>
                                                             <imageView alignment="center" verticalAlignment="center" image="carbs" contentMode="center" id="4aO-ao-Sp9">
                                                                 <color key="tintColor" name="carbs"/>
@@ -70,8 +71,8 @@
                                         </group>
                                         <group width="0.5" alignment="left" layout="vertical" id="rGH-c2-O6g">
                                             <items>
-                                                <button alignment="center" id="jea-z6-U9e">
-                                                    <group key="contentGroup" width="60" height="60" alignment="left" radius="30" id="RpD-Vg-Uef">
+                                                <button alignment="center" id="jea-z6-U9e" userLabel="Bolus Button">
+                                                    <group key="contentGroup" width="60" height="60" alignment="left" radius="30" id="RpD-Vg-Uef" userLabel="Bolus Button Background">
                                                         <items>
                                                             <imageView alignment="center" verticalAlignment="center" image="bolus" contentMode="center" id="RKB-f5-XWX">
                                                                 <color key="tintColor" name="insulin"/>
@@ -146,6 +147,12 @@
                     </items>
                     <variation key="device=watch38mm" spacing="5"/>
                     <connections>
+                        <outlet property="bolusButton" destination="jea-z6-U9e" id="vsS-E7-0GF"/>
+                        <outlet property="bolusButtonBackground" destination="RpD-Vg-Uef" id="dqU-y1-yLp"/>
+                        <outlet property="bolusButtonImage" destination="RKB-f5-XWX" id="uQi-Fu-0ai"/>
+                        <outlet property="carbsButton" destination="5iF-jW-tC8" id="him-XO-Jod"/>
+                        <outlet property="carbsButtonBackground" destination="C7f-Mo-eUU" id="ere-wU-Kax"/>
+                        <outlet property="carbsButtonImage" destination="4aO-ao-Sp9" id="Nlk-SP-VmT"/>
                         <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>
                         <outlet property="loopHUDImage" destination="Q7C-xN-eH8" id="CIe-B3-umI"/>
                         <outlet property="overrideButton" destination="dYe-c2-Sfm" id="m7H-fY-Cxg"/>
@@ -177,10 +184,10 @@
                                     <items>
                                         <group width="1" height="26" alignment="left" id="pYI-3J-lxs">
                                             <items>
-                                                <label height="1" alignment="left" hidden="YES" text="---" textAlignment="center" id="Dt1-kz-jMZ">
+                                                <label height="1" alignment="left" hidden="YES" text="– – –" textAlignment="center" id="Dt1-kz-jMZ">
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
-                                                <label height="1" alignment="right" hidden="YES" text="---" textAlignment="center" id="yl8-ZP-c3l">
+                                                <label height="1" alignment="right" hidden="YES" text="– – –" textAlignment="center" id="yl8-ZP-c3l">
                                                     <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
@@ -211,7 +218,7 @@
                                                         <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
                                                         <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                                     </label>
-                                                    <label alignment="left" text="—" id="CsQ-fc-KLC">
+                                                    <label alignment="left" text="–" id="CsQ-fc-KLC">
                                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
                                                     </label>
@@ -277,7 +284,7 @@
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
-                                        <label alignment="right" verticalAlignment="bottom" text="—" id="Mhe-aR-kQQ">
+                                        <label alignment="right" verticalAlignment="bottom" text="–" id="Mhe-aR-kQQ">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
                                         </label>
                                     </items>
@@ -288,7 +295,7 @@
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
-                                        <label alignment="right" verticalAlignment="bottom" text="—" id="IRi-4t-ESO">
+                                        <label alignment="right" verticalAlignment="bottom" text="–" id="IRi-4t-ESO">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
                                         </label>
                                     </items>
@@ -398,16 +405,16 @@
         <image name="1-hour-graph" width="70" height="70"/>
         <image name="2-hour-graph" width="70" height="70"/>
         <image name="3-hour-graph" width="70" height="70"/>
-        <image name="bolus" width="44" height="44"/>
-        <image name="carbs" width="44" height="44"/>
+        <image name="bolus" width="32" height="32"/>
+        <image name="carbs" width="32" height="32"/>
         <image name="loop_unknown" width="26" height="26"/>
-        <image name="pre-meal" width="44" height="44"/>
-        <image name="workout" width="44" height="44"/>
+        <image name="pre-meal" width="32" height="32"/>
+        <image name="workout" width="32" height="32"/>
         <namedColor name="carbs">
             <color red="0.0" green="0.66699999570846558" blue="0.22400000691413879" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="carbs-dark">
-            <color red="0.0" green="0.66699999570846558" blue="0.22400000691413879" alpha="0.15000000596046448" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0080000003799796104" green="0.14100000262260437" blue="0.050999999046325684" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="insulin">
             <color red="0.33300000429153442" green="0.41200000047683716" blue="0.94900000095367432" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -425,7 +432,7 @@
             <color red="0.46700000762939453" green="0.36500000953674316" blue="0.79600000381469727" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="workout-dark">
-            <color red="0.46700000762939453" green="0.36500000953674316" blue="0.79600000381469727" alpha="0.15000000596046448" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.125" green="0.10999999940395355" blue="0.17299999296665192" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

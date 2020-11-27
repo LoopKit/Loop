@@ -23,13 +23,15 @@ private extension RefreshContext {
 final class CarbAbsorptionViewController: LoopChartsTableViewController, IdentifiableClass {
 
     private let log = OSLog(category: "StatusTableViewController")
+    
+    private var allowEditing: Bool = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.tableView.allowsSelectionDuringEditing = true
 
-        carbEffectChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
+        carbEffectChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBound
 
         let notificationCenter = NotificationCenter.default
 
@@ -63,7 +65,13 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             tableView.addGestureRecognizer(gestureRecognizer)
         }
 
-        navigationItem.rightBarButtonItems?.append(editButtonItem)
+        if !deviceManager.isClosedLoop {
+            allowEditing = false
+        }
+        
+        if allowEditing {
+            navigationItem.rightBarButtonItems?.append(editButtonItem)
+        }
 
         tableView.rowHeight = UITableView.automaticDimension
 
@@ -387,7 +395,8 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                     }
                 }
             }
-
+            
+            cell.isEditable = allowEditing
             return cell
         }
     }
@@ -436,7 +445,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         case .charts, .totals:
             return false
         case .entries:
-            return carbStatuses[indexPath.row].entry.createdByCurrentApp
+            return allowEditing && carbStatuses[indexPath.row].entry.createdByCurrentApp
         }
     }
 
@@ -478,7 +487,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         case .totals:
             return nil
         case .entries:
-            return carbStatuses[indexPath.row].entry.createdByCurrentApp ? indexPath : nil
+            return (allowEditing && carbStatuses[indexPath.row].entry.createdByCurrentApp) ? indexPath : nil
         }
     }
 
@@ -492,17 +501,30 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             break
         }
     }
+    
+    @IBAction func presentCarbEntryScreen() {
+        let navigationWrapper: UINavigationController
+        if deviceManager.isClosedLoop {
+            let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
+            
+            carbEntryViewController.deviceManager = deviceManager
+            carbEntryViewController.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
+            carbEntryViewController.preferredCarbUnit = deviceManager.carbStore.preferredUnit
+            navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
+        } else {
+            let viewModel = SimpleBolusViewModel(delegate: deviceManager)
+            let bolusEntryView = SimpleBolusView(displayMealEntry: true, viewModel: viewModel)
+            let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+            navigationWrapper = UINavigationController(rootViewController: hostingController)
+            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+        }
+        self.present(navigationWrapper, animated: true)
+    }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
 
-        var targetViewController = segue.destination
-
-        if let navVC = targetViewController as? UINavigationController, let topViewController = navVC.topViewController {
-            targetViewController = topViewController
-        }
-
-        switch targetViewController {
+        switch segue.destination {
         case let vc as CarbEntryViewController:
             if let selectedCell = sender as? UITableViewCell, let indexPath = tableView.indexPath(for: selectedCell), indexPath.row < carbStatuses.count {
                 vc.originalCarbEntry = carbStatuses[indexPath.row].entry
@@ -520,3 +542,4 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
     @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {}
 }
+

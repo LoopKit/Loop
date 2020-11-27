@@ -23,7 +23,7 @@ extension HUDRowController {
     }
 
     func setDetail(_ detail: String?) {
-        detailTextLabel.setText(detail ?? "—")
+        detailTextLabel.setText(detail ?? "–")
     }
 
     func setContentInset(_ inset: NSDirectionalEdgeInsets) {

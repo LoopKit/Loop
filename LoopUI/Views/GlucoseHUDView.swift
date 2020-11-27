@@ -13,7 +13,7 @@ import LoopKitUI
 
 public final class GlucoseHUDView: BaseHUDView {
     
-    static let staleGlucoseRepresentation: String = "---"
+    static let staleGlucoseRepresentation: String = NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)")
     
     private var stalenessTimer: Timer?
     

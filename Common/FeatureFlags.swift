@@ -13,7 +13,7 @@ let FeatureFlags = FeatureFlagConfiguration()
 struct FeatureFlagConfiguration: Decodable {
     let cgmManagerCategorizeManualGlucoseRangeEnabled: Bool
     let criticalAlertsEnabled: Bool
-    let deleteAllButtonEnabled: Bool
+    let entryDeletionEnabled: Bool
     let fiaspInsulinModelEnabled: Bool
     let includeServicesInSettingsEnabled: Bool
     let mockTherapySettingsEnabled: Bool
@@ -41,10 +41,10 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
         
         // Swift compiler config is inverse, since the default state is enabled.
-        #if DELETE_ALL_BUTTON_DISABLED
-        self.deleteAllButtonEnabled = false
+        #if ENTRY_DELETION_DISABLED
+        self.entryDeletionEnabled = false
         #else
-        self.deleteAllButtonEnabled = true
+        self.entryDeletionEnabled = true
         #endif
 
         // Swift compiler config is inverse, since the default state is enabled.
@@ -136,7 +136,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
         return [
             "* cgmManagerCategorizeManualGlucoseRangeEnabled: \(cgmManagerCategorizeManualGlucoseRangeEnabled)",
             "* criticalAlertsEnabled: \(criticalAlertsEnabled)",
-            "* deleteAllButtonEnabled: \(deleteAllButtonEnabled)",
+            "* entryDeletionEnabled: \(entryDeletionEnabled)",
             "* fiaspInsulinModelEnabled: \(fiaspInsulinModelEnabled)",
             "* includeServicesInSettingsEnabled: \(includeServicesInSettingsEnabled)",
             "* mockTherapySettingsEnabled: \(mockTherapySettingsEnabled)",

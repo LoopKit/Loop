@@ -68,16 +68,18 @@ class LoopDataManager {
             observeHealthKitSamplesFromOtherApps: false,
             cacheStore: cacheStore,
             cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
-            defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
+            defaultAbsorptionTimes: LoopCoreConstants.defaultCarbAbsorptionTimes,
             observationInterval: 0,     // No longer use HealthKit as source of recent carbs
             syncVersion: 0,
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+            observeHealthKitSamplesFromOtherApps: false,
             cacheStore: cacheStore,
-            cacheLength: .hours(4)
+            cacheLength: .hours(4),
+            observationInterval: 0,     // No longer use HealthKit as source of recent glucose
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
     }
 }
@@ -92,7 +94,7 @@ extension LoopDataManager {
 
         if activeContext == nil || context.shouldReplace(activeContext!) {
             if let newGlucoseSample = context.newGlucoseSample {
-                self.glucoseStore.addGlucose(newGlucoseSample) { (_) in }
+                self.glucoseStore.addGlucoseSamples([newGlucoseSample]) { (_) in }
             }
             activeContext = context
         }
@@ -117,7 +119,7 @@ extension LoopDataManager {
             case .success(let context):
                 self.carbStore.setSyncCarbObjects(context.objects) { (error) in
                     if let error = error {
-                        self.log.error("Failure setting carb backfill: %{public}@", String(describing: error))
+                        self.log.error("Failure setting sync carb objects: %{public}@", String(describing: error))
                     }
                 }
             case .failure:
@@ -147,7 +149,11 @@ extension LoopDataManager {
         WCSession.default.sendGlucoseBackfillRequestMessage(userInfo) { (result) in
             switch result {
             case .success(let context):
-                self.glucoseStore.addGlucose(context.samples) { _ in }
+                self.glucoseStore.setSyncGlucoseSamples(context.samples) { (error) in
+                    if let error = error {
+                        self.log.error("Failure setting sync glucose samples: %{public}@", String(describing: error))
+                    }
+                }
             case .failure:
                 // Already logged
                 // Reset our last date to immediately retry
@@ -181,14 +187,22 @@ extension LoopDataManager {
             return
         }
 
-        glucoseStore.getCachedGlucoseSamples(start: .earliestGlucoseCutoff) { samples in
+        glucoseStore.getGlucoseSamples(start: .earliestGlucoseCutoff) { result in
+            var historicalGlucose: [StoredGlucoseSample]?
+            switch result {
+            case .failure(let error):
+                self.log.error("Failure getting glucose samples: %{public}@", String(describing: error))
+                historicalGlucose = nil
+            case .success(let samples):
+                historicalGlucose = samples
+            }
             let chartData = GlucoseChartData(
                 unit: activeContext.preferredGlucoseUnit,
                 correctionRange: self.settings.glucoseTargetRangeSchedule,
                 preMealOverride: self.settings.preMealOverride,
                 scheduleOverride: self.settings.scheduleOverride,
-                historicalGlucose: samples,
-                predictedGlucose: activeContext.predictedGlucose?.values
+                historicalGlucose: historicalGlucose,
+                predictedGlucose: (activeContext.isClosedLoop ?? false) ? activeContext.predictedGlucose?.values : nil
             )
             completion(chartData)
         }

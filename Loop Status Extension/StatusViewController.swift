@@ -57,9 +57,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }(),
             traitCollection: traitCollection
         )
-
-        let glucoseMGDLDisplayBound: (lower: Double, upper: Double) = FeatureFlags.predictedGlucoseChartClampEnabled ? (80, 240) : (100, 175)
-        charts.predictedGlucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.lower)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: glucoseMGDLDisplayBound.upper)
+        
+        if FeatureFlags.predictedGlucoseChartClampEnabled {
+            charts.predictedGlucose.glucoseDisplayRange = ChartConstants.glucoseChartDefaultDisplayBoundClamped
+        } else {
+            charts.predictedGlucose.glucoseDisplayRange = ChartConstants.glucoseChartDefaultDisplayBound
+        }
 
         return charts
     }()
@@ -78,7 +81,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         healthStore: healthStore,
         observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
         cacheStore: cacheStore,
-        observationEnabled: false
+        observationEnabled: false,
+        provenanceIdentifier: HKSource.default().bundleIdentifier
     )
 
     lazy var doseStore = DoseStore(
@@ -88,17 +92,9 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         observationEnabled: false,
         insulinModel: defaults?.insulinModelSettings?.model,
         basalProfile: defaults?.basalRateSchedule,
-        insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule
+        insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule,
+        provenanceIdentifier: HKSource.default().bundleIdentifier
     )
-    
-    let absorptionTimes = LoopSettings.defaultCarbAbsorptionTimes
-    lazy var carbStore = CarbStore(healthStore: healthStore,
-                                   observeHealthKitSamplesFromOtherApps: false,
-                                   cacheStore: cacheStore,
-                                   cacheLength: .hours(24),
-                                   defaultAbsorptionTimes: absorptionTimes,
-                                   observationInterval: 0,
-                                   provenanceIdentifier: HKSource.default().bundleIdentifier)
     
     private var pluginManager: PluginManager = {
         let containingAppFrameworksURL = Bundle.main.privateFrameworksURL?.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Frameworks")
@@ -188,7 +184,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
         var activeInsulin: Double?
         let carbUnit = HKUnit.gram()
-        var activeCarbs: HKQuantity?
         var glucose: [StoredGlucoseSample] = []
 
         group.enter()
@@ -201,18 +196,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
             group.leave()
         }
-        
-        group.enter()
-        carbStore.carbsOnBoard(at: Date()) { (result) in
-            switch result {
-            case .success(let cobValue):
-                activeCarbs = cobValue.quantity
-            case .failure:
-                activeCarbs = nil
-            }
-            group.leave()
-        }
-
+    
         charts.startDate = Calendar.current.nextDate(after: Date(timeIntervalSinceNow: .minutes(-5)), matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? Date()
 
         // Showing the whole history plus full prediction in the glucose plot
@@ -220,8 +204,13 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         charts.maxEndDate = charts.startDate.addingTimeInterval(TimeInterval(hours: 3))
 
         group.enter()
-        glucoseStore.getCachedGlucoseSamples(start: charts.startDate) { (result) in
-            glucose = result
+        glucoseStore.getGlucoseSamples(start: charts.startDate) { (result) in
+            switch result {
+            case .failure:
+                glucose = []
+            case .success(let samples):
+                glucose = samples
+            }
             group.leave()
         }
 
@@ -247,18 +236,20 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 self.hudView.pumpStatusHUD.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.start)
             }
 
-            self.hudView.loopCompletionHUD.dosingEnabled = defaults.loopSettings?.dosingEnabled ?? false
-
             if let lastCompleted = context.lastLoopCompleted {
                 self.hudView.loopCompletionHUD.lastLoopCompleted = lastCompleted
+            }
+            
+            if let isClosedLoop = context.isClosedLoop {
+                self.hudView.loopCompletionHUD.loopIconClosed = isClosedLoop
             }
 
             let insulinFormatter: NumberFormatter = {
                 let numberFormatter = NumberFormatter()
 
                 numberFormatter.numberStyle = .decimal
-                numberFormatter.minimumFractionDigits = 1
-                numberFormatter.maximumFractionDigits = 1
+                numberFormatter.minimumFractionDigits = 2
+                numberFormatter.maximumFractionDigits = 2
                 
                 return numberFormatter
             }()
@@ -278,8 +269,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             let carbsFormatter = QuantityFormatter()
             carbsFormatter.setPreferredNumberFormatter(for: carbUnit)
 
-            if let activeCarbs = activeCarbs,
-                let activeCarbsNumberString = carbsFormatter.string(from: activeCarbs, for: carbUnit)
+            if let carbsOnBoard = context.carbsOnBoard,
+               let activeCarbsNumberString = carbsFormatter.string(from: HKQuantity(unit: carbUnit, doubleValue: carbsOnBoard), for: carbUnit)
             {
                 self.activeCarbsAmountLabel.text = String(format: NSLocalizedString("%1$@", comment: "The subtitle format describing the grams of active carbs.  (1: localized carb value description)"), activeCarbsNumberString)
             } else {
@@ -294,12 +285,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 return
             }
 
-            if let lastGlucose = glucose.last, let recencyInterval = defaults.loopSettings?.inputDataRecencyInterval {
+            if let lastGlucose = glucose.last {
                 self.hudView.cgmStatusHUD.setGlucoseQuantity(
                     lastGlucose.quantity.doubleValue(for: unit),
                     at: lastGlucose.startDate,
                     unit: unit,
-                    staleGlucoseAge: recencyInterval,
+                    staleGlucoseAge: LoopCoreConstants.inputDataRecencyInterval,
                     glucoseDisplay: context.glucoseDisplay,
                     wasUserEntered: lastGlucose.wasUserEntered
                 )
@@ -312,8 +303,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             self.charts.predictedGlucose.glucoseUnit = unit
             self.charts.predictedGlucose.setGlucoseValues(glucose)
 
-            if let predictedGlucose = context.predictedGlucose?.samples {
+            if let predictedGlucose = context.predictedGlucose?.samples, context.isClosedLoop == true {
                 self.charts.predictedGlucose.setPredictedGlucoseValues(predictedGlucose)
+            } else {
+                self.charts.predictedGlucose.setPredictedGlucoseValues([])
             }
 
             self.charts.predictedGlucose.targetGlucoseSchedule = defaults.loopSettings?.glucoseTargetRangeSchedule

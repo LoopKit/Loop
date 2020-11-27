@@ -18,7 +18,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
         return 2
     }
 
-    private(set) var freshness = LoopCompletionFreshness.unknown {
+    private(set) var freshness = LoopCompletionFreshness.stale {
         didSet {
             updateTintColor()
         }
@@ -30,9 +30,9 @@ public final class LoopCompletionHUDView: BaseHUDView {
         updateDisplay(nil)
     }
 
-    public var dosingEnabled = false {
+    public var loopIconClosed = false {
         didSet {
-            loopStateView.open = !dosingEnabled
+            loopStateView.open = !loopIconClosed
         }
     }
 
@@ -78,8 +78,6 @@ public final class LoopCompletionHUDView: BaseHUDView {
             tintColor = stateColors?.warning
         case .stale:
             tintColor = stateColors?.error
-        case .unknown:
-            tintColor = stateColors?.unknown
         }
 
         self.tintColor = tintColor
@@ -122,7 +120,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
     @objc private func updateDisplay(_: Timer?) {
         if let date = lastLoopCompleted {
             let ago = abs(min(0, date.timeIntervalSinceNow))
-            
+
             freshness = LoopCompletionFreshness(age: ago)
 
             if let timeString = formatter.string(from: ago) {
@@ -139,15 +137,15 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
                 accessibilityLabel = String(format: LocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
             } else {
-                caption?.text = "—"
+                caption?.text = "–"
                 accessibilityLabel = nil
             }
         } else {
-            caption?.text = "—"
+            caption?.text = "–"
             accessibilityLabel = LocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
         }
 
-        if dosingEnabled {
+        if loopIconClosed {
             accessibilityHint = LocalizedString("Closed loop", comment: "Accessibility hint describing completion HUD for a closed loop")
         } else {
             accessibilityHint = LocalizedString("Open loop", comment: "Accessbility hint describing completion HUD for an open loop")
@@ -158,5 +156,26 @@ public final class LoopCompletionHUDView: BaseHUDView {
         super.didMoveToWindow()
 
         assertTimer()
+    }
+}
+
+extension LoopCompletionHUDView {
+    public var loopCompletionMessage: (title: String, message: String) {
+        switch freshness {
+        case .fresh:
+            if loopStateView.open {
+                return (title: LocalizedString("Closed Loop OFF", comment: "Title of green open loop OFF message"),
+                        message: String(format: NSLocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but your basal insulin will not adjust automatically.\n\nTap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Green closed loop OFF message (1: app name)"), Bundle.main.bundleDisplayName))
+            } else {
+                return (title: LocalizedString("Closed Loop ON", comment: "Title of green closed loop ON message"),
+                        message: String(format: LocalizedString("\n%1$@ is operating with Closed Loop in the ON position. Your last loop was successful within the last 5 minutes.", comment: "Green closed loop ON message (1: app name)"), Bundle.main.bundleDisplayName))
+            }
+        case .aging:
+            return (title: LocalizedString("Loop Failure", comment: "Title of yellow loop message"),
+                    message: String(format: LocalizedString("\n%1$@ has not completed a loop successfully in the past 5-15 minutes.\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM.", comment: "Yellow loop message (1: app name) (2: app name)"), Bundle.main.bundleDisplayName, Bundle.main.bundleDisplayName))
+        case .stale:
+            return (title: LocalizedString("Loop Failure", comment: "Title of red loop message"),
+                    message: String(format: LocalizedString("\n%1$@ has not completed a loop successfully in over 15 minutes.\n\nTap your CGM and insulin pump status icons for more information. %1$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM.", comment: "Red loop message (1: app name) (2: app name)"), Bundle.main.bundleDisplayName, Bundle.main.bundleDisplayName))
+        }
     }
 }

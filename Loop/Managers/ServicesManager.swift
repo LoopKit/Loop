@@ -159,3 +159,9 @@ extension ServicesManager: ServiceDelegate {
         storeSettings(settings: settings)
     }
 }
+
+extension Array where Element == Service {
+    var supportingOnboarding: [ServiceUI] {
+        return compactMap { $0 as? ServiceUI }.filter { type(of: $0).providesOnboarding }
+    }
+}

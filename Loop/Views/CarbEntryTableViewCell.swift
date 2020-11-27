@@ -21,6 +21,14 @@ class CarbEntryTableViewCell: UITableViewCell {
 
     @IBOutlet private weak var observedDateLabel: UILabel!
 
+    @IBOutlet private weak var disclosureImage: UIImageView!
+    
+    var isEditable: Bool = true {
+        didSet {
+            disclosureImage.isHidden = !isEditable
+        }
+    }
+
     var clampedProgress: Float {
         get {
             return clampedProgressView.progress

@@ -174,7 +174,7 @@ private class TimeInRangeCalculator {
             dataManager.glucoseStore.getGlucoseSamples(start: day.start, end: day.end) { (result) in
                 switch result {
                 case .failure(let error):
-                    os_log(.error, log: self.log, "Failed to fetch samples: %{public}@", String(describing: error))
+                    os_log(.error, log: self.log, "Failure getting glucose samples: %{public}@", String(describing: error))
                     completion(error)
                 case .success(let samples):
                     if let timeInRange = samples.proportion(where: { self.range.contains($0.quantity) }) {

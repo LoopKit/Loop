@@ -32,6 +32,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     private var carbEntryUnderConsideration: NewCarbEntry?
     private var contextUpdateObservation: AnyObject?
     private var hasSentConfirmationMessage = false
+    private var contextDate: Date?
 
     // MARK: - Constants
     private static let defaultSupportedBolusVolumes = (0...600).map { 0.05 * Double($0) } // U
@@ -50,7 +51,9 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         case .carbEntry:
             break
         case .manualBolus:
-            self._recommendedBolusAmount = Published(initialValue: loopManager.activeContext?.recommendedBolusDose)
+            let activeContext = loopManager.activeContext
+            self.contextDate = activeContext?.creationDate
+            self._recommendedBolusAmount = Published(initialValue: activeContext?.recommendedBolusDose)
         }
 
         self._bolusPickerValues = Published(
@@ -89,8 +92,10 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                     self.recommendBolus(for: entry)
                 }
             case .manualBolus:
-                if self.recommendedBolusAmount != loopManager.activeContext?.recommendedBolusDose {
-                    self.recommendedBolusAmount = loopManager.activeContext?.recommendedBolusDose
+                let activeContext = loopManager.activeContext
+                self.contextDate = activeContext?.creationDate
+                if self.recommendedBolusAmount != activeContext?.recommendedBolusDose {
+                    self.recommendedBolusAmount = activeContext?.recommendedBolusDose
                 }
             }
         }
@@ -147,6 +152,8 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                             self.isComputingRecommendedBolus = false
                         }
 
+                        self.contextDate = context.creationDate
+
                         // Don't publish a new value if the recommendation has not changed.
                         guard self.recommendedBolusAmount != context.recommendedBolusDoseConsideringPotentialCarbEntry else {
                             return
@@ -170,7 +177,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func absorptionTime(for carbAbsorptionTime: CarbAbsorptionTime) -> TimeInterval {
-        let defaultTimes = LoopSettings.defaultCarbAbsorptionTimes
+        let defaultTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
 
         switch carbAbsorptionTime {
         case .fast:
@@ -201,7 +208,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             return
         }
 
-        let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), carbEntry: carbEntry)
+        let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry)
         do {
             try WCSession.default.sendBolusMessage(bolus) { [weak self] (error) in
                 DispatchQueue.main.async {
@@ -210,8 +217,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                     } else {
                         self?.hasSentConfirmationMessage = true
 
-                        let loopManager = ExtensionDelegate.shared().loopManager
-                        if let carbEntry = bolus.carbEntry {
+                        if bolus.carbEntry != nil {
                             if bolus.value == 0 {
                                 // Notify for a successful carb entry (sans bolus)
                                 WKInterfaceDevice.current().play(.success)

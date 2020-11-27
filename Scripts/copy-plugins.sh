@@ -13,7 +13,7 @@ function copy_plugins {
     echo "Looking for plugins in $1"
     for f in "$1"/*.loopplugin; do
       plugin=$(basename "$f")
-      echo Copying device plugin: $plugin to frameworks directory in app
+      echo Copying plugin: $plugin to frameworks directory in app
       plugin_path="$(readlink "$f" || echo "$f")"
       plugin_as_framework_path="${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/${plugin%.*}.framework"
       rsync -va --exclude=Frameworks "$plugin_path/." "${plugin_as_framework_path}"

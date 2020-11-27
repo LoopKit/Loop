@@ -39,5 +39,5 @@ extension WatchHistoricalCarbs: RawRepresentable {
         return encoder
     }
 
-    private static var decoder: PropertyListDecoder { PropertyListDecoder() }
+    private static var decoder: PropertyListDecoder = PropertyListDecoder()
 }
