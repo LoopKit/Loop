@@ -118,7 +118,7 @@ extension LoopSettings {
         case (nil, let scheduleOverride?):
             currentEffectiveOverride = scheduleOverride
         case (let preMealOverride?, let scheduleOverride?):
-            currentEffectiveOverride = preMealOverride.endDate > Date()
+            currentEffectiveOverride = preMealOverride.scheduledEndDate > Date()
                 ? preMealOverride
                 : scheduleOverride
         case (nil, nil):

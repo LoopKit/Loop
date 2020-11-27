@@ -106,8 +106,8 @@ extension PredictedGlucoseChart {
                 preMealOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(preMealOverride, unit: glucoseUnit, xAxisValues: xAxisValues)
 
                 if displayedScheduleOverride != nil {
-                    if displayedScheduleOverride!.endDate > preMealOverride.endDate {
-                        displayedScheduleOverride!.activeInterval = DateInterval(start: preMealOverride.endDate, end: displayedScheduleOverride!.endDate)
+                    if displayedScheduleOverride!.scheduledEndDate > preMealOverride.scheduledEndDate {
+                        displayedScheduleOverride!.activeInterval = DateInterval(start: preMealOverride.scheduledEndDate, end: displayedScheduleOverride!.scheduledEndDate)
                     } else {
                         displayedScheduleOverride = nil
                     }

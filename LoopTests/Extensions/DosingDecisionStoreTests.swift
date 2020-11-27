@@ -292,6 +292,9 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
     },
     "requestedBolus" : 0.80000000000000004,
     "scheduleOverride" : {
+      "actualEnd" : {
+        "type" : "natural"
+      },
       "context" : "custom",
       "duration" : {
         "finite" : {
@@ -700,6 +703,9 @@ class StoredDosingDecisionCodableTests: XCTestCase {
   },
   "requestedBolus" : 0.80000000000000004,
   "scheduleOverride" : {
+    "actualEnd" : {
+      "type" : "natural"
+    },
     "context" : "custom",
     "duration" : {
       "finite" : {

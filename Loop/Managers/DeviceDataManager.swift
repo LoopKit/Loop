@@ -164,7 +164,7 @@ final class DeviceDataManager {
 
     // MARK: - Status Extension
 
-    private var statusExtensionManager: StatusExtensionDataManager!
+    private var statusExtensionManager: ExtensionDataManager!
 
     // MARK: - Initialization
 
@@ -259,7 +259,7 @@ final class DeviceDataManager {
             self.cgmManager = pumpManager as? CGMManager
         }
 
-        statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
+        statusExtensionManager = ExtensionDataManager(deviceDataManager: self)
 
         loopManager = LoopDataManager(
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,

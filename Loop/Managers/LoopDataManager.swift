@@ -45,6 +45,8 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
+    
+    private var overrideObserver: NSKeyValueObservation? = nil
 
     deinit {
         for observer in notificationObservers {
@@ -96,6 +98,22 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
         loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: alertPresenter)
         loopSettingsAlerter.delegate = self
+
+        overrideObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
+            guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
+                return
+            }
+
+            guard let preset = self?.settings.overridePresets.first(where: {$0.name.lowercased() == name}) else {
+                self?.logger.error("Override Intent: Unable to find override named '%s'", String(describing: name))
+                return
+            }
+            
+            self?.logger.default("Override Intent: setting override named '%s'", String(describing: name))
+            self?.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
+            // Remove the override from UserDefaults so we don't set it multiple times
+            appGroup.intentExtensionOverrideToSet = nil
+        })
 
         overrideHistory.delegate = self
 
@@ -1794,6 +1812,7 @@ extension LoopDataManager {
                 "basalDeliveryState: \(String(describing: manager.basalDeliveryState))",
                 "carbsOnBoard: \(String(describing: state.carbsOnBoard))",
                 "error: \(String(describing: state.error))",
+                "overrideInUserDefaults: \(String(describing: UserDefaults.appGroup?.intentExtensionOverrideToSet))",
                 "",
                 String(reflecting: self.retrospectiveCorrection),
                 "",
