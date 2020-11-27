@@ -25,6 +25,7 @@ struct FeatureFlagConfiguration: Decodable {
     let sensitivityOverridesEnabled: Bool
     let simulatedCoreDataEnabled: Bool
     let walshInsulinModelEnabled: Bool
+    let siriEnabled: Bool
 
     fileprivate init() {
         #if CGM_MANAGER_CATEGORIZE_GLUCOSE_RANGE_ENABLED
@@ -119,6 +120,13 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.walshInsulinModelEnabled = true
         #endif
+        
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if SIRI_DISABLED
+        self.siriEnabled = false
+        #else
+        self.siriEnabled = true
+        #endif
     }
 }
 
@@ -139,7 +147,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* scenariosEnabled: \(scenariosEnabled)",
             "* sensitivityOverridesEnabled: \(sensitivityOverridesEnabled)",
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
-            "* walshInsulinModelEnabled: \(walshInsulinModelEnabled)"
+            "* walshInsulinModelEnabled: \(walshInsulinModelEnabled)",
+            "* siriEnabled: \(siriEnabled)",
         ].joined(separator: "\n")
     }
 }

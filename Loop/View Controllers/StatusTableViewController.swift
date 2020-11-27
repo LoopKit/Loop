@@ -1139,6 +1139,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
             vc.presets = deviceManager.loopManager.settings.overridePresets
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
+            vc.overrideHistory = deviceManager.loopManager.overrideHistory.getEvents()
             vc.delegate = self
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
@@ -1705,6 +1706,21 @@ extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
 
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmOverride override: TemporaryScheduleOverride) {
         deviceManager.loopManager.settings.scheduleOverride = override
+    }
+
+    func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmPreset preset: TemporaryScheduleOverridePreset) {
+        let intent = EnableOverridePresetIntent()
+        intent.overrideName = preset.name
+
+        let interaction = INInteraction(intent: intent, response: nil)
+        interaction.identifier = preset.id.uuidString
+        interaction.groupIdentifier = preset.name
+        interaction.donate { (error) in
+            if let error = error {
+                os_log(.error, "Failed to donate intent: %{public}@", String(describing: error))
+            }
+        }
+        deviceManager.loopManager.settings.scheduleOverride = preset.createOverride(enactTrigger: .local)
     }
 
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didCancelOverride override: TemporaryScheduleOverride) {
