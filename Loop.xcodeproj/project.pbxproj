@@ -662,69 +662,6 @@
 			remoteGlobalIDString = 43D9001A21EB209400AF44BF;
 			remoteInfo = "LoopCore-watchOS";
 		};
-		E942DE1F253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 430157F71C7EC03B00B64B63;
-			remoteInfo = "LoopKit Example";
-		};
-		E942DE21253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 43D8FDCB1C728FDF0073BE78;
-			remoteInfo = LoopKit;
-		};
-		E942DE23253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = A9E675F022713F4700E25293;
-			remoteInfo = "LoopKit-watchOS";
-		};
-		E942DE25253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 43D8FDD51C728FDF0073BE78;
-			remoteInfo = LoopKitTests;
-		};
-		E942DE27253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 1DEE230124A676A300693C32;
-			remoteInfo = LoopKitHostedTests;
-		};
-		E942DE29253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 43BA7154201E484D0058961E;
-			remoteInfo = LoopKitUI;
-		};
-		E942DE2B253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 89D2047221CC7BD7001238CC;
-			remoteInfo = MockKit;
-		};
-		E942DE2D253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 89D2048F21CC7C12001238CC;
-			remoteInfo = MockKitUI;
-		};
-		E942DE2F253BE1DE00AC532D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 892A5D34222F03CB008961AB;
-			remoteInfo = LoopTestingKit;
-		};
 		E9B07F92253BBA6500BAD8F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -1495,8 +1432,6 @@
 		E93E86C724E2E02200FF40C8 /* high_and_stable_predicted_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_predicted_glucose.json; sourceTree = "<group>"; };
 		E93E86C824E2E02200FF40C8 /* high_and_stable_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_counteraction_effect.json; sourceTree = "<group>"; };
 		E93E86C924E2E02200FF40C8 /* high_and_stable_momentum_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_momentum_effect.json; sourceTree = "<group>"; };
-		E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LoopKit.xcodeproj; path = ../LoopKit/LoopKit.xcodeproj; sourceTree = "<group>"; };
-		E942DE31253BE1E200AC532D /* LoopKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LoopKit; path = ../LoopKit; sourceTree = "<group>"; };
 		E942DE6D253BE5E100AC532D /* Loop Intent Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Intent Extension.entitlements"; sourceTree = "<group>"; };
 		E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreProtocol.swift; sourceTree = "<group>"; };
@@ -2441,9 +2376,6 @@
 			isa = PBXGroup;
 			children = (
 				1DC63E7325351BDF004605DA /* TrueTime.framework */,
-				E942DE31253BE1E200AC532D /* LoopKit */,
-				E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */,
-				C1EBB080252590C7000D9680 /* Minizip.framework */,
 				4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */,
 				C1750AEB255B013300B8011C /* Minizip.framework */,
 				C19F496225630504003632D7 /* Minizip.framework */,
@@ -2633,22 +2565,6 @@
 				E93E86C724E2E02200FF40C8 /* high_and_stable_predicted_glucose.json */,
 			);
 			path = high_and_stable;
-			sourceTree = "<group>";
-		};
-		E942DE14253BE1DE00AC532D /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				E942DE20253BE1DE00AC532D /* LoopKit Example.app */,
-				E942DE22253BE1DE00AC532D /* LoopKit.framework */,
-				E942DE24253BE1DE00AC532D /* LoopKit.framework */,
-				E942DE26253BE1DE00AC532D /* LoopKitTests.xctest */,
-				E942DE28253BE1DE00AC532D /* LoopKitHostedTests.xctest */,
-				E942DE2A253BE1DE00AC532D /* LoopKitUI.framework */,
-				E942DE2C253BE1DE00AC532D /* MockKit.framework */,
-				E942DE2E253BE1DE00AC532D /* MockKitUI.framework */,
-				E942DE30253BE1DE00AC532D /* LoopTestingKit.framework */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		E95D37FF24EADE68005E2F50 /* Store Protocols */ = {
@@ -3095,12 +3011,6 @@
 			mainGroup = 43776F831B8022E90074EA36;
 			productRefGroup = 43776F8D1B8022E90074EA36 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = E942DE14253BE1DE00AC532D /* Products */;
-					ProjectRef = E942DE13253BE1DE00AC532D /* LoopKit.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				43776F8B1B8022E90074EA36 /* Loop */,
@@ -3118,72 +3028,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		E942DE20253BE1DE00AC532D /* LoopKit Example.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = "LoopKit Example.app";
-			remoteRef = E942DE1F253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E942DE22253BE1DE00AC532D /* LoopKit.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = LoopKit.framework;
-			remoteRef = E942DE21253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E942DE24253BE1DE00AC532D /* LoopKit.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = LoopKit.framework;
-			remoteRef = E942DE23253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E942DE26253BE1DE00AC532D /* LoopKitTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = LoopKitTests.xctest;
-			remoteRef = E942DE25253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E942DE28253BE1DE00AC532D /* LoopKitHostedTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = LoopKitHostedTests.xctest;
-			remoteRef = E942DE27253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E942DE2A253BE1DE00AC532D /* LoopKitUI.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = LoopKitUI.framework;
-			remoteRef = E942DE29253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E942DE2C253BE1DE00AC532D /* MockKit.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = MockKit.framework;
-			remoteRef = E942DE2B253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E942DE2E253BE1DE00AC532D /* MockKitUI.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = MockKitUI.framework;
-			remoteRef = E942DE2D253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E942DE30253BE1DE00AC532D /* LoopTestingKit.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = LoopTestingKit.framework;
-			remoteRef = E942DE2F253BE1DE00AC532D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		43776F8A1B8022E90074EA36 /* Resources */ = {
@@ -3364,7 +3208,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -f $PROJECT_DIR/.gitmodules ]; then\n    echo \"Skipping checkout due to presence of .gitmodules file\"\n    if [ $ACTION = \"install\" ]; then\n        echo \"You're installing: Make sure to keep all submodules up-to-date and run carthage build after changes.\"\n    fi\nelse\n    echo \"Bootstrapping Carthage dependencies...\"\n    unset LLVM_TARGET_TRIPLE_SUFFIX\n\n    if ! cmp -s Cartfile.Resolved Carthage/Cartfile.resolved; then\n        time ./Scripts/carthage.sh bootstrap --project-directory \"$SRCROOT\" --platform ios --cache-builds --verbose || exit 1\n        cp Cartfile.resolved Carthage\n    else\n        echo \"Carthage: not bootstrapping\"\n    fi\nfi\n";
+			shellScript = "if [ -f $PROJECT_DIR/.gitmodules ]; then\n    echo \"Skipping checkout due to presence of .gitmodules file\"\n    if [ $ACTION = \"install\" ]; then\n        echo \"You're installing: Make sure to keep all submodules up-to-date and run carthage build after changes.\"\n    fi\nelse\n    echo \"Bootstrapping Carthage dependencies...\"\n    unset LLVM_TARGET_TRIPLE_SUFFIX\n\n    if ! cmp -s Cartfile.Resolved Carthage/Cartfile.resolved; then\n        time ./Scripts/carthage.sh bootstrap --project-directory \"$SRCROOT\" --platform ios,watchos --cache-builds --verbose || exit 1\n        cp Cartfile.resolved Carthage\n    else\n        echo \"Carthage: not bootstrapping\"\n    fi\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		432CF88220D8BCD90066B889 /* Homebrew & Carthage Setup */ = {
