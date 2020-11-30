@@ -14,7 +14,7 @@ import LoopKitUI
 import LoopUI
 
 
-struct BolusEntryView: View, HorizontalSizeClassOverride {
+struct BolusEntryView: View {
     @ObservedObject var viewModel: BolusEntryViewModel
 
     @State private var enteredBolusAmount = ""
@@ -40,8 +40,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
                 // TODO: Fix this in Xcode 12 when we're building for iOS 14.
                 .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : -28)
-                .listStyle(GroupedListStyle())
-                .environment(\.horizontalSizeClass, self.horizontalOverride)
+                .insetGroupedListStyle()
                 
                 self.actionArea
                     .frame(height: self.isKeyboardVisible ? 0 : nil)

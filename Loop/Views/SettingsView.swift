@@ -12,7 +12,7 @@ import MockKit
 import SwiftUI
 import HealthKit
 
-public struct SettingsView: View, HorizontalSizeClassOverride {
+public struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appName) private var appName
     @Environment(\.carbTintColor) private var carbTintColor
@@ -52,10 +52,9 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
                 }
                 supportSection
             }
-            .listStyle(GroupedListStyle())
+            .insetGroupedListStyle()
             .navigationBarTitle(Text(NSLocalizedString("Settings", comment: "Settings screen title")))
             .navigationBarItems(trailing: dismissButton)
-            .environment(\.horizontalSizeClass, horizontalOverride)
         }
     }
     
@@ -205,7 +204,7 @@ extension SettingsView {
             ForEach(viewModel.servicesViewModel.activeServices().indices, id: \.self) { index in
                 LargeButton(action: { self.viewModel.servicesViewModel.didTapService(index) },
                             includeArrow: true,
-                            imageView: self.serviceImage(uiImage: (self.viewModel.servicesViewModel.activeServices()[index] as! ServiceUI).image),
+                            imageView: self.serviceImage(uiImage: (self.viewModel.servicesViewModel.activeServices()[index] as? ServiceUI)?.image),
                             label: self.viewModel.servicesViewModel.activeServices()[index].localizedTitle,
                             descriptiveText: "")
             }
