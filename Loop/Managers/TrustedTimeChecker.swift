@@ -72,8 +72,7 @@ class TrustedTimeChecker {
     private func issueTimeChangedAlert() {
         let alertIdentifier = Alert.Identifier(managerIdentifier: "Loop", alertIdentifier: "significantTimeChange")
         let alertTitle = NSLocalizedString("Time Change Detected", comment: "Time change alert title")
-        // TODO: remove Tidepool-isms
-        let alertBody = NSLocalizedString("Your phone’s time has been changed. Tidepool Loop needs accurate time records to make predictions about your glucose and adjust your insulin accordingly.\n\nCheck in your iPhone Settings (General / Date & Time) and verify that Set Automatically is enabled. Failure to resolve could lead to serious under-delivery or over-delivery of insulin. If you did not change the time, contact Tidepool Support.", comment: "Time change alert body")
+        let alertBody = String(format: NSLocalizedString("Your phone’s time has been changed. %1$@ needs accurate time records to make predictions about your glucose and adjust your insulin accordingly.\n\nCheck in your iPhone Settings (General / Date & Time) and verify that Set Automatically is enabled. Failure to resolve could lead to serious under-delivery or over-delivery of insulin.", comment: "Time change alert body. (1: app name)"), Bundle.main.bundleDisplayName)
         let content = Alert.Content(title: alertTitle, body: alertBody, acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Alert acknowledgment OK button"))
         alertManager?.issueAlert(Alert(identifier: alertIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate))
     }

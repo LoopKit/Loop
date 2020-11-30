@@ -11,12 +11,6 @@ import LoopKitUI
 import MockKit
 import MockKitUI
 
-public struct AvailableDevice {
-    let identifier: String
-    let localizedTitle: String
-}
-
-
 let staticPumpManagers: [PumpManagerUI.Type] = [
     MockPumpManager.self,
 ]
@@ -26,7 +20,7 @@ let staticPumpManagersByIdentifier: [String: PumpManagerUI.Type] = staticPumpMan
 }
 
 let availableStaticPumpManagers = staticPumpManagers.map { (Type) -> AvailableDevice in
-    return AvailableDevice(identifier: Type.managerIdentifier, localizedTitle: Type.localizedTitle)
+    return AvailableDevice(identifier: Type.managerIdentifier, localizedTitle: Type.localizedTitle, providesOnboarding: false)
 }
 
 extension PumpManager {

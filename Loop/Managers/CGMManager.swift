@@ -16,7 +16,7 @@ let staticCGMManagersByIdentifier: [String: CGMManager.Type] = staticCGMManagers
 }
 
 let availableStaticCGMManagers = staticCGMManagers.map { (Type) -> AvailableDevice in
-    return AvailableDevice(identifier: Type.managerIdentifier, localizedTitle: Type.localizedTitle)
+    return AvailableDevice(identifier: Type.managerIdentifier, localizedTitle: Type.localizedTitle, providesOnboarding: false)
 }
 
 func CGMManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManager? {

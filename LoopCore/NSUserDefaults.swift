@@ -19,7 +19,7 @@ extension UserDefaults {
         case insulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
         case loopSettings = "com.loopkit.Loop.loopSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
-        case overrideHistory = "com.tidepool.loopkit.overrideHistory"
+        case overrideHistory = "com.loopkit.overrideHistory"
         case lastBedtimeQuery = "com.loopkit.Loop.lastBedtimeQuery"
         case bedtime = "com.loopkit.Loop.bedtime"
     }

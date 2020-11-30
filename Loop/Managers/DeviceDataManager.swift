@@ -101,8 +101,18 @@ final class DeviceDataManager {
     
     let settingsStore: SettingsStore
     
-    /// All the HealthKit types to be read and shared by stores
-    private var sampleTypes: Set<HKSampleType> {
+    /// All the HealthKit types to be read by stores
+    private var readTypes: Set<HKSampleType> {
+        return Set([
+            glucoseStore.sampleType,
+            carbStore.sampleType,
+            doseStore.sampleType,
+            HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!
+        ].compactMap { $0 })
+    }
+    
+    /// All the HealthKit types to be shared by stores
+    private var shareTypes: Set<HKSampleType> {
         return Set([
             glucoseStore.sampleType,
             carbStore.sampleType,
@@ -110,20 +120,30 @@ final class DeviceDataManager {
         ].compactMap { $0 })
     }
 
+    var sleepDataAuthorizationRequired: Bool {
+        return carbStore.healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .notDetermined
+    }
+    
+    var sleepDataSharingDenied: Bool {
+        return carbStore.healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .sharingDenied
+    }
+
     /// True if any stores require HealthKit authorization
     var authorizationRequired: Bool {
         return glucoseStore.authorizationRequired ||
                carbStore.authorizationRequired ||
-               doseStore.authorizationRequired
+               doseStore.authorizationRequired ||
+               sleepDataAuthorizationRequired
     }
 
     /// True if the user has explicitly denied access to any stores' HealthKit types
     private var sharingDenied: Bool {
         return glucoseStore.sharingDenied ||
                carbStore.sharingDenied ||
-               doseStore.sharingDenied
+               doseStore.sharingDenied ||
+               sleepDataSharingDenied
     }
-    
+
     // MARK: Services
 
     private(set) var servicesManager: ServicesManager!
@@ -382,7 +402,7 @@ final class DeviceDataManager {
     var availableCGMManagers: [AvailableDevice] {
         var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
-            availableCGMManagers.append(AvailableDevice(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
+            availableCGMManagers.append(AvailableDevice(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle, providesOnboarding: false))
         }
         return availableCGMManagers
     }
@@ -392,14 +412,12 @@ final class DeviceDataManager {
     }
     
     public typealias SetupCGMCompletion = (CGMManager?) -> Void
-    public func maybeSetupCGMManager(_ identifier: String, setupClosure: (CGMManagerUI.Type, @escaping SetupCGMCompletion) -> Void) {
+    public func maybeSetupCGMManager(_ identifier: String, setupClosure: (CGMManagerUI.Type) -> Void) {
         if identifier == pumpManager?.managerIdentifier, let cgmManager = pumpManager as? CGMManager {
             // We have a pump that is a CGM!
             self.cgmManager = cgmManager
         } else if let cgmManagerType = cgmManagerTypeByIdentifier(identifier) {
-            setupClosure(cgmManagerType) {
-                self.cgmManager = $0
-            }
+            setupClosure(cgmManagerType)
         }
     }
     
@@ -430,9 +448,9 @@ final class DeviceDataManager {
     }
     
     // Get HealthKit authorization for all of the stores
-    func authorize(_ completion: @escaping () -> Void) {
+    func authorizeHealthStore(_ completion: @escaping () -> Void) {
         // Authorize all types at once for simplicity
-        healthStore.requestAuthorization(toShare: sampleTypes, read: sampleTypes) { (success, error) in
+        healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
                 // Call the individual authorization methods to trigger query creation
                 self.carbStore.authorize(toShare: true, { _ in })
@@ -465,6 +483,7 @@ final class DeviceDataManager {
                         "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
                         "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
                         "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
+                        "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
@@ -726,12 +745,17 @@ extension DeviceDataManager: CGMManagerDelegate {
     }
 }
 
+extension DeviceDataManager: CGMManagerSetupViewControllerDelegate {
+    func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
+        self.cgmManager = cgmManager
+    }
+}
 
 // MARK: - PumpManagerDelegate
 extension DeviceDataManager: PumpManagerDelegate {
     func pumpManager(_ pumpManager: PumpManager, didAdjustPumpClockBy adjustment: TimeInterval) {
         dispatchPrecondition(condition: .onQueue(queue))
-        log.default("PumpManager:%{public}@ did adjust pump block by %fs", String(describing: type(of: pumpManager)), adjustment)
+        log.default("PumpManager:%{public}@ did adjust pump clock by %fs", String(describing: type(of: pumpManager)), adjustment)
 
         analyticsServicesManager.pumpTimeDidDrift(adjustment)
     }
@@ -770,15 +794,31 @@ extension DeviceDataManager: PumpManagerDelegate {
         }
         lastBLEDrivenUpdate = Date()
 
-        cgmManager?.fetchNewDataIfNeeded { (result) in
+        refreshCGM()
+    }
+    
+    private func refreshCGM(_ completion: (() -> Void)? = nil) {        
+        guard let cgmManager = cgmManager else {
+            completion?()
+            return
+        }
+
+        cgmManager.fetchNewDataIfNeeded { (result) in
             if case .newData = result {
                 self.analyticsServicesManager.didFetchNewCGMData()
             }
 
-            if let manager = self.cgmManager {
-                self.queue.async {
-                    self.processCGMReadingResult(manager, readingResult: result)
-                }
+            self.queue.async {
+                self.processCGMReadingResult(cgmManager, readingResult: result)
+                completion?()
+            }
+        }
+    }
+    
+    func refreshDeviceData() {
+        refreshCGM() {
+            self.queue.async {
+                self.pumpManager?.ensureCurrentPumpData(completion: nil)
             }
         }
     }
@@ -1242,3 +1282,27 @@ fileprivate extension FileManager {
 //MARK: - CGMStalenessMonitorDelegate protocol conformance
 
 extension GlucoseStore : CGMStalenessMonitorDelegate { }
+
+
+//MARK: - SupportInfoProvider protocol conformance
+
+extension DeviceDataManager: SupportInfoProvider {
+    
+    public var localizedAppNameAndVersion: String {
+        return Bundle.main.localizedNameAndVersion
+    }
+    
+    public var pumpStatus: PumpManagerStatus? {
+        return pumpManager?.status
+    }
+    
+    public var cgmDevice: HKDevice? {
+        return cgmManager?.device
+    }
+    
+    public func generateIssueReport(completion: @escaping (String) -> Void) {
+        generateDiagnosticReport(completion)
+    }
+    
+    
+}
