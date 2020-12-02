@@ -216,23 +216,25 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     private var foodKeyboard: EmojiInputController!
     
     private func updateDisplayAccurateCarbEntryWarning() {
-        deviceManager.loopManager.getLoopState { [weak self] (_, state) in
-            let endDate = Date()
-            let startDate = endDate.addingTimeInterval(.minutes(-20))
-            let threshold = HKQuantity(unit: GlucoseEffectVelocity.unit, doubleValue: 3)
+        let now = Date()
+        let startDate = now.addingTimeInterval(.minutes(-20))
 
-            let filteredInsulinCounteractionEffects = state.insulinCounteractionEffects.filterDateRange(startDate, endDate)
-
+        deviceManager.glucoseStore.getGlucoseSamples(start: startDate, end: nil) { [weak self] (result) -> Void in
             DispatchQueue.main.async {
-                // at least 3 insulin counteraction effects are required to calculate the average
-                guard filteredInsulinCounteractionEffects.count >= 3,
-                    let averageInsulinCounteractionEffect = filteredInsulinCounteractionEffects.average(unit: GlucoseEffectVelocity.unit) else
-                {
+                switch result {
+                case .failure:
                     self?.shouldDisplayAccurateCarbEntryWarning = false
-                    return
+                case .success(let samples):
+                    let filteredSamples = samples.filterDateRange(startDate, now)
+                    guard let startSample = filteredSamples.first, let endSample = filteredSamples.last else {
+                        self?.shouldDisplayAccurateCarbEntryWarning = false
+                        return
+                    }
+                    let duration = endSample.startDate.timeIntervalSince(startSample.startDate)
+                    let delta = endSample.quantity.doubleValue(for: .milligramsPerDeciliter) - startSample.quantity.doubleValue(for: .milligramsPerDeciliter)
+                    let velocity = delta / duration.minutes // Unit = mg/dL/m
+                    self?.shouldDisplayAccurateCarbEntryWarning = duration >= .minutes(12) && velocity > LoopConstants.missedMealWarningGlucoseRiseThreshold
                 }
-
-                self?.shouldDisplayAccurateCarbEntryWarning = averageInsulinCounteractionEffect >= threshold
             }
         }
     }

@@ -52,4 +52,6 @@ enum LoopConstants {
     static let defaultWatchCarbPickerValue = 15 // grams
     
     static let defaultWatchBolusPickerValue = 1.0 // %
+    
+    static let missedMealWarningGlucoseRiseThreshold = 3.0 // mg/dL/m
 }
