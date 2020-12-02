@@ -62,8 +62,8 @@
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "docelowo 92 mg/dL";
 
-/* Class = "UILabel"; text = "g COB"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g COB";
+/* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
+"SQx-au-ZcM.text" = "g Active Carbs";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Węglowodany";
