@@ -136,14 +136,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
             refreshContext.formUnion(RefreshContext.all)
         }
     }
+
+    private var isOnboardingComplete: Bool { deviceManager.loopManager.therapySettings.isComplete }
     
-    private func navigateToOnboardingIfNecessary() {
-        let therapySettings = deviceManager.loopManager.therapySettings
-        
-        guard !therapySettings.isComplete else {
-            return
-        }
-        
+    private func navigateToOnboarding() {
         if let onboardingService = deviceManager.servicesManager.activeServices.supportingOnboarding.first {
             showServiceSettings(onboardingService)
         } else if let firstAvailableService = (deviceManager.pluginManager.availableServices.filter { $0.providesOnboarding }.first) {
@@ -169,9 +165,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             deviceManager.authorizeHealthStore {
                 DispatchQueue.main.async {
+                    // On first launch, before HealthKit permissions are acknowledged, preferredGlucoseUnit will be nil, so set here when available
+                    self.preferredGlucoseUnit = self.deviceManager.glucoseStore.preferredUnit
+
                     self.log.debug("[reloadData] after HealthKit authorization")
                     self.reloadData()
-                    self.navigateToOnboardingIfNecessary()
+                    if !self.isOnboardingComplete {
+                        self.navigateToOnboarding()
+                    }
                 }
             }
         }
@@ -309,7 +310,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         // This should be kept up to date immediately
         hudView?.loopCompletionHUD.lastLoopCompleted = deviceManager.loopManager.lastLoopCompleted
 
-        guard !reloading && !deviceManager.authorizationRequired else {
+        guard !reloading && !deviceManager.authorizationRequired && isOnboardingComplete else {
             return
         }
 
