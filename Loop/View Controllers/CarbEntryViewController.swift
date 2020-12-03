@@ -217,7 +217,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     
     private func updateDisplayAccurateCarbEntryWarning() {
         let now = Date()
-        let startDate = now.addingTimeInterval(.minutes(-20))
+        let startDate = now.addingTimeInterval(-LoopConstants.missedMealWarningGlucoseRecencyWindow)
 
         deviceManager.glucoseStore.getGlucoseSamples(start: startDate, end: nil) { [weak self] (result) -> Void in
             DispatchQueue.main.async {
@@ -231,9 +231,13 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
                         return
                     }
                     let duration = endSample.startDate.timeIntervalSince(startSample.startDate)
+                    guard duration >= LoopConstants.missedMealWarningVelocitySampleMinDuration else {
+                        self?.shouldDisplayAccurateCarbEntryWarning = false
+                        return
+                    }
                     let delta = endSample.quantity.doubleValue(for: .milligramsPerDeciliter) - startSample.quantity.doubleValue(for: .milligramsPerDeciliter)
                     let velocity = delta / duration.minutes // Unit = mg/dL/m
-                    self?.shouldDisplayAccurateCarbEntryWarning = duration >= .minutes(12) && velocity > LoopConstants.missedMealWarningGlucoseRiseThreshold
+                    self?.shouldDisplayAccurateCarbEntryWarning = velocity > LoopConstants.missedMealWarningGlucoseRiseThreshold
                 }
             }
         }

@@ -53,5 +53,8 @@ enum LoopConstants {
     
     static let defaultWatchBolusPickerValue = 1.0 // %
     
+    /// Missed Meal warning constants
     static let missedMealWarningGlucoseRiseThreshold = 3.0 // mg/dL/m
+    static let missedMealWarningGlucoseRecencyWindow = TimeInterval(minutes: 20)
+    static let missedMealWarningVelocitySampleMinDuration = TimeInterval(minutes: 12)
 }
