@@ -16,7 +16,7 @@ struct SupportMenuItem: Identifiable {
     var menuItemView: AnyView
 }
 
-struct SupportScreenView: View, HorizontalSizeClassOverride {
+struct SupportScreenView: View {
     @Environment(\.dismiss) private var dismiss
     
     var didTapIssueReport: ((_ title: String) -> Void)?
@@ -44,9 +44,8 @@ struct SupportScreenView: View, HorizontalSizeClassOverride {
                 }
             }
         }
-        .listStyle(GroupedListStyle())
+        .insetGroupedListStyle()
         .navigationBarTitle(Text("Support", comment: "Support screen title"))
-        .environment(\.horizontalSizeClass, horizontalOverride)
     }
     
     func openURL(_ url: URL) {
