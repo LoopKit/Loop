@@ -12,7 +12,7 @@ import LoopKitUI
 import HealthKit
 import LoopCore
 
-struct SimpleBolusView: View, HorizontalSizeClassOverride {
+struct SimpleBolusView: View {
 
     @Environment(\.dismiss) var dismiss
     
@@ -48,8 +48,7 @@ struct SimpleBolusView: View, HorizontalSizeClassOverride {
                 // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
                 // TODO: Fix this in Xcode 12 when we're building for iOS 14.
                 .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : 0)
-                .listStyle(GroupedListStyle()) // In iOS 14, this should be InsetGroupedListStyle()
-                .environment(\.horizontalSizeClass, .regular)
+                .insetGroupedListStyle()
                 .navigationBarTitle(Text(self.title), displayMode: .inline)
                 
                 self.actionArea

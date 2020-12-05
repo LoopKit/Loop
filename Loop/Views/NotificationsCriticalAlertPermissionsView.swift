@@ -9,7 +9,7 @@
 import LoopKitUI
 import SwiftUI
 
-public struct NotificationsCriticalAlertPermissionsView: View, HorizontalSizeClassOverride {
+public struct NotificationsCriticalAlertPermissionsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appName) private var appName
 
@@ -49,10 +49,9 @@ public struct NotificationsCriticalAlertPermissionsView: View, HorizontalSizeCla
             manageCriticalAlertsSection
             notificationAndCriticalAlertPermissionSupportSection
         }
-        .listStyle(GroupedListStyle())
+        .insetGroupedListStyle()
         .navigationBarTitle(Text(NSLocalizedString("Alert Permissions", comment: "Notification & Critical Alert Permissions screen title")))
         .navigationBarItems(leading: dismissButton)
-        .environment(\.horizontalSizeClass, horizontalOverride)
     }
 }
 

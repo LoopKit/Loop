@@ -115,8 +115,8 @@
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "Förväntat 5,1 mmol/l";
 
-/* Class = "UILabel"; text = "g COB"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g COB";
+/* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
+"SQx-au-ZcM.text" = "g Active Carbs";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glukos";
