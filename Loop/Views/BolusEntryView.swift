@@ -263,6 +263,7 @@ struct BolusEntryView: View {
                 bolusUnitsLabel
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var recommendedBolusString: String {
@@ -287,10 +288,10 @@ struct BolusEntryView: View {
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
                     maxLength: 5
                 )
-                
                 bolusUnitsLabel
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var bolusUnitsLabel: some View {
@@ -454,6 +455,7 @@ struct LabeledQuantity: View {
                 .foregroundColor(Color(.secondaryLabel))
                 .fixedSize(horizontal: true, vertical: false)
         }
+        .accessibilityElement(children: .combine)
         .font(.subheadline)
         .modifier(LabelBackground())
     }
