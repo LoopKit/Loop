@@ -158,7 +158,7 @@ final class BolusEntryViewModel: ObservableObject {
         originalCarbEntry: StoredCarbEntry? = nil,
         potentialCarbEntry: NewCarbEntry? = nil,
         selectedCarbAbsorptionTimeEmoji: String? = nil,
-        isManualGlucoseEntryEnabled: Bool = false
+        isManualGlucoseEntryEnabled: Bool = false,
         supportedInsulinModels: SupportedInsulinModelSettings? = nil
     ) {
         self.delegate = delegate
@@ -357,7 +357,7 @@ final class BolusEntryViewModel: ObservableObject {
         // Authenticate the bolus before saving anything
         if isLoggingDose && enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
             let message = String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt to log an insulin dose"), enteredBolusAmountString)
-            authenticationChallenge(message) {
+            authenticate(message) {
                 switch $0 {
                 case .success:
                     self.continueSaving(onSuccess: completion)

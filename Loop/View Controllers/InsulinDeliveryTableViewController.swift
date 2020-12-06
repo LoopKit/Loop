@@ -563,12 +563,5 @@ fileprivate extension UIAlertController {
     }
 }
 
-fileprivate extension UIViewController {
-    /// Argumentless wrapper around `dismiss(animated:)` in order to pass as a selector
-    @objc func dismissWithAnimation() {
-        dismiss(animated: true)
-    }
-}
-
 extension InsulinDeliveryTableViewController: IdentifiableClass {
 }
