@@ -451,9 +451,14 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 cell.accessoryType = entry.isUploaded ? .checkmark : .none
                 cell.selectionStyle = .default
             case .logDose(let values):
-                let event = values[indexPath.row]
-                let time = timeFormatter.string(from: event.date)
-                cell.textLabel?.text = event.title ?? NSLocalizedString("Unknown", comment: "The default title to use when an entry has none")
+                let entry = values[indexPath.row]
+                let time = timeFormatter.string(from: entry.date)
+
+                if let attributedText = entry.dose?.localizedAttributedDescription {
+                                    cell.textLabel?.attributedText = attributedText
+                } else {
+                    cell.textLabel?.text = NSLocalizedString("Unknown", comment: "The default description to use when an entry has no dose description")
+                }
                 cell.detailTextLabel?.text = time
                 cell.selectionStyle = .default
             }
