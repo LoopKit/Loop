@@ -305,14 +305,19 @@ struct BolusEntryView: View {
     }
     private var datePicker: some View {
         // Allow 6 hours before & after due to longest DIA
-        ExpandableDateListPicker(
-            with: viewModel.selectedDoseDate,
-            text: NSLocalizedString("Date", comment: "Date picker label"),
-            onUpdate: { [weak viewModel] date in
-                viewModel?.selectedDoseDate = date
-            }
-        )
+        ZStack(alignment: .topLeading) {
+            DatePicker(
+                "",
+                selection: $viewModel.selectedDoseDate,
+                in: Date().addingTimeInterval(-.hours(6))...Date().addingTimeInterval(.hours(6)),
+                displayedComponents: [.date, .hourAndMinute]
+            )
+            .pickerStyle(WheelPickerStyle())
+            
+            Text(NSLocalizedString("Date", comment: "Date picker label"))
+        }
     }
+    
 
     private var bolusEntryRow: some View {
         HStack {
