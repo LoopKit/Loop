@@ -19,4 +19,9 @@ extension UIViewController {
         }
         return presentedViewController?.topmostViewController ?? self
     }
+
+    /// Argumentless wrapper around `dismiss(animated:)` in order to pass as a selector
+    @objc func dismissWithAnimation() {
+        dismiss(animated: true)
+    }
 }

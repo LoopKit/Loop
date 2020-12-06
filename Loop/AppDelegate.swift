@@ -6,13 +6,13 @@
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
 //
 
+import HealthKit
 import Intents
 import LoopCore
 import LoopKit
+import LoopKitUI
 import UIKit
 import UserNotifications
-import HealthKit
-import LoopKitUI
 
 @UIApplicationMain
 final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationController {
@@ -25,6 +25,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
     private var deviceDataManager: DeviceDataManager!
     private var loopAlertsManager: LoopAlertsManager!
     private var bluetoothStateManager: BluetoothStateManager!
+    private var trustedTimeChecker: TrustedTimeChecker!
 
     var window: UIWindow?
     
@@ -76,6 +77,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         OrientationLock.deviceOrientationController = self
 
         NotificationManager.authorize(delegate: self)
+
+        if FeatureFlags.siriEnabled && INPreferences.siriAuthorizationStatus() == .notDetermined {
+            INPreferences.requestSiriAuthorization { _ in }
+        }
         
         rootViewController.pushViewController(statusTableViewController, animated: false)
 
@@ -88,6 +93,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         scheduleBackgroundTasks()
 
         launchOptions = nil
+        
+        trustedTimeChecker = TrustedTimeChecker(alertManager)
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -185,7 +192,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
             finishLaunch(application: application)
         }
     }
-
+        
     // MARK: - DeviceOrientationController
 
     var supportedInterfaceOrientations = UIInterfaceOrientationMask.allButUpsideDown

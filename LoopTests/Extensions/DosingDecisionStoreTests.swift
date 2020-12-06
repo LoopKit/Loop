@@ -23,6 +23,19 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
                 try assertDosingDecisionObjectEncodable(object, encodesJSON: """
 {
   "data" : {
+    "carbEntry" : {
+      "absorptionTime" : 18000,
+      "createdByCurrentApp" : true,
+      "foodType" : "Pizza",
+      "provenanceIdentifier" : "com.loopkit.loop",
+      "quantity" : 29,
+      "startDate" : "2020-01-02T03:00:23Z",
+      "syncIdentifier" : "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
+      "syncVersion" : 2,
+      "userCreatedDate" : "2020-05-14T22:06:12Z",
+      "userUpdatedDate" : "2020-05-14T22:07:32Z",
+      "uuid" : "135CDABE-9343-7242-4233-1020384789AE"
+    },
     "carbsOnBoard" : {
       "endDate" : "2020-05-14T23:18:41Z",
       "quantity" : 45.5,
@@ -38,6 +51,49 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
       "name" : "Device Name",
       "systemName" : "Device System Name",
       "systemVersion" : "Device System Version"
+    },
+    "effectiveGlucoseTargetRangeSchedule" : {
+      "override" : {
+        "end" : "2020-05-14T23:12:17Z",
+        "start" : "2020-05-14T21:12:17Z",
+        "value" : {
+          "maxValue" : 115,
+          "minValue" : 105
+        }
+      },
+      "rangeSchedule" : {
+        "unit" : "mg/dL",
+        "valueSchedule" : {
+          "items" : [
+            {
+              "startTime" : 0,
+              "value" : {
+                "maxValue" : 110,
+                "minValue" : 100
+              }
+            },
+            {
+              "startTime" : 25200,
+              "value" : {
+                "maxValue" : 100,
+                "minValue" : 90
+              }
+            },
+            {
+              "startTime" : 75600,
+              "value" : {
+                "maxValue" : 120,
+                "minValue" : 110
+              }
+            }
+          ],
+          "referenceTimeInterval" : 0,
+          "repeatInterval" : 86400,
+          "timeZone" : {
+            "identifier" : "America/Los_Angeles"
+          }
+        }
+      }
     },
     "errors" : [
       {
@@ -108,49 +164,6 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
         }
       }
     },
-    "glucoseTargetRangeScheduleApplyingOverrideIfActive" : {
-      "override" : {
-        "end" : "2020-05-14T23:12:17Z",
-        "start" : "2020-05-14T21:12:17Z",
-        "value" : {
-          "maxValue" : 115,
-          "minValue" : 105
-        }
-      },
-      "rangeSchedule" : {
-        "unit" : "mg/dL",
-        "valueSchedule" : {
-          "items" : [
-            {
-              "startTime" : 0,
-              "value" : {
-                "maxValue" : 110,
-                "minValue" : 100
-              }
-            },
-            {
-              "startTime" : 25200,
-              "value" : {
-                "maxValue" : 100,
-                "minValue" : 90
-              }
-            },
-            {
-              "startTime" : 75600,
-              "value" : {
-                "maxValue" : 120,
-                "minValue" : 110
-              }
-            }
-          ],
-          "referenceTimeInterval" : 0,
-          "repeatInterval" : 86400,
-          "timeZone" : {
-            "identifier" : "America/Los_Angeles"
-          }
-        }
-      }
-    },
     "insulinOnBoard" : {
       "startDate" : "2020-05-14T22:38:26Z",
       "value" : 1.5
@@ -158,6 +171,12 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
     "lastReservoirValue" : {
       "startDate" : "2020-05-14T22:07:19Z",
       "unitVolume" : 113.3
+    },
+    "manualGlucose" : {
+      "endDate" : "2020-05-14T22:09:00Z",
+      "quantity" : 153,
+      "quantityUnit" : "mg/dL",
+      "startDate" : "2020-05-14T22:09:00Z"
     },
     "notificationSettings" : {
       "alertSetting" : "disabled",
@@ -172,6 +191,18 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
       "providesAppNotificationSettings" : true,
       "showPreviewsSetting" : "whenAuthenticated",
       "soundSetting" : "enabled"
+    },
+    "originalCarbEntry" : {
+      "absorptionTime" : 18000,
+      "createdByCurrentApp" : true,
+      "foodType" : "Pizza",
+      "provenanceIdentifier" : "com.loopkit.loop",
+      "quantity" : 19,
+      "startDate" : "2020-01-02T03:00:23Z",
+      "syncIdentifier" : "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
+      "syncVersion" : 1,
+      "userCreatedDate" : "2020-05-14T22:06:12Z",
+      "uuid" : "18CF3948-0B3D-4B12-8BFE-14986B0E6784"
     },
     "predictedGlucose" : [
       {
@@ -209,7 +240,7 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
     ],
     "pumpManagerStatus" : {
       "basalDeliveryState" : "initiatingTempBasal",
-      "bolusState" : "none",
+      "bolusState" : "noBolus",
       "deliveryIsUncertain" : false,
       "device" : {
         "firmwareVersion" : "Device Firmware Version",
@@ -259,7 +290,11 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
         "unitsPerHour" : 0.75
       }
     },
+    "requestedBolus" : 0.80000000000000004,
     "scheduleOverride" : {
+      "actualEnd" : {
+        "type" : "natural"
+      },
       "context" : "custom",
       "duration" : {
         "finite" : {
@@ -399,6 +434,19 @@ class StoredDosingDecisionCodableTests: XCTestCase {
     func testCodable() throws {
         try assertStoredDosingDecisionCodable(StoredDosingDecision.test, encodesJSON: """
 {
+  "carbEntry" : {
+    "absorptionTime" : 18000,
+    "createdByCurrentApp" : true,
+    "foodType" : "Pizza",
+    "provenanceIdentifier" : "com.loopkit.loop",
+    "quantity" : 29,
+    "startDate" : "2020-01-02T03:00:23Z",
+    "syncIdentifier" : "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
+    "syncVersion" : 2,
+    "userCreatedDate" : "2020-05-14T22:06:12Z",
+    "userUpdatedDate" : "2020-05-14T22:07:32Z",
+    "uuid" : "135CDABE-9343-7242-4233-1020384789AE"
+  },
   "carbsOnBoard" : {
     "endDate" : "2020-05-14T23:18:41Z",
     "quantity" : 45.5,
@@ -414,6 +462,49 @@ class StoredDosingDecisionCodableTests: XCTestCase {
     "name" : "Device Name",
     "systemName" : "Device System Name",
     "systemVersion" : "Device System Version"
+  },
+  "effectiveGlucoseTargetRangeSchedule" : {
+    "override" : {
+      "end" : "2020-05-14T23:12:17Z",
+      "start" : "2020-05-14T21:12:17Z",
+      "value" : {
+        "maxValue" : 115,
+        "minValue" : 105
+      }
+    },
+    "rangeSchedule" : {
+      "unit" : "mg/dL",
+      "valueSchedule" : {
+        "items" : [
+          {
+            "startTime" : 0,
+            "value" : {
+              "maxValue" : 110,
+              "minValue" : 100
+            }
+          },
+          {
+            "startTime" : 25200,
+            "value" : {
+              "maxValue" : 100,
+              "minValue" : 90
+            }
+          },
+          {
+            "startTime" : 75600,
+            "value" : {
+              "maxValue" : 120,
+              "minValue" : 110
+            }
+          }
+        ],
+        "referenceTimeInterval" : 0,
+        "repeatInterval" : 86400,
+        "timeZone" : {
+          "identifier" : "America/Los_Angeles"
+        }
+      }
+    }
   },
   "errors" : [
     {
@@ -484,49 +575,6 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       }
     }
   },
-  "glucoseTargetRangeScheduleApplyingOverrideIfActive" : {
-    "override" : {
-      "end" : "2020-05-14T23:12:17Z",
-      "start" : "2020-05-14T21:12:17Z",
-      "value" : {
-        "maxValue" : 115,
-        "minValue" : 105
-      }
-    },
-    "rangeSchedule" : {
-      "unit" : "mg/dL",
-      "valueSchedule" : {
-        "items" : [
-          {
-            "startTime" : 0,
-            "value" : {
-              "maxValue" : 110,
-              "minValue" : 100
-            }
-          },
-          {
-            "startTime" : 25200,
-            "value" : {
-              "maxValue" : 100,
-              "minValue" : 90
-            }
-          },
-          {
-            "startTime" : 75600,
-            "value" : {
-              "maxValue" : 120,
-              "minValue" : 110
-            }
-          }
-        ],
-        "referenceTimeInterval" : 0,
-        "repeatInterval" : 86400,
-        "timeZone" : {
-          "identifier" : "America/Los_Angeles"
-        }
-      }
-    }
-  },
   "insulinOnBoard" : {
     "startDate" : "2020-05-14T22:38:26Z",
     "value" : 1.5
@@ -534,6 +582,12 @@ class StoredDosingDecisionCodableTests: XCTestCase {
   "lastReservoirValue" : {
     "startDate" : "2020-05-14T22:07:19Z",
     "unitVolume" : 113.3
+  },
+  "manualGlucose" : {
+    "endDate" : "2020-05-14T22:09:00Z",
+    "quantity" : 153,
+    "quantityUnit" : "mg/dL",
+    "startDate" : "2020-05-14T22:09:00Z"
   },
   "notificationSettings" : {
     "alertSetting" : "disabled",
@@ -548,6 +602,18 @@ class StoredDosingDecisionCodableTests: XCTestCase {
     "providesAppNotificationSettings" : true,
     "showPreviewsSetting" : "whenAuthenticated",
     "soundSetting" : "enabled"
+  },
+  "originalCarbEntry" : {
+    "absorptionTime" : 18000,
+    "createdByCurrentApp" : true,
+    "foodType" : "Pizza",
+    "provenanceIdentifier" : "com.loopkit.loop",
+    "quantity" : 19,
+    "startDate" : "2020-01-02T03:00:23Z",
+    "syncIdentifier" : "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
+    "syncVersion" : 1,
+    "userCreatedDate" : "2020-05-14T22:06:12Z",
+    "uuid" : "18CF3948-0B3D-4B12-8BFE-14986B0E6784"
   },
   "predictedGlucose" : [
     {
@@ -585,7 +651,7 @@ class StoredDosingDecisionCodableTests: XCTestCase {
   ],
   "pumpManagerStatus" : {
     "basalDeliveryState" : "initiatingTempBasal",
-    "bolusState" : "none",
+    "bolusState" : "noBolus",
     "deliveryIsUncertain" : false,
     "device" : {
       "firmwareVersion" : "Device Firmware Version",
@@ -635,7 +701,11 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       "unitsPerHour" : 0.75
     }
   },
+  "requestedBolus" : 0.80000000000000004,
   "scheduleOverride" : {
+    "actualEnd" : {
+      "type" : "natural"
+    },
     "context" : "custom",
     "duration" : {
       "finite" : {
@@ -689,7 +759,7 @@ extension StoredDosingDecision: Equatable {
             lhs.carbsOnBoard == rhs.carbsOnBoard &&
             lhs.scheduleOverride == rhs.scheduleOverride &&
             lhs.glucoseTargetRangeSchedule == rhs.glucoseTargetRangeSchedule &&
-            lhs.glucoseTargetRangeScheduleApplyingOverrideIfActive == rhs.glucoseTargetRangeScheduleApplyingOverrideIfActive &&
+            lhs.effectiveGlucoseTargetRangeSchedule == rhs.effectiveGlucoseTargetRangeSchedule &&
             lhs.predictedGlucose == rhs.predictedGlucose &&
             lhs.predictedGlucoseIncludingPendingInsulin == rhs.predictedGlucoseIncludingPendingInsulin &&
             lhs.lastReservoirValue == rhs.lastReservoirValue &&
@@ -778,7 +848,7 @@ fileprivate extension StoredDosingDecision {
                                                               override: GlucoseRangeSchedule.Override(value: DoubleRange(minValue: 105.0, maxValue: 115.0),
                                                                                                       start: dateFormatter.date(from: "2020-05-14T21:12:17Z")!,
                                                                                                       end: dateFormatter.date(from: "2020-05-14T23:12:17Z")!))
-        let glucoseTargetRangeScheduleApplyingOverrideIfActive = GlucoseRangeSchedule(rangeSchedule: DailyQuantitySchedule(unit: .milligramsPerDeciliter,
+        let effectiveGlucoseTargetRangeSchedule = GlucoseRangeSchedule(rangeSchedule: DailyQuantitySchedule(unit: .milligramsPerDeciliter,
                                                                                                                            dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: DoubleRange(minValue: 100.0, maxValue: 110.0)),
                                                                                                                                         RepeatingScheduleValue(startTime: .hours(7), value: DoubleRange(minValue: 90.0, maxValue: 100.0)),
                                                                                                                                         RepeatingScheduleValue(startTime: .hours(21), value: DoubleRange(minValue: 110.0, maxValue: 120.0))],
@@ -800,6 +870,30 @@ fileprivate extension StoredDosingDecision {
                                                                              quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 117.8))]
         let lastReservoirValue = StoredDosingDecision.LastReservoirValue(startDate: dateFormatter.date(from: "2020-05-14T22:07:19Z")!,
                                                                          unitVolume: 113.3)
+        let manualGlucose = SimpleGlucoseValue(startDate: dateFormatter.date(from: "2020-05-14T22:09:00Z")!,
+                                               quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 153))
+        let originalCarbEntry = StoredCarbEntry(uuid: UUID(uuidString: "18CF3948-0B3D-4B12-8BFE-14986B0E6784")!,
+                                                provenanceIdentifier: "com.loopkit.loop",
+                                                syncIdentifier: "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
+                                                syncVersion: 1,
+                                                startDate: dateFormatter.date(from: "2020-01-02T03:00:23Z")!,
+                                                quantity: HKQuantity(unit: .gram(), doubleValue: 19),
+                                                foodType: "Pizza",
+                                                absorptionTime: .hours(5),
+                                                createdByCurrentApp: true,
+                                                userCreatedDate: dateFormatter.date(from: "2020-05-14T22:06:12Z")!,
+                                                userUpdatedDate: nil)
+        let carbEntry = StoredCarbEntry(uuid: UUID(uuidString: "135CDABE-9343-7242-4233-1020384789AE")!,
+                                        provenanceIdentifier: "com.loopkit.loop",
+                                        syncIdentifier: "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
+                                        syncVersion: 2,
+                                        startDate: dateFormatter.date(from: "2020-01-02T03:00:23Z")!,
+                                        quantity: HKQuantity(unit: .gram(), doubleValue: 29),
+                                        foodType: "Pizza",
+                                        absorptionTime: .hours(5),
+                                        createdByCurrentApp: true,
+                                        userCreatedDate: dateFormatter.date(from: "2020-05-14T22:06:12Z")!,
+                                        userUpdatedDate: dateFormatter.date(from: "2020-05-14T22:07:32Z")!)
         let recommendedTempBasal = StoredDosingDecision.TempBasalRecommendationWithDate(recommendation: TempBasalRecommendation(unitsPerHour: 0.75,
                                                                                                                                 duration: .minutes(30)),
                                                                                         date: dateFormatter.date(from: "2020-05-14T22:38:15Z")!)
@@ -808,6 +902,7 @@ fileprivate extension StoredDosingDecision {
                                                                                                                     notice: .predictedGlucoseBelowTarget(minGlucose: PredictedGlucoseValue(startDate: dateFormatter.date(from: "2020-05-14T23:03:15Z")!,
                                                                                                                                                                                            quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 75.5)))),
                                                                                 date: dateFormatter.date(from: "2020-05-14T22:38:16Z")!)
+        let requestedBolus = 0.8
         let pumpManagerStatus = PumpManagerStatus(timeZone: TimeZone(identifier: "America/Los_Angeles")!,
                                                   device: HKDevice(name: "Device Name",
                                                                    manufacturer: "Device Manufacturer",
@@ -819,7 +914,7 @@ fileprivate extension StoredDosingDecision {
                                                                    udiDeviceIdentifier: "Device UDI Device Identifier"),
                                                   pumpBatteryChargeRemaining: 3.5,
                                                   basalDeliveryState: .initiatingTempBasal,
-                                                  bolusState: .none,
+                                                  bolusState: .noBolus,
                                                   pumpStatusHighlight: PumpManagerStatus.PumpStatusHighlight(localizedMessage: "Test message",
                                                                                                              imageName: "test.image",
                                                                                                              state: .normalPump),
@@ -857,12 +952,16 @@ fileprivate extension StoredDosingDecision {
                                     carbsOnBoard: carbsOnBoard,
                                     scheduleOverride: scheduleOverride,
                                     glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
-                                    glucoseTargetRangeScheduleApplyingOverrideIfActive: glucoseTargetRangeScheduleApplyingOverrideIfActive,
+                                    effectiveGlucoseTargetRangeSchedule: effectiveGlucoseTargetRangeSchedule,
                                     predictedGlucose: predictedGlucose,
                                     predictedGlucoseIncludingPendingInsulin: predictedGlucoseIncludingPendingInsulin,
                                     lastReservoirValue: lastReservoirValue,
+                                    manualGlucose: manualGlucose,
+                                    originalCarbEntry: originalCarbEntry,
+                                    carbEntry: carbEntry,
                                     recommendedTempBasal: recommendedTempBasal,
                                     recommendedBolus: recommendedBolus,
+                                    requestedBolus: requestedBolus,
                                     pumpManagerStatus: pumpManagerStatus,
                                     notificationSettings: notificationSettings,
                                     deviceSettings: deviceSettings,

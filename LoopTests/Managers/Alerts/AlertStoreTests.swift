@@ -66,17 +66,19 @@ class AlertStoreTests: XCTestCase {
     }
     
     func testStoredAlertSerialization() {
-        let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Self.historicDate)
-        XCTAssertNil(object.acknowledgedDate)
-        XCTAssertNil(object.retractedDate)
-        XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.backgroundContent)
-        XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.foregroundContent)
-        XCTAssertEqual("managerIdentifier2.alertIdentifier2", object.identifier.value)
-        XCTAssertEqual(true, object.isCritical)
-        XCTAssertEqual(Self.historicDate, object.issuedDate)
-        XCTAssertEqual(1, object.modificationCounter)
-        XCTAssertEqual("{\"sound\":{\"name\":\"soundName\"}}", object.sound)
-        XCTAssertEqual(Alert.Trigger.immediate, object.trigger)
+        alertStore.managedObjectContext.performAndWait {
+            let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Self.historicDate)
+            XCTAssertNil(object.acknowledgedDate)
+            XCTAssertNil(object.retractedDate)
+            XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.backgroundContent)
+            XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.foregroundContent)
+            XCTAssertEqual("managerIdentifier2.alertIdentifier2", object.identifier.value)
+            XCTAssertEqual(true, object.isCritical)
+            XCTAssertEqual(Self.historicDate, object.issuedDate)
+            XCTAssertEqual(1, object.modificationCounter)
+            XCTAssertEqual("{\"sound\":{\"name\":\"soundName\"}}", object.sound)
+            XCTAssertEqual(Alert.Trigger.immediate, object.trigger)
+        }
     }
     
     func testQueryAnchorSerialization() {
@@ -609,6 +611,47 @@ class AlertStoreTests: XCTestCase {
         }
         wait(for: [expect], timeout: 1)
     }
+    
+    func testLookupAllAcknowledgedUnretractedRepeatingAlertsAll() {
+        let expect = self.expectation(description: #function)
+        fillWith(startDate: Self.historicDate, data: [
+            (repeatingAlert, true, false),
+            (repeatingAlert, true, false)
+        ]) {
+            self.alertStore.lookupAllAcknowledgedUnretractedRepeatingAlerts(completion: self.expectSuccess { alerts in
+                XCTAssertEqual(alerts.count, 2)
+                self.assertEqual([self.repeatingAlert, self.repeatingAlert], alerts)
+                expect.fulfill()
+            })
+        }
+        wait(for: [expect], timeout: 1)
+    }
+    
+    func testLookupAllAcknowledgedUnretractedRepeatingAlertsEmpty() {
+        let expect = self.expectation(description: #function)
+        alertStore.lookupAllAcknowledgedUnretractedRepeatingAlerts(completion: expectSuccess { alerts in
+            XCTAssertTrue(alerts.isEmpty)
+            expect.fulfill()
+        })
+        wait(for: [expect], timeout: 1)
+    }
+    
+    func testLookupAllAcknowledgedUnretractedRepeatingAlertsSome() {
+        let expect = self.expectation(description: #function)
+        fillWith(startDate: Self.historicDate, data: [
+            (repeatingAlert, true, true),
+            (repeatingAlert, true, false),
+            (alert1, true, false)
+        ]) {
+            self.alertStore.lookupAllAcknowledgedUnretractedRepeatingAlerts(completion: self.expectSuccess { alerts in
+                XCTAssertEqual(alerts.count, 1)
+                self.assertEqual([self.repeatingAlert], alerts)
+                expect.fulfill()
+            })
+        }
+        wait(for: [expect], timeout: 1)
+    }
+    
 
     private func fillWith(startDate: Date, data: [(alert: Alert, acknowledged: Bool, retracted: Bool)], _ completion: @escaping () -> Void) {
         let increment = 1.0

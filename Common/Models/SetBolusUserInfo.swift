@@ -13,6 +13,7 @@ import LoopKit
 struct SetBolusUserInfo {
     let value: Double
     let startDate: Date
+    let contextDate: Date?
     let carbEntry: NewCarbEntry?
 }
 
@@ -34,6 +35,7 @@ extension SetBolusUserInfo: RawRepresentable {
 
         self.value = value
         self.startDate = startDate
+        self.contextDate = rawValue["cd"] as? Date
         self.carbEntry = (rawValue["ce"] as? NewCarbEntry.RawValue).flatMap(NewCarbEntry.init(rawValue:))
     }
 
@@ -45,9 +47,8 @@ extension SetBolusUserInfo: RawRepresentable {
             "sd": startDate
         ]
 
-        if let carbEntry = carbEntry {
-            raw["ce"] = carbEntry.rawValue
-        }
+        raw["cd"] = contextDate
+        raw["ce"] = carbEntry?.rawValue
 
         return raw
     }

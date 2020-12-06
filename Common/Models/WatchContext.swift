@@ -48,6 +48,8 @@ final class WatchContext: RawRepresentable {
 
     var cgmManagerState: CGMManager.RawStateValue?
 
+    var isClosedLoop: Bool?
+    
     init() {}
 
     required init?(rawValue: RawValue) {
@@ -56,6 +58,7 @@ final class WatchContext: RawRepresentable {
         }
 
         self.creationDate = creationDate
+        isClosedLoop = rawValue["cl"] as? Bool
 
         if let unitString = rawValue["gu"] as? String {
             preferredGlucoseUnit = HKUnit(from: unitString)
@@ -101,6 +104,7 @@ final class WatchContext: RawRepresentable {
         raw["ba"] = lastNetTempBasalDose
         raw["bad"] = lastNetTempBasalDate
         raw["bp"] = batteryPercentage
+        raw["cl"] = isClosedLoop
 
         raw["cgmManagerState"] = cgmManagerState
 

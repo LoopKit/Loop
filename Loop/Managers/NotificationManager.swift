@@ -167,27 +167,6 @@ extension NotificationManager {
         }
     }
 
-    static func sendPumpBatteryLowNotification() {
-        let notification = UNMutableNotificationContent()
-
-        notification.title = NSLocalizedString("Pump Battery Low", comment: "The notification title for a low pump battery")
-        notification.body = NSLocalizedString("Change the pump battery immediately", comment: "The notification alert describing a low pump battery")
-        notification.sound = .default
-        notification.categoryIdentifier = LoopNotificationCategory.pumpBatteryLow.rawValue
-
-        let request = UNNotificationRequest(
-            identifier: LoopNotificationCategory.pumpBatteryLow.rawValue,
-            content: notification,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-
-    static func clearPumpBatteryLowNotification() {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [LoopNotificationCategory.pumpBatteryLow.rawValue])
-    }
-
     static func sendPumpReservoirEmptyNotification() {
         let notification = UNMutableNotificationContent()
 

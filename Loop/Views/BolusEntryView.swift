@@ -14,7 +14,7 @@ import LoopKitUI
 import LoopUI
 
 
-struct BolusEntryView: View, HorizontalSizeClassOverride {
+struct BolusEntryView: View {
     @ObservedObject var viewModel: BolusEntryViewModel
 
     @State private var enteredBolusAmount = ""
@@ -40,8 +40,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
                 // TODO: Fix this in Xcode 12 when we're building for iOS 14.
                 .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : -28)
-                .listStyle(GroupedListStyle())
-                .environment(\.horizontalSizeClass, self.horizontalOverride)
+                .insetGroupedListStyle()
                 
                 self.actionArea
                     .frame(height: self.isKeyboardVisible ? 0 : nil)
@@ -210,11 +209,13 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 HStack(alignment: .firstTextBaseline) {
                     DismissibleKeyboardTextField(
                         text: typedManualGlucoseEntry,
-                        placeholder: "---",
-                        font: typedManualGlucoseEntry.wrappedValue == "" ? .preferredFont(forTextStyle: .title1) : .heavy(.title1),
+                        placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
+                        // The heavy title is ending up clipped due to a bug that is fixed in iOS 14.  Uncomment the following when we can build for iOS 14.
+                        font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
                         textAlignment: .right,
                         keyboardType: .decimalPad,
-                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible
+                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
+                        maxLength: 3
                     )
 
                     Text(QuantityFormatter().string(from: viewModel.glucoseUnit))
@@ -282,11 +283,12 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 bolusUnitsLabel
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var recommendedBolusString: String {
         guard let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) else {
-            return "-"
+            return "–"
         }
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }
@@ -324,12 +326,13 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     textColor: .loopAccent,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder
+                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
+                    maxLength: 5
                 )
-                
                 bolusUnitsLabel
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var bolusUnitsLabel: some View {
@@ -372,7 +375,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             let suspendThresholdString = QuantityFormatter().string(from: suspendThreshold, for: viewModel.glucoseUnit) ?? String(describing: suspendThreshold)
             return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text("Your glucose is below or predicted to go below your suspend threshold, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below suspend threshold")
+                caption: Text("Your glucose is below or predicted to go below your glucose safety limit, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit")
             )
         case .staleGlucoseData:
             return WarningView(
@@ -461,8 +464,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             )
         case .manualGlucoseEntryOutOfAcceptableRange:
             let formatter = QuantityFormatter(for: viewModel.glucoseUnit)
-            let acceptableLowerBound = formatter.string(from: BolusEntryViewModel.validManualGlucoseEntryRange.lowerBound, for: viewModel.glucoseUnit) ?? String(describing: BolusEntryViewModel.validManualGlucoseEntryRange.lowerBound)
-            let acceptableUpperBound = formatter.string(from: BolusEntryViewModel.validManualGlucoseEntryRange.upperBound, for: viewModel.glucoseUnit) ?? String(describing: BolusEntryViewModel.validManualGlucoseEntryRange.upperBound)
+            let acceptableLowerBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.lowerBound, for: viewModel.glucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.lowerBound)
+            let acceptableUpperBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.upperBound, for: viewModel.glucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.upperBound)
             return SwiftUI.Alert(
                 title: Text("Glucose Entry Out of Range", comment: "Alert title for a manual glucose entry out of range error"),
                 message: Text("A manual glucose entry must be between \(acceptableLowerBound) and \(acceptableUpperBound)", comment: "Alert message for a manual glucose entry out of range error")
@@ -495,13 +498,14 @@ struct LabeledQuantity: View {
                 .foregroundColor(Color(.secondaryLabel))
                 .fixedSize(horizontal: true, vertical: false)
         }
+        .accessibilityElement(children: .combine)
         .font(.subheadline)
         .modifier(LabelBackground())
     }
 
     var valueText: Text {
         guard let quantity = quantity else {
-            return Text("--")
+            return Text("– –")
         }
         
         let formatter = QuantityFormatter()

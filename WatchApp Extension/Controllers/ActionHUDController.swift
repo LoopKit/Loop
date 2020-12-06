@@ -20,10 +20,20 @@ final class ActionHUDController: HUDInterfaceController {
     @IBOutlet var overrideButton: WKInterfaceButton!
     @IBOutlet var overrideButtonImage: WKInterfaceImage!
     @IBOutlet var overrideButtonBackground: WKInterfaceGroup!
+    @IBOutlet var carbsButton: WKInterfaceButton!
+    @IBOutlet var carbsButtonImage: WKInterfaceImage!
+    @IBOutlet var carbsButtonBackground: WKInterfaceGroup!
+    @IBOutlet var bolusButton: WKInterfaceButton!
+    @IBOutlet var bolusButtonImage: WKInterfaceImage!
+    @IBOutlet var bolusButtonBackground: WKInterfaceGroup!
 
     private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor, onIconColor: .darkCarbsColor, offIconColor: .carbsColor)
 
     private lazy var overrideButtonGroup = ButtonGroup(button: overrideButton, image: overrideButtonImage, background: overrideButtonBackground, onBackgroundColor: .overrideColor, offBackgroundColor: .darkOverrideColor, onIconColor: .darkOverrideColor, offIconColor: .overrideColor)
+
+    private lazy var carbsButtonGroup = ButtonGroup(button: carbsButton, image: carbsButtonImage, background: carbsButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor, onIconColor: .darkCarbsColor, offIconColor: .carbsColor)
+
+    private lazy var bolusButtonGroup = ButtonGroup(button: bolusButton, image: bolusButtonImage, background: bolusButtonBackground, onBackgroundColor: .insulin, offBackgroundColor: .darkInsulin, onIconColor: .darkInsulin, offIconColor: .insulin)
 
     @IBOutlet var overrideButtonLabel: WKInterfaceLabel! {
         didSet {
@@ -59,16 +69,28 @@ final class ActionHUDController: HUDInterfaceController {
         updateForPreMeal(enabled: loopManager.settings.preMealOverride?.isActive() == true)
         updateForOverrideContext(activeOverrideContext)
 
-        if loopManager.settings.preMealTargetRange == nil {
+        let isClosedLoop = loopManager.activeContext?.isClosedLoop ?? false
+        
+        if !isClosedLoop {
             preMealButtonGroup.state = .disabled
-        } else if preMealButtonGroup.state == .disabled {
-            preMealButtonGroup.state = .off
-        }
-
-        if !canEnableOverride {
             overrideButtonGroup.state = .disabled
-        } else if overrideButtonGroup.state == .disabled {
-            overrideButtonGroup.state = .off
+            carbsButtonGroup.state = .disabled
+            bolusButtonGroup.state = .disabled
+        } else {
+            carbsButtonGroup.state = .off
+            bolusButtonGroup.state = .off
+            
+            if loopManager.settings.preMealTargetRange == nil {
+                preMealButtonGroup.state = .disabled
+            } else if preMealButtonGroup.state == .disabled {
+                preMealButtonGroup.state = .off
+            }
+            
+            if !canEnableOverride {
+                overrideButtonGroup.state = .disabled
+            } else if overrideButtonGroup.state == .disabled {
+                overrideButtonGroup.state = .off
+            }
         }
 
         glucoseFormatter.setPreferredNumberFormatter(for: loopManager.settings.glucoseUnit ?? .milligramsPerDeciliter)

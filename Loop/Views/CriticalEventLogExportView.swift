@@ -11,7 +11,7 @@ import LoopKit
 import LoopKitUI
 
 struct CriticalEventLogExportView: View {
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.presentationMode) var presentationMode
 
     @ObservedObject var viewModel: CriticalEventLogExportViewModel
 
@@ -27,6 +27,8 @@ struct CriticalEventLogExportView: View {
             Spacer()
         }
         .navigationBarTitle(Text("Critical Event Logs", comment: "Critical event log export title"), displayMode: .automatic)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: cancelButton)
         .onAppear { self.viewModel.export() }
         .onDisappear { self.viewModel.cancel() }
         .alert(isPresented: $viewModel.showingError) {
@@ -34,7 +36,15 @@ struct CriticalEventLogExportView: View {
         }
     }
 
-    @ViewBuilder
+    private var cancelButton: some View {
+        Button(action: {
+            self.viewModel.cancel()
+            self.presentationMode.wrappedValue.dismiss()
+        }) {
+            Text("Cancel", comment: "Cancel export button title")
+        }
+    }
+
     private var exportingView: some View {
         VStack {
             Text("Preparing Critical Event Logs", comment: "Preparing critical event log text")
@@ -46,7 +56,6 @@ struct CriticalEventLogExportView: View {
         }
     }
 
-    @ViewBuilder
     private var exportedView: some View {
         VStack {
             Image(systemName: "checkmark.circle.fill")
@@ -59,7 +68,7 @@ struct CriticalEventLogExportView: View {
         }
         .sheet(isPresented: $viewModel.showingShare, onDismiss: {
             self.viewModel.cancel()
-            self.dismiss()
+            self.presentationMode.wrappedValue.dismiss()
         }) {
             ActivityViewController(activityItems: self.viewModel.activityItems, applicationActivities: nil)
         }
@@ -75,7 +84,7 @@ struct CriticalEventLogExportView: View {
     private var errorAlertPrimaryButton: SwiftUI.Alert.Button {
         .cancel() {
             self.viewModel.cancel()
-            self.dismiss()
+            self.presentationMode.wrappedValue.dismiss()
         }
     }
 

@@ -56,7 +56,7 @@ extension CarbStore {
     }
 
     func purgeHistoricalCarbObjects(completion: @escaping (Error?) -> Void) {
-        purgeCarbObjectsUnconditionally(before: historicalEndDate, completion: completion)
+        purgeCachedCarbObjectsUnconditionally(before: historicalEndDate, completion: completion)
     }
 }
 

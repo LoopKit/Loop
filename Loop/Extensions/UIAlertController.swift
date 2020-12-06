@@ -20,7 +20,7 @@ extension UIAlertController {
      */
     internal convenience init(workoutDurationSelectionHandler handler: @escaping (_ duration: TimeInterval) -> Void) {
         self.init(
-            title: NSLocalizedString("Use Workout Glucose Targets", comment: "The title of the alert controller used to select a duration for workout targets"),
+            title: NSLocalizedString("Use Workout Preset", comment: "The title of the alert controller used to select a duration for workout targets"),
             message: nil,
             preferredStyle: .actionSheet
         )
@@ -37,9 +37,30 @@ extension UIAlertController {
             })
         }
 
-        let distantFuture = NSLocalizedString("Indefinitely", comment: "The title of a target alert action specifying an indefinitely long workout targets duration")
+        let distantFuture = NSLocalizedString("Until I turn off", comment: "The title of a target alert action specifying workout targets duration until it is turned off by the user")
         addAction(UIAlertAction(title: distantFuture, style: .default) { _ in
             handler(.infinity)
+        })
+
+        addCancelAction()
+    }
+    
+    /**
+     Initializes an ActionSheet-styled controller for selecting a pre-meal preset duration
+     
+     - parameter handler: A closure to execute when the sheet is dismissed after selection. The closure has a single argument:
+        - duration: The duration for which the pre-meal preset is to be enabled
+     */
+    internal convenience init(premealDurationSelectionHandler handler: @escaping (_ duration: TimeInterval) -> Void) {
+        self.init(
+            title: NSLocalizedString("Use Pre-Meal Preset", comment: "The title of the alert controller used to select a duration for pre-meal targets"),
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+
+        let distantFuture = NSLocalizedString("Until I enter carbs", comment: "The title of a target alert action specifying pre-meal targets duration for 1 hour or until the user enters carbs (whichever comes first).")
+        addAction(UIAlertAction(title: distantFuture, style: .default) { _ in
+            handler(.hours(1))
         })
 
         addCancelAction()

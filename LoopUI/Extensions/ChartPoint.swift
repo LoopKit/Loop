@@ -13,7 +13,7 @@ import SwiftCharts
 
 
 extension ChartPoint {
-    static func pointsForGlucoseRangeSchedule(_ glucoseRangeSchedule: GlucoseRangeSchedule, unit: HKUnit, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    static func pointsForGlucoseRangeSchedule(_ glucoseRangeSchedule: GlucoseRangeSchedule, unit: HKUnit, xAxisValues: [ChartAxisValue], considering potentialOverride: TemporaryScheduleOverride? = nil) -> [[ChartPoint]] {
         let targetRanges = glucoseRangeSchedule.quantityBetween(
             start: ChartAxisValueDate.dateFromScalar(xAxisValues.first!.scalar),
             end: ChartAxisValueDate.dateFromScalar(xAxisValues.last!.scalar)
@@ -21,6 +21,7 @@ extension ChartPoint {
 
         let dateFormatter = DateFormatter()
 
+        var result = [[ChartPoint]]()
         var maxPoints: [ChartPoint] = []
         var minPoints: [ChartPoint] = []
 
@@ -38,22 +39,44 @@ extension ChartPoint {
                 endDate = ChartAxisValueDate(date: targetRanges[index + 1].startDate, formatter: dateFormatter)
             }
 
-            let value = range.value.doubleRangeWithMinimumIncrement(in: unit)
-            let minValue = ChartAxisValueDouble(value.minValue)
-            let maxValue = ChartAxisValueDouble(value.maxValue)
-
-            maxPoints += [
-                ChartPoint(x: startDate, y: maxValue),
-                ChartPoint(x: endDate, y: maxValue)
-            ]
-
-            minPoints += [
-                ChartPoint(x: startDate, y: minValue),
-                ChartPoint(x: endDate, y: minValue)
-            ]
+            if let potentialOverride = potentialOverride, startDate.date < endDate.date {
+                let chartRange = startDate.date...endDate.date
+                let overrideRange = potentialOverride.startDate...potentialOverride.scheduledEndDate
+                if overrideRange.overlaps(chartRange) {
+                    addBar(value: range.value, unit: unit, startDate: startDate, endDate: ChartAxisValueDate(date: potentialOverride.startDate, formatter: dateFormatter), maxPoints: &maxPoints, minPoints: &minPoints)
+                    result += [maxPoints + minPoints.reversed()]
+                    maxPoints = []
+                    minPoints = []
+                    addBar(value: range.value, unit: unit, startDate: ChartAxisValueDate(date: potentialOverride.scheduledEndDate, formatter: dateFormatter), endDate: endDate, maxPoints: &maxPoints, minPoints: &minPoints)
+                } else {
+                    addBar(value: range.value, unit: unit, startDate: startDate, endDate: endDate, maxPoints: &maxPoints, minPoints: &minPoints)
+                }
+            } else {
+                addBar(value: range.value, unit: unit, startDate: startDate, endDate: endDate, maxPoints: &maxPoints, minPoints: &minPoints)
+            }
         }
-
-        return maxPoints + minPoints.reversed()
+        result += [maxPoints + minPoints.reversed()]
+        
+        return result
+    }
+    
+    static fileprivate func addBar(value: ClosedRange<HKQuantity>, unit: HKUnit, startDate: ChartAxisValueDate, endDate: ChartAxisValueDate,
+                                   maxPoints: inout [ChartPoint], minPoints: inout [ChartPoint]) {
+        guard startDate.date < endDate.date else { return }
+        
+        let value = value.doubleRangeWithMinimumIncrement(in: unit)
+        let minValue = ChartAxisValueDouble(value.minValue)
+        let maxValue = ChartAxisValueDouble(value.maxValue)
+        
+        maxPoints += [
+            ChartPoint(x: startDate, y: maxValue),
+            ChartPoint(x: endDate, y: maxValue)
+        ]
+        
+        minPoints += [
+            ChartPoint(x: startDate, y: minValue),
+            ChartPoint(x: endDate, y: minValue)
+        ]
     }
 
     static func pointsForGlucoseRangeScheduleOverride(_ override: TemporaryScheduleOverride, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool = false) -> [ChartPoint] {

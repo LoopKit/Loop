@@ -5,21 +5,26 @@
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
 //
 
-import LoopKit
 import HealthKit
+import LoopKit
 
 public struct LoopSettings: Equatable {
+    public var isScheduleOverrideInfiniteWorkout: Bool {
+        guard let scheduleOverride = scheduleOverride else { return false }
+        return scheduleOverride.context == .legacyWorkout && scheduleOverride.duration.isInfinite
+    }
+    
     public var dosingEnabled = false
 
     public let dynamicCarbAbsorptionEnabled = true
-
-    public static let defaultCarbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .minutes(30), medium: .hours(3), slow: .hours(5))
 
     public var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
 
     public var preMealTargetRange: DoubleRange?
 
     public var legacyWorkoutTargetRange: DoubleRange?
+
+    public var indefiniteWorkoutOverrideEnabledDate: Date?
 
     public var overridePresets: [TemporaryScheduleOverridePreset] = []
 
@@ -40,7 +45,7 @@ public struct LoopSettings: Equatable {
             if let newValue = preMealOverride, newValue.context != .preMeal || newValue.settings.insulinNeedsScaleFactor != nil {
                 preconditionFailure("The `preMealOverride` field should be used only for a pre-meal target range override")
             }
-
+            
             if preMealOverride != nil, scheduleOverride?.context == .legacyWorkout {
                 scheduleOverride = nil
             }
@@ -53,31 +58,6 @@ public struct LoopSettings: Equatable {
 
     public var suspendThreshold: GlucoseThreshold? = nil
 
-    public let retrospectiveCorrectionEnabled = true
-
-    /// The interval over which to aggregate changes in glucose for retrospective correction
-    public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
-
-    /// The amount of time since a given date that input data should be considered valid
-    public let inputDataRecencyInterval = TimeInterval(minutes: 15)
-    
-    /// Loop completion aging category limits
-    public let completionFreshLimit = TimeInterval(minutes: 6)
-    public let completionAgingLimit = TimeInterval(minutes: 16)
-    public let completionStaleLimit = TimeInterval(hours: 12)
-
-    public let batteryReplacementDetectionThreshold = 0.5
-
-    public let defaultWatchCarbPickerValue = 15 // grams
-
-    public let defaultWatchBolusPickerValue = 1.0 // %
-
-    // MARK - Display settings
-
-    public let minimumChartWidthPerHour: CGFloat = 50
-
-    public let statusChartMinimumHistoryDisplay: TimeInterval = .hours(1)
-    
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
@@ -127,7 +107,10 @@ public struct LoopSettings: Equatable {
 }
 
 extension LoopSettings {
-    public var glucoseTargetRangeScheduleApplyingOverrideIfActive: GlucoseRangeSchedule? {
+    public func effectiveGlucoseTargetRangeSchedule(presumingMealEntry: Bool = false) -> GlucoseRangeSchedule?  {
+        
+        let preMealOverride = presumingMealEntry ? nil : self.preMealOverride
+        
         let currentEffectiveOverride: TemporaryScheduleOverride?
         switch (preMealOverride, scheduleOverride) {
         case (let preMealOverride?, nil):
@@ -135,7 +118,7 @@ extension LoopSettings {
         case (nil, let scheduleOverride?):
             currentEffectiveOverride = scheduleOverride
         case (let preMealOverride?, let scheduleOverride?):
-            currentEffectiveOverride = preMealOverride.endDate > Date()
+            currentEffectiveOverride = preMealOverride.scheduledEndDate > Date()
                 ? preMealOverride
                 : scheduleOverride
         case (nil, nil):
@@ -162,8 +145,8 @@ extension LoopSettings {
     }
 
     public func futureOverrideEnabled(relativeTo date: Date = Date()) -> Bool {
-        guard let override = scheduleOverride else { return false }
-        return override.startDate > date
+        guard let scheduleOverride = scheduleOverride else { return false }
+        return scheduleOverride.startDate > date
     }
 
     public mutating func enablePreMealOverride(at date: Date = Date(), for duration: TimeInterval) {
@@ -189,10 +172,15 @@ extension LoopSettings {
         preMealOverride = nil
     }
 
-    public func legacyWorkoutOverride(beginningAt date: Date = Date(), for duration: TimeInterval) -> TemporaryScheduleOverride? {
+    public mutating func legacyWorkoutOverride(beginningAt date: Date = Date(), for duration: TimeInterval) -> TemporaryScheduleOverride? {
         guard let legacyWorkoutTargetRange = legacyWorkoutTargetRange, let unit = glucoseUnit else {
             return nil
         }
+
+        if duration.isInfinite {
+            indefiniteWorkoutOverrideEnabledDate = date
+        }
+        
         return TemporaryScheduleOverride(
             context: .legacyWorkout,
             settings: TemporaryScheduleOverrideSettings(unit: unit, targetRange: legacyWorkoutTargetRange),
@@ -209,13 +197,18 @@ extension LoopSettings {
             return
         }
 
-        guard let override = scheduleOverride else { return }
+        guard let scheduleOverride = scheduleOverride else { return }
+        
+        if isScheduleOverrideInfiniteWorkout {
+            indefiniteWorkoutOverrideEnabledDate = nil
+        }
+
         if let context = context {
-            if override.context == context {
-                scheduleOverride = nil
+            if scheduleOverride.context == context {
+                self.scheduleOverride = nil
             }
         } else {
-            scheduleOverride = nil
+            self.scheduleOverride = nil
         }
     }
 }
@@ -258,6 +251,8 @@ extension LoopSettings: RawRepresentable {
             self.legacyWorkoutTargetRange = DoubleRange(rawValue: rawLegacyWorkoutTargetRange)
         }
 
+        self.indefiniteWorkoutOverrideEnabledDate = rawValue["indefiniteWorkoutOverrideEnabledDate"] as? Date
+
         if let rawPresets = rawValue["overridePresets"] as? [TemporaryScheduleOverridePreset.RawValue] {
             self.overridePresets = rawPresets.compactMap(TemporaryScheduleOverridePreset.init(rawValue:))
         }
@@ -289,6 +284,7 @@ extension LoopSettings: RawRepresentable {
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue
         raw["preMealTargetRange"] = preMealTargetRange?.rawValue
         raw["legacyWorkoutTargetRange"] = legacyWorkoutTargetRange?.rawValue
+        raw["indefiniteWorkoutOverrideEnabledDate"] = indefiniteWorkoutOverrideEnabledDate
         raw["preMealOverride"] = preMealOverride?.rawValue
         raw["scheduleOverride"] = scheduleOverride?.rawValue
         raw["maximumBasalRatePerHour"] = maximumBasalRatePerHour

@@ -89,7 +89,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                 let template = CLKComplicationTemplate.templateForFamily(complication.family,
                                                                          from: context,
                                                                          at: timelineDate,
-                                                                         recencyInterval: settings.inputDataRecencyInterval,
+                                                                         recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
                                                                          chartGenerator: self.makeChart)
             {
                 switch complication.family {
@@ -122,7 +122,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             
             var futureChangeDates: [Date] = [
                 // Stale glucose date: just a second after glucose expires
-                glucoseDate + settings.inputDataRecencyInterval + 1,
+                glucoseDate + LoopCoreConstants.inputDataRecencyInterval + 1,
             ]
             
             if let loopLastRunDate = context.loopLastRunDate {
@@ -138,7 +138,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                 if let template = CLKComplicationTemplate.templateForFamily(complication.family,
                                                                             from: context,
                                                                             at: futureChangeDate,
-                                                                            recencyInterval: settings.inputDataRecencyInterval,
+                                                                            recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
                                                                             chartGenerator: self.makeChart)
                 {
                     template.tintColor = UIColor.tintColor

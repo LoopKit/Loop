@@ -194,77 +194,85 @@ class AlertManagerTests: XCTestCase {
     }
         
     func testPlaybackPendingImmediateAlert() {
-        let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
-        let alert = Alert(identifier: Self.mockIdentifier,
-                          foregroundContent: content, backgroundContent: content, trigger: .immediate)
-        mockAlertStore.storedAlerts = [StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)]
-        
-        alertManager = AlertManager(rootViewController: UIViewController(),
-                                    handlers: [mockPresenter],
-                                    userNotificationCenter: mockUserNotificationCenter,
-                                    fileManager: mockFileManager,
-                                    alertStore: mockAlertStore)
-        XCTAssertEqual(alert, mockPresenter.issuedAlert)
+        mockAlertStore.managedObjectContext.performAndWait {
+            let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
+            let alert = Alert(identifier: Self.mockIdentifier,
+                              foregroundContent: content, backgroundContent: content, trigger: .immediate)
+            mockAlertStore.storedAlerts = [StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)]
+
+            alertManager = AlertManager(rootViewController: UIViewController(),
+                                        handlers: [mockPresenter],
+                                        userNotificationCenter: mockUserNotificationCenter,
+                                        fileManager: mockFileManager,
+                                        alertStore: mockAlertStore)
+            XCTAssertEqual(alert, mockPresenter.issuedAlert)
+        }
     }
     
     func testPlaybackPendingExpiredDelayedNotification() {
-        let date = Date.distantPast
-        let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
-        let alert = Alert(identifier: Self.mockIdentifier,
-                          foregroundContent: content, backgroundContent: content, trigger: .delayed(interval: 30.0))
-        let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
-        storedAlert.issuedDate = date
-        mockAlertStore.storedAlerts = [storedAlert]
-        alertManager = AlertManager(rootViewController: UIViewController(),
-                                    handlers: [mockPresenter],
-                                    userNotificationCenter: mockUserNotificationCenter,
-                                    fileManager: mockFileManager,
-                                    alertStore: mockAlertStore)
-        let expected = Alert(identifier: Self.mockIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate)
-        XCTAssertEqual(expected, mockPresenter.issuedAlert)
+        mockAlertStore.managedObjectContext.performAndWait {
+            let date = Date.distantPast
+            let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
+            let alert = Alert(identifier: Self.mockIdentifier,
+                              foregroundContent: content, backgroundContent: content, trigger: .delayed(interval: 30.0))
+            let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
+            storedAlert.issuedDate = date
+            mockAlertStore.storedAlerts = [storedAlert]
+            alertManager = AlertManager(rootViewController: UIViewController(),
+                                        handlers: [mockPresenter],
+                                        userNotificationCenter: mockUserNotificationCenter,
+                                        fileManager: mockFileManager,
+                                        alertStore: mockAlertStore)
+            let expected = Alert(identifier: Self.mockIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate)
+            XCTAssertEqual(expected, mockPresenter.issuedAlert)
+        }
     }
     
     func testPlaybackPendingDelayedNotification() {
-        let date = Date().addingTimeInterval(-15.0) // Pretend the 30-second-delayed alert was issued 15 seconds ago
-        let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
-        let alert = Alert(identifier: Self.mockIdentifier,
-                          foregroundContent: content, backgroundContent: content, trigger: .delayed(interval: 30.0))
-        let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
-        storedAlert.issuedDate = date
-        mockAlertStore.storedAlerts = [storedAlert]
-        alertManager = AlertManager(rootViewController: UIViewController(),
-                                    handlers: [mockPresenter],
-                                    userNotificationCenter: mockUserNotificationCenter,
-                                    fileManager: mockFileManager,
-                                    alertStore: mockAlertStore)
+        mockAlertStore.managedObjectContext.performAndWait {
+            let date = Date().addingTimeInterval(-15.0) // Pretend the 30-second-delayed alert was issued 15 seconds ago
+            let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
+            let alert = Alert(identifier: Self.mockIdentifier,
+                              foregroundContent: content, backgroundContent: content, trigger: .delayed(interval: 30.0))
+            let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
+            storedAlert.issuedDate = date
+            mockAlertStore.storedAlerts = [storedAlert]
+            alertManager = AlertManager(rootViewController: UIViewController(),
+                                        handlers: [mockPresenter],
+                                        userNotificationCenter: mockUserNotificationCenter,
+                                        fileManager: mockFileManager,
+                                        alertStore: mockAlertStore)
 
-        // The trigger for this should be `.delayed` by "something less than 15 seconds",
-        // but the exact value depends on the speed of executing this test.
-        // As long as it is <= 15 seconds, we call it good.
-        XCTAssertNotNil(mockPresenter.issuedAlert)
-        switch mockPresenter.issuedAlert?.trigger {
-        case .some(.delayed(let interval)):
-            XCTAssertLessThanOrEqual(interval, 15.0)
-        default:
-            XCTFail("Wrong trigger \(String(describing: mockPresenter.issuedAlert?.trigger))")
+            // The trigger for this should be `.delayed` by "something less than 15 seconds",
+            // but the exact value depends on the speed of executing this test.
+            // As long as it is <= 15 seconds, we call it good.
+            XCTAssertNotNil(mockPresenter.issuedAlert)
+            switch mockPresenter.issuedAlert?.trigger {
+            case .some(.delayed(let interval)):
+                XCTAssertLessThanOrEqual(interval, 15.0)
+            default:
+                XCTFail("Wrong trigger \(String(describing: mockPresenter.issuedAlert?.trigger))")
+            }
         }
     }
     
     func testPlaybackPendingRepeatingNotification() {
-        let date = Date.distantPast
-        let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
-        let alert = Alert(identifier: Self.mockIdentifier,
-                          foregroundContent: content, backgroundContent: content, trigger: .repeating(repeatInterval: 60.0))
-        let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
-        storedAlert.issuedDate = date
-        mockAlertStore.storedAlerts = [storedAlert]
-        alertManager = AlertManager(rootViewController: UIViewController(),
-                                    handlers: [mockPresenter],
-                                    userNotificationCenter: mockUserNotificationCenter,
-                                    fileManager: mockFileManager,
-                                    alertStore: mockAlertStore)
+        mockAlertStore.managedObjectContext.performAndWait {
+            let date = Date.distantPast
+            let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
+            let alert = Alert(identifier: Self.mockIdentifier,
+                              foregroundContent: content, backgroundContent: content, trigger: .repeating(repeatInterval: 60.0))
+            let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
+            storedAlert.issuedDate = date
+            mockAlertStore.storedAlerts = [storedAlert]
+            alertManager = AlertManager(rootViewController: UIViewController(),
+                                        handlers: [mockPresenter],
+                                        userNotificationCenter: mockUserNotificationCenter,
+                                        fileManager: mockFileManager,
+                                        alertStore: mockAlertStore)
 
-        XCTAssertEqual(alert, mockPresenter.issuedAlert)
+            XCTAssertEqual(alert, mockPresenter.issuedAlert)
+        }
     }
 }
 

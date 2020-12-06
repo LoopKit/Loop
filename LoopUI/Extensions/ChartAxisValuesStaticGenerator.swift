@@ -40,8 +40,14 @@ extension ChartAxisValuesStaticGenerator {
             
             /// If there should be a padding segment added when a scalar value falls on the first or last axis value, adjust the first and last axis values
             if firstValue =~ first && addPaddingSegmentIfEdge {
+               firstValue = firstValue - segmentSize
+            }
+            
+            // do not allow the first label to be displayed as -0
+            while firstValue < 0 && firstValue.rounded() == -0 {
                 firstValue = firstValue - segmentSize
             }
+            
             if lastValue =~ last && addPaddingSegmentIfEdge {
                 lastValue = lastValue + segmentSize
             }
@@ -49,14 +55,17 @@ extension ChartAxisValuesStaticGenerator {
             let distance = lastValue - firstValue
             var currentMultiple = multiple
             var segmentCount = distance / currentMultiple
-            
+            var potentialSegmentValues = stride(from: firstValue, to: lastValue, by: currentMultiple)
+
             /// Find the optimal number of segments and segment width
-            
             /// If the number of segments is greater than desired, make each segment wider
-            while segmentCount > maxSegmentCount {
-                // This is the only difference from SwiftCharts (i.e., currentMultiple *= 2)
+            /// ensure no label of -0 will be displayed on the axis
+            while segmentCount > maxSegmentCount ||
+                !potentialSegmentValues.filter({ $0 < 0 && $0.rounded() == -0 }).isEmpty
+            {
                 currentMultiple += multiple
                 segmentCount = distance / currentMultiple
+                potentialSegmentValues = stride(from: firstValue, to: lastValue, by: currentMultiple)
             }
             segmentCount = ceil(segmentCount)
             
@@ -69,7 +78,13 @@ extension ChartAxisValuesStaticGenerator {
             /// Generate axis values from the first value, segment size and number of segments
             let offset = firstValue
             return (0...Int(segmentCount)).map {segment in
-                let scalar = offset + (Double(segment) * segmentSize)
+                var scalar = offset + (Double(segment) * segmentSize)
+                // a value that could be displayed as 0 should truly be 0 to have the zero-line drawn correctly.
+                if scalar != 0,
+                    scalar.rounded() == 0
+                {
+                    scalar = 0
+                }
                 return axisValueGenerator(scalar)
             }
         } else {
