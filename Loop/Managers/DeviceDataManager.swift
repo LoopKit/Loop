@@ -1289,6 +1289,9 @@ extension GlucoseStore : CGMStalenessMonitorDelegate { }
 extension DeviceDataManager: SupportInfoProvider {
     
     public var localizedAppNameAndVersion: String {
+        if let branch = Bundle.main.gitBranch, branch != "main", branch != "master" {
+            return Bundle.main.localizedNameAndVersion + " (\(branch))"
+        }
         return Bundle.main.localizedNameAndVersion
     }
     
@@ -1303,6 +1306,5 @@ extension DeviceDataManager: SupportInfoProvider {
     public func generateIssueReport(completion: @escaping (String) -> Void) {
         generateDiagnosticReport(completion)
     }
-    
     
 }

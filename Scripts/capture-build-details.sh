@@ -14,7 +14,7 @@ plist="${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
 if [ -e .git ]; then
   rev=$(git rev-parse HEAD)
   plutil -replace com-loopkit-Loop-git-revision -string ${rev} "${plist}"
-  branch=$(git branch | grep \* | cut -d ' ' -f2-)
+  branch=$(git branch --show-current)
   plutil -replace com-loopkit-Loop-git-branch -string "${branch}" "${plist}"
 fi;
 plutil -replace com-loopkit-Loop-srcroot -string "${SRCROOT}" "${plist}"
