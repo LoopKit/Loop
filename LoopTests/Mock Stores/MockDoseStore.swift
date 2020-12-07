@@ -67,7 +67,7 @@ class MockDoseStore: DoseStoreProtocol {
         completion("")
     }
     
-    func logOutsideDoseEvents(_ doses: [DoseEntry], completion: @escaping (Error?) -> Void) {
+    func logOutsideDose(_ doses: [DoseEntry], completion: @escaping (Error?) -> Void) {
         completion(nil)
     }
     

@@ -625,7 +625,7 @@ extension LoopDataManager {
     func logOutsideInsulinDose(dose: DoseEntry, completion: @escaping (_ error: Error?) -> Void) {
         let doseList = [dose]
 
-        doseStore.logOutsideDoseEvents(doseList) { (error) in
+        doseStore.logOutsideDose(doseList) { (error) in
             if let error = error {
                 completion(error)
             }

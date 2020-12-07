@@ -192,7 +192,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private enum Values {
         case reservoir([ReservoirValue])
         case history([PersistedPumpEvent])
-        case logDose([PersistedOutsideDoseEvent])
+        case logDose([PersistedOutsideDose])
     }
 
     // Not thread-safe
@@ -396,7 +396,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         case .history:
             doseStore?.deleteAllPumpEvents(completion)
         case .logDose:
-            doseStore?.deleteAllOutsideDoseEvents(completion)
+            doseStore?.deleteAllOutsideDoses(completion)
         }
     }
 
@@ -510,7 +510,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 self.values = .logDose(doses)
 
                 tableView.deleteRows(at: [indexPath], with: .automatic)
-                doseStore?.deleteOutsideDoseEvent(value) { (error) -> Void in
+                doseStore?.deleteOutsideDose(value) { error in
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
