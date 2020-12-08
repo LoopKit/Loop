@@ -417,6 +417,26 @@ extension LoopDataManager {
             }
 
             analyticsServicesManager.didChangeInsulinModel()
+
+            // Don't update the setting if it's not rapid-acting
+            if case .exponentialPreset(let model) = newValue, case .fiasp = model { } else if let setting = newValue {
+                rapidActingInsulinModelSetting = setting
+            }
+        }
+    }
+    
+    var rapidActingInsulinModelSetting: InsulinModelSettings {
+        get {
+            return doseStore.rapidActingInsulinModelSetting
+        }
+        set {
+            doseStore.rapidActingInsulinModelSetting = newValue
+            UserDefaults.appGroup?.rapidActingInsulinModelSetting = newValue
+
+            self.dataAccessQueue.async {
+                self.insulinEffect = nil
+                self.notify(forChange: .preferences)
+            }
         }
     }
 

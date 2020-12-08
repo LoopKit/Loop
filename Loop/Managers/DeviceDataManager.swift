@@ -219,6 +219,7 @@ final class DeviceDataManager {
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             defaultInsulinModelSetting: UserDefaults.appGroup?.insulinModelSettings,
+            rapidActingInsulinModelSetting: UserDefaults.appGroup?.rapidActingInsulinModelSetting,
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,

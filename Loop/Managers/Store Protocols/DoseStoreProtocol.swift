@@ -19,6 +19,8 @@ protocol DoseStoreProtocol: AnyObject {
     
     var basalProfileApplyingOverrideHistory: BasalRateSchedule? { get }
     
+    var rapidActingInsulinModelSetting: LoopKit.InsulinModelSettings {get set}
+    
     // MARK: authorization
     var authorizationRequired: Bool { get }
     
