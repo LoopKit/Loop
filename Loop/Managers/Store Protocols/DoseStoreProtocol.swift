@@ -13,7 +13,7 @@ protocol DoseStoreProtocol: AnyObject {
     // MARK: settings
     var basalProfile: LoopKit.BasalRateSchedule? { get set }
     
-    var defaultInsulinModelSetting: LoopKit.InsulinModelSettings? { get set }
+    var pumpInsulinModelSetting: LoopKit.InsulinModelSettings? { get set }
     
     var insulinSensitivitySchedule: LoopKit.InsulinSensitivitySchedule? { get set }
     

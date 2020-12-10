@@ -403,10 +403,10 @@ extension LoopDataManager {
     /// The length of time insulin has an effect on blood glucose
     var insulinModelSettings: InsulinModelSettings? {
         get {
-            return doseStore.defaultInsulinModelSetting
+            return doseStore.pumpInsulinModelSetting
         }
         set {
-            doseStore.defaultInsulinModelSetting = newValue
+            doseStore.pumpInsulinModelSetting = newValue
             UserDefaults.appGroup?.insulinModelSettings = newValue
 
             self.dataAccessQueue.async {
@@ -624,9 +624,9 @@ extension LoopDataManager {
     ///   - startDate: The date the dose was started at.
     ///   - value: The number of Units in the dose.
     ///   - insulinModel: The type of insulin model that should be used for the dose.
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelSetting: InsulinModelSettings? = nil) {
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory? = nil) {
         let syncIdentifier = Data(UUID().uuidString.utf8).hexadecimalString
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinModelSetting: insulinModelSetting)
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinModelCategory: insulinModelCategory)
 
         logOutsideInsulinDose(dose: dose) { (error) in
             if error == nil {
@@ -1122,8 +1122,9 @@ extension LoopDataManager {
 
                 let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
                 let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+                let insulinModelInfo = InsulinModelInfo(defaultInsulinModel: model, rapidActingModel: doseStore.rapidActingInsulinModelSetting.model)
                 let bolusEffect = [potentialBolus]
-                    .glucoseEffects(defaultModel: model, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: sensitivity)
+                    .glucoseEffects(insulinModelInfo: insulinModelInfo, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: sensitivity)
                     .filterDateRange(nextEffectDate, nil)
                 effects.append(bolusEffect)
             }

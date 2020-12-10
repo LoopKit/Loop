@@ -841,11 +841,11 @@ fileprivate class MockLoopState: LoopState {
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     var loggedBolusUnits: Double?
     var loggedDate: Date?
-    var loggedDoseModel: InsulinModelSettings?
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelSetting: InsulinModelSettings?) {
+    var loggedDoseModel: InsulinModelCategory?
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory?) {
         loggedBolusUnits = units
         loggedDate = startDate
-        loggedDoseModel = insulinModelSetting
+        loggedDoseModel = insulinModelCategory
     }
     
     var loopStateCallBlock: ((LoopState) -> Void)?
@@ -912,6 +912,8 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     var preferredGlucoseUnit: HKUnit = .milligramsPerDeciliter
     
     var insulinModel: InsulinModel? = MockInsulinModel()
+    
+    var rapidActingModel: InsulinModelSettings = InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)!
     
     var settings: LoopSettings = LoopSettings()
 }

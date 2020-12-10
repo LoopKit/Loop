@@ -25,6 +25,7 @@ struct BolusEntryView: View {
 
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
+    @State private var pickerShouldExpand = false
 
     @Environment(\.dismiss) var dismiss
 
@@ -295,7 +296,8 @@ struct BolusEntryView: View {
     
     private var insulinModelPicker: some View {
         ExpandablePicker(
-            with: viewModel.insulinModelPickerOptions,
+            with: viewModel.insulinModelStringPickerOptions,
+            // ANNA TODO: could this be refactored?
             onUpdate: { [weak viewModel] index in
                 viewModel?.selectedInsulinModelIndex = index
             },
