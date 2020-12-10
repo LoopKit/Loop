@@ -173,7 +173,6 @@ final class BolusEntryViewModel: ObservableObject {
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
         self.insulinModelStringPickerOptions = []
-        // ANNA TODO: better way to do this?
         self.isLoggingDose = supportedInsulinModels != nil
 
         self.isManualGlucoseEntryEnabled = isManualGlucoseEntryEnabled
@@ -903,8 +902,10 @@ extension BolusEntryViewModel {
         case (false, false): return .enterBolus
         }
     }
-    
-    // ANNA TODO: is this best way to do this??
+}
+
+// MARK: Insulin Model Helpers
+extension BolusEntryView {
     func categoryFor(insulinModel: InsulinModel?) -> InsulinModelCategory? {
         guard let insulinModel = insulinModel else {
             return nil

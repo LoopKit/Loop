@@ -418,7 +418,7 @@ extension LoopDataManager {
 
             analyticsServicesManager.didChangeInsulinModel()
 
-            // Don't update the setting if it's not rapid-acting
+            // Don't update the model if it's not rapid-acting
             if case .exponentialPreset(let model) = newValue, case .fiasp = model { } else if let setting = newValue {
                 rapidActingInsulinModelSetting = setting
             }
@@ -1122,7 +1122,7 @@ extension LoopDataManager {
 
                 let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
                 let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
-                let insulinModelInfo = InsulinModelInfo(defaultInsulinModel: model, rapidActingModel: doseStore.rapidActingInsulinModelSetting.model)
+                let insulinModelInfo = InsulinModelInformation(defaultInsulinModel: model, rapidActingModel: doseStore.rapidActingInsulinModelSetting.model)
                 let bolusEffect = [potentialBolus]
                     .glucoseEffects(insulinModelInfo: insulinModelInfo, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: sensitivity)
                     .filterDateRange(nextEffectDate, nil)
