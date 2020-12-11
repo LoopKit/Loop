@@ -199,6 +199,8 @@ final class BolusEntryViewModel: ObservableObject {
         if let allowedModels = allowedModels, allowedModels.fiaspModelEnabled {
             insulinModelStringPickerOptions.append(InsulinModelCategory.fiasp.title)
         }
+        
+        selectedInsulinModelIndex = startingPickerIndex
     }
     
     var startingPickerIndex: Int {
@@ -902,10 +904,7 @@ extension BolusEntryViewModel {
         case (false, false): return .enterBolus
         }
     }
-}
 
-// MARK: Insulin Model Helpers
-extension BolusEntryView {
     func categoryFor(insulinModel: InsulinModel?) -> InsulinModelCategory? {
         guard let insulinModel = insulinModel else {
             return nil

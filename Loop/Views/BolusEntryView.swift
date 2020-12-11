@@ -297,12 +297,8 @@ struct BolusEntryView: View {
     private var insulinModelPicker: some View {
         ExpandablePicker(
             with: viewModel.insulinModelStringPickerOptions,
-            // ANNA TODO: could this be refactored?
-            onUpdate: { [weak viewModel] index in
-                viewModel?.selectedInsulinModelIndex = index
-            },
-            label: NSLocalizedString("Insulin Model", comment: "Insulin model title"),
-            initialPickerIndex: viewModel.startingPickerIndex
+            pickerIndex: $viewModel.selectedInsulinModelIndex,
+            label: NSLocalizedString("Insulin Model", comment: "Insulin model title")
         )
     }
     private var datePicker: some View {
