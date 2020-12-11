@@ -50,8 +50,6 @@ protocol BolusEntryViewModelDelegate: class {
     
     var insulinModel: InsulinModel? { get }
     
-    var rapidActingModel: InsulinModelSettings { get }
-    
     var settings: LoopSettings { get }
 }
 

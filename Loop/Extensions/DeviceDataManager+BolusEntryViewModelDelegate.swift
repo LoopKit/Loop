@@ -71,10 +71,6 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
         return loopManager.insulinModelSettings?.model
     }
     
-    var rapidActingModel: InsulinModelSettings {
-        return doseStore.rapidActingInsulinModelSetting
-    }
-    
     var settings: LoopSettings {
         return loopManager.settings
     }
