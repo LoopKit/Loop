@@ -1905,13 +1905,20 @@ extension StatusTableViewController: CGMManagerSetupViewControllerDelegate {
 
 extension StatusTableViewController: PumpManagerSetupViewControllerDelegate {
     fileprivate func setupPumpManager(for pumpManagerType: PumpManagerUI.Type) {
-        var setupViewController = pumpManagerType.setupViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default)
-        setupViewController.setupDelegate = self
-        setupViewController.completionDelegate = self
-        setupViewController.basalSchedule = deviceManager.loopManager.basalRateSchedule
-        setupViewController.maxBolusUnits = deviceManager.loopManager.settings.maximumBolus
-        setupViewController.maxBasalRateUnitsPerHour = deviceManager.loopManager.settings.maximumBasalRatePerHour
-        show(setupViewController, sender: self)
+        if var setupViewController = pumpManagerType.setupViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default) {
+            setupViewController.setupDelegate = self
+            setupViewController.completionDelegate = self
+            setupViewController.basalSchedule = deviceManager.loopManager.basalRateSchedule
+            setupViewController.maxBolusUnits = deviceManager.loopManager.settings.maximumBolus
+            setupViewController.maxBasalRateUnitsPerHour = deviceManager.loopManager.settings.maximumBasalRatePerHour
+            show(setupViewController, sender: self)
+        } else {
+            let pumpManager = pumpManagerType.init(rawState: [:])
+            if let basalRateSchedule = deviceManager.loopManager.basalRateSchedule {
+                pumpManager?.syncBasalRateSchedule(items: basalRateSchedule.items, completion: { _ in })
+            }
+            deviceManager.pumpManager = pumpManager
+        }
     }
 
     func pumpManagerSetupViewController(_ pumpManagerSetupViewController: PumpManagerSetupViewController,
