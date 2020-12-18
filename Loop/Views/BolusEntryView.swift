@@ -195,7 +195,8 @@ struct BolusEntryView: View {
                         textAlignment: .right,
                         keyboardType: .decimalPad,
                         shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
-                        maxLength: 3
+                        maxLength: 3,
+                        doneButtonColor: .loopAccent
                     )
 
                     Text(QuantityFormatter().string(from: viewModel.glucoseUnit))
@@ -285,7 +286,8 @@ struct BolusEntryView: View {
                     textAlignment: .right,
                     keyboardType: .decimalPad,
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
-                    maxLength: 5
+                    maxLength: 5,
+                    doneButtonColor: .loopAccent
                 )
                 
                 bolusUnitsLabel

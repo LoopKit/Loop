@@ -119,7 +119,8 @@ struct SimpleBolusView: View {
                     placeholder: viewModel.carbPlaceholder,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    maxLength: 5
+                    maxLength: 5,
+                    doneButtonColor: .loopAccent
                 )
                 carbUnitsLabel
             }
@@ -141,7 +142,8 @@ struct SimpleBolusView: View {
                     font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    maxLength: 3
+                    maxLength: 3,
+                    doneButtonColor: .loopAccent
                 )
 
                 glucoseUnitsLabel
@@ -198,7 +200,8 @@ struct SimpleBolusView: View {
                     textAlignment: .right,
                     keyboardType: .decimalPad,
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
-                    maxLength: 5
+                    maxLength: 5,
+                    doneButtonColor: .loopAccent
                 )
                 
                 bolusUnitsLabel
