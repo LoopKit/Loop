@@ -6,7 +6,8 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import Foundation
+import UIKit
+import UserNotifications
 import HealthKit
 import LoopKit
 import LoopCore

@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "LoopKit",
+        "repositoryURL": "https://github.com/LoopKit/LoopKit.git",
+        "state": {
+          "branch": "package-experiment",
+          "revision": "4512982ee171884c6aa1092ead0298d2d281aa57",
+          "version": null
+        }
+      },
+      {
+        "package": "MKRingProgressView",
+        "repositoryURL": "https://github.com/maxkonovalov/MKRingProgressView.git",
+        "state": {
+          "branch": "master",
+          "revision": "ed13bf30eb13a83f0d117d49524c15bedec13924",
+          "version": null
+        }
+      },
+      {
+        "package": "SwiftCharts",
+        "repositoryURL": "https://github.com/ps2/SwiftCharts.git",
+        "state": {
+          "branch": "uikit-explicit",
+          "revision": "d4835fde68557524dcb08aad6079df2a5103c860",
+          "version": null
+        }
+      },
+      {
+        "package": "TrueTime",
+        "repositoryURL": "https://github.com/jay18001/TrueTime.swift.git",
+        "state": {
+          "branch": "master",
+          "revision": "80f4900a6d369f71da204b752cd16a637d7b7ecc",
+          "version": null
+        }
+      },
+      {
+        "package": "Zip",
+        "repositoryURL": "https://github.com/marmelroy/Zip.git",
+        "state": {
+          "branch": null,
+          "revision": "bd19d974e8a38cc8d3a88c90c8a107386c3b8ccf",
+          "version": "2.1.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -6,6 +6,7 @@
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
 //
 
+import UIKit
 import BackgroundTasks
 import HealthKit
 import LoopKit

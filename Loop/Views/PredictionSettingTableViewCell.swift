@@ -5,6 +5,7 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
+import UIKit
 import LoopKitUI
 
 class PredictionSettingTableViewCell: SwitchTableViewCell {

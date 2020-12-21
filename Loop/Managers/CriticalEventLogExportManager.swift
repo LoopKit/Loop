@@ -6,6 +6,7 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
+import UIKit
 import os.log
 import Foundation
 import LoopKit

@@ -6,6 +6,7 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
+import Foundation
 import LoopKit
 
 /// Class responsible for monitoring "system level" operations and alerting the user to any anomalous situations (e.g. bluetooth off)

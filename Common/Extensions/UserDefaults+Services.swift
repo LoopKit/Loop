@@ -6,6 +6,7 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
+import Foundation
 import LoopKit
 
 extension UserDefaults {

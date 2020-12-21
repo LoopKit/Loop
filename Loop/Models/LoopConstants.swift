@@ -6,7 +6,7 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-import Foundation
+import CoreGraphics
 import HealthKit
 import LoopKit
 

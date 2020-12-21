@@ -6,7 +6,7 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import LoopKit
 import LoopUI
 import HealthKit
