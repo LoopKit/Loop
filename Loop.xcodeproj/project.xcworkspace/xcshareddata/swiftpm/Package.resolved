@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "G4ShareSpy",
+        "repositoryURL": "https://github.com/LoopKit/G4ShareSpy.git",
+        "state": {
+          "branch": "package-experiment",
+          "revision": "6bfacbb1168a8a32eeed50053cd5ffc55be704eb",
+          "version": null
+        }
+      },
+      {
         "package": "LoopKit",
         "repositoryURL": "https://github.com/LoopKit/LoopKit.git",
         "state": {

@@ -10,6 +10,7 @@ import NightscoutServiceKit
 import NightscoutServiceKitUI
 import ShareClient
 import ShareClientUI
+import G4ShareSpy
 
 struct Plugins {
     public static var pumpManagers: [PumpManagerUI.Type] = [
@@ -19,6 +20,7 @@ struct Plugins {
     ]
     
     public static var cgmManagers: [CGMManagerUI.Type] = [
+        G4CGMManager.self,
         ShareClientManager.self,
         MockCGMManager.self,
     ]
