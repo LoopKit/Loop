@@ -705,7 +705,7 @@
         <!--OverrideSelectionViewController-->
         <scene sceneID="O3A-Oa-kvc">
             <objects>
-                <viewControllerPlaceholder storyboardName="OverrideSelectionViewController" bundleIdentifier="com.loopkit.LoopKitUI" id="n4Q-tf-UqN" sceneMemberID="viewController"/>
+                <viewControllerPlaceholder storyboardName="OverrideSelectionViewController" bundleIdentifier="LoopKit-LoopKitUI-resources" id="n4Q-tf-UqN" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bU3-Ra-HmR" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1146" y="-49"/>
