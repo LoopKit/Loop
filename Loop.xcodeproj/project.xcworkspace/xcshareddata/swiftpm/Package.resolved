@@ -6,7 +6,7 @@
         "repositoryURL": "https://github.com/LoopKit/LoopKit.git",
         "state": {
           "branch": "package-experiment",
-          "revision": "20cbdb4e5ee41795aadaa6ad56240c5cf03909af",
+          "revision": "0142e9275bdd403f23b950ff22434219035a626f",
           "version": null
         }
       },
@@ -20,11 +20,20 @@
         }
       },
       {
+        "package": "NightscoutService",
+        "repositoryURL": "https://github.com/ps2/NightscoutService.git",
+        "state": {
+          "branch": "package-experiment",
+          "revision": "a7f9953af6d91656e47cd22d838ff6be2293fbb0",
+          "version": null
+        }
+      },
+      {
         "package": "RileyLinkIOS",
         "repositoryURL": "https://github.com/ps2/rileylink_ios.git",
         "state": {
           "branch": "package-experiment",
-          "revision": "51042865eebc5ac6b747c957541f2b57cc13e740",
+          "revision": "5b1b091af50407f1a637c1f7c49d241d4c26eee2",
           "version": null
         }
       },

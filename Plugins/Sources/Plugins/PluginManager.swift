@@ -49,11 +49,13 @@ public class PluginManager {
     }
 
     public func getServiceTypeByIdentifier(_ identifier: String) -> ServiceUI.Type? {
-        return nil
+        return Plugins.services.first { identifier == $0.serviceIdentifier }
     }
 
     public var availableServices: [AvailableService] {
-        return []
+        return Plugins.services.map {
+            AvailableService(identifier: $0.serviceIdentifier, localizedTitle: $0.localizedTitle, providesOnboarding: $0.providesOnboarding)
+        }
     }
 
 }

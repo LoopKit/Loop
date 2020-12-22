@@ -14,7 +14,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/LoopKit/LoopKit.git", .branch("package-experiment")),
-        .package(name: "RileyLinkIOS", url: "https://github.com/ps2/rileylink_ios.git", .branch("package-experiment"))
+        .package(name: "RileyLinkIOS", url: "https://github.com/ps2/rileylink_ios.git", .branch("package-experiment")),
+        .package(url: "https://github.com/ps2/NightscoutService.git", .branch("package-experiment"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -22,8 +23,12 @@ let package = Package(
         .target(
             name: "Plugins",
             dependencies: [
+                .product(name: "MockKit", package: "LoopKit"),
+                .product(name: "MockKitUI", package: "LoopKit"),
                 .product(name: "LoopKitUI", package: "LoopKit"),
-                .product(name: "OmniKitPlugin", package: "RileyLinkIOS")
+                .product(name: "OmniKitPlugin", package: "RileyLinkIOS"),
+                .product(name: "MinimedKitPlugin", package: "RileyLinkIOS"),
+                .product(name: "NightscoutServiceKitPlugin", package: "NightscoutService")
             ]),
         .testTarget(
             name: "PluginsTests",
