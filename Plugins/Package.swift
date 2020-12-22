@@ -17,7 +17,8 @@ let package = Package(
         .package(name: "RileyLinkIOS", url: "https://github.com/ps2/rileylink_ios.git", .branch("package-experiment")),
         .package(url: "https://github.com/ps2/NightscoutService.git", .branch("package-experiment")),
         .package(name: "ShareClient", url: "https://github.com/LoopKit/dexcom-share-client-swift.git", .branch("package-experiment")),
-        .package(url: "https://github.com/LoopKit/G4ShareSpy.git", .branch("package-experiment"))
+        .package(url: "https://github.com/LoopKit/G4ShareSpy.git", .branch("package-experiment")),
+        .package(url: "https://github.com/LoopKit/CGMBLEKit.git", .branch("package-experiment"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -33,6 +34,8 @@ let package = Package(
                 .product(name: "NightscoutServiceKitPlugin", package: "NightscoutService"),
                 .product(name: "ShareClientPlugin", package: "ShareClient"),
                 .product(name: "G4ShareSpyPlugin", package: "G4ShareSpy"),
+                .product(name: "CGMBLEKitG5Plugin", package: "CGMBLEKit"),
+                .product(name: "CGMBLEKitG6Plugin", package: "CGMBLEKit")
             ]),
         .testTarget(
             name: "PluginsTests",

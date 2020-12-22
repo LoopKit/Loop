@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "CGMBLEKit",
+        "repositoryURL": "https://github.com/LoopKit/CGMBLEKit.git",
+        "state": {
+          "branch": "package-experiment",
+          "revision": "1bdec89e0c247b148093960119551594eb939a2a",
+          "version": null
+        }
+      },
+      {
         "package": "ShareClient",
         "repositoryURL": "https://github.com/LoopKit/dexcom-share-client-swift.git",
         "state": {
@@ -15,7 +24,7 @@
         "repositoryURL": "https://github.com/LoopKit/G4ShareSpy.git",
         "state": {
           "branch": "package-experiment",
-          "revision": "6bfacbb1168a8a32eeed50053cd5ffc55be704eb",
+          "revision": "6676ec965fae3527718cc57cc6179f6f4fec709b",
           "version": null
         }
       },
