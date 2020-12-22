@@ -17,6 +17,6 @@ public protocol NibLoadable: IdentifiableClass {
 
 extension NibLoadable {
     public static func nib() -> UINib {
-        return UINib(nibName: className, bundle: Bundle(for: self))
+        return UINib(nibName: className, bundle: Bundle.module)
     }
 }

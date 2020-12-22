@@ -8,16 +8,12 @@
 
 import SwiftUI
 
-private class FrameworkBundle {
-    static let main = Bundle(for: FrameworkBundle.self)
-}
-
 extension Image {
     init(frameworkImage name: String, decorative: Bool = false) {
         if decorative {
-            self.init(decorative: name, bundle: FrameworkBundle.main)
+            self.init(decorative: name, bundle: Bundle.module)
         } else {
-            self.init(name, bundle: FrameworkBundle.main)
+            self.init(name, bundle: Bundle.module)
         }
     }
 }
