@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="OJt-dE-GaA">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="OJt-dE-GaA">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -145,10 +145,10 @@
         <!--InsulinKit-->
         <scene sceneID="n8N-hY-V0o">
             <objects>
-                <viewControllerPlaceholder storyboardName="InsulinKit" bundleIdentifier="com.loopkit.LoopKitUI" id="a8v-ef-RZZ" sceneMemberID="viewController">
+                <placeholder placeholderIdentifier="IBFirstResponder" id="MjI-5q-y5n" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <viewControllerPlaceholder storyboardName="InsulinKit" bundleIdentifier="LoopKit-LoopKitUI-resources" id="a8v-ef-RZZ" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" id="BWb-ny-Yc4"/>
                 </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="MjI-5q-y5n" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1413" y="-460"/>
         </scene>
@@ -907,14 +907,14 @@
     </scenes>
     <resources>
         <image name="Oval Selection" width="21" height="21"/>
-        <image name="Pre-Meal" width="32" height="32"/>
-        <image name="bolus" width="32" height="32"/>
-        <image name="carbs" width="32" height="32"/>
+        <image name="Pre-Meal" width="29" height="29"/>
+        <image name="bolus" width="22" height="24"/>
+        <image name="carbs" width="29" height="29"/>
         <image name="chevron.right" catalog="system" width="96" height="128"/>
-        <image name="settings" width="32" height="32"/>
-        <image name="workout" width="32" height="32"/>
+        <image name="settings" width="25" height="40"/>
+        <image name="workout" width="30" height="29"/>
         <namedColor name="carbs">
-            <color red="0.0" green="0.66699999570846558" blue="0.22400000691413879" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.3880000114440918" green="0.85500001907348633" blue="0.2199999988079071" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
