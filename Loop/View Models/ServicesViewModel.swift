@@ -8,6 +8,7 @@
 
 import LoopKit
 import SwiftUI
+import Plugins
 
 public protocol ServicesViewModelDelegate: class {
     func addService(identifier: String)

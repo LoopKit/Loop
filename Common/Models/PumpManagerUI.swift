@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import LoopKitUI
+import Plugins
 
 typealias PumpManagerHUDViewRawValue = [String: Any]
 
@@ -16,7 +17,7 @@ func PumpManagerHUDViewFromRawValue(_ rawValue: PumpManagerHUDViewRawValue, plug
     guard
         let identifier = rawValue["managerIdentifier"] as? String,
         let rawState = rawValue["hudProviderView"] as? HUDProvider.HUDViewRawState,
-        let manager = pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier] else
+        let manager = pluginManager.getPumpManagerTypeByIdentifier(identifier) else
     {
         return nil
     }

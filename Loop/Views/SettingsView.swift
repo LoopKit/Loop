@@ -11,6 +11,7 @@ import LoopKitUI
 import MockKit
 import SwiftUI
 import HealthKit
+import Plugins
 
 public struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss

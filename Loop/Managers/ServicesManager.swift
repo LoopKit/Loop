@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import LoopKitUI
+import Plugins
 
 class ServicesManager {
 
@@ -43,11 +44,11 @@ class ServicesManager {
     }
 
     public var availableServices: [AvailableService] {
-        return pluginManager.availableServices + availableStaticServices
+        return pluginManager.availableServices
     }
 
     func serviceUITypeByIdentifier(_ identifier: String) -> ServiceUI.Type? {
-        return pluginManager.getServiceTypeByIdentifier(identifier) ?? staticServicesByIdentifier[identifier] as? ServiceUI.Type
+        return pluginManager.getServiceTypeByIdentifier(identifier)
     }
 
     private func serviceTypeFromRawValue(_ rawValue: Service.RawStateValue) -> Service.Type? {

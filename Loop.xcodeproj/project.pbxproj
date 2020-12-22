@@ -350,7 +350,6 @@
 		C130C90A259167270052563C /* MockKit in Frameworks */ = {isa = PBXBuildFile; productRef = C130C909259167270052563C /* MockKit */; };
 		C130C90C259167270052563C /* MockKitUI in Frameworks */ = {isa = PBXBuildFile; productRef = C130C90B259167270052563C /* MockKitUI */; };
 		C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */; };
-		C136AA2423109CC6008A320D /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C13DA2B024F6C7690098BB29 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13DA2AF24F6C7690098BB29 /* UIViewController.swift */; };
 		C148CEE724FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */; };
@@ -360,7 +359,6 @@
 		C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165B8CD23302C5D0004112E /* RemoteCommand.swift */; };
 		C16B5C262590FB7D006982F3 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C16B5C252590FB7D006982F3 /* SwiftCharts */; };
 		C16B5C272590FB7D006982F3 /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C16B5C252590FB7D006982F3 /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C16DA84222E8E112008624C2 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
 		C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */; };
 		C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */; };
@@ -370,6 +368,8 @@
 		C18913B52524F24C007B0683 /* DeviceDataManager+SimpleBolusViewModelDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18913B42524F24C007B0683 /* DeviceDataManager+SimpleBolusViewModelDelegate.swift */; };
 		C19008FE25225D3900721625 /* SimpleBolusCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19008FD25225D3900721625 /* SimpleBolusCalculator.swift */; };
 		C1900900252271BB00721625 /* SimpleBolusCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19008FF252271BB00721625 /* SimpleBolusCalculatorTests.swift */; };
+		C1A85E2A2591B3D0009582C2 /* Plugins in Frameworks */ = {isa = PBXBuildFile; productRef = C1A85E292591B3D0009582C2 /* Plugins */; };
+		C1A85E2F2591B447009582C2 /* Plugins in Frameworks */ = {isa = PBXBuildFile; productRef = C1A85E2E2591B447009582C2 /* Plugins */; };
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C660D1252E4DD5009B5C32 /* LoopConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C660D0252E4DD5009B5C32 /* LoopConstants.swift */; };
 		C1C6BDB625910C0B0035A04A /* LoopKit in Frameworks */ = {isa = PBXBuildFile; productRef = C1C6BDB525910C0B0035A04A /* LoopKit */; };
@@ -1096,13 +1096,13 @@
 		C12CB9B823106A6300F84978 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Intents.strings; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
 		C130C8E5259165100052563C /* NotificationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettings.swift; sourceTree = "<group>"; };
+		C130C9102591A67B0052563C /* Plugins */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Plugins; sourceTree = "<group>"; };
 		C13DA2AF24F6C7690098BB29 /* UIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
 		C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliveryUncertaintyAlertManager.swift; sourceTree = "<group>"; };
 		C165756E2534C468004AE16E /* SimpleBolusViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBolusViewModelTests.swift; sourceTree = "<group>"; };
 		C16575702538A36B004AE16E /* CGMStalenessMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMStalenessMonitor.swift; sourceTree = "<group>"; };
 		C16575722538AFF6004AE16E /* CGMStalenessMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMStalenessMonitorTests.swift; sourceTree = "<group>"; };
 		C165B8CD23302C5D0004112E /* RemoteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommand.swift; sourceTree = "<group>"; };
-		C16DA84122E8E112008624C2 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
 		C17824991E1999FA00D9D25C /* CaseCountable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaseCountable.swift; sourceTree = "<group>"; };
 		C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdTableViewController.swift; sourceTree = "<group>"; };
 		C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_very_low_end_high.json; sourceTree = "<group>"; };
@@ -1205,6 +1205,7 @@
 			files = (
 				C130C9052591670F0052563C /* LoopUI in Frameworks */,
 				C130C8DA25914A830052563C /* Zip in Frameworks */,
+				C1A85E2A2591B3D0009582C2 /* Plugins in Frameworks */,
 				C130C8FE259166F20052563C /* LoopKitUI in Frameworks */,
 				C16B5C262590FB7D006982F3 /* SwiftCharts in Frameworks */,
 				C130C8D42591485B0052563C /* TrueTime in Frameworks */,
@@ -1259,6 +1260,7 @@
 				C1C6BDE525910FD00035A04A /* LoopUI in Frameworks */,
 				C1FFF5CC259119280041D23B /* MockKit in Frameworks */,
 				437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */,
+				C1A85E2F2591B447009582C2 /* Plugins in Frameworks */,
 				C1C6BDD025910D6A0035A04A /* LoopKitUI in Frameworks */,
 				C130C8C8259147850052563C /* MockKitUI in Frameworks */,
 			);
@@ -1403,6 +1405,7 @@
 				4F70C1DF1DE8DCA7006380B7 /* Loop Status Extension */,
 				C1C6BD9C259106B60035A04A /* LoopCore */,
 				C1C6BDE025910EB70035A04A /* LoopUI */,
+				C130C9102591A67B0052563C /* Plugins */,
 				43A943731B926B7B0051FA24 /* WatchApp */,
 				43A943821B926B7B0051FA24 /* WatchApp Extension */,
 				43F78D2C1C8FC58F002152D1 /* LoopTests */,
@@ -1434,7 +1437,6 @@
 		43776F8E1B8022E90074EA36 /* Loop */ = {
 			isa = PBXGroup;
 			children = (
-				C16DA84022E8E104008624C2 /* Plugins */,
 				7D7076651FE06EE4004AC8EA /* Localizable.strings */,
 				7D7076511FE06EE1004AC8EA /* InfoPlist.strings */,
 				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
@@ -2013,14 +2015,6 @@
 			path = LoopCore;
 			sourceTree = "<group>";
 		};
-		C16DA84022E8E104008624C2 /* Plugins */ = {
-			isa = PBXGroup;
-			children = (
-				C16DA84122E8E112008624C2 /* PluginManager.swift */,
-			);
-			path = Plugins;
-			sourceTree = "<group>";
-		};
 		C18A491122FCC20B00FDA733 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
@@ -2198,6 +2192,7 @@
 				C130C9042591670F0052563C /* LoopUI */,
 				C130C909259167270052563C /* MockKit */,
 				C130C90B259167270052563C /* MockKitUI */,
+				C1A85E292591B3D0009582C2 /* Plugins */,
 			);
 			productName = Loop;
 			productReference = 43776F8C1B8022E90074EA36 /* Loop.app */;
@@ -2319,6 +2314,7 @@
 				C1C6BDE425910FD00035A04A /* LoopUI */,
 				C1FFF5CB259119280041D23B /* MockKit */,
 				C130C8C7259147850052563C /* MockKitUI */,
+				C1A85E2E2591B447009582C2 /* Plugins */,
 			);
 			productName = "Loop Status Extension";
 			productReference = 4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */;
@@ -2876,7 +2872,6 @@
 				1D2609AD248EEB9900A6F258 /* LoopAlertsManager.swift in Sources */,
 				A9CBE45C248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift in Sources */,
 				433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */,
-				C16DA84222E8E112008624C2 /* PluginManager.swift in Sources */,
 				43785E932120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift in Sources */,
 				439A7944211FE22F0041B75F /* NSUserActivity.swift in Sources */,
 				4328E0331CFC091100E199AA /* WatchContext+LoopKit.swift in Sources */,
@@ -3120,7 +3115,6 @@
 				4345E3FB21F04911009E00E5 /* UIColor+HIG.swift in Sources */,
 				43BFF0CD1E466C8400FF19A9 /* StateColorPalette.swift in Sources */,
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
-				C136AA2423109CC6008A320D /* PluginManager.swift in Sources */,
 				4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */,
 				4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */,
 			);
@@ -4294,6 +4288,14 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C16B5C242590FB7D006982F3 /* XCRemoteSwiftPackageReference "SwiftCharts" */;
 			productName = SwiftCharts;
+		};
+		C1A85E292591B3D0009582C2 /* Plugins */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Plugins;
+		};
+		C1A85E2E2591B447009582C2 /* Plugins */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Plugins;
 		};
 		C1C6BDB525910C0B0035A04A /* LoopKit */ = {
 			isa = XCSwiftPackageProductDependency;

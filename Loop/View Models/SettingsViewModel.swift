@@ -12,6 +12,7 @@ import LoopKit
 import LoopKitUI
 import SwiftUI
 import HealthKit
+import Plugins
 
 public class DeviceViewModel: ObservableObject {
     public typealias DeleteTestingDataFunc = () -> Void

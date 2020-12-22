@@ -15,6 +15,7 @@ import LoopUI
 import NotificationCenter
 import UIKit
 import SwiftCharts
+import Plugins
 
 class StatusViewController: UIViewController, NCWidgetProviding {
 

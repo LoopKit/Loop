@@ -15,6 +15,7 @@ import LoopCore
 import LoopTestingKit
 import UserNotifications
 import Combine
+import Plugins
 
 final class DeviceDataManager {
 
@@ -346,11 +347,11 @@ final class DeviceDataManager {
     }
 
     var availablePumpManagers: [AvailableDevice] {
-        return pluginManager.availablePumpManagers + availableStaticPumpManagers
+        return pluginManager.availablePumpManagers
     }
 
     public func pumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
-        return pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier] as? PumpManagerUI.Type
+        return pluginManager.getPumpManagerTypeByIdentifier(identifier)
     }
 
     private func pumpManagerTypeFromRawValue(_ rawValue: [String: Any]) -> PumpManager.Type? {
@@ -401,7 +402,7 @@ final class DeviceDataManager {
     }
 
     var availableCGMManagers: [AvailableDevice] {
-        var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
+        var availableCGMManagers = pluginManager.availableCGMManagers
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
             availableCGMManagers.append(AvailableDevice(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle, providesOnboarding: false))
         }
@@ -409,7 +410,7 @@ final class DeviceDataManager {
     }
 
     public func cgmManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
-        return pluginManager.getCGMManagerTypeByIdentifier(identifier) ?? staticCGMManagersByIdentifier[identifier] as? CGMManagerUI.Type
+        return pluginManager.getCGMManagerTypeByIdentifier(identifier)
     }
     
     public typealias SetupCGMCompletion = (CGMManager?) -> Void

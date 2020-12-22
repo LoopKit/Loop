@@ -7,28 +7,7 @@
 
 import LoopKit
 import MockKit
-
-// TODO: Need a flag other than Debug for including MockCGMManager
-let staticCGMManagers: [CGMManager.Type] = [MockCGMManager.self]
-
-let staticCGMManagersByIdentifier: [String: CGMManager.Type] = staticCGMManagers.reduce(into: [:]) { (map, Type) in
-    map[Type.managerIdentifier] = Type
-}
-
-let availableStaticCGMManagers = staticCGMManagers.map { (Type) -> AvailableDevice in
-    return AvailableDevice(identifier: Type.managerIdentifier, localizedTitle: Type.localizedTitle, providesOnboarding: false)
-}
-
-func CGMManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManager? {
-    guard let managerIdentifier = rawValue["managerIdentifier"] as? String,
-        let rawState = rawValue["state"] as? CGMManager.RawStateValue,
-        let Manager = staticCGMManagersByIdentifier[managerIdentifier]
-    else {
-        return nil
-    }
-    
-    return Manager.init(rawState: rawState)
-}
+import Plugins
 
 extension CGMManager {
     var rawValue: [String: Any] {

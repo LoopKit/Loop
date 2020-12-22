@@ -13,6 +13,7 @@ import LoopKit
 import LoopKitUI
 import UIKit
 import UserNotifications
+import Plugins
 
 @UIApplicationMain
 final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationController {

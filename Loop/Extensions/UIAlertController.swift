@@ -9,6 +9,7 @@
 import UIKit
 import LoopKit
 import LoopKitUI
+import Plugins
 
 
 extension UIAlertController {

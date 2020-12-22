@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "RileyLinkIOS",
+        "repositoryURL": "https://github.com/ps2/rileylink_ios.git",
+        "state": {
+          "branch": "package-experiment",
+          "revision": "51042865eebc5ac6b747c957541f2b57cc13e740",
+          "version": null
+        }
+      },
+      {
         "package": "SwiftCharts",
         "repositoryURL": "https://github.com/ps2/SwiftCharts.git",
         "state": {
