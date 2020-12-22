@@ -41,11 +41,13 @@ public class PluginManager {
     }
     
     public func getCGMManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
-        return nil
+        return Plugins.cgmManagers.first { identifier == $0.managerIdentifier }
     }
     
     public var availableCGMManagers: [AvailableDevice] {
-        return []
+        return Plugins.cgmManagers.map {
+            AvailableDevice(identifier: $0.managerIdentifier, localizedTitle: $0.localizedTitle, providesOnboarding: false)
+        }
     }
 
     public func getServiceTypeByIdentifier(_ identifier: String) -> ServiceUI.Type? {

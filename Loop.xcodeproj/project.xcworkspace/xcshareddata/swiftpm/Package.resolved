@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "ShareClient",
+        "repositoryURL": "https://github.com/LoopKit/dexcom-share-client-swift.git",
+        "state": {
+          "branch": "package-experiment",
+          "revision": "10240789a9a14c49151a41f3d05198e20ff7e597",
+          "version": null
+        }
+      },
+      {
         "package": "LoopKit",
         "repositoryURL": "https://github.com/LoopKit/LoopKit.git",
         "state": {
