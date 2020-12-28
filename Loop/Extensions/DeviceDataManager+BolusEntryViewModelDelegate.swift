@@ -11,8 +11,8 @@ import LoopCore
 import LoopKit
 
 extension DeviceDataManager: BolusEntryViewModelDelegate {
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelSetting: InsulinModelSettings?) {
-        loopManager.logOutsideInsulinDose(startDate: startDate, units: units, insulinModelSetting: insulinModelSetting)
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory?) {
+        loopManager.logOutsideInsulinDose(startDate: startDate, units: units, insulinModelCategory: insulinModelCategory)
     }
     
 

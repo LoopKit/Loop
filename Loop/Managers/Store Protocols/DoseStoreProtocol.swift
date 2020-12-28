@@ -13,11 +13,13 @@ protocol DoseStoreProtocol: AnyObject {
     // MARK: settings
     var basalProfile: LoopKit.BasalRateSchedule? { get set }
     
-    var defaultInsulinModelSetting: LoopKit.InsulinModelSettings? { get set }
+    var pumpInsulinModelSetting: LoopKit.InsulinModelSettings? { get set }
     
     var insulinSensitivitySchedule: LoopKit.InsulinSensitivitySchedule? { get set }
     
     var basalProfileApplyingOverrideHistory: BasalRateSchedule? { get }
+    
+    var rapidActingInsulinModelSetting: LoopKit.InsulinModelSettings {get set}
     
     // MARK: authorization
     var authorizationRequired: Bool { get }
@@ -56,7 +58,7 @@ protocol DoseStoreProtocol: AnyObject {
     
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
     
-    func logOutsideDoseEvents(_ doses: [DoseEntry], completion: @escaping (_ error: Error?) -> Void)
+    func logOutsideDose(_ doses: [DoseEntry], completion: @escaping (_ error: Error?) -> Void)
     
     // MARK: IOB and insulin effect
     func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)

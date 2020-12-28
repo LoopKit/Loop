@@ -37,7 +37,9 @@ class MockDoseStore: DoseStoreProtocol {
     var basalProfile: BasalRateSchedule?
     
     // Default to the adult exponential insulin model
-    var defaultInsulinModelSetting: InsulinModelSettings? = InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)
+    var pumpInsulinModelSetting: InsulinModelSettings? = InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)
+    
+    var rapidActingInsulinModelSetting: InsulinModelSettings = InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)!
     
     var insulinSensitivitySchedule: InsulinSensitivitySchedule?
     
@@ -67,7 +69,7 @@ class MockDoseStore: DoseStoreProtocol {
         completion("")
     }
     
-    func logOutsideDoseEvents(_ doses: [DoseEntry], completion: @escaping (Error?) -> Void) {
+    func logOutsideDose(_ doses: [DoseEntry], completion: @escaping (Error?) -> Void) {
         completion(nil)
     }
     

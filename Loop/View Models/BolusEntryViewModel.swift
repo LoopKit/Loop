@@ -30,7 +30,7 @@ protocol BolusEntryViewModelDelegate: class {
     
     func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
     
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelSetting: InsulinModelSettings?)
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory?)
 
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -121,22 +121,16 @@ final class BolusEntryViewModel: ObservableObject {
     
     // MARK: - External Insulin
     @Published var selectedInsulinModelIndex: Int = 0
+    
     // Return nil if we aren't logging a dose so the bolus is annotated with the correct insulin model
-    var selectedInsulinModel: ExponentialInsulinModelPreset? {
-        return isLoggingDose ? presetFromTitle[insulinModelPickerOptions[selectedInsulinModelIndex]] : nil
+    var selectedInsulinModelCategory: InsulinModelCategory? {
+        return isLoggingDose ? categoryFor(title: insulinModelStringPickerOptions[selectedInsulinModelIndex]) : nil
     }
     @Published var selectedDoseDate: Date = Date()
     
-    var insulinModelPickerOptions: [String]
+    var insulinModelStringPickerOptions: [String]
     
     let isLoggingDose: Bool
-    
-    
-    let presetFromTitle: [String: ExponentialInsulinModelPreset] = [
-        InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title: .humalogNovologAdult,
-        InsulinModelSettings.exponentialPreset(.humalogNovologChild).title: .humalogNovologChild,
-        InsulinModelSettings.exponentialPreset(.fiasp).title: .fiasp
-    ]
 
     // MARK: - Seams
     private weak var delegate: BolusEntryViewModelDelegate?
@@ -176,7 +170,7 @@ final class BolusEntryViewModel: ObservableObject {
         self.originalCarbEntry = originalCarbEntry
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
-        self.insulinModelPickerOptions = []
+        self.insulinModelStringPickerOptions = []
         self.isLoggingDose = supportedInsulinModels != nil
 
         self.isManualGlucoseEntryEnabled = isManualGlucoseEntryEnabled
@@ -198,18 +192,20 @@ final class BolusEntryViewModel: ObservableObject {
     }
     
     private func findInsulinModelPickerOptions(_ allowedModels: SupportedInsulinModelSettings?) {
-        insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title)
-        insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologChild).title)
-        
-        // Not including Walsh in the UI because (1) it's rarely used and (2) this mechanism shouldn't be used to enter long-acting insulin (which someone could try to do with a long Walsh duration)
+        insulinModelStringPickerOptions.append(InsulinModelCategory.rapidActing.title)
+
         if let allowedModels = allowedModels, allowedModels.fiaspModelEnabled {
-            insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.fiasp).title)
+            insulinModelStringPickerOptions.append(InsulinModelCategory.fiasp.title)
         }
+        
+        selectedInsulinModelIndex = startingPickerIndex
     }
     
     var startingPickerIndex: Int {
-        if let pumpInsulinModel = delegate?.insulinModel as? ExponentialInsulinModelPreset, let indexToStartOn = insulinModelPickerOptions.firstIndex(of: pumpInsulinModel.title) {
-            return indexToStartOn
+        if let pumpInsulinCategory = categoryFor(insulinModel: delegate?.insulinModel), case .fiasp = pumpInsulinCategory {
+            if let indexToStartOn = insulinModelStringPickerOptions.firstIndex(of: pumpInsulinCategory.title) {
+                return indexToStartOn
+            }
         }
         
         return 0
@@ -391,11 +387,10 @@ final class BolusEntryViewModel: ObservableObject {
                 completion()
                 return
             }
-            
-            let model = selectedInsulinModel
-            let insulinModelSettings = InsulinModelSettings(model: model!)
 
-            delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinModelSetting: insulinModelSettings)
+            let insulinModelCategory = selectedInsulinModelCategory
+
+            delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinModelCategory: insulinModelCategory)
             completion()
         } else if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
@@ -603,13 +598,9 @@ final class BolusEntryViewModel: ObservableObject {
     private func updatePredictedGlucoseValues(from state: LoopState, completion: @escaping () -> Void = {}) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let (manualGlucoseSample, enteredBolus, doseDate, insulinModel) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, self.selectedDoseDate, self.selectedInsulinModel) }
-        var insulinModelSettings: InsulinModelSettings?
-        if let model = insulinModel {
-            insulinModelSettings = InsulinModelSettings(model: model)
-        }
+        let (manualGlucoseSample, enteredBolus, doseDate, insulinModelCategory) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, self.selectedDoseDate, self.selectedInsulinModelCategory) }
         
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinModelSetting: insulinModelSettings)
+        let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinModelCategory: insulinModelCategory)
 
         let predictedGlucoseValues: [PredictedGlucoseValue]
         do {
@@ -910,5 +901,30 @@ extension BolusEntryViewModel {
         case (false, true): return .deliver
         case (false, false): return .enterBolus
         }
+    }
+
+    func categoryFor(insulinModel: InsulinModel?) -> InsulinModelCategory? {
+        guard let insulinModel = insulinModel else {
+            return nil
+        }
+        
+        if let exponential = insulinModel as? ExponentialInsulinModelPreset, case .fiasp = exponential {
+            return .fiasp
+        }
+        
+        return .rapidActing
+    }
+    
+    func categoryFor(title: String) -> InsulinModelCategory? {
+        if title == "No Associated Model" {
+            return InsulinModelCategory.none
+        }
+        if title == "Rapid Acting" {
+            return .rapidActing
+        }
+        if title == "Fiasp" {
+            return .fiasp
+        }
+        return nil
     }
 }

@@ -403,10 +403,10 @@ extension LoopDataManager {
     /// The length of time insulin has an effect on blood glucose
     var insulinModelSettings: InsulinModelSettings? {
         get {
-            return doseStore.defaultInsulinModelSetting
+            return doseStore.pumpInsulinModelSetting
         }
         set {
-            doseStore.defaultInsulinModelSetting = newValue
+            doseStore.pumpInsulinModelSetting = newValue
             UserDefaults.appGroup?.insulinModelSettings = newValue
 
             self.dataAccessQueue.async {
@@ -417,6 +417,26 @@ extension LoopDataManager {
             }
 
             analyticsServicesManager.didChangeInsulinModel()
+
+            // Don't update the model if it's not rapid-acting
+            if case .exponentialPreset(let model) = newValue, case .fiasp = model { } else if let setting = newValue {
+                rapidActingInsulinModelSetting = setting
+            }
+        }
+    }
+    
+    var rapidActingInsulinModelSetting: InsulinModelSettings {
+        get {
+            return doseStore.rapidActingInsulinModelSetting
+        }
+        set {
+            doseStore.rapidActingInsulinModelSetting = newValue
+            UserDefaults.appGroup?.rapidActingInsulinModelSetting = newValue
+
+            self.dataAccessQueue.async {
+                self.insulinEffect = nil
+                self.notify(forChange: .preferences)
+            }
         }
     }
 
@@ -604,9 +624,9 @@ extension LoopDataManager {
     ///   - startDate: The date the dose was started at.
     ///   - value: The number of Units in the dose.
     ///   - insulinModel: The type of insulin model that should be used for the dose.
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelSetting: InsulinModelSettings? = nil) {
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory? = nil) {
         let syncIdentifier = Data(UUID().uuidString.utf8).hexadecimalString
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinModelSetting: insulinModelSetting)
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinModelCategory: insulinModelCategory)
 
         logOutsideInsulinDose(dose: dose) { (error) in
             if error == nil {
@@ -625,7 +645,7 @@ extension LoopDataManager {
     func logOutsideInsulinDose(dose: DoseEntry, completion: @escaping (_ error: Error?) -> Void) {
         let doseList = [dose]
 
-        doseStore.logOutsideDoseEvents(doseList) { (error) in
+        doseStore.logOutsideDose(doseList) { (error) in
             if let error = error {
                 completion(error)
             }
@@ -1102,8 +1122,9 @@ extension LoopDataManager {
 
                 let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
                 let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+                let insulinModelInfo = InsulinModelInformation(defaultInsulinModel: model, rapidActingModel: doseStore.rapidActingInsulinModelSetting.model)
                 let bolusEffect = [potentialBolus]
-                    .glucoseEffects(defaultModel: model, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: sensitivity)
+                    .glucoseEffects(insulinModelInfo: insulinModelInfo, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: sensitivity)
                     .filterDateRange(nextEffectDate, nil)
                 effects.append(bolusEffect)
             }

@@ -66,7 +66,7 @@ class BolusEntryViewModelTests: XCTestCase {
         setUpViewModel()
     }
     
-    func setUpViewModel(originalCarbEntry: StoredCarbEntry? = nil, potentialCarbEntry: NewCarbEntry? = nil, selectedCarbAbsorptionTimeEmoji: String? = nil) {
+    func setUpViewModel(originalCarbEntry: StoredCarbEntry? = nil, potentialCarbEntry: NewCarbEntry? = nil, selectedCarbAbsorptionTimeEmoji: String? = nil, supportedInsulinModels: SupportedInsulinModelSettings? = nil) {
         bolusEntryViewModel = BolusEntryViewModel(delegate: delegate,
                                                   now: { self.now },
                                                   screenWidth: 512,
@@ -75,7 +75,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                   timeZone: TimeZone(abbreviation: "GMT")!,
                                                   originalCarbEntry: originalCarbEntry,
                                                   potentialCarbEntry: potentialCarbEntry,
-                                                  selectedCarbAbsorptionTimeEmoji: selectedCarbAbsorptionTimeEmoji)
+                                                  selectedCarbAbsorptionTimeEmoji: selectedCarbAbsorptionTimeEmoji, supportedInsulinModels: supportedInsulinModels)
         bolusEntryViewModel.authenticate = authenticateOverride
         bolusEntryViewModel.maximumBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 10)
     }
@@ -761,6 +761,18 @@ class BolusEntryViewModelTests: XCTestCase {
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         XCTAssertEqual(.saveAndDeliver, bolusEntryViewModel.actionButtonAction)
     }
+    
+    func testDoseLogging() throws {
+        setUpViewModel(supportedInsulinModels: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true))
+        XCTAssertTrue(bolusEntryViewModel.isLoggingDose)
+        XCTAssertEqual(.logging, bolusEntryViewModel.actionButtonAction)
+        XCTAssertEqual(0, bolusEntryViewModel.selectedInsulinModelIndex)
+        bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
+        
+        try saveAndDeliver(BolusEntryViewModelTests.exampleBolusQuantity)
+        XCTAssertEqual(delegate.loggedBolusUnits, Self.exampleBolusQuantity.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(delegate.loggedDoseModel, .rapidActing)
+    }
 }
 
 // MARK: utilities
@@ -841,11 +853,11 @@ fileprivate class MockLoopState: LoopState {
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     var loggedBolusUnits: Double?
     var loggedDate: Date?
-    var loggedDoseModel: InsulinModelSettings?
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelSetting: InsulinModelSettings?) {
+    var loggedDoseModel: InsulinModelCategory?
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory?) {
         loggedBolusUnits = units
         loggedDate = startDate
-        loggedDoseModel = insulinModelSetting
+        loggedDoseModel = insulinModelCategory
     }
     
     var loopStateCallBlock: ((LoopState) -> Void)?

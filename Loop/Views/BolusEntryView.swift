@@ -25,6 +25,7 @@ struct BolusEntryView: View {
 
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
+    @State private var pickerShouldExpand = false
 
     @Environment(\.dismiss) var dismiss
 
@@ -295,12 +296,9 @@ struct BolusEntryView: View {
     
     private var insulinModelPicker: some View {
         ExpandablePicker(
-            with: viewModel.insulinModelPickerOptions,
-            onUpdate: { [weak viewModel] index in
-                viewModel?.selectedInsulinModelIndex = index
-            },
-            label: NSLocalizedString("Insulin Model", comment: "Insulin model title"),
-            initialPickerIndex: viewModel.startingPickerIndex
+            with: viewModel.insulinModelStringPickerOptions,
+            pickerIndex: $viewModel.selectedInsulinModelIndex,
+            label: NSLocalizedString("Insulin Model", comment: "Insulin model title")
         )
     }
     private var datePicker: some View {
@@ -538,16 +536,5 @@ struct LabelBackground: ViewModifier {
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
                     .fill(Color(.systemGray6))
             )
-    }
-}
-
-extension Binding {
-    func onChange(_ handler: @escaping (Value) -> Void) -> Binding<Value> {
-        return Binding(
-            get: { self.wrappedValue },
-            set: { selection in
-                self.wrappedValue = selection
-                handler(selection)
-        })
     }
 }
