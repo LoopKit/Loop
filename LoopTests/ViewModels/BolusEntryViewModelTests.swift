@@ -853,11 +853,11 @@ fileprivate class MockLoopState: LoopState {
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     var loggedBolusUnits: Double?
     var loggedDate: Date?
-    var loggedDoseModel: InsulinModelCategory?
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory?) {
+    var loggedDoseModel: InsulinType?
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?) {
         loggedBolusUnits = units
         loggedDate = startDate
-        loggedDoseModel = insulinModelCategory
+        loggedDoseModel = insulinType
     }
     
     var loopStateCallBlock: ((LoopState) -> Void)?
