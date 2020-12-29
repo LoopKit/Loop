@@ -624,9 +624,9 @@ extension LoopDataManager {
     ///   - startDate: The date the dose was started at.
     ///   - value: The number of Units in the dose.
     ///   - insulinModel: The type of insulin model that should be used for the dose.
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory? = nil) {
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType? = nil) {
         let syncIdentifier = Data(UUID().uuidString.utf8).hexadecimalString
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinModelCategory: insulinModelCategory)
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinType: insulinType)
 
         logOutsideInsulinDose(dose: dose) { (error) in
             if error == nil {

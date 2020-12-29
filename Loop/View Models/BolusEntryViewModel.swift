@@ -30,7 +30,7 @@ protocol BolusEntryViewModelDelegate: class {
     
     func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
     
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelCategory: InsulinModelCategory?)
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?)
 
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -123,8 +123,8 @@ final class BolusEntryViewModel: ObservableObject {
     @Published var selectedInsulinModelIndex: Int = 0
     
     // Return nil if we aren't logging a dose so the bolus is annotated with the correct insulin model
-    var selectedInsulinModelCategory: InsulinModelCategory? {
-        return isLoggingDose ? categoryFor(title: insulinModelStringPickerOptions[selectedInsulinModelIndex]) : nil
+    var selectedInsulinType: InsulinType? {
+        return isLoggingDose ? typeFor(title: insulinModelStringPickerOptions[selectedInsulinModelIndex]) : nil
     }
     @Published var selectedDoseDate: Date = Date()
     
@@ -192,18 +192,18 @@ final class BolusEntryViewModel: ObservableObject {
     }
     
     private func findInsulinModelPickerOptions(_ allowedModels: SupportedInsulinModelSettings?) {
-        insulinModelStringPickerOptions.append(InsulinModelCategory.rapidActing.title)
+        insulinModelStringPickerOptions.append(InsulinType.rapidActing.title)
 
         if let allowedModels = allowedModels, allowedModels.fiaspModelEnabled {
-            insulinModelStringPickerOptions.append(InsulinModelCategory.fiasp.title)
+            insulinModelStringPickerOptions.append(InsulinType.fiasp.title)
         }
         
         selectedInsulinModelIndex = startingPickerIndex
     }
     
     var startingPickerIndex: Int {
-        if let pumpInsulinCategory = categoryFor(insulinModel: delegate?.insulinModel), case .fiasp = pumpInsulinCategory {
-            if let indexToStartOn = insulinModelStringPickerOptions.firstIndex(of: pumpInsulinCategory.title) {
+        if let pumpInsulinType = typeFor(insulinModel: delegate?.insulinModel), case .fiasp = pumpInsulinType {
+            if let indexToStartOn = insulinModelStringPickerOptions.firstIndex(of: pumpInsulinType.title) {
                 return indexToStartOn
             }
         }
@@ -388,9 +388,9 @@ final class BolusEntryViewModel: ObservableObject {
                 return
             }
 
-            let insulinModelCategory = selectedInsulinModelCategory
+            let insulinType = selectedInsulinType
 
-            delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinModelCategory: insulinModelCategory)
+            delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinType: insulinType)
             completion()
         } else if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
@@ -598,9 +598,9 @@ final class BolusEntryViewModel: ObservableObject {
     private func updatePredictedGlucoseValues(from state: LoopState, completion: @escaping () -> Void = {}) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let (manualGlucoseSample, enteredBolus, doseDate, insulinModelCategory) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, self.selectedDoseDate, self.selectedInsulinModelCategory) }
+        let (manualGlucoseSample, enteredBolus, doseDate, insulinType) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, self.selectedDoseDate, self.selectedInsulinType) }
         
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinModelCategory: insulinModelCategory)
+        let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: insulinType)
 
         let predictedGlucoseValues: [PredictedGlucoseValue]
         do {
@@ -903,7 +903,7 @@ extension BolusEntryViewModel {
         }
     }
 
-    func categoryFor(insulinModel: InsulinModel?) -> InsulinModelCategory? {
+    func typeFor(insulinModel: InsulinModel?) -> InsulinType? {
         guard let insulinModel = insulinModel else {
             return nil
         }
@@ -915,9 +915,9 @@ extension BolusEntryViewModel {
         return .rapidActing
     }
     
-    func categoryFor(title: String) -> InsulinModelCategory? {
+    func typeFor(title: String) -> InsulinType? {
         if title == "No Associated Model" {
-            return InsulinModelCategory.none
+            return InsulinType.none
         }
         if title == "Rapid Acting" {
             return .rapidActing
