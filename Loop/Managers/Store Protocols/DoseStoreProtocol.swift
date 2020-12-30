@@ -13,13 +13,11 @@ protocol DoseStoreProtocol: AnyObject {
     // MARK: settings
     var basalProfile: LoopKit.BasalRateSchedule? { get set }
     
-    var pumpInsulinModelSetting: LoopKit.InsulinModelSettings? { get set }
+    var insulinModelSettings: LoopKit.InsulinModelSettings? { get set }
     
     var insulinSensitivitySchedule: LoopKit.InsulinSensitivitySchedule? { get set }
     
     var basalProfileApplyingOverrideHistory: BasalRateSchedule? { get }
-    
-    var rapidActingInsulinModelSetting: LoopKit.InsulinModelSettings {get set}
     
     // MARK: authorization
     var authorizationRequired: Bool { get }
@@ -40,8 +38,6 @@ protocol DoseStoreProtocol: AnyObject {
     var pumpRecordsBasalProfileStartEvents: Bool { get set }
     
     var pumpEventQueryAfterDate: Date { get }
-    
-    var longestEffectDuration: TimeInterval { get set }
     
     // MARK: dose management
     func resetPumpData(completion: ((_ error: DoseStore.DoseStoreError?) -> Void)?)

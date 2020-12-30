@@ -766,7 +766,7 @@ class BolusEntryViewModelTests: XCTestCase {
         setUpViewModel(supportedInsulinModels: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true))
         XCTAssertTrue(bolusEntryViewModel.isLoggingDose)
         XCTAssertEqual(.logging, bolusEntryViewModel.actionButtonAction)
-        XCTAssertEqual(0, bolusEntryViewModel.selectedInsulinModelIndex)
+        XCTAssertEqual(0, bolusEntryViewModel.selectedInsulinTypeIndex)
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         
         try saveAndDeliver(BolusEntryViewModelTests.exampleBolusQuantity)

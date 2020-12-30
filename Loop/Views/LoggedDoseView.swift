@@ -1,8 +1,8 @@
 //
-//  BolusEntryView.swift
+//  LoggedDoseView.swift
 //  Loop
 //
-//  Created by Michael Pangburn on 7/17/20.
+//  Created by Pete Schwamb on 12/29/20.
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
@@ -14,8 +14,8 @@ import LoopKitUI
 import LoopUI
 
 
-struct BolusEntryView: View {
-    @ObservedObject var viewModel: BolusEntryViewModel
+struct LoggedDoseView: View {
+    @ObservedObject var viewModel: LoggedDoseViewModel
 
     @State private var enteredBolusAmount = ""
     @State private var shouldBolusEntryBecomeFirstResponder = false
@@ -59,7 +59,6 @@ struct BolusEntryView: View {
             .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
             .navigationBarTitle(self.title)
                 .supportedInterfaceOrientations(.portrait)
-                .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
                 .onReceive(self.viewModel.$enteredBolus) { updatedBolusEntry in
                     // The view model can update the user's entered bolus when the recommendation changes; ensure the text entry updates in tandem.
                     let amount = updatedBolusEntry.doubleValue(for: .internationalUnit())
@@ -76,10 +75,7 @@ struct BolusEntryView: View {
     }
     
     private var title: Text {
-        if viewModel.potentialCarbEntry == nil {
-            return Text("Bolus", comment: "Title for bolus entry screen")
-        }
-        return Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
+        return Text("Log Dose", comment: "Title for dose logging screen")
     }
 
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
@@ -158,30 +154,19 @@ struct BolusEntryView: View {
                     .bold()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                if viewModel.isManualGlucoseEntryEnabled {
-                    manualGlucoseEntryRow
-                } else if viewModel.potentialCarbEntry != nil {
-                    potentialCarbEntryRow
-                } else {
-                    recommendedBolusRow
-                }
+                // A manual BG shouldn't be required to log a dose
+                datePicker
             }
             .padding(.top, 8)
             
-            if viewModel.isManualGlucoseEntryEnabled && viewModel.potentialCarbEntry != nil {
-                potentialCarbEntryRow
-            }
-
-            if viewModel.isManualGlucoseEntryEnabled || viewModel.potentialCarbEntry != nil {
-                recommendedBolusRow
-            }
+            insulinTypePicker
 
             bolusEntryRow
         }
     }
     
     private var titleText: Text {
-        return Text("Bolus Summary", comment: "Title for card displaying carb entry and bolus recommendation")
+        return Text("Dose Summary", comment: "Title for card to log dose")
     }
 
     private var glucoseFormatter: NumberFormatter {
@@ -280,6 +265,29 @@ struct BolusEntryView: View {
         }
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }
+    
+    private var insulinTypePicker: some View {
+        ExpandablePicker(
+            with: viewModel.insulinTypePickerOptions.map { $0.title },
+            pickerIndex: $viewModel.selectedInsulinTypeIndex,
+            label: NSLocalizedString("Insulin Type", comment: "Insulin type label")
+        )
+    }
+    private var datePicker: some View {
+        // Allow 6 hours before & after due to longest DIA
+        ZStack(alignment: .topLeading) {
+            DatePicker(
+                "",
+                selection: $viewModel.selectedDoseDate,
+                in: Date().addingTimeInterval(-.hours(6))...Date().addingTimeInterval(.hours(6)),
+                displayedComponents: [.date, .hourAndMinute]
+            )
+            .pickerStyle(WheelPickerStyle())
+            
+            Text(NSLocalizedString("Date", comment: "Date picker label"))
+        }
+    }
+    
 
     private var bolusEntryRow: some View {
         HStack {
@@ -319,81 +327,22 @@ struct BolusEntryView: View {
 
     private var actionArea: some View {
         VStack(spacing: 0) {
-            if viewModel.isNoticeVisible {
-                warning(for: viewModel.activeNotice!)
-                    .padding([.top, .horizontal])
-                    .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
-            }
-
-            if viewModel.isManualGlucosePromptVisible {
-                enterManualGlucoseButton
-                    .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
-            }
-
             actionButton
         }
         .padding(.bottom) // FIXME: unnecessary on iPhone 8 size devices
         .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
     }
-
-    private func warning(for notice: BolusEntryViewModel.Notice) -> some View {
-        switch notice {
-        case .predictedGlucoseBelowSuspendThreshold(suspendThreshold: let suspendThreshold):
-            let suspendThresholdString = QuantityFormatter().string(from: suspendThreshold, for: viewModel.glucoseUnit) ?? String(describing: suspendThreshold)
-            return WarningView(
-                title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text("Your glucose is below or predicted to go below your glucose safety limit, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit")
-            )
-        case .staleGlucoseData:
-            return WarningView(
-                title: Text("No Recent Glucose Data", comment: "Title for bolus screen notice when glucose data is missing or stale"),
-                caption: Text("Enter a blood glucose from a meter for a recommended bolus amount.", comment: "Caption for bolus screen notice when glucose data is missing or stale")
-            )
-        case .stalePumpData:
-            return WarningView(
-                title: Text("No Recent Pump Data", comment: "Title for bolus screen notice when pump data is missing or stale"),
-                caption: Text("Your pump data is stale. Loop cannot recommend a bolus amount.", comment: "Caption for bolus screen notice when pump data is missing or stale"),
-                severity: .critical
-            )
-        }
-    }
             
-    private var enterManualGlucoseButton: some View {
-        Button(
-            action: {
-                withAnimation {
-                    self.viewModel.isManualGlucoseEntryEnabled = true
-                }
-            },
-            label: { Text("Enter Fingerstick Glucose", comment: "Button text prompting manual glucose entry on bolus screen") }
-        )
-        .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .manualGlucoseEntry ? .primary : .secondary))
-        .padding([.top, .horizontal])
-    }
-
     private var actionButton: some View {
         Button<Text>(
             action: {
-                if self.viewModel.actionButtonAction == .enterBolus {
-                    self.shouldBolusEntryBecomeFirstResponder = true
-                } else {
-                    self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
-                }
+                self.viewModel.logDose(onSuccess: self.dismiss)
             },
             label: {
-                switch viewModel.actionButtonAction {
-                case .saveWithoutBolusing:
-                    return Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
-                case .saveAndDeliver:
-                    return Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
-                case .enterBolus:
-                    return Text("Enter Bolus", comment: "Button text to begin entering a bolus")
-                case .deliver:
-                    return Text("Deliver", comment: "Button text to deliver a bolus")
-                }
+                return Text("Log Dose", comment: "Button text to log a dose")
             }
         )
-        .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
+        .buttonStyle(ActionButtonStyle(.primary))
         .padding()
     }
 
@@ -446,57 +395,5 @@ struct BolusEntryView: View {
                 message: Text("An updated bolus recommendation is available.", comment: "Alert message when glucose data returns while on bolus screen")
             )
         }
-    }
-}
-
-struct LabeledQuantity: View {
-    var label: Text
-    var quantity: HKQuantity?
-    var unit: HKUnit
-    var maxFractionDigits: Int?
-
-    var body: some View {
-        HStack(spacing: 4) {
-            label
-                .bold()
-            valueText
-                .foregroundColor(Color(.secondaryLabel))
-                .fixedSize(horizontal: true, vertical: false)
-        }
-        .accessibilityElement(children: .combine)
-        .font(.subheadline)
-        .modifier(LabelBackground())
-    }
-
-    var valueText: Text {
-        guard let quantity = quantity else {
-            return Text("– –")
-        }
-        
-        let formatter = QuantityFormatter()
-        formatter.setPreferredNumberFormatter(for: unit)
-
-        if let maxFractionDigits = maxFractionDigits {
-            formatter.numberFormatter.maximumFractionDigits = maxFractionDigits
-        }
-
-        guard let string = formatter.string(from: quantity, for: unit) else {
-            assertionFailure("Unable to format \(String(describing: quantity)) \(unit)")
-            return Text("")
-        }
-
-        return Text(string)
-    }
-}
-
-struct LabelBackground: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color(.systemGray6))
-            )
     }
 }
