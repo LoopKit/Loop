@@ -1416,7 +1416,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func onPumpTapped() {
-        guard var settings = deviceManager.pumpManager?.settingsViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default) else {
+        guard var settings = deviceManager.pumpManager?.settingsViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default, allowedInsulinTypes: deviceManager.allowedInsulinTypes) else {
             // assert?
             return
         }
@@ -1921,7 +1921,7 @@ extension StatusTableViewController: CGMManagerSetupViewControllerDelegate {
 
 extension StatusTableViewController: PumpManagerSetupViewControllerDelegate {
     fileprivate func setupPumpManager(for pumpManagerType: PumpManagerUI.Type) {
-        var setupViewController = pumpManagerType.setupViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default)
+        var setupViewController = pumpManagerType.setupViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default, allowedInsulinTypes: deviceManager.allowedInsulinTypes)
         setupViewController.setupDelegate = self
         setupViewController.completionDelegate = self
         setupViewController.basalSchedule = deviceManager.loopManager.basalRateSchedule

@@ -20,12 +20,8 @@ struct LoggedDoseView: View {
     @State private var enteredBolusAmount = ""
     @State private var shouldBolusEntryBecomeFirstResponder = false
 
-    @State private var isManualGlucoseEntryRowVisible = false
-    @State private var enteredManualGlucose = ""
-
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
-    @State private var pickerShouldExpand = false
 
     @Environment(\.dismiss) var dismiss
 
@@ -63,13 +59,6 @@ struct LoggedDoseView: View {
                     // The view model can update the user's entered bolus when the recommendation changes; ensure the text entry updates in tandem.
                     let amount = updatedBolusEntry.doubleValue(for: .internationalUnit())
                     self.enteredBolusAmount = amount == 0 ? "" : Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-            }
-            .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
-                // The view model can disable manual glucose entry if CGM data returns.
-                if !isManualGlucoseEntryEnabled {
-                    self.isManualGlucoseEntryRowVisible = false
-                    self.enteredManualGlucose = ""
-                }
             }
         }
     }
@@ -154,7 +143,6 @@ struct LoggedDoseView: View {
                     .bold()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                // A manual BG shouldn't be required to log a dose
                 datePicker
             }
             .padding(.top, 8)
@@ -173,71 +161,6 @@ struct LoggedDoseView: View {
         QuantityFormatter(for: viewModel.glucoseUnit).numberFormatter
     }
 
-    @ViewBuilder
-    private var manualGlucoseEntryRow: some View {
-        if viewModel.isManualGlucoseEntryEnabled {
-            HStack {
-                Text("Fingerstick Glucose", comment: "Label for manual glucose entry row on bolus screen")
-                Spacer()
-                HStack(alignment: .firstTextBaseline) {
-                    DismissibleKeyboardTextField(
-                        text: typedManualGlucoseEntry,
-                        placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
-                        // The heavy title is ending up clipped due to a bug that is fixed in iOS 14.  Uncomment the following when we can build for iOS 14.
-                        font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
-                        textAlignment: .right,
-                        keyboardType: .decimalPad,
-                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
-                        maxLength: 3
-                    )
-
-                    Text(QuantityFormatter().string(from: viewModel.glucoseUnit))
-                        .foregroundColor(Color(.secondaryLabel))
-                }
-            }
-            .onKeyboardStateChange { state in
-                if state.animationDuration > 0 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + state.animationDuration) {
-                         self.isManualGlucoseEntryRowVisible = true
-                    }
-                }
-            }
-        }
-    }
-
-    private var typedManualGlucoseEntry: Binding<String> {
-        Binding(
-            get: { self.enteredManualGlucose },
-            set: { newValue in
-                if let doubleValue = self.glucoseFormatter.number(from: newValue)?.doubleValue {
-                    self.viewModel.enteredManualGlucose = HKQuantity(unit: self.viewModel.glucoseUnit, doubleValue: doubleValue)
-                } else {
-                    self.viewModel.enteredManualGlucose = nil
-                }
-
-                self.enteredManualGlucose = newValue
-            }
-        )
-    }
-
-    @ViewBuilder
-    private var potentialCarbEntryRow: some View {
-        if viewModel.carbEntryAmountAndEmojiString != nil && viewModel.carbEntryDateAndAbsorptionTimeString != nil {
-            HStack {
-                Text("Carb Entry", comment: "Label for carb entry row on bolus screen")
-
-                Text(viewModel.carbEntryAmountAndEmojiString!)
-                    .foregroundColor(Color(.carbTintColor))
-                    .modifier(LabelBackground())
-
-                Spacer()
-
-                Text(viewModel.carbEntryDateAndAbsorptionTimeString!)
-                    .foregroundColor(Color(.secondaryLabel))
-            }
-        }
-    }
-
     private static let doseAmountFormatter: NumberFormatter = {
         let quantityFormatter = QuantityFormatter()
         quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
@@ -248,7 +171,6 @@ struct LoggedDoseView: View {
         HStack {
             Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
             Spacer()
-            ActivityIndicator(isAnimating: $viewModel.isRefreshingPump, style: .default)
             HStack(alignment: .firstTextBaseline) {
                 Text(recommendedBolusString)
                     .font(.title)
@@ -344,56 +266,5 @@ struct LoggedDoseView: View {
         )
         .buttonStyle(ActionButtonStyle(.primary))
         .padding()
-    }
-
-    private func alert(for alert: BolusEntryViewModel.Alert) -> SwiftUI.Alert {
-        switch alert {
-        case .recommendationChanged:
-            return SwiftUI.Alert(
-                title: Text("Bolus Recommendation Updated", comment: "Alert title for an updated bolus recommendation"),
-                message: Text("The bolus recommendation has updated. Please reconfirm the bolus amount.", comment: "Alert message for an updated bolus recommendation")
-            )
-        case .maxBolusExceeded:
-            guard let maximumBolusAmountString = viewModel.maximumBolusAmountString else {
-                fatalError("Impossible to exceed max bolus without a configured max bolus")
-            }
-            return SwiftUI.Alert(
-                title: Text("Exceeds Maximum Bolus", comment: "Alert title for a maximum bolus validation error"),
-                message: Text("The maximum bolus amount is \(maximumBolusAmountString) U.", comment: "Alert message for a maximum bolus validation error (1: max bolus value)")
-            )
-        case .noPumpManagerConfigured:
-            return SwiftUI.Alert(
-                title: Text("No Pump Configured", comment: "Alert title for a missing pump error"),
-                message: Text("A pump must be configured before a bolus can be delivered.", comment: "Alert message for a missing pump error")
-            )
-        case .noMaxBolusConfigured:
-            return SwiftUI.Alert(
-                title: Text("No Maximum Bolus Configured", comment: "Alert title for a missing maximum bolus setting error"),
-                message: Text("The maximum bolus setting must be configured before a bolus can be delivered.", comment: "Alert message for a missing maximum bolus setting error")
-            )
-        case .carbEntryPersistenceFailure:
-            return SwiftUI.Alert(
-                title: Text("Unable to Save Carb Entry", comment: "Alert title for a carb entry persistence error"),
-                message: Text("An error occurred while trying to save your carb entry.", comment: "Alert message for a carb entry persistence error")
-            )
-        case .manualGlucoseEntryOutOfAcceptableRange:
-            let formatter = QuantityFormatter(for: viewModel.glucoseUnit)
-            let acceptableLowerBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.lowerBound, for: viewModel.glucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.lowerBound)
-            let acceptableUpperBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.upperBound, for: viewModel.glucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.upperBound)
-            return SwiftUI.Alert(
-                title: Text("Glucose Entry Out of Range", comment: "Alert title for a manual glucose entry out of range error"),
-                message: Text("A manual glucose entry must be between \(acceptableLowerBound) and \(acceptableUpperBound)", comment: "Alert message for a manual glucose entry out of range error")
-            )
-        case .manualGlucoseEntryPersistenceFailure:
-            return SwiftUI.Alert(
-                title: Text("Unable to Save Manual Glucose Entry", comment: "Alert title for a manual glucose entry persistence error"),
-                message: Text("An error occurred while trying to save your manual glucose entry.", comment: "Alert message for a manual glucose entry persistence error")
-            )
-        case .glucoseNoLongerStale:
-            return SwiftUI.Alert(
-                title: Text("Glucose Data Now Available", comment: "Alert title when glucose data returns while on bolus screen"),
-                message: Text("An updated bolus recommendation is available.", comment: "Alert message when glucose data returns while on bolus screen")
-            )
-        }
     }
 }

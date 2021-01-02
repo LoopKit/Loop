@@ -21,15 +21,6 @@ protocol LoggedDoseViewModelDelegate: class {
     
     func withLoopState(do block: @escaping (LoopState) -> Void)
 
-    func addGlucoseSamples(_ samples: [NewGlucoseSample], completion: ((_ result: Swift.Result<[StoredGlucoseSample], Error>) -> Void)?)
-    
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry? ,
-                      completion: @escaping (_ result: Result<StoredCarbEntry>) -> Void)
-
-    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
-    
-    func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
-    
     func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?)
 
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
@@ -37,8 +28,6 @@ protocol LoggedDoseViewModelDelegate: class {
     func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)
     
     func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ result: CarbStoreResult<CarbValue>) -> Void)
-    
-    func ensureCurrentPumpData(completion: @escaping () -> Void)
     
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
 
@@ -52,33 +41,16 @@ protocol LoggedDoseViewModelDelegate: class {
     
     var pumpInsulinType: InsulinType? { get }
 
-
-    var settings: LoopSettings { get }
+    //var settings: LoopSettings { get }
 }
 
 final class LoggedDoseViewModel: ObservableObject {
-    enum Alert: Int {
-        case recommendationChanged
-        case maxBolusExceeded
-        case noPumpManagerConfigured
-        case noMaxBolusConfigured
-        case carbEntryPersistenceFailure
-        case manualGlucoseEntryOutOfAcceptableRange
-        case manualGlucoseEntryPersistenceFailure
-        case glucoseNoLongerStale
-    }
-
-    enum Notice: Equatable {
-        case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
-        case staleGlucoseData
-        case stalePumpData
-    }
 
     var authenticate: AuthenticationChallenge = LocalAuthentication.deviceOwnerCheck
 
     // MARK: - State
 
-    @Published var glucoseValues: [GlucoseValue] = [] // stored glucose values + manual glucose entry
+    @Published var glucoseValues: [GlucoseValue] = [] // stored glucose values
     private var storedGlucoseValues: [GlucoseValue] = []
     @Published var predictedGlucoseValues: [GlucoseValue] = []
     @Published var glucoseUnit: HKUnit = .milligramsPerDeciliter
@@ -91,30 +63,14 @@ final class LoggedDoseViewModel: ObservableObject {
     @Published var preMealOverride: TemporaryScheduleOverride?
     private var savedPreMealOverride: TemporaryScheduleOverride?
     @Published var scheduleOverride: TemporaryScheduleOverride?
-    var maximumBolus: HKQuantity?
-
-    let originalCarbEntry: StoredCarbEntry?
-    let potentialCarbEntry: NewCarbEntry?
-    let selectedCarbAbsorptionTimeEmoji: String?
-
-    @Published var isManualGlucoseEntryEnabled = false
-    @Published var enteredManualGlucose: HKQuantity?
-    private var manualGlucoseSample: NewGlucoseSample? // derived from `enteredManualGlucose`, but stored to ensure timestamp consistency
 
     @Published var recommendedBolus: HKQuantity?
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
     private var isInitiatingSaveOrBolus = false
 
-    private var dosingDecision = BolusDosingDecision()
-
-    @Published var activeAlert: Alert?
-    @Published var activeNotice: Notice?
-
-    private let log = OSLog(category: "BolusEntryViewModel")
+    private let log = OSLog(category: "LoggedDoseViewModel")
     private var cancellables: Set<AnyCancellable> = []
 
-    @Published var isRefreshingPump: Bool = false
-    
     let chartManager: ChartsManager = {
         let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
                                                           yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
@@ -138,7 +94,6 @@ final class LoggedDoseViewModel: ObservableObject {
     private let screenWidth: CGFloat
     private let debounceIntervalMilliseconds: Int
     private let uuidProvider: () -> String
-    private let carbEntryDateFormatter: DateFormatter
     
     // MARK: - Initialization
 
@@ -149,10 +104,6 @@ final class LoggedDoseViewModel: ObservableObject {
         debounceIntervalMilliseconds: Int = 400,
         uuidProvider: @escaping () -> String = { UUID().uuidString },
         timeZone: TimeZone? = nil,
-        originalCarbEntry: StoredCarbEntry? = nil,
-        potentialCarbEntry: NewCarbEntry? = nil,
-        selectedCarbAbsorptionTimeEmoji: String? = nil,
-        isManualGlucoseEntryEnabled: Bool = false,
         supportedInsulinModels: SupportedInsulinModelSettings? = nil
     ) {
         self.delegate = delegate
@@ -160,28 +111,14 @@ final class LoggedDoseViewModel: ObservableObject {
         self.screenWidth = screenWidth
         self.debounceIntervalMilliseconds = debounceIntervalMilliseconds
         self.uuidProvider = uuidProvider
-        self.carbEntryDateFormatter = DateFormatter()
-        self.carbEntryDateFormatter.dateStyle = .none
-        self.carbEntryDateFormatter.timeStyle = .short
-        if let timeZone = timeZone {
-            self.carbEntryDateFormatter.timeZone = timeZone
-        }
         
-        self.originalCarbEntry = originalCarbEntry
-        self.potentialCarbEntry = potentialCarbEntry
-        self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
-        
-        self.insulinTypePickerOptions = [.aspart, .lispro, .glulisine]
+        self.insulinTypePickerOptions = [.novolog, .humalog, .apidra]
         if let allowedModels = supportedInsulinModels, allowedModels.fiaspModelEnabled {
             insulinTypePickerOptions.append(.fiasp)
         }
         
-        self.isManualGlucoseEntryEnabled = isManualGlucoseEntryEnabled
-        
         self.chartDateInterval = DateInterval(start: Date(timeInterval: .hours(-1), since: now()), duration: .hours(7))
         
-        self.dosingDecision.originalCarbEntry = originalCarbEntry
-
         selectedInsulinTypeIndex = startingPickerIndex
         
         observeLoopUpdates()
@@ -280,9 +217,6 @@ final class LoggedDoseViewModel: ObservableObject {
         let now = self.now()
         let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
 
-        dosingDecision.requestedBolus = bolusVolume
-        delegate?.storeBolusDosingDecision(dosingDecision, withDate: now)
-
         guard bolusVolume > 0 else {
             completion()
             return
@@ -293,17 +227,6 @@ final class LoggedDoseViewModel: ObservableObject {
         // TODO: should we pass along completion or not???
         delegate?.enactBolus(units: bolusVolume, at: now, completion: { _ in })
         completion()
-    }
-
-    private func presentAlert(_ alert: Alert) {
-        dispatchPrecondition(condition: .onQueue(.main))
-
-        // As of iOS 13.6 / Xcode 11.6, swapping out an alert while one is active crashes SwiftUI.
-        guard activeAlert == nil else {
-            return
-        }
-
-        activeAlert = alert
     }
 
     private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit())
@@ -320,42 +243,6 @@ final class LoggedDoseViewModel: ObservableObject {
     var enteredBolusAmountString: String {
         let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
         return bolusVolumeFormatter.numberFormatter.string(from: bolusVolume) ?? String(bolusVolume)
-    }
-
-    var maximumBolusAmountString: String? {
-        guard let maxBolusVolume = maximumBolus?.doubleValue(for: .internationalUnit()) else {
-            return nil
-        }
-        return bolusVolumeFormatter.numberFormatter.string(from: maxBolusVolume) ?? String(maxBolusVolume)
-    }
-
-    var carbEntryAmountAndEmojiString: String? {
-        guard
-            let potentialCarbEntry = potentialCarbEntry,
-            let carbAmountString = QuantityFormatter(for: .gram()).string(from: potentialCarbEntry.quantity, for: .gram())
-        else {
-            return nil
-        }
-
-        if let emoji = potentialCarbEntry.foodType ?? selectedCarbAbsorptionTimeEmoji {
-            return String(format: NSLocalizedString("%1$@ %2$@", comment: "Format string combining carb entry quantity and absorption time emoji"), carbAmountString, emoji)
-        } else {
-            return carbAmountString
-        }
-    }
-
-    var carbEntryDateAndAbsorptionTimeString: String? {
-        guard let potentialCarbEntry = potentialCarbEntry else {
-            return nil
-        }
-
-        let entryTimeString = carbEntryDateFormatter.string(from: potentialCarbEntry.startDate)
-
-        if let absorptionTime = potentialCarbEntry.absorptionTime, let absorptionTimeString = absorptionTimeFormatter.string(from: absorptionTime) {
-            return String(format: NSLocalizedString("%1$@ + %2$@", comment: "Format string combining carb entry time and absorption time"), entryTimeString, absorptionTimeString)
-        } else {
-            return entryTimeString
-        }
     }
 
     // MARK: - Data upkeep
@@ -391,48 +278,32 @@ final class LoggedDoseViewModel: ObservableObject {
     private func updateGlucoseChartValues() {
         dispatchPrecondition(condition: .onQueue(.main))
 
-        var chartGlucoseValues = storedGlucoseValues
-        if let manualGlucoseSample = manualGlucoseSample {
-            chartGlucoseValues.append(manualGlucoseSample.quantitySample)
-        }
-
-        self.glucoseValues = chartGlucoseValues
+        self.glucoseValues = storedGlucoseValues
     }
 
     /// - NOTE: `completion` is invoked on the main queue after predicted glucose values are updated
     private func updatePredictedGlucoseValues(from state: LoopState, completion: @escaping () -> Void = {}) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let (manualGlucoseSample, enteredBolus, doseDate, insulinType) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, self.selectedDoseDate, self.selectedInsulinType) }
+        let (enteredBolus, doseDate, insulinType) = DispatchQueue.main.sync { (self.enteredBolus, self.selectedDoseDate, self.selectedInsulinType) }
         
         let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: insulinType)
 
         let predictedGlucoseValues: [PredictedGlucoseValue]
         do {
-            if let manualGlucoseEntry = manualGlucoseSample {
-                predictedGlucoseValues = try state.predictGlucoseFromManualGlucose(
-                    manualGlucoseEntry,
-                    potentialBolus: enteredBolusDose,
-                    potentialCarbEntry: potentialCarbEntry,
-                    replacingCarbEntry: originalCarbEntry,
-                    includingPendingInsulin: true
-                )
-            } else {
-                predictedGlucoseValues = try state.predictGlucose(
-                    using: .all,
-                    potentialBolus: enteredBolusDose,
-                    potentialCarbEntry: potentialCarbEntry,
-                    replacingCarbEntry: originalCarbEntry,
-                    includingPendingInsulin: true
-                )
-            }
+            predictedGlucoseValues = try state.predictGlucose(
+                using: .all,
+                potentialBolus: enteredBolusDose,
+                potentialCarbEntry: nil,
+                replacingCarbEntry: nil,
+                includingPendingInsulin: true
+            )
         } catch {
             predictedGlucoseValues = []
         }
 
         DispatchQueue.main.async {
             self.predictedGlucoseValues = predictedGlucoseValues
-            self.dosingDecision.predictedGlucoseIncludingPendingInsulin = predictedGlucoseValues
             completion()
         }
     }
@@ -445,10 +316,8 @@ final class LoggedDoseViewModel: ObservableObject {
                 switch result {
                 case .success(let iob):
                     self.activeInsulin = HKQuantity(unit: .internationalUnit(), doubleValue: iob.value)
-                    self.dosingDecision.insulinOnBoard = iob
                 case .failure:
                     self.activeInsulin = nil
-                    self.dosingDecision.insulinOnBoard = nil
                 }
             }
         }
@@ -470,10 +339,8 @@ final class LoggedDoseViewModel: ObservableObject {
                 switch result {
                 case .success(let carbValue):
                     self.activeCarbs = carbValue.quantity
-                    self.dosingDecision.carbsOnBoard = carbValue
                 case .failure:
                     self.activeCarbs = nil
-                    self.dosingDecision.carbsOnBoard = nil
                 }
             }
         }
@@ -490,8 +357,6 @@ final class LoggedDoseViewModel: ObservableObject {
         glucoseUnit = delegate.preferredGlucoseUnit
 
         targetGlucoseSchedule = delegate.settings.glucoseTargetRangeSchedule
-        // Pre-meal override should be ignored if we have carbs (LOOP-1964)
-        preMealOverride = potentialCarbEntry == nil ? delegate.settings.preMealOverride : nil
         scheduleOverride = delegate.settings.scheduleOverride
 
         if preMealOverride?.hasFinished() == true {
@@ -500,18 +365,6 @@ final class LoggedDoseViewModel: ObservableObject {
 
         if scheduleOverride?.hasFinished() == true {
             scheduleOverride = nil
-        }
-
-        maximumBolus = delegate.settings.maximumBolus.map { maxBolusAmount in
-            HKQuantity(unit: .internationalUnit(), doubleValue: maxBolusAmount)
-        }
-
-        dosingDecision.scheduleOverride = preMealOverride ?? scheduleOverride
-        dosingDecision.glucoseTargetRangeSchedule = targetGlucoseSchedule
-        if scheduleOverride != nil || preMealOverride != nil {
-            dosingDecision.effectiveGlucoseTargetRangeSchedule = delegate.settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
-        } else {
-            dosingDecision.effectiveGlucoseTargetRangeSchedule = nil
         }
     }
 
