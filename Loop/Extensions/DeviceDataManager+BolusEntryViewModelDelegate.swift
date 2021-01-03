@@ -10,7 +10,7 @@ import HealthKit
 import LoopCore
 import LoopKit
 
-extension DeviceDataManager: BolusEntryViewModelDelegate {
+extension DeviceDataManager: BolusEntryViewModelDelegate, LoggedDoseViewModelDelegate {
     
     func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?) {
         loopManager.logOutsideInsulinDose(startDate: startDate, units: units, insulinType: insulinType)
@@ -68,7 +68,7 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
     }
     
     var pumpInsulinType: InsulinType? {
-        return pumpManager?.insulinType
+        return pumpManager?.status.insulinType
     }
         
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {

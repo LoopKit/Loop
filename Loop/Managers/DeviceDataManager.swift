@@ -281,7 +281,8 @@ final class DeviceDataManager {
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
             settingsStore: settingsStore,
-            alertPresenter: alertManager
+            alertPresenter: alertManager,
+            pumpInsulinType: pumpManager?.status.insulinType
         )
         cacheStore.delegate = loopManager
         
@@ -870,6 +871,10 @@ extension DeviceDataManager: PumpManagerDelegate {
 
         // Update the pump-schedule based settings
         loopManager.setScheduleTimeZone(status.timeZone)
+        
+        if status.insulinType != oldStatus.insulinType {
+            loopManager.pumpInsulinType = status.insulinType
+        }
         
         if status.deliveryIsUncertain != oldStatus.deliveryIsUncertain {
             DispatchQueue.main.async {

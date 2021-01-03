@@ -40,7 +40,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     private let analyticsServicesManager: AnalyticsServicesManager
 
     let loopSettingsAlerter: LoopSettingsAlerter
-
+    
     private let now: () -> Date
 
     // References to registered notification center observers
@@ -72,7 +72,8 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         dosingDecisionStore: DosingDecisionStoreProtocol,
         settingsStore: SettingsStoreProtocol,
         now: @escaping () -> Date = { Date() },
-        alertPresenter: AlertPresenter? = nil
+        alertPresenter: AlertPresenter? = nil,
+        pumpInsulinType: InsulinType?
     ) {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -93,6 +94,8 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         self.now = now
 
         self.settingsStore = settingsStore
+        
+        self.lockedPumpInsulinType = Locked(pumpInsulinType)
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
@@ -271,6 +274,16 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         }
     }
     private let lockedBasalDeliveryState: Locked<PumpManagerStatus.BasalDeliveryState?>
+    
+    var pumpInsulinType: InsulinType? {
+        get {
+            return lockedPumpInsulinType.value
+        }
+        set {
+            lockedPumpInsulinType.value = newValue
+        }
+    }
+    private let lockedPumpInsulinType: Locked<InsulinType?>
 
     fileprivate var lastRequestedBolus: DoseEntry?
 
@@ -758,6 +771,7 @@ extension LoopDataManager {
     /// Executes an analysis of the current data, and recommends an adjustment to the current
     /// temporary basal rate.
     func loop() {
+        
         self.dataAccessQueue.async {
             self.logger.default("Loop running")
             NotificationCenter.default.post(name: .LoopRunning, object: self)
@@ -1295,7 +1309,7 @@ extension LoopDataManager {
             let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
             let maxBolus = settings.maximumBolus,
             let insulinModelSettings = insulinModelSettings,
-            let insulinType = delegate?.pumpInsulinType
+            let insulinType = pumpInsulinType
         else {
             throw LoopError.configurationError(.generalSettings)
         }
@@ -1431,7 +1445,7 @@ extension LoopDataManager {
             let basalRates = basalRateScheduleApplyingOverrideHistory,
             let maxBolus = settings.maximumBolus,
             let insulinModelSettings = insulinModelSettings,
-            let insulinType = delegate?.pumpInsulinType
+            let insulinType = pumpInsulinType
         else {
             throw LoopError.configurationError(.generalSettings)
         }
@@ -1917,9 +1931,6 @@ protocol LoopDataManagerDelegate: class {
 
     /// The pump manager status, if one exists.
     var pumpManagerStatus: PumpManagerStatus? { get }
-    
-    /// The insulin type the pump is currently delivering, if configured
-    var pumpInsulinType: InsulinType? { get }
     
     /// The pump manager status, if one exists.
     var automaticDosingEnabled: Bool { get }

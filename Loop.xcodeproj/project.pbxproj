@@ -477,6 +477,7 @@
 		C1742332259BEADC00399C9D /* LoggedDoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742331259BEADC00399C9D /* LoggedDoseView.swift */; };
 		C174233C259BEB0F00399C9D /* LoggedDoseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C174233B259BEB0F00399C9D /* LoggedDoseViewModel.swift */; };
 		C1750AEC255B013300B8011C /* Minizip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1750AEB255B013300B8011C /* Minizip.framework */; };
+		C1777A6625A125F100595963 /* LoggedDoseViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1777A6525A125F100595963 /* LoggedDoseViewModelTests.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
 		C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */; };
 		C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */; };
@@ -1376,6 +1377,7 @@
 		C1742331259BEADC00399C9D /* LoggedDoseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedDoseView.swift; sourceTree = "<group>"; };
 		C174233B259BEB0F00399C9D /* LoggedDoseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedDoseViewModel.swift; sourceTree = "<group>"; };
 		C1750AEB255B013300B8011C /* Minizip.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Minizip.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1777A6525A125F100595963 /* LoggedDoseViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedDoseViewModelTests.swift; sourceTree = "<group>"; };
 		C17824991E1999FA00D9D25C /* CaseCountable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaseCountable.swift; sourceTree = "<group>"; };
 		C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdTableViewController.swift; sourceTree = "<group>"; };
 		C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_very_low_end_high.json; sourceTree = "<group>"; };
@@ -2459,6 +2461,7 @@
 				1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */,
 				B4BC56372518DEA900373647 /* CGMStatusHUDViewModelTests.swift */,
 				C165756E2534C468004AE16E /* SimpleBolusViewModelTests.swift */,
+				C1777A6525A125F100595963 /* LoggedDoseViewModelTests.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -3752,6 +3755,7 @@
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
 				B44251B3252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
+				C1777A6625A125F100595963 /* LoggedDoseViewModelTests.swift in Sources */,
 				A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */,
 				A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */,
 				A963B27A252CEBAE0062AA12 /* SetBolusUserInfoTests.swift in Sources */,

@@ -41,7 +41,7 @@ protocol LoggedDoseViewModelDelegate: class {
     
     var pumpInsulinType: InsulinType? { get }
 
-    //var settings: LoopSettings { get }
+    var settings: LoopSettings { get }
 }
 
 final class LoggedDoseViewModel: ObservableObject {
@@ -89,7 +89,7 @@ final class LoggedDoseViewModel: ObservableObject {
     var insulinTypePickerOptions: [InsulinType]
     
     // MARK: - Seams
-    private weak var delegate: BolusEntryViewModelDelegate?
+    private weak var delegate: LoggedDoseViewModelDelegate?
     private let now: () -> Date
     private let screenWidth: CGFloat
     private let debounceIntervalMilliseconds: Int
@@ -98,7 +98,7 @@ final class LoggedDoseViewModel: ObservableObject {
     // MARK: - Initialization
 
     init(
-        delegate: BolusEntryViewModelDelegate,
+        delegate: LoggedDoseViewModelDelegate,
         now: @escaping () -> Date = { Date() },
         screenWidth: CGFloat = UIScreen.main.bounds.width,
         debounceIntervalMilliseconds: Int = 400,
@@ -210,22 +210,6 @@ final class LoggedDoseViewModel: ObservableObject {
         }
 
         delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinType: selectedInsulinType)
-        completion()
-    }
-
-    private func deliverBolus(onSuccess completion: @escaping () -> Void) {
-        let now = self.now()
-        let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
-
-        guard bolusVolume > 0 else {
-            completion()
-            return
-        }
-
-        isInitiatingSaveOrBolus = true
-        savedPreMealOverride = nil
-        // TODO: should we pass along completion or not???
-        delegate?.enactBolus(units: bolusVolume, at: now, completion: { _ in })
         completion()
     }
 

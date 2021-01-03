@@ -37,10 +37,8 @@ class MockDoseStore: DoseStoreProtocol {
     var basalProfile: BasalRateSchedule?
     
     // Default to the adult exponential insulin model
-    var pumpInsulinModelSetting: InsulinModelSettings? = InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)
-    
-    var rapidActingInsulinModelSetting: InsulinModelSettings = InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)!
-    
+    var insulinModelSettings: InsulinModelSettings? = InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)
+        
     var insulinSensitivitySchedule: InsulinSensitivitySchedule?
     
     var sampleType: HKSampleType?

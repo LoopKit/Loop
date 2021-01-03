@@ -252,6 +252,7 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
         "softwareVersion" : "Device Software Version",
         "udiDeviceIdentifier" : "Device UDI Device Identifier"
       },
+      "insulinType" : 0,
       "pumpBatteryChargeRemaining" : 3.5,
       "pumpLifecycleProgress" : {
         "percentComplete" : 0.5,
@@ -663,6 +664,7 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       "softwareVersion" : "Device Software Version",
       "udiDeviceIdentifier" : "Device UDI Device Identifier"
     },
+    "insulinType" : 0,
     "pumpBatteryChargeRemaining" : 3.5,
     "pumpLifecycleProgress" : {
       "percentComplete" : 0.5,
@@ -915,6 +917,7 @@ fileprivate extension StoredDosingDecision {
                                                   pumpBatteryChargeRemaining: 3.5,
                                                   basalDeliveryState: .initiatingTempBasal,
                                                   bolusState: .noBolus,
+                                                  insulinType: .novolog,
                                                   pumpStatusHighlight: PumpManagerStatus.PumpStatusHighlight(localizedMessage: "Test message",
                                                                                                              imageName: "test.image",
                                                                                                              state: .normalPump),
