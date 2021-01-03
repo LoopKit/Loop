@@ -12,7 +12,7 @@ import LoopKit
 
 class MockDoseStore: DoseStoreProtocol {
     
-    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.humalogNovologAdult.actionDuration
+    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.rapidActingAdult.actionDuration
     
     init(for test: DataManagerTestType = .flatAndStable) {
         self.testType = test // The store returns different effect values based on the test type
@@ -37,7 +37,7 @@ class MockDoseStore: DoseStoreProtocol {
     var basalProfile: BasalRateSchedule?
     
     // Default to the adult exponential insulin model
-    var insulinModelSettings: InsulinModelSettings? = InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)
+    var insulinModelSettings: InsulinModelSettings? = InsulinModelSettings(model: ExponentialInsulinModelPreset.rapidActingAdult)
         
     var insulinSensitivitySchedule: InsulinSensitivitySchedule?
     

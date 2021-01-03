@@ -75,7 +75,7 @@ extension DeviceDataManager: BolusEntryViewModelDelegate, LoggedDoseViewModelDel
         if let insulinModelSettings = doseStore.insulinModelSettings {
             return insulinModelSettings.model(for: type).effectDuration
         } else {
-            return ExponentialInsulinModelPreset.humalogNovologAdult.effectDuration
+            return ExponentialInsulinModelPreset.rapidActingAdult.effectDuration
         }
     }
 
