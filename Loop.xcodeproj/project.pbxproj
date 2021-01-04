@@ -785,6 +785,7 @@
 		43FCEEB8221BCF790013DD30 /* GlucoseChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseChart.swift; sourceTree = "<group>"; };
 		43FCEEBA22211C860013DD30 /* CarbEffectChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEffectChart.swift; sourceTree = "<group>"; };
 		43FCEEBC22212DD50013DD30 /* PredictedGlucoseChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictedGlucoseChart.swift; sourceTree = "<group>"; };
+		4B01334C25A3768D00D960CA /* remove-sim-archs.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "remove-sim-archs.sh"; sourceTree = "<group>"; };
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = G4ShareSpy.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
 		4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleUnit.swift; sourceTree = "<group>"; };
@@ -1888,6 +1889,7 @@
 		C18A491122FCC20B00FDA733 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
+				4B01334C25A3768D00D960CA /* remove-sim-archs.sh */,
 				C1D197FE232CF92D0096D646 /* capture-build-details.sh */,
 				C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */,
 				C18A491222FCC22800FDA733 /* build-derived-assets.sh */,
