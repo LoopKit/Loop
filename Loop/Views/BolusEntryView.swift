@@ -76,9 +76,6 @@ struct BolusEntryView: View {
     }
     
     private var title: Text {
-        if viewModel.isLoggingDose {
-            return Text("Log Dose", comment: "Title for dose logging screen")
-        }
         if viewModel.potentialCarbEntry == nil {
             return Text("Bolus", comment: "Title for bolus entry screen")
         }
@@ -161,10 +158,7 @@ struct BolusEntryView: View {
                     .bold()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                // A manual BG shouldn't be required to log a dose
-                if viewModel.isLoggingDose {
-                    datePicker
-                } else if viewModel.isManualGlucoseEntryEnabled {
+                if viewModel.isManualGlucoseEntryEnabled {
                     manualGlucoseEntryRow
                 } else if viewModel.potentialCarbEntry != nil {
                     potentialCarbEntryRow
@@ -174,15 +168,11 @@ struct BolusEntryView: View {
             }
             .padding(.top, 8)
             
-            if viewModel.isLoggingDose {
-                insulinModelPicker
-            }
-
             if viewModel.isManualGlucoseEntryEnabled && viewModel.potentialCarbEntry != nil {
                 potentialCarbEntryRow
             }
 
-            if (viewModel.isManualGlucoseEntryEnabled && !viewModel.isLoggingDose) || viewModel.potentialCarbEntry != nil {
+            if viewModel.isManualGlucoseEntryEnabled || viewModel.potentialCarbEntry != nil {
                 recommendedBolusRow
             }
 
@@ -191,9 +181,6 @@ struct BolusEntryView: View {
     }
     
     private var titleText: Text {
-        if viewModel.isLoggingDose {
-            return Text("Dose Summary", comment: "Title for card to log dose")
-        }
         return Text("Bolus Summary", comment: "Title for card displaying carb entry and bolus recommendation")
     }
 
@@ -293,29 +280,6 @@ struct BolusEntryView: View {
         }
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }
-    
-    private var insulinModelPicker: some View {
-        ExpandablePicker(
-            with: viewModel.insulinModelStringPickerOptions,
-            pickerIndex: $viewModel.selectedInsulinModelIndex,
-            label: NSLocalizedString("Insulin Model", comment: "Insulin model title")
-        )
-    }
-    private var datePicker: some View {
-        // Allow 6 hours before & after due to longest DIA
-        ZStack(alignment: .topLeading) {
-            DatePicker(
-                "",
-                selection: $viewModel.selectedDoseDate,
-                in: Date().addingTimeInterval(-.hours(6))...Date().addingTimeInterval(.hours(6)),
-                displayedComponents: [.date, .hourAndMinute]
-            )
-            .pickerStyle(WheelPickerStyle())
-            
-            Text(NSLocalizedString("Date", comment: "Date picker label"))
-        }
-    }
-    
 
     private var bolusEntryRow: some View {
         HStack {
@@ -355,13 +319,13 @@ struct BolusEntryView: View {
 
     private var actionArea: some View {
         VStack(spacing: 0) {
-            if viewModel.isNoticeVisible && !viewModel.isLoggingDose {
+            if viewModel.isNoticeVisible {
                 warning(for: viewModel.activeNotice!)
                     .padding([.top, .horizontal])
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
 
-            if viewModel.isManualGlucosePromptVisible && !viewModel.isLoggingDose {
+            if viewModel.isManualGlucosePromptVisible {
                 enterManualGlucoseButton
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
@@ -426,8 +390,6 @@ struct BolusEntryView: View {
                     return Text("Enter Bolus", comment: "Button text to begin entering a bolus")
                 case .deliver:
                     return Text("Deliver", comment: "Button text to deliver a bolus")
-                case .logging:
-                    return Text("Log Dose", comment: "Button text to log a dose")
                 }
             }
         )

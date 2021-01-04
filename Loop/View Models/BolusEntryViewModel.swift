@@ -40,6 +40,8 @@ protocol BolusEntryViewModelDelegate: class {
     
     func ensureCurrentPumpData(completion: @escaping () -> Void)
     
+    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
+
     var mostRecentGlucoseDataDate: Date? { get }
     
     var mostRecentPumpDataDate: Date? { get }
@@ -48,8 +50,9 @@ protocol BolusEntryViewModelDelegate: class {
     
     var preferredGlucoseUnit: HKUnit { get }
     
-    var insulinModel: InsulinModel? { get }
-    
+    var pumpInsulinType: InsulinType? { get }
+
+
     var settings: LoopSettings { get }
 }
 
@@ -119,19 +122,6 @@ final class BolusEntryViewModel: ObservableObject {
         return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
     
-    // MARK: - External Insulin
-    @Published var selectedInsulinModelIndex: Int = 0
-    
-    // Return nil if we aren't logging a dose so the bolus is annotated with the correct insulin model
-    var selectedInsulinType: InsulinType? {
-        return isLoggingDose ? typeFor(title: insulinModelStringPickerOptions[selectedInsulinModelIndex]) : nil
-    }
-    @Published var selectedDoseDate: Date = Date()
-    
-    var insulinModelStringPickerOptions: [String]
-    
-    let isLoggingDose: Bool
-
     // MARK: - Seams
     private weak var delegate: BolusEntryViewModelDelegate?
     private let now: () -> Date
@@ -152,8 +142,7 @@ final class BolusEntryViewModel: ObservableObject {
         originalCarbEntry: StoredCarbEntry? = nil,
         potentialCarbEntry: NewCarbEntry? = nil,
         selectedCarbAbsorptionTimeEmoji: String? = nil,
-        isManualGlucoseEntryEnabled: Bool = false,
-        supportedInsulinModels: SupportedInsulinModelSettings? = nil
+        isManualGlucoseEntryEnabled: Bool = false
     ) {
         self.delegate = delegate
         self.now = now
@@ -170,47 +159,22 @@ final class BolusEntryViewModel: ObservableObject {
         self.originalCarbEntry = originalCarbEntry
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
-        self.insulinModelStringPickerOptions = []
-        self.isLoggingDose = supportedInsulinModels != nil
-
+        
         self.isManualGlucoseEntryEnabled = isManualGlucoseEntryEnabled
         
         self.chartDateInterval = DateInterval(start: Date(timeInterval: .hours(-1), since: now()), duration: .hours(7))
         
         self.dosingDecision.originalCarbEntry = originalCarbEntry
 
-        findInsulinModelPickerOptions(supportedInsulinModels)
         observeLoopUpdates()
         observeEnteredBolusChanges()
         observeEnteredManualGlucoseChanges()
         observeElapsedTime()
         observeRecommendedBolusChanges()
-        observeInsulinModelChanges()
-        observeDoseDateChanges()
 
         update()
     }
-    
-    private func findInsulinModelPickerOptions(_ allowedModels: SupportedInsulinModelSettings?) {
-        insulinModelStringPickerOptions.append(InsulinType.rapidActing.title)
-
-        if let allowedModels = allowedModels, allowedModels.fiaspModelEnabled {
-            insulinModelStringPickerOptions.append(InsulinType.fiasp.title)
-        }
         
-        selectedInsulinModelIndex = startingPickerIndex
-    }
-    
-    var startingPickerIndex: Int {
-        if let pumpInsulinType = typeFor(insulinModel: delegate?.insulinModel), case .fiasp = pumpInsulinType {
-            if let indexToStartOn = insulinModelStringPickerOptions.firstIndex(of: pumpInsulinType.title) {
-                return indexToStartOn
-            }
-        }
-        
-        return 0
-    }
-
     private func observeLoopUpdates() {
         NotificationCenter.default
             .publisher(for: .LoopDataUpdated)
@@ -266,30 +230,6 @@ final class BolusEntryViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func observeInsulinModelChanges() {
-        $selectedInsulinModelIndex
-            .removeDuplicates()
-            .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updatePredictedGlucoseValues(from: state)
-                }
-            }
-            .store(in: &cancellables)
-    }
-    
-    private func observeDoseDateChanges() {
-        $selectedDoseDate
-            .removeDuplicates()
-            .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updatePredictedGlucoseValues(from: state)
-                }
-            }
-            .store(in: &cancellables)
-    }
-
     private func observeElapsedTime() {
         // If glucose data is stale, loop status updates cannot be expected to keep presented data fresh.
         // Periodically update the UI to ensure recommendations do not go stale.
@@ -319,7 +259,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     func setRecommendedBolus() {
-        guard isBolusRecommended, !isLoggingDose else { return }
+        guard isBolusRecommended else { return }
         enteredBolus = recommendedBolus!
         isRefreshingPump = false
         delegate?.withLoopState { [weak self] state in
@@ -351,17 +291,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         // Authenticate the bolus before saving anything
-        if isLoggingDose && enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
-            let message = String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt to log an insulin dose"), enteredBolusAmountString)
-            authenticate(message) {
-                switch $0 {
-                case .success:
-                    self.continueSaving(onSuccess: completion)
-                case .failure:
-                    break
-                }
-            }
-        } else if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
+        if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
             let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString)
             authenticate(message) { [weak self] in
                 switch $0 {
@@ -381,18 +311,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
     
     private func continueSaving(onSuccess completion: @escaping () -> Void) {
-        if isLoggingDose {
-            let doseVolume = enteredBolus.doubleValue(for: .internationalUnit())
-            guard doseVolume > 0 else {
-                completion()
-                return
-            }
-
-            let insulinType = selectedInsulinType
-
-            delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinType: insulinType)
-            completion()
-        } else if let manualGlucoseSample = manualGlucoseSample {
+        if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
             delegate?.addGlucoseSamples([manualGlucoseSample]) { result in
                 DispatchQueue.main.async {
@@ -598,9 +517,9 @@ final class BolusEntryViewModel: ObservableObject {
     private func updatePredictedGlucoseValues(from state: LoopState, completion: @escaping () -> Void = {}) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let (manualGlucoseSample, enteredBolus, doseDate, insulinType) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, self.selectedDoseDate, self.selectedInsulinType) }
+        let (manualGlucoseSample, enteredBolus, insulinType) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, delegate?.pumpInsulinType) }
         
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: insulinType)
+        let enteredBolusDose = DoseEntry(type: .bolus, startDate: Date(), value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: insulinType)
 
         let predictedGlucoseValues: [PredictedGlucoseValue]
         do {
@@ -821,7 +740,7 @@ final class BolusEntryViewModel: ObservableObject {
         let availableWidth = screenWidth - chartManager.fixedHorizontalMargin - 2 * viewMarginInset
 
         let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
-        let futureHours = ceil((delegate?.insulinModel?.effectDuration ?? .hours(4)).hours)
+        let futureHours = ceil((delegate?.insulinActivityDuration(for: delegate?.pumpInsulinType) ?? .hours(4)).hours)
         let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeInterval: -TimeInterval(hours: historyHours), since: now())
@@ -887,44 +806,14 @@ extension BolusEntryViewModel {
         case saveAndDeliver
         case enterBolus
         case deliver
-        case logging
     }
     
     var actionButtonAction: ActionButtonAction {
-        if isLoggingDose {
-            return .logging
-        }
-        
         switch (hasDataToSave, hasBolusEntryReadyToDeliver) {
         case (true, true): return .saveAndDeliver
         case (true, false): return .saveWithoutBolusing
         case (false, true): return .deliver
         case (false, false): return .enterBolus
         }
-    }
-
-    func typeFor(insulinModel: InsulinModel?) -> InsulinType? {
-        guard let insulinModel = insulinModel else {
-            return nil
-        }
-        
-        if let exponential = insulinModel as? ExponentialInsulinModelPreset, case .fiasp = exponential {
-            return .fiasp
-        }
-        
-        return .rapidActing
-    }
-    
-    func typeFor(title: String) -> InsulinType? {
-        if title == "No Associated Model" {
-            return InsulinType.none
-        }
-        if title == "Rapid Acting" {
-            return .rapidActing
-        }
-        if title == "Fiasp" {
-            return .fiasp
-        }
-        return nil
     }
 }

@@ -87,7 +87,7 @@ extension DeviceDataManager {
         {
             return action
         } else if let pumpManager = pumpManager {
-            return .presentViewController(pumpManager.settingsViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default))
+            return .presentViewController(pumpManager.settingsViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default, allowedInsulinTypes: allowedInsulinTypes))
         } else {
             return .setupNewPump
         }

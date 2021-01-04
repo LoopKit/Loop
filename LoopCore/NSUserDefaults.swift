@@ -81,7 +81,7 @@ extension UserDefaults {
                 }
                
             }
-            return InsulinModelSettings(model: ExponentialInsulinModelPreset.humalogNovologAdult)!
+            return InsulinModelSettings(model: ExponentialInsulinModelPreset.rapidActingAdult)!
         }
         set {
             set(newValue.rawValue, forKey: Key.rapidActingInsulinModelSetting.rawValue)
