@@ -10,8 +10,12 @@ import HealthKit
 import LoopCore
 import LoopKit
 
-extension DeviceDataManager: BolusEntryViewModelDelegate {
-
+extension DeviceDataManager: BolusEntryViewModelDelegate, LoggedDoseViewModelDelegate {
+    
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?) {
+        loopManager.logOutsideInsulinDose(startDate: startDate, units: units, insulinType: insulinType)
+    }
+    
     func withLoopState(do block: @escaping (LoopState) -> Void) {
         loopManager.getLoopState { block($1) }
     }
@@ -63,10 +67,18 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
         return glucoseStore.preferredUnit ?? .milligramsPerDeciliter
     }
     
-    var insulinModel: InsulinModel? {
-        return loopManager.insulinModelSettings?.model
+    var pumpInsulinType: InsulinType? {
+        return pumpManager?.status.insulinType
     }
-    
+        
+    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
+        if let insulinModelSettings = doseStore.insulinModelSettings {
+            return insulinModelSettings.model(for: type).effectDuration
+        } else {
+            return ExponentialInsulinModelPreset.rapidActingAdult.effectDuration
+        }
+    }
+
     var settings: LoopSettings {
         return loopManager.settings
     }

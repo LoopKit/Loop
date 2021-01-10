@@ -11,6 +11,9 @@ import LoopKit
 @testable import Loop
 
 class MockDoseStore: DoseStoreProtocol {
+    
+    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.rapidActingAdult.actionDuration
+    
     init(for test: DataManagerTestType = .flatAndStable) {
         self.testType = test // The store returns different effect values based on the test type
         self.pumpEventQueryAfterDate = MockDoseStore.currentDate(for: test)
@@ -34,8 +37,8 @@ class MockDoseStore: DoseStoreProtocol {
     var basalProfile: BasalRateSchedule?
     
     // Default to the adult exponential insulin model
-    var insulinModel: InsulinModel? = ExponentialInsulinModelPreset.humalogNovologAdult
-    
+    var insulinModelSettings: InsulinModelSettings? = InsulinModelSettings(model: ExponentialInsulinModelPreset.rapidActingAdult)
+        
     var insulinSensitivitySchedule: InsulinSensitivitySchedule?
     
     var sampleType: HKSampleType?
@@ -62,6 +65,10 @@ class MockDoseStore: DoseStoreProtocol {
     
     func generateDiagnosticReport(_ completion: @escaping (String) -> Void) {
         completion("")
+    }
+    
+    func logOutsideDose(_ doses: [DoseEntry], completion: @escaping (Error?) -> Void) {
+        completion(nil)
     }
     
     func resetPumpData(completion: ((DoseStore.DoseStoreError?) -> Void)?) {

@@ -293,7 +293,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let availableWidth = (refreshContext.newSize ?? self.tableView.bounds.size).width - self.charts.fixedHorizontalMargin
 
         let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
-        let futureHours = ceil((deviceManager.loopManager.insulinModelSettings?.model.effectDuration ?? .hours(4)).hours)
+        let futureHours = ceil((deviceManager.loopManager.insulinModelSettings?.longestEffectDuration ?? .hours(4)).hours)
         let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeIntervalSinceNow: -TimeInterval(hours: historyHours))
@@ -1180,7 +1180,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             vc.hidesBottomBarWhenPushed = true
             vc.preferredGlucoseUnit = statusCharts.glucose.glucoseUnit
         case let vc as InsulinDeliveryTableViewController:
-            vc.doseStore = deviceManager.doseStore
+            vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
             vc.enableEntryDeletion = FeatureFlags.entryDeletionEnabled
             vc.headerValueLabelColor = .insulinTintColor
@@ -1416,7 +1416,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func onPumpTapped() {
-        guard var settings = deviceManager.pumpManager?.settingsViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default) else {
+        guard var settings = deviceManager.pumpManager?.settingsViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default, allowedInsulinTypes: deviceManager.allowedInsulinTypes) else {
             // assert?
             return
         }
@@ -1921,7 +1921,7 @@ extension StatusTableViewController: CGMManagerSetupViewControllerDelegate {
 
 extension StatusTableViewController: PumpManagerSetupViewControllerDelegate {
     fileprivate func setupPumpManager(for pumpManagerType: PumpManagerUI.Type) {
-        var setupViewController = pumpManagerType.setupViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default)
+        var setupViewController = pumpManagerType.setupViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default, allowedInsulinTypes: deviceManager.allowedInsulinTypes)
         setupViewController.setupDelegate = self
         setupViewController.completionDelegate = self
         setupViewController.basalSchedule = deviceManager.loopManager.basalRateSchedule

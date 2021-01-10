@@ -17,6 +17,7 @@ extension UserDefaults {
         case basalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
         case carbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case insulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
+        case rapidActingInsulinModelSetting = "com.loopkit.Loop.rapidActingInsulinModelSetting"
         case loopSettings = "com.loopkit.Loop.loopSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case overrideHistory = "com.loopkit.overrideHistory"
@@ -69,6 +70,21 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.insulinModelSettings.rawValue)
+        }
+    }
+    
+    public var rapidActingInsulinModelSetting: InsulinModelSettings {
+        get {
+            if let rawValue = dictionary(forKey: Key.rapidActingInsulinModelSetting.rawValue) {
+                if let setting = InsulinModelSettings(rawValue: rawValue) {
+                    return setting
+                }
+               
+            }
+            return InsulinModelSettings(model: ExponentialInsulinModelPreset.rapidActingAdult)!
+        }
+        set {
+            set(newValue.rawValue, forKey: Key.rapidActingInsulinModelSetting.rawValue)
         }
     }
 

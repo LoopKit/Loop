@@ -1094,4 +1094,35 @@ class RecommendBolusTests: XCTestCase {
         XCTAssertEqual(0, dose.amount)
     }
 
+    func testDoseWithFiaspCurve() {
+        let glucose = loadGlucoseValueFixture("recommended_temp_start_low_end_just_above_range")
+
+        let dose = glucose.recommendedBolus(
+            to: glucoseTargetRange,
+            at: glucose.first!.startDate,
+            suspendThreshold: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0),
+            sensitivity: insulinSensitivitySchedule,
+            model: ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 3300.0),
+            pendingInsulin: 0,
+            maxBolus: maxBolus,
+            volumeRounder: fortyIncrementsPerUnitRounder
+        )
+        XCTAssertEqual(0.375, dose.amount)
+    }
+
+    func testDoseWithChildCurve() {
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
+
+        let dose = glucose.recommendedBolus(
+            to: glucoseTargetRange,
+            at: glucose.first!.startDate,
+            suspendThreshold: suspendThreshold.quantity,
+            sensitivity: self.insulinSensitivitySchedule,
+            model: ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 3900.0),
+            pendingInsulin: 0,
+            maxBolus: maxBolus
+        )
+
+        XCTAssertEqual(1.96, dose.amount, accuracy: 1.0 / 40.0)
+    }
 }

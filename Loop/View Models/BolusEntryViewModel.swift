@@ -29,6 +29,8 @@ protocol BolusEntryViewModelDelegate: class {
     func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
     func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
+    
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?)
 
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -38,6 +40,8 @@ protocol BolusEntryViewModelDelegate: class {
     
     func ensureCurrentPumpData(completion: @escaping () -> Void)
     
+    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
+
     var mostRecentGlucoseDataDate: Date? { get }
     
     var mostRecentPumpDataDate: Date? { get }
@@ -46,8 +50,9 @@ protocol BolusEntryViewModelDelegate: class {
     
     var preferredGlucoseUnit: HKUnit { get }
     
-    var insulinModel: InsulinModel? { get }
-    
+    var pumpInsulinType: InsulinType? { get }
+
+
     var settings: LoopSettings { get }
 }
 
@@ -116,7 +121,7 @@ final class BolusEntryViewModel: ObservableObject {
         predictedGlucoseChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayRangeWide
         return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
-
+    
     // MARK: - Seams
     private weak var delegate: BolusEntryViewModelDelegate?
     private let now: () -> Date
@@ -154,7 +159,7 @@ final class BolusEntryViewModel: ObservableObject {
         self.originalCarbEntry = originalCarbEntry
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
-
+        
         self.isManualGlucoseEntryEnabled = isManualGlucoseEntryEnabled
         
         self.chartDateInterval = DateInterval(start: Date(timeInterval: .hours(-1), since: now()), duration: .hours(7))
@@ -169,7 +174,7 @@ final class BolusEntryViewModel: ObservableObject {
 
         update()
     }
-    
+        
     private func observeLoopUpdates() {
         NotificationCenter.default
             .publisher(for: .LoopDataUpdated)
@@ -224,7 +229,7 @@ final class BolusEntryViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
-
+    
     private func observeElapsedTime() {
         // If glucose data is stale, loop status updates cannot be expected to keep presented data fresh.
         // Periodically update the UI to ensure recommendations do not go stale.
@@ -512,8 +517,9 @@ final class BolusEntryViewModel: ObservableObject {
     private func updatePredictedGlucoseValues(from state: LoopState, completion: @escaping () -> Void = {}) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let (manualGlucoseSample, enteredBolus) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus) }
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: Date(), value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units)
+        let (manualGlucoseSample, enteredBolus, insulinType) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, delegate?.pumpInsulinType) }
+        
+        let enteredBolusDose = DoseEntry(type: .bolus, startDate: Date(), value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: insulinType)
 
         let predictedGlucoseValues: [PredictedGlucoseValue]
         do {
@@ -734,7 +740,7 @@ final class BolusEntryViewModel: ObservableObject {
         let availableWidth = screenWidth - chartManager.fixedHorizontalMargin - 2 * viewMarginInset
 
         let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
-        let futureHours = ceil((delegate?.insulinModel?.effectDuration ?? .hours(4)).hours)
+        let futureHours = ceil((delegate?.insulinActivityDuration(for: delegate?.pumpInsulinType) ?? .hours(4)).hours)
         let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeInterval: -TimeInterval(hours: historyHours), since: now())

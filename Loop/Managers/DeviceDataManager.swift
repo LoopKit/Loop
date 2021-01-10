@@ -53,6 +53,14 @@ final class DeviceDataManager {
     @Published public var isClosedLoop: Bool
     
     lazy private var cancellables = Set<AnyCancellable>()
+    
+    lazy var allowedInsulinTypes: [InsulinType] = {
+        var allowed = InsulinType.allCases
+        if !FeatureFlags.fiaspInsulinModelEnabled {
+            allowed.remove(.fiasp)
+        }
+        return allowed
+    }()
 
     private var cgmStalenessMonitor: CGMStalenessMonitor
 
@@ -218,7 +226,7 @@ final class DeviceDataManager {
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModel: UserDefaults.appGroup?.insulinModelSettings?.model,
+            insulinModelSettings: UserDefaults.appGroup?.insulinModelSettings,
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
@@ -273,7 +281,8 @@ final class DeviceDataManager {
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
             settingsStore: settingsStore,
-            alertPresenter: alertManager
+            alertPresenter: alertManager,
+            pumpInsulinType: pumpManager?.status.insulinType
         )
         cacheStore.delegate = loopManager
         
@@ -544,7 +553,7 @@ private extension DeviceDataManager {
         pumpManager?.delegateQueue = queue
 
         doseStore.device = pumpManager?.status.device
-        pumpManagerHUDProvider = pumpManager?.hudProvider(insulinTintColor: .insulinTintColor, guidanceColors: .default)
+        pumpManagerHUDProvider = pumpManager?.hudProvider(insulinTintColor: .insulinTintColor, guidanceColors: .default, allowedInsulinTypes: allowedInsulinTypes)
 
         // Proliferate PumpModel preferences to DoseStore
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
@@ -863,6 +872,10 @@ extension DeviceDataManager: PumpManagerDelegate {
         // Update the pump-schedule based settings
         loopManager.setScheduleTimeZone(status.timeZone)
         
+        if status.insulinType != oldStatus.insulinType {
+            loopManager.pumpInsulinType = status.insulinType
+        }
+        
         if status.deliveryIsUncertain != oldStatus.deliveryIsUncertain {
             DispatchQueue.main.async {
                 if status.deliveryIsUncertain {
@@ -1050,10 +1063,7 @@ extension DeviceDataManager {
     }
 
     func deleteTestingCGMData(completion: ((Error?) -> Void)? = nil) {
-        guard FeatureFlags.scenariosEnabled else {
-            fatalError("\(#function) should be invoked only when scenarios are enabled")
-        }
-
+        
         guard let testingCGMManager = cgmManager as? TestingCGMManager else {
             assertionFailure("\(#function) should be invoked only when a testing CGM manager is in use")
             return
