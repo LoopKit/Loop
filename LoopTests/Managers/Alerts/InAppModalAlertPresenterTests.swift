@@ -66,6 +66,10 @@ class InAppModalAlertPresenterTests: XCTestCase {
         func play(url: URL) {
             urlPlayed = url
         }
+        var stopAllCalled = false
+        func stopAll() {
+            stopAllCalled = true
+        }
     }
     
     static let managerIdentifier = "managerIdentifier"
