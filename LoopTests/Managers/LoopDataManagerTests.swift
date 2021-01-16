@@ -207,7 +207,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         let updateGroup = DispatchGroup()
         updateGroup.enter()
         var predictedGlucose: [PredictedGlucoseValue]?
-        var recommendedBolus: BolusRecommendation?
+        var recommendedBolus: ManualBolusRecommendation?
         self.loopDataManager.getLoopState { _, state in
             predictedGlucose = state.predictedGlucose
             recommendedBolus = state.recommendedBolus?.recommendation

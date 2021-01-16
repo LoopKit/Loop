@@ -625,7 +625,7 @@ final class BolusEntryViewModel: ObservableObject {
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        var recommendation: BolusRecommendation?
+        var recommendation: ManualBolusRecommendation?
         let recommendedBolus: HKQuantity?
         let notice: Notice?
         do {
@@ -679,7 +679,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func computeBolusRecommendation(from state: LoopState) throws -> BolusRecommendation? {
+    private func computeBolusRecommendation(from state: LoopState) throws -> ManualBolusRecommendation? {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
         let manualGlucoseSample = DispatchQueue.main.sync { self.manualGlucoseSample }

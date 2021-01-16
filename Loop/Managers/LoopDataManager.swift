@@ -248,8 +248,8 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
     fileprivate var predictedGlucose: [PredictedGlucoseValue]? {
         didSet {
-            recommendedTempBasal = nil
-            recommendedBolus = nil
+            recommendedAutomaticDose = nil
+            recommendedManualBolus = nil
             predictedGlucoseIncludingPendingInsulin = nil
         }
     }
@@ -258,9 +258,9 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
     private var recentCarbEntries: [StoredCarbEntry]?
 
-    fileprivate var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
+    fileprivate var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)?
 
-    fileprivate var recommendedBolus: (recommendation: BolusRecommendation, date: Date)?
+    fileprivate var recommendedManualBolus: (recommendation: ManualBolusRecommendation, date: Date)?
 
     fileprivate var carbsOnBoard: CarbValue?
 
@@ -568,8 +568,8 @@ extension LoopDataManager {
         self.dataAccessQueue.async {
             self.logger.debug("bolusConfirmed")
             self.lastRequestedBolus = nil
-            self.recommendedBolus = nil
-            self.recommendedTempBasal = nil
+            self.recommendedManualBolus = nil
+            self.recommendedAutomaticDose = nil
             self.insulinEffect = nil
             self.notify(forChange: .bolus)
 
@@ -623,8 +623,8 @@ extension LoopDataManager {
 
         logOutsideInsulinDose(dose: dose) { (error) in
             if error == nil {
-                self.recommendedBolus = nil
-                self.recommendedTempBasal = nil
+                self.recommendedManualBolus = nil
+                self.recommendedAutomaticDose = nil
                 self.insulinEffect = nil
                 self.notify(forChange: .bolus)
             }
@@ -704,7 +704,7 @@ extension LoopDataManager {
                                                                   predictedGlucose: state.predictedGlucose,
                                                                   predictedGlucoseIncludingPendingInsulin: state.predictedGlucoseIncludingPendingInsulin,
                                                                   lastReservoirValue: StoredDosingDecision.LastReservoirValue(self.doseStore.lastReservoirValue),
-                                                                  recommendedTempBasal: StoredDosingDecision.TempBasalRecommendationWithDate(state.recommendedTempBasal),
+                                                                  automaticDoseRecommendation: StoredDosingDecision.AutomaticDoseRecommendationWithDate(state.recommendedAutomaticDose),
                                                                   recommendedBolus: StoredDosingDecision.BolusRecommendationWithDate(state.recommendedBolus),
                                                                   pumpManagerStatus: self.delegate?.pumpManagerStatus,
                                                                   notificationSettings: NotificationSettings(notificationSettings),
@@ -760,9 +760,9 @@ extension LoopDataManager {
 
     // Actions
 
-    func enactRecommendedTempBasal(_ completion: @escaping (_ error: Error?) -> Void) {
+    func enactRecommendedDose(_ completion: @escaping (_ error: Error?) -> Void) {
         dataAccessQueue.async {
-            self.setRecommendedTempBasal(completion)
+            self.enactDose(completion)
         }
     }
 
@@ -783,7 +783,7 @@ extension LoopDataManager {
                 try self.update()
 
                 if self.delegate?.automaticDosingEnabled == true {
-                    self.setRecommendedTempBasal { (error) -> Void in
+                    self.enactDose { (error) -> Void in
                         if let error = error {
                             self.loopDidError(date: self.now(), error: error, duration: -startDate.timeIntervalSince(self.now()))
                         } else {
@@ -1235,7 +1235,7 @@ extension LoopDataManager {
         )
     }
 
-    fileprivate func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
+    fileprivate func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
         guard lastRequestedBolus == nil else {
             // Don't recommend changes if a bolus was just requested.
             // Sending additional pump commands is not going to be
@@ -1250,7 +1250,7 @@ extension LoopDataManager {
     }
 
     /// - Throws: LoopError.missingDataError
-    fileprivate func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
+    fileprivate func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
         guard lastRequestedBolus == nil else {
             // Don't recommend changes if a bolus was just requested.
             // Sending additional pump commands is not going to be
@@ -1270,7 +1270,7 @@ extension LoopDataManager {
     ///     - LoopError.pumpDataTooOld
     ///     - LoopError.configurationError
     fileprivate func recommendBolusValidatingDataRecency<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
-                                                                               consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> BolusRecommendation? {
+                                                                               consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> ManualBolusRecommendation? {
         guard let glucose = glucoseStore.latestGlucose else {
             throw LoopError.missingDataError(.glucose)
         }
@@ -1303,7 +1303,7 @@ extension LoopDataManager {
     
     /// - Throws: LoopError.configurationError
     private func recommendBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
-                                                      consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> BolusRecommendation? {
+                                                      consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> ManualBolusRecommendation? {
         guard
             let glucoseTargetRange = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil),
             let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
@@ -1470,26 +1470,51 @@ extension LoopDataManager {
         } else {
             lastTempBasal = nil
         }
+        
+        let dosingRecommendation: AutomaticDoseRecommendation?
 
-        let tempBasal = predictedGlucose.recommendedTempBasal(
-            to: glucoseTargetRange,
-            at: predictedGlucose[0].startDate,
-            suspendThreshold: settings.suspendThreshold?.quantity,
-            sensitivity: insulinSensitivity,
-            model: insulinModelSettings.model(for: insulinType),
-            basalRates: basalRates,
-            maxBasalRate: maxBasal,
-            lastTempBasal: lastTempBasal,
-            rateRounder: rateRounder,
-            isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
-        )
+        switch settings.dosingStrategy {
+        case .automaticBolus:
+            let volumeRounder = { (_ units: Double) in
+                return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
+            }
 
-        if let temp = tempBasal {
+            dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
+                to: glucoseTargetRange,
+                at: predictedGlucose[0].startDate,
+                suspendThreshold: settings.suspendThreshold?.quantity,
+                sensitivity: insulinSensitivity,
+                model: insulinModelSettings.model(for: insulinType),
+                basalRates: basalRates,
+                maxAutomaticBolus: maxBolus * LoopConstants.bolusPartialApplicationFactor,
+                partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor,
+                lastTempBasal: lastTempBasal,
+                volumeRounder: volumeRounder,
+                rateRounder: rateRounder,
+                isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
+            )
+        case .tempBasalOnly:
+            let temp = predictedGlucose.recommendedTempBasal(
+                to: glucoseTargetRange,
+                at: predictedGlucose[0].startDate,
+                suspendThreshold: settings.suspendThreshold?.quantity,
+                sensitivity: insulinSensitivity,
+                model: insulinModelSettings.model(for: insulinType),
+                basalRates: basalRates,
+                maxBasalRate: maxBasal,
+                lastTempBasal: lastTempBasal,
+                rateRounder: rateRounder,
+                isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
+            )
+            dosingRecommendation = AutomaticDoseRecommendation(basalAdjustment: temp, bolusUnits: 0)
+        }
+
+        if let dosingRecommendation = dosingRecommendation {
             self.logger.default("Current basal state: %{public}@", String(describing: basalDeliveryState))
-            self.logger.default("Recommending temp basal: %{public}@ at %{public}@", String(describing: temp), String(describing: startDate))
-            recommendedTempBasal = (recommendation: temp, date: startDate)
+            self.logger.default("Recommending dose: %{public}@ at %{public}@", String(describing: dosingRecommendation), String(describing: startDate))
+            recommendedAutomaticDose = (recommendation: dosingRecommendation, date: startDate)
         } else {
-            recommendedTempBasal = nil
+            recommendedAutomaticDose = nil
         }
 
         let volumeRounder = { (_ units: Double) in
@@ -1508,33 +1533,32 @@ extension LoopDataManager {
             maxBolus: maxBolus,
             volumeRounder: volumeRounder
         )
-        recommendedBolus = (recommendation: recommendation, date: startDate)
-        self.logger.debug("Recommending bolus: %{public}@", String(describing: recommendedBolus))
+        recommendedManualBolus = (recommendation: recommendation, date: startDate)
+        self.logger.debug("Recommending bolus: %{public}@", String(describing: recommendedManualBolus))
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
-    private func setRecommendedTempBasal(_ completion: @escaping (_ error: Error?) -> Void) {
+    private func enactDose(_ completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-        guard let recommendedTempBasal = self.recommendedTempBasal else {
+        guard let recommendedDose = self.recommendedAutomaticDose else {
             completion(nil)
             return
         }
 
-        guard abs(recommendedTempBasal.date.timeIntervalSince(now())) < TimeInterval(minutes: 5) else {
-            completion(LoopError.recommendationExpired(date: recommendedTempBasal.date))
+        guard abs(recommendedDose.date.timeIntervalSince(now())) < TimeInterval(minutes: 5) else {
+            completion(LoopError.recommendationExpired(date: recommendedDose.date))
+            return
+        }
+        
+        if case .suspended = basalDeliveryState {
+            completion(LoopError.pumpSuspended)
             return
         }
 
-        delegate?.loopDataManager(self, didRecommendBasalChange: recommendedTempBasal) { (result) in
+        delegate?.loopDataManager(self, didRecommend: recommendedDose) { (error) in
             self.dataAccessQueue.async {
-                switch result {
-                case .success:
-                    self.recommendedTempBasal = nil
-                    completion(nil)
-                case .failure(let error):
-                    completion(error)
-                }
+                completion(error)
             }
         }
     }
@@ -1558,9 +1582,9 @@ protocol LoopState {
     var predictedGlucoseIncludingPendingInsulin: [PredictedGlucoseValue]? { get }
 
     /// The recommended temp basal based on predicted glucose
-    var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? { get }
+    var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)? { get }
 
-    var recommendedBolus: (recommendation: BolusRecommendation, date: Date)? { get }
+    var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)? { get }
 
     /// The difference in predicted vs actual glucose over a recent period
     var retrospectiveGlucoseDiscrepancies: [GlucoseChange]? { get }
@@ -1602,7 +1626,7 @@ protocol LoopState {
     /// - Parameter replacedCarbEntry: An existing carb entry replaced by `potentialCarbEntry`
     /// - Returns: A bolus recommendation, or `nil` if not applicable
     /// - Throws: LoopError.missingDataError if recommendation cannot be computed
-    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation?
+    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation?
 
     /// Computes the recommended bolus for correcting a glucose prediction derived from a manual glucose entry, optionally considering a potential carb entry.
     /// - Parameter glucose: The unstored manual glucose entry
@@ -1610,7 +1634,7 @@ protocol LoopState {
     /// - Parameter replacedCarbEntry: An existing carb entry replaced by `potentialCarbEntry`
     /// - Returns: A bolus recommendation, or `nil` if not applicable
     /// - Throws: LoopError.configurationError if recommendation cannot be computed
-    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation?
+    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation?
 }
 
 extension LoopState {
@@ -1663,20 +1687,20 @@ extension LoopDataManager {
             return loopDataManager.predictedGlucoseIncludingPendingInsulin
         }
 
-        var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? {
+        var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             guard loopDataManager.lastRequestedBolus == nil else {
                 return nil
             }
-            return loopDataManager.recommendedTempBasal
+            return loopDataManager.recommendedAutomaticDose
         }
 
-        var recommendedBolus: (recommendation: BolusRecommendation, date: Date)? {
+        var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             guard loopDataManager.lastRequestedBolus == nil else {
                 return nil
             }
-            return loopDataManager.recommendedBolus
+            return loopDataManager.recommendedManualBolus
         }
 
         var retrospectiveGlucoseDiscrepancies: [GlucoseChange]? {
@@ -1705,12 +1729,12 @@ extension LoopDataManager {
             return try loopDataManager.predictGlucoseFromManualGlucose(glucose, potentialBolus: potentialBolus, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: includingPendingInsulin)
         }
 
-        func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
+        func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return try loopDataManager.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry)
         }
 
-        func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
+        func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return try loopDataManager.recommendBolusForManualGlucose(glucose, consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry)
         }
@@ -1790,7 +1814,7 @@ extension LoopDataManager {
             sensitivitySchedule: sensitivitySchedule,
             at: date)
         
-        dosingDecision.recommendedBolus = BolusRecommendation(amount: bolusAmount.doubleValue(for: .internationalUnit()), pendingInsulin: 0, notice: notice)
+        dosingDecision.recommendedBolus = ManualBolusRecommendation(amount: bolusAmount.doubleValue(for: .internationalUnit()), pendingInsulin: 0, notice: notice)
         
         return dosingDecision
     }
@@ -1854,7 +1878,7 @@ extension LoopDataManager {
 
                 "glucoseMomentumEffect: \(manager.glucoseMomentumEffect ?? [])",
                 "retrospectiveGlucoseEffect: \(manager.retrospectiveGlucoseEffect)",
-                "recommendedTempBasal: \(String(describing: state.recommendedTempBasal))",
+                "recommendedAutomaticDose: \(String(describing: state.recommendedAutomaticDose))",
                 "recommendedBolus: \(String(describing: state.recommendedBolus))",
                 "lastBolus: \(String(describing: manager.lastRequestedBolus))",
                 "lastLoopCompleted: \(String(describing: manager.lastLoopCompleted))",
@@ -1913,7 +1937,7 @@ protocol LoopDataManagerDelegate: class {
     ///   - basal: The new recommended basal
     ///   - completion: A closure called once on completion
     ///   - result: The enacted basal
-    func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
+    func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), completion: @escaping (_ result: Error?) -> Void) -> Void
 
     /// Asks the delegate to round a recommended basal rate to a supported rate
     ///
@@ -1926,7 +1950,7 @@ protocol LoopDataManagerDelegate: class {
     ///
     /// - Parameters:
     ///   - units: The recommended bolus in U
-    /// - Returns: a supported bolus volume in U. The volume returned should not be larger than the passed in rate.
+    /// - Returns: a supported bolus volume in U. The volume returned should be the nearest deliverable volume.
     func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double
 
     /// The pump manager status, if one exists.
@@ -1954,17 +1978,17 @@ private extension StoredDosingDecision.LastReservoirValue {
     }
 }
 
-private extension StoredDosingDecision.TempBasalRecommendationWithDate {
-    init?(_ tempBasalRecommendationDate: (recommendation: TempBasalRecommendation, date: Date)?) {
-        guard let tempBasalRecommendationDate = tempBasalRecommendationDate else {
+private extension StoredDosingDecision.AutomaticDoseRecommendationWithDate {
+    init?(_ automaticDoseRecommendationWithDate: (recommendation: AutomaticDoseRecommendation, date: Date)?) {
+        guard let automaticDoseRecommendationWithDate = automaticDoseRecommendationWithDate else {
             return nil
         }
-        self.init(recommendation: tempBasalRecommendationDate.recommendation, date: tempBasalRecommendationDate.date)
+        self.init(recommendation: automaticDoseRecommendationWithDate.recommendation, date: automaticDoseRecommendationWithDate.date)
     }
 }
 
 private extension StoredDosingDecision.BolusRecommendationWithDate {
-    init?(_ bolusRecommendationDate: (recommendation: BolusRecommendation, date: Date)?) {
+    init?(_ bolusRecommendationDate: (recommendation: ManualBolusRecommendation, date: Date)?) {
         guard let bolusRecommendationDate = bolusRecommendationDate else {
             return nil
         }

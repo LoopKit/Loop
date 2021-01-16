@@ -77,7 +77,7 @@ extension StoredDosingDecision: Codable {
                   manualGlucose: try container.decodeIfPresent(SimpleGlucoseValue.self, forKey: .manualGlucose),
                   originalCarbEntry: try container.decodeIfPresent(StoredCarbEntry.self, forKey: .originalCarbEntry),
                   carbEntry: try container.decodeIfPresent(StoredCarbEntry.self, forKey: .carbEntry),
-                  recommendedTempBasal: try container.decodeIfPresent(TempBasalRecommendationWithDate.self, forKey: .recommendedTempBasal),
+                  automaticDoseRecommendation: try container.decodeIfPresent(AutomaticDoseRecommendationWithDate.self, forKey: .automaticDoseRecommendation),
                   recommendedBolus: try container.decodeIfPresent(BolusRecommendationWithDate.self, forKey: .recommendedBolus),
                   requestedBolus: try container.decodeIfPresent(Double.self, forKey: .requestedBolus),
                   pumpManagerStatus: try container.decodeIfPresent(PumpManagerStatus.self, forKey: .pumpManagerStatus),
@@ -101,7 +101,7 @@ extension StoredDosingDecision: Codable {
         try container.encodeIfPresent(manualGlucose, forKey: .manualGlucose)
         try container.encodeIfPresent(originalCarbEntry, forKey: .originalCarbEntry)
         try container.encodeIfPresent(carbEntry, forKey: .carbEntry)
-        try container.encodeIfPresent(recommendedTempBasal, forKey: .recommendedTempBasal)
+        try container.encodeIfPresent(automaticDoseRecommendation, forKey: .automaticDoseRecommendation)
         try container.encodeIfPresent(recommendedBolus, forKey: .recommendedBolus)
         try container.encodeIfPresent(requestedBolus, forKey: .requestedBolus)
         try container.encodeIfPresent(pumpManagerStatus, forKey: .pumpManagerStatus)
@@ -203,7 +203,7 @@ extension StoredDosingDecision: Codable {
         case manualGlucose
         case originalCarbEntry
         case carbEntry
-        case recommendedTempBasal
+        case automaticDoseRecommendation
         case recommendedBolus
         case requestedBolus
         case pumpManagerStatus

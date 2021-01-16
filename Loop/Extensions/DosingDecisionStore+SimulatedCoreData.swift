@@ -104,10 +104,12 @@ fileprivate extension StoredDosingDecision {
         }
         let lastReservoirValue = StoredDosingDecision.LastReservoirValue(startDate: date.addingTimeInterval(-.minutes(1)),
                                                                          unitVolume: 113.3)
-        let recommendedTempBasal = StoredDosingDecision.TempBasalRecommendationWithDate(recommendation: TempBasalRecommendation(unitsPerHour: 0.75,
-                                                                                                                                duration: .minutes(30)),
-                                                                                        date: date.addingTimeInterval(-.minutes(1)))
-        let recommendedBolus = StoredDosingDecision.BolusRecommendationWithDate(recommendation: BolusRecommendation(amount: 0.2,
+        let tempBasalRecommendation = TempBasalRecommendation(unitsPerHour: 0.75,
+                                                              duration: .minutes(30))
+        let automaticDoseRecommendation = StoredDosingDecision.AutomaticDoseRecommendationWithDate(
+            recommendation: AutomaticDoseRecommendation(basalAdjustment: tempBasalRecommendation, bolusUnits: 0),
+            date: date.addingTimeInterval(-.minutes(1)))
+        let recommendedBolus = StoredDosingDecision.BolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 0.2,
                                                                                                                     pendingInsulin: 0.75,
                                                                                                                     notice: .predictedGlucoseBelowTarget(minGlucose: PredictedGlucoseValue(startDate: date.addingTimeInterval(.minutes(30)),
                                                                                                                                                                                            quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 95.0)))),
@@ -154,7 +156,7 @@ fileprivate extension StoredDosingDecision {
                                     predictedGlucose: predictedGlucose,
                                     predictedGlucoseIncludingPendingInsulin: predictedGlucoseIncludingPendingInsulin,
                                     lastReservoirValue: lastReservoirValue,
-                                    recommendedTempBasal: recommendedTempBasal,
+                                    automaticDoseRecommendation: automaticDoseRecommendation,
                                     recommendedBolus: recommendedBolus,
                                     pumpManagerStatus: pumpManagerStatus,
                                     notificationSettings: notificationSettings,

@@ -58,12 +58,12 @@ extension BolusRecommendationNotice: Equatable {
 }
 
 
-extension BolusRecommendation: Comparable {
-    public static func ==(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+extension ManualBolusRecommendation: Comparable {
+    public static func ==(lhs: ManualBolusRecommendation, rhs: ManualBolusRecommendation) -> Bool {
         return lhs.amount == rhs.amount
     }
 
-    public static func <(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+    public static func <(lhs: ManualBolusRecommendation, rhs: ManualBolusRecommendation) -> Bool {
         return lhs.amount < rhs.amount
     }
 }

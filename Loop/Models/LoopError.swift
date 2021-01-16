@@ -88,6 +88,9 @@ enum LoopError: Error {
 
     // Invalid Data
     case invalidData(details: String)
+    
+    // Pump Suspended
+    case pumpSuspended
 }
 
 extension LoopError: Codable {
@@ -96,6 +99,8 @@ extension LoopError: Codable {
             switch string {
             case CodableKeys.connectionError.rawValue:
                 self = .connectionError
+            case CodableKeys.pumpSuspended.rawValue:
+                self = .pumpSuspended
             default:
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "invalid enumeration"))
             }
@@ -142,6 +147,9 @@ extension LoopError: Codable {
         case .invalidData(let details):
             var container = encoder.container(keyedBy: CodableKeys.self)
             try container.encode(InvalidData(details: details), forKey: .invalidData)
+        case .pumpSuspended:
+            var container = encoder.singleValueContainer()
+            try container.encode(CodableKeys.pumpSuspended.rawValue)
         }
     }
     
@@ -178,6 +186,7 @@ extension LoopError: Codable {
         case pumpDataTooOld
         case recommendationExpired
         case invalidData
+        case pumpSuspended
     }
 }
 
@@ -215,7 +224,8 @@ extension LoopError: LocalizedError {
             return String(format: NSLocalizedString("Recommendation expired: %1$@ old", comment: "The error message when a recommendation has expired. (1: age of recommendation in minutes)"), minutes)
         case .invalidData(let details):
             return String(format: NSLocalizedString("Invalid data: %1$@", comment: "The error message when invalid data was encountered. (1: details of invalid data)"), details)
-
+        case .pumpSuspended:
+            return NSLocalizedString("Pump Suspended. Automatic dosing is disabled.", comment: "The error message displayed for pumpSuspended errors.")
         }
     }
 }

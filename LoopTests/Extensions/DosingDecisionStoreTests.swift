@@ -284,7 +284,7 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
         "pendingInsulin" : 0.75
       }
     },
-    "recommendedTempBasal" : {
+    "automaticDoseRecommendation" : {
       "date" : "2020-05-14T22:38:15Z",
       "recommendation" : {
         "duration" : 1800,
@@ -696,7 +696,7 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       "pendingInsulin" : 0.75
     }
   },
-  "recommendedTempBasal" : {
+  "automaticDoseRecommendation" : {
     "date" : "2020-05-14T22:38:15Z",
     "recommendation" : {
       "duration" : 1800,
@@ -899,7 +899,7 @@ fileprivate extension StoredDosingDecision {
         let recommendedTempBasal = StoredDosingDecision.TempBasalRecommendationWithDate(recommendation: TempBasalRecommendation(unitsPerHour: 0.75,
                                                                                                                                 duration: .minutes(30)),
                                                                                         date: dateFormatter.date(from: "2020-05-14T22:38:15Z")!)
-        let recommendedBolus = StoredDosingDecision.BolusRecommendationWithDate(recommendation: BolusRecommendation(amount: 1.2,
+        let recommendedBolus = StoredDosingDecision.BolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 1.2,
                                                                                                                     pendingInsulin: 0.75,
                                                                                                                     notice: .predictedGlucoseBelowTarget(minGlucose: PredictedGlucoseValue(startDate: dateFormatter.date(from: "2020-05-14T23:03:15Z")!,
                                                                                                                                                                                            quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 75.5)))),

@@ -38,6 +38,8 @@ enum LoopConstants {
     // Compile time configuration
    
     static let retrospectiveCorrectionEnabled = true
+    
+    static let bolusPartialApplicationFactor = 0.4 // %
 
     /// The interval over which to aggregate changes in glucose for retrospective correction
     static let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)

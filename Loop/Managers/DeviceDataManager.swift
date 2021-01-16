@@ -18,6 +18,8 @@ import Combine
 final class DeviceDataManager {
 
     private let queue = DispatchQueue(label: "com.loopkit.DeviceManagerQueue", qos: .utility)
+    
+    fileprivate let dosingQueue: DispatchQueue = DispatchQueue(label: "com.loopkit.DeviceManagerDosingQueue", qos: .utility)
 
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
@@ -358,7 +360,7 @@ final class DeviceDataManager {
     }
 
     public func pumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
-        return pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier] as? PumpManagerUI.Type
+        return pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier]
     }
 
     private func pumpManagerTypeFromRawValue(_ rawValue: [String: Any]) -> PumpManager.Type? {
@@ -1091,38 +1093,74 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             return units
         }
 
-        return pumpManager.roundToSupportedBolusVolume(units: units)
+        let rounded = ([0.0] + pumpManager.supportedBolusVolumes).enumerated().min( by: { abs($0.1 - units) < abs($1.1 - units) } )!.1
+        self.log.default("Rounded %{public}@ to %{public}@", String(describing: units), String(describing: rounded))
+
+        return rounded
     }
 
     func loopDataManager(
         _ manager: LoopDataManager,
-        didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
-        completion: @escaping (_ result: Result<DoseEntry>) -> Void
+        didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date),
+        completion: @escaping (_ error: Error?) -> Void
     ) {
         guard let pumpManager = pumpManager else {
-            completion(.failure(LoopError.configurationError(.pumpManager)))
+            completion(LoopError.configurationError(.pumpManager))
             return
         }
         
         guard !pumpManager.status.deliveryIsUncertain else {
-            completion(.failure(LoopError.connectionError))
+            completion(LoopError.connectionError)
             return
         }
 
-        log.default("LoopManager did recommend basal change")
+        log.default("LoopManager did recommend dose")
 
-        pumpManager.enactTempBasal(
-            unitsPerHour: basal.recommendation.unitsPerHour,
-            for: basal.recommendation.duration,
-            completion: { result in
-                switch result {
-                case .success(let doseEntry):
-                    completion(.success(doseEntry))
-                case .failure(let error):
-                    completion(.failure(error))
+        dosingQueue.async {
+            let doseDispatchGroup = DispatchGroup()
+
+            var tempBasalError: Error? = nil
+            var bolusError: Error? = nil
+
+            if let basalAdjustment = automaticDose.recommendation.basalAdjustment {
+                self.log.default("LoopManager did recommend basal change")
+
+                doseDispatchGroup.enter()
+                pumpManager.enactTempBasal(unitsPerHour: basalAdjustment.unitsPerHour, for: basalAdjustment.duration, completion: { result in
+                    switch result {
+                    case .failure(let error):
+                        tempBasalError = error
+                    default:
+                        break
+                    }
+                    doseDispatchGroup.leave()
+                })
+            }
+
+            doseDispatchGroup.wait()
+
+            guard tempBasalError == nil else {
+                completion(tempBasalError)
+                return
+            }
+            
+            if automaticDose.recommendation.bolusUnits > 0 {
+                self.log.default("LoopManager did recommend bolus dose")
+                doseDispatchGroup.enter()
+                pumpManager.enactBolus(units: automaticDose.recommendation.bolusUnits, at: Date()) { (result) in
+                    switch result {
+                    case .failure(let error):
+                        bolusError = error
+                    default:
+                        self.log.default("PumpManager issued bolus command")
+                        break
+                    }
+                    doseDispatchGroup.leave()
                 }
             }
-        )
+            doseDispatchGroup.wait()
+            completion(bolusError)
+        }
     }
     
     var automaticDosingEnabled: Bool {

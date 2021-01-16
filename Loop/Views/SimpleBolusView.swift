@@ -362,7 +362,7 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
         
         func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
             var decision = BolusDosingDecision()
-            decision.recommendedBolus = BolusRecommendation(amount: 3, pendingInsulin: 0)
+            decision.recommendedBolus = ManualBolusRecommendation(amount: 3, pendingInsulin: 0)
             return decision
         }
         
