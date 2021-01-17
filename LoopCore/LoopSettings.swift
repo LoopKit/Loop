@@ -22,15 +22,6 @@ public extension DosingStrategy {
             return NSLocalizedString("Automatic Bolus", comment: "Title string for automatic bolus dosing strategy")
         }
     }
-
-    var subtitle: String {
-        switch self {
-        case .tempBasalOnly:
-            return NSLocalizedString("Loop will dose via temp basals, limited by your max temp basal setting.", comment: "Description string for temp basal only dosing strategy")
-        case .automaticBolus:
-            return NSLocalizedString("Loop will automatically bolus when bg is predicted to be higher than target range, and will use temp basals when bg is predicted to be lower than target range.", comment: "Description string for automatic bolus dosing strategy")
-        }
-    }
 }
 
 public struct LoopSettings: Equatable {

@@ -14,15 +14,15 @@ public struct DosingStrategySelectionView: View {
     
     @Binding private var dosingStrategy: DosingStrategy
     
+    @State private var internalDosingStrategy: DosingStrategy
+    
     public init(dosingStrategy: Binding<DosingStrategy>) {
         self._dosingStrategy = dosingStrategy
+        self._internalDosingStrategy = State(initialValue: dosingStrategy.wrappedValue)
     }
     
     public var body: some View {
         List {
-            Section {
-                Text(dosingStrategy.title)
-            }
             Section {
                 options
             }
@@ -35,14 +35,13 @@ public struct DosingStrategySelectionView: View {
         ForEach(DosingStrategy.allCases, id: \.self) { strategy in
             CheckmarkListItem(
                 title: Text(strategy.title),
-                description: Text(strategy.subtitle),
+                description: Text(strategy.informationalText),
                 isSelected: Binding(
                     get: { self.dosingStrategy == strategy },
                     set: { isSelected in
                         if isSelected {
-                            withAnimation {
-                                self.dosingStrategy = strategy
-                            }
+                            self.dosingStrategy = strategy
+                            self.internalDosingStrategy = strategy // Hack to force update. :(
                         }
                     }
                 )
@@ -50,6 +49,18 @@ public struct DosingStrategySelectionView: View {
             .padding(.vertical, 4)
         }
     }
+}
+
+extension DosingStrategy {
+    var informationalText: String {
+        switch self {
+        case .tempBasalOnly:
+            return NSLocalizedString("Loop will set temporary basal rates to increase and decrease insulin delivery.", comment: "Description string for temp basal only dosing strategy")
+        case .automaticBolus:
+            return NSLocalizedString("Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal.", comment: "Description string for automatic bolus dosing strategy")
+        }
+    }
+
 }
 
 struct DosingStrategySelectionView_Previews: PreviewProvider {
