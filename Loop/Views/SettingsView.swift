@@ -37,6 +37,9 @@ public struct SettingsView: View {
         NavigationView {
             List {
                 loopSection
+                if FeatureFlags.automaticBolusEnabled {
+                    dosingStrategySection
+                }
                 if viewModel.showWarning {
                     alertPermissionsSection
                 }
@@ -87,7 +90,19 @@ extension SettingsView {
             .disabled(!viewModel.isClosedLoopAllowed)
         }
     }
-    
+
+    private var dosingStrategySection: some View {
+        Section(header: SectionHeader(label: NSLocalizedString("Dosing Strategy", comment: "The title of the Dosing Strategy section in settings"))) {
+            
+            NavigationLink(destination: DosingStrategySelectionView(dosingStrategy: $viewModel.dosingStrategy))
+            {
+                HStack {
+                    Text(viewModel.dosingStrategy.title)
+                }
+            }
+        }
+    }
+
     private var alertPermissionsSection: some View {
         Section {
             NavigationLink(destination:
@@ -386,7 +401,6 @@ public struct SettingsView_Previews: PreviewProvider {
     
     public static var previews: some View {
         let fakeClosedLoopAllowedPublisher = FakeClosedLoopAllowedPublisher()
-        let supportInfoProvider = MockSupportInfoProvider()
         let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
                                           cgmManagerSettingsViewModel: DeviceViewModel(),
@@ -402,6 +416,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           preferredGlucoseUnit: .milligramsPerDeciliter,
                                           supportInfoProvider: MockSupportInfoProvider(),
                                           activeServices: [],
+                                          dosingStrategy: .automaticBolus,
                                           delegate: nil)
         return Group {
             SettingsView(viewModel: viewModel)

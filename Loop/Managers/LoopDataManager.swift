@@ -760,12 +760,6 @@ extension LoopDataManager {
 
     // Actions
 
-    func enactRecommendedDose(_ completion: @escaping (_ error: Error?) -> Void) {
-        dataAccessQueue.async {
-            self.enactDose(completion)
-        }
-    }
-
     /// Runs the "loop"
     ///
     /// Executes an analysis of the current data, and recommends an adjustment to the current
@@ -956,7 +950,7 @@ extension LoopDataManager {
 
         if predictedGlucose == nil {
             do {
-                try updatePredictedGlucoseAndRecommendedBasalAndBolus()
+                try updatePredictedGlucoseAndRecommendedDose()
             } catch let error {
                 logger.error("%{public}@", String(describing: error))
 
@@ -1394,7 +1388,7 @@ extension LoopDataManager {
     ///     - LoopError.glucoseTooOld
     ///     - LoopError.missingDataError
     ///     - LoopError.pumpDataTooOld
-    private func updatePredictedGlucoseAndRecommendedBasalAndBolus() throws {
+    private func updatePredictedGlucoseAndRecommendedDose() throws {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         self.logger.debug("Recomputing prediction and recommendations.")

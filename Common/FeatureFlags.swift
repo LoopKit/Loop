@@ -26,6 +26,7 @@ struct FeatureFlagConfiguration: Decodable {
     let simulatedCoreDataEnabled: Bool
     let walshInsulinModelEnabled: Bool
     let siriEnabled: Bool
+    let automaticBolusEnabled: Bool
 
     fileprivate init() {
         #if CGM_MANAGER_CATEGORIZE_GLUCOSE_RANGE_ENABLED
@@ -127,6 +128,13 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.siriEnabled = true
         #endif
+        
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if AUTOMATIC_BOLUS_DISABLED
+        self.automaticBolusEnabled = false
+        #else
+        self.automaticBolusEnabled = true
+        #endif
     }
 }
 
@@ -149,6 +157,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
             "* walshInsulinModelEnabled: \(walshInsulinModelEnabled)",
             "* siriEnabled: \(siriEnabled)",
+            "* automaticBolusEnabled: \(automaticBolusEnabled)"
         ].joined(separator: "\n")
     }
 }

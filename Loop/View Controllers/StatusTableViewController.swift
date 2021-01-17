@@ -1341,6 +1341,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
                                           supportInfoProvider: deviceManager,
                                           activeServices: deviceManager.servicesManager.activeServices,
+                                          dosingStrategy: deviceManager.loopManager.settings.dosingStrategy,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),
@@ -1910,6 +1911,10 @@ extension StatusTableViewController {
 extension StatusTableViewController: SettingsViewModelDelegate {
     func dosingEnabledChanged(_ value: Bool) {
         self.deviceManager.loopManager.settings.dosingEnabled = value
+    }
+    
+    func dosingStrategyChanged(_ strategy: DosingStrategy) {
+        self.deviceManager.loopManager.settings.dosingStrategy = strategy
     }
 
     func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings) {
