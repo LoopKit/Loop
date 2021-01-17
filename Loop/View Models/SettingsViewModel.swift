@@ -85,7 +85,11 @@ public class SettingsViewModel: ObservableObject {
     let supportInfoProvider: SupportInfoProvider
         
     @Published var isClosedLoopAllowed: Bool
-    @Published var dosingStrategy: DosingStrategy
+    @Published var dosingStrategy: DosingStrategy {
+        didSet {
+            delegate?.dosingStrategyChanged(dosingStrategy)
+        }
+    }
 
     var closedLoopPreference: Bool {
        didSet {
