@@ -80,10 +80,10 @@ public class SettingsViewModel: ObservableObject {
     let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
     let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
-    let preferredGlucoseUnit: HKUnit
     let supportInfoProvider: SupportInfoProvider
         
     @Published var isClosedLoopAllowed: Bool
+    @Published var preferredGlucoseUnit: HKUnit
     
     var closedLoopPreference: Bool {
        didSet {
@@ -145,5 +145,11 @@ public class SettingsViewModel: ObservableObject {
             .assign(to: \.isClosedLoopAllowed, on: self)
             .store(in: &cancellables)
         
+    }
+}
+
+extension SettingsViewModel: PreferredGlucoseUnitObserver {
+    public func preferredGlucoseUnitDidChange(to preferredGlucoseUnit: HKUnit) {
+        self.preferredGlucoseUnit = preferredGlucoseUnit
     }
 }

@@ -32,6 +32,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     lazy private var cancellables = Set<AnyCancellable>()
 
+    private var preferredGlucoseUnitObservers = WeakSynchronizedSet<PreferredGlucoseUnitObserver>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -90,16 +92,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     self?.reloadData(animated: true)
                 }
             },
-            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
-                DispatchQueue.main.async {
-                    self?.log.debug("[reloadData] for HealthKit unit preference change")
-                    self?.preferredGlucoseUnit = self?.deviceManager.glucoseStore.preferredUnit
-                    self?.unitPreferencesDidChange(to: self?.preferredGlucoseUnit)
-                    self?.refreshContext = RefreshContext.all
-                }
-            }
         ]
-        
+
+        deviceManager.addPreferredGlucoseUnitObserver(self)
+
         deviceManager.$isClosedLoop
             .receive(on: DispatchQueue.main)
             .sink { self.closedLoopStatusChanged($0) }
@@ -1408,6 +1404,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           supportInfoProvider: deviceManager,
                                           activeServices: deviceManager.servicesManager.activeServices,
                                           delegate: self)
+        deviceManager.addPreferredGlucoseUnitObserver(viewModel)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),
             isModalInPresentation: false)
@@ -1432,6 +1429,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         var settings = cgmManager.settingsViewController(for: unit, glucoseTintColor: .glucoseTintColor, guidanceColors: .default)
         settings.completionDelegate = self
+        deviceManager.addPreferredGlucoseUnitObserver(settings)
         show(settings, sender: self)
     }
     
@@ -1558,6 +1556,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .presentViewController(let vc):
             var completionNotifyingVC = vc
             completionNotifyingVC.completionDelegate = self
+            if let preferredGlucoseUnitObservingVC = completionNotifyingVC as? PreferredGlucoseUnitObserver {
+                deviceManager.addPreferredGlucoseUnitObserver(preferredGlucoseUnitObservingVC)
+            }
             self.present(completionNotifyingVC, animated: true, completion: nil)
         case .openAppURL(let url):
             UIApplication.shared.open(url)
@@ -2064,5 +2065,13 @@ extension StatusTableViewController: ServicesViewModelDelegate {
             deviceManager.servicesManager.addActiveService(service)
         }
     }
+}
 
+extension StatusTableViewController: PreferredGlucoseUnitObserver {
+    func preferredGlucoseUnitDidChange(to preferredGlucoseUnit: HKUnit) {
+        self.log.debug("[reloadData] for HealthKit unit preference change")
+        self.preferredGlucoseUnit = preferredGlucoseUnit
+        self.unitPreferencesDidChange(to: preferredGlucoseUnit)
+        self.refreshContext = RefreshContext.all
+    }
 }

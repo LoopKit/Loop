@@ -56,6 +56,8 @@ final class DeviceDataManager {
 
     private var cgmStalenessMonitor: CGMStalenessMonitor
 
+    private var preferredGlucoseUnitObservers = WeakSynchronizedSet<PreferredGlucoseUnitObserver>()
+
     // MARK: - CGM
 
     var cgmManager: CGMManager? {
@@ -334,6 +336,17 @@ final class DeviceDataManager {
             .receive(on: DispatchQueue.main)
             .sink { if !$0 { self.loopManager.settings.clearOverride(matching: .preMeal) } }
             .store(in: &cancellables)
+
+
+        NotificationCenter.default.addObserver(forName: .HealthStorePreferredGlucoseUnitDidChange, object: glucoseStore.healthStore, queue: nil) { [weak self] _ in
+            guard let strongSelf = self else {
+                return
+            }
+
+            if let preferredGlucoseUnit = strongSelf.glucoseStore.preferredUnit {
+                strongSelf.notifyObserversOfPreferredGlucoseUnitChange(to: preferredGlucoseUnit)
+            }
+        }
     }
     
     var isCGMManagerValidPumpManager: Bool {
@@ -534,7 +547,10 @@ private extension DeviceDataManager {
                                               soundVendor: cgmManager)            
             cgmHasValidSensorSession = cgmManager.cgmStatus.hasValidSensorSession
         }
-        
+
+        if let cgmManagerUI = cgmManager as? CGMManagerUI {
+            addPreferredGlucoseUnitObserver(cgmManagerUI)
+        }
     }
 
     func setupPump() {
@@ -1307,4 +1323,26 @@ extension DeviceDataManager: SupportInfoProvider {
         generateDiagnosticReport(completion)
     }
     
+}
+
+extension DeviceDataManager {
+    func addPreferredGlucoseUnitObserver(_ observer: PreferredGlucoseUnitObserver) {
+        let queue = DispatchQueue.main
+        preferredGlucoseUnitObservers.insert(observer, queue: queue)
+        if let preferredGlucoseUnit = glucoseStore.preferredUnit {
+            queue.async {
+                observer.preferredGlucoseUnitDidChange(to: preferredGlucoseUnit)
+            }
+        }
+    }
+
+    func removePreferredGlucoseUnitObserver(_ observer: PreferredGlucoseUnitObserver) {
+        preferredGlucoseUnitObservers.removeElement(observer)
+    }
+
+    func notifyObserversOfPreferredGlucoseUnitChange(to preferredGlucoseUnit: HKUnit) {
+        self.preferredGlucoseUnitObservers.forEach {
+            $0.preferredGlucoseUnitDidChange(to: preferredGlucoseUnit)
+        }
+    }
 }
