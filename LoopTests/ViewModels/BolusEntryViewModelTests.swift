@@ -16,7 +16,7 @@ import XCTest
 
 class BolusEntryViewModelTests: XCTestCase {
    
-    static let now = Date.distantFuture
+    static let now = ISO8601DateFormatter().date(from: "2020-03-11T07:00:00-0700")!
     static let exampleStartDate = now - .hours(2)
     static let exampleEndDate = now - .hours(1)
     static fileprivate let exampleGlucoseValue = MockGlucoseValue(quantity: exampleManualGlucoseQuantity, startDate: exampleStartDate)
@@ -665,14 +665,14 @@ class BolusEntryViewModelTests: XCTestCase {
     func testCarbEntryDateAndAbsorptionTimeString() throws {
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
 
-        XCTAssertEqual("10:00 PM + 0m", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+        XCTAssertEqual("12:00 PM + 0m", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
     }
     
     func testCarbEntryDateAndAbsorptionTimeString2() throws {
         let potentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: Self.exampleStartDate, foodType: nil, absorptionTime: nil)
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: potentialCarbEntry)
 
-        XCTAssertEqual("10:00 PM", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+        XCTAssertEqual("12:00 PM", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
     }
 
     func testIsManualGlucosePromptVisible() throws {
