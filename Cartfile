@@ -3,6 +3,6 @@ github "LoopKit/CGMBLEKit" "dev"
 github "i-schuetz/SwiftCharts" == 0.6.5
 github "LoopKit/dexcom-share-client-swift" "dev"
 github "LoopKit/G4ShareSpy" "dev"
-github "ps2/rileylink_ios" "dev"
+github "ps2/rileylink_ios" "carthage-pin"
 github "LoopKit/Amplitude-iOS" "decreepify"
 github "Andrei0105/spike-client-swift-195" "dev"
