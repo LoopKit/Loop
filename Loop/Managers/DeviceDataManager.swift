@@ -461,7 +461,7 @@ final class DeviceDataManager {
     }
     
     // Get HealthKit authorization for all of the stores
-    func authorizeHealthStore(_ completion: @escaping () -> Void) {
+    func authorizeHealthStore(_ completion: @escaping (Bool) -> Void) {
         // Authorize all types at once for simplicity
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
@@ -471,7 +471,7 @@ final class DeviceDataManager {
                 self.glucoseStore.authorize(toShare: true, { _ in })
             }
 
-            completion()
+            completion(success)
         }
     }
 

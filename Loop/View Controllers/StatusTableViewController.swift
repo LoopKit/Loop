@@ -157,17 +157,18 @@ final class StatusTableViewController: LoopChartsTableViewController {
         super.viewDidAppear(animated)
 
         if !appearedOnce {
-            appearedOnce = true
+            authorizeHealthStore { success in
+                self.appearedOnce = success
+                if success {
+                    DispatchQueue.main.async {
+                        // On first launch, before HealthKit permissions are acknowledged, preferredGlucoseUnit will be nil, so set here when available
+                        self.preferredGlucoseUnit = self.deviceManager.glucoseStore.preferredUnit
 
-            deviceManager.authorizeHealthStore {
-                DispatchQueue.main.async {
-                    // On first launch, before HealthKit permissions are acknowledged, preferredGlucoseUnit will be nil, so set here when available
-                    self.preferredGlucoseUnit = self.deviceManager.glucoseStore.preferredUnit
-
-                    self.log.debug("[reloadData] after HealthKit authorization")
-                    self.reloadData()
-                    if !self.isOnboardingComplete {
-                        self.navigateToOnboarding()
+                        self.log.debug("[reloadData] after HealthKit authorization")
+                        self.reloadData()
+                        if !self.isOnboardingComplete {
+                            self.navigateToOnboarding()
+                        }
                     }
                 }
             }
@@ -178,6 +179,18 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.analyticsServicesManager.didDisplayStatusScreen()
         
         deviceManager.checkDeliveryUncertaintyState()
+    }
+    
+    private func authorizeHealthStore(completion: @escaping (Bool) -> Void) {
+        deviceManager.authorizeHealthStore { accessFormWasCompleted in
+            // returned Bool only indicates if the user completed the health access form.
+            if accessFormWasCompleted {
+                completion(accessFormWasCompleted)
+            } else {
+                // if the user did not complete the health access form, present the health access form again so the user can allow or deny access
+                self.authorizeHealthStore(completion: completion)
+            }
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
