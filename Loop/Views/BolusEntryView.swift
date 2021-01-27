@@ -190,8 +190,7 @@ struct BolusEntryView: View {
                     DismissibleKeyboardTextField(
                         text: typedManualGlucoseEntry,
                         placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
-                        // The heavy title is ending up clipped due to a bug that is fixed in iOS 14.  Uncomment the following when we can build for iOS 14.
-                        font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
+                        font: .heavy(.title1),
                         textAlignment: .right,
                         keyboardType: .decimalPad,
                         shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
