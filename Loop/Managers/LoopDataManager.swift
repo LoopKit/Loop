@@ -1322,7 +1322,7 @@ extension LoopDataManager {
         
         let model = insulinModelSettings.model(for: insulinType)
 
-        return predictedGlucose.recommendedBolus(
+        return predictedGlucose.recommendedManualBolus(
             to: glucoseTargetRange,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
@@ -1517,7 +1517,7 @@ extension LoopDataManager {
 
         let pendingInsulin = try getPendingInsulin()
         let predictionDrivingBolusRecommendation = pendingInsulin > 0 ? predictedGlucoseIncludingPendingInsulin : predictedGlucose
-        let recommendation = predictionDrivingBolusRecommendation.recommendedBolus(
+        let recommendation = predictionDrivingBolusRecommendation.recommendedManualBolus(
             to: glucoseTargetRange,
             at: predictedGlucose[0].startDate,
             suspendThreshold: settings.suspendThreshold?.quantity,

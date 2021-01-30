@@ -803,7 +803,7 @@ fileprivate class MockLoopState: LoopState {
     
     var predictedGlucoseIncludingPendingInsulin: [PredictedGlucoseValue]?
     
-    var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
+    var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)?
     
     var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)?
     

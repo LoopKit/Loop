@@ -499,7 +499,7 @@ extension Collection where Element: GlucoseValue {
     ///   - maxBolus: The maximum bolus to return
     ///   - volumeRounder: Closure that rounds recommendation to nearest supported bolus volume. If nil, no rounding is performed
     /// - Returns: A bolus recommendation
-    func recommendedBolus(
+    func recommendedManualBolus(
         to correctionRange: GlucoseRangeSchedule,
         at date: Date = Date(),
         suspendThreshold: HKQuantity?,
