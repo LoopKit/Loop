@@ -451,7 +451,7 @@ class BolusEntryViewModelTests: XCTestCase {
         authenticateOverrideCompletion(.failure(MockError()))
         
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertFalse(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
@@ -486,7 +486,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 0.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -512,7 +512,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 0.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
