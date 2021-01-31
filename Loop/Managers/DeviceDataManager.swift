@@ -580,23 +580,19 @@ private extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, at startDate: Date = Date(), completion: @escaping (_ error: Error?) -> Void = { _ in }) {
+    func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
             return
         }
 
         self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
-        pumpManager.enactBolus(units: units, at: startDate) { (result) in
+        pumpManager.enactBolus(units: units, automatic: automatic) { (result) in
             switch result {
             case .failure(let error):
                 self.log.error("%{public}@", String(describing: error))
-                switch error {
-                case .uncertainDelivery:
-                    // Do not generate notification on uncertain delivery error
-                    break
-                default:
-                    NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
+                if case .uncertainDelivery = error, !automatic {
+                    NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
                 }
                 self.loopManager.bolusRequestFailed(error) {
                     completion(error)
@@ -1147,7 +1143,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             if automaticDose.recommendation.bolusUnits > 0 {
                 self.log.default("LoopManager did recommend bolus dose")
                 doseDispatchGroup.enter()
-                pumpManager.enactBolus(units: automaticDose.recommendation.bolusUnits, at: Date()) { (result) in
+                pumpManager.enactBolus(units: automaticDose.recommendation.bolusUnits, automatic: true) { (result) in
                     switch result {
                     case .failure(let error):
                         bolusError = error

@@ -191,7 +191,8 @@ fileprivate extension PersistedPumpEvent {
                                   raw: Data(UUID().uuidString.utf8),
                                   title: UUID().uuidString,
                                   type: type,
-                                  isMutable: false)
+                                  isMutable: false,
+                                  automatic: nil)
     }
 
     private static func simulated(dose: DoseEntry) -> PersistedPumpEvent {
@@ -203,6 +204,7 @@ fileprivate extension PersistedPumpEvent {
                                   raw: Data(UUID().uuidString.utf8),
                                   title: String(describing: dose),
                                   type: dose.type.pumpEventType!,
-                                  isMutable: false)
+                                  isMutable: false,
+                                  automatic: nil)
     }
 }

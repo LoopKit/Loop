@@ -430,7 +430,7 @@ class BolusEntryViewModelTests: XCTestCase {
         authenticateOverrideCompletion(.success(()))
         
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(now, delegate.enactedBolusDate)
+        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
         XCTAssertTrue(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
@@ -451,7 +451,7 @@ class BolusEntryViewModelTests: XCTestCase {
         authenticateOverrideCompletion(.failure(MockError()))
         
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusDate)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertFalse(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
@@ -486,7 +486,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 0.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusDate)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -512,7 +512,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 0.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusDate)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -535,7 +535,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 1.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(now, delegate.enactedBolusDate)
+        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -560,7 +560,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 1.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(now, delegate.enactedBolusDate)
+        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -621,7 +621,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 1.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(now, delegate.enactedBolusDate)
+        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -880,10 +880,10 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     }
 
     var enactedBolusUnits: Double?
-    var enactedBolusDate: Date?
-    func enactBolus(units: Double, at startDate: Date, completion: @escaping (Error?) -> Void) {
+    var enactedBolusAutomatic: Bool?
+    func enactBolus(units: Double, automatic: Bool, completion: @escaping (Error?) -> Void) {
         enactedBolusUnits = units
-        enactedBolusDate = startDate
+        enactedBolusAutomatic = automatic
     }
     
     var getGlucoseSamplesResponse: [StoredGlucoseSample] = []
