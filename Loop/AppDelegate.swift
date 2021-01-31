@@ -228,7 +228,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             {
                 deviceDataManager?.analyticsServicesManager.didRetryBolus()
 
-                deviceDataManager?.enactBolus(units: units, at: startDate) { (_) in
+                deviceDataManager?.enactBolus(units: units, automatic: false) { (_) in
                     completionHandler()
                 }
                 return

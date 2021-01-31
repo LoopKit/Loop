@@ -22,8 +22,8 @@ extension DeviceDataManager: SimpleBolusViewModelDelegate {
         }
     }
     
-    func enactBolus(units: Double, at startDate: Date) {
-        enactBolus(units: units, at: startDate) { (_) in }
+    func enactBolus(units: Double, automatic: Bool) {
+        enactBolus(units: units, automatic: automatic) { (_) in }
     }
     
     func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {

@@ -32,9 +32,6 @@ extension DeviceDataManager: BolusEntryViewModelDelegate, LoggedDoseViewModelDel
         loopManager.storeBolusDosingDecision(bolusDosingDecision, withDate: date)
     }
 
-    /// func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
-    /// is already implemented in DeviceDataManager
-    
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
         glucoseStore.getGlucoseSamples(start: start, end: end, completion: completion)
     }

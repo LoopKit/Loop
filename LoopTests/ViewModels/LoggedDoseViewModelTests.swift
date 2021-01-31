@@ -97,10 +97,8 @@ fileprivate class MockLoggedDoseViewModelDelegate: LoggedDoseViewModelDelegate {
     }
     
     var enactedBolusUnits: Double?
-    var enactedBolusDate: Date?
-    func enactBolus(units: Double, at startDate: Date, completion: @escaping (Error?) -> Void) {
+    func enactBolus(units: Double, automatic: Bool, completion: @escaping (Error?) -> Void) {
         enactedBolusUnits = units
-        enactedBolusDate = startDate
     }
     
     var getGlucoseSamplesResponse: [StoredGlucoseSample] = []
