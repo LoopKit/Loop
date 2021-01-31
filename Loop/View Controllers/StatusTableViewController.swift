@@ -339,7 +339,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         reloading = true
 
         let reloadGroup = DispatchGroup()
-        var newRecommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
         var glucoseSamples: [StoredGlucoseSample]?
         var predictedGlucoseValues: [GlucoseValue]?
         var iobValues: [InsulinValue]?
@@ -349,7 +348,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var carbsOnBoard: HKQuantity?
         let startDate = charts.startDate
         let basalDeliveryState = self.basalDeliveryState
-        let isClosedLoop = deviceManager.isClosedLoop
 
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
@@ -362,7 +360,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
 
             /// Update the status HUDs immediately
-            let lastLoopCompleted = manager.lastLoopCompleted
             let lastLoopError = state.error
 
             // Net basal rate HUD
@@ -380,14 +377,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 if let netBasal = netBasal {
                     self.hudView?.pumpStatusHUD.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.start)
                 }
-            }
-
-            // Display a recommended basal change only if we haven't completed recently and we are in closed loop mode
-            if (lastLoopCompleted == nil ||
-                lastLoopCompleted! < Date(timeIntervalSinceNow: .minutes(-6))) &&
-                isClosedLoop
-            {
-                newRecommendedTempBasal = state.recommendedTempBasal
             }
 
             if currentContext.contains(.carbs) {
@@ -565,7 +554,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
 
             // Show/hide the table view rows
-            let statusRowMode = self.determineStatusRowMode(recommendedTempBasal: newRecommendedTempBasal)
+            let statusRowMode = self.determineStatusRowMode()
 
             self.updateHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
 
@@ -630,7 +619,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private enum StatusRowMode {
         case hidden
-        case recommendedTempBasal(tempBasal: TempBasalRecommendation, at: Date, enacting: Bool)
         case scheduleOverrideEnabled(TemporaryScheduleOverride)
         case enactingBolus
         case bolusing(dose: DoseEntry)
@@ -650,7 +638,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private var statusRowMode = StatusRowMode.hidden
 
-    private func determineStatusRowMode(recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? = nil) -> StatusRowMode {
+    private func determineStatusRowMode() -> StatusRowMode {
         let statusRowMode: StatusRowMode
 
         if case .initiating = bolusState {
@@ -665,8 +653,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             statusRowMode = .bolusing(dose: dose)
         } else if deviceManager.isGlucoseValueStale {
             statusRowMode = .recommendManualGlucoseEntry
-        } else if let (recommendation: tempBasal, date: date) = recommendedTempBasal {
-            statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
         } else if let scheduleOverride = deviceManager.loopManager.settings.scheduleOverride,
             !scheduleOverride.hasFinished()
         {
@@ -715,26 +701,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         switch (statusWasVisible, statusIsVisible) {
         case (true, true):
             switch (oldStatusRowMode, self.statusRowMode) {
-            case (.recommendedTempBasal(tempBasal: let oldTempBasal, at: let oldDate, enacting: let wasEnacting),
-                  .recommendedTempBasal(tempBasal: let newTempBasal, at: let newDate, enacting: let isEnacting)):
-                // Ensure we have a change
-                guard oldTempBasal != newTempBasal || oldDate != newDate || wasEnacting != isEnacting else {
-                    break
-                }
-
-                // If the rate or date change, reload the row
-                if oldTempBasal != newTempBasal || oldDate != newDate {
-                    self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
-                } else if let cell = tableView.cellForRow(at: statusIndexPath) {
-                    // If only the enacting state changed, update the activity indicator
-                    if isEnacting {
-                        let indicatorView = UIActivityIndicatorView(style: .default)
-                        indicatorView.startAnimating()
-                        cell.accessoryView = indicatorView
-                    } else {
-                        cell.accessoryView = nil
-                    }
-                }
             case (.enactingBolus, .enactingBolus):
                 break
             case (.bolusing(let oldDose), .bolusing(let newDose)):
@@ -877,22 +843,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 switch statusRowMode {
                 case .hidden:
                     let cell = getTitleSubtitleCell()
-                    return cell
-                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting):
-                    let cell = getTitleSubtitleCell()
-                    let timeFormatter = DateFormatter()
-                    timeFormatter.dateStyle = .none
-                    timeFormatter.timeStyle = .short
-
-                    cell.titleLabel.text = NSLocalizedString("Recommended Basal", comment: "The title of the cell displaying a recommended temp basal value")
-                    cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ U/hour @ %2$@", comment: "The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: tempBasal.unitsPerHour), number: .decimal), timeFormatter.string(from: date))
-                    cell.selectionStyle = .default
-
-                    if enacting {
-                        let indicatorView = UIActivityIndicatorView(style: .default)
-                        indicatorView.startAnimating()
-                        cell.accessoryView = indicatorView
-                    }
                     return cell
                 case .scheduleOverrideEnabled(let override):
                     let cell = getTitleSubtitleCell()
@@ -1069,23 +1019,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 tableView.deselectRow(at: indexPath, animated: true)
 
                 switch statusRowMode {
-                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) where !enacting:
-                    self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
-
-                    self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
-                        DispatchQueue.main.async {
-                            self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
-
-                            if let error = error {
-                                self.log.error("Failed to enact recommended temp basal: %{public}@", String(describing: error))
-                                self.present(UIAlertController(with: error), animated: true)
-                            } else {
-                                self.refreshContext.update(with: .status)
-                                self.log.debug("[reloadData] after manually enacting temp basal")
-                                self.reloadData()
-                            }
-                        }
-                    }
                 case .pumpSuspended(let resuming) where !resuming:
                     self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
                     self.deviceManager.pumpManager?.resumeDelivery() { (error) in
@@ -1408,6 +1341,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
                                           supportInfoProvider: deviceManager,
                                           activeServices: deviceManager.servicesManager.activeServices,
+                                          dosingStrategy: deviceManager.loopManager.settings.dosingStrategy,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),
@@ -1977,6 +1911,10 @@ extension StatusTableViewController {
 extension StatusTableViewController: SettingsViewModelDelegate {
     func dosingEnabledChanged(_ value: Bool) {
         self.deviceManager.loopManager.settings.dosingEnabled = value
+    }
+    
+    func dosingStrategyChanged(_ strategy: DosingStrategy) {
+        self.deviceManager.loopManager.settings.dosingStrategy = strategy
     }
 
     func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings) {

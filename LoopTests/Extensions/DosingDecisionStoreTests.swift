@@ -23,6 +23,16 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
                 try assertDosingDecisionObjectEncodable(object, encodesJSON: """
 {
   "data" : {
+    "automaticDoseRecommendation" : {
+      "date" : "2020-05-14T22:38:15Z",
+      "recommendation" : {
+        "basalAdjustment" : {
+          "duration" : 1800,
+          "unitsPerHour" : 0.75
+        },
+        "bolusUnits" : 0
+      }
+    },
     "carbEntry" : {
       "absorptionTime" : 18000,
       "createdByCurrentApp" : true,
@@ -284,13 +294,6 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
         "pendingInsulin" : 0.75
       }
     },
-    "recommendedTempBasal" : {
-      "date" : "2020-05-14T22:38:15Z",
-      "recommendation" : {
-        "duration" : 1800,
-        "unitsPerHour" : 0.75
-      }
-    },
     "requestedBolus" : 0.80000000000000004,
     "scheduleOverride" : {
       "actualEnd" : {
@@ -435,6 +438,16 @@ class StoredDosingDecisionCodableTests: XCTestCase {
     func testCodable() throws {
         try assertStoredDosingDecisionCodable(StoredDosingDecision.test, encodesJSON: """
 {
+  "automaticDoseRecommendation" : {
+    "date" : "2020-05-14T22:38:15Z",
+    "recommendation" : {
+      "basalAdjustment" : {
+        "duration" : 1800,
+        "unitsPerHour" : 0.75
+      },
+      "bolusUnits" : 0
+    }
+  },
   "carbEntry" : {
     "absorptionTime" : 18000,
     "createdByCurrentApp" : true,
@@ -696,13 +709,6 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       "pendingInsulin" : 0.75
     }
   },
-  "recommendedTempBasal" : {
-    "date" : "2020-05-14T22:38:15Z",
-    "recommendation" : {
-      "duration" : 1800,
-      "unitsPerHour" : 0.75
-    }
-  },
   "requestedBolus" : 0.80000000000000004,
   "scheduleOverride" : {
     "actualEnd" : {
@@ -765,7 +771,7 @@ extension StoredDosingDecision: Equatable {
             lhs.predictedGlucose == rhs.predictedGlucose &&
             lhs.predictedGlucoseIncludingPendingInsulin == rhs.predictedGlucoseIncludingPendingInsulin &&
             lhs.lastReservoirValue == rhs.lastReservoirValue &&
-            lhs.recommendedTempBasal == rhs.recommendedTempBasal &&
+            lhs.automaticDoseRecommendation == rhs.automaticDoseRecommendation &&
             lhs.recommendedBolus == rhs.recommendedBolus &&
             lhs.pumpManagerStatus == rhs.pumpManagerStatus &&
             lhs.notificationSettings == rhs.notificationSettings &&
@@ -815,8 +821,8 @@ extension StoredDosingDecision.LastReservoirValue: Equatable {
     }
 }
 
-extension StoredDosingDecision.TempBasalRecommendationWithDate: Equatable {
-    public static func == (lhs: StoredDosingDecision.TempBasalRecommendationWithDate, rhs: StoredDosingDecision.TempBasalRecommendationWithDate) -> Bool {
+extension StoredDosingDecision.AutomaticDoseRecommendationWithDate: Equatable {
+    public static func == (lhs: StoredDosingDecision.AutomaticDoseRecommendationWithDate, rhs: StoredDosingDecision.AutomaticDoseRecommendationWithDate) -> Bool {
         return lhs.recommendation == rhs.recommendation && lhs.date == rhs.date
     }
 }
@@ -896,10 +902,15 @@ fileprivate extension StoredDosingDecision {
                                         createdByCurrentApp: true,
                                         userCreatedDate: dateFormatter.date(from: "2020-05-14T22:06:12Z")!,
                                         userUpdatedDate: dateFormatter.date(from: "2020-05-14T22:07:32Z")!)
-        let recommendedTempBasal = StoredDosingDecision.TempBasalRecommendationWithDate(recommendation: TempBasalRecommendation(unitsPerHour: 0.75,
-                                                                                                                                duration: .minutes(30)),
-                                                                                        date: dateFormatter.date(from: "2020-05-14T22:38:15Z")!)
-        let recommendedBolus = StoredDosingDecision.BolusRecommendationWithDate(recommendation: BolusRecommendation(amount: 1.2,
+        let automaticDosingRecommendation = StoredDosingDecision.AutomaticDoseRecommendationWithDate(
+            recommendation: AutomaticDoseRecommendation(
+                basalAdjustment: TempBasalRecommendation(
+                    unitsPerHour: 0.75,
+                    duration: .minutes(30)),
+                bolusUnits: 0),
+            date: dateFormatter.date(from: "2020-05-14T22:38:15Z")!)
+        
+        let recommendedBolus = StoredDosingDecision.BolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 1.2,
                                                                                                                     pendingInsulin: 0.75,
                                                                                                                     notice: .predictedGlucoseBelowTarget(minGlucose: PredictedGlucoseValue(startDate: dateFormatter.date(from: "2020-05-14T23:03:15Z")!,
                                                                                                                                                                                            quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 75.5)))),
@@ -962,7 +973,7 @@ fileprivate extension StoredDosingDecision {
                                     manualGlucose: manualGlucose,
                                     originalCarbEntry: originalCarbEntry,
                                     carbEntry: carbEntry,
-                                    recommendedTempBasal: recommendedTempBasal,
+                                    automaticDoseRecommendation: automaticDosingRecommendation,
                                     recommendedBolus: recommendedBolus,
                                     requestedBolus: requestedBolus,
                                     pumpManagerStatus: pumpManagerStatus,

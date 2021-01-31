@@ -18,7 +18,7 @@ struct BolusDosingDecision {
     var manualGlucose: GlucoseValue?
     var originalCarbEntry: StoredCarbEntry?
     var carbEntry: StoredCarbEntry?
-    var recommendedBolus: BolusRecommendation?
+    var recommendedBolus: ManualBolusRecommendation?
     var requestedBolus: Double?
     
     init() {}

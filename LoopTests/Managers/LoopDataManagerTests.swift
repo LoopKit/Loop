@@ -126,10 +126,10 @@ class LoopDataManagerDosingTests: XCTestCase {
         let updateGroup = DispatchGroup()
         updateGroup.enter()
         var predictedGlucose: [PredictedGlucoseValue]?
-        var recommendedTempBasal: TempBasalRecommendation?
+        var recommendedDose: AutomaticDoseRecommendation?
         self.loopDataManager.getLoopState { _, state in
             predictedGlucose = state.predictedGlucose
-            recommendedTempBasal = state.recommendedTempBasal?.recommendation
+            recommendedDose = state.recommendedAutomaticDose?.recommendation
             updateGroup.leave()
         }
         // We need to wait until the task completes to get outputs
@@ -142,6 +142,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             XCTAssertEqual(expected.startDate, calculated.startDate)
             XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: 1.0 / 40.0)
         }
+        
+        let recommendedTempBasal = recommendedDose?.basalAdjustment
 
         XCTAssertEqual(1.40, recommendedTempBasal!.unitsPerHour, accuracy: 1.0 / 40.0)
     }
@@ -156,7 +158,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         var recommendedBasal: TempBasalRecommendation?
         self.loopDataManager.getLoopState { _, state in
             predictedGlucose = state.predictedGlucose
-            recommendedBasal = state.recommendedTempBasal?.recommendation
+            recommendedBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
             updateGroup.leave()
         }
         // We need to wait until the task completes to get outputs
@@ -183,7 +185,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         var recommendedTempBasal: TempBasalRecommendation?
         self.loopDataManager.getLoopState { _, state in
             predictedGlucose = state.predictedGlucose
-            recommendedTempBasal = state.recommendedTempBasal?.recommendation
+            recommendedTempBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
             updateGroup.leave()
         }
         // We need to wait until the task completes to get outputs
@@ -207,7 +209,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         let updateGroup = DispatchGroup()
         updateGroup.enter()
         var predictedGlucose: [PredictedGlucoseValue]?
-        var recommendedBolus: BolusRecommendation?
+        var recommendedBolus: ManualBolusRecommendation?
         self.loopDataManager.getLoopState { _, state in
             predictedGlucose = state.predictedGlucose
             recommendedBolus = state.recommendedBolus?.recommendation
@@ -237,7 +239,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         var recommendedTempBasal: TempBasalRecommendation?
         self.loopDataManager.getLoopState { _, state in
             predictedGlucose = state.predictedGlucose
-            recommendedTempBasal = state.recommendedTempBasal?.recommendation
+            recommendedTempBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
             updateGroup.leave()
         }
         // We need to wait until the task completes to get outputs
@@ -264,7 +266,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         var recommendedTempBasal: TempBasalRecommendation?
         self.loopDataManager.getLoopState { _, state in
             predictedGlucose = state.predictedGlucose
-            recommendedTempBasal = state.recommendedTempBasal?.recommendation
+            recommendedTempBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
             updateGroup.leave()
         }
         // We need to wait until the task completes to get outputs

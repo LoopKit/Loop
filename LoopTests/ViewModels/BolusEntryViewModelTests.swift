@@ -283,7 +283,7 @@ class BolusEntryViewModelTests: XCTestCase {
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
         let mockState = MockLoopState()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -300,7 +300,7 @@ class BolusEntryViewModelTests: XCTestCase {
         let mockState = MockLoopState()
         delegate.settings.suspendThreshold = GlucoseThreshold(unit: .milligramsPerDeciliter, value: Self.exampleCGMGlucoseQuantity.doubleValue(for: .milligramsPerDeciliter))
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -312,7 +312,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusWithNoticeMissingSuspendThreshold() throws {
         let mockState = MockLoopState()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -324,7 +324,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusWithOtherNotice() throws {
         let mockState = MockLoopState()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.currentGlucoseBelowTarget(glucose: Self.exampleGlucoseValue))
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.currentGlucoseBelowTarget(glucose: Self.exampleGlucoseValue))
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -371,7 +371,7 @@ class BolusEntryViewModelTests: XCTestCase {
         let mockState = MockLoopState()
         bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -409,7 +409,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertNil(bolusEntryViewModel.recommendedBolus)
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         let mockState = MockLoopState()
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         // Now, through the magic of `observeRecommendedBolusChanges` and the recommendedBolus publisher it should update to 1.234.  But we have to wait twice on main to make this reliable...
         waitOnMain()
@@ -803,9 +803,9 @@ fileprivate class MockLoopState: LoopState {
     
     var predictedGlucoseIncludingPendingInsulin: [PredictedGlucoseValue]?
     
-    var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
+    var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)?
     
-    var recommendedBolus: (recommendation: BolusRecommendation, date: Date)?
+    var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)?
     
     var retrospectiveGlucoseDiscrepancies: [GlucoseChange]?
     
@@ -820,18 +820,18 @@ fileprivate class MockLoopState: LoopState {
         return predictGlucoseValueResult
     }
     
-    var bolusRecommendationResult: BolusRecommendation?
+    var bolusRecommendationResult: ManualBolusRecommendation?
     var bolusRecommendationError: Error?
     var consideringPotentialCarbEntryPassed: NewCarbEntry??
     var replacingCarbEntryPassed: StoredCarbEntry??
-    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
+    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
         consideringPotentialCarbEntryPassed = potentialCarbEntry
         replacingCarbEntryPassed = replacedCarbEntry
         if let error = bolusRecommendationError { throw error }
         return bolusRecommendationResult
     }
     
-    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
+    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
         consideringPotentialCarbEntryPassed = potentialCarbEntry
         replacingCarbEntryPassed = replacedCarbEntry
         if let error = bolusRecommendationError { throw error }

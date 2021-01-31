@@ -44,3 +44,4 @@ LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION_RELEASE =
 
 // Optional overrides
 #include? "LoopOverride.xcconfig"
+#include? "../LoopConfigOverride.xcconfig"

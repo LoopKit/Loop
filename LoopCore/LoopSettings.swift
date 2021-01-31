@@ -8,6 +8,22 @@
 import HealthKit
 import LoopKit
 
+public enum DosingStrategy: Int, CaseIterable {
+    case tempBasalOnly
+    case automaticBolus
+}
+
+public extension DosingStrategy {
+    var title: String {
+        switch self {
+        case .tempBasalOnly:
+            return NSLocalizedString("Temp Basal Only", comment: "Title string for temp basal only dosing strategy")
+        case .automaticBolus:
+            return NSLocalizedString("Automatic Bolus", comment: "Title string for automatic bolus dosing strategy")
+        }
+    }
+}
+
 public struct LoopSettings: Equatable {
     public var isScheduleOverrideInfiniteWorkout: Bool {
         guard let scheduleOverride = scheduleOverride else { return false }
@@ -57,6 +73,8 @@ public struct LoopSettings: Equatable {
     public var maximumBolus: Double?
 
     public var suspendThreshold: GlucoseThreshold? = nil
+    
+    public var dosingStrategy: DosingStrategy = .tempBasalOnly
 
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
@@ -272,6 +290,11 @@ extension LoopSettings: RawRepresentable {
         if let rawThreshold = rawValue["minimumBGGuard"] as? GlucoseThreshold.RawValue {
             self.suspendThreshold = GlucoseThreshold(rawValue: rawThreshold)
         }
+        
+        if let rawDosingStrategy = rawValue["dosingStrategy"] as? DosingStrategy.RawValue,
+            let dosingStrategy = DosingStrategy(rawValue: rawDosingStrategy) {
+            self.dosingStrategy = dosingStrategy
+        }
     }
 
     public var rawValue: RawValue {
@@ -290,6 +313,7 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBasalRatePerHour"] = maximumBasalRatePerHour
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
+        raw["dosingStrategy"] = dosingStrategy.rawValue
 
         return raw
     }

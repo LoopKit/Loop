@@ -48,6 +48,7 @@ public class DeviceViewModel: ObservableObject {
 
 public protocol SettingsViewModelDelegate: class {
     func dosingEnabledChanged(_: Bool)
+    func dosingStrategyChanged(_: DosingStrategy)
     func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings)
     func didTapIssueReport(title: String)
 }
@@ -84,7 +85,12 @@ public class SettingsViewModel: ObservableObject {
     let supportInfoProvider: SupportInfoProvider
         
     @Published var isClosedLoopAllowed: Bool
-    
+    @Published var dosingStrategy: DosingStrategy {
+        didSet {
+            delegate?.dosingStrategyChanged(dosingStrategy)
+        }
+    }
+
     var closedLoopPreference: Bool {
        didSet {
            delegate?.dosingEnabledChanged(closedLoopPreference)
@@ -108,6 +114,7 @@ public class SettingsViewModel: ObservableObject {
                 preferredGlucoseUnit: HKUnit,
                 supportInfoProvider: SupportInfoProvider,
                 activeServices: [Service],
+                dosingStrategy: DosingStrategy,
                 delegate: SettingsViewModelDelegate?
     ) {
         self.notificationsCriticalAlertPermissionsViewModel = notificationsCriticalAlertPermissionsViewModel
@@ -123,8 +130,9 @@ public class SettingsViewModel: ObservableObject {
         self.closedLoopPreference = initialDosingEnabled
         self.isClosedLoopAllowed = false
         self.preferredGlucoseUnit = preferredGlucoseUnit
-        self.activeServices = activeServices
         self.supportInfoProvider = supportInfoProvider
+        self.activeServices = activeServices
+        self.dosingStrategy = dosingStrategy
         self.delegate = delegate
         
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
