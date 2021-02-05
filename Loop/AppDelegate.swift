@@ -193,6 +193,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
 
     var supportedInterfaceOrientations = UIInterfaceOrientationMask.allButUpsideDown
 
+    func setOriginallySupportedInferfaceOrientations() {
+        supportedInterfaceOrientations = UIInterfaceOrientationMask.allButUpsideDown
+    }
+
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         supportedInterfaceOrientations
     }
