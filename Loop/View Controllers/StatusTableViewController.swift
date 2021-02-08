@@ -44,6 +44,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
 
         registerPumpManager()
+        registerCGMManager()
 
         let notificationCenter = NotificationCenter.default
 
@@ -83,6 +84,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             },
             notificationCenter.addObserver(forName: .CGMManagerChanged, object: deviceManager, queue: nil) { [weak self] (notification: Notification) in
                 DispatchQueue.main.async {
+                    self?.registerCGMManager()
                     self?.configureCGMManagerHUDViews()
                 }
             },
@@ -283,6 +285,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func glucoseUnitDidChange() {
         refreshContext = RefreshContext.all
     }
+    
+    private func registerCGMManager() {
+        deviceManager.cgmManager?.removeStatusObserver(self)
+        deviceManager.cgmManager?.addStatusObserver(self, queue: .main)
+    }
 
     private func registerPumpManager() {
         self.basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
@@ -290,7 +297,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.pumpManager?.removeStatusObserver(self)
         deviceManager.pumpManager?.addStatusObserver(self, queue: .main)
     }
-
+    
     private lazy var statusCharts = StatusChartsManager(colors: .primary, settings: .default, traitCollection: self.traitCollection)
 
     override func createChartsManager() -> ChartsManager {
@@ -1866,6 +1873,13 @@ extension StatusTableViewController: PumpManagerStatusObserver {
             refreshContext.update(with: .status)
             self.reloadData(animated: true)
         }
+    }
+}
+
+extension StatusTableViewController: CGMManagerStatusObserver {
+    func cgmManager(_ manager: CGMManager, didUpdate status: CGMManagerStatus) {
+        refreshContext.update(with: .status)
+        self.reloadData(animated: true)
     }
 }
 

@@ -547,7 +547,7 @@ private extension DeviceDataManager {
                                             alertResponder: cgmManager)
             alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
                                               soundVendor: cgmManager)            
-            cgmHasValidSensorSession = cgmManager.cgmStatus.hasValidSensorSession
+            cgmHasValidSensorSession = cgmManager.cgmManagerStatus.hasValidSensorSession
         }
 
         if let cgmManagerUI = cgmManager as? CGMManagerUI {
