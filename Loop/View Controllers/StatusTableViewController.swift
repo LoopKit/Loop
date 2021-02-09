@@ -1970,7 +1970,7 @@ extension StatusTableViewController: PumpManagerSetupViewControllerDelegate {
 
 extension StatusTableViewController: BluetoothStateManagerObserver {
     func bluetoothStateManager(_ bluetoothStateManager: BluetoothStateManager,
-                           bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
+                               bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
     {
         refreshContext.update(with: .status)
         reloadData(animated: true)
