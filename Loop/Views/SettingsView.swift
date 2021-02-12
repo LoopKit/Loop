@@ -260,7 +260,7 @@ extension SettingsView {
         }
     }
     
-    private func makeDeleteAlert(for model: DeviceViewModel) -> SwiftUI.Alert {
+    private func makeDeleteAlert<T>(for model: DeviceViewModel<T>) -> SwiftUI.Alert {
         return SwiftUI.Alert(title: Text("Delete Testing Data"),
                              message: Text("Are you sure you want to delete all your \(model.name()) Data?\n(This action is not reversible)"),
                              primaryButton: .cancel(),
@@ -271,7 +271,7 @@ extension SettingsView {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
             NavigationLink(destination: SupportScreenView(didTapIssueReport: viewModel.didTapIssueReport,
                                                           criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel,
-                                                          activeServices: self.viewModel.activeServices,
+                                                          availableSupports: self.viewModel.availableSupports,
                                                           supportInfoProvider: self.viewModel.supportInfoProvider))
             {
                 Text(NSLocalizedString("Support", comment: "The title of the support item in settings"))
@@ -344,18 +344,20 @@ fileprivate class FakeService1: Service {
     static var serviceIdentifier: String = "FakeService1"
     var serviceDelegate: ServiceDelegate?
     var rawState: RawStateValue = [:]
+    required init() {}
     required init?(rawState: RawStateValue) {}
-    convenience init() { self.init(rawState: [:])! }
-    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle, providesOnboarding: false) }
+    let isOnboarded = true
+    var available: ServiceDescriptor { ServiceDescriptor(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
 }
 fileprivate class FakeService2: Service {
     static var localizedTitle: String = "Service 2"
     static var serviceIdentifier: String = "FakeService2"
     var serviceDelegate: ServiceDelegate?
     var rawState: RawStateValue = [:]
+    required init() {}
     required init?(rawState: RawStateValue) {}
-    convenience init() { self.init(rawState: [:])! }
-    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle, providesOnboarding: false) }
+    let isOnboarded = true
+    var available: ServiceDescriptor { ServiceDescriptor(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
 }
 fileprivate let servicesViewModel = ServicesViewModel(showServices: true,
                                                       availableServices: { [FakeService1().available, FakeService2().available] },
@@ -386,10 +388,9 @@ public struct SettingsView_Previews: PreviewProvider {
     
     public static var previews: some View {
         let fakeClosedLoopAllowedPublisher = FakeClosedLoopAllowedPublisher()
-        let supportInfoProvider = MockSupportInfoProvider()
         let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
-                                          pumpManagerSettingsViewModel: DeviceViewModel(),
-                                          cgmManagerSettingsViewModel: DeviceViewModel(),
+                                          pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
+                                          cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
                                           therapySettings: { TherapySettings() },
@@ -401,7 +402,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
                                           preferredGlucoseUnit: .milligramsPerDeciliter,
                                           supportInfoProvider: MockSupportInfoProvider(),
-                                          activeServices: [],
+                                          availableSupports: [],
                                           delegate: nil)
         return Group {
             SettingsView(viewModel: viewModel)

@@ -409,6 +409,7 @@
 		A9CBE45C248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CBE45B248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift */; };
 		A9CE912224CA032E00302A40 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B29892041F54A00BA9F93 /* NSUserDefaults.swift */; };
 		A9DAE7D02332D77F006AE942 /* LoopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DAE7CF2332D77F006AE942 /* LoopTests.swift */; };
+		A9DCF32A25B0FABF00C89088 /* LoopUIColorPalette+Default.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DCF2D525B0F3C500C89088 /* LoopUIColorPalette+Default.swift */; };
 		A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DF02CA24F72B9E00B7C988 /* CriticalEventLogTests.swift */; };
 		A9DF02CD24F72BC800B7C988 /* PersistenceControllerTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DF02CC24F72BC800B7C988 /* PersistenceControllerTestCase.swift */; };
 		A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */; };
@@ -1290,6 +1291,7 @@
 		A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DosingDecisionStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9CBE45B248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9DAE7CF2332D77F006AE942 /* LoopTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopTests.swift; sourceTree = "<group>"; };
+		A9DCF2D525B0F3C500C89088 /* LoopUIColorPalette+Default.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopUIColorPalette+Default.swift"; sourceTree = "<group>"; };
 		A9DF02CA24F72B9E00B7C988 /* CriticalEventLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalEventLogTests.swift; sourceTree = "<group>"; };
 		A9DF02CC24F72BC800B7C988 /* PersistenceControllerTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceControllerTestCase.swift; sourceTree = "<group>"; };
 		A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBackfillRequestUserInfoTests.swift; sourceTree = "<group>"; };
@@ -1930,6 +1932,7 @@
 				A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */,
 				A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */,
 				A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */,
+				A9DCF2D525B0F3C500C89088 /* LoopUIColorPalette+Default.swift */,
 				438172D81F4E9E37003C3328 /* NewPumpEvent.swift */,
 				89E267FE229267DF00A3F2AF /* Optional.swift */,
 				A967D94B24F99B9300CDDF8A /* OutputStream.swift */,
@@ -3423,6 +3426,7 @@
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
 				C148CEE724FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
+				A9DCF32A25B0FABF00C89088 /* LoopUIColorPalette+Default.swift in Sources */,
 				1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */,
 				A9B607B0247F000F00792BE4 /* UserNotifications+Loop.swift in Sources */,
 				43F89CA322BDFBBD006BB54E /* UIActivityIndicatorView.swift in Sources */,

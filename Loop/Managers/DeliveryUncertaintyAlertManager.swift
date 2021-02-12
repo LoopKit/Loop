@@ -21,7 +21,7 @@ class DeliveryUncertaintyAlertManager {
     }
 
     private func showUncertainDeliveryRecoveryView() {
-        var controller = pumpManager.deliveryUncertaintyRecoveryViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default)
+        var controller = pumpManager.deliveryUncertaintyRecoveryViewController(colorPalette: .default)
         controller.completionDelegate = self
         self.rootViewController.present(controller, animated: true)
     }

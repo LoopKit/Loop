@@ -6,6 +6,7 @@
 //
 
 import LoopKit
+import LoopKitUI
 import MockKit
 
 // TODO: Need a flag other than Debug for including MockCGMManager
@@ -16,7 +17,7 @@ let staticCGMManagersByIdentifier: [String: CGMManager.Type] = [
 ]
 
 let availableStaticCGMManagers = [
-    AvailableDevice(identifier: MockCGMManager.managerIdentifier, localizedTitle: MockCGMManager.localizedTitle, providesOnboarding: false)
+    CGMManagerDescriptor(identifier: MockCGMManager.managerIdentifier, localizedTitle: MockCGMManager.localizedTitle)
 ]
 
 func CGMManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManager? {

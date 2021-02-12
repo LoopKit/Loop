@@ -21,7 +21,7 @@ struct SupportScreenView: View {
     
     var didTapIssueReport: ((_ title: String) -> Void)?
     var criticalEventLogExportViewModel: CriticalEventLogExportViewModel
-    let activeServices: [Service]
+    let availableSupports: [SupportUI]
     let supportInfoProvider: SupportInfoProvider
     
     @State private var adverseEventReportURLInvalid = false
@@ -53,19 +53,13 @@ struct SupportScreenView: View {
     }
     
     var supportMenuItems: [SupportMenuItem] {
-        return activeServices.compactMap { (service) -> SupportMenuItem? in
-            if let view = (service as? ServiceUI)?.supportMenuItem(supportInfoProvider: supportInfoProvider, urlHandler: openURL) {
-                return SupportMenuItem(id: service.serviceIdentifier, menuItemView: view)
+        return availableSupports.compactMap { (support) -> SupportMenuItem? in
+            if let view = support.supportMenuItem(supportInfoProvider: supportInfoProvider, urlHandler: openURL) {
+                return SupportMenuItem(id: support.supportIdentifier, menuItemView: view)
             } else {
                 return nil
             }
         }
-    }
-        
-    private var invalidAdverseEventReportURLAlert: SwiftUI.Alert {
-        Alert(title: Text("Invalid Adverse Event Report URL", comment: "Alert title when the adverse event report URL cannot be constructed properly."),
-              message: Text("The adverse event report URL could not be constructed properly.", comment: "Alert message when the adverse event report URL cannot be constructed properly."),
-              dismissButton: .default(Text("Dismiss", comment: "Dismiss button for the invalid adverse event report URL alert.")))
     }
 }
 
@@ -85,6 +79,6 @@ struct SupportScreenView_Previews: PreviewProvider {
 
     static var previews: some View {
         SupportScreenView(criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
-                          activeServices: [], supportInfoProvider: MockSupportInfoProvider())
+                          availableSupports: [], supportInfoProvider: MockSupportInfoProvider())
     }
 }

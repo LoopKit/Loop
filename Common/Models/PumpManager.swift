@@ -20,7 +20,7 @@ let staticPumpManagersByIdentifier: [String: PumpManagerUI.Type] = [
 ]
 
 let availableStaticPumpManagers = [
-    AvailableDevice(identifier: MockPumpManager.managerIdentifier, localizedTitle: MockPumpManager.localizedTitle, providesOnboarding: false)
+    PumpManagerDescriptor(identifier: MockPumpManager.managerIdentifier, localizedTitle: MockPumpManager.localizedTitle)
 ]
 
 extension PumpManager {
