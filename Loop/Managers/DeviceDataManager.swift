@@ -950,29 +950,6 @@ extension DeviceDataManager: PumpManagerDelegate {
                 completion(.failure(error))
             case .success(let (newValue, lastValue, areStoredValuesContinuous)):
                 completion(.success((newValue: newValue, lastValue: lastValue, areStoredValuesContinuous: areStoredValuesContinuous)))
-
-                // Send notifications for low reservoir if necessary
-                if let previousVolume = lastValue?.unitVolume {
-                    guard newValue.unitVolume > 0 else {
-                        NotificationManager.sendPumpReservoirEmptyNotification()
-                        return
-                    }
-
-                    let warningThresholds: [Double] = [10, 20, 30]
-
-                    for threshold in warningThresholds {
-                        if newValue.unitVolume <= threshold && previousVolume > threshold {
-                            NotificationManager.sendPumpReservoirLowNotificationForAmount(newValue.unitVolume, andTimeRemaining: nil)
-                            break
-                        }
-                    }
-
-                    if newValue.unitVolume > previousVolume + 1 {
-                        self.analyticsServicesManager.reservoirWasRewound()
-
-                        NotificationManager.clearPumpReservoirNotification()
-                    }
-                }
             }
         }
     }
