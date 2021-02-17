@@ -2117,10 +2117,10 @@ extension StatusTableViewController {
         }
 
         let onboarding = onboardingUIType.createOnboarding()
-        var onboardingViewController = onboarding.onboardingViewController(preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
-                                                                           cgmManagerProvider: self,
+        var onboardingViewController = onboarding.onboardingViewController(cgmManagerProvider: self,
                                                                            pumpManagerProvider: self,
                                                                            serviceProvider: self,
+                                                                           preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
                                                                            colorPalette: .default)
         onboardingViewController.onboardingDelegate = self
         onboardingViewController.cgmManagerCreateDelegate = self
@@ -2131,7 +2131,9 @@ extension StatusTableViewController {
         onboardingViewController.serviceOnboardDelegate = self
         onboardingViewController.completionDelegate = self
 
-        show(onboardingViewController, sender: self)
+        deviceManager.addPreferredGlucoseUnitObserver(onboardingViewController)
+
+        present(onboardingViewController, animated: true)
     }
 }
 

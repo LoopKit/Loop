@@ -15,9 +15,9 @@ import HealthKit
 public struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appName) private var appName
+    @Environment(\.guidanceColors) private var guidanceColors
     @Environment(\.carbTintColor) private var carbTintColor
     @Environment(\.glucoseTintColor) private var glucoseTintColor
-    @Environment(\.guidanceColors) private var guidanceColors
     @Environment(\.insulinTintColor) private var insulinTintColor
 
     @ObservedObject var viewModel: SettingsViewModel
