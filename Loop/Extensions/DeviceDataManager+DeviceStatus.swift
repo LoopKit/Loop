@@ -25,6 +25,10 @@ extension DeviceDataManager {
         }
     }
     
+    var cgmStatusBadge: DeviceStatusBadge? {
+        return (cgmManager as? CGMManagerUI)?.cgmStatusBadge
+    }
+    
     var cgmLifecycleProgress: DeviceLifecycleProgress? {
         return (cgmManager as? CGMManagerUI)?.cgmLifecycleProgress
     }

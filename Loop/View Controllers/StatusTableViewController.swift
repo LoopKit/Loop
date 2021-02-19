@@ -573,6 +573,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                                             wasUserEntered: glucose.wasUserEntered)
                 }
                 hudView.cgmStatusHUD.presentStatusHighlight(self.deviceManager.cgmStatusHighlight)
+                hudView.cgmStatusHUD.presentStatusBadge(self.deviceManager.cgmStatusBadge)
                 hudView.cgmStatusHUD.lifecycleProgress = self.deviceManager.cgmLifecycleProgress
 
                 // Pump Status
