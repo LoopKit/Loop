@@ -96,21 +96,21 @@
                             </constraints>
                         </stackView>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oSZ-F8-Rb1" customClass="StatusBadgeHUDView" customModule="LoopUI" customModuleProvider="target">
-                            <rect key="frame" x="134" y="2" width="16" height="16"/>
+                            <rect key="frame" x="131" y="1" width="19" height="19"/>
                             <subviews>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="questionmark.circle.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="MHG-iP-fBI">
-                                    <rect key="frame" x="0.0" y="0.5" width="16" height="15"/>
+                                    <rect key="frame" x="0.0" y="0.5" width="19" height="18"/>
                                     <color key="tintColor" name="warning"/>
                                 </imageView>
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstItem="MHG-iP-fBI" firstAttribute="width" secondItem="oSZ-F8-Rb1" secondAttribute="width" id="Aoy-00-Usd"/>
-                                <constraint firstAttribute="width" constant="16" id="G3Z-Xn-D5p"/>
+                                <constraint firstAttribute="width" constant="19" id="G3Z-Xn-D5p"/>
                                 <constraint firstItem="MHG-iP-fBI" firstAttribute="height" secondItem="oSZ-F8-Rb1" secondAttribute="height" id="OWO-9R-xsC"/>
                                 <constraint firstItem="MHG-iP-fBI" firstAttribute="centerX" secondItem="oSZ-F8-Rb1" secondAttribute="centerX" id="Tu7-Pf-OxI"/>
                                 <constraint firstItem="MHG-iP-fBI" firstAttribute="centerY" secondItem="oSZ-F8-Rb1" secondAttribute="centerY" id="icV-xH-Fuj"/>
-                                <constraint firstAttribute="height" constant="16" id="x5j-yC-i10"/>
+                                <constraint firstAttribute="height" constant="19" id="x5j-yC-i10"/>
                             </constraints>
                             <connections>
                                 <outlet property="badgeIcon" destination="MHG-iP-fBI" id="OSN-JM-6iM"/>
@@ -134,7 +134,7 @@
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="150" id="Nl5-qI-g5J"/>
                         <constraint firstAttribute="trailing" secondItem="BMR-SB-Ayc" secondAttribute="trailing" id="VJX-X2-64n"/>
                         <constraint firstAttribute="trailing" secondItem="KzR-4q-Npx" secondAttribute="trailing" constant="6" id="YfI-gU-2nA"/>
-                        <constraint firstItem="oSZ-F8-Rb1" firstAttribute="top" secondItem="BMR-SB-Ayc" secondAttribute="top" constant="-8" id="f9r-1G-yvo"/>
+                        <constraint firstItem="oSZ-F8-Rb1" firstAttribute="top" secondItem="BMR-SB-Ayc" secondAttribute="top" constant="-9" id="f9r-1G-yvo"/>
                         <constraint firstAttribute="bottom" secondItem="BMR-SB-Ayc" secondAttribute="bottom" constant="20" id="gZy-K7-Xnv"/>
                         <constraint firstAttribute="trailing" secondItem="1CX-eC-9a3" secondAttribute="trailing" constant="18" id="pDO-Zj-Lmm"/>
                         <constraint firstItem="BMR-SB-Ayc" firstAttribute="top" secondItem="MLJ-z5-oVV" secondAttribute="top" constant="10" id="rFr-XW-3G8"/>
@@ -287,10 +287,10 @@
                             </constraints>
                         </stackView>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="c24-E5-y2y" customClass="StatusBadgeHUDView" customModule="LoopUI" customModuleProvider="target">
-                            <rect key="frame" x="126" y="2" width="16" height="16"/>
+                            <rect key="frame" x="123" y="1" width="19" height="19"/>
                             <subviews>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="questionmark.circle.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="Tdo-Xm-cL0">
-                                    <rect key="frame" x="0.0" y="0.5" width="16" height="15"/>
+                                    <rect key="frame" x="0.0" y="0.5" width="19" height="18"/>
                                     <color key="tintColor" name="warning"/>
                                 </imageView>
                             </subviews>
@@ -300,8 +300,8 @@
                                 <constraint firstItem="Tdo-Xm-cL0" firstAttribute="width" secondItem="c24-E5-y2y" secondAttribute="width" id="Hju-g5-iRu"/>
                                 <constraint firstItem="Tdo-Xm-cL0" firstAttribute="height" secondItem="c24-E5-y2y" secondAttribute="height" id="Y8m-UV-wPl"/>
                                 <constraint firstItem="Tdo-Xm-cL0" firstAttribute="centerY" secondItem="c24-E5-y2y" secondAttribute="centerY" id="e5y-Vc-loW"/>
-                                <constraint firstAttribute="width" constant="16" id="gex-KW-MY0"/>
-                                <constraint firstAttribute="height" constant="16" id="yxc-JK-3dO"/>
+                                <constraint firstAttribute="width" constant="19" id="gex-KW-MY0"/>
+                                <constraint firstAttribute="height" constant="19" id="yxc-JK-3dO"/>
                             </constraints>
                             <connections>
                                 <outlet property="badgeIcon" destination="Tdo-Xm-cL0" id="p1w-na-6kE"/>
@@ -320,7 +320,7 @@
                     <constraints>
                         <constraint firstItem="rr5-s9-RU2" firstAttribute="leading" secondItem="GcS-Ho-amr" secondAttribute="leading" constant="18" id="2Hv-eH-NzS"/>
                         <constraint firstAttribute="bottom" secondItem="rr5-s9-RU2" secondAttribute="bottom" constant="8" id="BNE-fE-c8Z"/>
-                        <constraint firstItem="c24-E5-y2y" firstAttribute="top" secondItem="Ao2-HQ-nCe" secondAttribute="top" constant="-8" id="BsO-0s-JSh"/>
+                        <constraint firstItem="c24-E5-y2y" firstAttribute="top" secondItem="Ao2-HQ-nCe" secondAttribute="top" constant="-9" id="BsO-0s-JSh"/>
                         <constraint firstItem="L6g-Dz-wXm" firstAttribute="top" secondItem="GcS-Ho-amr" secondAttribute="top" constant="10" id="FG6-TV-Mei"/>
                         <constraint firstAttribute="bottom" secondItem="Ao2-HQ-nCe" secondAttribute="bottom" constant="20" id="Icw-tf-Wxf"/>
                         <constraint firstItem="Ao2-HQ-nCe" firstAttribute="top" secondItem="GcS-Ho-amr" secondAttribute="top" constant="10" id="Uya-vx-dUS"/>
