@@ -38,4 +38,4 @@ for COUNTER in $(seq 0 $(($SCRIPT_INPUT_FILE_COUNT - 1))); do
 done
 
 echo "Copy Frameworks with Carthage"
-carthage copy-frameworks
+"${SRCROOT}/bin/carthage" copy-frameworks

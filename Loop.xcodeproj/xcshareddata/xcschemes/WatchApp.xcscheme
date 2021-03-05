@@ -90,8 +90,8 @@
       notificationPayloadFile = "WatchApp Extension/PushNotificationPayload.apns">
       <RemoteRunnable
          runnableDebuggingMode = "2"
-         BundleIdentifier = "com.apple.carousel"
-         RemotePath = "/Naterade">
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/$(MAIN_APP_DISPLAY_NAME)">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
@@ -110,8 +110,8 @@
       notificationPayloadFile = "WatchApp Extension/PushNotificationPayload.apns">
       <RemoteRunnable
          runnableDebuggingMode = "2"
-         BundleIdentifier = "com.apple.carousel"
-         RemotePath = "/Naterade">
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/$(MAIN_APP_DISPLAY_NAME)">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
