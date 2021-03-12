@@ -31,7 +31,7 @@ protocol SimpleBolusViewModelDelegate: class {
 
     func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision?
 
-    var preferredGlucoseUnit: HKUnit { get }
+    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable { get }
     
     var maximumBolus: Double { get }
 
@@ -79,7 +79,7 @@ class SimpleBolusViewModel: ObservableObject {
     @Published var enteredGlucoseAmount: String = "" {
         didSet {
             if let enteredGlucose = glucoseAmountFormatter.number(from: enteredGlucoseAmount)?.doubleValue {
-                glucose = HKQuantity(unit: delegate.preferredGlucoseUnit, doubleValue: enteredGlucose)
+                glucose = HKQuantity(unit: delegate.displayGlucoseUnitObservable.displayGlucoseUnit, doubleValue: enteredGlucose)
                 if let glucose = glucose, glucose < suspendThreshold {
                     activeNotice = .glucoseBelowSuspendThreshold
                 } else {
@@ -106,7 +106,7 @@ class SimpleBolusViewModel: ObservableObject {
     private var glucose: HKQuantity? = nil
     private var bolus: HKQuantity? = nil
     
-    var glucoseUnit: HKUnit { return delegate.preferredGlucoseUnit }
+    var glucoseUnit: HKUnit { return delegate.displayGlucoseUnitObservable.displayGlucoseUnit }
     
     var suspendThreshold: HKQuantity { return delegate.suspendThreshold }
 
@@ -180,7 +180,7 @@ class SimpleBolusViewModel: ObservableObject {
     init(delegate: SimpleBolusViewModelDelegate) {
         self.delegate = delegate
         let glucoseQuantityFormatter = QuantityFormatter()
-        glucoseQuantityFormatter.setPreferredNumberFormatter(for: delegate.preferredGlucoseUnit)
+        glucoseQuantityFormatter.setPreferredNumberFormatter(for: delegate.displayGlucoseUnitObservable.displayGlucoseUnit)
         glucoseAmountFormatter = glucoseQuantityFormatter.numberFormatter
         enteredBolusAmount = Self.doseAmountFormatter.string(from: 0.0)!
         updateRecommendation()

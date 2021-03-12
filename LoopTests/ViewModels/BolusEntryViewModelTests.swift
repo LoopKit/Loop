@@ -88,7 +88,6 @@ class BolusEntryViewModelTests: XCTestCase {
     func testInitialConditions() throws {
         XCTAssertEqual(0, bolusEntryViewModel.glucoseValues.count)
         XCTAssertEqual(0, bolusEntryViewModel.predictedGlucoseValues.count)
-        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
         XCTAssertNil(bolusEntryViewModel.activeCarbs)
         XCTAssertNil(bolusEntryViewModel.activeInsulin)
         XCTAssertNil(bolusEntryViewModel.targetGlucoseSchedule)
@@ -189,7 +188,6 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertNil(bolusEntryViewModel.preMealOverride)
         XCTAssertNil(bolusEntryViewModel.scheduleOverride)
         XCTAssertNil(bolusEntryViewModel.targetGlucoseSchedule)
-        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
         let newGlucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .millimolesPerLiter, dailyItems: [
             RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 100, maxValue: 110)),
             RepeatingScheduleValue(startTime: TimeInterval(28800), value: DoubleRange(minValue: 90, maxValue: 100)),
@@ -210,7 +208,6 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(newSettings.preMealOverride, bolusEntryViewModel.preMealOverride)
         XCTAssertEqual(newSettings.scheduleOverride, bolusEntryViewModel.scheduleOverride)
         XCTAssertEqual(newGlucoseTargetRangeSchedule, bolusEntryViewModel.targetGlucoseSchedule)
-        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
     }
 
     func testUpdateSettingsWithCarbs() throws {
@@ -218,7 +215,6 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertNil(bolusEntryViewModel.preMealOverride)
         XCTAssertNil(bolusEntryViewModel.scheduleOverride)
         XCTAssertNil(bolusEntryViewModel.targetGlucoseSchedule)
-        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
         let newGlucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .millimolesPerLiter, dailyItems: [
             RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 100, maxValue: 110)),
             RepeatingScheduleValue(startTime: TimeInterval(28800), value: DoubleRange(minValue: 90, maxValue: 100)),
@@ -238,7 +234,6 @@ class BolusEntryViewModelTests: XCTestCase {
         // Pre-meal override should be ignored if we have carbs (LOOP-1964), and cleared in settings
         XCTAssertEqual(newSettings.scheduleOverride, bolusEntryViewModel.scheduleOverride)
         XCTAssertEqual(newGlucoseTargetRangeSchedule, bolusEntryViewModel.targetGlucoseSchedule)
-        XCTAssertEqual(.milligramsPerDeciliter, bolusEntryViewModel.glucoseUnit)
         
         // ... but restored if we cancel without bolusing
         bolusEntryViewModel = nil

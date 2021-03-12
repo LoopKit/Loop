@@ -9,7 +9,9 @@
 import XCTest
 import HealthKit
 import LoopKit
+import LoopKitUI
 import LoopCore
+
 @testable import Loop
 
 class SimpleBolusViewModelTests: XCTestCase {
@@ -242,8 +244,8 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         storedBolusDecision = bolusDosingDecision
     }
 
-    var preferredGlucoseUnit: HKUnit {
-        return .milligramsPerDeciliter
+    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable {
+        return DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
     }
     
     var maximumBolus: Double {

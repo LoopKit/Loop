@@ -30,7 +30,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     var preferredCarbUnit = HKUnit.gram()
     
     private var glucoseUnit: HKUnit {
-        return deviceManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+        return deviceManager.displayGlucoseUnitObservable.displayGlucoseUnit
     }
 
     var maxQuantity = HKQuantity(unit: .gram(), doubleValue: 250)
@@ -496,7 +496,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
         )
 
-        let bolusEntryView = BolusEntryView(viewModel: viewModel)
+        let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
 
         // After confirming a bolus, pop back to this controller's predecessor, i.e. all the way back out of the carb flow.
         let predecessorViewControllerType = (navigationController?.viewControllers.dropLast().last).map { type(of: $0) } ?? UIViewController.self

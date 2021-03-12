@@ -32,8 +32,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     lazy private var cancellables = Set<AnyCancellable>()
 
-    private var preferredGlucoseUnitObservers = WeakSynchronizedSet<PreferredGlucoseUnitObserver>()
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -95,8 +93,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
             },
         ]
-
-        deviceManager.addPreferredGlucoseUnitObserver(self)
 
         deviceManager.$isClosedLoop
             .receive(on: DispatchQueue.main)
@@ -163,9 +159,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 self.appearedOnce = success
                 if success {
                     DispatchQueue.main.async {
-                        // On first launch, before HealthKit permissions are acknowledged, preferredGlucoseUnit will be nil, so set here when available
-                        self.preferredGlucoseUnit = self.deviceManager.glucoseStore.preferredUnit
-
                         self.log.debug("[reloadData] after HealthKit authorization")
                         self.reloadData()
                         if !self.isOnboardingComplete && self.hasOnboarding {
@@ -283,6 +276,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     override func glucoseUnitDidChange() {
+        self.log.debug("[reloadData] for HealthKit unit preference change")
         refreshContext = RefreshContext.all
     }
     
@@ -1195,7 +1189,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case let vc as CarbAbsorptionViewController:
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
-            vc.preferredGlucoseUnit = statusCharts.glucose.glucoseUnit
         case let vc as InsulinDeliveryTableViewController:
             vc.doseStore = deviceManager.doseStore
             vc.hidesBottomBarWhenPushed = true
@@ -1210,7 +1203,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             vc.delegate = self
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
-            vc.preferredGlucoseUnit = statusCharts.glucose.glucoseUnit
         default:
             break
         }
@@ -1241,7 +1233,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let activity = activity {
                 viewModel.restoreUserActivityState(activity)
             }
-            let bolusEntryView = SimpleBolusView(displayMealEntry: true, viewModel: viewModel)
+            let bolusEntryView = SimpleBolusView(displayMealEntry: true, viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
             navigationWrapper = UINavigationController(rootViewController: hostingController)
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
@@ -1257,11 +1249,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let hostingController: DismissibleHostingController
         if deviceManager.isClosedLoop {
             let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
-            let bolusEntryView = BolusEntryView(viewModel: viewModel)
+            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         } else {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager)
-            let bolusEntryView = SimpleBolusView(displayMealEntry: false, viewModel: viewModel)
+            let bolusEntryView = SimpleBolusView(displayMealEntry: false, viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         }
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
@@ -1419,13 +1411,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           isClosedLoopAllowed: deviceManager.$isClosedLoopAllowed,
-                                          preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
                                           supportInfoProvider: deviceManager,
                                           availableSupports: deviceManager.availableSupports,
                                           delegate: self)
-        deviceManager.addPreferredGlucoseUnitObserver(viewModel)
         let hostingController = DismissibleHostingController(
-            rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),
+            rootView: SettingsView(viewModel: viewModel)
+                .environmentObject(deviceManager.displayGlucoseUnitObservable)
+                .environment(\.appName, Bundle.main.bundleDisplayName),
             isModalInPresentation: false)
         present(hostingController, animated: true)
     }
@@ -1441,16 +1433,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func onCGMTapped() {
-        guard let unit = preferredGlucoseUnit,
-            let cgmManager = deviceManager.cgmManager as? CGMManagerUI else {
+        guard let cgmManager = deviceManager.cgmManager as? CGMManagerUI else {
             // assert?
             return
         }
 
-        var settings = cgmManager.settingsViewController(for: unit, colorPalette: .default)
+        var settings = cgmManager.settingsViewController(for: deviceManager.displayGlucoseUnitObservable, colorPalette: .default)
         settings.cgmManagerOnboardDelegate = self
         settings.completionDelegate = self
-        deviceManager.addPreferredGlucoseUnitObserver(settings)
         show(settings, sender: self)
     }
 
@@ -1577,9 +1567,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .presentViewController(let vc):
             var completionNotifyingVC = vc
             completionNotifyingVC.completionDelegate = self
-            if let preferredGlucoseUnitObservingVC = completionNotifyingVC as? PreferredGlucoseUnitObserver {
-                deviceManager.addPreferredGlucoseUnitObserver(preferredGlucoseUnitObservingVC)
-            }
             self.present(completionNotifyingVC, animated: true, completion: nil)
         case .openAppURL(let url):
             UIApplication.shared.open(url)
@@ -1737,9 +1724,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(stepActiveScenarioBackward))
             rightSwipe.direction = .right
 
-            let toolBar = navigationController!.toolbar!
-            toolBar.addGestureRecognizer(leftSwipe)
-            toolBar.addGestureRecognizer(rightSwipe)
+            if let toolBar = navigationController?.toolbar {
+                toolBar.addGestureRecognizer(leftSwipe)
+                toolBar.addGestureRecognizer(rightSwipe)
+            }
         }
     }
 
@@ -2121,7 +2109,7 @@ extension StatusTableViewController {
         var onboardingViewController = onboarding.onboardingViewController(cgmManagerProvider: self,
                                                                            pumpManagerProvider: self,
                                                                            serviceProvider: self,
-                                                                           preferredGlucoseUnit: deviceManager.preferredGlucoseUnit,
+                                                                           displayGlucoseUnitObservable: deviceManager.displayGlucoseUnitObservable,
                                                                            colorPalette: .default)
         onboardingViewController.onboardingDelegate = self
         onboardingViewController.cgmManagerCreateDelegate = self
@@ -2131,8 +2119,6 @@ extension StatusTableViewController {
         onboardingViewController.serviceCreateDelegate = self
         onboardingViewController.serviceOnboardDelegate = self
         onboardingViewController.completionDelegate = self
-
-        deviceManager.addPreferredGlucoseUnitObserver(onboardingViewController)
 
         present(onboardingViewController, animated: true)
     }
@@ -2243,15 +2229,6 @@ extension StatusTableViewController: ServiceProvider {
         }
 
         return .success(result)
-    }
-}
-
-extension StatusTableViewController: PreferredGlucoseUnitObserver {
-    func preferredGlucoseUnitDidChange(to preferredGlucoseUnit: HKUnit) {
-        self.log.debug("[reloadData] for HealthKit unit preference change")
-        self.preferredGlucoseUnit = preferredGlucoseUnit
-        self.unitPreferencesDidChange(to: preferredGlucoseUnit)
-        self.refreshContext = RefreshContext.all
     }
 }
 

@@ -116,7 +116,6 @@ extension SettingsView {
                     TherapySettingsView(
                         viewModel: TherapySettingsViewModel(mode: .settings,
                                                             therapySettings: self.viewModel.therapySettings(),
-                                                            preferredGlucoseUnit: self.viewModel.preferredGlucoseUnit,
                                                             supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
                                                             pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
@@ -388,6 +387,7 @@ public struct SettingsView_Previews: PreviewProvider {
     
     public static var previews: some View {
         let fakeClosedLoopAllowedPublisher = FakeClosedLoopAllowedPublisher()
+        let displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
         let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
                                           cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
@@ -400,7 +400,6 @@ public struct SettingsView_Previews: PreviewProvider {
                                           sensitivityOverridesEnabled: false,
                                           initialDosingEnabled: true,
                                           isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
-                                          preferredGlucoseUnit: .milligramsPerDeciliter,
                                           supportInfoProvider: MockSupportInfoProvider(),
                                           availableSupports: [],
                                           delegate: nil)
@@ -409,11 +408,13 @@ public struct SettingsView_Previews: PreviewProvider {
                 .colorScheme(.light)
                 .previewDevice(PreviewDevice(rawValue: "iPhone SE 2"))
                 .previewDisplayName("SE light")
+                .environmentObject(displayGlucoseUnitObservable)
             
             SettingsView(viewModel: viewModel)
                 .colorScheme(.dark)
                 .previewDevice(PreviewDevice(rawValue: "iPhone 11 Pro Max"))
                 .previewDisplayName("11 Pro dark")
+                .environmentObject(displayGlucoseUnitObservable)
         }
     }
 }

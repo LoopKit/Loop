@@ -44,8 +44,6 @@ protocol BolusEntryViewModelDelegate: class {
     
     var isPumpConfigured: Bool { get }
     
-    var preferredGlucoseUnit: HKUnit { get }
-    
     var insulinModel: InsulinModel? { get }
     
     var settings: LoopSettings { get }
@@ -76,7 +74,6 @@ final class BolusEntryViewModel: ObservableObject {
     @Published var glucoseValues: [GlucoseValue] = [] // stored glucose values + manual glucose entry
     private var storedGlucoseValues: [GlucoseValue] = []
     @Published var predictedGlucoseValues: [GlucoseValue] = []
-    @Published var glucoseUnit: HKUnit = .milligramsPerDeciliter
     @Published var chartDateInterval: DateInterval
 
     @Published var activeCarbs: HKQuantity?
@@ -697,8 +694,6 @@ final class BolusEntryViewModel: ObservableObject {
         guard let delegate = delegate else {
             return
         }
-
-        glucoseUnit = delegate.preferredGlucoseUnit
 
         targetGlucoseSchedule = delegate.settings.glucoseTargetRangeSchedule
         // Pre-meal override should be ignored if we have carbs (LOOP-1964)
