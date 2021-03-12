@@ -21,12 +21,12 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     var settings: LoopSettings = LoopSettings()
 
     override func setUp() {
-        settings.preMealTargetRange = DoubleRange(minValue: 80, maxValue: 80)
+        settings.preMealTargetRange = DoubleRange(minValue: 80, maxValue: 80).quantityRange(for: .milligramsPerDeciliter)
         settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
             unit: .milligramsPerDeciliter,
             dailyItems: [.init(startTime: 0, value: DoubleRange(minValue: 95, maxValue: 105))]
         )
-        settings.legacyWorkoutTargetRange = DoubleRange(minValue: 120, maxValue: 150)
+        settings.legacyWorkoutTargetRange = DoubleRange(minValue: 120, maxValue: 150).quantityRange(for: .milligramsPerDeciliter)
         settings.enableLegacyWorkoutOverride(for: .infinity)
         
         alert = nil

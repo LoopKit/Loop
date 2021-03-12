@@ -18,6 +18,6 @@ extension WatchContext {
         self.glucoseDate = glucose?.startDate
         self.glucoseIsDisplayOnly = glucose?.isDisplayOnly
         self.glucoseWasUserEntered = glucose?.wasUserEntered
-        self.preferredGlucoseUnit = glucoseUnit
+        self.displayGlucoseUnit = glucoseUnit
     }
 }

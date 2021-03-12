@@ -12,7 +12,7 @@ import LoopKit
 
 
 class LoopSettingsTests: XCTestCase {
-    private let preMealRange = DoubleRange(minValue: 80, maxValue: 80)
+    private let preMealRange = DoubleRange(minValue: 80, maxValue: 80).quantityRange(for: .milligramsPerDeciliter)
     private let targetRange = DoubleRange(minValue: 95, maxValue: 105)
     
     private lazy var settings: LoopSettings = {
@@ -29,7 +29,7 @@ class LoopSettingsTests: XCTestCase {
         var settings = self.settings
         let preMealStart = Date()
         settings.enablePreMealOverride(at: preMealStart, for: 1 /* hour */ * 60 * 60)
-        let actualPreMealRange = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
+        let actualPreMealRange = settings.effectiveGlucoseTargetRangeSchedule()?.quantityRange(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
         XCTAssertEqual(preMealRange, actualPreMealRange)
     }
     
@@ -81,11 +81,11 @@ class LoopSettingsTests: XCTestCase {
         )
         settings.scheduleOverride = override
 
-        let actualPreMealRange = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
+        let actualPreMealRange = settings.effectiveGlucoseTargetRangeSchedule()?.quantityRange(at: preMealStart.addingTimeInterval(30 /* minutes */ * 60))
         XCTAssertEqual(actualPreMealRange, preMealRange)
 
         // The pre-meal range should be projected into the future, despite the simultaneous schedule override
-        let preMealRangeDuringOverride = settings.effectiveGlucoseTargetRangeSchedule()?.value(at: preMealStart.addingTimeInterval(2 /* hours */ * 60 * 60))
+        let preMealRangeDuringOverride = settings.effectiveGlucoseTargetRangeSchedule()?.quantityRange(at: preMealStart.addingTimeInterval(2 /* hours */ * 60 * 60))
         XCTAssertEqual(preMealRangeDuringOverride, preMealRange)
     }
 
@@ -93,7 +93,7 @@ class LoopSettingsTests: XCTestCase {
         var settings = self.settings
         settings.preMealOverride = TemporaryScheduleOverride(
             context: .preMeal,
-            settings: TemporaryScheduleOverrideSettings(unit: .milligramsPerDeciliter, targetRange: preMealRange),
+            settings: TemporaryScheduleOverrideSettings(targetRange: preMealRange),
             startDate: Date(timeIntervalSinceNow: -2 /* hours */ * 60 * 60),
             duration: .finite(1 /* hours */ * 60 * 60),
             enactTrigger: .local,

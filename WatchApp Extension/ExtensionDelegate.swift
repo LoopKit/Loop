@@ -161,10 +161,10 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             return
         }
 
-        if context.preferredGlucoseUnit == nil {
+        if context.displayGlucoseUnit == nil {
             let type = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
             loopManager.healthStore.preferredUnits(for: [type]) { (units, error) in
-                context.preferredGlucoseUnit = units[type]
+                context.displayGlucoseUnit = units[type]
 
                 DispatchQueue.main.async {
                     self.loopManager.updateContext(context)
