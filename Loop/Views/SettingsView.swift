@@ -13,6 +13,7 @@ import SwiftUI
 import HealthKit
 
 public struct SettingsView: View {
+    @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appName) private var appName
     @Environment(\.guidanceColors) private var guidanceColors
@@ -121,6 +122,7 @@ extension SettingsView {
                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
                                                             chartColors: .primary,
                                                             didSave: self.viewModel.didSave))
+                        .environmentObject(displayGlucoseUnitObservable)
                         .environment(\.dismiss, self.dismiss)
                         .environment(\.appName, self.appName)
                         .environment(\.carbTintColor, self.carbTintColor)

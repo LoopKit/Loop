@@ -84,7 +84,7 @@ public class SettingsViewModel: ObservableObject {
     let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
     let supportInfoProvider: SupportInfoProvider
-        
+
     @Published var isClosedLoopAllowed: Bool
     
     var closedLoopPreference: Bool {
@@ -126,7 +126,7 @@ public class SettingsViewModel: ObservableObject {
         self.supportInfoProvider = supportInfoProvider
         self.availableSupports = availableSupports
         self.delegate = delegate
-        
+
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
         notificationsCriticalAlertPermissionsViewModel.objectWillChange.sink { [weak self] in
             self?.objectWillChange.send()
@@ -144,6 +144,5 @@ public class SettingsViewModel: ObservableObject {
         isClosedLoopAllowed
             .assign(to: \.isClosedLoopAllowed, on: self)
             .store(in: &cancellables)
-        
     }
 }
