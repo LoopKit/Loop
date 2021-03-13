@@ -1,5 +1,5 @@
 //
-//  InAppModalAlertPresenterTests.swift
+//  InAppModalAlertIssuerTests.swift
 //  LoopTests
 //
 //  Created by Rick Pasetto on 4/15/20.
@@ -10,7 +10,7 @@ import LoopKit
 import XCTest
 @testable import Loop
 
-class InAppModalAlertPresenterTests: XCTestCase {
+class InAppModalAlertIssuerTests: XCTestCase {
     
     class MockAlertAction: UIAlertAction {
         typealias Handler = ((UIAlertAction) -> Void)
@@ -40,7 +40,7 @@ class InAppModalAlertPresenterTests: XCTestCase {
         }
     }
     
-    class MockViewController: UIViewController {
+    class MockViewController: UIViewController, AlertPresenter {
         var viewControllerPresented: UIViewController?
         var autoComplete = true
         var completion: (() -> Void)?
@@ -56,7 +56,7 @@ class InAppModalAlertPresenterTests: XCTestCase {
             completion?()
         }
     }
-    
+
     class MockSoundPlayer: AlertSoundPlayer {
         var vibrateCalled = false
         func vibrate() {
@@ -83,31 +83,30 @@ class InAppModalAlertPresenterTests: XCTestCase {
     var mockAlertManagerResponder: MockAlertManagerResponder!
     var mockViewController: MockViewController!
     var mockSoundPlayer: MockSoundPlayer!
-    var inAppModalAlertPresenter: InAppModalAlertPresenter!
+    var inAppModalAlertIssuer: InAppModalAlertIssuer!
     
     override func setUp() {
         mockAlertManagerResponder = MockAlertManagerResponder()
         mockViewController = MockViewController()
         mockSoundPlayer = MockSoundPlayer()
         
-        let newTimerFunc: InAppModalAlertPresenter.TimerFactoryFunction = { timeInterval, repeats, block in
+        let newTimerFunc: InAppModalAlertIssuer.TimerFactoryFunction = { timeInterval, repeats, block in
             let timer = Timer(timeInterval: timeInterval, repeats: repeats) { _ in block?() }
             self.mockTimer = timer
             self.mockTimerTimeInterval = timeInterval
             self.mockTimerRepeats = repeats
             return timer
         }
-        inAppModalAlertPresenter =
-            InAppModalAlertPresenter(rootViewController: mockViewController,
-                                     alertManagerResponder: mockAlertManagerResponder,
-                                     soundPlayer: mockSoundPlayer,
-                                     newActionFunc: MockAlertAction.init,
-                                     newTimerFunc: newTimerFunc)
+        inAppModalAlertIssuer = InAppModalAlertIssuer(alertPresenter: mockViewController,
+                                                      alertManagerResponder: mockAlertManagerResponder,
+                                                      soundPlayer: mockSoundPlayer,
+                                                      newActionFunc: MockAlertAction.init,
+                                                      newTimerFunc: newTimerFunc)
     }
     
     func testIssueImmediateAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         let alertController = mockViewController.viewControllerPresented as? UIAlertController
@@ -124,13 +123,13 @@ class InAppModalAlertPresenterTests: XCTestCase {
                           backgroundContent: backgroundContent,
                           trigger: .immediate,
                           sound: .sound(name: soundName))
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         let alertController = mockViewController.viewControllerPresented as? UIAlertController
         XCTAssertNotNil(alertController)
         XCTAssertEqual("FOREGROUND", alertController?.title)
-        XCTAssertEqual("\(InAppModalAlertPresenterTests.managerIdentifier)-\(soundName)", mockSoundPlayer.urlPlayed?.lastPathComponent)
+        XCTAssertEqual("\(InAppModalAlertIssuerTests.managerIdentifier)-\(soundName)", mockSoundPlayer.urlPlayed?.lastPathComponent)
         XCTAssertTrue(mockSoundPlayer.vibrateCalled)
     }
     
@@ -140,7 +139,7 @@ class InAppModalAlertPresenterTests: XCTestCase {
                           backgroundContent: backgroundContent,
                           trigger: .immediate,
                           sound: .vibrate)
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         let alertController = mockViewController.viewControllerPresented as? UIAlertController
@@ -156,7 +155,7 @@ class InAppModalAlertPresenterTests: XCTestCase {
                           backgroundContent: backgroundContent,
                           trigger: .immediate,
                           sound: .silence)
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         let alertController = mockViewController.viewControllerPresented as? UIAlertController
@@ -168,11 +167,11 @@ class InAppModalAlertPresenterTests: XCTestCase {
     
     func testRemoveImmediateAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         var dismissed = false
-        inAppModalAlertPresenter.removeDeliveredAlert(identifier: alert.identifier) {
+        inAppModalAlertIssuer.removeDeliveredAlert(identifier: alert.identifier) {
             dismissed = true
         }
         
@@ -186,17 +185,17 @@ class InAppModalAlertPresenterTests: XCTestCase {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger:
             .immediate)
         mockViewController.autoComplete = false
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         mockViewController.viewControllerPresented = nil
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         XCTAssertNil(mockViewController.viewControllerPresented)
     }
     
     func testIssueImmediateAlertWithoutForegroundContentDoesNothing() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: nil, backgroundContent: backgroundContent, trigger: .immediate)
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         XCTAssertNil(mockViewController.viewControllerPresented)
@@ -204,7 +203,7 @@ class InAppModalAlertPresenterTests: XCTestCase {
     
     func testIssueImmediateAlertAcknowledgement() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         waitOnMain()
         let action = (mockViewController.viewControllerPresented as? UIAlertController)?.actions[0] as? MockAlertAction
         XCTAssertNotNil(action)
@@ -216,7 +215,7 @@ class InAppModalAlertPresenterTests: XCTestCase {
     func testIssueDelayedAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
         mockViewController.autoComplete = false
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         // Timer should be created but won't fire yet
@@ -235,13 +234,13 @@ class InAppModalAlertPresenterTests: XCTestCase {
     func testIssueDelayedAlertTwiceOnlyOneWorks() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
         mockViewController.autoComplete = false
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         guard let firstTimer = mockTimer else { XCTFail(); return }
         mockTimer = nil
         // This should not schedule another timer
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         XCTAssertNil(mockTimer)
@@ -255,7 +254,7 @@ class InAppModalAlertPresenterTests: XCTestCase {
     
     func testIssueDelayedAlertWithoutForegroundContentDoesNothing() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: nil, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         XCTAssertNil(mockViewController.viewControllerPresented)
@@ -263,11 +262,11 @@ class InAppModalAlertPresenterTests: XCTestCase {
     
     func testRetractAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         XCTAssert(mockTimer?.isValid == true)
-        inAppModalAlertPresenter.retractAlert(identifier: alert.identifier)
+        inAppModalAlertIssuer.retractAlert(identifier: alert.identifier)
         
         waitOnMain()
         XCTAssert(mockTimer?.isValid == false)
@@ -276,7 +275,7 @@ class InAppModalAlertPresenterTests: XCTestCase {
     func testIssueRepeatingAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .repeating(repeatInterval: 0.1))
         mockViewController.autoComplete = false
-        inAppModalAlertPresenter.issueAlert(alert)
+        inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
         // Timer should be created but won't fire yet

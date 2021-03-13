@@ -70,7 +70,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         dosingDecisionStore: DosingDecisionStoreProtocol,
         settingsStore: SettingsStoreProtocol,
         now: @escaping () -> Date = { Date() },
-        alertPresenter: AlertPresenter? = nil
+        alertIssuer: AlertIssuer? = nil
     ) {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -94,10 +94,13 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
-        loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: alertPresenter)
+        loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: alertIssuer)
         loopSettingsAlerter.delegate = self
 
         overrideHistory.delegate = self
+
+        // Required for device settings in stored dosing decisions
+        UIDevice.current.isBatteryMonitoringEnabled = true
 
         // Observe changes
         notificationObservers = [
@@ -2019,15 +2022,30 @@ extension LoopDataManager {
 
 extension LoopDataManager {
     public var therapySettings: TherapySettings {
-        TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
-                        preMealTargetRange: settings.preMealTargetRange,
-                        workoutTargetRange: settings.legacyWorkoutTargetRange,
-                        maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
-                        maximumBolus: settings.maximumBolus,
-                        suspendThreshold: settings.suspendThreshold,
-                        insulinSensitivitySchedule: insulinSensitivitySchedule,
-                        carbRatioSchedule: carbRatioSchedule,
-                        basalRateSchedule: basalRateSchedule,
-                        insulinModelSettings: insulinModelSettings)
+        get {
+            TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
+                            preMealTargetRange: settings.preMealTargetRange,
+                            workoutTargetRange: settings.legacyWorkoutTargetRange,
+                            maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
+                            maximumBolus: settings.maximumBolus,
+                            suspendThreshold: settings.suspendThreshold,
+                            insulinSensitivitySchedule: insulinSensitivitySchedule,
+                            carbRatioSchedule: carbRatioSchedule,
+                            basalRateSchedule: basalRateSchedule,
+                            insulinModelSettings: insulinModelSettings)
+        }
+        
+        set {
+            settings.glucoseTargetRangeSchedule = newValue.glucoseTargetRangeSchedule
+            settings.preMealTargetRange = newValue.preMealTargetRange
+            settings.legacyWorkoutTargetRange = newValue.workoutTargetRange
+            settings.suspendThreshold = newValue.suspendThreshold
+            settings.maximumBolus = newValue.maximumBolus
+            settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
+            insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
+            carbRatioSchedule = newValue.carbRatioSchedule
+            basalRateSchedule = newValue.basalRateSchedule
+            insulinModelSettings = newValue.insulinModelSettings
+        }
     }
 }

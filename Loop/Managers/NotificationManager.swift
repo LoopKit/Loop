@@ -51,19 +51,22 @@ extension NotificationManager {
         return Set(categories)
     }
 
-    static func authorize(delegate: UNUserNotificationCenterDelegate) {
+    static func getAuthorization(_ completion: @escaping (UNAuthorizationStatus) -> Void) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            completion(settings.authorizationStatus)
+        }
+    }
+
+    static func authorize(_ completion: @escaping (UNAuthorizationStatus) -> Void) {
         var authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         if FeatureFlags.criticalAlertsEnabled, #available(iOS 12.0, *) {
             authOptions.insert(.criticalAlert)
         }
         
         let center = UNUserNotificationCenter.current()
-        center.delegate = delegate
         center.requestAuthorization(options: authOptions) { (granted, error) in
-            guard granted else {
-                return
-            }
             UNUserNotificationCenter.current().getNotificationSettings { settings in
+                completion(settings.authorizationStatus)
                 guard settings.authorizationStatus == .authorized else {
                     return
                 }

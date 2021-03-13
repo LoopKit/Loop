@@ -13,7 +13,7 @@ import XCTest
 
 class AlertManagerTests: XCTestCase {
     
-    class MockPresenter: AlertPresenter {
+    class MockIssuer: AlertIssuer {
         var issuedAlert: Alert?
         func issueAlert(_ alert: Alert) {
             issuedAlert = alert
@@ -63,6 +63,11 @@ class AlertManagerTests: XCTestCase {
         }
     }
     
+    class MockPresenter: AlertPresenter {
+        func present(_ viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) { completion?() }
+        func dismiss(animated: Bool, completion: (() -> Void)?) { completion?() }
+    }
+
     class MockSoundVendor: AlertSoundVendor {
         func getSoundBaseURL() -> URL? {
             // Hm.  It's not easy to make a "fake" URL, so we'll use this one:
@@ -113,6 +118,7 @@ class AlertManagerTests: XCTestCase {
     
     var mockFileManager: MockFileManager!
     var mockPresenter: MockPresenter!
+    var mockIssuer: MockIssuer!
     var mockUserNotificationCenter: MockUserNotificationCenter!
     var mockAlertStore: MockAlertStore!
     var alertManager: AlertManager!
@@ -126,10 +132,11 @@ class AlertManagerTests: XCTestCase {
     override func setUp() {
         mockFileManager = MockFileManager()
         mockPresenter = MockPresenter()
+        mockIssuer = MockIssuer()
         mockUserNotificationCenter = MockUserNotificationCenter()
         mockAlertStore = MockAlertStore()
-        alertManager = AlertManager(rootViewController: UIViewController(),
-                                    handlers: [mockPresenter],
+        alertManager = AlertManager(alertPresenter: mockPresenter,
+                                    handlers: [mockIssuer],
                                     userNotificationCenter: mockUserNotificationCenter,
                                     fileManager: mockFileManager,
                                     alertStore: mockAlertStore)
@@ -141,14 +148,14 @@ class AlertManagerTests: XCTestCase {
     
     func testIssueAlertOnHandlerCalled() {
         alertManager.issueAlert(mockAlert)
-        XCTAssertEqual(mockAlert.identifier, mockPresenter.issuedAlert?.identifier)
-        XCTAssertNil(mockPresenter.retractedAlertIdentifier)
+        XCTAssertEqual(mockAlert.identifier, mockIssuer.issuedAlert?.identifier)
+        XCTAssertNil(mockIssuer.retractedAlertIdentifier)
     }
     
     func testRetractAlertOnHandlerCalled() {
         alertManager.retractAlert(identifier: mockAlert.identifier)
-        XCTAssertNil(mockPresenter.issuedAlert)
-        XCTAssertEqual(mockAlert.identifier, mockPresenter.retractedAlertIdentifier)
+        XCTAssertNil(mockIssuer.issuedAlert)
+        XCTAssertEqual(mockAlert.identifier, mockIssuer.retractedAlertIdentifier)
     }
     
     func testAlertResponderAcknowledged() {
@@ -200,12 +207,12 @@ class AlertManagerTests: XCTestCase {
                               foregroundContent: content, backgroundContent: content, trigger: .immediate)
             mockAlertStore.storedAlerts = [StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)]
 
-            alertManager = AlertManager(rootViewController: UIViewController(),
-                                        handlers: [mockPresenter],
+            alertManager = AlertManager(alertPresenter: mockPresenter,
+                                        handlers: [mockIssuer],
                                         userNotificationCenter: mockUserNotificationCenter,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore)
-            XCTAssertEqual(alert, mockPresenter.issuedAlert)
+            XCTAssertEqual(alert, mockIssuer.issuedAlert)
         }
     }
     
@@ -218,13 +225,13 @@ class AlertManagerTests: XCTestCase {
             let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
-            alertManager = AlertManager(rootViewController: UIViewController(),
-                                        handlers: [mockPresenter],
+            alertManager = AlertManager(alertPresenter: mockPresenter,
+                                        handlers: [mockIssuer],
                                         userNotificationCenter: mockUserNotificationCenter,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore)
             let expected = Alert(identifier: Self.mockIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate)
-            XCTAssertEqual(expected, mockPresenter.issuedAlert)
+            XCTAssertEqual(expected, mockIssuer.issuedAlert)
         }
     }
     
@@ -237,8 +244,8 @@ class AlertManagerTests: XCTestCase {
             let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
-            alertManager = AlertManager(rootViewController: UIViewController(),
-                                        handlers: [mockPresenter],
+            alertManager = AlertManager(alertPresenter: mockPresenter,
+                                        handlers: [mockIssuer],
                                         userNotificationCenter: mockUserNotificationCenter,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore)
@@ -246,12 +253,12 @@ class AlertManagerTests: XCTestCase {
             // The trigger for this should be `.delayed` by "something less than 15 seconds",
             // but the exact value depends on the speed of executing this test.
             // As long as it is <= 15 seconds, we call it good.
-            XCTAssertNotNil(mockPresenter.issuedAlert)
-            switch mockPresenter.issuedAlert?.trigger {
+            XCTAssertNotNil(mockIssuer.issuedAlert)
+            switch mockIssuer.issuedAlert?.trigger {
             case .some(.delayed(let interval)):
                 XCTAssertLessThanOrEqual(interval, 15.0)
             default:
-                XCTFail("Wrong trigger \(String(describing: mockPresenter.issuedAlert?.trigger))")
+                XCTFail("Wrong trigger \(String(describing: mockIssuer.issuedAlert?.trigger))")
             }
         }
     }
@@ -265,13 +272,13 @@ class AlertManagerTests: XCTestCase {
             let storedAlert = StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
-            alertManager = AlertManager(rootViewController: UIViewController(),
-                                        handlers: [mockPresenter],
+            alertManager = AlertManager(alertPresenter: mockPresenter,
+                                        handlers: [mockIssuer],
                                         userNotificationCenter: mockUserNotificationCenter,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore)
 
-            XCTAssertEqual(alert, mockPresenter.issuedAlert)
+            XCTAssertEqual(alert, mockIssuer.issuedAlert)
         }
     }
 }

@@ -35,7 +35,7 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     func testWorkoutOverrideReminderElasped() {
         testExpectation = self.expectation(description: #function)
 
-        let loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: self, workoutOverrideReminderInterval:  -.seconds(1)) // the elasped time will always be greater than a negative number
+        let loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: self, workoutOverrideReminderInterval:  -.seconds(1)) // the elasped time will always be greater than a negative number
         loopSettingsAlerter.delegate = self
 
         NotificationCenter.default.post(name: .LoopRunning, object: nil)
@@ -47,7 +47,7 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     func testWorkoutOverrideReminderRepeated() {
         testExpectation = self.expectation(description: #function)
 
-        let loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: self, workoutOverrideReminderInterval:  -.seconds(1)) // the elasped time will always be greater than a negative number
+        let loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: self, workoutOverrideReminderInterval:  -.seconds(1)) // the elasped time will always be greater than a negative number
         loopSettingsAlerter.delegate = self
 
         NotificationCenter.default.post(name: .LoopRunning, object: nil)
@@ -65,7 +65,7 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     }
 
     func testWorkoutOverrideReminderNotElasped() {
-        let loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: self)
+        let loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: self)
         loopSettingsAlerter.delegate = self
         
         NotificationCenter.default.post(name: .LoopRunning, object: nil)
@@ -75,7 +75,7 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     }
 }
 
-extension LoopSettingsAlerterTests: AlertPresenter {
+extension LoopSettingsAlerterTests: AlertIssuer {
     func issueAlert(_ alert: Alert) {
         self.alert = alert
         testExpectation.fulfill()

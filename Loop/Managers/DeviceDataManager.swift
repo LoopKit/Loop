@@ -23,6 +23,7 @@ final class DeviceDataManager {
 
     let pluginManager: PluginManager
     weak var alertManager: AlertManager!
+    let bluetoothProvider: BluetoothProvider
 
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
@@ -38,11 +39,9 @@ final class DeviceDataManager {
 
     private var deviceLog: PersistentDeviceLog
 
-    var bluetoothState: BluetoothStateManager.BluetoothState = .other
-    
     // MARK: - App-level responsibilities
 
-    private var rootViewController: UIViewController
+    private var alertPresenter: AlertPresenter
     
     private var deliveryUncertaintyAlertManager: DeliveryUncertaintyAlertManager?
     
@@ -174,7 +173,7 @@ final class DeviceDataManager {
 
     private(set) var loopManager: LoopDataManager!
 
-    init(pluginManager: PluginManager, alertManager: AlertManager, bluetoothStateManager: BluetoothStateManager, rootViewController: UIViewController) {
+    init(pluginManager: PluginManager, alertManager: AlertManager, bluetoothProvider: BluetoothProvider, alertPresenter: AlertPresenter) {
         let localCacheDuration = Bundle.main.localCacheDuration
 
         let fileManager = FileManager.default
@@ -194,7 +193,8 @@ final class DeviceDataManager {
 
         self.pluginManager = pluginManager
         self.alertManager = alertManager
-        self.rootViewController = rootViewController
+        self.bluetoothProvider = bluetoothProvider
+        self.alertPresenter = alertPresenter
         
         self.healthStore = HKHealthStore()
         self.cacheStore = PersistenceController.controllerInAppGroupDirectory()
@@ -251,8 +251,6 @@ final class DeviceDataManager {
 
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
         displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
-        
-        bluetoothStateManager.addBluetoothStateObserver(self)
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
@@ -280,7 +278,7 @@ final class DeviceDataManager {
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
             settingsStore: settingsStore,
-            alertPresenter: alertManager
+            alertIssuer: alertManager
         )
         cacheStore.delegate = loopManager
         
@@ -366,6 +364,38 @@ final class DeviceDataManager {
         return pluginManager.availablePumpManagers + availableStaticPumpManagers
     }
 
+    func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<UIViewController & PumpManagerCreateNotifying & PumpManagerOnboardNotifying & CompletionNotifying, PumpManager>, Error> {
+        switch setupPumpManagerUI(withIdentifier: identifier, initialSettings: settings) {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let success):
+            switch success {
+            case .userInteractionRequired(let viewController):
+                return .success(.userInteractionRequired(viewController))
+            case .createdAndOnboarded(let pumpManagerUI):
+                return .success(.createdAndOnboarded(pumpManagerUI))
+            }
+        }
+    }
+
+    struct UnknownPumpManagerIdentifierError: Error {}
+
+    func setupPumpManagerUI(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<UIViewController & PumpManagerCreateNotifying & PumpManagerOnboardNotifying & CompletionNotifying, PumpManagerUI>, Error> {
+        guard let pumpManagerUIType = pumpManagerTypeByIdentifier(identifier) else {
+            return .failure(UnknownPumpManagerIdentifierError())
+        }
+
+        let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default)
+        if case .createdAndOnboarded(let pumpManagerUI) = result {
+            if let basalRateSchedule = loopManager.basalRateSchedule {
+                pumpManagerUI.syncBasalRateSchedule(items: basalRateSchedule.items, completion: { _ in })
+            }
+            self.pumpManager = pumpManagerUI
+        }
+
+        return .success(result)
+    }
+
     public func pumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
         return pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier]
     }
@@ -425,6 +455,39 @@ final class DeviceDataManager {
         return availableCGMManagers
     }
 
+    func setupCGMManager(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & CGMManagerCreateNotifying & CGMManagerOnboardNotifying & CompletionNotifying, CGMManager>, Error> {
+        if let cgmManager = setupCGMManagerFromPumpManager(withIdentifier: identifier) {
+            return .success(.createdAndOnboarded(cgmManager))
+        }
+
+        switch setupCGMManagerUI(withIdentifier: identifier) {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let success):
+            switch success {
+            case .userInteractionRequired(let viewController):
+                return .success(.userInteractionRequired(viewController))
+            case .createdAndOnboarded(let cgmManagerUI):
+                return .success(.createdAndOnboarded(cgmManagerUI))
+            }
+        }
+    }
+
+    struct UnknownCGMManagerIdentifierError: Error {}
+
+    fileprivate func setupCGMManagerUI(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & CGMManagerCreateNotifying & CGMManagerOnboardNotifying & CompletionNotifying, CGMManagerUI>, Error> {
+        guard let cgmManagerUIType = cgmManagerTypeByIdentifier(identifier) else {
+            return .failure(UnknownCGMManagerIdentifierError())
+        }
+
+        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default)
+        if case .createdAndOnboarded(let cgmManagerUI) = result {
+            self.cgmManager = cgmManagerUI
+        }
+
+        return .success(result)
+    }
+
     public func cgmManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
         return pluginManager.getCGMManagerTypeByIdentifier(identifier) ?? staticCGMManagersByIdentifier[identifier] as? CGMManagerUI.Type
     }
@@ -464,9 +527,15 @@ final class DeviceDataManager {
             }
         }
     }
+
+    func getHealthStoreAuthorization(_ completion: @escaping (HKAuthorizationRequestStatus) -> Void) {
+        healthStore.getRequestStatusForAuthorization(toShare: shareTypes, read: readTypes) { (authorizationRequestStatus, _) in
+            completion(authorizationRequestStatus)
+        }
+    }
     
     // Get HealthKit authorization for all of the stores
-    func authorizeHealthStore(_ completion: @escaping (Bool) -> Void) {
+    func authorizeHealthStore(_ completion: @escaping (HKAuthorizationRequestStatus) -> Void) {
         // Authorize all types at once for simplicity
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
@@ -476,7 +545,7 @@ final class DeviceDataManager {
                 self.glucoseStore.authorize(toShare: true, { _ in })
             }
 
-            completion(success)
+            self.getHealthStoreAuthorization(completion)
         }
     }
 
@@ -565,7 +634,7 @@ private extension DeviceDataManager {
         pumpManager?.delegateQueue = queue
 
         doseStore.device = pumpManager?.status.device
-        pumpManagerHUDProvider = pumpManager?.hudProvider(colorPalette: .default)
+        pumpManagerHUDProvider = pumpManager?.hudProvider(bluetoothProvider: bluetoothProvider, colorPalette: .default)
 
         // Proliferate PumpModel preferences to DoseStore
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
@@ -577,7 +646,7 @@ private extension DeviceDataManager {
             alertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.managerIdentifier,
                                                     soundVendor: pumpManager)
             
-            deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, rootViewController: rootViewController)
+            deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
         }
     }
 
@@ -699,7 +768,7 @@ extension DeviceDataManager: DeviceManagerDelegate {
 }
 
 // MARK: - UserAlertHandler
-extension DeviceDataManager: AlertPresenter {
+extension DeviceDataManager: AlertIssuer {
     static let managerIdentifier = "DeviceDataManager"
 
     func issueAlert(_ alert: Alert) {
@@ -769,14 +838,22 @@ extension DeviceDataManager: CGMManagerDelegate {
     }
 }
 
+// MARK: - CGMManagerCreateDelegate
+
 extension DeviceDataManager: CGMManagerCreateDelegate {
     func cgmManagerCreateNotifying(didCreateCGMManager cgmManager: CGMManagerUI) {
+        log.default("CGM manager with identifier '%{public}@' created", cgmManager.managerIdentifier)
         self.cgmManager = cgmManager
     }
 }
 
+// MARK: - CGMManagerOnboardDelegate
+
 extension DeviceDataManager: CGMManagerOnboardDelegate {
-    func cgmManagerOnboardNotifying(didOnboardCGMManager cgmManager: CGMManagerUI) {}
+    func cgmManagerOnboardNotifying(didOnboardCGMManager cgmManager: CGMManagerUI) {
+        precondition(cgmManager.isOnboarded)
+        log.default("CGM manager with identifier '%{public}@' onboarded", cgmManager.managerIdentifier)
+    }
 }
 
 // MARK: - PumpManagerDelegate
@@ -969,6 +1046,34 @@ extension DeviceDataManager: PumpManagerDelegate {
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
         dispatchPrecondition(condition: .onQueue(queue))
         return doseStore.pumpEventQueryAfterDate
+    }
+}
+
+// MARK: - PumpManagerCreateDelegate
+
+extension DeviceDataManager: PumpManagerCreateDelegate {
+    func pumpManagerCreateNotifying(didCreatePumpManager pumpManager: PumpManagerUI) {
+        log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
+        self.pumpManager = pumpManager
+    }
+}
+
+// MARK: - PumpManagerOnboardDelegate
+
+extension DeviceDataManager: PumpManagerOnboardDelegate {
+    func pumpManagerOnboardNotifying(didOnboardPumpManager pumpManager: PumpManagerUI, withFinalSettings settings: PumpManagerSetupSettings) {
+        precondition(pumpManager.isOnboarded)
+        log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.managerIdentifier)
+
+        if let basalRateSchedule = settings.basalSchedule {
+            loopManager.basalRateSchedule = basalRateSchedule
+        }
+        if let maxBasalRateUnitsPerHour = settings.maxBasalRateUnitsPerHour {
+            loopManager.settings.maximumBasalRatePerHour = maxBasalRateUnitsPerHour
+        }
+        if let maxBolusUnits = settings.maxBolusUnits {
+            loopManager.settings.maximumBolus = maxBolusUnits
+        }
     }
 }
 
@@ -1264,16 +1369,6 @@ extension DeviceDataManager {
                 self.loopManager.purgeHistoricalCoreData(completion: completion)
             }
         }
-    }
-}
-
-//MARK: - Bluetooth State Manager Observation
-
-extension DeviceDataManager: BluetoothStateManagerObserver {
-    func bluetoothStateManager(_ bluetoothStateManager: BluetoothStateManager,
-                               bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
-    {
-        self.bluetoothState = bluetoothState
     }
 }
 

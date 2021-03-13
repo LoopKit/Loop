@@ -6,6 +6,7 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
+import os.log
 import Foundation
 import LoopKit
 import LoopKitUI
@@ -14,6 +15,8 @@ class PluginManager {
     private let pluginBundles: [Bundle]
 
     public let availableSupports: [SupportUI]
+
+    private let log = OSLog(category: "PluginManager")
 
     public init(pluginsURL: URL? = Bundle.main.privateFrameworksURL) {
         var bundles = [Bundle]()
@@ -24,7 +27,7 @@ class PluginManager {
                 for pluginURL in try FileManager.default.contentsOfDirectory(at: pluginsURL, includingPropertiesForKeys: nil).filter({$0.path.hasSuffix(".framework")}) {
                     if let bundle = Bundle(url: pluginURL) {
                         if bundle.isLoopPlugin {
-                            print("Found loop plugin at \(pluginURL)")
+                            log.debug("Found loop plugin: %{public}@", pluginURL.absoluteString)
                             bundles.append(bundle)
                             if bundle.isSupportPlugin {
                                 if let support = try bundle.loadAndInstantiateSupport() {
@@ -33,7 +36,7 @@ class PluginManager {
                             }
                         }
                         if bundle.isLoopExtension {
-                            print("Found Loop extension at \(pluginURL), loading...")
+                            log.debug("Found loop extension: %{public}@", pluginURL.absoluteString)
                             if let support = try bundle.loadAndInstantiateSupport() {
                                 availableSupports.append(support)
                             }
@@ -41,7 +44,7 @@ class PluginManager {
                     }
                 }
             } catch let error {
-                print("Error loading plugins: \(String(describing: error))")
+                log.error("Error loading plugins: %{public}@", String(describing: error))
             }
         }
         self.pluginBundles = bundles
@@ -66,7 +69,7 @@ class PluginManager {
                         fatalError("PrincipalClass not found")
                     }
                 } catch let error {
-                    print(error)
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
                 }
             }
         }
@@ -102,7 +105,7 @@ class PluginManager {
                         fatalError("PrincipalClass not found")
                     }
                 } catch let error {
-                    print(error)
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
                 }
             }
         }
@@ -138,7 +141,7 @@ class PluginManager {
                         fatalError("PrincipalClass not found")
                     }
                 } catch let error {
-                    print(error)
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
                 }
             }
         }
@@ -174,7 +177,7 @@ class PluginManager {
                         fatalError("PrincipalClass not found")
                     }
                 } catch let error {
-                    print(error)
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
                 }
             }
         }

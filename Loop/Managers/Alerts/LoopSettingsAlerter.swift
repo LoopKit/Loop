@@ -17,14 +17,14 @@ class LoopSettingsAlerter {
 
     weak var delegate: LoopSettingsAlerterDelegate?
 
-    private let alertPresenter: AlertPresenter?
+    private let alertIssuer: AlertIssuer?
     
     let workoutOverrideReminderInterval: TimeInterval
     
-    init(alertPresenter: AlertPresenter? = nil,
+    init(alertIssuer: AlertIssuer? = nil,
          workoutOverrideReminderInterval: TimeInterval = .days(1))
     {
-        self.alertPresenter = alertPresenter
+        self.alertIssuer = alertIssuer
         self.workoutOverrideReminderInterval = workoutOverrideReminderInterval
 
         NotificationCenter.default.addObserver(forName: .LoopRunning, object: nil, queue: nil) {
@@ -47,7 +47,7 @@ class LoopSettingsAlerter {
     }
 
     private func issueWorkoutOverrideReminder() {
-        alertPresenter?.issueAlert(workoutOverrideReminderAlert)
+        alertIssuer?.issueAlert(workoutOverrideReminderAlert)
     }
 }
 

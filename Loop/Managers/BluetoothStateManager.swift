@@ -10,101 +10,105 @@ import CoreBluetooth
 import LoopKit
 import LoopKitUI
 
-public protocol BluetoothStateManagerObserver: class {
-    func bluetoothStateManager(_ bluetoothStateManager: BluetoothStateManager, bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
-}
+public class BluetoothStateManager: NSObject, BluetoothProvider {
+    private var completion: ((BluetoothAuthorization) -> Void)?
+    private var centralManager: CBCentralManager?
+    private var bluetoothObservers = WeakSynchronizedSet<BluetoothObserver>()
 
-public class BluetoothStateManager: NSObject {
-
-    public enum BluetoothState {
-        case poweredOn
-        case poweredOff
-        case unauthorized
-        case denied
-        case other
-                
-        var action: HUDTapAction? {
-            switch self {
-            case .unauthorized, .denied:
-                return .openAppURL(URL(string: UIApplication.openSettingsURLString)!)
-            case .poweredOff:
-                return .takeNoAction
-            default:
-                return nil
-            }
-        }
-    }
-    
-    private var bluetoothCentralManager: CBCentralManager!
-    
-    private var bluetoothState: BluetoothState = .other
-    
-    private var bluetoothStateObservers = WeakSynchronizedSet<BluetoothStateManagerObserver>()
-    
     override init() {
         super.init()
-        bluetoothCentralManager = CBCentralManager(delegate: self, queue: nil)
+
+        if bluetoothAuthorization != .notDetermined {
+            self.centralManager = CBCentralManager(delegate: self, queue: nil)
+        }
     }
-    
-    public func addBluetoothStateObserver(_ observer: BluetoothStateManagerObserver,
-                                     queue: DispatchQueue = .main)
-    {
-        bluetoothStateObservers.insert(observer, queue: queue)
+
+    public var bluetoothAuthorization: BluetoothAuthorization {
+        if #available(iOS 13.1, *) {    // TODO: Remove once iOS 14 required
+            return BluetoothAuthorization(CBCentralManager.authorization)
+        }
+        return .notDetermined
     }
-    
-    public func removeBluetoothStateObserver(_ observer: BluetoothStateManagerObserver) {
-        bluetoothStateObservers.removeElement(observer)
+
+    public var bluetoothState: BluetoothState {
+        guard let centralManager = centralManager else {
+            return .unknown
+        }
+        return BluetoothState(centralManager.state)
+    }
+
+    public func authorizeBluetooth(_ completion: @escaping (BluetoothAuthorization) -> Void) {
+        guard centralManager == nil else {
+            completion(bluetoothAuthorization)
+            return
+        }
+        self.completion = completion
+        self.centralManager = CBCentralManager(delegate: self, queue: nil)
+    }
+
+    public func addBluetoothObserver(_ observer: BluetoothObserver, queue: DispatchQueue = .main) {
+        bluetoothObservers.insert(observer, queue: queue)
+    }
+
+    public func removeBluetoothObserver(_ observer: BluetoothObserver) {
+        bluetoothObservers.removeElement(observer)
     }
 }
 
-// MARK: CBCentralManagerDelegate implementation
+// MARK: - CBCentralManagerDelegate
 
 extension BluetoothStateManager: CBCentralManagerDelegate {
-    
     public func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        switch central.state {
-        case .unauthorized:
-            bluetoothState = .unauthorized
-            switch central.authorization {
-            case .denied:
-                bluetoothState = .denied
-            default:
-                break
-            }
-        case .poweredOn:
-            bluetoothState = .poweredOn
-        case .poweredOff:
-            bluetoothState = .poweredOff
-        default:
-            bluetoothState = .other
-            break
+        if let completion = completion {
+            completion(bluetoothAuthorization)
+            self.completion = nil
         }
-        bluetoothStateObservers.forEach { $0.bluetoothStateManager(self, bluetoothStateDidUpdate: self.bluetoothState) }
+        bluetoothObservers.forEach { $0.bluetoothDidUpdateState(BluetoothState(central.state)) }
     }
 }
 
-// MARK: - Bluetooth Status Highlight
+// MARK: - BluetoothAuthorization
 
-extension BluetoothStateManager {
-    struct BluetoothStateHighlight: DeviceStatusHighlight {
-        var localizedMessage: String
-        var imageName: String = "bluetooth.disabled"
-        var state: DeviceStatusHighlightState = .critical
-        
-        init(localizedMessage: String) {
-            self.localizedMessage = localizedMessage
+extension BluetoothAuthorization {
+    fileprivate init(_ authorization: CBManagerAuthorization) {
+        switch authorization {
+        case .notDetermined:
+            self = .notDetermined
+        case .restricted:
+            self = .restricted
+        case .denied:
+            self = .denied
+        case .allowedAlways:
+            self = .authorized
+        @unknown default:
+            self = .notDetermined
         }
     }
-    
-    public static var bluetoothOffHighlight: DeviceStatusHighlight {
-        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Bluetooth\nOff", comment: "Message to the user to that the bluetooth is off"))
-    }
-    
-    public static var bluetoothEnableHighlight: DeviceStatusHighlight {
-        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Enable\nBluetooth", comment: "Message to the user to enable bluetooth"))
-    }
-    
-    public static var bluetoothUnavailableHighlight: DeviceStatusHighlight {
-        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Bluetooth\nUnavailable", comment: "Message to the user that bluetooth is unavailable to the app"))
+}
+
+// MARK: - BluetoothState
+
+extension BluetoothState {
+    fileprivate init(_ state: CBManagerState) {
+        switch state {
+        case .unknown:
+            self = .unknown
+        case .resetting:
+            self = .resetting
+        case .unsupported:
+            #if IOS_SIMULATOR
+            self = .poweredOn   // Simulator reports unsupported, but pretend it is powered on
+            #else
+            self = .unsupported
+            #endif
+        case .unauthorized:
+            self = .unauthorized
+        case .poweredOff:
+            self = .poweredOff
+        case .poweredOn:
+            self = .poweredOn
+        @unknown default:
+            self = .unknown
+        }
     }
 }

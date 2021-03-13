@@ -11,12 +11,6 @@ import LoopKit
 /// Class responsible for monitoring "system level" operations and alerting the user to any anomalous situations (e.g. bluetooth off)
 public class LoopAlertsManager {
     
-    public enum BluetoothState {
-        case on
-        case off
-        case unauthorized
-    }
-    
     static let managerIdentifier = "Loop"
     
     private lazy var log = DiagnosticLog(category: String(describing: LoopAlertsManager.self))
@@ -25,9 +19,9 @@ public class LoopAlertsManager {
     
     private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
     
-    init(alertManager: AlertManager, bluetoothStateManager: BluetoothStateManager) {
+    init(alertManager: AlertManager, bluetoothProvider: BluetoothProvider) {
         self.alertManager = alertManager
-        bluetoothStateManager.addBluetoothStateObserver(self)
+        bluetoothProvider.addBluetoothObserver(self, queue: .main)
     }
         
     private func onBluetoothPermissionDenied() {
@@ -61,18 +55,16 @@ public class LoopAlertsManager {
 
 }
 
-// MARK: - Bluetooth State Observer
+// MARK: - BluetoothObserver
 
-extension LoopAlertsManager: BluetoothStateManagerObserver {
-    public func bluetoothStateManager(_ bluetoothStateManager: BluetoothStateManager,
-                                      bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
-    {
-        switch bluetoothState {
+extension LoopAlertsManager: BluetoothObserver {
+    public func bluetoothDidUpdateState(_ state: BluetoothState) {
+        switch state {
         case .poweredOn:
             onBluetoothPoweredOn()
         case .poweredOff:
             onBluetoothPoweredOff()
-        case .denied:
+        case .unauthorized:
             onBluetoothPermissionDenied()
         default:
             return

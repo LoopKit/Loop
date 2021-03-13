@@ -44,6 +44,35 @@ class ServicesManager {
         return pluginManager.availableServices + availableStaticServices
     }
 
+    func setupService(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & ServiceCreateNotifying & ServiceOnboardNotifying & CompletionNotifying, Service>, Error> {
+        switch setupServiceUI(withIdentifier: identifier) {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let success):
+            switch success {
+            case .userInteractionRequired(let viewController):
+                return .success(.userInteractionRequired(viewController))
+            case .createdAndOnboarded(let serviceUI):
+                return .success(.createdAndOnboarded(serviceUI))
+            }
+        }
+    }
+
+    struct UnknownServiceIdentifierError: Error {}
+    
+    fileprivate func setupServiceUI(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & ServiceCreateNotifying & ServiceOnboardNotifying & CompletionNotifying, ServiceUI>, Error> {
+        guard let serviceUIType = serviceUITypeByIdentifier(identifier) else {
+            return .failure(UnknownServiceIdentifierError())
+        }
+
+        let result = serviceUIType.setupViewController(colorPalette: .default)
+        if case .createdAndOnboarded(let serviceUI) = result {
+            addActiveService(serviceUI)
+        }
+
+        return .success(result)
+    }
+
     func serviceUITypeByIdentifier(_ identifier: String) -> ServiceUI.Type? {
         return pluginManager.getServiceTypeByIdentifier(identifier) ?? staticServicesByIdentifier[identifier] as? ServiceUI.Type
     }
@@ -135,6 +164,8 @@ class ServicesManager {
     }
 }
 
+// MARK: - ServiceDelegate
+
 extension ServicesManager: ServiceDelegate {
     func serviceDidUpdateState(_ service: Service) {
         saveState()
@@ -143,6 +174,24 @@ extension ServicesManager: ServiceDelegate {
     func serviceWantsDeletion(_ service: Service) {
         log.default("Service with identifier '%{public}@' deleted", service.serviceIdentifier)
         removeActiveService(service)
+    }
+}
+
+// MARK: - ServiceCreateDelegate
+
+extension ServicesManager: ServiceCreateDelegate {
+    func serviceCreateNotifying(didCreateService service: Service) {
+        log.default("Service with identifier '%{public}@' created", service.serviceIdentifier)
+        addActiveService(service)
+    }
+}
+
+// MARK: - ServiceCreateDelegate
+
+extension ServicesManager: ServiceOnboardDelegate {
+    func serviceOnboardNotifying(didOnboardService service: Service) {
+        precondition(service.isOnboarded)
+        log.default("Service with identifier '%{public}@' onboarded", service.serviceIdentifier)
     }
 }
 
