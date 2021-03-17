@@ -72,7 +72,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         dosingDecisionStore: DosingDecisionStoreProtocol,
         settingsStore: SettingsStoreProtocol,
         now: @escaping () -> Date = { Date() },
-        alertPresenter: AlertPresenter? = nil,
+        alertIssuer: AlertIssuer? = nil,
         pumpInsulinType: InsulinType?
     ) {
         self.analyticsServicesManager = analyticsServicesManager
@@ -99,7 +99,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
-        loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: alertPresenter)
+        loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: alertIssuer)
         loopSettingsAlerter.delegate = self
 
         overrideObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
@@ -119,6 +119,9 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         })
 
         overrideHistory.delegate = self
+
+        // Required for device settings in stored dosing decisions
+        UIDevice.current.isBatteryMonitoringEnabled = true
 
         // Observe changes
         notificationObservers = [
@@ -513,6 +516,25 @@ extension LoopDataManager {
                     completion?(.failure(error))
                 }
             }
+        }
+    }
+    
+    /// Take actions to address how insulin is delivered when the CGM data is unreliable
+    ///
+    /// An active high temp basal (greater than the basal schedule) is cancelled when the CGM data is unreliable.
+    func recievedUnreliableCGMReading() {
+        guard case .tempBasal(let tempBasal) = basalDeliveryState,
+              let scheduledBasalRate = basalRateSchedule?.value(at: now()),
+              tempBasal.unitsPerHour > scheduledBasalRate else
+        {
+            return
+        }
+              
+        // Cancel that temp basal
+        recommendedAutomaticDose = (recommendation: AutomaticDoseRecommendation(basalAdjustment: .cancel, bolusUnits: 0), date: self.now())
+        enactDose { (error) -> Void in
+            self.storeDosingDecision(withDate: self.now(), withError: error)
+            self.notify(forChange: .tempBasal)
         }
     }
 
@@ -2086,15 +2108,30 @@ extension LoopDataManager {
 
 extension LoopDataManager {
     public var therapySettings: TherapySettings {
-        TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
-                        preMealTargetRange: settings.preMealTargetRange,
-                        workoutTargetRange: settings.legacyWorkoutTargetRange,
-                        maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
-                        maximumBolus: settings.maximumBolus,
-                        suspendThreshold: settings.suspendThreshold,
-                        insulinSensitivitySchedule: insulinSensitivitySchedule,
-                        carbRatioSchedule: carbRatioSchedule,
-                        basalRateSchedule: basalRateSchedule,
-                        insulinModelSettings: insulinModelSettings)
+        get {
+            TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
+                            preMealTargetRange: settings.preMealTargetRange,
+                            workoutTargetRange: settings.legacyWorkoutTargetRange,
+                            maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
+                            maximumBolus: settings.maximumBolus,
+                            suspendThreshold: settings.suspendThreshold,
+                            insulinSensitivitySchedule: insulinSensitivitySchedule,
+                            carbRatioSchedule: carbRatioSchedule,
+                            basalRateSchedule: basalRateSchedule,
+                            insulinModelSettings: insulinModelSettings)
+        }
+        
+        set {
+            settings.glucoseTargetRangeSchedule = newValue.glucoseTargetRangeSchedule
+            settings.preMealTargetRange = newValue.preMealTargetRange
+            settings.legacyWorkoutTargetRange = newValue.workoutTargetRange
+            settings.suspendThreshold = newValue.suspendThreshold
+            settings.maximumBolus = newValue.maximumBolus
+            settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
+            insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
+            carbRatioSchedule = newValue.carbRatioSchedule
+            basalRateSchedule = newValue.basalRateSchedule
+            insulinModelSettings = newValue.insulinModelSettings
+        }
     }
 }

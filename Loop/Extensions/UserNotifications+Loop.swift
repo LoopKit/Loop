@@ -43,6 +43,8 @@ extension UNAuthorizationStatus: CustomStringConvertible {
             return "authorized"
         case .provisional:
             return "provisional"
+        case .ephemeral:
+            return "ephemeral"
         @unknown default:
             return "unknown"
         }

@@ -20,9 +20,9 @@ extension DismissibleHostingController {
                   dismissalMode: dismissalMode,
                   isModalInPresentation: isModalInPresentation,
                   onDisappear: onDisappear,
+                  guidanceColors: GuidanceColors.default,
                   carbTintColor: .carbTintColor,
                   glucoseTintColor: .glucoseTintColor,
-                  guidanceColors: GuidanceColors.default,
                   insulinTintColor: .insulinTintColor)
     }
 }

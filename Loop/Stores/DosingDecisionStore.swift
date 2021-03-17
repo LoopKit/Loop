@@ -55,7 +55,11 @@ extension DosingDecisionStore {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let anchor, let dosingDecisionData):
-                completion(.success(anchor, dosingDecisionData.compactMap { self.decodeDosingDecision(fromData: $0.data) }))
+                // Decoding a large number of dosing decisions can be very CPU intensive and may take considerable wall clock time.
+                // Do not block DosingDecisionStore dataAccessQueue. Perform work and callback in global utility queue.
+                DispatchQueue.global(qos: .utility).async {
+                    completion(.success(anchor, dosingDecisionData.compactMap { self.decodeDosingDecision(fromData: $0.data) }))
+                }
             }
         }
     }

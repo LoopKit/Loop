@@ -13,7 +13,7 @@ import HealthKit
 import LoopCore
 
 struct SimpleBolusView: View {
-
+    @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
     @Environment(\.dismiss) var dismiss
     
     @State private var shouldBolusEntryBecomeFirstResponder = false
@@ -119,7 +119,8 @@ struct SimpleBolusView: View {
                     placeholder: viewModel.carbPlaceholder,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    maxLength: 5
+                    maxLength: 5,
+                    doneButtonColor: .loopAccent
                 )
                 carbUnitsLabel
             }
@@ -137,11 +138,11 @@ struct SimpleBolusView: View {
                 DismissibleKeyboardTextField(
                     text: $viewModel.enteredGlucoseAmount,
                     placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
-                    // The heavy title is ending up clipped due to a bug that is fixed in iOS 14.  Uncomment the following when we can build for iOS 14.
-                    font: .preferredFont(forTextStyle: .title1), // .heavy(.title1),
+                    font: .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    maxLength: 3
+                    maxLength: 3,
+                    doneButtonColor: .loopAccent
                 )
 
                 glucoseUnitsLabel
@@ -198,7 +199,8 @@ struct SimpleBolusView: View {
                     textAlignment: .right,
                     keyboardType: .decimalPad,
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
-                    maxLength: 5
+                    maxLength: 5,
+                    doneButtonColor: .loopAccent
                 )
                 
                 bolusUnitsLabel
@@ -213,7 +215,7 @@ struct SimpleBolusView: View {
     }
     
     private var glucoseUnitsLabel: some View {
-        Text(QuantityFormatter().string(from: viewModel.glucoseUnit))
+        Text(QuantityFormatter().string(from: displayGlucoseUnitObservable.displayGlucoseUnit))
             .fixedSize()
             .foregroundColor(Color(.secondaryLabel))
     }
@@ -291,9 +293,9 @@ struct SimpleBolusView: View {
                 message: Text(message)
             )
         case .manualGlucoseEntryOutOfAcceptableRange:
-            let formatter = QuantityFormatter(for: viewModel.glucoseUnit)
-            let acceptableLowerBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.lowerBound, for: viewModel.glucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.lowerBound)
-            let acceptableUpperBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.upperBound, for: viewModel.glucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.upperBound)
+            let formatter = QuantityFormatter(for: displayGlucoseUnitObservable.displayGlucoseUnit)
+            let acceptableLowerBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.lowerBound, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.lowerBound)
+            let acceptableUpperBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.upperBound, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.upperBound)
             return SwiftUI.Alert(
                 title: Text("Glucose Entry Out of Range", comment: "Alert title for a manual glucose entry out of range error"),
                 message: Text(String(format: NSLocalizedString("A manual glucose entry must be between %1$@ and %2$@", comment: "Alert message for a manual glucose entry out of range error. (1: acceptable lower bound) (2: acceptable upper bound)"), acceptableLowerBound, acceptableUpperBound))
@@ -312,7 +314,7 @@ struct SimpleBolusView: View {
     private func warning(for notice: SimpleBolusViewModel.Notice) -> some View {
         switch notice {
         case .glucoseBelowSuspendThreshold:
-            let suspendThresholdString = QuantityFormatter().string(from: viewModel.suspendThreshold, for: viewModel.glucoseUnit) ?? String(describing: viewModel.suspendThreshold)
+            let suspendThresholdString = QuantityFormatter().string(from: viewModel.suspendThreshold, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: viewModel.suspendThreshold)
             return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
                 caption: Text(String(format: NSLocalizedString("Your glucose is below your glucose safety limit, %1$@.", comment: "Format string for bolus screen notice when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold)"), suspendThresholdString))
@@ -369,8 +371,8 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
         func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
         }
         
-        var preferredGlucoseUnit: HKUnit {
-            return .milligramsPerDeciliter
+        var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable {
+            return DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
         }
         
         var maximumBolus: Double {
@@ -389,5 +391,6 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             SimpleBolusView(displayMealEntry: true, viewModel: viewModel)
         }
         .previewDevice("iPod touch (7th generation)")
+        .environmentObject(DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter))
     }
 }

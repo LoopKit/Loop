@@ -1,5 +1,5 @@
 //
-//  UserNotificationAlertPresenterTests.swift
+//  UserNotificationAlertIssuerTests.swift
 //  LoopTests
 //
 //  Created by Rick Pasetto on 4/15/20.
@@ -10,9 +10,9 @@ import LoopKit
 import XCTest
 @testable import Loop
 
-class UserNotificationAlertPresenterTests: XCTestCase {
+class UserNotificationAlertIssuerTests: XCTestCase {
     
-    var userNotificationAlertPresenter: UserNotificationAlertPresenter!
+    var userNotificationAlertIssuer: UserNotificationAlertIssuer!
     
     let alertIdentifier = Alert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar")
     let foregroundContent = Alert.Content(title: "FOREGROUND", body: "foreground", acknowledgeActionButtonLabel: "")
@@ -22,13 +22,13 @@ class UserNotificationAlertPresenterTests: XCTestCase {
     
     override func setUp() {
         mockUserNotificationCenter = MockUserNotificationCenter()
-        userNotificationAlertPresenter =
-            UserNotificationAlertPresenter(userNotificationCenter: mockUserNotificationCenter)
+        userNotificationAlertIssuer =
+            UserNotificationAlertIssuer(userNotificationCenter: mockUserNotificationCenter)
     }
 
     func testIssueImmediateAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
+        userNotificationAlertIssuer.issueAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -49,7 +49,7 @@ class UserNotificationAlertPresenterTests: XCTestCase {
     func testIssueImmediateCriticalAlert() {
         let backgroundContent = Alert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "", isCritical: true)
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
+        userNotificationAlertIssuer.issueAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -69,7 +69,7 @@ class UserNotificationAlertPresenterTests: XCTestCase {
     
     func testIssueDelayedAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
-        userNotificationAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
+        userNotificationAlertIssuer.issueAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -90,7 +90,7 @@ class UserNotificationAlertPresenterTests: XCTestCase {
     
     func testIssueRepeatingAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .repeating(repeatInterval: 100))
-        userNotificationAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
+        userNotificationAlertIssuer.issueAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -111,12 +111,12 @@ class UserNotificationAlertPresenterTests: XCTestCase {
     
     func testRetractAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationAlertPresenter.issueAlert(alert)
+        userNotificationAlertIssuer.issueAlert(alert)
 
         waitOnMain()
         mockUserNotificationCenter.deliverAll()
         
-        userNotificationAlertPresenter.retractAlert(identifier: alert.identifier)
+        userNotificationAlertIssuer.retractAlert(identifier: alert.identifier)
         
         waitOnMain()
         XCTAssertTrue(mockUserNotificationCenter.pendingRequests.isEmpty)
@@ -126,7 +126,7 @@ class UserNotificationAlertPresenterTests: XCTestCase {
     
     func testDoesNotShowIfNoBackgroundContent() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: nil, trigger: .immediate)
-        userNotificationAlertPresenter.issueAlert(alert)
+        userNotificationAlertIssuer.issueAlert(alert)
 
         waitOnMain()
         

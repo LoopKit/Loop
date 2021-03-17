@@ -6,18 +6,19 @@
 //
 
 import LoopKit
+import LoopKitUI
 import MockKit
 
 // TODO: Need a flag other than Debug for including MockCGMManager
 let staticCGMManagers: [CGMManager.Type] = [MockCGMManager.self]
 
-let staticCGMManagersByIdentifier: [String: CGMManager.Type] = staticCGMManagers.reduce(into: [:]) { (map, Type) in
-    map[Type.managerIdentifier] = Type
-}
+let staticCGMManagersByIdentifier: [String: CGMManager.Type] = [
+    MockCGMManager.managerIdentifier: MockCGMManager.self
+]
 
-let availableStaticCGMManagers = staticCGMManagers.map { (Type) -> AvailableDevice in
-    return AvailableDevice(identifier: Type.managerIdentifier, localizedTitle: Type.localizedTitle, providesOnboarding: false)
-}
+let availableStaticCGMManagers = [
+    CGMManagerDescriptor(identifier: MockCGMManager.managerIdentifier, localizedTitle: MockCGMManager.localizedTitle)
+]
 
 func CGMManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManager? {
     guard let managerIdentifier = rawValue["managerIdentifier"] as? String,
@@ -33,7 +34,7 @@ func CGMManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManager? {
 extension CGMManager {
     var rawValue: [String: Any] {
         return [
-            "managerIdentifier": type(of: self).managerIdentifier,
+            "managerIdentifier": managerIdentifier,
             "state": self.rawState
         ]
     }

@@ -9,8 +9,18 @@
 import LoopKit
 
 extension DeviceStatusHighlight {
+    public var image: UIImage? {
+        if let image = UIImage(named: imageName) {
+            return image
+        } else {
+            return UIImage(systemName: imageName)
+        }
+    }
+}
+
+extension DeviceStatusElementState {
     public var color: UIColor {
-        switch state {
+        switch self {
         case .normalCGM:
             return .glucose
         case .normalPump:
@@ -19,14 +29,6 @@ extension DeviceStatusHighlight {
             return .warning
         case .critical:
             return .critical
-        }
-    }
-    
-    public var image: UIImage? {
-        if let image = UIImage(named: imageName) {
-            return image
-        } else {
-            return UIImage(systemName: imageName)
         }
     }
 }

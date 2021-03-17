@@ -21,7 +21,7 @@ extension CLKComplicationTemplate {
         recencyInterval: TimeInterval,
         chartGenerator makeChart: () -> UIImage?
     ) -> CLKComplicationTemplate? {
-        guard let glucose = context.glucose, let unit = context.preferredGlucoseUnit else {
+        guard let glucose = context.glucose, let unit = context.displayGlucoseUnit else {
             return nil
         }
         

@@ -158,6 +158,6 @@ public class CGMStatusHUDViewModel {
     
     func setManualGlucoseTrendIconOverride() {
         manualGlucoseTrendIconOverride = storedStatusHighlight?.image ?? UIImage(systemName: "questionmark.circle")
-        glucoseTrendTintColor = storedStatusHighlight?.color ?? .glucoseTintColor
+        glucoseTrendTintColor = storedStatusHighlight?.state.color ?? .glucoseTintColor
     }
 }

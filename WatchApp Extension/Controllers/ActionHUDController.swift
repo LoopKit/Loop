@@ -8,6 +8,7 @@
 
 import WatchKit
 import WatchConnectivity
+import HealthKit
 import LoopKit
 import LoopCore
 import SwiftUI
@@ -93,7 +94,7 @@ final class ActionHUDController: HUDInterfaceController {
             }
         }
 
-        glucoseFormatter.setPreferredNumberFormatter(for: loopManager.settings.glucoseUnit ?? .milligramsPerDeciliter)
+        glucoseFormatter.setPreferredNumberFormatter(for: loopManager.displayGlucoseUnit)
     }
     
     private var canEnableOverride: Bool {
@@ -138,7 +139,12 @@ final class ActionHUDController: HUDInterfaceController {
         }
         
         let buttonToSelect = loopManager.settings.preMealOverride?.isActive() == true ? SelectedButton.on : SelectedButton.off
-        let viewModel = OnOffSelectionViewModel(title: NSLocalizedString("Pre-Meal", comment: "Title for sheet to enable/disable pre-meal on watch"), message: formattedGlucoseRangeString(from: range), onSelection: setPreMealEnabled, selectedButton: buttonToSelect, selectedButtonTint: .carbsColor)
+        let viewModel = OnOffSelectionViewModel(
+            title: NSLocalizedString("Pre-Meal", comment: "Title for sheet to enable/disable pre-meal on watch"),
+            message: formattedGlucoseRangeString(from: range),
+            onSelection: setPreMealEnabled,
+            selectedButton: buttonToSelect,
+            selectedButtonTint: .carbsColor)
         
         presentController(withName: OnOffSelectionController.className, context: viewModel)
     }
@@ -220,15 +226,17 @@ final class ActionHUDController: HUDInterfaceController {
         }
     }
 
-    private func formattedGlucoseRangeString(from range: DoubleRange) -> String {
-        String(
+    private func formattedGlucoseRangeString(from range: ClosedRange<HKQuantity>) -> String {
+        let unit = loopManager.displayGlucoseUnit
+        let rangeDouble = range.doubleRange(for: unit)
+        return String(
             format: NSLocalizedString(
                 "%1$@ – %2$@ %3$@",
                 comment: "Format string for glucose range (1: lower bound)(2: upper bound)(3: unit)"
             ),
-            glucoseFormatter.numberFormatter.string(from: range.minValue) ?? String(range.minValue),
-            glucoseFormatter.numberFormatter.string(from: range.maxValue) ?? String(range.maxValue),
-            glucoseFormatter.string(from: loopManager.settings.glucoseUnit ?? .milligramsPerDeciliter)
+            glucoseFormatter.numberFormatter.string(from: rangeDouble.minValue) ?? String(rangeDouble.minValue),
+            glucoseFormatter.numberFormatter.string(from: rangeDouble.maxValue) ?? String(rangeDouble.maxValue),
+            glucoseFormatter.string(from: unit)
         )
     }
 

@@ -6,6 +6,7 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
+import os.log
 import LoopKit
 import LoopKitUI
 
@@ -23,26 +24,53 @@ class ServicesManager {
 
     private let servicesLock = UnfairLock()
 
-    weak var loopDataManager: LoopDataManager?
+    private let log = OSLog(category: "ServicesManager")
 
     init(
         pluginManager: PluginManager,
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
-        remoteDataServicesManager: RemoteDataServicesManager,
-        dataManager: LoopDataManager
+        remoteDataServicesManager: RemoteDataServicesManager
     ) {
         self.pluginManager = pluginManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
-        self.loopDataManager = dataManager
         
         restoreState()
     }
 
-    public var availableServices: [AvailableService] {
+    public var availableServices: [ServiceDescriptor] {
         return pluginManager.availableServices + availableStaticServices
+    }
+
+    func setupService(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & ServiceCreateNotifying & ServiceOnboardNotifying & CompletionNotifying, Service>, Error> {
+        switch setupServiceUI(withIdentifier: identifier) {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let success):
+            switch success {
+            case .userInteractionRequired(let viewController):
+                return .success(.userInteractionRequired(viewController))
+            case .createdAndOnboarded(let serviceUI):
+                return .success(.createdAndOnboarded(serviceUI))
+            }
+        }
+    }
+
+    struct UnknownServiceIdentifierError: Error {}
+    
+    fileprivate func setupServiceUI(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & ServiceCreateNotifying & ServiceOnboardNotifying & CompletionNotifying, ServiceUI>, Error> {
+        guard let serviceUIType = serviceUITypeByIdentifier(identifier) else {
+            return .failure(UnknownServiceIdentifierError())
+        }
+
+        let result = serviceUIType.setupViewController(colorPalette: .default)
+        if case .createdAndOnboarded(let serviceUI) = result {
+            addActiveService(serviceUI)
+        }
+
+        return .success(result)
     }
 
     func serviceUITypeByIdentifier(_ identifier: String) -> ServiceUI.Type? {
@@ -114,19 +142,6 @@ class ServicesManager {
     private func saveState() {
         UserDefaults.appGroup?.servicesState = services.compactMap { $0.rawValue }
     }
-    
-    private func storeSettings(settings: TherapySettings) {
-        loopDataManager?.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
-        loopDataManager?.settings.preMealTargetRange = settings.preMealTargetRange
-        loopDataManager?.settings.legacyWorkoutTargetRange = settings.workoutTargetRange
-        loopDataManager?.settings.suspendThreshold = settings.suspendThreshold
-        loopDataManager?.settings.maximumBolus = settings.maximumBolus
-        loopDataManager?.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
-        loopDataManager?.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
-        loopDataManager?.carbRatioSchedule = settings.carbRatioSchedule
-        loopDataManager?.basalRateSchedule = settings.basalRateSchedule
-        loopDataManager?.insulinModelSettings = settings.insulinModelSettings
-    }
 
     private func restoreState() {
         UserDefaults.appGroup?.servicesState.forEach { rawValue in
@@ -149,19 +164,37 @@ class ServicesManager {
     }
 }
 
-extension ServicesManager: ServiceDelegate {
+// MARK: - ServiceDelegate
 
+extension ServicesManager: ServiceDelegate {
     func serviceDidUpdateState(_ service: Service) {
         saveState()
     }
 
-    func serviceHasNewTherapySettings(_ settings: TherapySettings) {
-        storeSettings(settings: settings)
+    func serviceWantsDeletion(_ service: Service) {
+        log.default("Service with identifier '%{public}@' deleted", service.serviceIdentifier)
+        removeActiveService(service)
     }
 }
 
-extension Array where Element == Service {
-    var supportingOnboarding: [ServiceUI] {
-        return compactMap { $0 as? ServiceUI }.filter { type(of: $0).providesOnboarding }
+// MARK: - ServiceCreateDelegate
+
+extension ServicesManager: ServiceCreateDelegate {
+    func serviceCreateNotifying(didCreateService service: Service) {
+        log.default("Service with identifier '%{public}@' created", service.serviceIdentifier)
+        addActiveService(service)
     }
+}
+
+// MARK: - ServiceCreateDelegate
+
+extension ServicesManager: ServiceOnboardDelegate {
+    func serviceOnboardNotifying(didOnboardService service: Service) {
+        precondition(service.isOnboarded)
+        log.default("Service with identifier '%{public}@' onboarded", service.serviceIdentifier)
+    }
+}
+
+extension ServicesManager {
+    var availableSupports: [SupportUI] { activeServices.compactMap { $0 as? SupportUI } }
 }

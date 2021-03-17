@@ -69,22 +69,22 @@ extension UIAlertController {
     /// Initializes an action sheet-styled controller for selecting a PumpManager
     ///
     /// - Parameters:
-    ///   - pumpManagers: An array of available PumpManagers
+    ///   - availablePumpManagers: An array of available PumpManagers
     ///   - selectionHandler: A closure to execute when a manager is selected
     ///   - identifier: Identifier of the selected PumpManager
-    internal convenience init(pumpManagers: [AvailableDevice], selectionHandler: @escaping (_ identifier: String) -> Void) {
+    internal convenience init(availablePumpManagers: [PumpManagerDescriptor], selectionHandler: @escaping (_ identifier: String) -> Void) {
         self.init(
             title: NSLocalizedString("Add Pump", comment: "Action sheet title selecting Pump"),
             message: nil,
             preferredStyle: .actionSheet
         )
 
-        for device in pumpManagers {
+        for availablePumpManager in availablePumpManagers {
             addAction(UIAlertAction(
-                title: device.localizedTitle,
+                title: availablePumpManager.localizedTitle,
                 style: .default,
                 handler: { (_) in
-                    selectionHandler(device.identifier)
+                    selectionHandler(availablePumpManager.identifier)
                 }
             ))
         }
@@ -93,22 +93,22 @@ extension UIAlertController {
     /// Initializes an action sheet-styled controller for selecting a CGMManager
     ///
     /// - Parameters:
-    ///   - cgmManagers: An array of available CGMManagers
+    ///   - availableCGMManagers: An array of available CGMManagers
     ///   - selectionHandler: A closure to execute when either a new CGMManager or the current PumpManager is selected
     ///   - identifier: Identifier of the selected CGMManager
-    internal convenience init(cgmManagers: [AvailableDevice], selectionHandler: @escaping (_ identifier: String) -> Void) {
+    internal convenience init(availableCGMManagers: [CGMManagerDescriptor], selectionHandler: @escaping (_ identifier: String) -> Void) {
         self.init(
             title: NSLocalizedString("Add CGM", comment: "Action sheet title selecting CGM"),
             message: nil,
             preferredStyle: .actionSheet
         )
         
-        for manager in cgmManagers {
+        for availableCGMManager in availableCGMManagers {
             addAction(UIAlertAction(
-                title: manager.localizedTitle,
+                title: availableCGMManager.localizedTitle,
                 style: .default,
                 handler: { (_) in
-                    selectionHandler(manager.identifier)
+                    selectionHandler(availableCGMManager.identifier)
             }
             ))
         }
@@ -137,22 +137,22 @@ extension UIAlertController {
     /// Initializes an action sheet-styled controller for selecting a service.
     ///
     /// - Parameters:
-    ///   - services: An array of available services.
+    ///   - availableServices: An array of available services.
     ///   - selectionHandler: A closure to execute when a service is selected.
     ///   - identifier: The identifier of the selected service.
-    internal convenience init(services: [AvailableService], selectionHandler: @escaping (_ identifier: String) -> Void) {
+    internal convenience init(availableServices: [ServiceDescriptor], selectionHandler: @escaping (_ identifier: String) -> Void) {
         self.init(
             title: NSLocalizedString("Add Service", comment: "Action sheet title selecting service"),
             message: nil,
             preferredStyle: .actionSheet
         )
 
-        for service in services {
+        for availableService in availableServices {
             addAction(UIAlertAction(
-                title: service.localizedTitle,
+                title: availableService.localizedTitle,
                 style: .default,
                 handler: { (_) in
-                    selectionHandler(service.identifier)
+                    selectionHandler(availableService.identifier)
                 }
             ))
         }

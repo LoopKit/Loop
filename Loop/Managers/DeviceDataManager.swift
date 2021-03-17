@@ -25,6 +25,7 @@ final class DeviceDataManager {
 
     let pluginManager: PluginManager
     weak var alertManager: AlertManager!
+    let bluetoothProvider: BluetoothProvider
 
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
@@ -40,11 +41,9 @@ final class DeviceDataManager {
 
     private var deviceLog: PersistentDeviceLog
 
-    var bluetoothState: BluetoothStateManager.BluetoothState = .other
-    
     // MARK: - App-level responsibilities
 
-    private var rootViewController: UIViewController
+    private var alertPresenter: AlertPresenter
     
     private var deliveryUncertaintyAlertManager: DeliveryUncertaintyAlertManager?
     
@@ -65,6 +64,10 @@ final class DeviceDataManager {
     }()
 
     private var cgmStalenessMonitor: CGMStalenessMonitor
+
+    private var displayGlucoseUnitObservers = WeakSynchronizedSet<DisplayGlucoseUnitObserver>()
+
+    public private(set) var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
 
     // MARK: - CGM
 
@@ -180,7 +183,7 @@ final class DeviceDataManager {
 
     private(set) var loopManager: LoopDataManager!
 
-    init(pluginManager: PluginManager, alertManager: AlertManager, bluetoothStateManager: BluetoothStateManager, rootViewController: UIViewController) {
+    init(pluginManager: PluginManager, alertManager: AlertManager, bluetoothProvider: BluetoothProvider, alertPresenter: AlertPresenter) {
         let localCacheDuration = Bundle.main.localCacheDuration
 
         let fileManager = FileManager.default
@@ -200,7 +203,8 @@ final class DeviceDataManager {
 
         self.pluginManager = pluginManager
         self.alertManager = alertManager
-        self.rootViewController = rootViewController
+        self.bluetoothProvider = bluetoothProvider
+        self.alertPresenter = alertPresenter
         
         self.healthStore = HKHealthStore()
         self.cacheStore = PersistenceController.controllerInAppGroupDirectory()
@@ -254,8 +258,9 @@ final class DeviceDataManager {
         self.cgmHasValidSensorSession = false
         self.isClosedLoop = false
         self.isClosedLoopAllowed = false
-        
-        bluetoothStateManager.addBluetoothStateObserver(self)
+
+        // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
+        displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
@@ -283,7 +288,7 @@ final class DeviceDataManager {
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
             settingsStore: settingsStore,
-            alertPresenter: alertManager,
+            alertIssuer: alertManager,
             pumpInsulinType: pumpManager?.status.insulinType
         )
         cacheStore.delegate = loopManager
@@ -302,8 +307,7 @@ final class DeviceDataManager {
             pluginManager: pluginManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
-            remoteDataServicesManager: remoteDataServicesManager,
-            dataManager: loopManager
+            remoteDataServicesManager: remoteDataServicesManager
         )
 
         let criticalEventLogs: [CriticalEventLog] = [settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
@@ -345,6 +349,18 @@ final class DeviceDataManager {
             .receive(on: DispatchQueue.main)
             .sink { if !$0 { self.loopManager.settings.clearOverride(matching: .preMeal) } }
             .store(in: &cancellables)
+
+
+        NotificationCenter.default.addObserver(forName: .HealthStorePreferredGlucoseUnitDidChange, object: glucoseStore.healthStore, queue: nil) { [weak self] _ in
+            guard let strongSelf = self else {
+                return
+            }
+
+            if let preferredGlucoseUnit = strongSelf.glucoseStore.preferredUnit {
+                strongSelf.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: preferredGlucoseUnit)
+                strongSelf.notifyObserversOfDisplayGlucoseUnitChange(to: preferredGlucoseUnit)
+            }
+        }
     }
     
     var isCGMManagerValidPumpManager: Bool {
@@ -355,8 +371,40 @@ final class DeviceDataManager {
         return pumpManagerTypeFromRawValue(rawValue) != nil
     }
 
-    var availablePumpManagers: [AvailableDevice] {
+    var availablePumpManagers: [PumpManagerDescriptor] {
         return pluginManager.availablePumpManagers + availableStaticPumpManagers
+    }
+
+    func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<UIViewController & PumpManagerCreateNotifying & PumpManagerOnboardNotifying & CompletionNotifying, PumpManager>, Error> {
+        switch setupPumpManagerUI(withIdentifier: identifier, initialSettings: settings) {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let success):
+            switch success {
+            case .userInteractionRequired(let viewController):
+                return .success(.userInteractionRequired(viewController))
+            case .createdAndOnboarded(let pumpManagerUI):
+                return .success(.createdAndOnboarded(pumpManagerUI))
+            }
+        }
+    }
+
+    struct UnknownPumpManagerIdentifierError: Error {}
+
+    func setupPumpManagerUI(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<UIViewController & PumpManagerCreateNotifying & PumpManagerOnboardNotifying & CompletionNotifying, PumpManagerUI>, Error> {
+        guard let pumpManagerUIType = pumpManagerTypeByIdentifier(identifier) else {
+            return .failure(UnknownPumpManagerIdentifierError())
+        }
+
+        let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowedInsulinTypes: allowedInsulinTypes)
+        if case .createdAndOnboarded(let pumpManagerUI) = result {
+            if let basalRateSchedule = loopManager.basalRateSchedule {
+                pumpManagerUI.syncBasalRateSchedule(items: basalRateSchedule.items, completion: { _ in })
+            }
+            self.pumpManager = pumpManagerUI
+        }
+
+        return .success(result)
     }
 
     public func pumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
@@ -385,7 +433,6 @@ final class DeviceDataManager {
         switch readingResult {
         case .newData(let values):
             log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
-
             loopManager.addGlucoseSamples(values) { result in
                 self.log.default("Asserting current pump data")
                 self.pumpManager?.ensureCurrentPumpData(completion: nil)
@@ -395,9 +442,10 @@ final class DeviceDataManager {
                     }
                 }
             }
+        case .unreliableData:
+            loopManager.recievedUnreliableCGMReading()
         case .noData:
             log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
-
             pumpManager?.ensureCurrentPumpData(completion: nil)
         case .error(let error):
             log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
@@ -410,26 +458,59 @@ final class DeviceDataManager {
         updatePumpManagerBLEHeartbeatPreference()
     }
 
-    var availableCGMManagers: [AvailableDevice] {
+    var availableCGMManagers: [CGMManagerDescriptor] {
         var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
-            availableCGMManagers.append(AvailableDevice(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle, providesOnboarding: false))
+            availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
         }
         return availableCGMManagers
+    }
+
+    func setupCGMManager(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & CGMManagerCreateNotifying & CGMManagerOnboardNotifying & CompletionNotifying, CGMManager>, Error> {
+        if let cgmManager = setupCGMManagerFromPumpManager(withIdentifier: identifier) {
+            return .success(.createdAndOnboarded(cgmManager))
+        }
+
+        switch setupCGMManagerUI(withIdentifier: identifier) {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let success):
+            switch success {
+            case .userInteractionRequired(let viewController):
+                return .success(.userInteractionRequired(viewController))
+            case .createdAndOnboarded(let cgmManagerUI):
+                return .success(.createdAndOnboarded(cgmManagerUI))
+            }
+        }
+    }
+
+    struct UnknownCGMManagerIdentifierError: Error {}
+
+    fileprivate func setupCGMManagerUI(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & CGMManagerCreateNotifying & CGMManagerOnboardNotifying & CompletionNotifying, CGMManagerUI>, Error> {
+        guard let cgmManagerUIType = cgmManagerTypeByIdentifier(identifier) else {
+            return .failure(UnknownCGMManagerIdentifierError())
+        }
+
+        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default)
+        if case .createdAndOnboarded(let cgmManagerUI) = result {
+            self.cgmManager = cgmManagerUI
+        }
+
+        return .success(result)
     }
 
     public func cgmManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
         return pluginManager.getCGMManagerTypeByIdentifier(identifier) ?? staticCGMManagersByIdentifier[identifier] as? CGMManagerUI.Type
     }
     
-    public typealias SetupCGMCompletion = (CGMManager?) -> Void
-    public func maybeSetupCGMManager(_ identifier: String, setupClosure: (CGMManagerUI.Type) -> Void) {
-        if identifier == pumpManager?.managerIdentifier, let cgmManager = pumpManager as? CGMManager {
-            // We have a pump that is a CGM!
-            self.cgmManager = cgmManager
-        } else if let cgmManagerType = cgmManagerTypeByIdentifier(identifier) {
-            setupClosure(cgmManagerType)
+    public func setupCGMManagerFromPumpManager(withIdentifier identifier: String) -> CGMManager? {
+        guard identifier == pumpManager?.managerIdentifier, let cgmManager = pumpManager as? CGMManager else {
+            return nil
         }
+
+        // We have a pump that is a CGM!
+        self.cgmManager = cgmManager
+        return cgmManager
     }
     
     private func cgmManagerTypeFromRawValue(_ rawValue: [String: Any]) -> CGMManager.Type? {
@@ -457,9 +538,15 @@ final class DeviceDataManager {
             }
         }
     }
+
+    func getHealthStoreAuthorization(_ completion: @escaping (HKAuthorizationRequestStatus) -> Void) {
+        healthStore.getRequestStatusForAuthorization(toShare: shareTypes, read: readTypes) { (authorizationRequestStatus, _) in
+            completion(authorizationRequestStatus)
+        }
+    }
     
     // Get HealthKit authorization for all of the stores
-    func authorizeHealthStore(_ completion: @escaping () -> Void) {
+    func authorizeHealthStore(_ completion: @escaping (HKAuthorizationRequestStatus) -> Void) {
         // Authorize all types at once for simplicity
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
@@ -469,7 +556,7 @@ final class DeviceDataManager {
                 self.glucoseStore.authorize(toShare: true, { _ in })
             }
 
-            completion()
+            self.getHealthStoreAuthorization(completion)
         }
     }
 
@@ -543,9 +630,12 @@ private extension DeviceDataManager {
                                             alertResponder: cgmManager)
             alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
                                               soundVendor: cgmManager)            
-            cgmHasValidSensorSession = cgmManager.cgmStatus.hasValidSensorSession
+            cgmHasValidSensorSession = cgmManager.cgmManagerStatus.hasValidSensorSession
         }
-        
+
+        if let cgmManagerUI = cgmManager as? CGMManagerUI {
+            addDisplayGlucoseUnitObserver(cgmManagerUI)
+        }
     }
 
     func setupPump() {
@@ -555,7 +645,7 @@ private extension DeviceDataManager {
         pumpManager?.delegateQueue = queue
 
         doseStore.device = pumpManager?.status.device
-        pumpManagerHUDProvider = pumpManager?.hudProvider(insulinTintColor: .insulinTintColor, guidanceColors: .default, allowedInsulinTypes: allowedInsulinTypes)
+        pumpManagerHUDProvider = pumpManager?.hudProvider(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowedInsulinTypes: allowedInsulinTypes)
 
         // Proliferate PumpModel preferences to DoseStore
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
@@ -567,7 +657,7 @@ private extension DeviceDataManager {
             alertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.managerIdentifier,
                                                     soundVendor: pumpManager)
             
-            deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, rootViewController: rootViewController)
+            deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
         }
     }
 
@@ -680,12 +770,12 @@ extension DeviceDataManager: DeviceManagerDelegate {
     }
 
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
-        deviceLog.log(managerIdentifier: Swift.type(of: manager).managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
+        deviceLog.log(managerIdentifier: manager.managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
     }
 }
 
 // MARK: - UserAlertHandler
-extension DeviceDataManager: AlertPresenter {
+extension DeviceDataManager: AlertIssuer {
     static let managerIdentifier = "DeviceDataManager"
 
     func issueAlert(_ alert: Alert) {
@@ -717,6 +807,9 @@ extension DeviceDataManager: AlertPresenter {
 extension DeviceDataManager: CGMManagerDelegate {
     func cgmManagerWantsDeletion(_ manager: CGMManager) {
         dispatchPrecondition(condition: .onQueue(queue))
+
+        log.default("CGM manager with identifier '%{public}@' wants deletion", manager.managerIdentifier)
+
         DispatchQueue.main.async {
             self.cgmManager = nil
         }
@@ -752,9 +845,21 @@ extension DeviceDataManager: CGMManagerDelegate {
     }
 }
 
-extension DeviceDataManager: CGMManagerSetupViewControllerDelegate {
-    func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
+// MARK: - CGMManagerCreateDelegate
+
+extension DeviceDataManager: CGMManagerCreateDelegate {
+    func cgmManagerCreateNotifying(didCreateCGMManager cgmManager: CGMManagerUI) {
+        log.default("CGM manager with identifier '%{public}@' created", cgmManager.managerIdentifier)
         self.cgmManager = cgmManager
+    }
+}
+
+// MARK: - CGMManagerOnboardDelegate
+
+extension DeviceDataManager: CGMManagerOnboardDelegate {
+    func cgmManagerOnboardNotifying(didOnboardCGMManager cgmManager: CGMManagerUI) {
+        precondition(cgmManager.isOnboarded)
+        log.default("CGM manager with identifier '%{public}@' onboarded", cgmManager.managerIdentifier)
     }
 }
 
@@ -888,7 +993,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
 
-        log.default("PumpManager:%{public}@ will deactivate", String(describing: type(of: pumpManager)))
+        log.default("Pump manager with identifier '%{public}@' will deactivate", pumpManager.managerIdentifier)
 
         doseStore.resetPumpData(completion: nil)
         DispatchQueue.main.async {
@@ -939,29 +1044,6 @@ extension DeviceDataManager: PumpManagerDelegate {
                 completion(.failure(error))
             case .success(let (newValue, lastValue, areStoredValuesContinuous)):
                 completion(.success((newValue: newValue, lastValue: lastValue, areStoredValuesContinuous: areStoredValuesContinuous)))
-
-                // Send notifications for low reservoir if necessary
-                if let previousVolume = lastValue?.unitVolume {
-                    guard newValue.unitVolume > 0 else {
-                        NotificationManager.sendPumpReservoirEmptyNotification()
-                        return
-                    }
-
-                    let warningThresholds: [Double] = [10, 20, 30]
-
-                    for threshold in warningThresholds {
-                        if newValue.unitVolume <= threshold && previousVolume > threshold {
-                            NotificationManager.sendPumpReservoirLowNotificationForAmount(newValue.unitVolume, andTimeRemaining: nil)
-                            break
-                        }
-                    }
-
-                    if newValue.unitVolume > previousVolume + 1 {
-                        self.analyticsServicesManager.reservoirWasRewound()
-
-                        NotificationManager.clearPumpReservoirNotification()
-                    }
-                }
             }
         }
     }
@@ -975,6 +1057,34 @@ extension DeviceDataManager: PumpManagerDelegate {
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
         dispatchPrecondition(condition: .onQueue(queue))
         return doseStore.pumpEventQueryAfterDate
+    }
+}
+
+// MARK: - PumpManagerCreateDelegate
+
+extension DeviceDataManager: PumpManagerCreateDelegate {
+    func pumpManagerCreateNotifying(didCreatePumpManager pumpManager: PumpManagerUI) {
+        log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
+        self.pumpManager = pumpManager
+    }
+}
+
+// MARK: - PumpManagerOnboardDelegate
+
+extension DeviceDataManager: PumpManagerOnboardDelegate {
+    func pumpManagerOnboardNotifying(didOnboardPumpManager pumpManager: PumpManagerUI, withFinalSettings settings: PumpManagerSetupSettings) {
+        precondition(pumpManager.isOnboarded)
+        log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.managerIdentifier)
+
+        if let basalRateSchedule = settings.basalSchedule {
+            loopManager.basalRateSchedule = basalRateSchedule
+        }
+        if let maxBasalRateUnitsPerHour = settings.maxBasalRateUnitsPerHour {
+            loopManager.settings.maximumBasalRatePerHour = maxBasalRateUnitsPerHour
+        }
+        if let maxBolusUnits = settings.maxBolusUnits {
+            loopManager.settings.maximumBolus = maxBolusUnits
+        }
     }
 }
 
@@ -1193,10 +1303,10 @@ extension DeviceDataManager {
 // MARK: - Critical Event Log Export
 
 extension DeviceDataManager {
-    private static var criticalEventLogHistoricalExportBackgroundTaskIdentifer: String { "com.loopkit.background-task.critical-event-log.historical-export" }
+    private static var criticalEventLogHistoricalExportBackgroundTaskIdentifier: String { "com.loopkit.background-task.critical-event-log.historical-export" }
 
     public static func registerCriticalEventLogHistoricalExportBackgroundTask(_ handler: @escaping (BGProcessingTask) -> Void) -> Bool {
-        return BGTaskScheduler.shared.register(forTaskWithIdentifier: criticalEventLogHistoricalExportBackgroundTaskIdentifer, using: nil) { handler($0 as! BGProcessingTask) }
+        return BGTaskScheduler.shared.register(forTaskWithIdentifier: criticalEventLogHistoricalExportBackgroundTaskIdentifier, using: nil) { handler($0 as! BGProcessingTask) }
     }
 
     public func handleCriticalEventLogHistoricalExportBackgroundTask(_ task: BGProcessingTask) {
@@ -1228,7 +1338,7 @@ extension DeviceDataManager {
     public func scheduleCriticalEventLogHistoricalExportBackgroundTask(isRetry: Bool = false) {
         do {
             let earliestBeginDate = isRetry ? criticalEventLogExportManager.retryExportHistoricalDate() : criticalEventLogExportManager.nextExportHistoricalDate()
-            let request = BGProcessingTaskRequest(identifier: Self.criticalEventLogHistoricalExportBackgroundTaskIdentifer)
+            let request = BGProcessingTaskRequest(identifier: Self.criticalEventLogHistoricalExportBackgroundTaskIdentifier)
             request.earliestBeginDate = earliestBeginDate
             request.requiresExternalPower = true
 
@@ -1306,16 +1416,6 @@ extension DeviceDataManager {
     }
 }
 
-//MARK: - Bluetooth State Manager Observation
-
-extension DeviceDataManager: BluetoothStateManagerObserver {
-    func bluetoothStateManager(_ bluetoothStateManager: BluetoothStateManager,
-                               bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
-    {
-        self.bluetoothState = bluetoothState
-    }
-}
-
 fileprivate extension FileManager {
     var exportsDirectoryURL: URL {
         let applicationSupportDirectory = try! url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -1333,6 +1433,9 @@ extension GlucoseStore : CGMStalenessMonitorDelegate { }
 extension DeviceDataManager: SupportInfoProvider {
     
     public var localizedAppNameAndVersion: String {
+        if let branch = Bundle.main.gitBranch, branch != "", branch != "main", branch != "master" {
+            return Bundle.main.localizedNameAndVersion + " (\(branch))"
+        }
         return Bundle.main.localizedNameAndVersion
     }
     
@@ -1348,5 +1451,33 @@ extension DeviceDataManager: SupportInfoProvider {
         generateDiagnosticReport(completion)
     }
     
-    
+}
+
+extension DeviceDataManager {
+    func addDisplayGlucoseUnitObserver(_ observer: DisplayGlucoseUnitObserver) {
+        let queue = DispatchQueue.main
+        displayGlucoseUnitObservers.insert(observer, queue: queue)
+        if let displayGlucoseUnit = glucoseStore.preferredUnit {
+            queue.async {
+                observer.displayGlucoseUnitDidChange(to: displayGlucoseUnit)
+            }
+        }
+    }
+
+    func removeDisplayGlucoseUnitObserver(_ observer: DisplayGlucoseUnitObserver) {
+        displayGlucoseUnitObservers.removeElement(observer)
+    }
+
+    func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: HKUnit) {
+        self.displayGlucoseUnitObservers.forEach {
+            $0.displayGlucoseUnitDidChange(to: displayGlucoseUnit)
+        }
+    }
+}
+
+extension DeviceDataManager {
+    var availableSupports: [SupportUI] {
+        let availableSupports = pluginManager.availableSupports + servicesManager.availableSupports + [cgmManager, pumpManager].compactMap { $0 as? SupportUI }
+        return availableSupports.sorted { $0.supportIdentifier < $1.supportIdentifier } // Provide a consistent ordering
+    }
 }
