@@ -293,7 +293,9 @@ extension OnboardingManager: ServiceProvider {
 
 // MARK: - OnboardingProvider
 
-extension OnboardingManager: OnboardingProvider {}
+extension OnboardingManager: OnboardingProvider {
+    var allowSkipOnboarding: Bool { FeatureFlags.mockTherapySettingsEnabled }   // NOTE: SKIP ONBOARDING - DEBUG AND TEST ONLY
+}
 
 // MARK: - OnboardingUI
 
