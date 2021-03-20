@@ -295,6 +295,8 @@ extension LoopSettings: RawRepresentable {
             let dosingStrategy = DosingStrategy(rawValue: rawDosingStrategy) {
             self.dosingStrategy = dosingStrategy
         }
+        
+        self.deviceToken = rawValue["deviceToken"] as? Data
     }
 
     public var rawValue: RawValue {
@@ -314,6 +316,7 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
         raw["dosingStrategy"] = dosingStrategy.rawValue
+        raw["deviceToken"] = deviceToken
 
         return raw
     }
