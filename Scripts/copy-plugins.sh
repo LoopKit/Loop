@@ -13,7 +13,7 @@ function copy_plugins {
     echo "Looking for plugins in $1"
     for f in "$1"/*.loopplugin; do
       plugin=$(basename "$f")
-      echo Copying device plugin: $plugin to frameworks directory in app
+      echo Copying plugin: $plugin to frameworks directory in app
       plugin_path="$(readlink "$f" || echo "$f")"
       plugin_as_framework_path="${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/${plugin%.*}.framework"
       rsync -va --exclude=Frameworks "$plugin_path/." "${plugin_as_framework_path}"
@@ -28,7 +28,7 @@ function copy_plugins {
       for framework_path in "${f}"/Frameworks/*.framework; do
         framework=$(basename "$framework_path")
         echo "Copying plugin's framework $framework_path to ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/."
-        cp -a "$framework_path" "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/."
+        cp -avf "$framework_path" "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/."
         plugin_path="$(readlink "$f" || echo "$f")"
         if [ "$EXPANDED_CODE_SIGN_IDENTITY" != "-" ] && [ "$EXPANDED_CODE_SIGN_IDENTITY" != "" ]; then
           echo "Signing $framework for $plugin with $EXPANDED_CODE_SIGN_IDENTITY_NAME"

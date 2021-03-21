@@ -35,9 +35,12 @@ final class DataManager {
         carbStore = CarbStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
-            observationEnabled: false,
+            cacheLength: .hours(24),
+            defaultAbsorptionTimes: (fast: .minutes(30), medium: .hours(3), slow: .hours(5)),
+            observationInterval: 0,
             carbRatioSchedule: carbRatioSchedule,
-            insulinSensitivitySchedule: insulinSensitivitySchedule
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
 
         doseStore = DoseStore(
@@ -46,13 +49,15 @@ final class DataManager {
             observationEnabled: false,
             insulinModel: insulinModelSettings?.model,
             basalProfile: basalRateSchedule,
-            insulinSensitivitySchedule: insulinSensitivitySchedule
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
 
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
-            observationEnabled: false
+            observationEnabled: false,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
     }
 }
@@ -73,7 +78,7 @@ extension DataManager {
 
     /// The length of time insulin has an effect on blood glucose
     var insulinModelSettings: InsulinModelSettings? {
-        guard let model = doseStore.insulinModel else {
+        guard let model = doseStore.defaultInsulinModel else {
             return nil
         }
 

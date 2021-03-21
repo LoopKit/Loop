@@ -225,6 +225,15 @@ extension ExtensionDelegate: WCSessionDelegate {
             } else {
                 log.error("Could not decode LoopSettingsUserInfo: %{public}@", userInfo)
             }
+        case SupportedBolusVolumesUserInfo.name:
+            guard let volumes = SupportedBolusVolumesUserInfo(rawValue: userInfo)?.supportedBolusVolumes else {
+                log.error("Could not decode SupportedBolusVolumesUserInfo: %{public}@", userInfo)
+                return
+            }
+
+            DispatchQueue.main.async {
+                self.loopManager.supportedBolusVolumes = volumes
+            }
         case "WatchContext":
             // WatchContext is the only userInfo type without a "name" key. This isn't a great heuristic.
             updateContext(userInfo)
@@ -243,9 +252,9 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
 
 
 extension ExtensionDelegate {
-    static let didBecomeActiveNotification = Notification.Name("ExtensionDelegate.didBecomeActive")
+    static let didBecomeActiveNotification = Notification.Name("com.loopkit.Loop.LoopWatch.didBecomeActive")
 
-    static let willResignActiveNotification = Notification.Name("ExtensionDelegate.willResignActive")
+    static let willResignActiveNotification = Notification.Name("com.loopkit.Loop.LoopWatch.willResignActive")
 
     /// Global shortcut to present an alert for a specific error out-of-context with a specific interface controller.
     ///

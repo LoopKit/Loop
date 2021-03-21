@@ -4,6 +4,10 @@
 <dict>
 	<key>AppGroupIdentifier</key>
 	<string>$(APP_GROUP_IDENTIFIER)</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.loopkit.background-task.critical-event-log.historical-export</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -43,18 +47,25 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LoopLocalCacheDurationDays</key>
+	<string>$(LOOP_LOCAL_CACHE_DURATION_DAYS)</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera is used to scan barcodes of devices</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Face ID is used to authenticate insulin bolus.</string>
+	<string>Face ID is used to authenticate insulin bolus and to save changes to therapy settings.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation.</string>
+	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
+	<key>NSSiriUsageDescription</key>
+	<string>Loop uses Siri to allow you to set override presets with your voice.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
+		<string>EnableOverridePresetIntent</string>
 		<string>NewCarbEntry</string>
 		<string>NewCarbEntryIntent</string>
 		<string>ViewLoopStatus</string>
@@ -62,6 +73,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
+		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>

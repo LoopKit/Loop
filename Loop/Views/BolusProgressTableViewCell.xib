@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14854.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="16097.3" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait" appearance="dark"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14806.4"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -21,11 +20,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="416" height="54"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                     </view>
-                    <view contentMode="scaleToFill" horizontalHuggingPriority="251" placeholderIntrinsicWidth="332" placeholderIntrinsicHeight="32" translatesAutoresizingMaskIntoConstraints="NO" id="UrG-Ab-ud4" customClass="MKRingProgressView">
-                        <rect key="frame" x="369" y="11" width="32" height="32"/>
+                    <view contentMode="scaleToFill" horizontalHuggingPriority="251" placeholderIntrinsicWidth="25" placeholderIntrinsicHeight="25" translatesAutoresizingMaskIntoConstraints="NO" id="UrG-Ab-ud4" customClass="MKRingProgressView">
+                        <rect key="frame" x="379" y="12" width="30" height="30"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ACq-Bw-sij" userLabel="Square">
-                                <rect key="frame" x="11" y="11" width="10" height="10"/>
+                                <rect key="frame" x="11.5" y="11.5" width="7.5" height="7.5"/>
                                 <color key="backgroundColor" name="insulin"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="ACq-Bw-sij" secondAttribute="height" multiplier="1:1" id="KcF-0P-bM6"/>
@@ -36,8 +35,8 @@
                         <constraints>
                             <constraint firstAttribute="width" secondItem="UrG-Ab-ud4" secondAttribute="height" id="IbX-Nz-jyz"/>
                             <constraint firstItem="ACq-Bw-sij" firstAttribute="centerY" secondItem="UrG-Ab-ud4" secondAttribute="centerY" id="JJe-bL-WIh"/>
-                            <constraint firstItem="ACq-Bw-sij" firstAttribute="width" secondItem="UrG-Ab-ud4" secondAttribute="width" multiplier="0.3" id="Tsx-mp-RDs"/>
                             <constraint firstItem="ACq-Bw-sij" firstAttribute="centerX" secondItem="UrG-Ab-ud4" secondAttribute="centerX" id="rO0-0q-4oX"/>
+                            <constraint firstItem="ACq-Bw-sij" firstAttribute="width" secondItem="UrG-Ab-ud4" secondAttribute="width" multiplier="0.25" id="xfR-i3-I34"/>
                         </constraints>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="number" keyPath="ringWidth">
@@ -57,25 +56,34 @@
                             </userDefinedRuntimeAttribute>
                         </userDefinedRuntimeAttributes>
                     </view>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Bolusing" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xSg-dV-gfs">
-                        <rect key="frame" x="15" y="16" width="354" height="22"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Bolusing" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xSg-dV-gfs">
+                        <rect key="frame" x="7" y="16" width="279" height="22"/>
                         <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap to Stop" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xiw-DG-3Hi">
+                        <rect key="frame" x="290" y="18" width="83" height="18"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                        <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="UrG-Ab-ud4" firstAttribute="top" secondItem="jGE-di-Djd" secondAttribute="topMargin" id="8Fx-39-mMv"/>
                     <constraint firstItem="xSg-dV-gfs" firstAttribute="centerY" secondItem="jGE-di-Djd" secondAttribute="centerY" id="8oR-Su-nsR"/>
-                    <constraint firstItem="xSg-dV-gfs" firstAttribute="top" secondItem="jGE-di-Djd" secondAttribute="topMargin" constant="5" id="Dw0-cA-nUf"/>
+                    <constraint firstItem="Xiw-DG-3Hi" firstAttribute="centerY" secondItem="xSg-dV-gfs" secondAttribute="centerY" id="D2s-49-OrR"/>
                     <constraint firstAttribute="trailing" secondItem="Fv9-ct-CxM" secondAttribute="trailing" id="FPD-cj-gFp"/>
-                    <constraint firstItem="xSg-dV-gfs" firstAttribute="leading" secondItem="jGE-di-Djd" secondAttribute="leadingMargin" id="G4l-xP-Te2"/>
-                    <constraint firstItem="UrG-Ab-ud4" firstAttribute="leading" secondItem="xSg-dV-gfs" secondAttribute="trailing" id="JjW-g8-NcF"/>
+                    <constraint firstItem="xSg-dV-gfs" firstAttribute="leading" secondItem="jGE-di-Djd" secondAttribute="leadingMargin" constant="-8" id="G4l-xP-Te2"/>
+                    <constraint firstItem="xSg-dV-gfs" firstAttribute="top" relation="lessThanOrEqual" secondItem="jGE-di-Djd" secondAttribute="topMargin" constant="5" id="Iba-kp-585"/>
                     <constraint firstItem="Fv9-ct-CxM" firstAttribute="leading" secondItem="jGE-di-Djd" secondAttribute="leading" id="MTG-YW-gBY"/>
+                    <constraint firstItem="UrG-Ab-ud4" firstAttribute="centerY" secondItem="xSg-dV-gfs" secondAttribute="centerY" id="NGC-DV-vPs"/>
                     <constraint firstItem="Fv9-ct-CxM" firstAttribute="top" secondItem="jGE-di-Djd" secondAttribute="top" id="NRs-Uv-MTO"/>
-                    <constraint firstAttribute="trailingMargin" secondItem="UrG-Ab-ud4" secondAttribute="trailing" id="b8e-f9-gMs"/>
-                    <constraint firstAttribute="bottomMargin" secondItem="UrG-Ab-ud4" secondAttribute="bottom" id="exw-VR-6Z2"/>
+                    <constraint firstItem="UrG-Ab-ud4" firstAttribute="leading" secondItem="Xiw-DG-3Hi" secondAttribute="trailing" constant="6" id="XoP-5R-Rfe"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="UrG-Ab-ud4" secondAttribute="trailing" constant="-8" id="b8e-f9-gMs"/>
+                    <constraint firstItem="UrG-Ab-ud4" firstAttribute="top" secondItem="jGE-di-Djd" secondAttribute="top" constant="12" id="cIs-Js-hbn"/>
+                    <constraint firstAttribute="bottom" secondItem="UrG-Ab-ud4" secondAttribute="bottom" constant="12" id="eXk-td-5KB"/>
                     <constraint firstAttribute="bottom" secondItem="Fv9-ct-CxM" secondAttribute="bottom" id="m8V-Ta-F4r"/>
+                    <constraint firstItem="Xiw-DG-3Hi" firstAttribute="leading" secondItem="xSg-dV-gfs" secondAttribute="trailing" constant="4" id="qdS-mB-X7N"/>
                 </constraints>
                 <edgeInsets key="layoutMargins" top="8" left="15" bottom="8" right="8"/>
             </tableViewCellContentView>
@@ -90,7 +98,7 @@
     </objects>
     <resources>
         <namedColor name="insulin">
-            <color red="1" green="0.58399999141693115" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.33300000429153442" green="0.41200000047683716" blue="0.94900000095367432" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

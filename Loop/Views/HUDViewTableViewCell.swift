@@ -10,6 +10,6 @@ import LoopUI
 
 class HUDViewTableViewCell: UITableViewCell {
 
-    @IBOutlet var hudView: HUDView!
+    @IBOutlet var hudView: StatusBarHUDView!
 
 }

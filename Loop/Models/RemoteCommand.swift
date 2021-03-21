@@ -16,46 +16,44 @@ public enum RemoteCommandError: Error {
 
 
 enum RemoteCommand {
-    typealias RawValue = [String: Any]
-
     case temporaryScheduleOverride(TemporaryScheduleOverride)
     case cancelTemporaryOverride
     case bolusEntry(Double)
-     case carbsEntry(NewCarbEntry)
+    case carbsEntry(NewCarbEntry)
 }
 
 
 // Push Notifications
 extension RemoteCommand {
     init?(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], otp: String) {
-        
+
         // check OTP
         func checkOTP() -> Bool {
-           var retVal: Bool = false
+            var retVal: Bool = false
             
-           if let otpIn = notification["otp"] as? String {
-               print("OTP:   \(otp)")
-               print("OTPIn: \(otpIn)")
-               if (otpIn.count == 6 && otp.count == 6) {
-                  if( otpIn == otp ) {
-                      retVal = true
-                  }
-               }
-           } else {
-               retVal = false
-           }
-        
-           if(retVal) {
-              print("OTP Check Passed")
-           } else {
-              print("OTP Check Failed")
-           }
-        
-           return retVal
+            if let otpIn = notification["otp"] as? String {
+                print("OTP:   \(otp)")
+                print("OTPIn: \(otpIn)")
+                if (otpIn.count == 6 && otp.count == 6) {
+                    if( otpIn == otp ) {
+                        retVal = true
+                    }
+                }
+            } else {
+                retVal = false
+            }
+            
+            if(retVal) {
+                print("OTP Check Passed")
+            } else {
+                print("OTP Check Failed")
+            }
+            
+            return retVal
         }
         
-        if let overrideEnactName = notification["override-name"] as? String,
-            let preset = allowedPresets.first(where: { $0.name == overrideEnactName }),
+        if let overrideName = notification["override-name"] as? String,
+            let preset = allowedPresets.first(where: { $0.name == overrideName }),
             let remoteAddress = notification["remote-address"] as? String
         {
             var override = preset.createOverride(enactTrigger: .remote(remoteAddress))
@@ -78,8 +76,7 @@ extension RemoteCommand {
             let quantity = HKQuantity(unit: .gram(), doubleValue: carbsValue)
             let newEntry = NewCarbEntry(quantity: quantity, startDate: Date(), foodType: "", absorptionTime: absorptionTime)
             self = .carbsEntry(newEntry)
-        }
-        else {
+        } else {
             return nil
         }
     }

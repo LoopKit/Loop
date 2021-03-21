@@ -78,17 +78,20 @@
    Title text for button to set up a new pump */
 "Add Pump" = "添加泵";
 
-/* The title of the Amplitude service */
-"Amplitude" = "Amplitude";
+/* Title text for button to set up a service */
+"Add Service" = "Add Service";
+
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
+
+/* The title of the section containing algorithm settings */
+"Algorithm Settings" = "算法设置";
 
 /* Subtitle of Rapid-Acting – Children preset */
 "An adjustment to the adult model based on empirical effects in children." = "在成人胰岛素模型基础上专为儿童修改的胰岛素代谢模型";
-
-/* The title of the amplitude API key credential */
-"API Key" = "API Key";
-
-/* The title of the nightscout API secret credential */
-"API Secret" = "API密码";
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "确定要删除该CGM数据源？";
@@ -175,11 +178,11 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "自定义覆盖";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "用户Token";
-
 /* Button title to delete CGM */
 "Delete CGM" = "删除CGM数据源";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "删除账户";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "输注限制";
@@ -223,9 +226,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "葡萄糖增量预测算法";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "永久";
 
@@ -261,9 +261,6 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "读取中...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "Loop失败";
 
@@ -276,8 +273,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "葡萄糖动量效应";
 
-/* The title of the Nightscout service */
-"Nightscout" = "Nightscout";
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "请注意";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "没有连接的设备，或设备连接期间发生故障";
@@ -353,9 +350,6 @@
 
 /* Format fragment for a start time */
 "since %@" = "自从%@分钟前";
-
-/* The title of the nightscout site URL credential */
-"Site URL" = "网址";
 
 /* The format for the description of a temporary override start date */
 "starting at %@" = "开始于 %@";

@@ -13,7 +13,7 @@ import LoopKitUI
 class RootNavigationController: UINavigationController {
 
     /// Its root view controller is always StatusTableViewController after loading
-    var rootViewController: StatusTableViewController! {
+    var statusTableViewController: StatusTableViewController! {
         return viewControllers.first as? StatusTableViewController
     }
 
@@ -46,7 +46,7 @@ class RootNavigationController: UINavigationController {
 
             fallthrough
         default:
-            rootViewController.restoreUserActivityState(activity)
+            statusTableViewController.restoreUserActivityState(activity)
         }
     }
 

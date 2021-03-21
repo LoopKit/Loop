@@ -35,7 +35,9 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
     private lazy var loadButtonItem = UIBarButtonItem(title: "Load", style: .done, target: self, action: #selector(loadSelectedScenario))
 
     init(scenariosManager: TestingScenariosManager) {
-        assertDebugOnly()
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
 
         self.scenariosManager = scenariosManager
         super.init(style: .grouped)

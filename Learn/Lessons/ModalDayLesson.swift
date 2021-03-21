@@ -85,12 +85,6 @@ final class ModalDayLesson: Lesson {
     }
 }
 
-
-fileprivate extension TextCell {
-
-}
-
-
 fileprivate struct ModalDayBucket {
     let time: Range<TimeComponents>
     let orderedValues: [Double]
@@ -164,8 +158,7 @@ fileprivate struct ModalDayBuilder {
 
 
 fileprivate class ModalDayCalculator {
-    typealias ResultType = ModalDayBuilder
-    let calculator: DayCalculator<ResultType>
+    let calculator: DayCalculator<ModalDayBuilder>
     let bucketSize: TimeInterval
     let calendar: Calendar
     private let log: OSLog
@@ -187,7 +180,7 @@ fileprivate class ModalDayCalculator {
             dataManager.glucoseStore.getGlucoseSamples(start: day.start, end: day.end, completion: { (result) in
                 switch result {
                 case .failure(let error):
-                    os_log(.error, log: self.log, "Failed to fetch samples: %{public}@", String(describing: error))
+                    os_log(.error, log: self.log, "Failure getting glucose samples: %{public}@", String(describing: error))
                     completion(error)
                 case .success(let samples):
                     os_log(.error, log: self.log, "Found %d samples", samples.count)

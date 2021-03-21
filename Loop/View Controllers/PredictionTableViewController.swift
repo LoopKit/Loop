@@ -12,6 +12,7 @@ import LoopKit
 import LoopKitUI
 import LoopUI
 import UIKit
+import os.log
 
 
 private extension RefreshContext {
@@ -19,7 +20,8 @@ private extension RefreshContext {
 }
 
 
-class PredictionTableViewController: ChartsTableViewController, IdentifiableClass {
+class PredictionTableViewController: LoopChartsTableViewController, IdentifiableClass {
+    private let log = OSLog(category: "PredictionTableViewController")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,7 +29,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         tableView.rowHeight = UITableView.automaticDimension
         tableView.cellLayoutMarginsFollowReadableWidth = true
 
-        glucoseChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
+        glucoseChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayRangeWide
 
         let notificationCenter = NotificationCenter.default
 
@@ -45,6 +47,13 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
                     }
 
                     self?.reloadData(animated: true)
+                }
+            },
+            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
+                DispatchQueue.main.async {
+                    self?.log.debug("[reloadData] for HealthKit unit preference change")
+                    self?.unitPreferencesDidChange(to: self?.deviceManager.glucoseStore.preferredUnit)
+                    self?.refreshContext = RefreshContext.all
                 }
             }
         ]
@@ -85,10 +94,10 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         }
     }
 
-    let glucoseChart = PredictedGlucoseChart()
+    let glucoseChart = PredictedGlucoseChart(yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
 
     override func createChartsManager() -> ChartsManager {
-        return ChartsManager(colors: .default, settings: .default, charts: [glucoseChart], traitCollection: traitCollection)
+        return ChartsManager(colors: .primary, settings: .default, charts: [glucoseChart], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {
@@ -106,13 +115,19 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         chartStartDate = calendar.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
         let reloadGroup = DispatchGroup()
-        var glucoseValues: [StoredGlucoseSample]?
+        var glucoseSamples: [StoredGlucoseSample]?
         var totalRetrospectiveCorrection: HKQuantity?
 
         if self.refreshContext.remove(.glucose) != nil {
             reloadGroup.enter()
-            self.deviceManager.loopManager.glucoseStore.getCachedGlucoseSamples(start: self.chartStartDate) { (values) -> Void in
-                glucoseValues = values
+            deviceManager.glucoseStore.getGlucoseSamples(start: self.chartStartDate, end: nil) { (result) -> Void in
+                switch result {
+                case .failure(let error):
+                    self.log.error("Failure getting glucose samples: %{public}@", String(describing: error))
+                    glucoseSamples = nil
+                case .success(let samples):
+                    glucoseSamples = samples
+                }
                 reloadGroup.leave()
             }
         }
@@ -120,7 +135,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         // For now, do this every time
         _ = self.refreshContext.remove(.status)
         reloadGroup.enter()
-        self.deviceManager.loopManager.getLoopState { (manager, state) in
+        deviceManager.loopManager.getLoopState { (manager, state) in
             self.retrospectiveGlucoseDiscrepancies = state.retrospectiveGlucoseDiscrepancies
             totalRetrospectiveCorrection = state.totalRetrospectiveCorrection
             self.glucoseChart.setPredictedGlucoseValues(state.predictedGlucoseIncludingPendingInsulin ?? [])
@@ -147,8 +162,8 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         }
 
         reloadGroup.notify(queue: .main) {
-            if let glucoseValues = glucoseValues {
-                self.glucoseChart.setGlucoseValues(glucoseValues)
+            if let glucoseSamples = glucoseSamples {
+                self.glucoseChart.setGlucoseValues(glucoseSamples)
             }
             self.charts.invalidateChart(atIndex: 0)
 
@@ -210,12 +225,12 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
-            cell.chartContentView.chartGenerator = { [weak self] (frame) in
+            cell.setChartGenerator(generator: { [weak self] (frame) in
                 return self?.charts.chart(atIndex: 0, frame: frame)?.view
-            }
+            })
 
             self.tableView(tableView, updateTitleFor: cell, at: indexPath)
-            cell.titleLabel?.textColor = UIColor.secondaryLabelColor
+            cell.setTitleTextColor(color: UIColor.secondaryLabel)
             cell.selectionStyle = .none
 
             cell.addGestureRecognizer(charts.gestureRecognizer!)
@@ -234,9 +249,9 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         }
 
         if let eventualGlucose = eventualGlucoseDescription {
-            cell.titleLabel?.text = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose)
+            cell.setTitleLabelText(label: String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose))
         } else {
-            cell.titleLabel?.text = SettingsTableViewCell.NoValueString
+            cell.setTitleLabelText(label: SettingsTableViewCell.NoValueString)
         }
     }
 
@@ -254,7 +269,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
         if input == .retrospection,
             let lastDiscrepancy = retrospectiveGlucoseDiscrepancies?.last,
-            let currentGlucose = self.deviceManager.loopManager.glucoseStore.latestGlucose
+            let currentGlucose = deviceManager.glucoseStore.latestGlucose
         {
             let formatter = QuantityFormatter()
             formatter.setPreferredNumberFormatter(for: glucoseChart.glucoseUnit)

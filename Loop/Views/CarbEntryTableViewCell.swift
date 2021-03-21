@@ -21,7 +21,13 @@ class CarbEntryTableViewCell: UITableViewCell {
 
     @IBOutlet private weak var observedDateLabel: UILabel!
 
-    @IBOutlet private weak var uploadingIndicator: UIImageView!
+    @IBOutlet private weak var disclosureImage: UIImageView!
+    
+    var isEditable: Bool = true {
+        didSet {
+            disclosureImage.isHidden = !isEditable
+        }
+    }
 
     var clampedProgress: Float {
         get {
@@ -85,12 +91,6 @@ class CarbEntryTableViewCell: UITableViewCell {
         }
     }
 
-    var isUploading = false {
-        didSet {
-            uploadingIndicator.isHidden = !isUploading
-        }
-    }
-
     override func layoutSubviews() {
         super.layoutSubviews()
 
@@ -118,6 +118,5 @@ class CarbEntryTableViewCell: UITableViewCell {
         observedValueText = nil
         observedDateText = nil
         observedValueLabel.superview?.isHidden = true
-        uploadingIndicator.isHidden = true
     }
 }

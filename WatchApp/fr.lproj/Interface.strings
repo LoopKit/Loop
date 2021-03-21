@@ -1,17 +1,18 @@
+
 /* Class = "WKInterfaceButton"; title = "🌮"; ObjectID = "0fo-Z3-hTi"; */
 "0fo-Z3-hTi.title" = "🌮";
 
-/* Class = "WKInterfaceButton"; title = "Add Carbs"; ObjectID = "b6f-3I-jki"; */
-"b6f-3I-jki.title" = "Ajouter des glucides";
+/* Class = "WKInterfaceLabel"; text = "--"; ObjectID = "CWt-7U-cnK"; */
+"CWt-7U-cnK.text" = "--";
 
 /* Class = "WKInterfaceLabel"; text = "—"; ObjectID = "CsQ-fc-KLC"; */
 "CsQ-fc-KLC.text" = "—";
 
-/* Class = "WKInterfaceLabel"; text = "15"; ObjectID = "CWt-7U-cnK"; */
-"CWt-7U-cnK.text" = "15";
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "DZc-Gn-RLu"; */
+"DZc-Gn-RLu.accessibilityLabel" = "Ajouter";
 
-/* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
-"dea-qG-va8.text" = "GLUCIDES TOTAUX";
+/* Class = "WKInterfaceButton"; title = "+"; ObjectID = "DZc-Gn-RLu"; */
+"DZc-Gn-RLu.title" = "+";
 
 /* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "Dh9-HV-fXy"; */
 "Dh9-HV-fXy.accessibilityLabel" = "Soustraire";
@@ -19,20 +20,50 @@
 /* Class = "WKInterfaceButton"; title = "−"; ObjectID = "Dh9-HV-fXy"; */
 "Dh9-HV-fXy.title" = "−";
 
+/* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "Dt1-kz-jMZ"; */
+"Dt1-kz-jMZ.text" = "---";
+
+/* Class = "WKInterfaceLabel"; text = "—"; ObjectID = "IRi-4t-ESO"; */
+"IRi-4t-ESO.text" = "—";
+
+/* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
+"JXa-s1-PJx.text" = "Course";
+
+/* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
+"MZU-QV-PtZ.text" = "TITLE";
+
+/* Class = "WKInterfaceLabel"; text = "—"; ObjectID = "Mhe-aR-kQQ"; */
+"Mhe-aR-kQQ.text" = "—";
+
+/* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
+"Qsq-p5-1J0.title" = "Bolus";
+
+/* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
+"T4U-wP-dSW.text" = "Label";
+
+/* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
+"UVY-pa-SUL.text" = "🏃‍♀️";
+
+/* Class = "WKInterfaceLabel"; text = "10:09 AM"; ObjectID = "Ury-of-vQg"; */
+"Ury-of-vQg.text" = "10:09 AM";
+
+/* Class = "WKInterfaceLabel"; text = "Turn Digital Crown to bolus"; ObjectID = "Xcr-jO-0IQ"; */
+"Xcr-jO-0IQ.text" = "Tourn la couronne Digital Crown pour gérer le bolus";
+
+/* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
+"XkS-y5-khE.text" = "<body>";
+
+/* Class = "WKInterfaceButton"; title = "Add Carbs"; ObjectID = "b6f-3I-jki"; */
+"b6f-3I-jki.title" = "Ajouter des glucides";
+
 /* Class = "WKInterfaceButton"; title = "🍕"; ObjectID = "dPF-QZ-sh6"; */
 "dPF-QZ-sh6.title" = "🍕";
 
 /* Class = "WKInterfaceMenuItem"; title = "2 hours"; ObjectID = "dPh-7b-Tfv"; */
 "dPh-7b-Tfv.title" = "2 heures";
 
-/* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "Dt1-kz-jMZ"; */
-"Dt1-kz-jMZ.text" = "---";
-
-/* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "DZc-Gn-RLu"; */
-"DZc-Gn-RLu.accessibilityLabel" = "Ajouter";
-
-/* Class = "WKInterfaceButton"; title = "+"; ObjectID = "DZc-Gn-RLu"; */
-"DZc-Gn-RLu.title" = "+";
+/* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
+"dea-qG-va8.text" = "GLUCIDES TOTAUX";
 
 /* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "eu3-pj-GH3"; */
 "eu3-pj-GH3.accessibilityLabel" = "Ajouter";
@@ -58,29 +89,14 @@
 /* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
 "hln-CI-MRP.text" = "Glucides";
 
-/* Class = "WKInterfaceLabel"; text = "—"; ObjectID = "IRi-4t-ESO"; */
-"IRi-4t-ESO.text" = "—";
-
 /* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
 "jj3-Gq-HBy.text" = "Échec du bolus";
-
-/* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
-"JXa-s1-PJx.text" = "Course";
-
-/* Class = "WKInterfaceLabel"; text = "—"; ObjectID = "Mhe-aR-kQQ"; */
-"Mhe-aR-kQQ.text" = "—";
 
 /* Class = "WKInterfaceLabel"; text = "0.000"; ObjectID = "mpK-zY-UvA"; */
 "mpK-zY-UvA.text" = "0.000";
 
-/* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
-"MZU-QV-PtZ.text" = "TITLE";
-
 /* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
 "nC0-X3-oFJ.text" = "Surcharge";
-
-/* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
-"Qsq-p5-1J0.title" = "Bolus";
 
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
 "rNf-Mh-tID.title" = "Loop";
@@ -91,23 +107,11 @@
 /* Class = "WKInterfaceLabel"; text = "Bolus"; ObjectID = "smL-Rc-IZh"; */
 "smL-Rc-IZh.text" = "Bolus";
 
-/* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
-"T4U-wP-dSW.text" = "Label";
-
-/* Class = "WKInterfaceLabel"; text = "10:09 AM"; ObjectID = "Ury-of-vQg"; */
-"Ury-of-vQg.text" = "10:09 AM";
-
-/* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
-"UVY-pa-SUL.text" = "🏃‍♀️";
-
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "v5b-sO-bb8"; */
 "v5b-sO-bb8.title" = "Loop";
 
 /* Class = "WKInterfaceMenuItem"; title = "1 hour"; ObjectID = "vL1-NA-WZ1"; */
 "vL1-NA-WZ1.title" = "1 heure";
-
-/* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
-"XkS-y5-khE.text" = "<body>";
 
 /* Class = "WKInterfaceLabel"; text = "ACTIVE CARBS"; ObjectID = "ycL-5X-a05"; */
 "ycL-5X-a05.text" = "GLUCIDES ACTIFS";
@@ -116,5 +120,4 @@
 "yl8-ZP-c3l.text" = "---";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "zO8-x6-bZd"; */
-"zO8-x6-bZd.text" = "Nom";
-
+"zO8-x6-bZd.text" = "Label";

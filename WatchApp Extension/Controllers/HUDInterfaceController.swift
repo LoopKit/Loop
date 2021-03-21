@@ -7,13 +7,13 @@
 //
 
 import WatchKit
+import LoopCore
 
 class HUDInterfaceController: WKInterfaceController {
     private var activeContextObserver: NSObjectProtocol?
 
     @IBOutlet weak var loopHUDImage: WKInterfaceImage!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
-    @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
 
     var loopManager = ExtensionDelegate.shared().loopManager
 
@@ -31,6 +31,7 @@ class HUDInterfaceController: WKInterfaceController {
         }
         
         loopManager.requestGlucoseBackfillIfNecessary()
+        loopManager.requestContextUpdate()
     }
 
     override func didDeactivate() {
@@ -43,49 +44,50 @@ class HUDInterfaceController: WKInterfaceController {
     }
 
     func update() {
-        guard let activeContext = loopManager.activeContext,
-            let date = activeContext.loopLastRunDate
-        else {
-            loopHUDImage.setLoopImage(.unknown)
+        guard let activeContext = loopManager.activeContext else {
+            loopHUDImage.setHidden(true)
             return
         }
+        loopHUDImage.setHidden(false)
 
-        glucoseLabel.setText("---")
-        glucoseLabel.setHidden(false)
-        eventualGlucoseLabel.setHidden(true)
-        if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.preferredGlucoseUnit, glucoseDate.timeIntervalSinceNow > -loopManager.settings.inputDataRecencyInterval {
-            let formatter = NumberFormatter.glucoseFormatter(for: unit)
-
-            if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {
-                let trend = activeContext.glucoseTrend?.symbol ?? ""
-                glucoseLabel.setText(glucoseValue + trend)
+        let date = activeContext.loopLastRunDate
+        let isClosedLoop = activeContext.isClosedLoop ?? false
+        loopHUDImage.setLoopImage(isClosedLoop: isClosedLoop, {
+            if let date = date {
+                switch date.timeIntervalSinceNow {
+                case let t where t > .minutes(-6):
+                    return .fresh
+                case let t where t > .minutes(-20):
+                    return .aging
+                default:
+                    return .stale
+                }
+            } else {
+                return .unknown
             }
+        }())
 
-            if let eventualGlucose = activeContext.eventualGlucose {
-                let glucoseValue = formatter.string(from: eventualGlucose.doubleValue(for: unit))
-                eventualGlucoseLabel.setText(glucoseValue)
-                eventualGlucoseLabel.setHidden(false)
+        if date != nil {
+            glucoseLabel.setText(NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"))
+            glucoseLabel.setHidden(false)
+            if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.preferredGlucoseUnit, glucoseDate.timeIntervalSinceNow > -LoopCoreConstants.inputDataRecencyInterval {
+                let formatter = NumberFormatter.glucoseFormatter(for: unit)
+                
+                if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {
+                    let trend = activeContext.glucoseTrend?.symbol ?? ""
+                    glucoseLabel.setText(glucoseValue + trend)
+                }
             }
         }
 
-        loopHUDImage.setLoopImage({
-            switch date.timeIntervalSinceNow {
-            case let t where t > .minutes(-6):
-                return .fresh
-            case let t where t > .minutes(-20):
-                return .aging
-            default:
-                return .stale
-            }
-        }())
     }
 
     @IBAction func addCarbs() {
-        presentController(withName: AddCarbsInterfaceController.className, context: nil)
+        presentController(withName: CarbAndBolusFlowController.className, context: CarbAndBolusFlow.Configuration.carbEntry)
     }
 
     @IBAction func setBolus() {
-        presentController(withName: BolusInterfaceController.className, context: loopManager.activeContext)
+        presentController(withName: CarbAndBolusFlowController.className, context: CarbAndBolusFlow.Configuration.manualBolus)
     }
 
 }

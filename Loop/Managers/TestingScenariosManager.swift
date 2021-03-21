@@ -30,7 +30,7 @@ protocol TestingScenariosManagerRequirements: TestingScenariosManager {
     var deviceManager: DeviceDataManager { get }
     var activeScenarioURL: URL? { get set }
     var activeScenario: TestingScenario? { get set }
-    var log: CategoryLogger { get }
+    var log: DiagnosticLog { get }
     func fetchScenario(from url: URL, completion: @escaping (Result<TestingScenario, Error>) -> Void)
 }
 
@@ -122,7 +122,7 @@ extension TestingScenariosManagerRequirements {
                 load(scenario) { error in
                     if error == nil {
                         self.activeScenarioURL = url
-                        self.log.debug(successLogMessage)
+                        self.log.debug("@{public}%", successLogMessage)
                     }
                     completion(error)
                 }
@@ -154,13 +154,15 @@ extension TestingScenariosManagerRequirements {
     private func stepForward(_ scenario: TestingScenario, completion: @escaping (TestingScenario) -> Void) {
         deviceManager.loopManager.getLoopState { _, state in
             var scenario = scenario
-            guard let recommendedTemp = state.recommendedTempBasal?.recommendation else {
+            guard let recommendedDose = state.recommendedAutomaticDose?.recommendation else {
                 scenario.stepForward(by: .minutes(5))
                 completion(scenario)
                 return
             }
-
-            scenario.stepForward(unitsPerHour: recommendedTemp.unitsPerHour, duration: recommendedTemp.duration)
+            
+            if let basalAdjustment = recommendedDose.basalAdjustment {
+                scenario.stepForward(unitsPerHour: basalAdjustment.unitsPerHour, duration: basalAdjustment.duration)
+            }
             completion(scenario)
         }
     }
@@ -175,11 +177,13 @@ extension TestingScenariosManagerRequirements {
     }
 
     private func loadScenario(_ scenario: TestingScenario, completion: @escaping (Error?) -> Void) {
-        assertDebugOnly()
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
 
         func bail(with error: Error) {
             activeScenarioURL = nil
-            log.error(error)
+            log.error("%{public}@", String(describing: error))
             completion(error)
         }
 
@@ -198,7 +202,8 @@ extension TestingScenariosManagerRequirements {
             }
 
             let instance = scenario.instantiate()
-            self.deviceManager.loopManager.carbStore.addCarbEntries(instance.carbEntries) { result in
+
+            self.deviceManager.carbStore.addCarbEntries(instance.carbEntries) { result in
                 switch result {
                 case .success(_):
                     pumpManager.reservoirFillFraction = 1.0
@@ -214,7 +219,9 @@ extension TestingScenariosManagerRequirements {
     }
 
     private func wipeExistingData(completion: @escaping (Error?) -> Void) {
-        assertDebugOnly()
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
 
         deviceManager.deleteTestingPumpData { error in
             guard error == nil else {
@@ -228,7 +235,7 @@ extension TestingScenariosManagerRequirements {
                     return
                 }
 
-                self.deviceManager.loopManager.carbStore.deleteAllCarbEntries(completion: completion)
+                self.deviceManager.carbStore.deleteAllCarbEntries(completion: completion)
             }
         }
     }
@@ -249,12 +256,12 @@ private extension CarbStore {
 
         addCarbEntry(entry) { individualResult in
             switch individualResult {
-            case .success(let storedEntry):
+            case .success(let entry):
                 let remainder = entries.dropFirst()
                 self.addCarbEntries(remainder) { collectiveResult in
                     switch collectiveResult {
-                    case .success(let storedEntries):
-                        completion(.success([storedEntry] + storedEntries))
+                    case .success(let entries):
+                        completion(.success([entry] + entries))
                     case .failure(let error):
                         completion(.failure(error))
                     }
@@ -267,10 +274,10 @@ private extension CarbStore {
 
     /// Errors if getting carb entries errors, or if deleting any individual entry errors.
     func deleteAllCarbEntries(completion: @escaping (CarbStoreError?) -> Void) {
-        getCarbEntries(start: .distantPast) { result in
+        getCarbEntries() { result in
             switch result {
-            case .success(let storedEntries):
-                self.deleteCarbEntries(storedEntries[...], completion: completion)
+            case .success(let entries):
+                self.deleteCarbEntries(entries[...], completion: completion)
             case .failure(let error):
                 completion(error)
             }

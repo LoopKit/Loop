@@ -62,7 +62,7 @@ extension CLKComplicationTemplate {
         let isGlucoseStale = date.timeIntervalSince(glucoseDate) > recencyInterval
 
         if isGlucoseStale {
-            glucoseString = "---"
+            glucoseString = NSLocalizedString("---", comment: "No glucose value representation (3 dashes for mg/dL; no spaces as this will get truncated in the watch complication)")
             trendString = ""
         } else {
             guard let formattedGlucose = formatter.string(from: glucose.doubleValue(for: unit)) else {
@@ -83,8 +83,6 @@ extension CLKComplicationTemplate {
             tintColor = .agingColor
         case .stale:
             tintColor = .staleColor
-        case .unknown:
-            tintColor = .disabledButtonColor
         }
 
         let glucoseAndTrend = "\(glucoseString)\(trendString)"
@@ -114,6 +112,7 @@ extension CLKComplicationTemplate {
             let template = CLKComplicationTemplateModularSmallStackText()
             template.line1TextProvider = glucoseAndTrendText
             template.line2TextProvider = timeText
+            template.highlightLine2 = true
             return template
         case .modularLarge:
             let template = CLKComplicationTemplateModularLargeTallBody()

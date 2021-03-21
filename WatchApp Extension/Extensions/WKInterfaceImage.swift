@@ -14,14 +14,15 @@ enum LoopImage: String {
     case stale
     case unknown
 
-    var imageName: String {
-        return "loop_\(rawValue)"
+    func imageName(isClosedLoop: Bool) -> String {
+        let suffix = isClosedLoop ? "closed" : "open"
+        return "loop_\(rawValue)_\(suffix)"
     }
 }
 
 
 extension WKInterfaceImage {
-    func setLoopImage(_ loopImage: LoopImage) {
-        setImageNamed(loopImage.imageName)
+    func setLoopImage(isClosedLoop: Bool, _ loopImage: LoopImage) {
+        setImageNamed(loopImage.imageName(isClosedLoop: isClosedLoop))
     }
 }

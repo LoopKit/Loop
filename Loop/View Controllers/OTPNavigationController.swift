@@ -5,14 +5,12 @@
 //  Created by Jose Paredes on 3/28/20.
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
-
 import Foundation
 import UIKit
 
 class OTPNavigationController: UINavigationController {
-    
-    // portrait only
 
+    // portrait only
     override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
        return .portrait
     }
@@ -22,5 +20,5 @@ class OTPNavigationController: UINavigationController {
     override public var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
         return .portrait
     }
-    
+
 }

@@ -10,26 +10,23 @@ import Foundation
 import LoopKit
 import LoopKitUI
 
-private let managersByIdentifier: [String: PumpManagerUI.Type] = staticPumpManagers.compactMap{ $0 as? PumpManagerUI.Type}.reduce(into: [:]) { (map, Type) in
-    map[Type.managerIdentifier] = Type
-}
+typealias PumpManagerHUDViewRawValue = [String: Any]
 
-typealias PumpManagerHUDViewsRawValue = [String: Any]
-
-func PumpManagerHUDViewsFromRawValue(_ rawValue: PumpManagerHUDViewsRawValue, pluginManager: PluginManager) -> [BaseHUDView]? {
+func PumpManagerHUDViewFromRawValue(_ rawValue: PumpManagerHUDViewRawValue, pluginManager: PluginManager) -> LevelHUDView? {
     guard
         let identifier = rawValue["managerIdentifier"] as? String,
-        let rawState = rawValue["hudProviderViews"] as? HUDProvider.HUDViewsRawState,
-        let manager = pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier] as? PumpManagerUI.Type else
+        let rawState = rawValue["hudProviderView"] as? HUDProvider.HUDViewRawState,
+        let manager = pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier] else
     {
         return nil
     }
-    return manager.createHUDViews(rawValue: rawState)
+
+    return manager.createHUDView(rawValue: rawState)
 }
 
-func PumpManagerHUDViewsRawValueFromHUDProvider(_ hudProvider: HUDProvider) -> PumpManagerHUDViewsRawValue {
+func PumpManagerHUDViewRawValueFromHUDProvider(_ hudProvider: HUDProvider) -> PumpManagerHUDViewRawValue {
     return [
         "managerIdentifier": hudProvider.managerIdentifier,
-        "hudProviderViews": hudProvider.hudViewsRawState
+        "hudProviderView": hudProvider.hudViewRawState
     ]
 }
