@@ -160,9 +160,12 @@ class LoopAppManager: NSObject {
         statusTableViewController.deviceManager = deviceDataManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
-        let rootNavigationController = RootNavigationController()
-        rootViewController = rootNavigationController
-        rootNavigationController.setViewControllers([statusTableViewController], animated: true)
+        var rootNavigationController = rootViewController as? RootNavigationController
+        if rootNavigationController == nil {
+            rootNavigationController = RootNavigationController()
+            rootViewController = rootNavigationController
+        }
+        rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
 
         handleRemoteNotificationFromLaunchOptions()
 
