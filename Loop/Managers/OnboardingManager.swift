@@ -205,6 +205,11 @@ extension OnboardingManager: OnboardingDelegate {
         precondition(onboarding === activeOnboarding)
         loopDataManager.therapySettings = therapySettings
     }
+
+    func onboarding(_ onboarding: OnboardingUI, hasNewDosingEnabled dosingEnabled: Bool) {
+        precondition(onboarding === activeOnboarding)
+        loopDataManager.settings.dosingEnabled = dosingEnabled
+    }
 }
 
 // MARK: - CompletionDelegate
