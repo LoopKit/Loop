@@ -16,7 +16,7 @@ class OnboardingManager {
     private let deviceDataManager: DeviceDataManager
     private let servicesManager: ServicesManager
     private let loopDataManager: LoopDataManager
-    private let window: UIWindow?
+    private weak var windowProvider: WindowProvider?
     private let userDefaults: UserDefaults
 
     private var isOnboarded: Bool {
@@ -31,13 +31,13 @@ class OnboardingManager {
 
     private var completion: (() -> Void)?
 
-    init(pluginManager: PluginManager, bluetoothProvider: BluetoothProvider, deviceDataManager: DeviceDataManager, servicesManager: ServicesManager, loopDataManager: LoopDataManager, window: UIWindow?, userDefaults: UserDefaults = .standard) {
+    init(pluginManager: PluginManager, bluetoothProvider: BluetoothProvider, deviceDataManager: DeviceDataManager, servicesManager: ServicesManager, loopDataManager: LoopDataManager, windowProvider: WindowProvider?, userDefaults: UserDefaults = .standard) {
         self.pluginManager = pluginManager
         self.bluetoothProvider = bluetoothProvider
         self.deviceDataManager = deviceDataManager
         self.servicesManager = servicesManager
         self.loopDataManager = loopDataManager
-        self.window = window
+        self.windowProvider = windowProvider
         self.userDefaults = userDefaults
 
         self.isOnboarded = userDefaults.onboardingManagerIsOnboarded
@@ -112,7 +112,7 @@ class OnboardingManager {
         onboardingViewController.serviceOnboardDelegate = servicesManager
         onboardingViewController.completionDelegate = self
 
-        window?.rootViewController = onboardingViewController
+        windowProvider?.window?.rootViewController = onboardingViewController
     }
 
     private func completeActiveOnboarding() {
@@ -293,7 +293,9 @@ extension OnboardingManager: ServiceProvider {
 
 // MARK: - OnboardingProvider
 
-extension OnboardingManager: OnboardingProvider {}
+extension OnboardingManager: OnboardingProvider {
+    var allowSkipOnboarding: Bool { FeatureFlags.mockTherapySettingsEnabled }   // NOTE: SKIP ONBOARDING - DEBUG AND TEST ONLY
+}
 
 // MARK: - OnboardingUI
 

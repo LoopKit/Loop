@@ -1587,8 +1587,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             actionSheet.addAction(UIAlertAction(title: "Mock Therapy Settings", style: .default) { _ in
                 let settings = TherapySettings.mockTherapySettings
                 self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
-                self.deviceManager.loopManager.settings.preMealTargetRange = settings.preMealTargetRange
-                self.deviceManager.loopManager.settings.legacyWorkoutTargetRange = settings.workoutTargetRange
+                self.deviceManager.loopManager.settings.preMealTargetRange = settings.correctionRangeOverrides?.preMeal
+                self.deviceManager.loopManager.settings.legacyWorkoutTargetRange = settings.correctionRangeOverrides?.workout
                 self.deviceManager.loopManager.settings.suspendThreshold = settings.suspendThreshold
                 self.deviceManager.loopManager.settings.maximumBolus = settings.maximumBolus
                 self.deviceManager.loopManager.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
@@ -1893,9 +1893,9 @@ extension StatusTableViewController: SettingsViewModelDelegate {
         case .glucoseTargetRange:
             deviceManager?.loopManager.settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule
         case .preMealCorrectionRangeOverride:
-            deviceManager?.loopManager.settings.preMealTargetRange = therapySettings.preMealTargetRange
+            deviceManager?.loopManager.settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal
         case .workoutCorrectionRangeOverride:
-            deviceManager?.loopManager.settings.legacyWorkoutTargetRange = therapySettings.workoutTargetRange
+            deviceManager?.loopManager.settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout
         case .suspendThreshold:
             deviceManager?.loopManager.settings.suspendThreshold = therapySettings.suspendThreshold
         case .basalRate:

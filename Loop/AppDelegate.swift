@@ -10,7 +10,7 @@ import UIKit
 import LoopKit
 
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     var window: UIWindow?
 
     private let loopAppManager = LoopAppManager()
@@ -21,8 +21,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         log.default("%{public}@ with launchOptions: %{public}@", #function, String(describing: launchOptions))
 
-        loopAppManager.initialize(with: launchOptions)
-        loopAppManager.launch(into: window)
+        loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
+        loopAppManager.launch()
         return loopAppManager.isLaunchComplete
     }
 
@@ -54,7 +54,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
         if !loopAppManager.isLaunchComplete {
-            loopAppManager.launch(into: window)
+            loopAppManager.launch()
         }
     }
 

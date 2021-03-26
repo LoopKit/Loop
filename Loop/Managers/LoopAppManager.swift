@@ -33,6 +33,10 @@ public extension AlertPresenter {
     func dismiss(animated: Bool) { dismiss(animated: animated, completion: nil) }
 }
 
+protocol WindowProvider: AnyObject {
+    var window: UIWindow? { get }
+}
+
 class LoopAppManager: NSObject {
     private enum State: Int {
         case initialize
@@ -44,8 +48,8 @@ class LoopAppManager: NSObject {
         var next: State { State(rawValue: rawValue + 1) ?? .launchComplete }
     }
 
+    private weak var windowProvider: WindowProvider?
     private var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    private var window: UIWindow?
 
     private var pluginManager: PluginManager!
     private var bluetoothStateManager: BluetoothStateManager!
@@ -61,10 +65,11 @@ class LoopAppManager: NSObject {
 
     // MARK: - Initialization
 
-    func initialize(with launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
+    func initialize(windowProvider: WindowProvider, launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
         dispatchPrecondition(condition: .onQueue(.main))
         precondition(state == .initialize)
 
+        self.windowProvider = windowProvider
         self.launchOptions = launchOptions
         
         if FeatureFlags.siriEnabled && INPreferences.siriAuthorizationStatus() == .notDetermined {
@@ -76,7 +81,7 @@ class LoopAppManager: NSObject {
         self.state = state.next
     }
 
-    func launch(into window: UIWindow?) {
+    func launch() {
         dispatchPrecondition(condition: .onQueue(.main))
         precondition(!isLaunchComplete)
         precondition(state != .initialize)
@@ -86,9 +91,7 @@ class LoopAppManager: NSObject {
             return
         }
 
-        self.window = window
-        
-        window?.tintColor = .loopAccent
+        windowProvider?.window?.tintColor = .loopAccent
         OrientationLock.deviceOrientationController = self
         UNUserNotificationCenter.current().delegate = self
 
@@ -133,7 +136,7 @@ class LoopAppManager: NSObject {
                                                    deviceDataManager: deviceDataManager,
                                                    servicesManager: deviceDataManager.servicesManager,
                                                    loopDataManager: deviceDataManager.loopManager,
-                                                   window: window,
+                                                   windowProvider: windowProvider,
                                                    userDefaults: UserDefaults.appGroup!)
 
         deviceDataManager.analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
@@ -162,9 +165,12 @@ class LoopAppManager: NSObject {
         statusTableViewController.deviceManager = deviceDataManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
-        let rootNavigationController = RootNavigationController()
-        rootViewController = rootNavigationController
-        rootNavigationController.setViewControllers([statusTableViewController], animated: true)
+        var rootNavigationController = rootViewController as? RootNavigationController
+        if rootNavigationController == nil {
+            rootNavigationController = RootNavigationController()
+            rootViewController = rootNavigationController
+        }
+        rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
 
         handleRemoteNotificationFromLaunchOptions()
 
@@ -264,8 +270,8 @@ class LoopAppManager: NSObject {
     }
 
     private var rootViewController: UIViewController? {
-        get { window?.rootViewController }
-        set { window?.rootViewController = newValue }
+        get { windowProvider?.window?.rootViewController }
+        set { windowProvider?.window?.rootViewController = newValue }
     }
 }
 
@@ -273,11 +279,11 @@ class LoopAppManager: NSObject {
 
 extension LoopAppManager: AlertPresenter {
     func present(_ viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) {
-        rootViewController?.present(viewControllerToPresent, animated: animated, completion: completion)
+        rootViewController?.topmostViewController.present(viewControllerToPresent, animated: animated, completion: completion)
     }
 
     func dismiss(animated: Bool, completion: (() -> Void)?) {
-        rootViewController?.dismiss(animated: animated, completion: completion)
+        rootViewController?.topmostViewController.dismiss(animated: animated, completion: completion)
     }
 }
 
