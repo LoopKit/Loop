@@ -536,7 +536,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                                             unit: unit,
                                                             staleGlucoseAge: LoopCoreConstants.inputDataRecencyInterval,
                                                             glucoseDisplay: self.deviceManager.glucoseDisplay(for: glucose),
-                                                            wasUserEntered: glucose.wasUserEntered)
+                                                            wasUserEntered: glucose.wasUserEntered,
+                                                            isDisplayOnly: glucose.isDisplayOnly)
                 }
                 hudView.cgmStatusHUD.presentStatusHighlight(self.deviceManager.cgmStatusHighlight)
                 hudView.cgmStatusHUD.presentStatusBadge(self.deviceManager.cgmStatusBadge)

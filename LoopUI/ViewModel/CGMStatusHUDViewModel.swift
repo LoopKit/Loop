@@ -107,7 +107,8 @@ public class CGMStatusHUDViewModel {
                             unit: HKUnit,
                             staleGlucoseAge: TimeInterval,
                             glucoseDisplay: GlucoseDisplayable?,
-                            isManualGlucose: Bool)
+                            wasUserEntered: Bool,
+                            isDisplayOnly: Bool)
     {
         var accessibilityStrings = [String]()
         
@@ -140,7 +141,8 @@ public class CGMStatusHUDViewModel {
             }
             accessibilityStrings.append(String(format: LocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
-        
+        // Only a user-entered glucose value that is *not* display-only (i.e. a calibration) is considered a manual glucose entry.
+        let isManualGlucose = wasUserEntered && !isDisplayOnly
         if isManualGlucose, glucoseValueCurrent {
             // a manual glucose value presents any status highlight icon instead of a trend icon
             setManualGlucoseTrendIconOverride()

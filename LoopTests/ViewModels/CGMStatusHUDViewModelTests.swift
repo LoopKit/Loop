@@ -49,7 +49,8 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                      unit: .milligramsPerDeciliter,
                                      staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
-                                     isManualGlucose: false)
+                                     wasUserEntered: false,
+                                     isDisplayOnly: false)
         
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertNil(viewModel.statusHighlight)
@@ -72,8 +73,9 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                      unit: .milligramsPerDeciliter,
                                      staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
-                                     isManualGlucose: false)
-        
+                                     wasUserEntered: false,
+                                     isDisplayOnly: false)
+
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertNil(viewModel.statusHighlight)
         XCTAssertEqual(viewModel.glucoseValueString, "– – –")
@@ -98,7 +100,8 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                      unit: .milligramsPerDeciliter,
                                      staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
-                                     isManualGlucose: false)
+                                     wasUserEntered: false,
+                                     isDisplayOnly: false)
         wait(for: [testExpect], timeout: 1.0)
         XCTAssertTrue(staleGlucoseValueHandlerWasCalled)
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
@@ -124,14 +127,38 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                      unit: .milligramsPerDeciliter,
                                      staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
-                                     isManualGlucose: true)
-        
+                                     wasUserEntered: true,
+                                     isDisplayOnly: false)
+
         XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, UIImage(systemName: "questionmark.circle"))
         XCTAssertNil(viewModel.statusHighlight)
         XCTAssertEqual(viewModel.glucoseValueString, "90")
         XCTAssertNil(viewModel.trend)
         XCTAssertNotEqual(viewModel.glucoseTrendTintColor, glucoseDisplay.glucoseRangeCategory?.trendColor)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, .glucoseTintColor)
+        XCTAssertEqual(viewModel.glucoseValueTintColor, glucoseDisplay.glucoseRangeCategory?.glucoseColor)
+        XCTAssertEqual(viewModel.unitsString, HKUnit.milligramsPerDeciliter.localizedShortUnitString)
+    }
+    
+    func testSetGlucoseQuantityCalibrationDoesNotShow() {
+        let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
+                                                trendType: .down,
+                                                isLocal: true,
+                                                glucoseRangeCategory: .urgentLow)
+        let glucoseStartDate = Date()
+        let staleGlucoseAge: TimeInterval = .minutes(15)
+        viewModel.setGlucoseQuantity(90,
+                                     at: glucoseStartDate,
+                                     unit: .milligramsPerDeciliter,
+                                     staleGlucoseAge: staleGlucoseAge,
+                                     glucoseDisplay: glucoseDisplay,
+                                     wasUserEntered: true,
+                                     isDisplayOnly: true)
+
+        XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
+        XCTAssertEqual(viewModel.glucoseValueString, "90")
+        XCTAssertEqual(viewModel.trend, .down)
+        XCTAssertEqual(viewModel.glucoseTrendTintColor, glucoseDisplay.glucoseRangeCategory?.trendColor)
         XCTAssertEqual(viewModel.glucoseValueTintColor, glucoseDisplay.glucoseRangeCategory?.glucoseColor)
         XCTAssertEqual(viewModel.unitsString, HKUnit.milligramsPerDeciliter.localizedShortUnitString)
     }
