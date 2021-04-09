@@ -15,18 +15,18 @@ let staticPumpManagers: [PumpManagerUI.Type] = [
     MockPumpManager.self,
 ]
 
-let staticPumpManagersByIdentifier: [String: PumpManagerUI.Type] = staticPumpManagers.reduce(into: [:]) { (map, Type) in
-    map[Type.managerIdentifier] = Type
-}
+let staticPumpManagersByIdentifier: [String: PumpManagerUI.Type] = [
+    MockPumpManager.managerIdentifier : MockPumpManager.self
+]
 
-let availableStaticPumpManagers = staticPumpManagers.map { (Type) -> AvailableDevice in
-    return AvailableDevice(identifier: Type.managerIdentifier, localizedTitle: Type.localizedTitle, providesOnboarding: false)
-}
+let availableStaticPumpManagers = [
+    PumpManagerDescriptor(identifier: MockPumpManager.managerIdentifier, localizedTitle: MockPumpManager.localizedTitle)
+]
 
 extension PumpManager {
     var rawValue: [String: Any] {
         return [
-            "managerIdentifier": type(of: self).managerIdentifier,
+            "managerIdentifier": self.managerIdentifier,
             "state": self.rawState
         ]
     }

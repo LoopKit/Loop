@@ -51,19 +51,22 @@ extension NotificationManager {
         return Set(categories)
     }
 
-    static func authorize(delegate: UNUserNotificationCenterDelegate) {
+    static func getAuthorization(_ completion: @escaping (UNAuthorizationStatus) -> Void) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            completion(settings.authorizationStatus)
+        }
+    }
+
+    static func authorize(_ completion: @escaping (UNAuthorizationStatus) -> Void) {
         var authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         if FeatureFlags.criticalAlertsEnabled, #available(iOS 12.0, *) {
             authOptions.insert(.criticalAlert)
         }
         
         let center = UNUserNotificationCenter.current()
-        center.delegate = delegate
         center.requestAuthorization(options: authOptions) { (granted, error) in
-            guard granted else {
-                return
-            }
             UNUserNotificationCenter.current().getNotificationSettings { settings in
+                completion(settings.authorizationStatus)
                 guard settings.authorizationStatus == .authorized else {
                     return
                 }
@@ -165,59 +168,5 @@ extension NotificationManager {
 
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: loopNotRunningIdentifiers)
         }
-    }
-
-    static func sendPumpReservoirEmptyNotification() {
-        let notification = UNMutableNotificationContent()
-
-        notification.title = NSLocalizedString("Pump Reservoir Empty", comment: "The notification title for an empty pump reservoir")
-        notification.body = NSLocalizedString("Change the pump reservoir now", comment: "The notification alert describing an empty pump reservoir")
-        notification.sound = .default
-        notification.categoryIdentifier = LoopNotificationCategory.pumpReservoirEmpty.rawValue
-
-        let request = UNNotificationRequest(
-            // Not a typo: this should replace any pump reservoir low notifications
-            identifier: LoopNotificationCategory.pumpReservoirLow.rawValue,
-            content: notification,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-
-    static func sendPumpReservoirLowNotificationForAmount(_ units: Double, andTimeRemaining remaining: TimeInterval?) {
-        let notification = UNMutableNotificationContent()
-
-        notification.title = NSLocalizedString("Pump Reservoir Low", comment: "The notification title for a low pump reservoir")
-
-        let unitsString = NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal)
-
-        let intervalFormatter = DateComponentsFormatter()
-        intervalFormatter.allowedUnits = [.hour, .minute]
-        intervalFormatter.maximumUnitCount = 1
-        intervalFormatter.unitsStyle = .full
-        intervalFormatter.includesApproximationPhrase = true
-        intervalFormatter.includesTimeRemainingPhrase = true
-
-        if let remaining = remaining, let timeString = intervalFormatter.string(from: remaining) {
-            notification.body = String(format: NSLocalizedString("%1$@ U left: %2$@", comment: "Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining)"), unitsString, timeString)
-        } else {
-            notification.body = String(format: NSLocalizedString("%1$@ U left", comment: "Low reservoir alert format string. (1: Number of units remaining)"), unitsString)
-        }
-
-        notification.sound = .default
-        notification.categoryIdentifier = LoopNotificationCategory.pumpReservoirLow.rawValue
-
-        let request = UNNotificationRequest(
-            identifier: LoopNotificationCategory.pumpReservoirLow.rawValue,
-            content: notification,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-
-    static func clearPumpReservoirNotification() {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [LoopNotificationCategory.pumpReservoirLow.rawValue])
     }
 }

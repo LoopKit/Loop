@@ -6,21 +6,22 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-import LoopKit
 import SwiftUI
+import LoopKit
+import LoopKitUI
 
 public protocol ServicesViewModelDelegate: class {
-    func addService(identifier: String)
-    func gotoService(identifier: String)
+    func addService(withIdentifier identifier: String)
+    func gotoService(withIdentifier identifier: String)
 }
 
 public class ServicesViewModel: ObservableObject {
     
     @Published var showServices: Bool
-    @Published var availableServices: () -> [AvailableService]
+    @Published var availableServices: () -> [ServiceDescriptor]
     @Published var activeServices: () -> [Service]
     
-    var inactiveServices: () -> [AvailableService] {
+    var inactiveServices: () -> [ServiceDescriptor] {
         return {
             return self.availableServices().filter { availableService in
                 !self.activeServices().contains { $0.serviceIdentifier == availableService.identifier }
@@ -31,7 +32,7 @@ public class ServicesViewModel: ObservableObject {
     weak var delegate: ServicesViewModelDelegate?
     
     init(showServices: Bool,
-         availableServices: @escaping () -> [AvailableService],
+         availableServices: @escaping () -> [ServiceDescriptor],
          activeServices: @escaping () -> [Service],
          delegate: ServicesViewModelDelegate? = nil) {
         self.showServices = showServices
@@ -41,10 +42,10 @@ public class ServicesViewModel: ObservableObject {
     }
     
     func didTapService(_ index: Int) {
-        delegate?.gotoService(identifier: activeServices()[index].serviceIdentifier)
+        delegate?.gotoService(withIdentifier: activeServices()[index].serviceIdentifier)
     }
     
-    func didTapAddService(_ availableService: AvailableService) {
-        delegate?.addService(identifier: availableService.identifier)
+    func didTapAddService(_ availableService: ServiceDescriptor) {
+        delegate?.addService(withIdentifier: availableService.identifier)
     }
 }

@@ -6,47 +6,49 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
+import os.log
 import Foundation
 import LoopKit
 import LoopKitUI
 
-
-public struct AvailableDevice {
-    let identifier: String
-    let localizedTitle: String
-    let providesOnboarding: Bool
-}
-
-typealias AvailableService = AvailableDevice
-
 class PluginManager {
     private let pluginBundles: [Bundle]
 
+    public let availableSupports: [SupportUI]
+
+    private let log = OSLog(category: "PluginManager")
+
     public init(pluginsURL: URL? = Bundle.main.privateFrameworksURL) {
         var bundles = [Bundle]()
+        var availableSupports = [SupportUI]()
 
         if let pluginsURL = pluginsURL {
             do {
                 for pluginURL in try FileManager.default.contentsOfDirectory(at: pluginsURL, includingPropertiesForKeys: nil).filter({$0.path.hasSuffix(".framework")}) {
                     if let bundle = Bundle(url: pluginURL) {
                         if bundle.isLoopPlugin {
-                            print("Found loop plugin at \(pluginURL)")
+                            log.debug("Found loop plugin: %{public}@", pluginURL.absoluteString)
                             bundles.append(bundle)
+                            if bundle.isSupportPlugin {
+                                if let support = try bundle.loadAndInstantiateSupport() {
+                                    availableSupports.append(support)
+                                }
+                            }
                         }
                         if bundle.isLoopExtension {
-                            print("Found Loop Extension at \(pluginURL)...loading")
-                            try bundle.loadAndReturnError()
-                            if let principalClass = bundle.principalClass as? NSObject.Type  {
-                                _ = principalClass.init()
+                            log.debug("Found loop extension: %{public}@", pluginURL.absoluteString)
+                            if let support = try bundle.loadAndInstantiateSupport() {
+                                availableSupports.append(support)
                             }
                         }
                     }
                 }
             } catch let error {
-                print("Error loading plugins: \(String(describing: error))")
+                log.error("Error loading plugins: %{public}@", String(describing: error))
             }
         }
         self.pluginBundles = bundles
+        self.availableSupports = availableSupports
     }
 
     func getPumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
@@ -67,21 +69,21 @@ class PluginManager {
                         fatalError("PrincipalClass not found")
                     }
                 } catch let error {
-                    print(error)
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
                 }
             }
         }
         return nil
     }
 
-    var availablePumpManagers: [AvailableDevice] {
-        return pluginBundles.compactMap({ (bundle) -> AvailableDevice? in
+    var availablePumpManagers: [PumpManagerDescriptor] {
+        return pluginBundles.compactMap({ (bundle) -> PumpManagerDescriptor? in
             guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerDisplayName.rawValue) as? String,
                 let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String else {
                     return nil
             }
             
-            return AvailableDevice(identifier: identifier, localizedTitle: title, providesOnboarding: false)
+            return PumpManagerDescriptor(identifier: identifier, localizedTitle: title)
         })
     }
     
@@ -103,21 +105,21 @@ class PluginManager {
                         fatalError("PrincipalClass not found")
                     }
                 } catch let error {
-                    print(error)
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
                 }
             }
         }
         return nil
     }
     
-    var availableCGMManagers: [AvailableDevice] {
-        return pluginBundles.compactMap({ (bundle) -> AvailableDevice? in
+    var availableCGMManagers: [CGMManagerDescriptor] {
+        return pluginBundles.compactMap({ (bundle) -> CGMManagerDescriptor? in
             guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerDisplayName.rawValue) as? String,
                 let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String else {
                     return nil
             }
             
-            return AvailableDevice(identifier: identifier, localizedTitle: title, providesOnboarding: false)
+            return CGMManagerDescriptor(identifier: identifier, localizedTitle: title)
         })
     }
 
@@ -139,38 +141,76 @@ class PluginManager {
                         fatalError("PrincipalClass not found")
                     }
                 } catch let error {
-                    print(error)
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
                 }
             }
         }
         return nil
     }
 
-    var availableServices: [AvailableService] {
-        return pluginBundles.compactMap({ (bundle) -> AvailableService? in
+    var availableServices: [ServiceDescriptor] {
+        return pluginBundles.compactMap({ (bundle) -> ServiceDescriptor? in
             guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.serviceDisplayName.rawValue) as? String,
                 let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.serviceIdentifier.rawValue) as? String else {
                     return nil
             }
-            
-            let providesOnboarding = (bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.providesOnboarding.rawValue) as? Bool) == true
 
-            return AvailableService(identifier: identifier, localizedTitle: title, providesOnboarding: providesOnboarding)
+            return ServiceDescriptor(identifier: identifier, localizedTitle: title)
         })
     }
 
+    func getOnboardingTypeByIdentifier(_ identifier: String) -> OnboardingUI.Type? {
+        for bundle in pluginBundles {
+            if let name = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.onboardingIdentifier.rawValue) as? String, name == identifier {
+                do {
+                    try bundle.loadAndReturnError()
+
+                    if let principalClass = bundle.principalClass as? NSObject.Type {
+
+                        if let plugin = principalClass.init() as? OnboardingUIPlugin {
+                            return plugin.onboardingType
+                        } else {
+                            fatalError("PrincipalClass does not conform to OnboardingUIPlugin")
+                        }
+
+                    } else {
+                        fatalError("PrincipalClass not found")
+                    }
+                } catch let error {
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
+                }
+            }
+        }
+        return nil
+    }
+
+    var availableOnboardingIdentifiers: [String] {
+        return pluginBundles.compactMap({ (bundle) -> String? in
+            return bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.onboardingIdentifier.rawValue) as? String
+        })
+    }
 }
 
 
 extension Bundle {
-    var isLoopPlugin: Bool {
-        return
-            object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String != nil ||
-            object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String != nil ||
-            object(forInfoDictionaryKey: LoopPluginBundleKey.serviceIdentifier.rawValue) as? String != nil
-    }
-    
-    var isLoopExtension: Bool {
-        return object(forInfoDictionaryKey: LoopPluginBundleKey.extensionIdentifier.rawValue) as? String != nil
+    var isPumpManagerPlugin: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String != nil }
+    var isCGMManagerPlugin: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String != nil }
+    var isServicePlugin: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.serviceIdentifier.rawValue) as? String != nil }
+    var isOnboardingPlugin: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.onboardingIdentifier.rawValue) as? String != nil }
+    var isSupportPlugin: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.supportIdentifier.rawValue) as? String != nil }
+
+    var isLoopPlugin: Bool { isPumpManagerPlugin || isCGMManagerPlugin || isServicePlugin || isOnboardingPlugin || isSupportPlugin }
+
+    var isLoopExtension: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.extensionIdentifier.rawValue) as? String != nil }
+
+    fileprivate func loadAndInstantiateSupport() throws -> SupportUI? {
+        try loadAndReturnError()
+
+        guard let principalClass = principalClass as? NSObject.Type,
+              let supportUIPlugin = principalClass.init() as? SupportUIPlugin else {
+            return nil
+        }
+        
+        return supportUIPlugin.support
     }
 }

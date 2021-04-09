@@ -10,13 +10,14 @@
         <!--Navigation Controller-->
         <scene sceneID="Ucb-uj-Fzl">
             <objects>
-                <navigationController navigationBarHidden="YES" toolbarHidden="NO" id="c6k-8z-nla" sceneMemberID="viewController">
+                <navigationController navigationBarHidden="YES" id="c6k-8z-nla" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" enabled="NO" title="" id="nfG-Bf-TrT"/>
+                    <nil key="simulatedTopBarMetrics"/>
+                    <nil key="simulatedBottomBarMetrics"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="3rC-hS-Fnr">
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="4Ow-gU-14I">
-                        <rect key="frame" x="0.0" y="813" width="414" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </toolbar>
                     <connections>

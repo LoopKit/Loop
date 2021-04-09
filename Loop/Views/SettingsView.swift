@@ -13,11 +13,12 @@ import SwiftUI
 import HealthKit
 
 public struct SettingsView: View {
+    @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appName) private var appName
+    @Environment(\.guidanceColors) private var guidanceColors
     @Environment(\.carbTintColor) private var carbTintColor
     @Environment(\.glucoseTintColor) private var glucoseTintColor
-    @Environment(\.guidanceColors) private var guidanceColors
     @Environment(\.insulinTintColor) private var insulinTintColor
 
     @ObservedObject var viewModel: SettingsViewModel
@@ -131,12 +132,12 @@ extension SettingsView {
                     TherapySettingsView(
                         viewModel: TherapySettingsViewModel(mode: .settings,
                                                             therapySettings: self.viewModel.therapySettings(),
-                                                            preferredGlucoseUnit: self.viewModel.preferredGlucoseUnit,
                                                             supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
                                                             pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
                                                             chartColors: .primary,
                                                             didSave: self.viewModel.didSave))
+                        .environmentObject(displayGlucoseUnitObservable)
                         .environment(\.dismiss, self.dismiss)
                         .environment(\.appName, self.appName)
                         .environment(\.carbTintColor, self.carbTintColor)
@@ -275,7 +276,7 @@ extension SettingsView {
         }
     }
     
-    private func makeDeleteAlert(for model: DeviceViewModel) -> SwiftUI.Alert {
+    private func makeDeleteAlert<T>(for model: DeviceViewModel<T>) -> SwiftUI.Alert {
         return SwiftUI.Alert(title: Text("Delete Testing Data"),
                              message: Text("Are you sure you want to delete all your \(model.name()) Data?\n(This action is not reversible)"),
                              primaryButton: .cancel(),
@@ -286,7 +287,7 @@ extension SettingsView {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
             NavigationLink(destination: SupportScreenView(didTapIssueReport: viewModel.didTapIssueReport,
                                                           criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel,
-                                                          activeServices: self.viewModel.activeServices,
+                                                          availableSupports: self.viewModel.availableSupports,
                                                           supportInfoProvider: self.viewModel.supportInfoProvider))
             {
                 Text(NSLocalizedString("Support", comment: "The title of the support item in settings"))
@@ -359,18 +360,20 @@ fileprivate class FakeService1: Service {
     static var serviceIdentifier: String = "FakeService1"
     var serviceDelegate: ServiceDelegate?
     var rawState: RawStateValue = [:]
+    required init() {}
     required init?(rawState: RawStateValue) {}
-    convenience init() { self.init(rawState: [:])! }
-    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle, providesOnboarding: false) }
+    let isOnboarded = true
+    var available: ServiceDescriptor { ServiceDescriptor(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
 }
 fileprivate class FakeService2: Service {
     static var localizedTitle: String = "Service 2"
     static var serviceIdentifier: String = "FakeService2"
     var serviceDelegate: ServiceDelegate?
     var rawState: RawStateValue = [:]
+    required init() {}
     required init?(rawState: RawStateValue) {}
-    convenience init() { self.init(rawState: [:])! }
-    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle, providesOnboarding: false) }
+    let isOnboarded = true
+    var available: ServiceDescriptor { ServiceDescriptor(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
 }
 fileprivate let servicesViewModel = ServicesViewModel(showServices: true,
                                                       availableServices: { [FakeService1().available, FakeService2().available] },
@@ -401,9 +404,10 @@ public struct SettingsView_Previews: PreviewProvider {
     
     public static var previews: some View {
         let fakeClosedLoopAllowedPublisher = FakeClosedLoopAllowedPublisher()
+        let displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
         let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
-                                          pumpManagerSettingsViewModel: DeviceViewModel(),
-                                          cgmManagerSettingsViewModel: DeviceViewModel(),
+                                          pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
+                                          cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
                                           therapySettings: { TherapySettings() },
@@ -413,21 +417,22 @@ public struct SettingsView_Previews: PreviewProvider {
                                           sensitivityOverridesEnabled: false,
                                           initialDosingEnabled: true,
                                           isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
-                                          preferredGlucoseUnit: .milligramsPerDeciliter,
                                           supportInfoProvider: MockSupportInfoProvider(),
-                                          activeServices: [],
                                           dosingStrategy: .automaticBolus,
+                                          availableSupports: [],
                                           delegate: nil)
         return Group {
             SettingsView(viewModel: viewModel)
                 .colorScheme(.light)
                 .previewDevice(PreviewDevice(rawValue: "iPhone SE 2"))
                 .previewDisplayName("SE light")
+                .environmentObject(displayGlucoseUnitObservable)
             
             SettingsView(viewModel: viewModel)
                 .colorScheme(.dark)
                 .previewDevice(PreviewDevice(rawValue: "iPhone 11 Pro Max"))
                 .previewDisplayName("11 Pro dark")
+                .environmentObject(displayGlucoseUnitObservable)
         }
     }
 }

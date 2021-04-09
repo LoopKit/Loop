@@ -34,7 +34,7 @@ class TrustedTimeChecker {
     private weak var alertManager: AlertManager?
     private lazy var log = DiagnosticLog(category: "TrustedTimeChecker")
 
-    init(_ alertManager: AlertManager) {
+    init(alertManager: AlertManager) {
         ntpClient = TrueTimeClient.sharedInstance
         ntpClient.start()
         self.alertManager = alertManager

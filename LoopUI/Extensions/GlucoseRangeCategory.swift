@@ -11,9 +11,9 @@ import LoopKit
 extension GlucoseRangeCategory {
     public var glucoseColor: UIColor {
         switch self {
-        case .normal, .high:
+        case .normal, .high, .low:
             return .label
-        case .low, .urgentLow, .belowRange:
+        case .urgentLow, .belowRange:
             return .critical
         case .aboveRange:
             return .warning
@@ -24,9 +24,9 @@ extension GlucoseRangeCategory {
         switch self {
         case .normal:
             return .glucose
-        case .urgentLow, .low, .belowRange:
+        case .urgentLow, .belowRange:
             return .critical
-        case .high, .aboveRange:
+        case .low, .high, .aboveRange:
             return .warning
         }
     }

@@ -155,13 +155,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         viewModel.setManualGlucoseTrendIconOverride()
         XCTAssertNil(viewModel.statusHighlight)
         XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, statusHighlight1.image)
-        XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight1.color)
+        XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight1.state.color)
 
         // ensure updating the status highlight icon also updates the manual glucose override icon
         viewModel.statusHighlight = statusHighlight2
         XCTAssertNil(viewModel.statusHighlight)
         XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, statusHighlight2.image)
-        XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight2.color)
+        XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight2.state.color)
     }
 
 }

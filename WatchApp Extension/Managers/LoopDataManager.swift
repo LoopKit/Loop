@@ -181,6 +181,12 @@ extension LoopDataManager {
 }
 
 extension LoopDataManager {
+    var displayGlucoseUnit: HKUnit {
+        activeContext?.displayGlucoseUnit ?? .milligramsPerDeciliter
+    }
+}
+
+extension LoopDataManager {
     func generateChartData(completion: @escaping (GlucoseChartData?) -> Void) {
         guard let activeContext = activeContext else {
             completion(nil)
@@ -197,7 +203,7 @@ extension LoopDataManager {
                 historicalGlucose = samples
             }
             let chartData = GlucoseChartData(
-                unit: activeContext.preferredGlucoseUnit,
+                unit: activeContext.displayGlucoseUnit,
                 correctionRange: self.settings.glucoseTargetRangeSchedule,
                 preMealOverride: self.settings.preMealOverride,
                 scheduleOverride: self.settings.scheduleOverride,

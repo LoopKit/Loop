@@ -21,12 +21,12 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     var settings: LoopSettings = LoopSettings()
 
     override func setUp() {
-        settings.preMealTargetRange = DoubleRange(minValue: 80, maxValue: 80)
+        settings.preMealTargetRange = DoubleRange(minValue: 80, maxValue: 80).quantityRange(for: .milligramsPerDeciliter)
         settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
             unit: .milligramsPerDeciliter,
             dailyItems: [.init(startTime: 0, value: DoubleRange(minValue: 95, maxValue: 105))]
         )
-        settings.legacyWorkoutTargetRange = DoubleRange(minValue: 120, maxValue: 150)
+        settings.legacyWorkoutTargetRange = DoubleRange(minValue: 120, maxValue: 150).quantityRange(for: .milligramsPerDeciliter)
         settings.enableLegacyWorkoutOverride(for: .infinity)
         
         alert = nil
@@ -35,7 +35,7 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     func testWorkoutOverrideReminderElasped() {
         testExpectation = self.expectation(description: #function)
 
-        let loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: self, workoutOverrideReminderInterval:  -.seconds(1)) // the elasped time will always be greater than a negative number
+        let loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: self, workoutOverrideReminderInterval:  -.seconds(1)) // the elasped time will always be greater than a negative number
         loopSettingsAlerter.delegate = self
 
         NotificationCenter.default.post(name: .LoopRunning, object: nil)
@@ -47,7 +47,7 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     func testWorkoutOverrideReminderRepeated() {
         testExpectation = self.expectation(description: #function)
 
-        let loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: self, workoutOverrideReminderInterval:  -.seconds(1)) // the elasped time will always be greater than a negative number
+        let loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: self, workoutOverrideReminderInterval:  -.seconds(1)) // the elasped time will always be greater than a negative number
         loopSettingsAlerter.delegate = self
 
         NotificationCenter.default.post(name: .LoopRunning, object: nil)
@@ -65,7 +65,7 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     }
 
     func testWorkoutOverrideReminderNotElasped() {
-        let loopSettingsAlerter = LoopSettingsAlerter(alertPresenter: self)
+        let loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: self)
         loopSettingsAlerter.delegate = self
         
         NotificationCenter.default.post(name: .LoopRunning, object: nil)
@@ -75,7 +75,7 @@ class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
     }
 }
 
-extension LoopSettingsAlerterTests: AlertPresenter {
+extension LoopSettingsAlerterTests: AlertIssuer {
     func issueAlert(_ alert: Alert) {
         self.alert = alert
         testExpectation.fulfill()
