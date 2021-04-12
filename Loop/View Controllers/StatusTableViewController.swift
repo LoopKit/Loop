@@ -1667,6 +1667,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         actionSheet.addAction(UIAlertAction(title: "Crash the App", style: .destructive) { _ in
             fatalError("Test Crash")
         })
+        actionSheet.addAction(UIAlertAction(title: "Delete CGM Manager", style: .destructive) { _ in
+            self.deviceManager.cgmManager?.delete() { }
+        })
 
         actionSheet.addCancelAction()
         present(actionSheet, animated: true)
