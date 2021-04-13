@@ -83,11 +83,7 @@ public class CGMStatusHUDViewModel {
             stalenessTimer == nil
         {
             stalenessTimer = Timer(fire: fireDate, interval: 0, repeats: false) { (_) in
-                self.glucoseValueString = CGMStatusHUDViewModel.staleGlucoseRepresentation
-                self.glucoseValueTintColor = .label
-                self.trend = nil
-                self.glucoseTrendTintColor = .glucoseTintColor
-                self.manualGlucoseTrendIconOverride = nil
+                self.displayStaleGlucoseValue()
                 self.staleGlucoseValueHandler()
             }
             RunLoop.main.add(stalenessTimer!, forMode: .default)
@@ -101,7 +97,17 @@ public class CGMStatusHUDViewModel {
     init(staleGlucoseValueHandler: @escaping () -> Void) {
         self.staleGlucoseValueHandler = staleGlucoseValueHandler
     }
-    
+
+    var lastCommunicationDate: Date? {
+        didSet {
+            if let signalLossHighlight = signalLossHighlight {
+                statusHighlight = signalLossHighlight
+            }
+        }
+    }
+
+    private var staleGlucoseAge: TimeInterval?
+
     func setGlucoseQuantity(_ glucoseQuantity: Double,
                             at glucoseStartDate: Date,
                             unit: HKUnit,
@@ -117,7 +123,8 @@ public class CGMStatusHUDViewModel {
         trend = nil
         
         let time = timeFormatter.string(from: glucoseStartDate)
-        
+
+        self.staleGlucoseAge = staleGlucoseAge
         isStaleAt = glucoseStartDate.addingTimeInterval(staleGlucoseAge)
         let glucoseValueCurrent = Date() < isStaleAt!
         
@@ -136,11 +143,11 @@ public class CGMStatusHUDViewModel {
                     glucoseValueString = valueString
                 }
             } else {
-                glucoseValueString = CGMStatusHUDViewModel.staleGlucoseRepresentation
-                glucoseValueTintColor = .label
+                displayStaleGlucoseValue()
             }
             accessibilityStrings.append(String(format: LocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
+
         // Only a user-entered glucose value that is *not* display-only (i.e. a calibration) is considered a manual glucose entry.
         let isManualGlucose = wasUserEntered && !isDisplayOnly
         if isManualGlucose, glucoseValueCurrent {
@@ -157,9 +164,44 @@ public class CGMStatusHUDViewModel {
         unitsString = unit.localizedShortUnitString
         accessibilityString = accessibilityStrings.joined(separator: ", ")
     }
+
+    func displayStaleGlucoseValue() {
+        glucoseValueString = CGMStatusHUDViewModel.staleGlucoseRepresentation
+        glucoseValueTintColor = .label
+        trend = nil
+        glucoseTrendTintColor = .glucoseTintColor
+        manualGlucoseTrendIconOverride = nil
+        if let signalLossHighlight = signalLossHighlight {
+            statusHighlight = signalLossHighlight
+        }
+    }
     
     func setManualGlucoseTrendIconOverride() {
         manualGlucoseTrendIconOverride = storedStatusHighlight?.image ?? UIImage(systemName: "questionmark.circle")
         glucoseTrendTintColor = storedStatusHighlight?.state.color ?? .glucoseTintColor
+    }
+}
+
+fileprivate extension CGMStatusHUDViewModel {
+    struct Highlight: DeviceStatusHighlight {
+        var localizedMessage: String
+        var imageName: String = "exclamationmark.circle.fill"
+        var state: DeviceStatusHighlightState = .critical
+
+        init(localizedMessage: String) {
+            self.localizedMessage = localizedMessage
+        }
+    }
+
+    var signalLossHighlight: DeviceStatusHighlight? {
+        guard let lastCommunicationDate = lastCommunicationDate,
+              let staleGlucoseAge = staleGlucoseAge,
+              -lastCommunicationDate.timeIntervalSinceNow > staleGlucoseAge else
+        {
+            // device has sent communications recently, so there is no signal loss
+            return nil
+        }
+
+        return Highlight(localizedMessage: NSLocalizedString("Signal Loss", comment: "Message to the user to that a CGM signal has been loss"))
     }
 }
