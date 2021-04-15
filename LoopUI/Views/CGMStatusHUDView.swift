@@ -122,11 +122,6 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         updateDisplay()
     }
 
-    public func setLastCommunicationDate(_ lastCommunicationDate: Date?) {
-        viewModel.lastCommunicationDate = lastCommunicationDate
-        updateDisplay()
-    }
-    
     func updateDisplay() {
         glucoseValueHUD.glucoseLabel.text = viewModel.glucoseValueString
         glucoseValueHUD.unitLabel.text = viewModel.unitsString

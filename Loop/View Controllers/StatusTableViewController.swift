@@ -529,7 +529,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             self.tableView.beginUpdates()
             if let hudView = self.hudView {
                 // CGM Status
-                hudView.cgmStatusHUD.setLastCommunicationDate(self.deviceManager.cgmManager?.cgmManagerStatus.lastCommunicationDate)
                 if let glucose = self.deviceManager.glucoseStore.latestGlucose {
                     let unit = self.statusCharts.glucose.glucoseUnit
                     hudView.cgmStatusHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: unit),

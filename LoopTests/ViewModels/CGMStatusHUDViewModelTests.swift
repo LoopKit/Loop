@@ -190,46 +190,6 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, statusHighlight2.image)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight2.state.color)
     }
-
-    func testSignalLoss() {
-        XCTAssertNil(viewModel.statusHighlight)
-
-        // simulate current glucose value
-        var lastCommunicationDate = Date()
-        let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
-                                                trendType: .down,
-                                                isLocal: true,
-                                                glucoseRangeCategory: .urgentLow)
-        var glucoseStartDate = lastCommunicationDate
-        let staleGlucoseAge: TimeInterval = .minutes(15)
-        viewModel.setGlucoseQuantity(90,
-                                     at: glucoseStartDate,
-                                     unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
-                                     glucoseDisplay: glucoseDisplay,
-                                     wasUserEntered: false,
-                                     isDisplayOnly: false)
-        viewModel.lastCommunicationDate = lastCommunicationDate
-        XCTAssertNil(viewModel.statusHighlight)
-
-        // simulate communications exist but no new glucose value for 2 hours
-        glucoseStartDate = lastCommunicationDate.addingTimeInterval(-.hours(2))
-        viewModel.setGlucoseQuantity(90,
-                                     at: glucoseStartDate,
-                                     unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
-                                     glucoseDisplay: glucoseDisplay,
-                                     wasUserEntered: false,
-                                     isDisplayOnly: false)
-        XCTAssertNil(viewModel.statusHighlight)
-        XCTAssertEqual(viewModel.glucoseValueString, CGMStatusHUDViewModel.staleGlucoseRepresentation)
-
-        // simulate no communications for 2 hours
-        lastCommunicationDate.addTimeInterval(-.hours(2))
-        viewModel.lastCommunicationDate = lastCommunicationDate
-        XCTAssertNotNil(viewModel.statusHighlight)
-        XCTAssertEqual(viewModel.statusHighlight?.localizedMessage, "Signal Loss")
-    }
 }
 
 extension CGMStatusHUDViewModelTests {

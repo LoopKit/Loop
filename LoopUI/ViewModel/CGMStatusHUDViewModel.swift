@@ -98,16 +98,6 @@ public class CGMStatusHUDViewModel {
         self.staleGlucoseValueHandler = staleGlucoseValueHandler
     }
 
-    var lastCommunicationDate: Date? {
-        didSet {
-            if let signalLossHighlight = signalLossHighlight {
-                statusHighlight = signalLossHighlight
-            }
-        }
-    }
-
-    private var staleGlucoseAge: TimeInterval?
-
     func setGlucoseQuantity(_ glucoseQuantity: Double,
                             at glucoseStartDate: Date,
                             unit: HKUnit,
@@ -124,7 +114,6 @@ public class CGMStatusHUDViewModel {
         
         let time = timeFormatter.string(from: glucoseStartDate)
 
-        self.staleGlucoseAge = staleGlucoseAge
         isStaleAt = glucoseStartDate.addingTimeInterval(staleGlucoseAge)
         let glucoseValueCurrent = Date() < isStaleAt!
         
@@ -171,37 +160,10 @@ public class CGMStatusHUDViewModel {
         trend = nil
         glucoseTrendTintColor = .glucoseTintColor
         manualGlucoseTrendIconOverride = nil
-        if let signalLossHighlight = signalLossHighlight {
-            statusHighlight = signalLossHighlight
-        }
     }
     
     func setManualGlucoseTrendIconOverride() {
         manualGlucoseTrendIconOverride = storedStatusHighlight?.image ?? UIImage(systemName: "questionmark.circle")
         glucoseTrendTintColor = storedStatusHighlight?.state.color ?? .glucoseTintColor
-    }
-}
-
-fileprivate extension CGMStatusHUDViewModel {
-    struct Highlight: DeviceStatusHighlight {
-        var localizedMessage: String
-        var imageName: String = "exclamationmark.circle.fill"
-        var state: DeviceStatusHighlightState = .critical
-
-        init(localizedMessage: String) {
-            self.localizedMessage = localizedMessage
-        }
-    }
-
-    var signalLossHighlight: DeviceStatusHighlight? {
-        guard let lastCommunicationDate = lastCommunicationDate,
-              let staleGlucoseAge = staleGlucoseAge,
-              -lastCommunicationDate.timeIntervalSinceNow > staleGlucoseAge else
-        {
-            // device has sent communications recently, so there is no signal loss
-            return nil
-        }
-
-        return Highlight(localizedMessage: NSLocalizedString("Signal Loss", comment: "Message to the user to that a CGM signal has been loss"))
     }
 }
