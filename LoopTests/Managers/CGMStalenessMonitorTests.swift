@@ -35,12 +35,12 @@ class CGMStalenessMonitorTests: XCTestCase {
         fetchExpectation = expectation(description: "Fetch latest cgm glucose")
         latestCGMGlucose = storedGlucoseSample
         
-        var recievedValues = [Bool]()
+        var receivedValues = [Bool]()
         let exp = expectation(description: "expected values")
         
         let cancelable = monitor.$cgmDataIsStale.sink { value in
-            recievedValues.append(value)
-            if recievedValues.count == 2 {
+            receivedValues.append(value)
+            if receivedValues.count == 2 {
                 exp.fulfill()
             }
         }
@@ -49,7 +49,7 @@ class CGMStalenessMonitorTests: XCTestCase {
         waitForExpectations(timeout: 2)
         
         XCTAssertNotNil(cancelable)
-        XCTAssertEqual(recievedValues, [true, false])
+        XCTAssertEqual(receivedValues, [true, false])
     }
     
     func testStalenessWithNoRecentCGMData() {
@@ -57,12 +57,12 @@ class CGMStalenessMonitorTests: XCTestCase {
         fetchExpectation = expectation(description: "Fetch latest cgm glucose")
         latestCGMGlucose = nil
         
-        var recievedValues = [Bool]()
+        var receivedValues = [Bool]()
         let exp = expectation(description: "expected values")
         
         let cancelable = monitor.$cgmDataIsStale.sink { value in
-            recievedValues.append(value)
-            if recievedValues.count == 2 {
+            receivedValues.append(value)
+            if receivedValues.count == 2 {
                 exp.fulfill()
             }
         }
@@ -71,7 +71,7 @@ class CGMStalenessMonitorTests: XCTestCase {
         waitForExpectations(timeout: 2)
         
         XCTAssertNotNil(cancelable)
-        XCTAssertEqual(recievedValues, [true, true])
+        XCTAssertEqual(receivedValues, [true, true])
     }
     
     func testStalenessNewReadingsArriving() {
@@ -79,12 +79,12 @@ class CGMStalenessMonitorTests: XCTestCase {
         fetchExpectation = expectation(description: "Fetch latest cgm glucose")
         latestCGMGlucose = nil
         
-        var recievedValues = [Bool]()
+        var receivedValues = [Bool]()
         let exp = expectation(description: "expected values")
         
         let cancelable = monitor.$cgmDataIsStale.sink { value in
-            recievedValues.append(value)
-            if recievedValues.count == 2 {
+            receivedValues.append(value)
+            if receivedValues.count == 2 {
                 exp.fulfill()
             }
         }
@@ -96,7 +96,7 @@ class CGMStalenessMonitorTests: XCTestCase {
         waitForExpectations(timeout: 2)
         
         XCTAssertNotNil(cancelable)
-        XCTAssertEqual(recievedValues, [true, false])
+        XCTAssertEqual(receivedValues, [true, false])
     }
 }
 

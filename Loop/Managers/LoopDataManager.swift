@@ -495,7 +495,7 @@ extension LoopDataManager {
     /// Take actions to address how insulin is delivered when the CGM data is unreliable
     ///
     /// An active high temp basal (greater than the basal schedule) is cancelled when the CGM data is unreliable.
-    func recievedUnreliableCGMReading() {
+    func receivedUnreliableCGMReading() {
         guard case .tempBasal(let tempBasal) = basalDeliveryState,
               let scheduledBasalRate = basalRateSchedule?.value(at: now()),
               tempBasal.unitsPerHour > scheduledBasalRate else

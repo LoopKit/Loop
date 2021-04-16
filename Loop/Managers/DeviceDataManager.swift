@@ -432,7 +432,7 @@ final class DeviceDataManager {
                 }
             }
         case .unreliableData:
-            loopManager.recievedUnreliableCGMReading()
+            loopManager.receivedUnreliableCGMReading()
         case .noData:
             log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
             pumpManager?.ensureCurrentPumpData(completion: nil)

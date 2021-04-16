@@ -42,7 +42,7 @@ public class LoopAlertsManager {
     private func onBluetoothPoweredOff() {
         log.default("Bluetooth powered off")
         let title = NSLocalizedString("Bluetooth Off Alert", comment: "Bluetooth off alert title")
-        let bgBody = NSLocalizedString("Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus.", comment: "Bluetooth off background alert body.")
+        let bgBody = NSLocalizedString("Loop will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus.", comment: "Bluetooth off background alert body.")
         let bgcontent = Alert.Content(title: title,
                                       body: bgBody,
                                       acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
