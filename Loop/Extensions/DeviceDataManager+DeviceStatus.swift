@@ -71,7 +71,7 @@ extension DeviceDataManager {
         {
             return .openAppURL(url)
         } else if let cgmManagerUI = (cgmManager as? CGMManagerUI) {
-            return .presentViewController(cgmManagerUI.settingsViewController(for: displayGlucoseUnitObservable, bluetoothProvider: bluetoothProvider, colorPalette: .default))
+            return .presentViewController(cgmManagerUI.settingsViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default))
         } else {
             return .setupNewCGM
         }

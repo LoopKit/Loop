@@ -364,7 +364,7 @@ final class DeviceDataManager {
         return pluginManager.availablePumpManagers + availableStaticPumpManagers
     }
 
-    func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<UIViewController & PumpManagerCreateNotifying & PumpManagerOnboardNotifying & CompletionNotifying, PumpManager>, Error> {
+    func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManager>, Error> {
         switch setupPumpManagerUI(withIdentifier: identifier, initialSettings: settings) {
         case .failure(let error):
             return .failure(error)
@@ -380,17 +380,15 @@ final class DeviceDataManager {
 
     struct UnknownPumpManagerIdentifierError: Error {}
 
-    func setupPumpManagerUI(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<UIViewController & PumpManagerCreateNotifying & PumpManagerOnboardNotifying & CompletionNotifying, PumpManagerUI>, Error> {
+    func setupPumpManagerUI(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManagerUI>, Error> {
         guard let pumpManagerUIType = pumpManagerTypeByIdentifier(identifier) else {
             return .failure(UnknownPumpManagerIdentifierError())
         }
 
         let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default)
         if case .createdAndOnboarded(let pumpManagerUI) = result {
-            if let basalRateSchedule = loopManager.basalRateSchedule {
-                pumpManagerUI.syncBasalRateSchedule(items: basalRateSchedule.items, completion: { _ in })
-            }
-            self.pumpManager = pumpManagerUI
+            pumpManagerOnboarding(didCreatePumpManager: pumpManagerUI)
+            pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI, withFinalSettings: settings)
         }
 
         return .success(result)
@@ -455,7 +453,7 @@ final class DeviceDataManager {
         return availableCGMManagers
     }
 
-    func setupCGMManager(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & CGMManagerCreateNotifying & CGMManagerOnboardNotifying & CompletionNotifying, CGMManager>, Error> {
+    func setupCGMManager(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<CGMManagerViewController, CGMManager>, Error> {
         if let cgmManager = setupCGMManagerFromPumpManager(withIdentifier: identifier) {
             return .success(.createdAndOnboarded(cgmManager))
         }
@@ -475,14 +473,15 @@ final class DeviceDataManager {
 
     struct UnknownCGMManagerIdentifierError: Error {}
 
-    fileprivate func setupCGMManagerUI(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & CGMManagerCreateNotifying & CGMManagerOnboardNotifying & CompletionNotifying, CGMManagerUI>, Error> {
+    fileprivate func setupCGMManagerUI(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<CGMManagerViewController, CGMManagerUI>, Error> {
         guard let cgmManagerUIType = cgmManagerTypeByIdentifier(identifier) else {
             return .failure(UnknownCGMManagerIdentifierError())
         }
 
-        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default)
+        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default)
         if case .createdAndOnboarded(let cgmManagerUI) = result {
-            self.cgmManager = cgmManagerUI
+            cgmManagerOnboarding(didCreateCGMManager: cgmManagerUI)
+            cgmManagerOnboarding(didOnboardCGMManager: cgmManagerUI)
         }
 
         return .success(result)
@@ -838,19 +837,15 @@ extension DeviceDataManager: CGMManagerDelegate {
     }
 }
 
-// MARK: - CGMManagerCreateDelegate
+// MARK: - CGMManagerOnboardingDelegate
 
-extension DeviceDataManager: CGMManagerCreateDelegate {
-    func cgmManagerCreateNotifying(didCreateCGMManager cgmManager: CGMManagerUI) {
+extension DeviceDataManager: CGMManagerOnboardingDelegate {
+    func cgmManagerOnboarding(didCreateCGMManager cgmManager: CGMManagerUI) {
         log.default("CGM manager with identifier '%{public}@' created", cgmManager.managerIdentifier)
         self.cgmManager = cgmManager
     }
-}
 
-// MARK: - CGMManagerOnboardDelegate
-
-extension DeviceDataManager: CGMManagerOnboardDelegate {
-    func cgmManagerOnboardNotifying(didOnboardCGMManager cgmManager: CGMManagerUI) {
+    func cgmManagerOnboarding(didOnboardCGMManager cgmManager: CGMManagerUI) {
         precondition(cgmManager.isOnboarded)
         log.default("CGM manager with identifier '%{public}@' onboarded", cgmManager.managerIdentifier)
     }
@@ -1049,19 +1044,15 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 }
 
-// MARK: - PumpManagerCreateDelegate
+// MARK: - PumpManagerOnboardingDelegate
 
-extension DeviceDataManager: PumpManagerCreateDelegate {
-    func pumpManagerCreateNotifying(didCreatePumpManager pumpManager: PumpManagerUI) {
+extension DeviceDataManager: PumpManagerOnboardingDelegate {
+    func pumpManagerOnboarding(didCreatePumpManager pumpManager: PumpManagerUI) {
         log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
         self.pumpManager = pumpManager
     }
-}
 
-// MARK: - PumpManagerOnboardDelegate
-
-extension DeviceDataManager: PumpManagerOnboardDelegate {
-    func pumpManagerOnboardNotifying(didOnboardPumpManager pumpManager: PumpManagerUI, withFinalSettings settings: PumpManagerSetupSettings) {
+    func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI, withFinalSettings settings: PumpManagerSetupSettings) {
         precondition(pumpManager.isOnboarded)
         log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.managerIdentifier)
 

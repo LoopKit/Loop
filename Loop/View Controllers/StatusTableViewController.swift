@@ -1400,7 +1400,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             // assert?
             return
         }
-        settingsViewController.pumpManagerOnboardDelegate = deviceManager
+        settingsViewController.pumpManagerOnboardingDelegate = deviceManager
         settingsViewController.completionDelegate = self
         show(settingsViewController, sender: self)
     }
@@ -1411,8 +1411,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return
         }
 
-        var settings = cgmManager.settingsViewController(for: deviceManager.displayGlucoseUnitObservable, bluetoothProvider: deviceManager.bluetoothProvider, colorPalette: .default)
-        settings.cgmManagerOnboardDelegate = deviceManager
+        var settings = cgmManager.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, displayGlucoseUnitObservable: deviceManager.displayGlucoseUnitObservable, colorPalette: .default)
+        settings.cgmManagerOnboardingDelegate = deviceManager
         settings.completionDelegate = self
         show(settings, sender: self)
     }
@@ -1892,8 +1892,7 @@ extension StatusTableViewController {
         case .success(let success):
             switch success {
             case .userInteractionRequired(var setupViewController):
-                setupViewController.cgmManagerCreateDelegate = deviceManager
-                setupViewController.cgmManagerOnboardDelegate = deviceManager
+                setupViewController.cgmManagerOnboardingDelegate = deviceManager
                 setupViewController.completionDelegate = self
                 show(setupViewController, sender: self)
             case .createdAndOnboarded:
@@ -1914,8 +1913,7 @@ extension StatusTableViewController {
         case .success(let success):
             switch success {
             case .userInteractionRequired(var setupViewController):
-                setupViewController.pumpManagerCreateDelegate = deviceManager
-                setupViewController.pumpManagerOnboardDelegate = deviceManager
+                setupViewController.pumpManagerOnboardingDelegate = deviceManager
                 setupViewController.completionDelegate = self
                 show(setupViewController, sender: self)
             case .createdAndOnboarded:
@@ -1989,8 +1987,7 @@ extension StatusTableViewController: ServicesViewModelDelegate {
         case .success(let success):
             switch success {
             case .userInteractionRequired(var setupViewController):
-                setupViewController.serviceCreateDelegate = deviceManager.servicesManager
-                setupViewController.serviceOnboardDelegate = deviceManager.servicesManager
+                setupViewController.serviceOnboardingDelegate = deviceManager.servicesManager
                 setupViewController.completionDelegate = self
                 show(setupViewController, sender: self)
             case .createdAndOnboarded:
@@ -2008,7 +2005,7 @@ extension StatusTableViewController: ServicesViewModelDelegate {
 
     fileprivate func showServiceSettings(_ serviceUI: ServiceUI) {
         var settingsViewController = serviceUI.settingsViewController(colorPalette: .default)
-        settingsViewController.serviceOnboardDelegate = deviceManager.servicesManager
+        settingsViewController.serviceOnboardingDelegate = deviceManager.servicesManager
         settingsViewController.completionDelegate = self
         show(settingsViewController, sender: self)
     }
