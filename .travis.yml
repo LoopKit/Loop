@@ -14,7 +14,7 @@ jobs:
     - # same stage; parallel
       script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme Learn build CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO | xcpretty
     - # same stage; parallel
-      script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme LoopTests -destination 'platform=iOS Simulator,name=iPhone 8' test ONLY_ACTIVE_ARCH=YES
+      script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme LoopTests -destination 'platform=iOS Simulator,name=iPhone 8' test EXCLUDED_ARCHES=arm64
     - # same stage; parallel
       script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme DoseMathTests -destination 'name=iPhone 8' test | xcpretty
 
