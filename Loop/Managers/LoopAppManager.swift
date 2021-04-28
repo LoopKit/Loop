@@ -177,7 +177,7 @@ class LoopAppManager: NSObject {
     // MARK: - Life Cycle
 
     func didBecomeActive() {
-        deviceDataManager?.updatePumpManagerBLEHeartbeatPreference()
+        deviceDataManager?.didBecomeActive()
     }
 
     // MARK: - Remote Notification
