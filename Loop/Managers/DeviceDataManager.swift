@@ -769,6 +769,10 @@ extension DeviceDataManager: DeviceManagerDelegate {
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
         deviceLog.log(managerIdentifier: manager.managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
     }
+    
+    var allowDebugFeatures: Bool {
+        FeatureFlags.mockTherapySettingsEnabled // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
+    }
 }
 
 // MARK: - UserAlertHandler
