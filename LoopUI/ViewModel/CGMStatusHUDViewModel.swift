@@ -27,7 +27,7 @@ public class CGMStatusHUDViewModel {
     
     var glucoseTrendIcon: UIImage? {
         guard let manualGlucoseTrendIconOverride = manualGlucoseTrendIconOverride else {
-            return trend?.image ?? UIImage(systemName: "questionmark.circle")
+            return trend?.image
         }
         return manualGlucoseTrendIconOverride
     }
@@ -163,7 +163,7 @@ public class CGMStatusHUDViewModel {
     }
     
     func setManualGlucoseTrendIconOverride() {
-        manualGlucoseTrendIconOverride = storedStatusHighlight?.image ?? UIImage(systemName: "questionmark.circle")
+        manualGlucoseTrendIconOverride = storedStatusHighlight?.image
         glucoseTrendTintColor = storedStatusHighlight?.state.color ?? .glucoseTintColor
     }
 }

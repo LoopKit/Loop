@@ -130,7 +130,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                      wasUserEntered: true,
                                      isDisplayOnly: false)
 
-        XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, UIImage(systemName: "questionmark.circle"))
+        XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertNil(viewModel.statusHighlight)
         XCTAssertEqual(viewModel.glucoseValueString, "90")
         XCTAssertNil(viewModel.trend)
