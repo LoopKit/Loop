@@ -1420,7 +1420,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private func closedLoopStatusChanged(_ isClosedLoop: Bool) {
         self.updatePreMealModeAvailability(allowed: isClosedLoop)
         self.hudView?.loopCompletionHUD.loopIconClosed = isClosedLoop
-
     }
 
     // MARK: - HUDs
@@ -1444,7 +1443,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
             configurePumpManagerHUDViews()
             configureCGMManagerHUDViews()
 
+            // when HUD view is initialized, update loop completion HUD (e.g., icon and last loop completed)
             hudView.loopCompletionHUD.stateColors = .loopStatus
+            hudView.loopCompletionHUD.loopIconClosed = deviceManager.isClosedLoop
+            hudView.loopCompletionHUD.lastLoopCompleted = deviceManager.loopManager.lastLoopCompleted
+
             hudView.cgmStatusHUD.stateColors = .cgmStatus
             hudView.cgmStatusHUD.tintColor = .label
             hudView.pumpStatusHUD.stateColors = .pumpStatus
