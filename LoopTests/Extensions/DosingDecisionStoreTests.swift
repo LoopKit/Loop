@@ -253,15 +253,6 @@ class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
         "udiDeviceIdentifier" : "Device UDI Device Identifier"
       },
       "pumpBatteryChargeRemaining" : 3.5,
-      "pumpLifecycleProgress" : {
-        "percentComplete" : 0.5,
-        "progressState" : "warning"
-      },
-      "pumpStatusHighlight" : {
-        "imageName" : "test.image",
-        "localizedMessage" : "Test message",
-        "state" : "normalPump"
-      },
       "timeZone" : {
         "identifier" : "America/Los_Angeles"
       }
@@ -661,15 +652,6 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       "udiDeviceIdentifier" : "Device UDI Device Identifier"
     },
     "pumpBatteryChargeRemaining" : 3.5,
-    "pumpLifecycleProgress" : {
-      "percentComplete" : 0.5,
-      "progressState" : "warning"
-    },
-    "pumpStatusHighlight" : {
-      "imageName" : "test.image",
-      "localizedMessage" : "Test message",
-      "state" : "normalPump"
-    },
     "timeZone" : {
       "identifier" : "America/Los_Angeles"
     }
@@ -908,12 +890,7 @@ fileprivate extension StoredDosingDecision {
                                                                    udiDeviceIdentifier: "Device UDI Device Identifier"),
                                                   pumpBatteryChargeRemaining: 3.5,
                                                   basalDeliveryState: .initiatingTempBasal,
-                                                  bolusState: .noBolus,
-                                                  pumpStatusHighlight: PumpManagerStatus.PumpStatusHighlight(localizedMessage: "Test message",
-                                                                                                             imageName: "test.image",
-                                                                                                             state: .normalPump),
-                                                  pumpLifecycleProgress: PumpManagerStatus.PumpLifecycleProgress(percentComplete: 0.5,
-                                                                                                                 progressState: .warning))
+                                                  bolusState: .noBolus)
         let notificationSettings = NotificationSettings(authorizationStatus: .authorized,
                                                         soundSetting: .enabled,
                                                         badgeSetting: .enabled,

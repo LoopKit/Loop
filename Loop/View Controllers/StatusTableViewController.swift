@@ -545,6 +545,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
                 // Pump Status
                 hudView.pumpStatusHUD.presentStatusHighlight(self.deviceManager.pumpStatusHighlight)
+                hudView.pumpStatusHUD.presentStatusBadge(self.deviceManager.pumpStatusBadge)
                 hudView.pumpStatusHUD.lifecycleProgress = self.deviceManager.pumpLifecycleProgress
             }
 
@@ -1830,13 +1831,8 @@ extension StatusTableViewController: PumpManagerStatusObserver {
         self.basalDeliveryState = status.basalDeliveryState
         self.bolusState = status.bolusState
 
-        // refresh display if pump status highlight or lifecycle progress have changed
-        if status.pumpStatusHighlight != oldStatus.pumpStatusHighlight ||
-           status.pumpLifecycleProgress != oldStatus.pumpLifecycleProgress
-        {
-            refreshContext.update(with: .status)
-            self.reloadData(animated: true)
-        }
+        refreshContext.update(with: .status)
+        self.reloadData(animated: true)
     }
 }
 

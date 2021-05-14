@@ -7,8 +7,9 @@
 //
 
 import LoopKit
+import UIKit
 
-protocol AlertManagerResponder: class {
+protocol AlertManagerResponder: AnyObject {
     /// Method for our Handlers to call to kick off alert response.  Differs from AlertResponder because here we need the whole `Identifier`.
     func acknowledgeAlert(identifier: Alert.Identifier)
 }

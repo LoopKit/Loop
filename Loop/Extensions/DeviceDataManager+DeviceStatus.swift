@@ -31,7 +31,7 @@ extension DeviceDataManager {
     var cgmLifecycleProgress: DeviceLifecycleProgress? {
         return (cgmManager as? CGMManagerUI)?.cgmLifecycleProgress
     }
-    
+
     var pumpStatusHighlight: DeviceStatusHighlight? {
         let bluetoothState = bluetoothProvider.bluetoothState
         if bluetoothState == .unsupported || bluetoothState == .unauthorized || bluetoothState == .poweredOff {
@@ -39,12 +39,16 @@ extension DeviceDataManager {
         } else if pumpManager == nil {
             return DeviceDataManager.addPumpStatusHighlight
         } else {
-            return pumpManagerStatus?.pumpStatusHighlight
+            return pumpManager?.pumpStatusHighlight
         }
     }
-    
+
+    var pumpStatusBadge: DeviceStatusBadge? {
+        return pumpManager?.pumpStatusBadge
+    }
+
     var pumpLifecycleProgress: DeviceLifecycleProgress? {
-        return pumpManagerStatus?.pumpLifecycleProgress
+        return pumpManager?.pumpLifecycleProgress
     }
     
     static var addCGMStatusHighlight: AddDeviceStatusHighlight {

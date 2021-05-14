@@ -49,7 +49,7 @@ public class DeviceViewModel<T>: ObservableObject {
 public typealias CGMManagerViewModel = DeviceViewModel<CGMManagerDescriptor>
 public typealias PumpManagerViewModel = DeviceViewModel<PumpManagerDescriptor>
 
-public protocol SettingsViewModelDelegate: class {
+public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings)
     func didTapIssueReport(title: String)
