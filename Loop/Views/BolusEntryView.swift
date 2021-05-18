@@ -196,7 +196,7 @@ struct BolusEntryView: View {
                         textAlignment: .right,
                         keyboardType: .decimalPad,
                         shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
-                        maxLength: 3,
+                        maxLength: 4,
                         doneButtonColor: .loopAccent
                     )
 

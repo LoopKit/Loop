@@ -141,7 +141,7 @@ struct SimpleBolusView: View {
                     font: .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    maxLength: 3,
+                    maxLength: 4,
                     doneButtonColor: .loopAccent
                 )
 
