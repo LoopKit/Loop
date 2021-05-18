@@ -17,6 +17,7 @@ import LoopUI
 struct BolusEntryView: View {
     @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
     @Environment(\.dismiss) var dismiss
+    @Environment(\.appName) var appName
     
     @ObservedObject var viewModel: BolusEntryViewModel
 
@@ -345,7 +346,7 @@ struct BolusEntryView: View {
         case .stalePumpData:
             return WarningView(
                 title: Text("No Recent Pump Data", comment: "Title for bolus screen notice when pump data is missing or stale"),
-                caption: Text("Your pump data is stale. Loop cannot recommend a bolus amount.", comment: "Caption for bolus screen notice when pump data is missing or stale"),
+                caption: Text(String(format: NSLocalizedString("Your pump data is stale. %1$@ cannot recommend a bolus amount.", comment: "Caption for bolus screen notice when pump data is missing or stale"), appName)),
                 severity: .critical
             )
         }
