@@ -179,7 +179,22 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         
         // ensure status highlight icon is set to the manual glucose override icon
         // when there is a manual glucose override icon, the status highlight isn't returned to be presented
-        viewModel.setManualGlucoseTrendIconOverride()
+        let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
+                                                trendType: .down,
+                                                isLocal: true,
+                                                glucoseRangeCategory: .urgentLow)
+        let glucoseStartDate = Date()
+        let staleGlucoseAge: TimeInterval = .minutes(15)
+        viewModel.setGlucoseQuantity(90,
+                                     at: glucoseStartDate,
+                                     unit: .milligramsPerDeciliter,
+                                     staleGlucoseAge: staleGlucoseAge,
+                                     glucoseDisplay: glucoseDisplay,
+                                     wasUserEntered: true,
+                                     isDisplayOnly: false)
+
+        XCTAssertEqual(viewModel.glucoseValueString, "90")
+        XCTAssertNil(viewModel.trend)
         XCTAssertNil(viewModel.statusHighlight)
         XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, statusHighlight1.image)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight1.state.color)
@@ -187,8 +202,111 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         // ensure updating the status highlight icon also updates the manual glucose override icon
         viewModel.statusHighlight = statusHighlight2
         XCTAssertNil(viewModel.statusHighlight)
+        XCTAssertEqual(viewModel.glucoseValueString, "90")
+        XCTAssertNil(viewModel.trend)
         XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, statusHighlight2.image)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight2.state.color)
+    }
+
+    func testManualGlucoseOverridesStatusHighlight() {
+        // add manual glucose
+        let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
+                                                trendType: .down,
+                                                isLocal: true,
+                                                glucoseRangeCategory: .urgentLow)
+        let staleGlucoseAge: TimeInterval = .minutes(15)
+        viewModel.setGlucoseQuantity(90,
+                                     at: Date(),
+                                     unit: .milligramsPerDeciliter,
+                                     staleGlucoseAge: staleGlucoseAge,
+                                     glucoseDisplay: glucoseDisplay,
+                                     wasUserEntered: true,
+                                     isDisplayOnly: false)
+
+        // check that manual glucose is displayed
+        XCTAssertEqual(viewModel.glucoseValueString, "90")
+        XCTAssertNil(viewModel.trend)
+        XCTAssertNil(viewModel.statusHighlight)
+        XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
+        XCTAssertEqual(viewModel.glucoseTrendTintColor, .glucoseTintColor)
+
+        // add status highlight
+        let statusHighlight1 = TestStatusHighlight(localizedMessage: "Test 1",
+                                                   imageName: "plus.circle",
+                                                   state: .normalCGM)
+        viewModel.statusHighlight = statusHighlight1
+
+        // check that manual glucose is still displayed (this time with status highlight icon)
+        XCTAssertEqual(viewModel.glucoseValueString, "90")
+        XCTAssertNil(viewModel.trend)
+        XCTAssertNil(viewModel.statusHighlight)
+        XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, statusHighlight1.image)
+        XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight1.state.color)
+
+        // add CGM glucose
+        viewModel.setGlucoseQuantity(95,
+                                     at: Date(),
+                                     unit: .milligramsPerDeciliter,
+                                     staleGlucoseAge: staleGlucoseAge,
+                                     glucoseDisplay: glucoseDisplay,
+                                     wasUserEntered: false,
+                                     isDisplayOnly: false)
+
+        // check that status highlight is displayed
+        XCTAssertEqual(viewModel.glucoseValueString, "95")
+        XCTAssertEqual(viewModel.trend, .down)
+        XCTAssertEqual(viewModel.statusHighlight as! TestStatusHighlight, statusHighlight1)
+        XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
+
+        // remove status highlight
+        viewModel.statusHighlight = nil
+
+        // check that CGM glucose is displayed
+        XCTAssertEqual(viewModel.glucoseValueString, "95")
+        XCTAssertEqual(viewModel.trend, .down)
+        XCTAssertNil(viewModel.statusHighlight)
+        XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
+
+        // add status highlight
+        let statusHighlight2 = TestStatusHighlight(localizedMessage: "Test 2",
+                                                   imageName: "exclamationmark.circle",
+                                                   state: .critical)
+        viewModel.statusHighlight = statusHighlight2
+
+        // check that status highlight is displayed
+        XCTAssertEqual(viewModel.glucoseValueString, "95")
+        XCTAssertEqual(viewModel.trend, .down)
+        XCTAssertEqual(viewModel.statusHighlight as! TestStatusHighlight, statusHighlight2)
+        XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
+
+        // add manual glucose
+        viewModel.setGlucoseQuantity(100,
+                                     at: Date(),
+                                     unit: .milligramsPerDeciliter,
+                                     staleGlucoseAge: staleGlucoseAge,
+                                     glucoseDisplay: glucoseDisplay,
+                                     wasUserEntered: true,
+                                     isDisplayOnly: false)
+
+        // check that manual glucose is still displayed (again with status highlight icon)
+        XCTAssertEqual(viewModel.glucoseValueString, "100")
+        XCTAssertNil(viewModel.trend)
+        XCTAssertNil(viewModel.statusHighlight)
+        XCTAssertEqual(viewModel.manualGlucoseTrendIconOverride, statusHighlight2.image)
+        XCTAssertEqual(viewModel.glucoseTrendTintColor, statusHighlight2.state.color)
+
+        // add stale manual glucose
+        viewModel.setGlucoseQuantity(100,
+                                     at: Date(),
+                                     unit: .milligramsPerDeciliter,
+                                     staleGlucoseAge: .minutes(-1),
+                                     glucoseDisplay: glucoseDisplay,
+                                     wasUserEntered: true,
+                                     isDisplayOnly: false)
+
+        // check that the status highlight is displayed
+        XCTAssertEqual(viewModel.statusHighlight as! TestStatusHighlight, statusHighlight2)
+        XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
     }
 }
 

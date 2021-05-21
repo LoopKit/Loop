@@ -31,23 +31,34 @@ public class CGMStatusHUDViewModel {
         }
         return manualGlucoseTrendIconOverride
     }
-    
+
+    private var glucoseValueCurrent: Bool {
+        guard let isStaleAt = isStaleAt else { return true }
+        return Date() < isStaleAt
+    }
+
+    private var isManualGlucose: Bool = false
+
+    private var isManualGlucoseCurrent: Bool {
+        return isManualGlucose && glucoseValueCurrent
+    }
+
     var manualGlucoseTrendIconOverride: UIImage?
     
     private var storedStatusHighlight: DeviceStatusHighlight?
     
     var statusHighlight: DeviceStatusHighlight? {
         get {
-            guard manualGlucoseTrendIconOverride == nil else {
-                // if there is an icon override for a manual glucose, don't provide the stored status highlight
+            guard !isManualGlucoseCurrent else {
+                // if there is a current manual glucose, don't provide the stored status highlight
                 return nil
             }
             return storedStatusHighlight
         }
         set {
             storedStatusHighlight = newValue
-            if manualGlucoseTrendIconOverride != nil {
-                // If there is an icon override for a manual glucose, it displays the current status highlight icon
+            if isManualGlucoseCurrent {
+                // If there is a current manual glucose, it displays the current status highlight icon
                 setManualGlucoseTrendIconOverride()
             }
         }
@@ -76,7 +87,7 @@ public class CGMStatusHUDViewModel {
             }
         }
     }
-    
+
     private func startStalenessTimerIfNeeded() {
         if let fireDate = isStaleAt,
             isVisible,
@@ -115,8 +126,7 @@ public class CGMStatusHUDViewModel {
         let time = timeFormatter.string(from: glucoseStartDate)
 
         isStaleAt = glucoseStartDate.addingTimeInterval(staleGlucoseAge)
-        let glucoseValueCurrent = Date() < isStaleAt!
-        
+
         glucoseValueTintColor = glucoseDisplay?.glucoseRangeCategory?.glucoseColor ?? .label
         
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
@@ -138,8 +148,8 @@ public class CGMStatusHUDViewModel {
         }
 
         // Only a user-entered glucose value that is *not* display-only (i.e. a calibration) is considered a manual glucose entry.
-        let isManualGlucose = wasUserEntered && !isDisplayOnly
-        if isManualGlucose, glucoseValueCurrent {
+        isManualGlucose = wasUserEntered && !isDisplayOnly
+        if isManualGlucoseCurrent {
             // a manual glucose value presents any status highlight icon instead of a trend icon
             setManualGlucoseTrendIconOverride()
         } else if let trend = glucoseDisplay?.trendType, glucoseValueCurrent {
