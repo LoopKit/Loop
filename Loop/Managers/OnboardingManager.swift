@@ -264,6 +264,13 @@ extension OnboardingManager: CGMManagerProvider {
 
     var availableCGMManagers: [CGMManagerDescriptor] { deviceDataManager.availableCGMManagers }
 
+    func imageForCGMManager(withIdentifier identifier: String) -> UIImage? {
+        guard let cgmManagerType = deviceDataManager.cgmManagerTypeByIdentifier(identifier) else {
+            return nil
+        }
+        return cgmManagerType.onboardingImage
+    }
+
     func onboardCGMManager(withIdentifier identifier: String) -> Swift.Result<OnboardingResult<CGMManagerViewController, CGMManager>, Error> {
         guard let cgmManager = deviceDataManager.cgmManager else {
             return deviceDataManager.setupCGMManager(withIdentifier: identifier)
@@ -290,6 +297,22 @@ extension OnboardingManager: PumpManagerProvider {
     var activePumpManager: PumpManager? { deviceDataManager.pumpManager }
 
     var availablePumpManagers: [PumpManagerDescriptor] { deviceDataManager.availablePumpManagers }
+
+    func imageForPumpManager(withIdentifier identifier: String) -> UIImage? {
+        guard let pumpManagerType = deviceDataManager.pumpManagerTypeByIdentifier(identifier) else {
+            return nil
+        }
+        return pumpManagerType.onboardingImage
+    }
+
+    func supportedIncrementsForPumpManager(withIdentifier identifier: String) -> PumpSupportedIncrements? {
+        guard let pumpManagerType = deviceDataManager.pumpManagerTypeByIdentifier(identifier) else {
+            return nil
+        }
+        return PumpSupportedIncrements(basalRates: pumpManagerType.onboardingSupportedBasalRates,
+                                       bolusVolumes: pumpManagerType.onboardingSupportedBolusVolumes,
+                                       maximumBasalScheduleEntryCount: pumpManagerType.onboardingMaximumBasalScheduleEntryCount)
+    }
 
     func onboardPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<OnboardingResult<PumpManagerViewController, PumpManager>, Error> {
         guard let pumpManager = deviceDataManager.pumpManager else {
