@@ -24,10 +24,7 @@ public class BluetoothStateManager: NSObject, BluetoothProvider {
     }
 
     public var bluetoothAuthorization: BluetoothAuthorization {
-        if #available(iOS 13.1, *) {    // TODO: Remove once iOS 14 required
-            return BluetoothAuthorization(CBCentralManager.authorization)
-        }
-        return .notDetermined
+        return BluetoothAuthorization(CBCentralManager.authorization)
     }
 
     public var bluetoothState: BluetoothState {

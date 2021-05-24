@@ -1015,14 +1015,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             // Compute the height of the HUD, defaulting to 70
             let hudHeight = ceil(hudView?.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height ?? 74)
             var availableSize = max(tableView.bounds.width, tableView.bounds.height)
-
-            if #available(iOS 11.0, *) {
-                availableSize -= (tableView.safeAreaInsets.top + tableView.safeAreaInsets.bottom + hudHeight)
-            } else {
-                // 20: Status bar
-                // 44: Toolbar
-                availableSize -= hudHeight + 20 + 44
-            }
+            availableSize -= (tableView.safeAreaInsets.top + tableView.safeAreaInsets.bottom + hudHeight)
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:

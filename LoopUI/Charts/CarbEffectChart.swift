@@ -76,17 +76,13 @@ extension CarbEffectChart {
 
         let carbFillColor = UIColor.carbTintColor.withAlphaComponent(0.5)
         let carbBlendMode: CGBlendMode
-        if #available(iOSApplicationExtension 13.0, iOS 13.0, *) {
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                carbBlendMode = .plusLighter
-            case .light, .unspecified:
-                carbBlendMode = .plusDarker
-            @unknown default:
-                carbBlendMode = .plusDarker
-            }
-        } else {
-            carbBlendMode = .colorBurn
+        switch traitCollection.userInterfaceStyle {
+        case .dark:
+            carbBlendMode = .plusLighter
+        case .light, .unspecified:
+            carbBlendMode = .plusDarker
+        @unknown default:
+            carbBlendMode = .plusDarker
         }
 
         // Carb effect

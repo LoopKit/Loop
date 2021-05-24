@@ -204,12 +204,10 @@ class LoopAppManager: NSObject {
     // MARK: - Continuity
 
     func userActivity(_ userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        if #available(iOS 12.0, *) {
-            if userActivity.activityType == NewCarbEntryIntent.className {
-                log.default("Restoring %{public}@ intent", userActivity.activityType)
-                rootViewController?.restoreUserActivityState(.forNewCarbEntry())
-                return true
-            }
+        if userActivity.activityType == NewCarbEntryIntent.className {
+            log.default("Restoring %{public}@ intent", userActivity.activityType)
+            rootViewController?.restoreUserActivityState(.forNewCarbEntry())
+            return true
         }
 
         switch userActivity.activityType {
