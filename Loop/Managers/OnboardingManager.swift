@@ -287,7 +287,7 @@ extension OnboardingManager: CGMManagerProvider {
             return .failure(OnboardingError.invalidState)
         }
 
-        return .success(.userInteractionRequired(cgmManagerUI.settingsViewController(bluetoothProvider: self, displayGlucoseUnitObservable: deviceDataManager.displayGlucoseUnitObservable, colorPalette: .default)))
+        return .success(.userInteractionRequired(cgmManagerUI.settingsViewController(bluetoothProvider: self, displayGlucoseUnitObservable: deviceDataManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)))
     }
 }
 
@@ -326,7 +326,7 @@ extension OnboardingManager: PumpManagerProvider {
             return .success(.createdAndOnboarded(pumpManager))
         }
 
-        return .success(.userInteractionRequired(pumpManager.settingsViewController(bluetoothProvider: self, colorPalette: .default)))
+        return .success(.userInteractionRequired(pumpManager.settingsViewController(bluetoothProvider: self, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)))
     }
 }
 

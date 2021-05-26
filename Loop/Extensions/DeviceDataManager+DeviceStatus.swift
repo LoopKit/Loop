@@ -75,7 +75,7 @@ extension DeviceDataManager {
         {
             return .openAppURL(url)
         } else if let cgmManagerUI = (cgmManager as? CGMManagerUI) {
-            return .presentViewController(cgmManagerUI.settingsViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default))
+            return .presentViewController(cgmManagerUI.settingsViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled))
         } else {
             return .setupNewCGM
         }
@@ -86,11 +86,11 @@ extension DeviceDataManager {
             return action
         } else if let pumpManagerHUDProvider = pumpManagerHUDProvider,
             let view = view,
-            let action = pumpManagerHUDProvider.didTapOnHUDView(view)
+            let action = pumpManagerHUDProvider.didTapOnHUDView(view, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)
         {
             return action
         } else if let pumpManager = pumpManager {
-            return .presentViewController(pumpManager.settingsViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default))
+            return .presentViewController(pumpManager.settingsViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled))
         } else {
             return .setupNewPump
         }
