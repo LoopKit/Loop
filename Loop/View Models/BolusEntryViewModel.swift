@@ -62,6 +62,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     enum Notice: Equatable {
+        case predictedGlucoseInRange
         case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
         case staleGlucoseData
         case stalePumpData
@@ -631,6 +632,8 @@ final class BolusEntryViewModel: ObservableObject {
                     } else {
                         notice = nil
                     }
+                case .predictedGlucoseInRange:
+                    notice = .predictedGlucoseInRange
                 default:
                     notice = nil
                 }
