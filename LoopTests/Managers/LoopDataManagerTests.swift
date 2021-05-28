@@ -103,7 +103,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             carbStore: carbStore,
             dosingDecisionStore: MockDosingDecisionStore(),
             settingsStore: MockSettingsStore(),
-            now: { currentDate }
+            now: { currentDate },
+            automaticDosingStatus: AutomaticDosingStatus(isClosedLoop: false, isClosedLoopAllowed: false)
         )
     }
     
