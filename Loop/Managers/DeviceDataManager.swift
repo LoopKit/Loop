@@ -734,7 +734,6 @@ extension DeviceDataManager {
 
     func didBecomeActive() {
         updatePumpManagerBLEHeartbeatPreference()
-        refreshDeviceData()
     }
 
     func updatePumpManagerBLEHeartbeatPreference() {
