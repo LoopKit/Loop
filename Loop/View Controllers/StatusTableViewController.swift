@@ -1156,8 +1156,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         switch targetViewController {
         case let vc as CarbAbsorptionViewController:
-            vc.deviceManager = deviceManager
             vc.closedLoopStatus = closedLoopStatus
+            vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
         case let vc as InsulinDeliveryTableViewController:
             vc.doseStore = deviceManager.doseStore
