@@ -18,6 +18,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
     private var testExpect: XCTestExpectation!
     
     override func setUpWithError() throws {
+        staleGlucoseValueHandlerWasCalled = false
         viewModel = CGMStatusHUDViewModel(staleGlucoseValueHandler: staleGlucoseValueHandler)
     }
 
