@@ -194,17 +194,17 @@ class OnboardingManager {
 
 extension OnboardingManager: OnboardingDelegate {
     func onboardingDidUpdateState(_ onboarding: OnboardingUI) {
-        precondition(onboarding === activeOnboarding)
+        guard onboarding.onboardingIdentifier == activeOnboarding?.onboardingIdentifier else { return }
         userDefaults.onboardingManagerActiveOnboardingRawValue = onboarding.rawValue
     }
 
     func onboarding(_ onboarding: OnboardingUI, hasNewTherapySettings therapySettings: TherapySettings) {
-        precondition(onboarding === activeOnboarding)
+        guard onboarding.onboardingIdentifier == activeOnboarding?.onboardingIdentifier else { return }
         loopDataManager.therapySettings = therapySettings
     }
 
     func onboarding(_ onboarding: OnboardingUI, hasNewDosingEnabled dosingEnabled: Bool) {
-        precondition(onboarding === activeOnboarding)
+        guard onboarding.onboardingIdentifier == activeOnboarding?.onboardingIdentifier else { return }
         loopDataManager.settings.dosingEnabled = dosingEnabled
     }
 }
