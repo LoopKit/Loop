@@ -68,8 +68,6 @@ public final class AlertManager {
         self.handlers = handlers ??
             [UserNotificationAlertIssuer(userNotificationCenter: userNotificationCenter),
             InAppModalAlertIssuer(alertPresenter: alertPresenter, alertManagerResponder: self)]
-
-        playbackAlertsFromPersistence()
     }
 
     public func addAlertResponder(managerIdentifier: String, alertResponder: AlertResponder) {
@@ -161,7 +159,7 @@ extension AlertManager {
 
 extension AlertManager {
 
-    private func playbackAlertsFromPersistence() {
+    func playbackAlertsFromPersistence() {
         playbackAlertsFromAlertStore()
     }
 

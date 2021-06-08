@@ -212,6 +212,7 @@ class AlertManagerTests: XCTestCase {
                                         userNotificationCenter: mockUserNotificationCenter,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore)
+            alertManager.playbackAlertsFromPersistence()
             XCTAssertEqual(alert, mockIssuer.issuedAlert)
         }
     }
@@ -230,6 +231,7 @@ class AlertManagerTests: XCTestCase {
                                         userNotificationCenter: mockUserNotificationCenter,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore)
+            alertManager.playbackAlertsFromPersistence()
             let expected = Alert(identifier: Self.mockIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate)
             XCTAssertEqual(expected, mockIssuer.issuedAlert)
         }
@@ -249,6 +251,7 @@ class AlertManagerTests: XCTestCase {
                                         userNotificationCenter: mockUserNotificationCenter,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore)
+            alertManager.playbackAlertsFromPersistence()
 
             // The trigger for this should be `.delayed` by "something less than 15 seconds",
             // but the exact value depends on the speed of executing this test.
@@ -277,6 +280,7 @@ class AlertManagerTests: XCTestCase {
                                         userNotificationCenter: mockUserNotificationCenter,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore)
+            alertManager.playbackAlertsFromPersistence()
 
             XCTAssertEqual(alert, mockIssuer.issuedAlert)
         }

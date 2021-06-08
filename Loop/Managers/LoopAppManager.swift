@@ -96,6 +96,7 @@ class LoopAppManager: NSObject {
         UNUserNotificationCenter.current().delegate = self
 
         resumeLaunch()
+        finishLaunch()
     }
 
     var isLaunchComplete: Bool { state == .launchComplete }
@@ -187,6 +188,10 @@ class LoopAppManager: NSObject {
         self.launchOptions = nil
 
         self.state = state.next
+    }
+
+    private func finishLaunch() {
+        alertManager.playbackAlertsFromPersistence()
     }
 
     // MARK: - Life Cycle
