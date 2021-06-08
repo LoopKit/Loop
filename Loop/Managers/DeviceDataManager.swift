@@ -104,12 +104,16 @@ final class DeviceDataManager {
     
     /// All the HealthKit types to be read by stores
     private var readTypes: Set<HKSampleType> {
-        return Set([
-            glucoseStore.sampleType,
-            carbStore.sampleType,
-            doseStore.sampleType,
-            HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!
-        ].compactMap { $0 })
+        var readTypes: Set<HKSampleType> = []
+
+        if FeatureFlags.observeHealthKitSamplesFromOtherApps {
+            readTypes.insert(glucoseStore.sampleType)
+            readTypes.insert(carbStore.sampleType)
+            readTypes.insert(doseStore.sampleType)
+        }
+        readTypes.insert(HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!)
+
+        return readTypes
     }
     
     /// All the HealthKit types to be shared by stores
@@ -118,7 +122,7 @@ final class DeviceDataManager {
             glucoseStore.sampleType,
             carbStore.sampleType,
             doseStore.sampleType,
-        ].compactMap { $0 })
+        ])
     }
 
     var sleepDataAuthorizationRequired: Bool {
@@ -528,9 +532,9 @@ final class DeviceDataManager {
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
                 // Call the individual authorization methods to trigger query creation
-                self.carbStore.authorize(toShare: true, { _ in })
-                self.doseStore.insulinDeliveryStore.authorize(toShare: true, { _ in })
-                self.glucoseStore.authorize(toShare: true, { _ in })
+                self.carbStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
+                self.doseStore.insulinDeliveryStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
+                self.glucoseStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
             }
 
             self.getHealthStoreAuthorization(completion)
@@ -1138,7 +1142,7 @@ extension DeviceDataManager {
                 return
             }
 
-            healthStore.deleteObjects(of: self.doseStore.sampleType!, predicate: devicePredicate) { success, deletedObjectCount, error in
+            healthStore.deleteObjects(of: self.doseStore.sampleType, predicate: devicePredicate) { success, deletedObjectCount, error in
                 if success {
                     insulinDeliveryStore.test_lastBasalEndDate = nil
                 }

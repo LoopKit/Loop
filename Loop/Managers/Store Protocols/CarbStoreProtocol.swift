@@ -37,7 +37,7 @@ protocol CarbStoreProtocol: AnyObject {
     
     var sharingDenied: Bool { get }
     
-    func authorize(toShare: Bool, _ completion: @escaping (_ result: HealthKitSampleStoreResult<Bool>) -> Void)
+    func authorize(toShare: Bool, read: Bool, _ completion: @escaping (_ result: HealthKitSampleStoreResult<Bool>) -> Void)
     
     // MARK: Data Management
     func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: NewCarbEntry, completion: @escaping (_ result: CarbStoreResult<StoredCarbEntry>) -> Void)
