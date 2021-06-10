@@ -14,7 +14,7 @@ import LoopCore
 
 struct SimpleBolusView: View {
     @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismissAction) var dismiss
     
     @State private var shouldBolusEntryBecomeFirstResponder = false
     @State private var isKeyboardVisible = false

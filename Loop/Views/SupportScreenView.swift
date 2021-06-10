@@ -17,7 +17,7 @@ struct SupportMenuItem: Identifiable {
 }
 
 struct SupportScreenView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismissAction) private var dismiss
     
     var didTapIssueReport: ((_ title: String) -> Void)?
     var criticalEventLogExportViewModel: CriticalEventLogExportViewModel

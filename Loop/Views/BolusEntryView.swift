@@ -16,7 +16,7 @@ import LoopUI
 
 struct BolusEntryView: View {
     @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismissAction) var dismiss
     @Environment(\.appName) var appName
     
     @ObservedObject var viewModel: BolusEntryViewModel
