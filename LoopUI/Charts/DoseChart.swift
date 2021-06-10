@@ -93,10 +93,12 @@ public extension DoseChart {
             )]
         )
 
+        // bolus points
+        let bolusPointSize: Double = 12
         let bolusLayer: ChartPointsScatterDownTrianglesLayer<ChartPoint>?
 
         if points.bolus.count > 0 {
-            bolusLayer = ChartPointsScatterDownTrianglesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: points.bolus, displayDelay: 0, itemSize: CGSize(width: 12, height: 12), itemFillColor: colors.insulinTint)
+            bolusLayer = ChartPointsScatterDownTrianglesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: points.bolus, displayDelay: 0, itemSize: CGSize(width: bolusPointSize, height: bolusPointSize), itemFillColor: colors.insulinTint)
         } else {
             bolusLayer = nil
         }
@@ -137,7 +139,14 @@ public extension DoseChart {
             bolusLayer
         ]
 
-        return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.compactMap { $0 })
+        let chart = Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.compactMap { $0 })
+
+        // the bolus points are drawn in the chart's drawersContentView. Update the drawersContentView frame to allow the bolus points to be drawn without clipping
+        var frame = chart.drawersContentView.frame
+        frame.size.height = frame.height+CGFloat(bolusPointSize/2)
+        chart.drawersContentView.frame = frame.offsetBy(dx: 0, dy: -CGFloat(bolusPointSize/2))
+
+        return chart
     }
     
     private func generateDosePoints(startDate: Date) -> DosePointsCache {

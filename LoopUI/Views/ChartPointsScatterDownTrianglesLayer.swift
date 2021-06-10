@@ -37,10 +37,13 @@ public class ChartPointsScatterDownTrianglesLayer<T: ChartPoint>: ChartPointsSca
         let w = self.itemSize.width
         let h = self.itemSize.height
 
+        let horizontalOffset = -view.frame.origin.x
+        let verticalOffset = -view.frame.origin.y
+
         let path = CGMutablePath()
-        path.move(to: CGPoint(x: chartPointModel.screenLoc.x, y: chartPointModel.screenLoc.y + h / 2))
-        path.addLine(to: CGPoint(x: chartPointModel.screenLoc.x + w / 2, y: chartPointModel.screenLoc.y - h / 2))
-        path.addLine(to: CGPoint(x: chartPointModel.screenLoc.x - w / 2, y: chartPointModel.screenLoc.y - h / 2))
+        path.move(to: CGPoint(x: chartPointModel.screenLoc.x + horizontalOffset, y: chartPointModel.screenLoc.y + verticalOffset + h / 2))
+        path.addLine(to: CGPoint(x: chartPointModel.screenLoc.x + horizontalOffset + w / 2, y: chartPointModel.screenLoc.y + verticalOffset - h / 2))
+        path.addLine(to: CGPoint(x: chartPointModel.screenLoc.x + horizontalOffset - w / 2, y: chartPointModel.screenLoc.y + verticalOffset - h / 2))
         path.closeSubpath()
 
         context.setFillColor(self.itemFillColor.cgColor)
