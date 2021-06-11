@@ -104,7 +104,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             dosingDecisionStore: MockDosingDecisionStore(),
             settingsStore: MockSettingsStore(),
             now: { currentDate },
-            pumpInsulinType: .novolog
+            pumpInsulinType: .novolog,
+            automaticDosingStatus: AutomaticDosingStatus(isClosedLoop: false, isClosedLoopAllowed: false)
         )
     }
     

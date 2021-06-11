@@ -7,6 +7,7 @@
 //
 
 import LoopKit
+import UIKit
 
 class UserNotificationAlertIssuer: AlertIssuer {
     

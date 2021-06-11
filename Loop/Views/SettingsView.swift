@@ -14,7 +14,7 @@ import HealthKit
 
 public struct SettingsView: View {
     @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismissAction) private var dismiss
     @Environment(\.appName) private var appName
     @Environment(\.guidanceColors) private var guidanceColors
     @Environment(\.carbTintColor) private var carbTintColor
@@ -129,17 +129,16 @@ extension SettingsView {
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
                 .sheet(isPresented: $therapySettingsIsPresented) {
-                    TherapySettingsView(
-                        viewModel: TherapySettingsViewModel(mode: .settings,
-                                                            therapySettings: self.viewModel.therapySettings(),
-                                                            supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
-                                                            pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
-                                                            syncPumpSchedule: self.viewModel.syncPumpSchedule,
-                                                            chartColors: .primary,
-                                                            didSave: self.viewModel.didSave))
+                    TherapySettingsView(mode: .settings,
+                                        viewModel: TherapySettingsViewModel(therapySettings: self.viewModel.therapySettings(),
+                                                                            supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
+                                                                            pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
+                                                                            syncPumpSchedule: self.viewModel.syncPumpSchedule,
+                                                                            didSave: self.viewModel.didSave))
                         .environmentObject(displayGlucoseUnitObservable)
-                        .environment(\.dismiss, self.dismiss)
+                        .environment(\.dismissAction, self.dismiss)
                         .environment(\.appName, self.appName)
+                        .environment(\.chartColorPalette, .primary)
                         .environment(\.carbTintColor, self.carbTintColor)
                         .environment(\.glucoseTintColor, self.glucoseTintColor)
                         .environment(\.guidanceColors, self.guidanceColors)

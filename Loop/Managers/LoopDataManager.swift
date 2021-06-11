@@ -7,10 +7,10 @@
 //
 
 import Foundation
+import Combine
 import HealthKit
 import LoopKit
 import LoopCore
-
 
 final class LoopDataManager: LoopSettingsAlerterDelegate {
     enum LoopUpdateContext: Int {
@@ -43,6 +43,10 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     
     private let now: () -> Date
 
+    private let automaticDosingStatus: AutomaticDosingStatus
+
+    lazy private var cancellables = Set<AnyCancellable>()
+
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
     
@@ -73,7 +77,8 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         settingsStore: SettingsStoreProtocol,
         now: @escaping () -> Date = { Date() },
         alertIssuer: AlertIssuer? = nil,
-        pumpInsulinType: InsulinType?
+        pumpInsulinType: InsulinType?,
+        automaticDosingStatus: AutomaticDosingStatus
     ) {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -96,6 +101,8 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         self.settingsStore = settingsStore
         
         self.lockedPumpInsulinType = Locked(pumpInsulinType)
+
+        self.automaticDosingStatus = automaticDosingStatus
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
@@ -166,6 +173,18 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
                 }
             }
         ]
+
+        // Turn off preMeal when going into closed loop off mode
+        // Cancel any active temp basal when going into closed loop off mode
+        // The dispatch is necessary in case this is coming from a didSet already on the settings struct.
+        self.automaticDosingStatus.$isClosedLoop
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { if !$0 {
+                self.settings.clearOverride(matching: .preMeal)
+                self.cancelActiveTempBasal()
+            } }
+            .store(in: &cancellables)
     }
 
     /// Loop-related settings
@@ -522,7 +541,7 @@ extension LoopDataManager {
     /// Take actions to address how insulin is delivered when the CGM data is unreliable
     ///
     /// An active high temp basal (greater than the basal schedule) is cancelled when the CGM data is unreliable.
-    func recievedUnreliableCGMReading() {
+    func receivedUnreliableCGMReading() {
         guard case .tempBasal(let tempBasal) = basalDeliveryState,
               let scheduledBasalRate = basalRateSchedule?.value(at: now()),
               tempBasal.unitsPerHour > scheduledBasalRate else
@@ -530,11 +549,21 @@ extension LoopDataManager {
             return
         }
               
-        // Cancel that temp basal
-        recommendedAutomaticDose = (recommendation: AutomaticDoseRecommendation(basalAdjustment: .cancel, bolusUnits: 0), date: self.now())
-        enactDose { (error) -> Void in
-            self.storeDosingDecision(withDate: self.now(), withError: error)
-            self.notify(forChange: .tempBasal)
+        // Cancel active high temp basal
+        cancelActiveTempBasal()
+    }
+
+    /// Cancel the active temp basal
+    func cancelActiveTempBasal() {
+        guard case .tempBasal(_) = basalDeliveryState else { return }
+
+        dataAccessQueue.async {
+            // assign recommendedTempBasal right before setRecommendedTempBasal to avoid another assignment during asynchronous call
+            self.recommendedTempBasal = (recommendation: TempBasalRecommendation.cancel, date: self.now())
+            self.setRecommendedTempBasal { (error) -> Void in
+                self.storeDosingDecision(withDate: self.now(), withError: error)
+                self.notify(forChange: .tempBasal)
+            }
         }
     }
 
@@ -798,8 +827,8 @@ extension LoopDataManager {
             do {
                 try self.update()
 
-                if self.delegate?.automaticDosingEnabled == true {
-                    self.enactDose { (error) -> Void in
+                if self.automaticDosingStatus.isClosedLoop == true {
+                    self.setRecommendedTempBasal { (error) -> Void in
                         if let error = error {
                             self.loopDidError(date: self.now(), error: error, duration: -startDate.timeIntervalSince(self.now()))
                         } else {
@@ -1971,9 +2000,6 @@ protocol LoopDataManagerDelegate: class {
 
     /// The pump manager status, if one exists.
     var pumpManagerStatus: PumpManagerStatus? { get }
-    
-    /// The pump manager status, if one exists.
-    var automaticDosingEnabled: Bool { get }
 }
 
 private extension TemporaryScheduleOverride {

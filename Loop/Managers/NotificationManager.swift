@@ -59,7 +59,7 @@ extension NotificationManager {
 
     static func authorize(_ completion: @escaping (UNAuthorizationStatus) -> Void) {
         var authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        if FeatureFlags.criticalAlertsEnabled, #available(iOS 12.0, *) {
+        if FeatureFlags.criticalAlertsEnabled {
             authOptions.insert(.criticalAlert)
         }
         
@@ -136,7 +136,7 @@ extension NotificationManager {
             }
 
             notification.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            if isCritical, FeatureFlags.criticalAlertsEnabled, #available(iOS 12.0, *) {
+            if isCritical, FeatureFlags.criticalAlertsEnabled {
                 notification.sound = .defaultCritical
             } else {
                 notification.sound = .default

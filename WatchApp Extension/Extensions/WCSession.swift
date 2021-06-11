@@ -67,6 +67,7 @@ extension WCSession {
                 completionHandler(nil)
             },
             errorHandler: { error in
+                log.info("sendBolusMessage failure: %{public}@", error.localizedDescription)
                 completionHandler(error)
             }
         )

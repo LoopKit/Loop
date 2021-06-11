@@ -104,12 +104,9 @@ class OnboardingManager {
 
     private func displayOnboarding(_ onboarding: OnboardingUI) {
         var onboardingViewController = onboarding.onboardingViewController(onboardingProvider: self, displayGlucoseUnitObservable: deviceDataManager.displayGlucoseUnitObservable, colorPalette: .default)
-        onboardingViewController.cgmManagerCreateDelegate = deviceDataManager
-        onboardingViewController.cgmManagerOnboardDelegate = deviceDataManager
-        onboardingViewController.pumpManagerCreateDelegate = deviceDataManager
-        onboardingViewController.pumpManagerOnboardDelegate = deviceDataManager
-        onboardingViewController.serviceCreateDelegate = servicesManager
-        onboardingViewController.serviceOnboardDelegate = servicesManager
+        onboardingViewController.cgmManagerOnboardingDelegate = deviceDataManager
+        onboardingViewController.pumpManagerOnboardingDelegate = deviceDataManager
+        onboardingViewController.serviceOnboardingDelegate = servicesManager
         onboardingViewController.completionDelegate = self
 
         windowProvider?.window?.rootViewController = onboardingViewController
@@ -197,13 +194,18 @@ class OnboardingManager {
 
 extension OnboardingManager: OnboardingDelegate {
     func onboardingDidUpdateState(_ onboarding: OnboardingUI) {
-        precondition(onboarding === activeOnboarding)
+        guard onboarding.onboardingIdentifier == activeOnboarding?.onboardingIdentifier else { return }
         userDefaults.onboardingManagerActiveOnboardingRawValue = onboarding.rawValue
     }
 
     func onboarding(_ onboarding: OnboardingUI, hasNewTherapySettings therapySettings: TherapySettings) {
-        precondition(onboarding === activeOnboarding)
+        guard onboarding.onboardingIdentifier == activeOnboarding?.onboardingIdentifier else { return }
         loopDataManager.therapySettings = therapySettings
+    }
+
+    func onboarding(_ onboarding: OnboardingUI, hasNewDosingEnabled dosingEnabled: Bool) {
+        guard onboarding.onboardingIdentifier == activeOnboarding?.onboardingIdentifier else { return }
+        loopDataManager.settings.dosingEnabled = dosingEnabled
     }
 }
 
@@ -262,8 +264,30 @@ extension OnboardingManager: CGMManagerProvider {
 
     var availableCGMManagers: [CGMManagerDescriptor] { deviceDataManager.availableCGMManagers }
 
-    func setupCGMManager(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & CGMManagerCreateNotifying & CGMManagerOnboardNotifying & CompletionNotifying, CGMManager>, Error> {
-        return deviceDataManager.setupCGMManager(withIdentifier: identifier)
+    func imageForCGMManager(withIdentifier identifier: String) -> UIImage? {
+        guard let cgmManagerType = deviceDataManager.cgmManagerTypeByIdentifier(identifier) else {
+            return nil
+        }
+        return cgmManagerType.onboardingImage
+    }
+
+    func onboardCGMManager(withIdentifier identifier: String) -> Swift.Result<OnboardingResult<CGMManagerViewController, CGMManager>, Error> {
+        guard let cgmManager = deviceDataManager.cgmManager else {
+            return deviceDataManager.setupCGMManager(withIdentifier: identifier)
+        }
+        guard cgmManager.managerIdentifier == identifier else {
+            return .failure(OnboardingError.invalidState)
+        }
+
+        if cgmManager.isOnboarded {
+            return .success(.createdAndOnboarded(cgmManager))
+        }
+
+        guard let cgmManagerUI = cgmManager as? CGMManagerUI else {
+            return .failure(OnboardingError.invalidState)
+        }
+
+        return .success(.userInteractionRequired(cgmManagerUI.settingsViewController(bluetoothProvider: self, displayGlucoseUnitObservable: deviceDataManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)))
     }
 }
 
@@ -274,8 +298,35 @@ extension OnboardingManager: PumpManagerProvider {
 
     var availablePumpManagers: [PumpManagerDescriptor] { deviceDataManager.availablePumpManagers }
 
-    func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<UIViewController & PumpManagerCreateNotifying & PumpManagerOnboardNotifying & CompletionNotifying, PumpManager>, Error> {
-        return deviceDataManager.setupPumpManager(withIdentifier: identifier, initialSettings: settings)
+    func imageForPumpManager(withIdentifier identifier: String) -> UIImage? {
+        guard let pumpManagerType = deviceDataManager.pumpManagerTypeByIdentifier(identifier) else {
+            return nil
+        }
+        return pumpManagerType.onboardingImage
+    }
+
+    func supportedIncrementsForPumpManager(withIdentifier identifier: String) -> PumpSupportedIncrements? {
+        guard let pumpManagerType = deviceDataManager.pumpManagerTypeByIdentifier(identifier) else {
+            return nil
+        }
+        return PumpSupportedIncrements(basalRates: pumpManagerType.onboardingSupportedBasalRates,
+                                       bolusVolumes: pumpManagerType.onboardingSupportedBolusVolumes,
+                                       maximumBasalScheduleEntryCount: pumpManagerType.onboardingMaximumBasalScheduleEntryCount)
+    }
+
+    func onboardPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<OnboardingResult<PumpManagerViewController, PumpManager>, Error> {
+        guard let pumpManager = deviceDataManager.pumpManager else {
+            return deviceDataManager.setupPumpManager(withIdentifier: identifier, initialSettings: settings)
+        }
+        guard pumpManager.managerIdentifier == identifier else {
+            return .failure(OnboardingError.invalidState)
+        }
+
+        if pumpManager.isOnboarded {
+            return .success(.createdAndOnboarded(pumpManager))
+        }
+
+        return .success(.userInteractionRequired(pumpManager.settingsViewController(bluetoothProvider: self, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)))
     }
 }
 
@@ -286,15 +337,27 @@ extension OnboardingManager: ServiceProvider {
 
     var availableServices: [ServiceDescriptor] { servicesManager.availableServices }
 
-    func setupService(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<UIViewController & ServiceCreateNotifying & ServiceOnboardNotifying & CompletionNotifying, Service>, Error> {
-        return servicesManager.setupService(withIdentifier: identifier)
+    func onboardService(withIdentifier identifier: String) -> Swift.Result<OnboardingResult<ServiceViewController, Service>, Error> {
+        guard let service = activeServices.first(where: { $0.serviceIdentifier == identifier }) else {
+            return servicesManager.setupService(withIdentifier: identifier)
+        }
+
+        if service.isOnboarded {
+            return .success(.createdAndOnboarded(service))
+        }
+
+        guard let serviceUI = service as? ServiceUI else {
+            return .failure(OnboardingError.invalidState)
+        }
+
+        return .success(.userInteractionRequired(serviceUI.settingsViewController(colorPalette: .default)))
     }
 }
 
 // MARK: - OnboardingProvider
 
 extension OnboardingManager: OnboardingProvider {
-    var allowSkipOnboarding: Bool { FeatureFlags.mockTherapySettingsEnabled }   // NOTE: SKIP ONBOARDING - DEBUG AND TEST ONLY
+    var allowDebugFeatures: Bool { FeatureFlags.mockTherapySettingsEnabled }   // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
 }
 
 // MARK: - OnboardingUI
@@ -307,6 +370,19 @@ fileprivate extension OnboardingUI {
             "onboardingIdentifier": onboardingIdentifier,
             "state": rawState
         ]
+    }
+}
+
+// MARK: - OnboardingError
+
+enum OnboardingError: LocalizedError {
+    case invalidState
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidState:
+            return NSLocalizedString("An unexpected onboarding error state occurred.", comment: "Invalid onboarding state")
+        }
     }
 }
 

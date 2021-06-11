@@ -7,7 +7,7 @@
 //
 
 import os.log
-import Foundation
+import UIKit
 import LoopKit
 
 public enum CriticalEventLogExportError: Error {

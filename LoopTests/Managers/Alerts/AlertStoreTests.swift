@@ -15,6 +15,7 @@ class AlertStoreTests: XCTestCase {
     
     var alertStore: AlertStore!
 
+    static let defaultTimeout: TimeInterval = 1.5
     static let expiryInterval: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */
     static let historicDate = Date(timeIntervalSinceNow: -expiryInterval + TimeInterval.hours(4))  // Within default 24 hour expiration
     
@@ -100,7 +101,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordIssuedTwo() {
@@ -113,7 +114,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordAcknowledged() {
@@ -132,7 +133,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordAcknowledgedOfInvalid() {
@@ -144,7 +145,7 @@ class AlertStoreTests: XCTestCase {
             }
             expect.fulfill()
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
 
     func testRecordRetracted() {
@@ -163,7 +164,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordIssuedExpiresOld() {
@@ -180,7 +181,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordAcknowledgedExpiresOld() {
@@ -203,7 +204,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordRetractedBeforeRepeatDelayShouldDelete() {
@@ -218,7 +219,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordRetractedExactlyAtDelayShouldDelete() {
@@ -233,7 +234,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
 
     func testRecordRetractedExactlyAtRepeatDelayShouldDelete() {
@@ -248,7 +249,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
 
@@ -268,7 +269,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordRetractedAfterRepeatDelayShouldRetract() {
@@ -287,7 +288,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     // These next two tests are admittedly weird corner cases, but theoretically they might be race conditions,
@@ -311,7 +312,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testRecordAcknowledgedThenRetracted() {
@@ -333,7 +334,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testEmptyQuery() {
@@ -344,7 +345,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testSimpleQuery() {
@@ -360,7 +361,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testSimpleQueryThenRetraction() {
@@ -388,7 +389,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testQueryByDate() {
@@ -407,7 +408,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testQueryByDateExcludingFutureDelayed() {
@@ -426,7 +427,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testQueryByDateExcludingFutureRepeating() {
@@ -445,7 +446,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
 
     func testQueryByDateNotExcludingFutureDelayed() {
@@ -460,7 +461,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
 
     func testQueryWithLimit() {
@@ -478,7 +479,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
         
     func testQueryThenContinue() {
@@ -499,7 +500,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testAcknowledgeFindsCorrectOne() {
@@ -525,7 +526,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testAcknowledgeMultiple() {
@@ -547,7 +548,7 @@ class AlertStoreTests: XCTestCase {
                 })
             })
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testLookupAllUnacknowledgedEmpty() {
@@ -556,7 +557,7 @@ class AlertStoreTests: XCTestCase {
             XCTAssertTrue(alerts.isEmpty)
             expect.fulfill()
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testLookupAllUnacknowledgedOne() {
@@ -567,7 +568,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     
@@ -579,7 +580,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testLookupAllUnacknowledgedSomeNot() {
@@ -594,7 +595,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testLookupAllUnacknowledgedSomeRetracted() {
@@ -609,7 +610,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testLookupAllAcknowledgedUnretractedRepeatingAlertsAll() {
@@ -624,7 +625,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testLookupAllAcknowledgedUnretractedRepeatingAlertsEmpty() {
@@ -633,7 +634,7 @@ class AlertStoreTests: XCTestCase {
             XCTAssertTrue(alerts.isEmpty)
             expect.fulfill()
         })
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
     func testLookupAllAcknowledgedUnretractedRepeatingAlertsSome() {
@@ -649,7 +650,7 @@ class AlertStoreTests: XCTestCase {
                 expect.fulfill()
             })
         }
-        wait(for: [expect], timeout: 1)
+        wait(for: [expect], timeout: Self.defaultTimeout)
     }
     
 

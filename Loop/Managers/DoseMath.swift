@@ -70,7 +70,9 @@ extension InsulinCorrection {
         switch self {
         case .suspend(min: let minimum):
             return .glucoseBelowSuspendThreshold(minGlucose: minimum)
-        case .inRange, .entirelyBelowRange:
+        case .inRange:
+            return .predictedGlucoseInRange
+        case .entirelyBelowRange:
             return nil
         case .aboveRange(min: let min, correcting: _, minTarget: let target, units: let units):
             if units > 0 && min.quantity < target {

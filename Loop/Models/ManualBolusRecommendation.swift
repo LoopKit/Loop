@@ -31,7 +31,8 @@ extension BolusRecommendationNotice {
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             let minBGStr = glucoseFormatter.string(from: minGlucose.quantity, unit: unit)!
             return String(format: NSLocalizedString("Predicted glucose at %1$@ is %2$@.", comment: "Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number)"), time, minBGStr)
-
+        case .predictedGlucoseInRange:
+            return NSLocalizedString("Predicted glucose is in range.", comment: "Notice when predicted glucose for bolus recommendation is in range")
         }
     }
 }
@@ -51,6 +52,10 @@ extension BolusRecommendationNotice: Equatable {
                 minGlucose1.startDate == minGlucose2.startDate &&
                 minGlucose1.endDate == minGlucose2.endDate &&
                 minGlucose1.quantity == minGlucose2.quantity
+
+        case (.predictedGlucoseInRange, .predictedGlucoseInRange):
+            return true
+
         default:
             return false
         }

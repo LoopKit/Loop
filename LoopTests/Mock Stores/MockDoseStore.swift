@@ -41,7 +41,7 @@ class MockDoseStore: DoseStoreProtocol {
         
     var insulinSensitivitySchedule: InsulinSensitivitySchedule?
     
-    var sampleType: HKSampleType?
+    var sampleType: HKSampleType = HKQuantityType.quantityType(forIdentifier: .insulinDelivery)!
     
     var authorizationRequired: Bool = false
     

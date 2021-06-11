@@ -21,7 +21,7 @@ class DeliveryUncertaintyAlertManager {
     }
 
     private func showUncertainDeliveryRecoveryView() {
-        var controller = pumpManager.deliveryUncertaintyRecoveryViewController(colorPalette: .default)
+        var controller = pumpManager.deliveryUncertaintyRecoveryViewController(colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)
         controller.completionDelegate = self
         self.alertPresenter.present(controller, animated: true)
     }
