@@ -24,16 +24,6 @@ import HealthKit
 //                try assertDosingDecisionObjectEncodable(object, encodesJSON: """
 //{
 //  "data" : {
-//    "automaticDoseRecommendation" : {
-//      "date" : "2020-05-14T22:38:15Z",
-//      "recommendation" : {
-//        "basalAdjustment" : {
-//          "duration" : 1800,
-//          "unitsPerHour" : 0.75
-//        },
-//        "bolusUnits" : 0
-//      }
-//    },
 //    "carbEntry" : {
 //      "absorptionTime" : 18000,
 //      "createdByCurrentApp" : true,
@@ -263,17 +253,7 @@ import HealthKit
 //        "softwareVersion" : "Device Software Version",
 //        "udiDeviceIdentifier" : "Device UDI Device Identifier"
 //      },
-//      "insulinType" : 0,
 //      "pumpBatteryChargeRemaining" : 3.5,
-//      "pumpLifecycleProgress" : {
-//        "percentComplete" : 0.5,
-//        "progressState" : "warning"
-//      },
-//      "pumpStatusHighlight" : {
-//        "imageName" : "test.image",
-//        "localizedMessage" : "Test message",
-//        "state" : "normalPump"
-//      },
 //      "timeZone" : {
 //        "identifier" : "America/Los_Angeles"
 //      }
@@ -295,11 +275,15 @@ import HealthKit
 //        "pendingInsulin" : 0.75
 //      }
 //    },
+//    "recommendedTempBasal" : {
+//      "date" : "2020-05-14T22:38:15Z",
+//      "recommendation" : {
+//        "duration" : 1800,
+//        "unitsPerHour" : 0.75
+//      }
+//    },
 //    "requestedBolus" : 0.80000000000000004,
 //    "scheduleOverride" : {
-//      "actualEnd" : {
-//        "type" : "natural"
-//      },
 //      "context" : "custom",
 //      "duration" : {
 //        "finite" : {
@@ -439,16 +423,6 @@ import HealthKit
 //    func testCodable() throws {
 //        try assertStoredDosingDecisionCodable(StoredDosingDecision.test, encodesJSON: """
 //{
-//  "automaticDoseRecommendation" : {
-//    "date" : "2020-05-14T22:38:15Z",
-//    "recommendation" : {
-//      "basalAdjustment" : {
-//        "duration" : 1800,
-//        "unitsPerHour" : 0.75
-//      },
-//      "bolusUnits" : 0
-//    }
-//  },
 //  "carbEntry" : {
 //    "absorptionTime" : 18000,
 //    "createdByCurrentApp" : true,
@@ -678,17 +652,7 @@ import HealthKit
 //      "softwareVersion" : "Device Software Version",
 //      "udiDeviceIdentifier" : "Device UDI Device Identifier"
 //    },
-//    "insulinType" : 0,
 //    "pumpBatteryChargeRemaining" : 3.5,
-//    "pumpLifecycleProgress" : {
-//      "percentComplete" : 0.5,
-//      "progressState" : "warning"
-//    },
-//    "pumpStatusHighlight" : {
-//      "imageName" : "test.image",
-//      "localizedMessage" : "Test message",
-//      "state" : "normalPump"
-//    },
 //    "timeZone" : {
 //      "identifier" : "America/Los_Angeles"
 //    }
@@ -710,11 +674,15 @@ import HealthKit
 //      "pendingInsulin" : 0.75
 //    }
 //  },
+//  "recommendedTempBasal" : {
+//    "date" : "2020-05-14T22:38:15Z",
+//    "recommendation" : {
+//      "duration" : 1800,
+//      "unitsPerHour" : 0.75
+//    }
+//  },
 //  "requestedBolus" : 0.80000000000000004,
 //  "scheduleOverride" : {
-//    "actualEnd" : {
-//      "type" : "natural"
-//    },
 //    "context" : "custom",
 //    "duration" : {
 //      "finite" : {
@@ -772,7 +740,7 @@ import HealthKit
 //            lhs.predictedGlucose == rhs.predictedGlucose &&
 //            lhs.predictedGlucoseIncludingPendingInsulin == rhs.predictedGlucoseIncludingPendingInsulin &&
 //            lhs.lastReservoirValue == rhs.lastReservoirValue &&
-//            lhs.automaticDoseRecommendation == rhs.automaticDoseRecommendation &&
+//            lhs.recommendedTempBasal == rhs.recommendedTempBasal &&
 //            lhs.recommendedBolus == rhs.recommendedBolus &&
 //            lhs.pumpManagerStatus == rhs.pumpManagerStatus &&
 //            lhs.notificationSettings == rhs.notificationSettings &&
@@ -822,8 +790,8 @@ import HealthKit
 //    }
 //}
 //
-//extension StoredDosingDecision.AutomaticDoseRecommendationWithDate: Equatable {
-//    public static func == (lhs: StoredDosingDecision.AutomaticDoseRecommendationWithDate, rhs: StoredDosingDecision.AutomaticDoseRecommendationWithDate) -> Bool {
+//extension StoredDosingDecision.TempBasalRecommendationWithDate: Equatable {
+//    public static func == (lhs: StoredDosingDecision.TempBasalRecommendationWithDate, rhs: StoredDosingDecision.TempBasalRecommendationWithDate) -> Bool {
 //        return lhs.recommendation == rhs.recommendation && lhs.date == rhs.date
 //    }
 //}
@@ -903,15 +871,10 @@ import HealthKit
 //                                        createdByCurrentApp: true,
 //                                        userCreatedDate: dateFormatter.date(from: "2020-05-14T22:06:12Z")!,
 //                                        userUpdatedDate: dateFormatter.date(from: "2020-05-14T22:07:32Z")!)
-//        let automaticDosingRecommendation = StoredDosingDecision.AutomaticDoseRecommendationWithDate(
-//            recommendation: AutomaticDoseRecommendation(
-//                basalAdjustment: TempBasalRecommendation(
-//                    unitsPerHour: 0.75,
-//                    duration: .minutes(30)),
-//                bolusUnits: 0),
-//            date: dateFormatter.date(from: "2020-05-14T22:38:15Z")!)
-//        
-//        let recommendedBolus = StoredDosingDecision.BolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 1.2,
+//        let recommendedTempBasal = StoredDosingDecision.TempBasalRecommendationWithDate(recommendation: TempBasalRecommendation(unitsPerHour: 0.75,
+//                                                                                                                                duration: .minutes(30)),
+//                                                                                        date: dateFormatter.date(from: "2020-05-14T22:38:15Z")!)
+//        let recommendedBolus = StoredDosingDecision.BolusRecommendationWithDate(recommendation: BolusRecommendation(amount: 1.2,
 //                                                                                                                    pendingInsulin: 0.75,
 //                                                                                                                    notice: .predictedGlucoseBelowTarget(minGlucose: PredictedGlucoseValue(startDate: dateFormatter.date(from: "2020-05-14T23:03:15Z")!,
 //                                                                                                                                                                                           quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 75.5)))),
@@ -928,13 +891,7 @@ import HealthKit
 //                                                                   udiDeviceIdentifier: "Device UDI Device Identifier"),
 //                                                  pumpBatteryChargeRemaining: 3.5,
 //                                                  basalDeliveryState: .initiatingTempBasal,
-//                                                  bolusState: .noBolus,
-//                                                  insulinType: .novolog,
-//                                                  pumpStatusHighlight: PumpManagerStatus.PumpStatusHighlight(localizedMessage: "Test message",
-//                                                                                                             imageName: "test.image",
-//                                                                                                             state: .normalPump),
-//                                                  pumpLifecycleProgress: PumpManagerStatus.PumpLifecycleProgress(percentComplete: 0.5,
-//                                                                                                                 progressState: .warning))
+//                                                  bolusState: .noBolus)
 //        let notificationSettings = NotificationSettings(authorizationStatus: .authorized,
 //                                                        soundSetting: .enabled,
 //                                                        badgeSetting: .enabled,
@@ -974,7 +931,7 @@ import HealthKit
 //                                    manualGlucose: manualGlucose,
 //                                    originalCarbEntry: originalCarbEntry,
 //                                    carbEntry: carbEntry,
-//                                    automaticDoseRecommendation: automaticDosingRecommendation,
+//                                    recommendedTempBasal: recommendedTempBasal,
 //                                    recommendedBolus: recommendedBolus,
 //                                    requestedBolus: requestedBolus,
 //                                    pumpManagerStatus: pumpManagerStatus,

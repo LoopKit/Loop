@@ -7,8 +7,9 @@
 //
 
 import LoopKit
+import UIKit
 
-protocol AlertManagerResponder: class {
+protocol AlertManagerResponder: AnyObject {
     /// Method for our Handlers to call to kick off alert response.  Differs from AlertResponder because here we need the whole `Identifier`.
     func acknowledgeAlert(identifier: Alert.Identifier)
 }
@@ -67,8 +68,6 @@ public final class AlertManager {
         self.handlers = handlers ??
             [UserNotificationAlertIssuer(userNotificationCenter: userNotificationCenter),
             InAppModalAlertIssuer(alertPresenter: alertPresenter, alertManagerResponder: self)]
-
-        playbackAlertsFromPersistence()
     }
 
     public func addAlertResponder(managerIdentifier: String, alertResponder: AlertResponder) {
@@ -160,7 +159,7 @@ extension AlertManager {
 
 extension AlertManager {
 
-    private func playbackAlertsFromPersistence() {
+    func playbackAlertsFromPersistence() {
         playbackAlertsFromAlertStore()
     }
 

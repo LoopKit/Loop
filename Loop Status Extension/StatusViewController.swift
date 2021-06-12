@@ -292,7 +292,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                     unit: unit,
                     staleGlucoseAge: LoopCoreConstants.inputDataRecencyInterval,
                     glucoseDisplay: context.glucoseDisplay,
-                    wasUserEntered: lastGlucose.wasUserEntered
+                    wasUserEntered: lastGlucose.wasUserEntered,
+                    isDisplayOnly: lastGlucose.isDisplayOnly
                 )
             }
 

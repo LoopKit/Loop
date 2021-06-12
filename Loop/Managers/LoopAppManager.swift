@@ -8,6 +8,7 @@
 
 import UIKit
 import Intents
+import Combine
 import LoopKit
 import LoopKitUI
 
@@ -63,6 +64,10 @@ class LoopAppManager: NSObject {
 
     private let log = DiagnosticLog(category: "LoopAppManager")
 
+    private let closedLoopStatus = ClosedLoopStatus(isClosedLoop: false, isClosedLoopAllowed: false)
+
+    lazy private var cancellables = Set<AnyCancellable>()
+
     // MARK: - Initialization
 
     func initialize(windowProvider: WindowProvider, launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
@@ -96,6 +101,7 @@ class LoopAppManager: NSObject {
         UNUserNotificationCenter.current().delegate = self
 
         resumeLaunch()
+        finishLaunch()
     }
 
     var isLaunchComplete: Bool { state == .launchComplete }
@@ -126,7 +132,8 @@ class LoopAppManager: NSObject {
         self.deviceDataManager = DeviceDataManager(pluginManager: pluginManager,
                                                    alertManager: alertManager,
                                                    bluetoothProvider: bluetoothStateManager,
-                                                   alertPresenter: self)
+                                                   alertPresenter: self,
+                                                   closedLoopStatus: closedLoopStatus)
         SharedLogging.instance = deviceDataManager.loggingServicesManager
 
         scheduleBackgroundTasks()
@@ -142,6 +149,12 @@ class LoopAppManager: NSObject {
         deviceDataManager.analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
 
         self.state = state.next
+
+        closedLoopStatus.$isClosedLoopAllowed
+            .combineLatest(deviceDataManager.loopManager.$settings)
+            .map { $0 && $1.dosingEnabled }
+            .assign(to: \.closedLoopStatus.isClosedLoop, on: self)
+            .store(in: &cancellables)
     }
 
     private func launchOnboarding() {
@@ -162,6 +175,7 @@ class LoopAppManager: NSObject {
 
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle(for: Self.self))
         let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
+        statusTableViewController.closedLoopStatus = closedLoopStatus
         statusTableViewController.deviceManager = deviceDataManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
@@ -172,6 +186,8 @@ class LoopAppManager: NSObject {
         }
         rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
 
+        deviceDataManager.refreshDeviceData()
+
         handleRemoteNotificationFromLaunchOptions()
 
         self.launchOptions = nil
@@ -179,10 +195,14 @@ class LoopAppManager: NSObject {
         self.state = state.next
     }
 
+    private func finishLaunch() {
+        alertManager.playbackAlertsFromPersistence()
+    }
+
     // MARK: - Life Cycle
 
     func didBecomeActive() {
-        deviceDataManager?.updatePumpManagerBLEHeartbeatPreference()
+        deviceDataManager?.didBecomeActive()
     }
 
     // MARK: - Remote Notification
@@ -207,12 +227,10 @@ class LoopAppManager: NSObject {
     // MARK: - Continuity
 
     func userActivity(_ userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        if #available(iOS 12.0, *) {
-            if userActivity.activityType == NewCarbEntryIntent.className {
-                log.default("Restoring %{public}@ intent", userActivity.activityType)
-                rootViewController?.restoreUserActivityState(.forNewCarbEntry())
-                return true
-            }
+        if userActivity.activityType == NewCarbEntryIntent.className {
+            log.default("Restoring %{public}@ intent", userActivity.activityType)
+            rootViewController?.restoreUserActivityState(.forNewCarbEntry())
+            return true
         }
 
         switch userActivity.activityType {

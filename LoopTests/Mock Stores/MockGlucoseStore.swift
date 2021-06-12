@@ -42,7 +42,7 @@ class MockGlucoseStore: GlucoseStoreProtocol {
     
     var sharingDenied: Bool = false
     
-    func authorize(toShare: Bool, _ completion: @escaping (HealthKitSampleStoreResult<Bool>) -> Void) {
+    func authorize(toShare: Bool, read: Bool, _ completion: @escaping (HealthKitSampleStoreResult<Bool>) -> Void) {
         completion(.success(true))
     }
     

@@ -10,7 +10,7 @@ import LoopKitUI
 import SwiftUI
 
 public struct NotificationsCriticalAlertPermissionsView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismissAction) private var dismiss
     @Environment(\.appName) private var appName
 
     private let backButtonText: String

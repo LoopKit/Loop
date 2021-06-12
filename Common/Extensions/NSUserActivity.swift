@@ -23,7 +23,7 @@ extension NSUserActivity {
         activity.isEligibleForSearch = true
         activity.isEligibleForHandoff = false
         activity.isEligibleForPublicIndexing = false
-        if #available(iOS 12.0, watchOSApplicationExtension 5.0, *) {
+        if #available(watchOSApplicationExtension 5.0, *) {
             activity.isEligibleForPrediction = true
         }
         activity.requiredUserInfoKeys = []

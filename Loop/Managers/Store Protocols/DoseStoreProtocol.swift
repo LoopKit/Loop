@@ -29,7 +29,7 @@ protocol DoseStoreProtocol: AnyObject {
     
     var lastAddedPumpData: Date { get }
     
-    var sampleType: HKSampleType? { get }
+    var sampleType: HKSampleType { get }
     
     var delegate: DoseStoreDelegate? { get set }
     

@@ -31,7 +31,7 @@ extension DeviceDataManager {
     var cgmLifecycleProgress: DeviceLifecycleProgress? {
         return (cgmManager as? CGMManagerUI)?.cgmLifecycleProgress
     }
-    
+
     var pumpStatusHighlight: DeviceStatusHighlight? {
         let bluetoothState = bluetoothProvider.bluetoothState
         if bluetoothState == .unsupported || bluetoothState == .unauthorized || bluetoothState == .poweredOff {
@@ -39,12 +39,16 @@ extension DeviceDataManager {
         } else if pumpManager == nil {
             return DeviceDataManager.addPumpStatusHighlight
         } else {
-            return pumpManagerStatus?.pumpStatusHighlight
+            return pumpManager?.pumpStatusHighlight
         }
     }
-    
+
+    var pumpStatusBadge: DeviceStatusBadge? {
+        return pumpManager?.pumpStatusBadge
+    }
+
     var pumpLifecycleProgress: DeviceLifecycleProgress? {
-        return pumpManagerStatus?.pumpLifecycleProgress
+        return pumpManager?.pumpLifecycleProgress
     }
     
     static var addCGMStatusHighlight: AddDeviceStatusHighlight {
@@ -71,7 +75,7 @@ extension DeviceDataManager {
         {
             return .openAppURL(url)
         } else if let cgmManagerUI = (cgmManager as? CGMManagerUI) {
-            return .presentViewController(cgmManagerUI.settingsViewController(for: displayGlucoseUnitObservable, bluetoothProvider: bluetoothProvider, colorPalette: .default))
+            return .presentViewController(cgmManagerUI.settingsViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled))
         } else {
             return .setupNewCGM
         }
@@ -82,11 +86,11 @@ extension DeviceDataManager {
             return action
         } else if let pumpManagerHUDProvider = pumpManagerHUDProvider,
             let view = view,
-            let action = pumpManagerHUDProvider.didTapOnHUDView(view)
+            let action = pumpManagerHUDProvider.didTapOnHUDView(view, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)
         {
             return action
         } else if let pumpManager = pumpManager {
-            return .presentViewController(pumpManager.settingsViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowedInsulinTypes: allowedInsulinTypes))
+            return .presentViewController(pumpManager.settingsViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled, allowedInsulinTypes: allowedInsulinTypes))
         } else {
             return .setupNewPump
         }

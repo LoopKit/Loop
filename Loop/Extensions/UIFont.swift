@@ -17,8 +17,7 @@ extension UIFont {
     ) {
         var descriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: style)
 
-        if #available(iOS 13.0, *),
-            let prettierDescriptor = descriptor.withDesign(design)?.withSymbolicTraits(traits)
+        if let prettierDescriptor = descriptor.withDesign(design)?.withSymbolicTraits(traits)
         {
             descriptor = prettierDescriptor
         } else if let prettierDescriptor = descriptor.withSymbolicTraits(traits) {

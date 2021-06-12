@@ -15,11 +15,7 @@ extension DeviceLifecycleProgressState {
         case .critical:
             return .critical
         case .dimmed:
-            if #available(iOS 14.0, *) {
-                return UIColor(Color.secondary)
-            } else {
-                return .systemGray
-            }
+            return UIColor(Color.secondary)
         case .normalCGM:
             return .glucose
         case .normalPump:

@@ -14,7 +14,7 @@ import LoopCore
 
 struct SimpleBolusView: View {
     @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismissAction) var dismiss
     
     @State private var shouldBolusEntryBecomeFirstResponder = false
     @State private var isKeyboardVisible = false
@@ -141,7 +141,7 @@ struct SimpleBolusView: View {
                     font: .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    maxLength: 3,
+                    maxLength: 4,
                     doneButtonColor: .loopAccent
                 )
 
@@ -325,7 +325,7 @@ struct SimpleBolusView: View {
     private func closedLoopOffInformationalModal() -> SwiftUI.Alert {
         return SwiftUI.Alert(
             title: Text("Closed Loop OFF", comment: "Alert title for closed loop off informational modal"),
-            message: Text(String(format: NSLocalizedString("%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but your basal insulin will not adjust automatically.\n\n", comment: "Alert message for closed loop off informational modal. (1: app name)"), Bundle.main.bundleDisplayName))
+            message: Text(String(format: NSLocalizedString("%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but your basal insulin will not adjust automatically.", comment: "Alert message for closed loop off informational modal. (1: app name)"), Bundle.main.bundleDisplayName))
         )
     }
 

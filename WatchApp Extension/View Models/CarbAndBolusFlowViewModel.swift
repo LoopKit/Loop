@@ -196,7 +196,6 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         }
 
         sendSetBolusUserInfo(carbEntry: carbEntry, bolus: 0)
-        dismiss()
     }
 
     func addCarbsAndDeliverBolus(_ bolusAmount: Double) {

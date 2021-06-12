@@ -14,6 +14,7 @@ extension LoopUIColorPalette {
                                   carbTintColor: .carbTintColor,
                                   glucoseTintColor: .glucoseTintColor,
                                   insulinTintColor: .insulinTintColor,
+                                  loopStatusColorPalette: .loopStatus,
                                   chartColorPalette: .primary)
     }
 }
