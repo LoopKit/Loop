@@ -558,9 +558,8 @@ extension LoopDataManager {
         guard case .tempBasal(_) = basalDeliveryState else { return }
 
         dataAccessQueue.async {
-            // assign recommendedTempBasal right before setRecommendedTempBasal to avoid another assignment during asynchronous call
-            self.recommendedTempBasal = (recommendation: TempBasalRecommendation.cancel, date: self.now())
-            self.setRecommendedTempBasal { (error) -> Void in
+            self.recommendedAutomaticDose = (recommendation: AutomaticDoseRecommendation(basalAdjustment: .cancel, bolusUnits: 0), date: self.now())
+            self.enactRecommendedAutomaticDose { (error) -> Void in
                 self.storeDosingDecision(withDate: self.now(), withError: error)
                 self.notify(forChange: .tempBasal)
             }
@@ -828,7 +827,7 @@ extension LoopDataManager {
                 try self.update()
 
                 if self.automaticDosingStatus.isClosedLoop == true {
-                    self.setRecommendedTempBasal { (error) -> Void in
+                    self.enactRecommendedAutomaticDose { (error) -> Void in
                         if let error = error {
                             self.loopDidError(date: self.now(), error: error, duration: -startDate.timeIntervalSince(self.now()))
                         } else {
@@ -1583,7 +1582,7 @@ extension LoopDataManager {
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
-    private func enactDose(_ completion: @escaping (_ error: Error?) -> Void) {
+    private func enactRecommendedAutomaticDose(_ completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let recommendedDose = self.recommendedAutomaticDose else {

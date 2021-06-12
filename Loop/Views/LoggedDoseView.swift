@@ -23,7 +23,7 @@ struct LoggedDoseView: View {
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
 
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismissAction) var dismiss
 
     var body: some View {
         GeometryReader { geometry in

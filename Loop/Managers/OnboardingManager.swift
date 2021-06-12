@@ -326,7 +326,7 @@ extension OnboardingManager: PumpManagerProvider {
             return .success(.createdAndOnboarded(pumpManager))
         }
 
-        return .success(.userInteractionRequired(pumpManager.settingsViewController(bluetoothProvider: self, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)))
+        return .success(.userInteractionRequired(pumpManager.settingsViewController(bluetoothProvider: self, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled, allowedInsulinTypes: deviceDataManager.allowedInsulinTypes)))
     }
 }
 

@@ -689,26 +689,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         switch (statusWasVisible, statusIsVisible) {
         case (true, true):
             switch (oldStatusRowMode, self.statusRowMode) {
-            case (.recommendedTempBasal(tempBasal: let oldTempBasal, at: let oldDate, enacting: let wasEnacting),
-                  .recommendedTempBasal(tempBasal: let newTempBasal, at: let newDate, enacting: let isEnacting)):
-                // Ensure we have a change
-                guard oldTempBasal != newTempBasal || oldDate != newDate || wasEnacting != isEnacting else {
-                    break
-                }
-
-                // If the rate or date change, reload the row
-                if oldTempBasal != newTempBasal || oldDate != newDate {
-                    tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
-                } else if let cell = tableView.cellForRow(at: statusIndexPath) {
-                    // If only the enacting state changed, update the activity indicator
-                    if isEnacting {
-                        let indicatorView = UIActivityIndicatorView(style: .default)
-                        indicatorView.startAnimating()
-                        cell.accessoryView = indicatorView
-                    } else {
-                        cell.accessoryView = nil
-                    }
-                }
             case (.enactingBolus, .enactingBolus):
                 break
             case (.bolusing(let oldDose), .bolusing(let newDose)):
@@ -1020,23 +1000,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 tableView.deselectRow(at: indexPath, animated: true)
 
                 switch statusRowMode {
-                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) where !enacting:
-                    updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
-
-                    deviceManager.loopManager.enactRecommendedTempBasal { (error) in
-                        DispatchQueue.main.async {
-                            self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
-
-                            if let error = error {
-                                self.log.error("Failed to enact recommended temp basal: %{public}@", String(describing: error))
-                                self.present(UIAlertController(with: error), animated: true)
-                            } else {
-                                self.refreshContext.update(with: .status)
-                                self.log.debug("[reloadData] after manually enacting temp basal")
-                                self.reloadData()
-                            }
-                        }
-                    }
                 case .pumpSuspended(let resuming) where !resuming:
                     updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
                     deviceManager.pumpManager?.resumeDelivery() { (error) in
