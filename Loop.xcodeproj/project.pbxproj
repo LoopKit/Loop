@@ -399,6 +399,10 @@
 		A9A63F8D246B261100588D5B /* DosingDecisionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9A63F8C246B261100588D5B /* DosingDecisionStoreTests.swift */; };
 		A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		A9B607B0247F000F00792BE4 /* UserNotifications+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B607AF247F000F00792BE4 /* UserNotifications+Loop.swift */; };
+		A9BCFA5C267F9BDC009394BE /* Base32.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA81262325F700AB8C89 /* Base32.xcframework */; };
+		A9BCFA5D267F9BDC009394BE /* Base32.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA81262325F700AB8C89 /* Base32.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A9BCFA5E267F9BE7009394BE /* OneTimePassword.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */; };
+		A9BCFA5F267F9BE7009394BE /* OneTimePassword.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A9C1719725366F780053BCBD /* WatchHistoricalGlucoseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C1719625366F780053BCBD /* WatchHistoricalGlucoseTest.swift */; };
 		A9C62D8223316FF600535612 /* UserDefaults+Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C62D8123316FF500535612 /* UserDefaults+Services.swift */; };
 		A9C62D842331700E00535612 /* DiagnosticLog+Subsystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C62D832331700D00535612 /* DiagnosticLog+Subsystem.swift */; };
@@ -710,7 +714,9 @@
 			dstSubfolderSpec = 10;
 			files = (
 				4F2C159A1E0C9E5600E160D4 /* LoopUI.framework in Embed Frameworks */,
+				A9BCFA5F267F9BE7009394BE /* OneTimePassword.framework in Embed Frameworks */,
 				43D9FFD721EAE05D00AF44BF /* LoopCore.framework in Embed Frameworks */,
+				A9BCFA5D267F9BDC009394BE /* Base32.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1324,6 +1330,8 @@
 		A9DF02CC24F72BC800B7C988 /* PersistenceControllerTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceControllerTestCase.swift; sourceTree = "<group>"; };
 		A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBackfillRequestUserInfoTests.swift; sourceTree = "<group>"; };
 		A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHistoricalCarbsTests.swift; sourceTree = "<group>"; };
+		A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = OneTimePassword.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9E2DA81262325F700AB8C89 /* Base32.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Base32.xcframework; path = ../OneTimePassword/Carthage/Build/Base32.xcframework; sourceTree = "<group>"; };
 		A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreTests.swift; sourceTree = "<group>"; };
 		A9E6DFE7246A043C005B1A1C /* DoseStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreTests.swift; sourceTree = "<group>"; };
 		A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerErrorTests.swift; sourceTree = "<group>"; };
@@ -1496,9 +1504,11 @@
 			files = (
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
 				1DC63E7425351BDF004605DA /* TrueTime.framework in Frameworks */,
+				A9BCFA5E267F9BE7009394BE /* OneTimePassword.framework in Frameworks */,
 				C1750AEC255B013300B8011C /* Minizip.framework in Frameworks */,
 				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
+				A9BCFA5C267F9BDC009394BE /* Base32.xcframework in Frameworks */,
 				892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */,
 				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
 				C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */,
@@ -2404,6 +2414,8 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A9E2DA81262325F700AB8C89 /* Base32.xcframework */,
+				A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */,
 				1DC63E7325351BDF004605DA /* TrueTime.framework */,
 				4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */,
 				C1750AEB255B013300B8011C /* Minizip.framework */,

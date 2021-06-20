@@ -1271,6 +1271,7 @@ extension Notification.Name {
 // MARK: - Remote Notification Handling
 extension DeviceDataManager {
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
+
         if FeatureFlags.remoteOverridesEnabled {
             if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
                 switch command {
@@ -1280,6 +1281,36 @@ extension DeviceDataManager {
                 case .cancelTemporaryOverride:
                     log.default("Canceling temporary override from remote command")
                     loopManager.settings.scheduleOverride = nil
+                case .bolusEntry(let bolusValue):
+                    log.default("Enacting remote bolus entry: %{public}@", String(describing: bolusValue))
+                    
+                    //Remote bolus requires validation from its remote source
+                    if remoteDataServicesManager.validatePushNotificationSource(notification) == false {
+                        log.info("Could not validate notification: %{public}@", String(describing: notification))
+                        return
+                    }
+
+                    // enact bolus; make sure maxbolus is in place for protection
+                    if let maxBolus = loopManager.settings.maximumBolus {
+                       if bolusValue.isLessThanOrEqualTo(maxBolus) {
+                          self.enactBolus(units: bolusValue, automatic: true)
+                       } else {
+                           log.default("Remote bolus higher than maximum. Aborting...")
+                       }
+                    } else {
+                        log.default("No max bolus detected. Aborting...")
+                    }
+                case .carbsEntry(let newEntry):
+                    log.default("Adding carbs entry.")
+                    
+                    //Remote carb entry requires validation from its remote source
+                    if remoteDataServicesManager.validatePushNotificationSource(notification) == false {
+                        log.info("Could not validate notification: %{public}@", String(describing: notification))
+                        return
+                    }
+                    
+                    let addCompletion: (CarbStoreResult<StoredCarbEntry>) -> Void = { _ in }
+                    carbStore.addCarbEntry(newEntry, completion: addCompletion )
                 }
             } else {
                 log.info("Unhandled remote notification: %{public}@", String(describing: notification))

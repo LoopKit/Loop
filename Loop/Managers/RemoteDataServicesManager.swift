@@ -361,6 +361,21 @@ extension RemoteDataServicesManager {
 
 }
 
+extension RemoteDataServicesManager {
+
+    func validatePushNotificationSource(_ notification: [String: AnyObject]) -> Bool {
+        for service in remoteDataServices {
+            let validated = service.validatePushNotificationSource(notification)
+            if validated {
+                return validated
+            }
+        }
+        
+        return false
+    }
+    
+}
+
 fileprivate extension UserDefaults {
 
     private func queryAnchorKey(for remoteDataService: RemoteDataService, withRemoteDataType remoteDataType: RemoteDataType) -> String {
