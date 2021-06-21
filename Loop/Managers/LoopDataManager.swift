@@ -574,6 +574,7 @@ extension LoopDataManager {
     ///
     /// - Parameters:
     ///   - dose: The DoseEntry representing the requested bolus
+    ///   - completion: A closure that is called after state has been updated
     func addRequestedBolus(_ dose: DoseEntry, completion: (() -> Void)?) {
         dataAccessQueue.async {
             self.logger.debug("addRequestedBolus")
@@ -587,8 +588,8 @@ extension LoopDataManager {
     /// Notifies the manager that the bolus is confirmed, but not fully delivered.
     ///
     /// - Parameters:
-    ///   - dose: The DoseEntry representing the confirmed bolus.
-    func bolusConfirmed(_ dose: DoseEntry, completion: (() -> Void)?) {
+    ///   - completion: A closure that is called after state has been updated
+    func bolusConfirmed(completion: (() -> Void)?) {
         self.dataAccessQueue.async {
             self.logger.debug("bolusConfirmed")
             self.lastRequestedBolus = nil
@@ -604,7 +605,8 @@ extension LoopDataManager {
     /// Notifies the manager that the bolus failed.
     ///
     /// - Parameters:
-    ///   - dose: The DoseEntry representing the confirmed bolus.
+    ///   - error: An error describing why the bolus request failed
+    ///   - completion: A closure that is called after state has been updated
     func bolusRequestFailed(_ error: Error, completion: (() -> Void)?) {
         self.dataAccessQueue.async {
             self.logger.debug("bolusRequestFailed")
@@ -1510,15 +1512,12 @@ extension LoopDataManager {
             return
         }
 
-        delegate?.loopDataManager(self, didRecommendBasalChange: recommendedTempBasal) { (result) in
+        delegate?.loopDataManager(self, didRecommendBasalChange: recommendedTempBasal) { (error) in
             self.dataAccessQueue.async {
-                switch result {
-                case .success:
+                if error == nil {
                     self.recommendedTempBasal = nil
-                    completion(nil)
-                case .failure(let error):
-                    completion(error)
                 }
+                completion(error)
             }
         }
     }
@@ -1887,16 +1886,15 @@ extension Notification.Name {
     static let LoopCompleted = Notification.Name(rawValue: "com.loopkit.Loop.LoopCompleted")
 }
 
-protocol LoopDataManagerDelegate: class {
+protocol LoopDataManagerDelegate: AnyObject {
 
     /// Informs the delegate that an immediate basal change is recommended
     ///
     /// - Parameters:
     ///   - manager: The manager
     ///   - basal: The new recommended basal
-    ///   - completion: A closure called once on completion
-    ///   - result: The enacted basal
-    func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
+    ///   - completion: A closure called once on completion. Will be passed a non-null error if acting on the recommendation fails.
+    func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (Error?) -> Void) -> Void
 
     /// Asks the delegate to round a recommended basal rate to a supported rate
     ///

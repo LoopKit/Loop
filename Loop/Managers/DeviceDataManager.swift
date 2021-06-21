@@ -381,7 +381,7 @@ final class DeviceDataManager {
         let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)
         if case .createdAndOnboarded(let pumpManagerUI) = result {
             pumpManagerOnboarding(didCreatePumpManager: pumpManagerUI)
-            pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI, withFinalSettings: settings)
+            pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI)
         }
 
         return .success(result)
@@ -658,9 +658,8 @@ extension DeviceDataManager {
         }
 
         self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
-        pumpManager.enactBolus(units: units, at: startDate) { (result) in
-            switch result {
-            case .failure(let error):
+        pumpManager.enactBolus(units: units, at: startDate) { (error) in
+            if let error = error {
                 self.log.error("%{public}@", String(describing: error))
                 switch error {
                 case .uncertainDelivery:
@@ -672,8 +671,8 @@ extension DeviceDataManager {
                 self.loopManager.bolusRequestFailed(error) {
                     completion(error)
                 }
-            case .success(let dose):
-                self.loopManager.bolusConfirmed(dose) {
+            } else {
+                self.loopManager.bolusConfirmed() {
                     completion(nil)
                 }
             }
@@ -736,27 +735,6 @@ extension DeviceDataManager {
 
 // MARK: - DeviceManagerDelegate
 extension DeviceDataManager: DeviceManagerDelegate {
-
-    func scheduleNotification(for manager: DeviceManager,
-                              identifier: String,
-                              content: UNNotificationContent,
-                              trigger: UNNotificationTrigger?) {
-        let request = UNNotificationRequest(
-            identifier: identifier,
-            content: content,
-            trigger: trigger
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-    
-    func clearNotification(for manager: DeviceManager, identifier: String) {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
-    }
-
-    func removeNotificationRequests(for manager: DeviceManager, identifiers: [String]) {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
-    }
 
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
         deviceLog.log(managerIdentifier: manager.managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
@@ -1053,19 +1031,9 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
         self.pumpManager = pumpManager
     }
 
-    func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI, withFinalSettings settings: PumpManagerSetupSettings) {
+    func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI) {
         precondition(pumpManager.isOnboarded)
         log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.managerIdentifier)
-
-        if let basalRateSchedule = settings.basalSchedule {
-            loopManager.basalRateSchedule = basalRateSchedule
-        }
-        if let maxBasalRateUnitsPerHour = settings.maxBasalRateUnitsPerHour {
-            loopManager.settings.maximumBasalRatePerHour = maxBasalRateUnitsPerHour
-        }
-        if let maxBolusUnits = settings.maxBolusUnits {
-            loopManager.settings.maximumBolus = maxBolusUnits
-        }
     }
 }
 
@@ -1189,15 +1157,15 @@ extension DeviceDataManager: LoopDataManagerDelegate {
     func loopDataManager(
         _ manager: LoopDataManager,
         didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
-        completion: @escaping (_ result: Result<DoseEntry>) -> Void
+        completion: @escaping (Error?) -> Void
     ) {
         guard let pumpManager = pumpManager else {
-            completion(.failure(LoopError.configurationError(.pumpManager)))
+            completion(LoopError.configurationError(.pumpManager))
             return
         }
         
         guard !pumpManager.status.deliveryIsUncertain else {
-            completion(.failure(LoopError.connectionError))
+            completion(LoopError.connectionError)
             return
         }
 
@@ -1206,14 +1174,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         pumpManager.enactTempBasal(
             unitsPerHour: basal.recommendation.unitsPerHour,
             for: basal.recommendation.duration,
-            completion: { result in
-                switch result {
-                case .success(let doseEntry):
-                    completion(.success(doseEntry))
-                case .failure(let error):
-                    completion(.failure(error))
-                }
-            }
+            completion: completion
         )
     }
 }
