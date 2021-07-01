@@ -1336,9 +1336,18 @@ extension GlucoseStore : CGMStalenessMonitorDelegate { }
 //MARK: - SupportInfoProvider protocol conformance
 
 extension DeviceDataManager: SupportInfoProvider {
+
+    private var branchNameIfNotReleaseBranch: String? {
+        return Bundle.main.gitBranch.filter { branch in
+            return branch != "" &&
+                branch != "main" &&
+                branch != "master" &&
+                !branch.starts(with: "release/")
+        }
+    }
     
     public var localizedAppNameAndVersion: String {
-        if let branch = Bundle.main.gitBranch, branch != "", branch != "main", branch != "master" {
+        if let branch = branchNameIfNotReleaseBranch {
             return Bundle.main.localizedNameAndVersion + " (\(branch))"
         }
         return Bundle.main.localizedNameAndVersion
