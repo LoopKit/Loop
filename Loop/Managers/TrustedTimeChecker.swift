@@ -33,9 +33,10 @@ class TrustedTimeChecker {
     private var ntpClient: TrueTimeClient
     private weak var alertManager: AlertManager?
     private lazy var log = DiagnosticLog(category: "TrustedTimeChecker")
-
+    
     init(alertManager: AlertManager) {
         ntpClient = TrueTimeClient.sharedInstance
+        ntpClient.logCallback = nil
         ntpClient.start()
         self.alertManager = alertManager
         NotificationCenter.default.addObserver(forName: UIApplication.significantTimeChangeNotification,
