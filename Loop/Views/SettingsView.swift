@@ -134,6 +134,7 @@ extension SettingsView {
                                                                             supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
                                                                             pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
                                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
+                                                                            sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                                                             didSave: self.viewModel.didSave))
                         .environmentObject(displayGlucoseUnitObservable)
                         .environment(\.dismissAction, self.dismiss)
