@@ -29,6 +29,7 @@
 		1D4990E824A25931005CC357 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FB2292456700A3F2AF /* FeatureFlags.swift */; };
 		1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
 		1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
+		1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */; };
 		1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80313C24746274002810DF /* AlertStoreTests.swift */; };
 		1D82E6A025377C6B009131FB /* TrustedTimeChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */; };
 		1D8D55BC252274650044DBB6 /* BolusEntryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */; };
@@ -770,6 +771,7 @@
 		1D49795724E7289700948F05 /* ServicesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesViewModel.swift; sourceTree = "<group>"; };
 		1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataClass.swift"; sourceTree = "<group>"; };
 		1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPermissionsChecker.swift; sourceTree = "<group>"; };
 		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
 		1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedTimeChecker.swift; sourceTree = "<group>"; };
 		1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusEntryViewModelTests.swift; sourceTree = "<group>"; };
@@ -2061,6 +2063,7 @@
 		43F5C2E41B93C5D4003EB13D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */,
 				439897361CD2F80600223065 /* AnalyticsServicesManager.swift */,
 				B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */,
 				439BED291E76093C00B0AED5 /* CGMManager.swift */,
@@ -3519,6 +3522,7 @@
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
+				1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */,
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
 				E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */,

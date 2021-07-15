@@ -10,7 +10,7 @@ import Foundation
 
 extension Bundle {
     var fullVersionString: String {
-        return "\(shortVersionString).\(version)"
+        return "\(shortVersionString) (\(version))"
     }
 
     var shortVersionString: String {

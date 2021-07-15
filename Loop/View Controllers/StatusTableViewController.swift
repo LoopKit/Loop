@@ -31,6 +31,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
 
     var closedLoopStatus: ClosedLoopStatus!
+    
+    let notificationsCriticalAlertPermissionsViewModel = NotificationsCriticalAlertPermissionsViewModel()
 
     lazy private var cancellables = Set<AnyCancellable>()
 
@@ -123,6 +125,20 @@ final class StatusTableViewController: LoopChartsTableViewController {
         addScenarioStepGestureRecognizers()
 
         tableView.backgroundColor = .secondarySystemBackground
+    
+        tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
+        notificationsCriticalAlertPermissionsViewModel.$showWarning
+            .receive(on: RunLoop.main)
+            .sink { [weak self] showWarning in
+                guard let self = self else { return }
+                let isWarningVisible = self.tableView.numberOfRows(inSection: Section.alertPermissionsDisabledWarning.rawValue) != 0
+                if !showWarning && isWarningVisible {
+                    self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.alertPermissionsDisabledWarning.rawValue)], with: .top)
+                } else if showWarning && !isWarningVisible {
+                    self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.alertPermissionsDisabledWarning.rawValue)], with: .top)
+                }
+            }
+            .store(in: &cancellables)
     }
 
     override func didReceiveMemoryWarning() {
@@ -141,6 +157,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         navigationController?.setToolbarHidden(false, animated: animated)
 
+        notificationsCriticalAlertPermissionsViewModel.updateState()
+        
         updateBolusProgress()
     }
 
@@ -562,23 +580,20 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
-    private enum Section: Int {
-        case hud = 0
+    private enum Section: Int, CaseIterable {
+        case alertPermissionsDisabledWarning
+        case hud
         case status
         case charts
-
-        static let count = 3
     }
 
     // MARK: - Chart Section Data
 
-    private enum ChartRow: Int {
-        case glucose = 0
+    private enum ChartRow: Int, CaseIterable {
+        case glucose
         case iob
         case dose
         case cob
-
-        static let count = 4
     }
 
     // MARK: Glucose
@@ -599,10 +614,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     // MARK: - Loop Status Section Data
 
-    private enum StatusRow: Int {
+    private enum StatusRow: Int, CaseIterable {
         case status = 0
-
-        static let count = 1
     }
 
     private enum StatusRowMode {
@@ -758,22 +771,46 @@ final class StatusTableViewController: LoopChartsTableViewController {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return Section.count
+        return Section.allCases.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
+        case .alertPermissionsDisabledWarning:
+            return notificationsCriticalAlertPermissionsViewModel.showWarning ? 1 : 0
         case .hud:
             return shouldShowHUD ? 1 : 0
         case .charts:
-            return ChartRow.count
+            return ChartRow.allCases.count
         case .status:
-            return shouldShowStatus ? StatusRow.count : 0
+            return shouldShowStatus ? StatusRow.allCases.count : 0
         }
     }
 
+    private class AlertPermissionsDisabledWarningCell: UITableViewCell {
+  
+        override func updateConfiguration(using state: UICellConfigurationState) {
+            super.updateConfiguration(using: state)
+            let content = NSLocalizedString("Alert Permissions Disabled", comment: "Warning text for when Notifications or Critical Alerts Permissions is disabled")
+            var contentConfig = defaultContentConfiguration().updated(for: state)
+            contentConfig.text = content
+            contentConfig.textProperties.color = .red
+            contentConfig.textProperties.font = .systemFont(ofSize: 15, weight: .semibold)
+            contentConfig.textProperties.adjustsFontSizeToFitWidth = true
+            contentConfig.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.red)
+            contentConfig.imageProperties.tintColor = .red
+            contentConfiguration = contentConfig
+            var backgroundConfig = backgroundConfiguration?.updated(for: state)
+            backgroundConfig?.backgroundColor = .secondarySystemBackground
+            backgroundConfiguration = backgroundConfig
+            accessoryType = .disclosureIndicator
+        }
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch Section(rawValue: indexPath.section)! {
+        case .alertPermissionsDisabledWarning:
+            return tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
         case .hud:
             let cell = tableView.dequeueReusableCell(withIdentifier: HUDViewTableViewCell.className, for: indexPath) as! HUDViewTableViewCell
             hudView = cell.hudView
@@ -955,7 +992,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     cell.setSubtitleLabel(label: nil)
                 }
             }
-        case .hud, .status:
+        case .hud, .status, .alertPermissionsDisabledWarning:
             break
         }
     }
@@ -976,24 +1013,18 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case .iob, .dose, .cob:
                 return max(106, 0.21 * availableSize)
             }
-        case .hud, .status:
+        case .hud, .status, .alertPermissionsDisabledWarning:
             return UITableView.automaticDimension
         }
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section)! {
-        case .charts:
-            switch ChartRow(rawValue: indexPath.row)! {
-            case .glucose:
-                if closedLoopStatus.isClosedLoop {
-                    performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
-                }
-            case .iob, .dose:
-                performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
-            case .cob:
-                performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
-            }
+        case .alertPermissionsDisabledWarning:
+            tableView.deselectRow(at: indexPath, animated: true)
+            presentSettings()
+        case .hud:
+            break
         case .status:
             switch StatusRow(rawValue: indexPath.row)! {
             case .status:
@@ -1052,8 +1083,17 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     break
                 }
             }
-        case .hud:
-            break
+        case .charts:
+            switch ChartRow(rawValue: indexPath.row)! {
+            case .glucose:
+                if closedLoopStatus.isClosedLoop {
+                    performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
+                }
+            case .iob, .dose:
+                performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
+            case .cob:
+                performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
+            }
         }
     }
 
@@ -1254,7 +1294,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func presentSettings() {
-        let notificationsCriticalAlertPermissionsViewModel = NotificationsCriticalAlertPermissionsViewModel()
         let deletePumpDataFunc: () -> PumpManagerViewModel.DeleteTestingDataFunc? = { [weak self] in
             (self?.deviceManager.pumpManager is TestingPumpManager) ? {
                 [weak self] in self?.deviceManager.deleteTestingPumpData()
