@@ -609,12 +609,12 @@ extension DoseEntry {
             {
                 description = String(format: NSLocalizedString("Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@", comment: "Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit)"), type.localizedDescription, numberFormatter.string(from: deliveredUnits) ?? "?", numberFormatter.string(from: programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString())
             } else {
-                description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString())
+                description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString(avoidLineBreaking: false))
             }
 
             return createAttributedDescription(from: description, with: font)
         case .basal, .tempBasal:
-            let description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: unitsPerHour) ?? "?", DoseEntry.unitsPerHour.shortLocalizedUnitString())
+            let description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: unitsPerHour) ?? "?", DoseEntry.unitsPerHour.shortLocalizedUnitString(avoidLineBreaking: false))
             return createAttributedDescription(from: description, with: font)
         case .suspend, .resume:
             let attributes: [NSAttributedString.Key: Any] = [
