@@ -17,7 +17,7 @@ import LoopKitUI
 import LoopUI
 import SwiftUI
 
-protocol BolusEntryViewModelDelegate: class {
+protocol BolusEntryViewModelDelegate: AnyObject {
     
     func withLoopState(do block: @escaping (LoopState) -> Void)
 
@@ -64,6 +64,7 @@ final class BolusEntryViewModel: ObservableObject {
     enum Notice: Equatable {
         case predictedGlucoseInRange
         case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
+        case glucoseBelowTarget
         case staleGlucoseData
         case stalePumpData
     }
@@ -634,6 +635,8 @@ final class BolusEntryViewModel: ObservableObject {
                     }
                 case .predictedGlucoseInRange:
                     notice = .predictedGlucoseInRange
+                case .allGlucoseBelowTarget(minGlucose: _):
+                    notice = .glucoseBelowTarget
                 default:
                     notice = nil
                 }
