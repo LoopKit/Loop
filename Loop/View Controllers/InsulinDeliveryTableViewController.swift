@@ -85,8 +85,13 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         super.viewDidLoad()
 
         state = .display
-        let logDoseButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapLogDoseButton))
-        navigationItem.rightBarButtonItems = [logDoseButton, editButtonItem]
+        
+        if FeatureFlags.outsideDosesEnabled {
+            let logDoseButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapLogDoseButton))
+            navigationItem.rightBarButtonItems = [logDoseButton, editButtonItem]
+        } else {
+            dataSourceSegmentedControl.removeSegment(at: 2, animated: false)
+        }
     }
 
     public override func viewWillAppear(_ animated: Bool) {

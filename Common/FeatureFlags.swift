@@ -27,6 +27,7 @@ struct FeatureFlagConfiguration: Decodable {
     let walshInsulinModelEnabled: Bool
     let siriEnabled: Bool
     let automaticBolusEnabled: Bool
+    let outsideDosesEnabled: Bool
 
     fileprivate init() {
         #if CGM_MANAGER_CATEGORIZE_GLUCOSE_RANGE_ENABLED
@@ -134,6 +135,13 @@ struct FeatureFlagConfiguration: Decodable {
         self.automaticBolusEnabled = false
         #else
         self.automaticBolusEnabled = true
+        #endif
+        
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if OUTSIDE_DOSES_DISABLED
+        self.outsideDosesEnabled = false
+        #else
+        self.outsideDosesEnabled = true
         #endif
     }
 }
