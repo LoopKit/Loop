@@ -1349,7 +1349,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: deviceManager.criticalEventLogExportManager),
                                           therapySettings: { [weak self] in self?.deviceManager.loopManager.therapySettings ?? TherapySettings() },
-                                          supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                                           pumpSupportedIncrements: pumpSupportedIncrements,
                                           syncPumpSchedule: syncBasalRateSchedule,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,

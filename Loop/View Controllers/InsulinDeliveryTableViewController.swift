@@ -160,10 +160,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
         tableView.endEditing(true)
 
-        let viewModel = LoggedDoseViewModel(
-            delegate: deviceManager,
-            supportedInsulinModels: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled)
-        )
+        let viewModel = LoggedDoseViewModel(delegate: deviceManager)
         let bolusEntryView = LoggedDoseView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)

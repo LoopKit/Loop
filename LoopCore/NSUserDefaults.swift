@@ -58,14 +58,7 @@ extension UserDefaults {
             if let rawValue = dictionary(forKey: Key.insulinModelSettings.rawValue) {
                 return InsulinModelSettings(rawValue: rawValue)
             } else {
-                // Migrate the version 0 case
-                let insulinActionDurationKey = "com.loudnate.Naterade.InsulinActionDuration"
-                defer {
-                    removeObject(forKey: insulinActionDurationKey)
-                }
-
-                let value = double(forKey: insulinActionDurationKey)
-                return value > 0 ? .walsh(WalshInsulinModel(actionDuration: value)) : nil
+                return InsulinModelSettings(model: ExponentialInsulinModelPreset.rapidActingAdult)!
             }
         }
         set {
