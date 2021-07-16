@@ -17,7 +17,7 @@ import LoopKitUI
 import LoopUI
 import SwiftUI
 
-protocol BolusEntryViewModelDelegate: class {
+protocol BolusEntryViewModelDelegate: AnyObject {
     
     func withLoopState(do block: @escaping (LoopState) -> Void)
 
