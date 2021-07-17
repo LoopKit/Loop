@@ -295,7 +295,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let availableWidth = (refreshContext.newSize ?? tableView.bounds.size).width - charts.fixedHorizontalMargin
 
         let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
-        let futureHours = ceil((deviceManager.loopManager.insulinModelSettings?.longestEffectDuration ?? .hours(4)).hours)
+        let futureHours = ceil(deviceManager.doseStore.longestEffectDuration.hours)
         let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeIntervalSinceNow: -TimeInterval(hours: historyHours))
@@ -1635,7 +1635,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 self.deviceManager.loopManager.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
                 self.deviceManager.loopManager.carbRatioSchedule = settings.carbRatioSchedule
                 self.deviceManager.loopManager.basalRateSchedule = settings.basalRateSchedule
-                self.deviceManager.loopManager.insulinModelSettings = settings.insulinModelSettings
+                self.deviceManager.loopManager.defaultRapidActingModel = settings.defaultRapidActingModel
             })
         }
         actionSheet.addAction(UIAlertAction(title: "Crash the App", style: .destructive) { _ in
@@ -1940,8 +1940,8 @@ extension StatusTableViewController: SettingsViewModelDelegate {
             deviceManager?.loopManager.settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
             deviceManager?.loopManager.settings.maximumBolus = therapySettings.maximumBolus
         case .insulinModel:
-            if let insulinModelSettings = therapySettings.insulinModelSettings {
-                deviceManager?.loopManager.insulinModelSettings = insulinModelSettings
+            if let defaultRapidActingModel = therapySettings.defaultRapidActingModel {
+                deviceManager?.loopManager.defaultRapidActingModel = defaultRapidActingModel
             }
         case .carbRatio:
             deviceManager?.loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule

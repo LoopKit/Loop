@@ -63,7 +63,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         basalDeliveryState: PumpManagerStatus.BasalDeliveryState?,
         basalRateSchedule: BasalRateSchedule? = UserDefaults.appGroup?.basalRateSchedule,
         carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup?.carbRatioSchedule,
-        insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup?.insulinModelSettings, // type of insulin delivered by the pump
         insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup?.insulinSensitivitySchedule,
         settings: LoopSettings = UserDefaults.appGroup?.loopSettings ?? LoopSettings(),
         overrideHistory: TemporaryScheduleOverrideHistory,
@@ -436,13 +435,13 @@ extension LoopDataManager {
     }
 
     /// The length of time insulin has an effect on blood glucose
-    var insulinModelSettings: InsulinModelSettings? {
+    var defaultRapidActingModel: ExponentialInsulinModelPreset? {
         get {
-            return doseStore.insulinModelSettings
+            return UserDefaults.appGroup?.defaultRapidActingModel
         }
         set {
-            doseStore.insulinModelSettings = newValue
-            UserDefaults.appGroup?.insulinModelSettings = newValue
+            doseStore.insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: newValue)
+            UserDefaults.appGroup?.defaultRapidActingModel = newValue
 
             self.dataAccessQueue.async {
                 // Invalidate cached effects based on this schedule
@@ -802,7 +801,7 @@ extension LoopDataManager {
                                       maximumBolus: loopSettings.maximumBolus,
                                       suspendThreshold: loopSettings.suspendThreshold,
                                       deviceToken: loopSettings.deviceToken?.hexadecimalString,
-                                      insulinModel: appGroup.insulinModelSettings.map { StoredInsulinModel($0) },
+                                      defaultRapidActingModel: appGroup.defaultRapidActingModel.map(StoredInsulinModel.init),
                                       basalRateSchedule: appGroup.basalRateSchedule,
                                       insulinSensitivitySchedule: appGroup.insulinSensitivitySchedule,
                                       carbRatioSchedule: appGroup.carbRatioSchedule,
@@ -1074,9 +1073,9 @@ extension LoopDataManager {
     ) throws -> [PredictedGlucoseValue] {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-        guard let insulinModelSettings = insulinModelSettings else {
-            throw LoopError.configurationError(.insulinModel)
-        }
+//        guard let insulinModelSettings = insulinModelSettings else {
+//            throw LoopError.configurationError(.insulinModel)
+//        }
 
         guard let glucose = startingGlucoseOverride ?? self.glucoseStore.latestGlucose else {
             throw LoopError.missingDataError(.glucose)
@@ -1163,7 +1162,7 @@ extension LoopDataManager {
                 let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
                 let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
                 let bolusEffect = [potentialBolus]
-                    .glucoseEffects(insulinModelSettings: insulinModelSettings, insulinSensitivity: sensitivity)
+                    .glucoseEffects(insulinModelProvider: doseStore.insulinModelProvider, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: sensitivity)
                     .filterDateRange(nextEffectDate, nil)
                 effects.append(bolusEffect)
             }
@@ -1181,7 +1180,7 @@ extension LoopDataManager {
 
         // Dosing requires prediction entries at least as long as the insulin model duration.
         // If our prediction is shorter than that, then extend it here.
-        let finalDate = glucose.startDate.addingTimeInterval(insulinModelSettings.longestEffectDuration)
+        let finalDate = glucose.startDate.addingTimeInterval(doseStore.longestEffectDuration)
         if let last = prediction.last, last.startDate < finalDate {
             prediction.append(PredictedGlucoseValue(startDate: finalDate, quantity: last.quantity))
         }
@@ -1354,7 +1353,6 @@ extension LoopDataManager {
             let glucoseTargetRange = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil),
             let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
             let maxBolus = settings.maximumBolus,
-            let insulinModelSettings = insulinModelSettings,
             let insulinType = pumpInsulinType
         else {
             throw LoopError.configurationError(.generalSettings)
@@ -1372,7 +1370,7 @@ extension LoopDataManager {
             return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
         }
         
-        let model = insulinModelSettings.model(for: insulinType)
+        let model = doseStore.insulinModelProvider.model(for: insulinType)
 
         return predictedGlucose.recommendedManualBolus(
             to: glucoseTargetRange,
@@ -1490,7 +1488,6 @@ extension LoopDataManager {
             let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
             let basalRates = basalRateScheduleApplyingOverrideHistory,
             let maxBolus = settings.maximumBolus,
-            let insulinModelSettings = insulinModelSettings,
             let insulinType = pumpInsulinType
         else {
             throw LoopError.configurationError(.generalSettings)
@@ -1530,7 +1527,7 @@ extension LoopDataManager {
                 at: predictedGlucose[0].startDate,
                 suspendThreshold: settings.suspendThreshold?.quantity,
                 sensitivity: insulinSensitivity,
-                model: insulinModelSettings.model(for: insulinType),
+                model: doseStore.insulinModelProvider.model(for: insulinType),
                 basalRates: basalRates,
                 maxAutomaticBolus: maxBolus * LoopConstants.bolusPartialApplicationFactor,
                 partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor,
@@ -1545,7 +1542,7 @@ extension LoopDataManager {
                 at: predictedGlucose[0].startDate,
                 suspendThreshold: settings.suspendThreshold?.quantity,
                 sensitivity: insulinSensitivity,
-                model: insulinModelSettings.model(for: insulinType),
+                model: doseStore.insulinModelProvider.model(for: insulinType),
                 basalRates: basalRates,
                 maxBasalRate: maxBasal,
                 lastTempBasal: lastTempBasal,
@@ -1574,7 +1571,7 @@ extension LoopDataManager {
             at: predictedGlucose[0].startDate,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
-            model: insulinModelSettings.model(for: insulinType),
+            model: doseStore.insulinModelProvider.model(for: insulinType),
             pendingInsulin: 0, // Pending insulin is already reflected in the prediction
             maxBolus: maxBolus,
             volumeRounder: volumeRounder
@@ -2147,7 +2144,7 @@ extension LoopDataManager {
                             insulinSensitivitySchedule: insulinSensitivitySchedule,
                             carbRatioSchedule: carbRatioSchedule,
                             basalRateSchedule: basalRateSchedule,
-                            insulinModelSettings: insulinModelSettings)
+                            defaultRapidActingModel: defaultRapidActingModel)
         }
         
         set {
@@ -2160,7 +2157,7 @@ extension LoopDataManager {
             insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
             carbRatioSchedule = newValue.carbRatioSchedule
             basalRateSchedule = newValue.basalRateSchedule
-            insulinModelSettings = newValue.insulinModelSettings
+            defaultRapidActingModel = newValue.defaultRapidActingModel
         }
     }
 }

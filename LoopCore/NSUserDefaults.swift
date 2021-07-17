@@ -16,8 +16,7 @@ extension UserDefaults {
     private enum Key: String {
         case basalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
         case carbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
-        case insulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
-        case rapidActingInsulinModelSetting = "com.loopkit.Loop.rapidActingInsulinModelSetting"
+        case defaultRapidActingModel = "com.loopkit.Loop.defaultRapidActingModel"
         case loopSettings = "com.loopkit.Loop.loopSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case overrideHistory = "com.loopkit.overrideHistory"
@@ -53,31 +52,16 @@ extension UserDefaults {
         }
     }
 
-    public var insulinModelSettings: InsulinModelSettings? {
+    public var defaultRapidActingModel: ExponentialInsulinModelPreset? {
         get {
-            if let rawValue = dictionary(forKey: Key.insulinModelSettings.rawValue) {
-                return InsulinModelSettings(rawValue: rawValue)
+            if let rawValue = string(forKey: Key.defaultRapidActingModel.rawValue) {
+                return ExponentialInsulinModelPreset(rawValue: rawValue)
             } else {
-                return InsulinModelSettings(model: ExponentialInsulinModelPreset.rapidActingAdult)!
+                return nil
             }
         }
         set {
-            set(newValue?.rawValue, forKey: Key.insulinModelSettings.rawValue)
-        }
-    }
-    
-    public var rapidActingInsulinModelSetting: InsulinModelSettings {
-        get {
-            if let rawValue = dictionary(forKey: Key.rapidActingInsulinModelSetting.rawValue) {
-                if let setting = InsulinModelSettings(rawValue: rawValue) {
-                    return setting
-                }
-               
-            }
-            return InsulinModelSettings(model: ExponentialInsulinModelPreset.rapidActingAdult)!
-        }
-        set {
-            set(newValue.rawValue, forKey: Key.rapidActingInsulinModelSetting.rawValue)
+            set(newValue?.rawValue, forKey: Key.defaultRapidActingModel.rawValue)
         }
     }
 

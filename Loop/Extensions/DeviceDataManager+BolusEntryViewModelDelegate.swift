@@ -69,11 +69,7 @@ extension DeviceDataManager: BolusEntryViewModelDelegate, LoggedDoseViewModelDel
     }
         
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
-        if let insulinModelSettings = doseStore.insulinModelSettings {
-            return insulinModelSettings.model(for: type).effectDuration
-        } else {
-            return ExponentialInsulinModelPreset.rapidActingAdult.effectDuration
-        }
+        return doseStore.insulinModelProvider.model(for: type).effectDuration
     }
 
     var settings: LoopSettings {
