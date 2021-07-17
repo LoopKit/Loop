@@ -16,6 +16,7 @@ extension UserDefaults {
     private enum Key: String {
         case basalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
         case carbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
+        case legacyInsulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
         case defaultRapidActingModel = "com.loopkit.Loop.defaultRapidActingModel"
         case loopSettings = "com.loopkit.Loop.loopSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
@@ -56,9 +57,21 @@ extension UserDefaults {
         get {
             if let rawValue = string(forKey: Key.defaultRapidActingModel.rawValue) {
                 return ExponentialInsulinModelPreset(rawValue: rawValue)
-            } else {
-                return nil
             }
+            
+            // Migrate
+            if let rawValue = dictionary(forKey: Key.legacyInsulinModelSettings.rawValue) {
+                if let typeName = rawValue["type"] as? String,
+                   typeName == "exponentialPreset",
+                   let modelRaw = rawValue["model"] as? ExponentialInsulinModelPreset.RawValue,
+                   let preset = ExponentialInsulinModelPreset(rawValue: modelRaw)
+                {
+                    removeObject(forKey: Key.legacyInsulinModelSettings.rawValue)
+                    return preset
+                }
+            }
+            
+            return nil
         }
         set {
             set(newValue?.rawValue, forKey: Key.defaultRapidActingModel.rawValue)
