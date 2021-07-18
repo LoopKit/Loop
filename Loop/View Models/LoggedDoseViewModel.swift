@@ -17,7 +17,7 @@ import LoopKitUI
 import LoopUI
 import SwiftUI
 
-protocol LoggedDoseViewModelDelegate: class {
+protocol LoggedDoseViewModelDelegate: AnyObject {
     
     func withLoopState(do block: @escaping (LoopState) -> Void)
 
@@ -103,8 +103,7 @@ final class LoggedDoseViewModel: ObservableObject {
         screenWidth: CGFloat = UIScreen.main.bounds.width,
         debounceIntervalMilliseconds: Int = 400,
         uuidProvider: @escaping () -> String = { UUID().uuidString },
-        timeZone: TimeZone? = nil,
-        supportedInsulinModels: SupportedInsulinModelSettings? = nil
+        timeZone: TimeZone? = nil
     ) {
         self.delegate = delegate
         self.now = now
@@ -112,10 +111,7 @@ final class LoggedDoseViewModel: ObservableObject {
         self.debounceIntervalMilliseconds = debounceIntervalMilliseconds
         self.uuidProvider = uuidProvider
         
-        self.insulinTypePickerOptions = [.novolog, .humalog, .apidra]
-        if let allowedModels = supportedInsulinModels, allowedModels.fiaspModelEnabled {
-            insulinTypePickerOptions.append(.fiasp)
-        }
+        self.insulinTypePickerOptions = [.novolog, .humalog, .apidra, .fiasp]
         
         self.chartDateInterval = DateInterval(start: Date(timeInterval: .hours(-1), since: now()), duration: .hours(7))
         

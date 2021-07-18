@@ -93,15 +93,18 @@ extension InAppModalAlertIssuer {
             if self.isAlertShowing(identifier: alert.identifier) {
                 return
             }
-            self.playSound(for: alert)
-            let alertController = self.presentAlert(title: content.title,
-                                                    message: content.body,
-                                                    action: content.acknowledgeActionButtonLabel,
-                                                    isCritical: content.isCritical) { [weak self] in
-                self?.clearDeliveredAlert(identifier: alert.identifier)
-                self?.alertManagerResponder?.acknowledgeAlert(identifier: alert.identifier)
+            let alertController = self.constructAlert(title: content.title,
+                                                      message: content.body,
+                                                      action: content.acknowledgeActionButtonLabel,
+                                                      isCritical: content.isCritical) { [weak self] in
+                  self?.clearDeliveredAlert(identifier: alert.identifier)
+                  self?.alertManagerResponder?.acknowledgeAlert(identifier: alert.identifier)
             }
-            self.addDeliveredAlert(alert: alert, controller: alertController)
+            self.alertPresenter?.present(alertController, animated: true) { [weak self] in
+                // the completion is called after the alert is displayed
+                self?.playSound(for: alert)
+                self?.addDeliveredAlert(alert: alert, controller: alertController)
+            }
         }
     }
     
@@ -135,15 +138,14 @@ extension InAppModalAlertIssuer {
         return alertsShowing.index(forKey: identifier) != nil
     }
 
-    private func presentAlert(title: String, message: String, action: String, isCritical: Bool, completion: @escaping () -> Void) -> UIAlertController {
+    private func constructAlert(title: String, message: String, action: String, isCritical: Bool, completion: @escaping () -> Void) -> UIAlertController {
         dispatchPrecondition(condition: .onQueue(.main))
         // For now, this is a simple alert with an "OK" button
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertController.addAction(newActionFunc(action, .default, { _ in completion() }))
-        alertPresenter?.present(alertController, animated: true)
         return alertController
     }
-        
+
     private func playSound(for alert: Alert) {
         guard let sound = alert.sound else { return }
         switch sound {

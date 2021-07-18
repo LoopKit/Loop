@@ -24,9 +24,9 @@ struct FeatureFlagConfiguration: Decodable {
     let scenariosEnabled: Bool
     let sensitivityOverridesEnabled: Bool
     let simulatedCoreDataEnabled: Bool
-    let walshInsulinModelEnabled: Bool
     let siriEnabled: Bool
     let automaticBolusEnabled: Bool
+    let outsideDosesEnabled: Bool
 
     fileprivate init() {
         #if CGM_MANAGER_CATEGORIZE_GLUCOSE_RANGE_ENABLED
@@ -116,13 +116,6 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         // Swift compiler config is inverse, since the default state is enabled.
-        #if WALSH_INSULIN_MODEL_DISABLED
-        self.walshInsulinModelEnabled = false
-        #else
-        self.walshInsulinModelEnabled = true
-        #endif
-        
-        // Swift compiler config is inverse, since the default state is enabled.
         #if SIRI_DISABLED
         self.siriEnabled = false
         #else
@@ -134,6 +127,13 @@ struct FeatureFlagConfiguration: Decodable {
         self.automaticBolusEnabled = false
         #else
         self.automaticBolusEnabled = true
+        #endif
+        
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if OUTSIDE_DOSES_DISABLED
+        self.outsideDosesEnabled = false
+        #else
+        self.outsideDosesEnabled = true
         #endif
     }
 }
@@ -155,7 +155,6 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* scenariosEnabled: \(scenariosEnabled)",
             "* sensitivityOverridesEnabled: \(sensitivityOverridesEnabled)",
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
-            "* walshInsulinModelEnabled: \(walshInsulinModelEnabled)",
             "* siriEnabled: \(siriEnabled)",
             "* automaticBolusEnabled: \(automaticBolusEnabled)"
         ].joined(separator: "\n")

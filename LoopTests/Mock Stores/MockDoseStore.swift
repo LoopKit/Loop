@@ -12,8 +12,6 @@ import LoopKit
 
 class MockDoseStore: DoseStoreProtocol {
     
-    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.rapidActingAdult.actionDuration
-    
     init(for test: DataManagerTestType = .flatAndStable) {
         self.testType = test // The store returns different effect values based on the test type
         self.pumpEventQueryAfterDate = MockDoseStore.currentDate(for: test)
@@ -37,8 +35,10 @@ class MockDoseStore: DoseStoreProtocol {
     var basalProfile: BasalRateSchedule?
     
     // Default to the adult exponential insulin model
-    var insulinModelSettings: InsulinModelSettings? = InsulinModelSettings(model: ExponentialInsulinModelPreset.rapidActingAdult)
-        
+    var insulinModelProvider: InsulinModelProvider = StaticInsulinModelProvider(ExponentialInsulinModelPreset.rapidActingAdult)
+
+    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.rapidActingAdult.actionDuration
+
     var insulinSensitivitySchedule: InsulinSensitivitySchedule?
     
     var sampleType: HKSampleType = HKQuantityType.quantityType(forIdentifier: .insulinDelivery)!

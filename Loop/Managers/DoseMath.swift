@@ -14,7 +14,7 @@ import LoopKit
 private enum InsulinCorrection {
     case inRange
     case aboveRange(min: GlucoseValue, correcting: GlucoseValue, minTarget: HKQuantity, units: Double)
-    case entirelyBelowRange(correcting: GlucoseValue, minTarget: HKQuantity, units: Double)
+    case entirelyBelowRange(min: GlucoseValue, minTarget: HKQuantity, units: Double)
     case suspend(min: GlucoseValue)
 }
 
@@ -25,7 +25,7 @@ extension InsulinCorrection {
         switch self {
         case .aboveRange(min: _, correcting: _, minTarget: _, units: let units):
             return units
-        case .entirelyBelowRange(correcting: _, minTarget: _, units: let units):
+        case .entirelyBelowRange(min: _, minTarget: _, units: let units):
             return units
         case .inRange, .suspend:
             return 0
@@ -72,8 +72,8 @@ extension InsulinCorrection {
             return .glucoseBelowSuspendThreshold(minGlucose: minimum)
         case .inRange:
             return .predictedGlucoseInRange
-        case .entirelyBelowRange:
-            return nil
+        case .entirelyBelowRange(min: let min, minTarget: _, units: _):
+            return .allGlucoseBelowTarget(minGlucose: min)
         case .aboveRange(min: let min, correcting: _, minTarget: let target, units: let units):
             if units > 0 && min.quantity < target {
                 return .predictedGlucoseBelowTarget(minGlucose: min)
@@ -323,7 +323,7 @@ extension Collection where Element: GlucoseValue {
             }
 
             return .entirelyBelowRange(
-                correcting: min,
+                min: min,
                 minTarget: minGlucoseTargets.lowerBound,
                 units: units
             )

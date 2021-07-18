@@ -47,7 +47,7 @@ final class DataManager {
             healthStore: healthStore,
             cacheStore: cacheStore,
             observationEnabled: false,
-            insulinModelSettings: insulinModelSettings,
+            insulinModelProvider: insulinModelSettings, longestEffectDuration: insulinModelDuration,
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
             provenanceIdentifier: HKSource.default().bundleIdentifier
