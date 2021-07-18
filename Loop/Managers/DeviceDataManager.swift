@@ -527,7 +527,7 @@ final class DeviceDataManager {
     func checkDeliveryUncertaintyState() {
         if let pumpManager = pumpManager, pumpManager.status.deliveryIsUncertain {
             DispatchQueue.main.async {
-                self.deliveryUncertaintyAlertManager!.showAlert()
+                self.deliveryUncertaintyAlertManager?.showAlert()
             }
         }
     }
@@ -973,6 +973,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         doseStore.resetPumpData(completion: nil)
         DispatchQueue.main.async {
             self.pumpManager = nil
+            self.deliveryUncertaintyAlertManager = nil
         }
     }
 
@@ -1041,6 +1042,7 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
     func pumpManagerOnboarding(didCreatePumpManager pumpManager: PumpManagerUI) {
         log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
         self.pumpManager = pumpManager
+        self.deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
     }
 
     func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI) {
