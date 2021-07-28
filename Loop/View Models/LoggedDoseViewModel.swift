@@ -21,7 +21,7 @@ protocol LoggedDoseViewModelDelegate: AnyObject {
     
     func withLoopState(do block: @escaping (LoopState) -> Void)
 
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?)
+    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?)
 
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -205,7 +205,7 @@ final class LoggedDoseViewModel: ObservableObject {
             return
         }
 
-        delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinType: selectedInsulinType)
+        delegate?.addManuallyEnteredDose(startDate: selectedDoseDate, units: doseVolume, insulinType: selectedInsulinType)
         completion()
     }
 

@@ -86,7 +86,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
         state = .display
         
-        if FeatureFlags.outsideDosesEnabled {
+        if FeatureFlags.manualDoseEntryEnabled {
             let logDoseButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapLogDoseButton))
             navigationItem.rightBarButtonItems = [logDoseButton, editButtonItem]
         } else {
@@ -194,7 +194,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private enum Values {
         case reservoir([ReservoirValue])
         case history([PersistedPumpEvent])
-        case logDose([PersistedOutsideDose])
+        case logDose([PersistedManualEntryDose])
     }
 
     // Not thread-safe
@@ -266,7 +266,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     self.updateTotal()
                 }
             case .logDose:
-                doseStore?.getLoggedDoses(since: Date.distantPast) { (result) in
+                doseStore?.getManuallyEnteredDoses(since: Date.distantPast) { (result) in
                     DispatchQueue.main.async { () -> Void in
                         switch result {
                         case .failure(let error):
@@ -398,7 +398,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         case .history:
             doseStore?.deleteAllPumpEvents(completion)
         case .logDose:
-            doseStore?.deleteAllOutsideDoses(completion)
+            doseStore?.deleteAllManuallyEnteredDoses(completion)
         }
     }
 
@@ -512,7 +512,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 self.values = .logDose(doses)
 
                 tableView.deleteRows(at: [indexPath], with: .automatic)
-                doseStore?.deleteOutsideDose(value) { error in
+                doseStore?.deleteManuallyEnteredDose(value) { error in
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)

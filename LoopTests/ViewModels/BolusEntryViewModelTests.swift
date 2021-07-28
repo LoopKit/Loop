@@ -876,7 +876,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     var loggedBolusUnits: Double?
     var loggedDate: Date?
     var loggedDoseModel: InsulinType?
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?) {
+    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) {
         loggedBolusUnits = units
         loggedDate = startDate
         loggedDoseModel = insulinType
