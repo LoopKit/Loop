@@ -670,9 +670,9 @@ extension LoopDataManager {
     ///   - insulinModel: The type of insulin model that should be used for the dose.
     func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType? = nil) {
         let syncIdentifier = Data(UUID().uuidString.utf8).hexadecimalString
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinType: insulinType)
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinType: insulinType, manuallyEntered: true)
 
-        addManuallyEnteredDose(dose: dose) { (error) in
+        doseStore.addDoses([dose]) { (error) in
             if error == nil {
                 self.recommendedManualBolus = nil
                 self.recommendedAutomaticDose = nil
@@ -682,19 +682,17 @@ extension LoopDataManager {
         }
     }
 
-    /// Logs a new external bolus insulin dose in the DoseStore and HealthKit
-    ///
-    /// - Parameters:
-    ///   - dose: The dose to be added.
-    func addManuallyEnteredDose(dose: DoseEntry, completion: @escaping (_ error: Error?) -> Void) {
-        let doseList = [dose]
-
-        doseStore.addManuallyEnteredDoses(doseList) { (error) in
-            if let error = error {
-                completion(error)
-            }
-        }
-    }
+//    /// Logs a new external bolus insulin dose in the DoseStore and HealthKit
+//    ///
+//    /// - Parameters:
+//    ///   - dose: The dose to be added.
+//    func addDose(dose: DoseEntry, completion: @escaping (_ error: Error?) -> Void) {
+//        doseStore.addDoses([dose]) { (error) in
+//            if let error = error {
+//                completion(error)
+//            }
+//        }
+//    }
 
     /// Adds and stores a pump reservoir volume
     ///
@@ -1352,8 +1350,7 @@ extension LoopDataManager {
         guard
             let glucoseTargetRange = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil),
             let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
-            let maxBolus = settings.maximumBolus,
-            let insulinType = pumpInsulinType
+            let maxBolus = settings.maximumBolus
         else {
             throw LoopError.configurationError(.generalSettings)
         }
@@ -1370,7 +1367,7 @@ extension LoopDataManager {
             return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
         }
         
-        let model = doseStore.insulinModelProvider.model(for: insulinType)
+        let model = doseStore.insulinModelProvider.model(for: pumpInsulinType)
 
         return predictedGlucose.recommendedManualBolus(
             to: glucoseTargetRange,
@@ -1487,8 +1484,7 @@ extension LoopDataManager {
             let glucoseTargetRange = settings.effectiveGlucoseTargetRangeSchedule(),
             let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
             let basalRates = basalRateScheduleApplyingOverrideHistory,
-            let maxBolus = settings.maximumBolus,
-            let insulinType = pumpInsulinType
+            let maxBolus = settings.maximumBolus
         else {
             throw LoopError.configurationError(.generalSettings)
         }
@@ -1515,7 +1511,7 @@ extension LoopDataManager {
         }
         
         let dosingRecommendation: AutomaticDoseRecommendation?
-
+        
         switch settings.dosingStrategy {
         case .automaticBolus:
             let volumeRounder = { (_ units: Double) in
@@ -1527,7 +1523,7 @@ extension LoopDataManager {
                 at: predictedGlucose[0].startDate,
                 suspendThreshold: settings.suspendThreshold?.quantity,
                 sensitivity: insulinSensitivity,
-                model: doseStore.insulinModelProvider.model(for: insulinType),
+                model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
                 basalRates: basalRates,
                 maxAutomaticBolus: maxBolus * LoopConstants.bolusPartialApplicationFactor,
                 partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor,
@@ -1542,7 +1538,7 @@ extension LoopDataManager {
                 at: predictedGlucose[0].startDate,
                 suspendThreshold: settings.suspendThreshold?.quantity,
                 sensitivity: insulinSensitivity,
-                model: doseStore.insulinModelProvider.model(for: insulinType),
+                model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
                 basalRates: basalRates,
                 maxBasalRate: maxBasal,
                 lastTempBasal: lastTempBasal,
@@ -1571,7 +1567,7 @@ extension LoopDataManager {
             at: predictedGlucose[0].startDate,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
-            model: doseStore.insulinModelProvider.model(for: insulinType),
+            model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
             pendingInsulin: 0, // Pending insulin is already reflected in the prediction
             maxBolus: maxBolus,
             volumeRounder: volumeRounder

@@ -194,7 +194,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private enum Values {
         case reservoir([ReservoirValue])
         case history([PersistedPumpEvent])
-        case logDose([PersistedManualEntryDose])
+        case logDose([DoseEntry])
     }
 
     // Not thread-safe
@@ -454,9 +454,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 cell.selectionStyle = .default
             case .logDose(let values):
                 let entry = values[indexPath.row]
-                let time = timeFormatter.string(from: entry.date)
+                let time = timeFormatter.string(from: entry.startDate)
 
-                if let attributedText = entry.dose?.localizedAttributedDescription {
+                if let attributedText = entry.localizedAttributedDescription {
                                     cell.textLabel?.attributedText = attributedText
                 } else {
                     cell.textLabel?.text = NSLocalizedString("Unknown", comment: "The default description to use when an entry has no dose description")
@@ -512,7 +512,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 self.values = .logDose(doses)
 
                 tableView.deleteRows(at: [indexPath], with: .automatic)
-                doseStore?.deleteManuallyEnteredDose(value) { error in
+                doseStore?.deleteDose(value) { error in
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
@@ -557,7 +557,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
                 let vc = CommandResponseViewController(command: { (completionHandler) -> String in
                     var description = [String]()
-                    description.append(self.timeFormatter.string(from: entry.date))
+                    description.append(self.timeFormatter.string(from: entry.startDate))
                     description.append(String(describing: entry))
 
                     return description.joined(separator: "\n\n")
