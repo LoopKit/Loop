@@ -67,7 +67,7 @@ class MockDoseStore: DoseStoreProtocol {
         completion("")
     }
     
-    func addDose(_ doses: [DoseEntry], completion: @escaping (Error?) -> Void) {
+    func addDoses(_ doses: [DoseEntry], completion: @escaping (Error?) -> Void) {
         completion(nil)
     }
     
