@@ -260,7 +260,7 @@ class GlucoseChartScene: SKScene {
                     return
                 }
 
-                override.activeInterval = DateInterval(start: startDate, end: override.scheduledEndDate)
+                override.scheduledInterval = DateInterval(start: startDate, end: override.scheduledEndDate)
             }
 
             guard let overrideHashable = TemporaryScheduleOverrideHashable(override) else {
