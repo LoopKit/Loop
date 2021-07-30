@@ -160,8 +160,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
         tableView.endEditing(true)
 
-        let viewModel = LoggedDoseViewModel(delegate: deviceManager)
-        let bolusEntryView = LoggedDoseView(viewModel: viewModel)
+        let viewModel = ManualEntryDoseViewModel(delegate: deviceManager)
+        let bolusEntryView = ManualEntryDoseView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
         hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))

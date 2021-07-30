@@ -10,7 +10,7 @@ import HealthKit
 import LoopCore
 import LoopKit
 
-extension DeviceDataManager: BolusEntryViewModelDelegate, LoggedDoseViewModelDelegate {
+extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDelegate {
     
     func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) {
         loopManager.addManuallyEnteredDose(startDate: startDate, units: units, insulinType: insulinType)

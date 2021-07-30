@@ -1,5 +1,5 @@
 //
-//  LoggedDoseViewModelTests.swift
+//  ManualEntryDoseViewModelTests.swift
 //  LoopTests
 //
 //  Created by Pete Schwamb on 1/2/21.
@@ -12,13 +12,13 @@ import LoopKit
 import XCTest
 @testable import Loop
 
-class LoggedDoseViewModelTests: XCTestCase {
+class ManualEntryDoseViewModelTests: XCTestCase {
 
     static let now = Date.distantFuture
     
     var now: Date = BolusEntryViewModelTests.now
 
-    var loggedDoseViewModel: LoggedDoseViewModel!
+    var manualEntryDoseViewModel: ManualEntryDoseViewModel!
 
     static let exampleBolusQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: 1.0)
 
@@ -34,7 +34,7 @@ class LoggedDoseViewModelTests: XCTestCase {
     fileprivate var delegate: MockLoggedDoseViewModelDelegate!
     
     static let mockUUID = UUID()
-    let mockUUID = LoggedDoseViewModelTests.mockUUID.uuidString
+    let mockUUID = ManualEntryDoseViewModelTests.mockUUID.uuidString
 
     override func setUpWithError() throws {
         now = Self.now
@@ -46,35 +46,35 @@ class LoggedDoseViewModelTests: XCTestCase {
     }
 
     func setUpViewModel() {
-        loggedDoseViewModel = LoggedDoseViewModel(delegate: delegate,
+        manualEntryDoseViewModel = ManualEntryDoseViewModel(delegate: delegate,
                                                   now: { self.now },
                                                   screenWidth: 512,
                                                   debounceIntervalMilliseconds: 0,
                                                   uuidProvider: { self.mockUUID },
                                                   timeZone: TimeZone(abbreviation: "GMT")!)
-        loggedDoseViewModel.authenticate = authenticateOverride
+        manualEntryDoseViewModel.authenticate = authenticateOverride
     }
 
     func testDoseLogging() throws {
-        XCTAssertEqual(0, loggedDoseViewModel.selectedInsulinTypeIndex)
-        loggedDoseViewModel.enteredBolus = Self.exampleBolusQuantity
+        XCTAssertEqual(0, manualEntryDoseViewModel.selectedInsulinTypeIndex)
+        manualEntryDoseViewModel.enteredBolus = Self.exampleBolusQuantity
         
-        try saveAndDeliver(LoggedDoseViewModelTests.exampleBolusQuantity)
+        try saveAndDeliver(ManualEntryDoseViewModelTests.exampleBolusQuantity)
         XCTAssertEqual(delegate.loggedBolusUnits, Self.exampleBolusQuantity.doubleValue(for: .internationalUnit()))
         XCTAssertEqual(delegate.loggedDoseModel, .novolog)
     }
     
     private func saveAndDeliver(_ bolus: HKQuantity, file: StaticString = #file, line: UInt = #line) throws {
-        loggedDoseViewModel.enteredBolus = bolus
-        loggedDoseViewModel.logDose { self.saveAndDeliverSuccess = true }
-        if bolus != LoggedDoseViewModelTests.noBolus {
+        manualEntryDoseViewModel.enteredBolus = bolus
+        manualEntryDoseViewModel.logDose { self.saveAndDeliverSuccess = true }
+        if bolus != ManualEntryDoseViewModelTests.noBolus {
             let authenticateOverrideCompletion = try XCTUnwrap(self.authenticateOverrideCompletion, file: file, line: line)
             authenticateOverrideCompletion(.success(()))
         }
     }
 }
 
-fileprivate class MockLoggedDoseViewModelDelegate: LoggedDoseViewModelDelegate {
+fileprivate class MockLoggedDoseViewModelDelegate: ManualDoseViewModelDelegate {
     
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
         return .hours(6) + .minutes(10)
