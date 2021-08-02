@@ -9,10 +9,33 @@
 import XCTest
 import HealthKit
 
-@testable import Loop
-// LoopKit is not compiled for Testing in carthage builds. LoopKit private units should be tested in LoopKit
+//@testable import Loop
+//// LoopKit is not compiled for Testing in carthage builds. LoopKit private units should be tested in LoopKit
 //@testable import LoopKit
-
+//
+//class PersistenceControllerTestCase: XCTestCase {
+//
+//    var cacheStore: PersistenceController!
+//
+//    override func setUp() {
+//        super.setUp()
+//
+//        cacheStore = PersistenceController(directoryURL: URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true).appendingPathComponent(UUID().uuidString, isDirectory: true))
+//    }
+//
+//    override func tearDown() {
+//        cacheStore.tearDown()
+//        cacheStore = nil
+//
+//        super.tearDown()
+//    }
+//
+//    deinit {
+//        cacheStore?.tearDown()
+//    }
+//    
+//}
+//
 //class DosingDecisionStorePersistenceTests: PersistenceControllerTestCase {
 //    func testSettingsObjectEncodable() throws {
 //        cacheStore.managedObjectContext.performAndWait {

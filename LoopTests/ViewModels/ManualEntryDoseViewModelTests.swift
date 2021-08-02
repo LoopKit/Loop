@@ -31,14 +31,14 @@ class ManualEntryDoseViewModelTests: XCTestCase {
     
     var saveAndDeliverSuccess = false
 
-    fileprivate var delegate: MockLoggedDoseViewModelDelegate!
+    fileprivate var delegate: MockManualEntryDoseViewModelDelegate!
     
     static let mockUUID = UUID()
     let mockUUID = ManualEntryDoseViewModelTests.mockUUID.uuidString
 
     override func setUpWithError() throws {
         now = Self.now
-        delegate = MockLoggedDoseViewModelDelegate()
+        delegate = MockManualEntryDoseViewModelDelegate()
         delegate.mostRecentGlucoseDataDate = now
         delegate.mostRecentPumpDataDate = now
         saveAndDeliverSuccess = false
@@ -60,13 +60,13 @@ class ManualEntryDoseViewModelTests: XCTestCase {
         manualEntryDoseViewModel.enteredBolus = Self.exampleBolusQuantity
         
         try saveAndDeliver(ManualEntryDoseViewModelTests.exampleBolusQuantity)
-        XCTAssertEqual(delegate.loggedBolusUnits, Self.exampleBolusQuantity.doubleValue(for: .internationalUnit()))
-        XCTAssertEqual(delegate.loggedDoseModel, .novolog)
+        XCTAssertEqual(delegate.manualEntryBolusUnits, Self.exampleBolusQuantity.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(delegate.manuallyEnteredDoseInsulinType, .novolog)
     }
     
     private func saveAndDeliver(_ bolus: HKQuantity, file: StaticString = #file, line: UInt = #line) throws {
         manualEntryDoseViewModel.enteredBolus = bolus
-        manualEntryDoseViewModel.logDose { self.saveAndDeliverSuccess = true }
+        manualEntryDoseViewModel.saveManualDose { self.saveAndDeliverSuccess = true }
         if bolus != ManualEntryDoseViewModelTests.noBolus {
             let authenticateOverrideCompletion = try XCTUnwrap(self.authenticateOverrideCompletion, file: file, line: line)
             authenticateOverrideCompletion(.success(()))
@@ -74,7 +74,7 @@ class ManualEntryDoseViewModelTests: XCTestCase {
     }
 }
 
-fileprivate class MockLoggedDoseViewModelDelegate: ManualDoseViewModelDelegate {
+fileprivate class MockManualEntryDoseViewModelDelegate: ManualDoseViewModelDelegate {
     
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
         return .hours(6) + .minutes(10)
@@ -82,13 +82,13 @@ fileprivate class MockLoggedDoseViewModelDelegate: ManualDoseViewModelDelegate {
     
     var pumpInsulinType: InsulinType?
     
-    var loggedBolusUnits: Double?
-    var loggedDate: Date?
-    var loggedDoseModel: InsulinType?
+    var manualEntryBolusUnits: Double?
+    var manualEntryDoseStartDate: Date?
+    var manuallyEnteredDoseInsulinType: InsulinType?
     func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) {
-        loggedBolusUnits = units
-        loggedDate = startDate
-        loggedDoseModel = insulinType
+        manualEntryBolusUnits = units
+        manualEntryDoseStartDate = startDate
+        manuallyEnteredDoseInsulinType = insulinType
     }
     
     var loopStateCallBlock: ((LoopState) -> Void)?

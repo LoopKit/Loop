@@ -873,13 +873,13 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     
     var pumpInsulinType: InsulinType?
     
-    var loggedBolusUnits: Double?
-    var loggedDate: Date?
-    var loggedDoseModel: InsulinType?
+    var manuallyEnteredBolusUnits: Double?
+    var manuallyEnteredDate: Date?
+    var manuallyEnteredInsulinType: InsulinType?
     func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) {
-        loggedBolusUnits = units
-        loggedDate = startDate
-        loggedDoseModel = insulinType
+        manuallyEnteredBolusUnits = units
+        manuallyEnteredDate = startDate
+        manuallyEnteredInsulinType = insulinType
     }
     
     var loopStateCallBlock: ((LoopState) -> Void)?

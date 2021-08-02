@@ -13,12 +13,20 @@ import HealthKit
 
 @testable import Loop
 
+enum MockPumpManagerError: Error {
+    case failed
+}
+
+extension MockPumpManagerError: LocalizedError {
+    
+}
+
 class MockPumpManager: PumpManager {
     
     var enactBolusCalled: ((Double, Bool) -> Void)?
     var enactTempBasalCalled: ((Double, TimeInterval) -> Void)?
     
-    var shouldFailTempBasal: Bool = false
+    var enactTempBasalError: PumpManagerError?
     
     init() {
         
@@ -84,7 +92,7 @@ class MockPumpManager: PumpManager {
     
     func enactTempBasal(unitsPerHour: Double, for duration: TimeInterval, completion: @escaping (PumpManagerError?) -> Void) {
         enactTempBasalCalled?(unitsPerHour, duration)
-        completion(nil)
+        completion(enactTempBasalError)
     }
     
     func suspendDelivery(completion: @escaping (Error?) -> Void) {
@@ -165,8 +173,7 @@ class DoseEnactorTests: XCTestCase {
             XCTFail("Should not enact bolus")
         }
         
-
-        pumpManager.shouldFailTempBasal = true
+        pumpManager.enactTempBasalError = .configuration(MockPumpManagerError.failed)
 
         enactor.enact(recommendation: recommendation, with: pumpManager) { error in
             XCTAssertNotNil(error)
