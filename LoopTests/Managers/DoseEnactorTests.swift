@@ -201,7 +201,7 @@ class DoseEnactorTests: XCTestCase {
         
 
         enactor.enact(recommendation: recommendation, with: pumpManager) { error in
-            XCTAssertNotNil(error)
+            XCTAssertNil(error)
         }
         
         waitForExpectations(timeout: 2)
