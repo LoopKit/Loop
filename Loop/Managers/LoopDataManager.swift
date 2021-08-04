@@ -1071,10 +1071,6 @@ extension LoopDataManager {
     ) throws -> [PredictedGlucoseValue] {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-//        guard let insulinModelSettings = insulinModelSettings else {
-//            throw LoopError.configurationError(.insulinModel)
-//        }
-
         guard let glucose = startingGlucoseOverride ?? self.glucoseStore.latestGlucose else {
             throw LoopError.missingDataError(.glucose)
         }
