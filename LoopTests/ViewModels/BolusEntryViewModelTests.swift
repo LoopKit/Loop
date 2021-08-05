@@ -96,7 +96,7 @@ class BolusEntryViewModelTests: XCTestCase {
        
         XCTAssertFalse(bolusEntryViewModel.isManualGlucoseEntryEnabled)
 
-        XCTAssertNil(bolusEntryViewModel.enteredManualGlucose)
+        XCTAssertNil(bolusEntryViewModel.manualGlucoseQuantity)
         XCTAssertNil(bolusEntryViewModel.recommendedBolus)
         XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 0), bolusEntryViewModel.enteredBolus)
 
@@ -118,20 +118,20 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testUpdateDisableManualGlucoseEntryIfNecessary() throws {
         bolusEntryViewModel.isManualGlucoseEntryEnabled = true
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         try triggerLoopStateUpdated(with: MockLoopState())
         XCTAssertFalse(bolusEntryViewModel.isManualGlucoseEntryEnabled)
-        XCTAssertNil(bolusEntryViewModel.enteredManualGlucose)
+        XCTAssertNil(bolusEntryViewModel.manualGlucoseQuantity)
         XCTAssertEqual(.glucoseNoLongerStale, bolusEntryViewModel.activeAlert)
     }
     
     func testUpdateDisableManualGlucoseEntryIfNecessaryStaleGlucose() throws {
         delegate.mostRecentGlucoseDataDate = Date.distantPast
         bolusEntryViewModel.isManualGlucoseEntryEnabled = true
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         try triggerLoopStateUpdated(with: MockLoopState())
         XCTAssertTrue(bolusEntryViewModel.isManualGlucoseEntryEnabled)
-        XCTAssertEqual(Self.exampleManualGlucoseQuantity, bolusEntryViewModel.enteredManualGlucose)
+        XCTAssertEqual(Self.exampleManualGlucoseQuantity, bolusEntryViewModel.manualGlucoseQuantity)
         XCTAssertNil(bolusEntryViewModel.activeAlert)
     }
 
@@ -146,7 +146,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testUpdateGlucoseValuesWithManual() throws {
         XCTAssertEqual(0, bolusEntryViewModel.glucoseValues.count)
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         try triggerLoopStateUpdatedWithDataAndWait()
         XCTAssertEqual([100.4, 123.4], bolusEntryViewModel.glucoseValues.map {
             return $0.quantity.doubleValue(for: .milligramsPerDeciliter)
@@ -155,7 +155,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testManualEntryClearsEnteredBolus() throws {
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         XCTAssertEqual(Self.exampleBolusQuantity, bolusEntryViewModel.enteredBolus)
         // For some reason, starting with Xcode 12.5, in order for these tests to pass we need to call `waitOnMain()`
         // _twice_ here.  Not exactly sure why, needs investigation.
@@ -176,7 +176,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
     
     func testUpdatePredictedGlucoseValuesWithManual() throws {
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         let mockLoopState = MockLoopState()
         mockLoopState.predictGlucoseValueResult = [PredictedGlucoseValue(startDate: Self.exampleStartDate, quantity: Self.exampleCGMGlucoseQuantity)]
         try triggerLoopStateUpdated(with: mockLoopState)
@@ -243,7 +243,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
     
     func testManualGlucoseChangesPredictedGlucoseValues() throws {
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         let mockLoopState = MockLoopState()
         mockLoopState.predictGlucoseValueResult = [PredictedGlucoseValue(startDate: Self.exampleStartDate, quantity: Self.exampleCGMGlucoseQuantity)]
         waitOnMain()
@@ -366,7 +366,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusWithManual() throws {
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
         let mockState = MockLoopState()
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
@@ -467,7 +467,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
     
     func testSaveManualGlucoseNoBolus() throws {
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         // manualGlucoseSample updates asynchronously on main
         // For some reason, starting with Xcode 12.5, in order for these tests to pass we need to call `waitOnMain()`
         // _twice_ here.  Not exactly sure why, needs investigation.
@@ -522,7 +522,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
     
     func testSaveManualGlucoseAndBolus() throws {
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         // manualGlucoseSample updates asynchronously on main
         // For some reason, starting with Xcode 12.5, in order for these tests to pass we need to call `waitOnMain()`
         // _twice_ here.  Not exactly sure why, needs investigation.
@@ -612,7 +612,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
     func testSaveManualGlucoseAndCarbAndBolus() throws {
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         // manualGlucoseSample updates asynchronously on main
         // For some reason, starting with Xcode 12.5, in order for these tests to pass we need to call `waitOnMain()`
         // _twice_ here.  Not exactly sure why, needs investigation.
@@ -750,7 +750,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
     
     func testActionButtonManualGlucose() {
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         XCTAssertEqual(.saveWithoutBolusing, bolusEntryViewModel.actionButtonAction)
     }
     
@@ -761,7 +761,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testActionButtonManualGlucoseAndPotentialCarbEntry() {
         setUpViewModel(potentialCarbEntry: mockPotentialCarbEntry)
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         XCTAssertEqual(.saveWithoutBolusing, bolusEntryViewModel.actionButtonAction)
     }
     
@@ -771,7 +771,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
     
     func testActionButtonSaveAndDeliverManualGlucose() {
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         XCTAssertEqual(.saveAndDeliver, bolusEntryViewModel.actionButtonAction)
     }
@@ -784,9 +784,17 @@ class BolusEntryViewModelTests: XCTestCase {
 
     func testActionButtonSaveAndDeliverBothManualGlucoseAndPotentialCarbEntry() {
         setUpViewModel(potentialCarbEntry: mockPotentialCarbEntry)
-        bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
+        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         XCTAssertEqual(.saveAndDeliver, bolusEntryViewModel.actionButtonAction)
+    }
+
+    func testManualGlucoseStringMatchesDisplayGlucoseUnit() {
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "")
+        bolusEntryViewModel.manualGlucoseString = "140"
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "140")
+        delegate.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .millimolesPerLiter)
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "7.8")
     }
 }
 
@@ -866,6 +874,8 @@ fileprivate class MockLoopState: LoopState {
 }
 
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
+
+    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
 
     var loopStateCallBlock: ((LoopState) -> Void)?
     func withLoopState(do block: @escaping (LoopState) -> Void) {

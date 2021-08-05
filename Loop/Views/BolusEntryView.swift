@@ -25,7 +25,6 @@ struct BolusEntryView: View {
     @State private var shouldBolusEntryBecomeFirstResponder = false
 
     @State private var isManualGlucoseEntryRowVisible = false
-    @State private var enteredManualGlucose = ""
 
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
@@ -72,10 +71,7 @@ struct BolusEntryView: View {
             }
             .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
                 // The view model can disable manual glucose entry if CGM data returns.
-                if !isManualGlucoseEntryEnabled {
-                    self.isManualGlucoseEntryRowVisible = false
-                    self.enteredManualGlucose = ""
-                }
+                self.isManualGlucoseEntryRowVisible = isManualGlucoseEntryEnabled
             }
         }
     }
@@ -190,7 +186,7 @@ struct BolusEntryView: View {
                 Spacer()
                 HStack(alignment: .firstTextBaseline) {
                     DismissibleKeyboardTextField(
-                        text: typedManualGlucoseEntry,
+                        text: enteredManualGlucose,
                         placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
                         font: .heavy(.title1),
                         textAlignment: .right,
@@ -214,18 +210,10 @@ struct BolusEntryView: View {
         }
     }
 
-    private var typedManualGlucoseEntry: Binding<String> {
+    private var enteredManualGlucose: Binding<String> {
         Binding(
-            get: { self.enteredManualGlucose },
-            set: { newValue in
-                if let doubleValue = glucoseFormatter.number(from: newValue)?.doubleValue {
-                    viewModel.enteredManualGlucose = HKQuantity(unit: displayGlucoseUnitObservable.displayGlucoseUnit, doubleValue: doubleValue)
-                } else {
-                    viewModel.enteredManualGlucose = nil
-                }
-
-                enteredManualGlucose = newValue
-            }
+            get: { viewModel.manualGlucoseString },
+            set: { newValue in viewModel.manualGlucoseString = newValue }
         )
     }
 

@@ -26,10 +26,10 @@ class SimpleBolusViewModelTests: XCTestCase {
     var enactedBolus: (units: Double, startDate: Date)?
     var currentIOB: InsulinValue = SimpleBolusViewModelTests.noIOB
     var currentRecommendation: Double = 0
+    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
 
     static var noIOB = InsulinValue(startDate: Date(), value: 0)
     static var someIOB = InsulinValue(startDate: Date(), value: 2.4)
-
     
     override func setUp() {
         addedGlucose = []
@@ -92,7 +92,7 @@ class SimpleBolusViewModelTests: XCTestCase {
         currentRecommendation = 2.5
 
         viewModel.enteredCarbAmount = "20"
-        viewModel.enteredGlucoseAmount = "180"
+        viewModel.manualGlucoseString = "180"
         
         let saveExpectation = expectation(description: "Save completion callback")
 
@@ -171,12 +171,12 @@ class SimpleBolusViewModelTests: XCTestCase {
 
         currentRecommendation = 3.0
 
-        viewModel.enteredGlucoseAmount = "180"
+        viewModel.manualGlucoseString = "180"
 
         XCTAssertEqual("3", viewModel.recommendedBolus)
         XCTAssertEqual("3", viewModel.enteredBolusAmount)
 
-        viewModel.enteredGlucoseAmount = ""
+        viewModel.manualGlucoseString = ""
 
         XCTAssertEqual("–", viewModel.recommendedBolus)
         XCTAssertEqual("0", viewModel.enteredBolusAmount)
@@ -190,13 +190,22 @@ class SimpleBolusViewModelTests: XCTestCase {
 
         currentIOB = SimpleBolusViewModelTests.someIOB
 
-        viewModel.enteredGlucoseAmount = "180"
+        viewModel.manualGlucoseString = "180"
 
         XCTAssertEqual("2.4", viewModel.activeInsulin)
 
-        viewModel.enteredGlucoseAmount = ""
+        viewModel.manualGlucoseString = ""
 
         XCTAssertNil(viewModel.activeInsulin)
+    }
+
+    func testManualGlucoseStringMatchesDisplayGlucoseUnit() {
+        let viewModel = SimpleBolusViewModel(delegate: self)
+        XCTAssertEqual(viewModel.manualGlucoseString, "")
+        viewModel.manualGlucoseString = "140"
+        XCTAssertEqual(viewModel.manualGlucoseString, "140")
+        self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .millimolesPerLiter)
+        XCTAssertEqual(viewModel.manualGlucoseString, "7.8")
     }
 }
 
@@ -244,10 +253,6 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         storedBolusDecision = bolusDosingDecision
     }
 
-    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable {
-        return DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
-    }
-    
     var maximumBolus: Double {
         return 3.0
     }
@@ -255,6 +260,4 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
     var suspendThreshold: HKQuantity {
         return HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80)
     }
-    
-    
 }
