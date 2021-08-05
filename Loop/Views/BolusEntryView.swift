@@ -29,6 +29,7 @@ struct BolusEntryView: View {
 
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
+    @State private var pickerShouldExpand = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -58,11 +59,7 @@ struct BolusEntryView: View {
             }
             .keyboardAware()
             .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
-            .navigationBarTitle(
-                self.viewModel.potentialCarbEntry == nil
-                    ? Text("Bolus", comment: "Title for bolus entry screen")
-                    : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
-            )
+            .navigationBarTitle(self.title)
                 .supportedInterfaceOrientations(.portrait)
                 .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
                 .onReceive(self.viewModel.$enteredBolus) { updatedBolusEntry in
@@ -78,6 +75,13 @@ struct BolusEntryView: View {
                 }
             }
         }
+    }
+    
+    private var title: Text {
+        if viewModel.potentialCarbEntry == nil {
+            return Text("Bolus", comment: "Title for bolus entry screen")
+        }
+        return Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
     }
 
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
@@ -152,7 +156,7 @@ struct BolusEntryView: View {
     private var summarySection: some View {
         Section {
             VStack(spacing: 16) {
-                Text("Bolus Summary", comment: "Title for card displaying carb entry and bolus recommendation")
+                titleText
                     .bold()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -165,7 +169,7 @@ struct BolusEntryView: View {
                 }
             }
             .padding(.top, 8)
-
+            
             if viewModel.isManualGlucoseEntryEnabled && viewModel.potentialCarbEntry != nil {
                 potentialCarbEntryRow
             }
@@ -176,6 +180,10 @@ struct BolusEntryView: View {
 
             bolusEntryRow
         }
+    }
+    
+    private var titleText: Text {
+        return Text("Bolus Summary", comment: "Title for card displaying carb entry and bolus recommendation")
     }
 
     private var glucoseFormatter: NumberFormatter {
@@ -265,6 +273,7 @@ struct BolusEntryView: View {
                 bolusUnitsLabel
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var recommendedBolusString: String {
@@ -290,10 +299,10 @@ struct BolusEntryView: View {
                     maxLength: 5,
                     doneButtonColor: .loopAccent
                 )
-                
                 bolusUnitsLabel
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var bolusUnitsLabel: some View {
@@ -462,6 +471,7 @@ struct LabeledQuantity: View {
                 .foregroundColor(Color(.secondaryLabel))
                 .fixedSize(horizontal: true, vertical: false)
         }
+        .accessibilityElement(children: .combine)
         .font(.subheadline)
         .modifier(LabelBackground())
     }

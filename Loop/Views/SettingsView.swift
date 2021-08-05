@@ -38,6 +38,9 @@ public struct SettingsView: View {
         NavigationView {
             List {
                 loopSection
+                if FeatureFlags.automaticBolusEnabled {
+                    dosingStrategySection
+                }
                 if viewModel.showWarning {
                     alertPermissionsSection
                 }
@@ -88,7 +91,19 @@ extension SettingsView {
             .disabled(!viewModel.isClosedLoopAllowed)
         }
     }
-    
+
+    private var dosingStrategySection: some View {
+        Section(header: SectionHeader(label: NSLocalizedString("Dosing Strategy", comment: "The title of the Dosing Strategy section in settings"))) {
+            
+            NavigationLink(destination: DosingStrategySelectionView(dosingStrategy: $viewModel.dosingStrategy))
+            {
+                HStack {
+                    Text(viewModel.dosingStrategy.title)
+                }
+            }
+        }
+    }
+
     private var alertPermissionsSection: some View {
         Section {
             NavigationLink(destination:
@@ -116,9 +131,9 @@ extension SettingsView {
                 .sheet(isPresented: $therapySettingsIsPresented) {
                     TherapySettingsView(mode: .settings,
                                         viewModel: TherapySettingsViewModel(therapySettings: self.viewModel.therapySettings(),
-                                                                            supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
                                                                             pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
                                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
+                                                                            sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                                                             didSave: self.viewModel.didSave))
                         .environmentObject(displayGlucoseUnitObservable)
                         .environment(\.dismissAction, self.dismiss)
@@ -395,13 +410,13 @@ public struct SettingsView_Previews: PreviewProvider {
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
                                           therapySettings: { TherapySettings() },
-                                          supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true),
                                           pumpSupportedIncrements: nil,
                                           syncPumpSchedule: nil,
                                           sensitivityOverridesEnabled: false,
                                           initialDosingEnabled: true,
                                           isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
                                           supportInfoProvider: MockSupportInfoProvider(),
+                                          dosingStrategy: .automaticBolus,
                                           availableSupports: [],
                                           delegate: nil)
         return Group {

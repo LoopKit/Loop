@@ -10,7 +10,7 @@ import SwiftUI
 import LoopKit
 import LoopKitUI
 
-public protocol ServicesViewModelDelegate: class {
+public protocol ServicesViewModelDelegate: AnyObject {
     func addService(withIdentifier identifier: String)
     func gotoService(withIdentifier identifier: String)
 }

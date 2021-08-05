@@ -18,7 +18,7 @@ import Combine
 final class DeviceDataManager {
 
     private let queue = DispatchQueue(label: "com.loopkit.DeviceManagerQueue", qos: .utility)
-
+    
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
@@ -50,6 +50,14 @@ final class DeviceDataManager {
     private let closedLoopStatus: ClosedLoopStatus
 
     lazy private var cancellables = Set<AnyCancellable>()
+    
+    lazy var allowedInsulinTypes: [InsulinType] = {
+        var allowed = InsulinType.allCases
+        if !FeatureFlags.fiaspInsulinModelEnabled {
+            allowed.remove(.fiasp)
+        }
+        return allowed
+    }()
 
     private var cgmStalenessMonitor: CGMStalenessMonitor
 
@@ -86,6 +94,8 @@ final class DeviceDataManager {
             UserDefaults.appGroup?.pumpManagerRawValue = pumpManager?.rawValue
         }
     }
+    
+    var doseEnactor = DoseEnactor()
     
     // MARK: Stores
     let healthStore: HKHealthStore
@@ -169,7 +179,7 @@ final class DeviceDataManager {
 
     // MARK: - Status Extension
 
-    private var statusExtensionManager: StatusExtensionDataManager!
+    private var statusExtensionManager: ExtensionDataManager!
 
     // MARK: - Initialization
 
@@ -229,7 +239,8 @@ final class DeviceDataManager {
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModel: UserDefaults.appGroup?.insulinModelSettings?.model,
+            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: UserDefaults.appGroup?.defaultRapidActingModel),
+            longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
@@ -271,7 +282,7 @@ final class DeviceDataManager {
         }
 
         //TODO The instantiation of these non-device related managers should be moved to LoopAppManager, and then LoopAppManager can wire up the connections between them.
-        statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self, closedLoopStatus: closedLoopStatus)
+        statusExtensionManager = ExtensionDataManager(deviceDataManager: self, closedLoopStatus: closedLoopStatus)
 
         loopManager = LoopDataManager(
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
@@ -286,6 +297,7 @@ final class DeviceDataManager {
             dosingDecisionStore: dosingDecisionStore,
             settingsStore: settingsStore,
             alertIssuer: alertManager,
+            pumpInsulinType: pumpManager?.status.insulinType,
             automaticDosingStatus: closedLoopStatus
         )
         cacheStore.delegate = loopManager
@@ -378,7 +390,7 @@ final class DeviceDataManager {
             return .failure(UnknownPumpManagerIdentifierError())
         }
 
-        let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)
+        let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled, allowedInsulinTypes: allowedInsulinTypes)
         if case .createdAndOnboarded(let pumpManagerUI) = result {
             pumpManagerOnboarding(didCreatePumpManager: pumpManagerUI)
             pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI)
@@ -515,7 +527,7 @@ final class DeviceDataManager {
     func checkDeliveryUncertaintyState() {
         if let pumpManager = pumpManager, pumpManager.status.deliveryIsUncertain {
             DispatchQueue.main.async {
-                self.deliveryUncertaintyAlertManager!.showAlert()
+                self.deliveryUncertaintyAlertManager?.showAlert()
             }
         }
     }
@@ -626,7 +638,7 @@ private extension DeviceDataManager {
         pumpManager?.delegateQueue = queue
 
         doseStore.device = pumpManager?.status.device
-        pumpManagerHUDProvider = pumpManager?.hudProvider(bluetoothProvider: bluetoothProvider, colorPalette: .default)
+        pumpManagerHUDProvider = pumpManager?.hudProvider(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowedInsulinTypes: allowedInsulinTypes)
 
         // Proliferate PumpModel preferences to DoseStore
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
@@ -651,22 +663,18 @@ private extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, at startDate: Date = Date(), completion: @escaping (_ error: Error?) -> Void = { _ in }) {
+    func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
             return
         }
 
         self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
-        pumpManager.enactBolus(units: units, at: startDate) { (error) in
+        pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
-                switch error {
-                case .uncertainDelivery:
-                    // Do not generate notification on uncertain delivery error
-                    break
-                default:
-                    NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
+                if case .uncertainDelivery = error, !automatic {
+                    NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
                 }
                 self.loopManager.bolusRequestFailed(error) {
                     completion(error)
@@ -942,6 +950,10 @@ extension DeviceDataManager: PumpManagerDelegate {
         // Update the pump-schedule based settings
         loopManager.setScheduleTimeZone(status.timeZone)
         
+        if status.insulinType != oldStatus.insulinType {
+            loopManager.pumpInsulinType = status.insulinType
+        }
+        
         if status.deliveryIsUncertain != oldStatus.deliveryIsUncertain {
             DispatchQueue.main.async {
                 if status.deliveryIsUncertain {
@@ -961,6 +973,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         doseStore.resetPumpData(completion: nil)
         DispatchQueue.main.async {
             self.pumpManager = nil
+            self.deliveryUncertaintyAlertManager = nil
         }
     }
 
@@ -1029,6 +1042,7 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
     func pumpManagerOnboarding(didCreatePumpManager pumpManager: PumpManagerUI) {
         log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
         self.pumpManager = pumpManager
+        self.deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
     }
 
     func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI) {
@@ -1120,10 +1134,7 @@ extension DeviceDataManager {
     }
 
     func deleteTestingCGMData(completion: ((Error?) -> Void)? = nil) {
-        guard FeatureFlags.scenariosEnabled else {
-            fatalError("\(#function) should be invoked only when scenarios are enabled")
-        }
-
+        
         guard let testingCGMManager = cgmManager as? TestingCGMManager else {
             assertionFailure("\(#function) should be invoked only when a testing CGM manager is in use")
             return
@@ -1151,12 +1162,15 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             return units
         }
 
-        return pumpManager.roundToSupportedBolusVolume(units: units)
+        let rounded = ([0.0] + pumpManager.supportedBolusVolumes).enumerated().min( by: { abs($0.1 - units) < abs($1.1 - units) } )!.1
+        self.log.default("Rounded %{public}@ to %{public}@", String(describing: units), String(describing: rounded))
+
+        return rounded
     }
 
     func loopDataManager(
         _ manager: LoopDataManager,
-        didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
+        didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date),
         completion: @escaping (Error?) -> Void
     ) {
         guard let pumpManager = pumpManager else {
@@ -1169,13 +1183,9 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             return
         }
 
-        log.default("LoopManager did recommend basal change")
-
-        pumpManager.enactTempBasal(
-            unitsPerHour: basal.recommendation.unitsPerHour,
-            for: basal.recommendation.duration,
-            completion: completion
-        )
+        log.default("LoopManager did recommend dose")
+        
+        doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager, completion: completion)
     }
 }
 

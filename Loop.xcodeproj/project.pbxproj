@@ -11,7 +11,6 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 432CF87820D8B8380066B889 /* Build configuration list for PBXAggregateTarget "Cartfile" */;
 			buildPhases = (
-				432CF88220D8BCD90066B889 /* Homebrew & Carthage Setup */,
 				432CF87B20D8B8490066B889 /* Build Carthage Dependencies */,
 			);
 			dependencies = (
@@ -270,7 +269,7 @@
 		4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */; };
 		4F70C1E41DE8DCA7006380B7 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */; };
 		4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */; };
+		4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */; };
 		4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; };
@@ -417,7 +416,6 @@
 		A9DAE7D02332D77F006AE942 /* LoopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DAE7CF2332D77F006AE942 /* LoopTests.swift */; };
 		A9DCF32A25B0FABF00C89088 /* LoopUIColorPalette+Default.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DCF2D525B0F3C500C89088 /* LoopUIColorPalette+Default.swift */; };
 		A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DF02CA24F72B9E00B7C988 /* CriticalEventLogTests.swift */; };
-		A9DF02CD24F72BC800B7C988 /* PersistenceControllerTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DF02CC24F72BC800B7C988 /* PersistenceControllerTestCase.swift */; };
 		A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */; };
 		A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */; };
 		A9E6DFE6246A042E005B1A1C /* CarbStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */; };
@@ -481,17 +479,23 @@
 		C16575762539FEF3004AE16E /* LoopCoreConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16575742539FD60004AE16E /* LoopCoreConstants.swift */; };
 		C1657578253A0021004AE16E /* ChartConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1657577253A0021004AE16E /* ChartConstants.swift */; };
 		C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165B8CD23302C5D0004112E /* RemoteCommand.swift */; };
+		C16B983E26B4893300256B05 /* DoseEnactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983D26B4893300256B05 /* DoseEnactor.swift */; };
+		C16B984026B4898800256B05 /* DoseEnactorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983F26B4898800256B05 /* DoseEnactorTests.swift */; };
 		C16DA84222E8E112008624C2 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
+		C1742332259BEADC00399C9D /* ManualEntryDoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742331259BEADC00399C9D /* ManualEntryDoseView.swift */; };
+		C174233C259BEB0F00399C9D /* ManualEntryDoseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C174233B259BEB0F00399C9D /* ManualEntryDoseViewModel.swift */; };
 		C1750AEC255B013300B8011C /* Minizip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1750AEB255B013300B8011C /* Minizip.framework */; };
+		C1777A6625A125F100595963 /* ManualEntryDoseViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1777A6525A125F100595963 /* ManualEntryDoseViewModelTests.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
 		C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */; };
 		C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */; };
-		C17824A51E1AD4D100D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
-		C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
+		C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* ManualBolusRecommendation.swift */; };
+		C17824A61E1AF91F00D9D25C /* ManualBolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* ManualBolusRecommendation.swift */; };
 		C1814B86225E507C008D2D8E /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1814B85225E507C008D2D8E /* Sequence.swift */; };
 		C18913B52524F24C007B0683 /* DeviceDataManager+SimpleBolusViewModelDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18913B42524F24C007B0683 /* DeviceDataManager+SimpleBolusViewModelDelegate.swift */; };
 		C19008FE25225D3900721625 /* SimpleBolusCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19008FD25225D3900721625 /* SimpleBolusCalculator.swift */; };
 		C1900900252271BB00721625 /* SimpleBolusCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19008FF252271BB00721625 /* SimpleBolusCalculatorTests.swift */; };
+		C191D2A125B3ACAA00C26C0B /* DosingStrategySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C191D2A025B3ACAA00C26C0B /* DosingStrategySelectionView.swift */; };
 		C19E96DF23D275F8003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
 		C19E96E023D275FA003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
 		C19F48742560ABFB003632D7 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
@@ -545,6 +549,9 @@
 		E93E86CC24E2E02200FF40C8 /* high_and_stable_predicted_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C724E2E02200FF40C8 /* high_and_stable_predicted_glucose.json */; };
 		E93E86CD24E2E02200FF40C8 /* high_and_stable_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C824E2E02200FF40C8 /* high_and_stable_counteraction_effect.json */; };
 		E93E86CE24E2E02200FF40C8 /* high_and_stable_momentum_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E86C924E2E02200FF40C8 /* high_and_stable_momentum_effect.json */; };
+		E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
+		E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
+		E942DF34253BF87F00AC532D /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
 		E95D380124EADE7C005E2F50 /* DoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */; };
 		E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */; };
 		E95D380524EADF78005E2F50 /* GlucoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */; };
@@ -555,6 +562,13 @@
 		E98A55F524EEE15A0008715D /* OnOffSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F424EEE15A0008715D /* OnOffSelectionController.swift */; };
 		E98A55F724EEE1E10008715D /* OnOffSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F624EEE1E10008715D /* OnOffSelectionView.swift */; };
 		E98A55F924EEFC200008715D /* OnOffSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F824EEFC200008715D /* OnOffSelectionViewModel.swift */; };
+		E9B07F7F253BBA6500BAD8F8 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */; };
+		E9B07F94253BBA6500BAD8F8 /* Loop Intent Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E9B07FEE253BBC7100BAD8F8 /* OverrideIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */; };
+		E9B08016253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
+		E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
+		E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
+		E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
 		E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB27AA23B85C3500FB4987 /* SleepStore.swift */; };
 		E9C00EF224C6221B00628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
@@ -660,6 +674,13 @@
 			remoteGlobalIDString = 43D9001A21EB209400AF44BF;
 			remoteInfo = "LoopCore-watchOS";
 		};
+		E9B07F92253BBA6500BAD8F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E9B07F7B253BBA6500BAD8F8;
+			remoteInfo = "Loop Intent Extension";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -736,6 +757,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				E9B07F94253BBA6500BAD8F8 /* Loop Intent Extension.appex in Embed App Extensions */,
 				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
@@ -970,7 +992,7 @@
 		4F70C1E31DE8DCA7006380B7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		4F70C1E51DE8DCA7006380B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4F70C1FD1DE8E662006380B7 /* Loop Status Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Status Extension.entitlements"; sourceTree = "<group>"; };
-		4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionDataManager.swift; sourceTree = "<group>"; };
+		4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionDataManager.swift; sourceTree = "<group>"; };
 		4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionContext.swift; sourceTree = "<group>"; };
 		4F75288B1DFE1DC600C322D6 /* LoopUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LoopUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F75288D1DFE1DC600C322D6 /* LoopUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoopUI.h; sourceTree = "<group>"; };
@@ -1304,7 +1326,6 @@
 		A9DAE7CF2332D77F006AE942 /* LoopTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopTests.swift; sourceTree = "<group>"; };
 		A9DCF2D525B0F3C500C89088 /* LoopUIColorPalette+Default.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopUIColorPalette+Default.swift"; sourceTree = "<group>"; };
 		A9DF02CA24F72B9E00B7C988 /* CriticalEventLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalEventLogTests.swift; sourceTree = "<group>"; };
-		A9DF02CC24F72BC800B7C988 /* PersistenceControllerTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceControllerTestCase.swift; sourceTree = "<group>"; };
 		A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBackfillRequestUserInfoTests.swift; sourceTree = "<group>"; };
 		A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHistoricalCarbsTests.swift; sourceTree = "<group>"; };
 		A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreTests.swift; sourceTree = "<group>"; };
@@ -1347,6 +1368,7 @@
 		B4FACBB02541FAB700199981 /* LoopSettingsAlerterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettingsAlerterTests.swift; sourceTree = "<group>"; };
 		B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+DeviceStatus.swift"; sourceTree = "<group>"; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
+		C11AA5C7258736CF00BDE12F /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
 		C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBolusViewModel.swift; sourceTree = "<group>"; };
 		C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContextRequestUserInfo.swift; sourceTree = "<group>"; };
 		C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
@@ -1366,12 +1388,18 @@
 		C16575742539FD60004AE16E /* LoopCoreConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCoreConstants.swift; sourceTree = "<group>"; };
 		C1657577253A0021004AE16E /* ChartConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartConstants.swift; sourceTree = "<group>"; };
 		C165B8CD23302C5D0004112E /* RemoteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommand.swift; sourceTree = "<group>"; };
+		C16B983D26B4893300256B05 /* DoseEnactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseEnactor.swift; sourceTree = "<group>"; };
+		C16B983F26B4898800256B05 /* DoseEnactorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseEnactorTests.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
+		C1742331259BEADC00399C9D /* ManualEntryDoseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualEntryDoseView.swift; sourceTree = "<group>"; };
+		C174233B259BEB0F00399C9D /* ManualEntryDoseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualEntryDoseViewModel.swift; sourceTree = "<group>"; };
 		C1750AEB255B013300B8011C /* Minizip.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Minizip.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1777A6525A125F100595963 /* ManualEntryDoseViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualEntryDoseViewModelTests.swift; sourceTree = "<group>"; };
 		C17824991E1999FA00D9D25C /* CaseCountable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaseCountable.swift; sourceTree = "<group>"; };
 		C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdTableViewController.swift; sourceTree = "<group>"; };
 		C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_very_low_end_high.json; sourceTree = "<group>"; };
-		C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusRecommendation.swift; sourceTree = "<group>"; };
+		C17824A41E1AD4D100D9D25C /* ManualBolusRecommendation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManualBolusRecommendation.swift; sourceTree = "<group>"; };
+		C17E500B25C672D3004829E3 /* carthage.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = carthage.sh; sourceTree = "<group>"; };
 		C1814B85225E507C008D2D8E /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		C18913B42524F24C007B0683 /* DeviceDataManager+SimpleBolusViewModelDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+SimpleBolusViewModelDelegate.swift"; sourceTree = "<group>"; };
 		C18A491222FCC22800FDA733 /* build-derived-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-assets.sh"; sourceTree = "<group>"; };
@@ -1379,6 +1407,7 @@
 		C18A491522FCC22900FDA733 /* copy-plugins.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-plugins.sh"; sourceTree = "<group>"; };
 		C19008FD25225D3900721625 /* SimpleBolusCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBolusCalculator.swift; sourceTree = "<group>"; };
 		C19008FF252271BB00721625 /* SimpleBolusCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBolusCalculatorTests.swift; sourceTree = "<group>"; };
+		C191D2A025B3ACAA00C26C0B /* DosingStrategySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DosingStrategySelectionView.swift; sourceTree = "<group>"; };
 		C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCompletionFreshness.swift; sourceTree = "<group>"; };
 		C19F496225630504003632D7 /* Minizip.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Minizip.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1AD41FF256D61E500164DDD /* Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comparable.swift; sourceTree = "<group>"; };
@@ -1429,6 +1458,7 @@
 		E93E86C724E2E02200FF40C8 /* high_and_stable_predicted_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_predicted_glucose.json; sourceTree = "<group>"; };
 		E93E86C824E2E02200FF40C8 /* high_and_stable_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_counteraction_effect.json; sourceTree = "<group>"; };
 		E93E86C924E2E02200FF40C8 /* high_and_stable_momentum_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_momentum_effect.json; sourceTree = "<group>"; };
+		E942DE6D253BE5E100AC532D /* Loop Intent Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Intent Extension.entitlements"; sourceTree = "<group>"; };
 		E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStoreProtocol.swift; sourceTree = "<group>"; };
@@ -1439,6 +1469,13 @@
 		E98A55F424EEE15A0008715D /* OnOffSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionController.swift; sourceTree = "<group>"; };
 		E98A55F624EEE1E10008715D /* OnOffSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionView.swift; sourceTree = "<group>"; };
 		E98A55F824EEFC200008715D /* OnOffSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionViewModel.swift; sourceTree = "<group>"; };
+		E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Intent Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
+		E9B07F80253BBA6500BAD8F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E9B07F86253BBA6500BAD8F8 /* IntentsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IntentsUI.framework; path = System/Library/Frameworks/IntentsUI.framework; sourceTree = SDKROOT; };
+		E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideIntentHandler.swift; sourceTree = "<group>"; };
+		E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+LoopIntents.swift"; sourceTree = "<group>"; };
+		E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentExtensionInfo.swift; sourceTree = "<group>"; };
 		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 		E9C00EEF24C620EF00628F35 /* LoopSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettings.swift; sourceTree = "<group>"; };
 		E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopSettings+Loop.swift"; sourceTree = "<group>"; };
@@ -1560,6 +1597,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E9B07F79253BBA6500BAD8F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -1587,6 +1631,7 @@
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
 				A9F5F1F4251050EC00E7C8A4 /* ZipArchiveTests.swift */,
 				C16575722538AFF6004AE16E /* CGMStalenessMonitorTests.swift */,
+				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1667,7 +1712,7 @@
 			children = (
 				43511CDD21FD80AD00566C63 /* RetrospectiveCorrection */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
-				C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */,
+				C17824A41E1AD4D100D9D25C /* ManualBolusRecommendation.swift */,
 				B4E2022F2661063E009421B5 /* ClosedLoopStatus.swift */,
 				B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */,
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
@@ -1698,6 +1743,7 @@
 				43F78D2C1C8FC58F002152D1 /* LoopTests */,
 				43E2D8D21D20BF42004DA55F /* DoseMathTests */,
 				43D9FFA321EA9A0C00AF44BF /* Learn */,
+				E9B07F7D253BBA6500BAD8F8 /* Loop Intent Extension */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
@@ -1718,6 +1764,7 @@
 				43D9FFA221EA9A0C00AF44BF /* Learn.app */,
 				43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */,
 				43D9002A21EB209400AF44BF /* LoopCore.framework */,
+				E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1736,6 +1783,7 @@
 				43776F951B8022E90074EA36 /* Main.storyboard */,
 				A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */,
 				A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */,
+				C11AA5C7258736CF00BDE12F /* DerivedAssetsBase.xcassets */,
 				43E344A01B9E144300C85C07 /* Extensions */,
 				43F5C2E41B93C5D4003EB13D /* Managers */,
 				43757D131C06F26C00910CB9 /* Models */,
@@ -2012,6 +2060,8 @@
 				1DD0B76624EC77AC008A2DC3 /* SupportScreenView.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
+				C1742331259BEADC00399C9D /* ManualEntryDoseView.swift */,
+				C191D2A025B3ACAA00C26C0B /* DosingStrategySelectionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2027,6 +2077,7 @@
 				A977A2F324ACFECF0059C207 /* CriticalEventLogExportManager.swift */,
 				C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
+				C16B983D26B4893300256B05 /* DoseEnactor.swift */,
 				43F78D251C8FC000002152D1 /* DoseMath.swift */,
 				89CA2B3C226E6B13004D9350 /* LocalTestingScenariosManager.swift */,
 				A9C62D862331703000535612 /* LoggingServicesManager.swift */,
@@ -2040,7 +2091,7 @@
 				A9C62D872331703000535612 /* ServicesManager.swift */,
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
 				43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */,
-				4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */,
+				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
 				89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */,
 				1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
@@ -2065,7 +2116,6 @@
 				A9DAE7CF2332D77F006AE942 /* LoopTests.swift */,
 				B4FACBB02541FAB700199981 /* LoopSettingsAlerterTests.swift */,
 				8968B113240C55F10074BB48 /* LoopSettingsTests.swift */,
-				A9DF02CC24F72BC800B7C988 /* PersistenceControllerTestCase.swift */,
 				E93E86AC24DDE02C00FF40C8 /* Mock Stores */,
 			);
 			path = LoopTests;
@@ -2223,6 +2273,7 @@
 				A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */,
 				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
 				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
+				E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2245,6 +2296,7 @@
 				43BFF0C31E4659E700FF19A9 /* UIColor+HIG.swift */,
 				4344628D20A7ADD100C4BE6F /* UserDefaults+CGM.swift */,
 				A9C62D8123316FF500535612 /* UserDefaults+Services.swift */,
+				E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2325,6 +2377,7 @@
 				B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */,
 				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
 				1D49795724E7289700948F05 /* ServicesViewModel.swift */,
+				C174233B259BEB0F00399C9D /* ManualEntryDoseViewModel.swift */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";
@@ -2383,6 +2436,7 @@
 				4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */,
 				438A95A71D8B9B24009D12E1 /* CGMBLEKit.framework */,
 				43F78D4B1C914197002152D1 /* LoopKit.framework */,
+				E9B07F86253BBA6500BAD8F8 /* IntentsUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2435,6 +2489,7 @@
 				1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */,
 				B4BC56372518DEA900373647 /* CGMStatusHUDViewModelTests.swift */,
 				C165756E2534C468004AE16E /* SimpleBolusViewModelTests.swift */,
+				C1777A6525A125F100595963 /* ManualEntryDoseViewModelTests.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -2458,6 +2513,7 @@
 		C18A491122FCC20B00FDA733 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
+				C17E500B25C672D3004829E3 /* carthage.sh */,
 				C1D197FE232CF92D0096D646 /* capture-build-details.sh */,
 				C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */,
 				C18A491222FCC22800FDA733 /* build-derived-assets.sh */,
@@ -2563,6 +2619,17 @@
 			path = "Store Protocols";
 			sourceTree = "<group>";
 		};
+		E9B07F7D253BBA6500BAD8F8 /* Loop Intent Extension */ = {
+			isa = PBXGroup;
+			children = (
+				E942DE6D253BE5E100AC532D /* Loop Intent Extension.entitlements */,
+				E9B07F7E253BBA6500BAD8F8 /* IntentHandler.swift */,
+				E9B07F80253BBA6500BAD8F8 /* Info.plist */,
+				E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */,
+			);
+			path = "Loop Intent Extension";
+			sourceTree = "<group>";
+		};
 		E9C58A7624DB510500487A17 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
@@ -2636,6 +2703,7 @@
 				43A943931B926B7B0051FA24 /* PBXTargetDependency */,
 				4F70C1E71DE8DCA7006380B7 /* PBXTargetDependency */,
 				43D9FFD521EAE05D00AF44BF /* PBXTargetDependency */,
+				E9B07F93253BBA6500BAD8F8 /* PBXTargetDependency */,
 			);
 			name = Loop;
 			productName = Loop;
@@ -2814,13 +2882,30 @@
 			productReference = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9B07F9A253BBA6500BAD8F8 /* Build configuration list for PBXNativeTarget "Loop Intent Extension" */;
+			buildPhases = (
+				E9B07F78253BBA6500BAD8F8 /* Sources */,
+				E9B07F79253BBA6500BAD8F8 /* Frameworks */,
+				E9B07F7A253BBA6500BAD8F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Loop Intent Extension";
+			productName = "Loop Intent Extension";
+			productReference = E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		43776F841B8022E90074EA36 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1010;
+				LastSwiftUpdateCheck = 1200;
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "LoopKit Authors";
 				TargetAttributes = {
@@ -2933,6 +3018,9 @@
 						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 					};
+					E9B07F7B253BBA6500BAD8F8 = {
+						ProvisioningStyle = Manual;
+					};
 				};
 			};
 			buildConfigurationList = 43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Loop" */;
@@ -2968,6 +3056,7 @@
 				4F70C1DB1DE8DCA7006380B7 /* Loop Status Extension */,
 				43A943711B926B7B0051FA24 /* WatchApp */,
 				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
+				E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */,
 				43D9FFA121EA9A0C00AF44BF /* Learn */,
 				43D9FFCE21EAE05D00AF44BF /* LoopCore */,
 				43D9001A21EB209400AF44BF /* LoopCore-watchOS */,
@@ -3136,6 +3225,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E9B07F7A253BBA6500BAD8F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -3151,22 +3247,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -f $PROJECT_DIR/.gitmodules ]; then\n    echo \"Skipping checkout due to presence of .gitmodules file\"\n    if [ $ACTION = \"install\" ]; then\n        echo \"You're installing: Make sure to keep all submodules up-to-date and run carthage build after changes.\"\n    fi\nelse\n    echo \"Bootstrapping Carthage dependencies...\"\n    unset LLVM_TARGET_TRIPLE_SUFFIX\n\n    if ! cmp -s Cartfile.Resolved Carthage/Cartfile.resolved; then\n        time ./Scripts/carthage.sh bootstrap --project-directory \"$SRCROOT\" --platform ios --cache-builds --verbose || exit 1\n        cp Cartfile.resolved Carthage\n    else\n        echo \"Carthage: not bootstrapping\"\n    fi\nfi\n";
+			shellScript = "if [ -f $PROJECT_DIR/.gitmodules ]; then\n    echo \"Skipping checkout due to presence of .gitmodules file\"\n    if [ $ACTION = \"install\" ]; then\n        echo \"You're installing: Make sure to keep all submodules up-to-date and run carthage build after changes.\"\n    fi\nelse\n    echo \"Bootstrapping Carthage dependencies...\"\n    unset LLVM_TARGET_TRIPLE_SUFFIX\n\n    if ! cmp -s Cartfile.Resolved Carthage/Cartfile.resolved; then\n        time ./Scripts/carthage.sh bootstrap --project-directory \"$SRCROOT\" --platform ios,watchos --cache-builds --verbose || exit 1\n        cp Cartfile.resolved Carthage\n    else\n        echo \"Carthage: not bootstrapping\"\n    fi\nfi\n";
 			showEnvVarsInLog = 0;
-		};
-		432CF88220D8BCD90066B889 /* Homebrew & Carthage Setup */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Homebrew & Carthage Setup";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if ! [ -x \"$(command -v brew)\" ]; then\n    # Install Homebrew\n    ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"\nfi\n\nif brew ls carthage > /dev/null; then\n    brew upgrade carthage || echo \"Continuing…\"\nelse\n    brew install carthage\nfi\n";
 		};
 		43D9FFE221EAE40600AF44BF /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3339,7 +3421,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C17824A51E1AD4D100D9D25C /* BolusRecommendation.swift in Sources */,
+				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
 				897A5A9624C2175B00C4E71D /* BolusEntryView.swift in Sources */,
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
 				A9A056B324B93C62007CF06D /* CriticalEventLogExportView.swift in Sources */,
@@ -3378,6 +3460,7 @@
 				43B260491ED248FB008CAA77 /* CarbEntryTableViewCell.swift in Sources */,
 				A9D5C5B625DC6C6A00534873 /* LoopAppManager.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
+				C1742332259BEADC00399C9D /* ManualEntryDoseView.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
 				43FCEEA9221A615B0013DD30 /* StatusChartsManager.swift in Sources */,
 				A9F703752489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift in Sources */,
@@ -3397,6 +3480,7 @@
 				892D7C5123B54A15008A9656 /* CarbEntryViewController.swift in Sources */,
 				B4E202302661063E009421B5 /* ClosedLoopStatus.swift in Sources */,
 				A999D40424663CE1004C89D4 /* DoseStore.swift in Sources */,
+				C191D2A125B3ACAA00C26C0B /* DosingStrategySelectionView.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				A977A2F424ACFECF0059C207 /* CriticalEventLogExportManager.swift in Sources */,
 				89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */,
@@ -3410,6 +3494,7 @@
 				A9A056B524B94123007CF06D /* CriticalEventLogExportViewModel.swift in Sources */,
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
+				C16B983E26B4893300256B05 /* DoseEnactor.swift in Sources */,
 				E98A55EF24EDD6E60008715D /* DosingDecisionStoreProtocol.swift in Sources */,
 				C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */,
 				E9C00EF524C623EF00628F35 /* LoopSettings+Loop.swift in Sources */,
@@ -3446,6 +3531,7 @@
 				1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */,
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
+				E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */,
 				C148CEE724FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift in Sources */,
 				1D12D3B92548EFDD00B53E8B /* main.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
@@ -3473,15 +3559,17 @@
 				436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */,
 				4F11D3C220DD80B3006E072C /* WatchHistoricalGlucose.swift in Sources */,
 				4372E490213CFCE70068E043 /* LoopSettingsUserInfo.swift in Sources */,
+				C174233C259BEB0F00399C9D /* ManualEntryDoseViewModel.swift in Sources */,
 				89CA2B3D226E6B13004D9350 /* LocalTestingScenariosManager.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				43511CE221FD80E400566C63 /* RetrospectiveCorrection.swift in Sources */,
 				1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */,
+				E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */,
 				A97F250825E056D500F0EE19 /* OnboardingManager.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				A9C62D8223316FF600535612 /* UserDefaults+Services.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
-				4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */,
+				4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
 				A9FB75F1252BE320004C7D3F /* BolusDosingDecision.swift in Sources */,
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
@@ -3678,7 +3766,7 @@
 				43E2D8D41D20BF42004DA55F /* DoseMathTests.swift in Sources */,
 				C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */,
 				C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */,
-				C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */,
+				C17824A61E1AF91F00D9D25C /* ManualBolusRecommendation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3689,6 +3777,8 @@
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
 				B44251B3252350CE00605937 /* ChartAxisValuesStaticGeneratorTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
+				C1777A6625A125F100595963 /* ManualEntryDoseViewModelTests.swift in Sources */,
+				C16B984026B4898800256B05 /* DoseEnactorTests.swift in Sources */,
 				A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */,
 				A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */,
 				A963B27A252CEBAE0062AA12 /* SetBolusUserInfoTests.swift in Sources */,
@@ -3699,7 +3789,6 @@
 				A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */,
 				C16575732538AFF6004AE16E /* CGMStalenessMonitorTests.swift in Sources */,
 				A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */,
-				A9DF02CD24F72BC800B7C988 /* PersistenceControllerTestCase.swift in Sources */,
 				1DA7A84424477698008257F0 /* InAppModalAlertIssuerTests.swift in Sources */,
 				E93E86A824DDCC4400FF40C8 /* MockDoseStore.swift in Sources */,
 				E98A55F124EDD85E0008715D /* MockDosingDecisionStore.swift in Sources */,
@@ -3806,6 +3895,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E9B07F78253BBA6500BAD8F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */,
+				E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */,
+				E9B07FEE253BBC7100BAD8F8 /* OverrideIntentHandler.swift in Sources */,
+				E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */,
+				E9B08016253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */,
+				E942DF34253BF87F00AC532D /* Intents.intentdefinition in Sources */,
+				E9B07F7F253BBA6500BAD8F8 /* IntentHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -3873,6 +3976,11 @@
 			isa = PBXTargetDependency;
 			target = 43D9001A21EB209400AF44BF /* LoopCore-watchOS */;
 			targetProxy = C117ED70232EDB3200DA57CD /* PBXContainerItemProxy */;
+		};
+		E9B07F93253BBA6500BAD8F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */;
+			targetProxy = E9B07F92253BBA6500BAD8F8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -4663,6 +4771,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = Learn/Learn.entitlements;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Learn/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)Learn";
@@ -4678,6 +4787,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = Learn/Learn.entitlements;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Learn/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)Learn";
@@ -4756,6 +4866,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop.app/Loop";
@@ -4825,6 +4936,42 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		E9B07F95253BBA6500BAD8F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Loop Intent Extension/Loop Intent Extension.entitlements";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).Loop-Intent-Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_INTENT_EXTENSION_DEBUG)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E9B07F96253BBA6500BAD8F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Loop Intent Extension/Loop Intent Extension.entitlements";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).Loop-Intent-Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_INTENT_EXTENSION_RELEASE)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -4935,6 +5082,15 @@
 			buildConfigurations = (
 				4F7528901DFE1DC600C322D6 /* Debug */,
 				4F7528911DFE1DC600C322D6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E9B07F9A253BBA6500BAD8F8 /* Build configuration list for PBXNativeTarget "Loop Intent Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9B07F95253BBA6500BAD8F8 /* Debug */,
+				E9B07F96253BBA6500BAD8F8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

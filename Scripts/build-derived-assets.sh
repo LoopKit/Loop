@@ -38,7 +38,14 @@ fi
 
 DERIVED_ASSETS="${DIRECTORY}/DerivedAssets.xcassets"
 DERIVED_ASSETS_BASE="${DIRECTORY}/DerivedAssetsBase.xcassets"
+
+# Assets can be overridden by a DerivedAssetsOverride.xcassets in ${DIRECTORY}, or
+# By a file named ${DIRECTORY}/../../OverrideAssets${EXECUTABLE_NAME}.xcassets
+
 DERIVED_ASSETS_OVERRIDE="${DIRECTORY}/DerivedAssetsOverride.xcassets"
+if [ ! -e "${DERIVED_ASSETS_OVERRIDE}" ]; then
+  DERIVED_ASSETS_OVERRIDE="${DIRECTORY}/../../OverrideAssets${EXECUTABLE_NAME}.xcassets"
+fi
 
 info "Building derived assets for ${DIRECTORY}..."
 rm -rf "${DERIVED_ASSETS}"

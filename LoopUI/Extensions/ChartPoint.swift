@@ -41,13 +41,13 @@ extension ChartPoint {
 
             if let potentialOverride = potentialOverride, startDate.date < endDate.date {
                 let chartRange = startDate.date...endDate.date
-                let overrideRange = potentialOverride.startDate...potentialOverride.endDate
+                let overrideRange = potentialOverride.startDate...potentialOverride.scheduledEndDate
                 if overrideRange.overlaps(chartRange) {
                     addBar(value: range.value, unit: unit, startDate: startDate, endDate: ChartAxisValueDate(date: potentialOverride.startDate, formatter: dateFormatter), maxPoints: &maxPoints, minPoints: &minPoints)
                     result += [maxPoints + minPoints.reversed()]
                     maxPoints = []
                     minPoints = []
-                    addBar(value: range.value, unit: unit, startDate: ChartAxisValueDate(date: potentialOverride.endDate, formatter: dateFormatter), endDate: endDate, maxPoints: &maxPoints, minPoints: &minPoints)
+                    addBar(value: range.value, unit: unit, startDate: ChartAxisValueDate(date: potentialOverride.scheduledEndDate, formatter: dateFormatter), endDate: endDate, maxPoints: &maxPoints, minPoints: &minPoints)
                 } else {
                     addBar(value: range.value, unit: unit, startDate: startDate, endDate: endDate, maxPoints: &maxPoints, minPoints: &minPoints)
                 }

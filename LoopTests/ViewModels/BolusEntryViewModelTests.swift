@@ -16,6 +16,7 @@ import XCTest
 
 class BolusEntryViewModelTests: XCTestCase {
    
+    // Some of the tests depend on a date on the hour
     static let now = ISO8601DateFormatter().date(from: "2020-03-11T07:00:00-0700")!
     static let exampleStartDate = now - .hours(2)
     static let exampleEndDate = now - .hours(1)
@@ -110,7 +111,7 @@ class BolusEntryViewModelTests: XCTestCase {
         // TODO: Test different screen widths
         // TODO: Test different insulin models
         // TODO: Test different chart history settings
-        let expected = DateInterval(start: now - .hours(9), duration: .hours(8))
+        let expected = DateInterval(start: now - .hours(2), duration: .hours(8))
         XCTAssertEqual(expected, bolusEntryViewModel.chartDateInterval)
     }
 
@@ -280,7 +281,7 @@ class BolusEntryViewModelTests: XCTestCase {
         setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
         let mockState = MockLoopState()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -297,7 +298,7 @@ class BolusEntryViewModelTests: XCTestCase {
         let mockState = MockLoopState()
         delegate.settings.suspendThreshold = GlucoseThreshold(unit: .milligramsPerDeciliter, value: Self.exampleCGMGlucoseQuantity.doubleValue(for: .milligramsPerDeciliter))
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -309,7 +310,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusWithNoticeMissingSuspendThreshold() throws {
         let mockState = MockLoopState()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -321,7 +322,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusWithOtherNotice() throws {
         let mockState = MockLoopState()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.currentGlucoseBelowTarget(glucose: Self.exampleGlucoseValue))
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.currentGlucoseBelowTarget(glucose: Self.exampleGlucoseValue))
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -368,7 +369,7 @@ class BolusEntryViewModelTests: XCTestCase {
         let mockState = MockLoopState()
         bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -406,7 +407,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertNil(bolusEntryViewModel.recommendedBolus)
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         let mockState = MockLoopState()
-        mockState.bolusRecommendationResult = BolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        mockState.bolusRecommendationResult = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
         try triggerLoopStateUpdatedWithDataAndWait(with: mockState)
         // Now, through the magic of `observeRecommendedBolusChanges` and the recommendedBolus publisher it should update to 1.234.  But we have to wait twice on main to make this reliable...
         // For some reason, starting with Xcode 12.5, in order for these tests to pass we need to call `waitOnMain()`
@@ -429,7 +430,7 @@ class BolusEntryViewModelTests: XCTestCase {
         authenticateOverrideCompletion(.success(()))
         
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(now, delegate.enactedBolusDate)
+        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
         XCTAssertTrue(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
@@ -450,7 +451,7 @@ class BolusEntryViewModelTests: XCTestCase {
         authenticateOverrideCompletion(.failure(MockError()))
         
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusDate)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertFalse(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
@@ -491,7 +492,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 0.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusDate)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -517,7 +518,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 0.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusDate)
+        XCTAssertNil(delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -546,7 +547,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 1.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(now, delegate.enactedBolusDate)
+        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -577,7 +578,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 1.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(now, delegate.enactedBolusDate)
+        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -647,7 +648,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                                                         requestedBolus: 1.0))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(now, delegate.enactedBolusDate)
+        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -787,7 +788,7 @@ class BolusEntryViewModelTests: XCTestCase {
         bolusEntryViewModel.enteredManualGlucose = Self.exampleManualGlucoseQuantity
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         XCTAssertEqual(.saveAndDeliver, bolusEntryViewModel.actionButtonAction)
-    }
+    }    
 }
 
 // MARK: utilities
@@ -829,9 +830,9 @@ fileprivate class MockLoopState: LoopState {
     
     var predictedGlucoseIncludingPendingInsulin: [PredictedGlucoseValue]?
     
-    var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
+    var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)?
     
-    var recommendedBolus: (recommendation: BolusRecommendation, date: Date)?
+    var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)?
     
     var retrospectiveGlucoseDiscrepancies: [GlucoseChange]?
     
@@ -846,18 +847,18 @@ fileprivate class MockLoopState: LoopState {
         return predictGlucoseValueResult
     }
     
-    var bolusRecommendationResult: BolusRecommendation?
+    var bolusRecommendationResult: ManualBolusRecommendation?
     var bolusRecommendationError: Error?
     var consideringPotentialCarbEntryPassed: NewCarbEntry??
     var replacingCarbEntryPassed: StoredCarbEntry??
-    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
+    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
         consideringPotentialCarbEntryPassed = potentialCarbEntry
         replacingCarbEntryPassed = replacedCarbEntry
         if let error = bolusRecommendationError { throw error }
         return bolusRecommendationResult
     }
     
-    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
+    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
         consideringPotentialCarbEntryPassed = potentialCarbEntry
         replacingCarbEntryPassed = replacedCarbEntry
         if let error = bolusRecommendationError { throw error }
@@ -866,7 +867,21 @@ fileprivate class MockLoopState: LoopState {
 }
 
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
-
+    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
+        return .hours(6) + .minutes(10)
+    }
+    
+    var pumpInsulinType: InsulinType?
+    
+    var manuallyEnteredBolusUnits: Double?
+    var manuallyEnteredDate: Date?
+    var manuallyEnteredInsulinType: InsulinType?
+    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) {
+        manuallyEnteredBolusUnits = units
+        manuallyEnteredDate = startDate
+        manuallyEnteredInsulinType = insulinType
+    }
+    
     var loopStateCallBlock: ((LoopState) -> Void)?
     func withLoopState(do block: @escaping (LoopState) -> Void) {
         loopStateCallBlock = block
@@ -892,10 +907,10 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     }
 
     var enactedBolusUnits: Double?
-    var enactedBolusDate: Date?
-    func enactBolus(units: Double, at startDate: Date, completion: @escaping (Error?) -> Void) {
+    var enactedBolusAutomatic: Bool?
+    func enactBolus(units: Double, automatic: Bool, completion: @escaping (Error?) -> Void) {
         enactedBolusUnits = units
-        enactedBolusDate = startDate
+        enactedBolusAutomatic = automatic
     }
     
     var getGlucoseSamplesResponse: [StoredGlucoseSample] = []

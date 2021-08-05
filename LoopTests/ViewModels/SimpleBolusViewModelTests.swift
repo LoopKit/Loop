@@ -23,7 +23,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     var addedGlucose: [NewGlucoseSample] = []
     var addedCarbEntry: NewCarbEntry?
     var storedBolusDecision: BolusDosingDecision?
-    var enactedBolus: (units: Double, startDate: Date)?
+    var enactedBolus: (units: Double, automatic: Bool)?
     var currentIOB: InsulinValue = SimpleBolusViewModelTests.noIOB
     var currentRecommendation: Double = 0
 
@@ -224,8 +224,8 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         completion(.success(storedCarbEntry))
     }
 
-    func enactBolus(units: Double, at startDate: Date) {
-        enactedBolus = (units: units, startDate: startDate)
+    func enactBolus(units: Double, automatic: Bool) {
+        enactedBolus = (units: units, automatic: automatic)
     }
     
     func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
@@ -235,7 +235,7 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
     func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
         
         var decision = BolusDosingDecision()
-        decision.recommendedBolus = BolusRecommendation(amount: currentRecommendation, pendingInsulin: 0, notice: .none)
+        decision.recommendedBolus = ManualBolusRecommendation(amount: currentRecommendation, pendingInsulin: 0, notice: .none)
         decision.insulinOnBoard = currentIOB
         return decision
     }

@@ -10,7 +10,7 @@ import Foundation
 import LoopKit
 import LoopCore
 
-protocol CGMStalenessMonitorDelegate: class {
+protocol CGMStalenessMonitorDelegate: AnyObject {
     func getLatestCGMGlucose(since: Date, completion: @escaping (_ result: Swift.Result<StoredGlucoseSample?, Error>) -> Void)
 }
 

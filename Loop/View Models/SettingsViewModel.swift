@@ -51,6 +51,7 @@ public typealias PumpManagerViewModel = DeviceViewModel<PumpManagerDescriptor>
 
 public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
+    func dosingStrategyChanged(_: DosingStrategy)
     func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings)
     func didTapIssueReport(title: String)
 }
@@ -79,14 +80,18 @@ public class SettingsViewModel: ObservableObject {
     let servicesViewModel: ServicesViewModel
     let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     let therapySettings: () -> TherapySettings
-    let supportedInsulinModelSettings: SupportedInsulinModelSettings
     let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
     let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
     let supportInfoProvider: SupportInfoProvider
 
     @Published var isClosedLoopAllowed: Bool
-    
+    @Published var dosingStrategy: DosingStrategy {
+        didSet {
+            delegate?.dosingStrategyChanged(dosingStrategy)
+        }
+    }
+
     var closedLoopPreference: Bool {
        didSet {
            delegate?.dosingEnabledChanged(closedLoopPreference)
@@ -101,13 +106,13 @@ public class SettingsViewModel: ObservableObject {
                 servicesViewModel: ServicesViewModel,
                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
                 therapySettings: @escaping () -> TherapySettings,
-                supportedInsulinModelSettings: SupportedInsulinModelSettings,
                 pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
                 syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
                 isClosedLoopAllowed: Published<Bool>.Publisher,
                 supportInfoProvider: SupportInfoProvider,
+                dosingStrategy: DosingStrategy,
                 availableSupports: [SupportUI],
                 delegate: SettingsViewModelDelegate?
     ) {
@@ -117,12 +122,12 @@ public class SettingsViewModel: ObservableObject {
         self.servicesViewModel = servicesViewModel
         self.criticalEventLogExportViewModel = criticalEventLogExportViewModel
         self.therapySettings = therapySettings
-        self.supportedInsulinModelSettings = supportedInsulinModelSettings
         self.pumpSupportedIncrements = pumpSupportedIncrements
         self.syncPumpSchedule = syncPumpSchedule
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.closedLoopPreference = initialDosingEnabled
         self.isClosedLoopAllowed = false
+        self.dosingStrategy = dosingStrategy
         self.supportInfoProvider = supportInfoProvider
         self.availableSupports = availableSupports
         self.delegate = delegate

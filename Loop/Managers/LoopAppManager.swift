@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Intents
 import Combine
 import LoopKit
 import LoopKitUI
@@ -76,6 +77,10 @@ class LoopAppManager: NSObject {
 
         self.windowProvider = windowProvider
         self.launchOptions = launchOptions
+        
+        if FeatureFlags.siriEnabled && INPreferences.siriAuthorizationStatus() == .notDetermined {
+            INPreferences.requestSiriAuthorization { _ in }
+        }
 
         registerBackgroundTasks()
 
@@ -335,8 +340,8 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
                 deviceDataManager?.analyticsServicesManager.didRetryBolus()
-
-                deviceDataManager?.enactBolus(units: units, at: startDate) { (_) in
+                
+                deviceDataManager?.enactBolus(units: units, automatic: false) { (_) in
                     completionHandler()
                 }
                 return

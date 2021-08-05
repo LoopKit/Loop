@@ -10,8 +10,12 @@ import HealthKit
 import LoopCore
 import LoopKit
 
-extension DeviceDataManager: BolusEntryViewModelDelegate {
-
+extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDelegate {
+    
+    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) {
+        loopManager.addManuallyEnteredDose(startDate: startDate, units: units, insulinType: insulinType)
+    }
+    
     func withLoopState(do block: @escaping (LoopState) -> Void) {
         loopManager.getLoopState { block($1) }
     }
@@ -28,9 +32,6 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
         loopManager.storeBolusDosingDecision(bolusDosingDecision, withDate: date)
     }
 
-    /// func enactBolus(units: Double, at startDate: Date, completion: @escaping (_ error: Error?) -> Void)
-    /// is already implemented in DeviceDataManager
-    
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
         glucoseStore.getGlucoseSamples(start: start, end: end, completion: completion)
     }
@@ -63,10 +64,14 @@ extension DeviceDataManager: BolusEntryViewModelDelegate {
         return glucoseStore.preferredUnit ?? .milligramsPerDeciliter
     }
     
-    var insulinModel: InsulinModel? {
-        return loopManager.insulinModelSettings?.model
+    var pumpInsulinType: InsulinType? {
+        return pumpManager?.status.insulinType
     }
-    
+        
+    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
+        return doseStore.insulinModelProvider.model(for: type).effectDuration
+    }
+
     var settings: LoopSettings {
         return loopManager.settings
     }

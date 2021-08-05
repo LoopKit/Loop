@@ -16,7 +16,8 @@ extension UserDefaults {
     private enum Key: String {
         case basalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
         case carbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
-        case insulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
+        case legacyInsulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
+        case defaultRapidActingModel = "com.loopkit.Loop.defaultRapidActingModel"
         case loopSettings = "com.loopkit.Loop.loopSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case overrideHistory = "com.loopkit.overrideHistory"
@@ -52,23 +53,28 @@ extension UserDefaults {
         }
     }
 
-    public var insulinModelSettings: InsulinModelSettings? {
+    public var defaultRapidActingModel: ExponentialInsulinModelPreset? {
         get {
-            if let rawValue = dictionary(forKey: Key.insulinModelSettings.rawValue) {
-                return InsulinModelSettings(rawValue: rawValue)
-            } else {
-                // Migrate the version 0 case
-                let insulinActionDurationKey = "com.loudnate.Naterade.InsulinActionDuration"
-                defer {
-                    removeObject(forKey: insulinActionDurationKey)
-                }
-
-                let value = double(forKey: insulinActionDurationKey)
-                return value > 0 ? .walsh(WalshInsulinModel(actionDuration: value)) : nil
+            if let rawValue = string(forKey: Key.defaultRapidActingModel.rawValue) {
+                return ExponentialInsulinModelPreset(rawValue: rawValue)
             }
+            
+            // Migrate
+            if let rawValue = dictionary(forKey: Key.legacyInsulinModelSettings.rawValue) {
+                if let typeName = rawValue["type"] as? String,
+                   typeName == "exponentialPreset",
+                   let modelRaw = rawValue["model"] as? ExponentialInsulinModelPreset.RawValue,
+                   let preset = ExponentialInsulinModelPreset(rawValue: modelRaw)
+                {
+                    removeObject(forKey: Key.legacyInsulinModelSettings.rawValue)
+                    return preset
+                }
+            }
+            
+            return nil
         }
         set {
-            set(newValue?.rawValue, forKey: Key.insulinModelSettings.rawValue)
+            set(newValue?.rawValue, forKey: Key.defaultRapidActingModel.rawValue)
         }
     }
 

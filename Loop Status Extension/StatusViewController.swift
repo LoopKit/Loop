@@ -90,7 +90,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
         cacheStore: cacheStore,
         observationEnabled: false,
-        insulinModel: defaults?.insulinModelSettings?.model,
+        insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: defaults?.defaultRapidActingModel),
+        longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
         basalProfile: defaults?.basalRateSchedule,
         insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule,
         provenanceIdentifier: HKSource.default().bundleIdentifier

@@ -9,7 +9,7 @@
 import Foundation
 
 
-public protocol IdentifiableClass: class {
+public protocol IdentifiableClass: AnyObject {
     static var className: String { get }
 }
 

@@ -90,7 +90,7 @@ extension DeviceDataManager {
         {
             return action
         } else if let pumpManager = pumpManager {
-            return .presentViewController(pumpManager.settingsViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled))
+            return .presentViewController(pumpManager.settingsViewController(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled, allowedInsulinTypes: allowedInsulinTypes))
         } else {
             return .setupNewPump
         }

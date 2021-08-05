@@ -9,7 +9,7 @@
 import LoopKit
 import LoopCore
 
-protocol LoopSettingsAlerterDelegate: class {
+protocol LoopSettingsAlerterDelegate: AnyObject {
     var settings: LoopSettings { get set }
 }
 

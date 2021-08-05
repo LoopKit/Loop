@@ -1,5 +1,5 @@
 language: objective-c
-osx_image: xcode11.6
+osx_image: xcode12.4
 
 cache:
   directories:
@@ -8,13 +8,13 @@ cache:
 jobs:
   include:
     - stage: build carthage
-      script: set -o pipefail && xcodebuild -project Loop.xcodeproj -target Cartfile
+      script: set -o pipefail && xcodebuild -project Loop.xcodeproj -target Cartfile | xcpretty
     - stage: test build
       script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme Loop build CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO | xcpretty
     - # same stage; parallel
       script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme Learn build CODE_SIGN_IDENTITY="" CODE_SIGNING_ALLOWED=NO | xcpretty
     - # same stage; parallel
-      script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme LoopTests -destination 'name=iPhone 8' test | xcpretty
+      script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme LoopTests -destination 'platform=iOS Simulator,name=iPhone 8' test EXCLUDED_ARCHS=arm64 | xcpretty
     - # same stage; parallel
       script: set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme DoseMathTests -destination 'name=iPhone 8' test | xcpretty
 
