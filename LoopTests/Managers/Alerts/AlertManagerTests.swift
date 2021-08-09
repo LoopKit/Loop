@@ -26,7 +26,8 @@ class AlertManagerTests: XCTestCase {
     
     class MockResponder: AlertResponder {
         var acknowledged: [Alert.AlertIdentifier: Bool] = [:]
-        func acknowledgeAlert(alertIdentifier: Alert.AlertIdentifier) {
+        func acknowledgeAlert(alertIdentifier: Alert.AlertIdentifier, completion: @escaping (Error?) -> Void) {
+            completion(nil)
             acknowledged[alertIdentifier] = true
         }
     }
