@@ -790,11 +790,23 @@ class BolusEntryViewModelTests: XCTestCase {
     }
 
     func testManualGlucoseStringMatchesDisplayGlucoseUnit() {
+        // used "260" mg/dL ("14.4" mmol/L) since 14.40 mmol/L -> 259 mg/dL and 14.43 mmol/L -> 260 mg/dL
         XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "")
-        bolusEntryViewModel.manualGlucoseString = "140"
-        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "140")
+        bolusEntryViewModel.manualGlucoseString = "260"
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "260")
         delegate.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .millimolesPerLiter)
-        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "7.8")
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "14.4")
+        delegate.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .milligramsPerDeciliter)
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "260")
+        delegate.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .millimolesPerLiter)
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "14.4")
+
+        bolusEntryViewModel.manualGlucoseString = "14.0"
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "14.0")
+        bolusEntryViewModel.manualGlucoseString = "14.4"
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "14.4")
+        delegate.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .milligramsPerDeciliter)
+        XCTAssertEqual(bolusEntryViewModel.manualGlucoseString, "259")
     }
 }
 

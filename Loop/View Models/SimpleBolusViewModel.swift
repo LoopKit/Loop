@@ -102,17 +102,23 @@ class SimpleBolusViewModel: ObservableObject {
 
     @Published private var _manualGlucoseString: String = "" {
         didSet {
-            if let manualGlucoseValue = glucoseQuantityFormatter.numberFormatter.number(from: _manualGlucoseString)?.doubleValue {
-                manualGlucoseQuantity = HKQuantity(unit: displayGlucoseUnit, doubleValue: manualGlucoseValue)
+            guard let manualGlucoseValue = glucoseQuantityFormatter.numberFormatter.number(from: _manualGlucoseString)?.doubleValue
+            else {
+                manualGlucoseQuantity = nil
+                return
+            }
+
+            // if needed update manualGlucoseQuantity and related activeNotice
+            if manualGlucoseQuantity == nil ||
+                _manualGlucoseString != glucoseQuantityFormatter.string(from: manualGlucoseQuantity!, for: cachedDisplayGlucoseUnit, includeUnit: false)
+            {
+                manualGlucoseQuantity = HKQuantity(unit: cachedDisplayGlucoseUnit, doubleValue: manualGlucoseValue)
                 if let manualGlucoseQuantity = manualGlucoseQuantity, manualGlucoseQuantity < suspendThreshold {
                     activeNotice = .glucoseBelowSuspendThreshold
                 } else {
                     activeNotice = nil
                 }
-            } else {
-                manualGlucoseQuantity = nil
             }
-            updateRecommendation()
         }
     }
 
@@ -127,7 +133,13 @@ class SimpleBolusViewModel: ObservableObject {
     }
     
     private var carbs: HKQuantity? = nil
-    private var manualGlucoseQuantity: HKQuantity? = nil
+
+    private var manualGlucoseQuantity: HKQuantity? = nil {
+        didSet {
+            updateRecommendation()
+        }
+    }
+
     private var bolus: HKQuantity? = nil
     
     var displayGlucoseUnit: HKUnit { return delegate.displayGlucoseUnitObservable.displayGlucoseUnit }

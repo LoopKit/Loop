@@ -200,12 +200,24 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
 
     func testManualGlucoseStringMatchesDisplayGlucoseUnit() {
+        // used "260" mg/dL ("14.4" mmol/L) since 14.40 mmol/L -> 259 mg/dL and 14.43 mmol/L -> 260 mg/dL
         let viewModel = SimpleBolusViewModel(delegate: self)
         XCTAssertEqual(viewModel.manualGlucoseString, "")
-        viewModel.manualGlucoseString = "140"
-        XCTAssertEqual(viewModel.manualGlucoseString, "140")
+        viewModel.manualGlucoseString = "260"
+        XCTAssertEqual(viewModel.manualGlucoseString, "260")
         self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .millimolesPerLiter)
-        XCTAssertEqual(viewModel.manualGlucoseString, "7.8")
+        XCTAssertEqual(viewModel.manualGlucoseString, "14.4")
+        self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .milligramsPerDeciliter)
+        XCTAssertEqual(viewModel.manualGlucoseString, "260")
+        self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .millimolesPerLiter)
+        XCTAssertEqual(viewModel.manualGlucoseString, "14.4")
+
+        viewModel.manualGlucoseString = "14.0"
+        XCTAssertEqual(viewModel.manualGlucoseString, "14.0")
+        viewModel.manualGlucoseString = "14.4"
+        XCTAssertEqual(viewModel.manualGlucoseString, "14.4")
+        self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .milligramsPerDeciliter)
+        XCTAssertEqual(viewModel.manualGlucoseString, "259")
     }
 }
 
