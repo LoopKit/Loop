@@ -12,9 +12,11 @@ import HealthKit
 protocol DoseStoreProtocol: AnyObject {
     // MARK: settings
     var basalProfile: LoopKit.BasalRateSchedule? { get set }
+
+    var insulinModelProvider: InsulinModelProvider { get set }
     
-    var insulinModelSettings: LoopKit.InsulinModelSettings? { get set }
-    
+    var longestEffectDuration: TimeInterval { get set }
+
     var insulinSensitivitySchedule: LoopKit.InsulinSensitivitySchedule? { get set }
     
     var basalProfileApplyingOverrideHistory: BasalRateSchedule? { get }

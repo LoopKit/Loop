@@ -59,6 +59,7 @@ class LoopAppManager: NSObject {
     private var trustedTimeChecker: TrustedTimeChecker!
     private var deviceDataManager: DeviceDataManager!
     private var onboardingManager: OnboardingManager!
+    private var alertPermissionsChecker: AlertPermissionsChecker!
 
     private var state: State = .initialize
 
@@ -126,6 +127,7 @@ class LoopAppManager: NSObject {
         self.bluetoothStateManager = BluetoothStateManager()
         self.alertManager = AlertManager(alertPresenter: self,
                                          expireAfter: Bundle.main.localCacheDuration)
+        self.alertPermissionsChecker = AlertPermissionsChecker(alertManager: alertManager)
         self.loopAlertsManager = LoopAlertsManager(alertManager: alertManager,
                                                    bluetoothProvider: bluetoothStateManager)
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
@@ -186,7 +188,7 @@ class LoopAppManager: NSObject {
         }
         rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
 
-        deviceDataManager.refreshDeviceData()
+        //deviceDataManager.refreshDeviceData()
 
         handleRemoteNotificationFromLaunchOptions()
 

@@ -85,8 +85,13 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         super.viewDidLoad()
 
         state = .display
-        let logDoseButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapLogDoseButton))
-        navigationItem.rightBarButtonItems = [logDoseButton, editButtonItem]
+        
+        if FeatureFlags.outsideDosesEnabled {
+            let logDoseButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapLogDoseButton))
+            navigationItem.rightBarButtonItems = [logDoseButton, editButtonItem]
+        } else {
+            dataSourceSegmentedControl.removeSegment(at: 2, animated: false)
+        }
     }
 
     public override func viewWillAppear(_ animated: Bool) {
@@ -155,10 +160,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
         tableView.endEditing(true)
 
-        let viewModel = LoggedDoseViewModel(
-            delegate: deviceManager,
-            supportedInsulinModels: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled)
-        )
+        let viewModel = LoggedDoseViewModel(delegate: deviceManager)
         let bolusEntryView = LoggedDoseView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
@@ -609,12 +611,12 @@ extension DoseEntry {
             {
                 description = String(format: NSLocalizedString("Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@", comment: "Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit)"), type.localizedDescription, numberFormatter.string(from: deliveredUnits) ?? "?", numberFormatter.string(from: programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString())
             } else {
-                description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString())
+                description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString(avoidLineBreaking: false))
             }
 
             return createAttributedDescription(from: description, with: font)
         case .basal, .tempBasal:
-            let description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: unitsPerHour) ?? "?", DoseEntry.unitsPerHour.shortLocalizedUnitString())
+            let description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: unitsPerHour) ?? "?", DoseEntry.unitsPerHour.shortLocalizedUnitString(avoidLineBreaking: false))
             return createAttributedDescription(from: description, with: font)
         case .suspend, .resume:
             let attributes: [NSAttributedString.Key: Any] = [

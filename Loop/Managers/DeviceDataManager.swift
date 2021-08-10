@@ -239,7 +239,8 @@ final class DeviceDataManager {
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModelSettings: UserDefaults.appGroup?.insulinModelSettings,
+            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: UserDefaults.appGroup?.defaultRapidActingModel),
+            longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
@@ -392,7 +393,7 @@ final class DeviceDataManager {
         let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled, allowedInsulinTypes: allowedInsulinTypes)
         if case .createdAndOnboarded(let pumpManagerUI) = result {
             pumpManagerOnboarding(didCreatePumpManager: pumpManagerUI)
-            pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI, withFinalSettings: settings)
+            pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI)
         }
 
         return .success(result)
@@ -526,7 +527,7 @@ final class DeviceDataManager {
     func checkDeliveryUncertaintyState() {
         if let pumpManager = pumpManager, pumpManager.status.deliveryIsUncertain {
             DispatchQueue.main.async {
-                self.deliveryUncertaintyAlertManager!.showAlert()
+                self.deliveryUncertaintyAlertManager?.showAlert()
             }
         }
     }
@@ -669,9 +670,8 @@ extension DeviceDataManager {
         }
 
         self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
-        pumpManager.enactBolus(units: units, automatic: automatic) { (result) in
-            switch result {
-            case .failure(let error):
+        pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
+            if let error = error {
                 self.log.error("%{public}@", String(describing: error))
                 if case .uncertainDelivery = error, !automatic {
                     NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
@@ -679,8 +679,8 @@ extension DeviceDataManager {
                 self.loopManager.bolusRequestFailed(error) {
                     completion(error)
                 }
-            case .success(let dose):
-                self.loopManager.bolusConfirmed(dose) {
+            } else {
+                self.loopManager.bolusConfirmed() {
                     completion(nil)
                 }
             }
@@ -743,27 +743,6 @@ extension DeviceDataManager {
 
 // MARK: - DeviceManagerDelegate
 extension DeviceDataManager: DeviceManagerDelegate {
-
-    func scheduleNotification(for manager: DeviceManager,
-                              identifier: String,
-                              content: UNNotificationContent,
-                              trigger: UNNotificationTrigger?) {
-        let request = UNNotificationRequest(
-            identifier: identifier,
-            content: content,
-            trigger: trigger
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-    
-    func clearNotification(for manager: DeviceManager, identifier: String) {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
-    }
-
-    func removeNotificationRequests(for manager: DeviceManager, identifiers: [String]) {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
-    }
 
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
         deviceLog.log(managerIdentifier: manager.managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
@@ -994,6 +973,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         doseStore.resetPumpData(completion: nil)
         DispatchQueue.main.async {
             self.pumpManager = nil
+            self.deliveryUncertaintyAlertManager = nil
         }
     }
 
@@ -1062,21 +1042,12 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
     func pumpManagerOnboarding(didCreatePumpManager pumpManager: PumpManagerUI) {
         log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
         self.pumpManager = pumpManager
+        self.deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
     }
 
-    func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI, withFinalSettings settings: PumpManagerSetupSettings) {
+    func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI) {
         precondition(pumpManager.isOnboarded)
         log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.managerIdentifier)
-
-        if let basalRateSchedule = settings.basalSchedule {
-            loopManager.basalRateSchedule = basalRateSchedule
-        }
-        if let maxBasalRateUnitsPerHour = settings.maxBasalRateUnitsPerHour {
-            loopManager.settings.maximumBasalRatePerHour = maxBasalRateUnitsPerHour
-        }
-        if let maxBolusUnits = settings.maxBolusUnits {
-            loopManager.settings.maximumBolus = maxBolusUnits
-        }
     }
 }
 
@@ -1200,7 +1171,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
     func loopDataManager(
         _ manager: LoopDataManager,
         didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date),
-        completion: @escaping (_ error: Error?) -> Void
+        completion: @escaping (Error?) -> Void
     ) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
@@ -1224,12 +1195,9 @@ extension DeviceDataManager: LoopDataManagerDelegate {
                 self.log.default("LoopManager did recommend basal change")
 
                 doseDispatchGroup.enter()
-                pumpManager.enactTempBasal(unitsPerHour: basalAdjustment.unitsPerHour, for: basalAdjustment.duration, completion: { result in
-                    switch result {
-                    case .failure(let error):
+                pumpManager.enactTempBasal(unitsPerHour: basalAdjustment.unitsPerHour, for: basalAdjustment.duration, completion: { error in
+                    if let error = error {
                         tempBasalError = error
-                    default:
-                        break
                     }
                     doseDispatchGroup.leave()
                 })
@@ -1245,13 +1213,11 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             if automaticDose.recommendation.bolusUnits > 0 {
                 self.log.default("LoopManager did recommend bolus dose")
                 doseDispatchGroup.enter()
-                pumpManager.enactBolus(units: automaticDose.recommendation.bolusUnits, automatic: true) { (result) in
-                    switch result {
-                    case .failure(let error):
+                pumpManager.enactBolus(units: automaticDose.recommendation.bolusUnits, automatic: true) { (error) in
+                    if let error = error {
                         bolusError = error
-                    default:
+                    } else {
                         self.log.default("PumpManager issued bolus command")
-                        break
                     }
                     doseDispatchGroup.leave()
                 }
@@ -1450,9 +1416,18 @@ extension GlucoseStore : CGMStalenessMonitorDelegate { }
 //MARK: - SupportInfoProvider protocol conformance
 
 extension DeviceDataManager: SupportInfoProvider {
+
+    private var branchNameIfNotReleaseBranch: String? {
+        return Bundle.main.gitBranch.filter { branch in
+            return branch != "" &&
+                branch != "main" &&
+                branch != "master" &&
+                !branch.starts(with: "release/")
+        }
+    }
     
     public var localizedAppNameAndVersion: String {
-        if let branch = Bundle.main.gitBranch, branch != "", branch != "main", branch != "master" {
+        if let branch = branchNameIfNotReleaseBranch {
             return Bundle.main.localizedNameAndVersion + " (\(branch))"
         }
         return Bundle.main.localizedNameAndVersion

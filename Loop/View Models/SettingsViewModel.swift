@@ -80,7 +80,6 @@ public class SettingsViewModel: ObservableObject {
     let servicesViewModel: ServicesViewModel
     let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     let therapySettings: () -> TherapySettings
-    let supportedInsulinModelSettings: SupportedInsulinModelSettings
     let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
     let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
@@ -107,7 +106,6 @@ public class SettingsViewModel: ObservableObject {
                 servicesViewModel: ServicesViewModel,
                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
                 therapySettings: @escaping () -> TherapySettings,
-                supportedInsulinModelSettings: SupportedInsulinModelSettings,
                 pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
                 syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?,
                 sensitivityOverridesEnabled: Bool,
@@ -124,7 +122,6 @@ public class SettingsViewModel: ObservableObject {
         self.servicesViewModel = servicesViewModel
         self.criticalEventLogExportViewModel = criticalEventLogExportViewModel
         self.therapySettings = therapySettings
-        self.supportedInsulinModelSettings = supportedInsulinModelSettings
         self.pumpSupportedIncrements = pumpSupportedIncrements
         self.syncPumpSchedule = syncPumpSchedule
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled

@@ -40,9 +40,11 @@ class OnboardingManager {
         self.windowProvider = windowProvider
         self.userDefaults = userDefaults
 
-        self.isOnboarded = userDefaults.onboardingManagerIsOnboarded
+        self.isOnboarded = userDefaults.onboardingManagerIsOnboarded && loopDataManager.therapySettings.isComplete
         if !isOnboarded {
-            self.completedOnboardingIdentifiers = userDefaults.onboardingManagerCompletedOnboardingIdentifiers
+            if loopDataManager.therapySettings.isComplete {
+                self.completedOnboardingIdentifiers = userDefaults.onboardingManagerCompletedOnboardingIdentifiers
+            }
             if let activeOnboardingRawValue = userDefaults.onboardingManagerActiveOnboardingRawValue {
                 self.activeOnboarding = onboardingFromRawValue(activeOnboardingRawValue)
                 self.activeOnboarding?.onboardingDelegate = self
@@ -351,6 +353,13 @@ extension OnboardingManager: ServiceProvider {
         }
 
         return .success(.userInteractionRequired(serviceUI.settingsViewController(colorPalette: .default)))
+    }
+}
+
+// MARK: - TherapySettingsProvider
+extension OnboardingManager: TherapySettingsProvider {
+    var onboardingTherapySettings: TherapySettings {
+        return loopDataManager.therapySettings
     }
 }
 

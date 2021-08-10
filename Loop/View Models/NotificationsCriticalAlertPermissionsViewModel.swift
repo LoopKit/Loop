@@ -33,10 +33,11 @@ public class NotificationsCriticalAlertPermissionsViewModel: ObservableObject {
         self.notificationsPermissionsGiven = notificationsPermissionsGiven
         self.criticalAlertsPermissionsGiven = criticalAlertsPermissionsGiven
         
-        NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: nil) {
-            [weak self] _ in
-            self?.updateState()
-        }
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .sink { [weak self] _ in
+                self?.updateState()
+            }
+            .store(in: &cancellables)
         updateState()
         
         showWarningPublisher
@@ -45,7 +46,7 @@ public class NotificationsCriticalAlertPermissionsViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func updateState() {
+    func updateState() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
                 self.notificationsPermissionsGiven = settings.alertSetting == .enabled

@@ -22,7 +22,7 @@ extension BolusRecommendationNotice {
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             let bgStr = glucoseFormatter.string(from: glucose.quantity, unit: unit)!
             return String(format: NSLocalizedString("Current glucose of %1$@ is below correction range.", comment: "Message when offering bolus recommendation even though bg is below range. (1: glucose value)"), bgStr)
-        case .predictedGlucoseBelowTarget(minGlucose: let minGlucose):
+        case .predictedGlucoseBelowTarget(minGlucose: let minGlucose), .allGlucoseBelowTarget(minGlucose: let minGlucose):
             let timeFormatter = DateFormatter()
             timeFormatter.dateStyle = .none
             timeFormatter.timeStyle = .short

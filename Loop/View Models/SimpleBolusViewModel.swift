@@ -16,7 +16,7 @@ import LoopCore
 import Intents
 import LocalAuthentication
 
-protocol SimpleBolusViewModelDelegate: class {
+protocol SimpleBolusViewModelDelegate: AnyObject {
     
     func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Error?) -> Void)
     
