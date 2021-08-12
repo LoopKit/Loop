@@ -18,11 +18,11 @@ class CGMStalenessMonitorTests: XCTestCase {
     private var fetchExpectation: XCTestExpectation?
     
     private var storedGlucoseSample: StoredGlucoseSample {
-        return StoredGlucoseSample(uuid: UUID(), provenanceIdentifier: UUID().uuidString, syncIdentifier: "syncIdentifier", syncVersion: 1, startDate: Date().addingTimeInterval(-.minutes(5)), quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 120), isDisplayOnly: false, wasUserEntered: false, device: nil)
+        return StoredGlucoseSample(uuid: UUID(), provenanceIdentifier: UUID().uuidString, syncIdentifier: "syncIdentifier", syncVersion: 1, startDate: Date().addingTimeInterval(-.minutes(5)), quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 120), trend: .flat, isDisplayOnly: false, wasUserEntered: false, device: nil)
     }
     
     private var newGlucoseSample: NewGlucoseSample {
-        return NewGlucoseSample(date: Date().addingTimeInterval(-.minutes(1)), quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 120), isDisplayOnly: false, wasUserEntered: false, syncIdentifier: "syncIdentifier")
+        return NewGlucoseSample(date: Date().addingTimeInterval(-.minutes(1)), quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 120), trend: .flat, isDisplayOnly: false, wasUserEntered: false, syncIdentifier: "syncIdentifier")
     }
 
     func testInitialValue() {

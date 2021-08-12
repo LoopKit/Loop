@@ -257,7 +257,12 @@ class SimpleBolusViewModel: ObservableObject {
         
         func saveManualGlucose(_ completion: @escaping (Bool) -> Void) {
             if let glucose = glucose {
-                let manualGlucoseSample = NewGlucoseSample(date: saveDate, quantity: glucose, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: UUID().uuidString)
+                let manualGlucoseSample = NewGlucoseSample(date: saveDate,
+                                                           quantity: glucose,
+                                                           trend: nil, // All manual glucose entries are assumed to have no trend.
+                                                           isDisplayOnly: false,
+                                                           wasUserEntered: true,
+                                                           syncIdentifier: UUID().uuidString)
                 delegate.addGlucose([manualGlucoseSample]) { error in
                     DispatchQueue.main.async {
                         if let error = error {

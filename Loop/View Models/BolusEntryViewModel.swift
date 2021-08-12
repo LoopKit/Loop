@@ -453,6 +453,7 @@ final class BolusEntryViewModel: ObservableObject {
             NewGlucoseSample(
                 date: entryDate,
                 quantity: quantity,
+                trend: nil, // All manual glucose entries are assumed to have no trend.
                 isDisplayOnly: false,
                 wasUserEntered: true,
                 syncIdentifier: uuidProvider()
