@@ -616,6 +616,7 @@ private extension DeviceDataManager {
         cgmManager?.delegateQueue = queue
 
         glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
+        glucoseStore.healthKitStorageDelay = cgmManager.map{ type(of: $0).healthKitStorageDelay } ?? 0
 
         updatePumpManagerBLEHeartbeatPreference()
         if let cgmManager = cgmManager {
