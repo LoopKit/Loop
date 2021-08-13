@@ -887,6 +887,12 @@ fileprivate class MockLoopState: LoopState {
 }
 
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
+        
+    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
+        return .hours(6) + .minutes(10)
+    }
+    
+    var pumpInsulinType: InsulinType?
 
     var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
 

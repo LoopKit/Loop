@@ -30,8 +30,6 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     
     func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void)
     
-    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?)
-
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
     func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)
