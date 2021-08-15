@@ -52,7 +52,7 @@ protocol DoseStoreProtocol: AnyObject {
     
     func executePumpEventQuery(fromQueryAnchor queryAnchor: DoseStore.QueryAnchor?, limit: Int, completion: @escaping (DoseStore.PumpEventQueryResult) -> Void)
     
-    func executeDoseQuery(fromQueryAnchor queryAnchor: DoseStore.QueryAnchor?, limit: Int, completion: @escaping (DoseStore.DoseQueryResult) -> Void)
+    func executeDoseQuery(fromQueryAnchor queryAnchor: DoseStore.QueryAnchor?, pumpEventLimit: Int, doseEventsLimit: Int, completion: @escaping (DoseStore.DoseQueryResult) -> Void)
     
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
     

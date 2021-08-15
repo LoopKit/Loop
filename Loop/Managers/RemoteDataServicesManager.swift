@@ -167,7 +167,7 @@ extension RemoteDataServicesManager {
             let semaphore = DispatchSemaphore(value: 0)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .dose) ?? DoseStore.QueryAnchor()
 
-            self.doseStore.executeDoseQuery(fromQueryAnchor: queryAnchor, limit: remoteDataService.doseDataLimit ?? Int.max) { result in
+            self.doseStore.executeDoseQuery(fromQueryAnchor: queryAnchor, pumpEventLimit: remoteDataService.doseDataLimit ?? Int.max / 2, doseEventsLimit: remoteDataService.doseDataLimit ?? Int.max / 2) { result in
                 switch result {
                 case .failure(let error):
                     self.log.error("Error querying dose data: %{public}@", String(describing: error))
