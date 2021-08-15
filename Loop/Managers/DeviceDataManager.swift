@@ -673,7 +673,9 @@ extension DeviceDataManager {
         pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
-                if case .uncertainDelivery = error, !automatic {
+                if case .uncertainDelivery = error {
+                    self.checkDeliveryUncertaintyState()
+                } else if !automatic {
                     NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
                 }
                 self.loopManager.bolusRequestFailed(error) {
