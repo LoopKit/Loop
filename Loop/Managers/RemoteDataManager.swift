@@ -36,6 +36,6 @@ final class RemoteDataManager {
 }
 
 
-protocol RemoteDataManagerDelegate: class {
+protocol RemoteDataManagerDelegate: AnyObject {
     func remoteDataManagerDidUpdateServices(_ dataManager: RemoteDataManager)
 }
