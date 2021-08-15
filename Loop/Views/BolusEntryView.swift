@@ -302,7 +302,9 @@ struct BolusEntryView: View {
                 bolusUnitsLabel
             }
             .onTapGesture {
-                typedBolusEntry.wrappedValue = ""
+                if typedBolusEntry.wrappedValue == recommendedBolusString {
+                    typedBolusEntry.wrappedValue = ""
+                }
             }
         }
         .accessibilityElement(children: .combine)
