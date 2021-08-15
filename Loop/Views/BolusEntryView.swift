@@ -301,6 +301,9 @@ struct BolusEntryView: View {
                 )
                 bolusUnitsLabel
             }
+            .onTapGesture {
+                typedBolusEntry.wrappedValue = ""
+            }
         }
         .accessibilityElement(children: .combine)
     }
