@@ -61,4 +61,16 @@ extension Bundle {
     var xcodeVersion: String? {
         return object(forInfoDictionaryKey: "com-loopkit-Loop-xcode-version") as? String
     }
+    
+    var profileExpiration: Date? {
+        return object(forInfoDictionaryKey: "com-loopkit-Loop-profile-expiration") as? Date
+    }
+
+    var profileExpirationString: String {
+        if let profileExpiration = profileExpiration {
+            return "\(profileExpiration)"
+        } else {
+            return "N/A"
+        }
+    }
 }
