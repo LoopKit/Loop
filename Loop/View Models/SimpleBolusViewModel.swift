@@ -76,19 +76,49 @@ class SimpleBolusViewModel: ObservableObject {
         }
     }
 
-    @Published var enteredGlucoseAmount: String = "" {
+    // needed to detect change in display glucose unit when returning to the app
+    private var cachedDisplayGlucoseUnit: HKUnit
+
+    var manualGlucoseString: String {
+        get  {
+            if cachedDisplayGlucoseUnit != displayGlucoseUnit {
+                cachedDisplayGlucoseUnit = displayGlucoseUnit
+                glucoseQuantityFormatter.setPreferredNumberFormatter(for: displayGlucoseUnit)
+                guard let manualGlucoseQuantity = manualGlucoseQuantity,
+                      let manualGlucoseString = glucoseQuantityFormatter.string(from: manualGlucoseQuantity, for: displayGlucoseUnit, includeUnit: false)
+                else {
+                    _manualGlucoseString = ""
+                    return _manualGlucoseString
+                }
+                self._manualGlucoseString = manualGlucoseString
+            }
+
+            return _manualGlucoseString
+        }
+        set {
+            _manualGlucoseString = newValue
+        }
+    }
+
+    @Published private var _manualGlucoseString: String = "" {
         didSet {
-            if let enteredGlucose = glucoseAmountFormatter.number(from: enteredGlucoseAmount)?.doubleValue {
-                glucose = HKQuantity(unit: delegate.displayGlucoseUnitObservable.displayGlucoseUnit, doubleValue: enteredGlucose)
-                if let glucose = glucose, glucose < suspendThreshold {
+            guard let manualGlucoseValue = glucoseQuantityFormatter.numberFormatter.number(from: _manualGlucoseString)?.doubleValue
+            else {
+                manualGlucoseQuantity = nil
+                return
+            }
+
+            // if needed update manualGlucoseQuantity and related activeNotice
+            if manualGlucoseQuantity == nil ||
+                _manualGlucoseString != glucoseQuantityFormatter.string(from: manualGlucoseQuantity!, for: cachedDisplayGlucoseUnit, includeUnit: false)
+            {
+                manualGlucoseQuantity = HKQuantity(unit: cachedDisplayGlucoseUnit, doubleValue: manualGlucoseValue)
+                if let manualGlucoseQuantity = manualGlucoseQuantity, manualGlucoseQuantity < suspendThreshold {
                     activeNotice = .glucoseBelowSuspendThreshold
                 } else {
                     activeNotice = nil
                 }
-            } else {
-                glucose = nil
             }
-            updateRecommendation()
         }
     }
 
@@ -103,10 +133,16 @@ class SimpleBolusViewModel: ObservableObject {
     }
     
     private var carbs: HKQuantity? = nil
-    private var glucose: HKQuantity? = nil
+
+    private var manualGlucoseQuantity: HKQuantity? = nil {
+        didSet {
+            updateRecommendation()
+        }
+    }
+
     private var bolus: HKQuantity? = nil
     
-    var glucoseUnit: HKUnit { return delegate.displayGlucoseUnitObservable.displayGlucoseUnit }
+    var displayGlucoseUnit: HKUnit { return delegate.displayGlucoseUnitObservable.displayGlucoseUnit }
     
     var suspendThreshold: HKQuantity { return delegate.suspendThreshold }
 
@@ -147,7 +183,7 @@ class SimpleBolusViewModel: ObservableObject {
     }
     
     var hasDataToSave: Bool {
-        return glucose != nil || carbs != nil
+        return manualGlucoseQuantity != nil || carbs != nil
     }
     
     var hasBolusEntryReadyToDeliver: Bool {
@@ -167,7 +203,7 @@ class SimpleBolusViewModel: ObservableObject {
         Self.carbAmountFormatter.string(from: 0.0)!
     }
 
-    private let glucoseAmountFormatter: NumberFormatter
+    private let glucoseQuantityFormatter = QuantityFormatter()
     private let delegate: SimpleBolusViewModelDelegate
     private let log = OSLog(category: "SimpleBolusViewModel")
     
@@ -181,7 +217,7 @@ class SimpleBolusViewModel: ObservableObject {
         self.delegate = delegate
         let glucoseQuantityFormatter = QuantityFormatter()
         glucoseQuantityFormatter.setPreferredNumberFormatter(for: delegate.displayGlucoseUnitObservable.displayGlucoseUnit)
-        glucoseAmountFormatter = glucoseQuantityFormatter.numberFormatter
+        cachedDisplayGlucoseUnit = delegate.displayGlucoseUnitObservable.displayGlucoseUnit
         enteredBolusAmount = Self.doseAmountFormatter.string(from: 0.0)!
         updateRecommendation()
         dosingDecision = BolusDosingDecision()
@@ -189,15 +225,15 @@ class SimpleBolusViewModel: ObservableObject {
     
     func updateRecommendation() {
         let recommendationDate = Date()
-        if carbs != nil || glucose != nil {
-            dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbs, manualGlucose: glucose)
+        if carbs != nil || manualGlucoseQuantity != nil {
+            dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbs, manualGlucose: manualGlucoseQuantity)
             if let decision = dosingDecision, let bolusRecommendation = decision.recommendedBolus {
                 recommendation = bolusRecommendation.amount
             } else {
                 recommendation = nil
             }
             
-            if let decision = dosingDecision, let insulinOnBoard = decision.insulinOnBoard, insulinOnBoard.value > 0, glucose != nil {
+            if let decision = dosingDecision, let insulinOnBoard = decision.insulinOnBoard, insulinOnBoard.value > 0, manualGlucoseQuantity != nil {
                 activeInsulin = Self.doseAmountFormatter.string(from: insulinOnBoard.value)
             } else {
                 activeInsulin = nil
@@ -220,8 +256,8 @@ class SimpleBolusViewModel: ObservableObject {
             }
         }
 
-        if let glucose = glucose {
-            guard LoopConstants.validManualGlucoseEntryRange.contains(glucose) else {
+        if let manualGlucoseQuantity = manualGlucoseQuantity {
+            guard LoopConstants.validManualGlucoseEntryRange.contains(manualGlucoseQuantity) else {
                 presentAlert(.manualGlucoseEntryOutOfAcceptableRange)
                 completion(false)
                 return
@@ -256,9 +292,9 @@ class SimpleBolusViewModel: ObservableObject {
         }
         
         func saveManualGlucose(_ completion: @escaping (Bool) -> Void) {
-            if let glucose = glucose {
+            if let manualGlucoseQuantity = manualGlucoseQuantity {
                 let manualGlucoseSample = NewGlucoseSample(date: saveDate,
-                                                           quantity: glucose,
+                                                           quantity: manualGlucoseQuantity,
                                                            trend: nil, // All manual glucose entries are assumed to have no trend.
                                                            isDisplayOnly: false,
                                                            wasUserEntered: true,
