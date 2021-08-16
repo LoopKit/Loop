@@ -26,9 +26,9 @@ public extension DosingStrategy {
     var subtitle: String {
         switch self {
         case .tempBasalOnly:
-            return NSLocalizedString("Loop will dose via temp basals, limited by your max temp basal setting.", comment: "Description string for temp basal only dosing strategy")
+            return NSLocalizedString("Loop will dose insulin using 30 minute temporary basal rates, limited by your max temp basal setting. This is the same strategy that Loop used in previous versions.", comment: "Description string for temp basal only dosing strategy")
         case .automaticBolus:
-            return NSLocalizedString("Loop will automatically bolus when bg is predicted to be higher than target range, and will use temp basals when bg is predicted to be lower than target range.", comment: "Description string for automatic bolus dosing strategy")
+            return NSLocalizedString("Loop will automatically bolus when bg is predicted to be higher than target range, and will use temp basals when bg is predicted to be lower than target range. Please use caution when selecting this option for the first time. You may need re-evaluate your settings, even if you have been having success with those settings when using Loop's original temp basal strategy.", comment: "Description string for automatic bolus dosing strategy")
         }
     }
 }
