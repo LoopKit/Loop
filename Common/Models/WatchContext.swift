@@ -147,7 +147,12 @@ extension WatchContext {
 extension WatchContext {
     var newGlucoseSample: NewGlucoseSample? {
         if let quantity = glucose, let date = glucoseDate, let syncIdentifier = glucoseSyncIdentifier {
-            return NewGlucoseSample(date: date, quantity: quantity, isDisplayOnly: glucoseIsDisplayOnly ?? false, wasUserEntered: glucoseWasUserEntered ?? false, syncIdentifier: syncIdentifier, syncVersion: 0)
+            return NewGlucoseSample(date: date,
+                                    quantity: quantity,
+                                    trend: glucoseTrendRawValue.flatMap { GlucoseTrend(rawValue: $0) },
+                                    isDisplayOnly: glucoseIsDisplayOnly ?? false,
+                                    wasUserEntered: glucoseWasUserEntered ?? false,
+                                    syncIdentifier: syncIdentifier, syncVersion: 0)
         }
         return nil
     }
