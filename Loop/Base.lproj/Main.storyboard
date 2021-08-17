@@ -274,6 +274,9 @@
                                                                     <fontDescription key="fontDescription" type="system" weight="light" pointSize="45"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
+                                                                    <variation key="heightClass=regular-widthClass=compact">
+                                                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="42"/>
+                                                                    </variation>
                                                                 </label>
                                                             </subviews>
                                                         </stackView>
@@ -307,6 +310,9 @@
                                                                     <fontDescription key="fontDescription" type="system" weight="light" pointSize="45"/>
                                                                     <nil key="textColor"/>
                                                                     <nil key="highlightedColor"/>
+                                                                    <variation key="heightClass=regular-widthClass=compact">
+                                                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="42"/>
+                                                                    </variation>
                                                                 </label>
                                                             </subviews>
                                                         </stackView>
