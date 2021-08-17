@@ -25,7 +25,7 @@ protocol GlucoseStoreProtocol: AnyObject {
     var authorizationRequired: Bool { get }
     
     var sharingDenied: Bool { get }
-    
+
     func authorize(toShare: Bool, read: Bool, _ completion: @escaping (_ result: HealthKitSampleStoreResult<Bool>) -> Void)
     
     // MARK: Sample Management

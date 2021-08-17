@@ -26,7 +26,7 @@ struct FeatureFlagConfiguration: Decodable {
     let simulatedCoreDataEnabled: Bool
     let siriEnabled: Bool
     let automaticBolusEnabled: Bool
-    let outsideDosesEnabled: Bool
+    let manualDoseEntryEnabled: Bool
 
     fileprivate init() {
         #if CGM_MANAGER_CATEGORIZE_GLUCOSE_RANGE_ENABLED
@@ -130,10 +130,10 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
         
         // Swift compiler config is inverse, since the default state is enabled.
-        #if OUTSIDE_DOSES_DISABLED
-        self.outsideDosesEnabled = false
+        #if MANUAL_DOSE_ENTRY_DISABLED
+        self.manualDoseEntryEnabled = false
         #else
-        self.outsideDosesEnabled = true
+        self.manualDoseEntryEnabled = true
         #endif
     }
 }
@@ -156,7 +156,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* sensitivityOverridesEnabled: \(sensitivityOverridesEnabled)",
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
             "* siriEnabled: \(siriEnabled)",
-            "* automaticBolusEnabled: \(automaticBolusEnabled)"
+            "* automaticBolusEnabled: \(automaticBolusEnabled)",
+            "* manualDoseEntryEnabled: \(manualDoseEntryEnabled)"
         ].joined(separator: "\n")
     }
 }

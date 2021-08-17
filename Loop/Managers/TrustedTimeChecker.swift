@@ -33,9 +33,14 @@ class TrustedTimeChecker {
     private var ntpClient: TrueTimeClient
     private weak var alertManager: AlertManager?
     private lazy var log = DiagnosticLog(category: "TrustedTimeChecker")
-    
+
     init(alertManager: AlertManager) {
         ntpClient = TrueTimeClient.sharedInstance
+        #if DEBUG
+        if ntpClient.responds(to: #selector(setter: TrueTimeClient.logCallback)) {
+            ntpClient.logCallback = { _ in }    // TrueTimeClient is a bit chatty in DEBUG build. This squelches all of its logging.
+        }
+        #endif
         ntpClient.start()
         self.alertManager = alertManager
         NotificationCenter.default.addObserver(forName: UIApplication.significantTimeChangeNotification,

@@ -28,7 +28,29 @@ extension GlucoseStore {
         var simulated = [NewGlucoseSample]()
 
         while startDate < endDate {
-            simulated.append(NewGlucoseSample.simulated(date: startDate, value: simulatedValueBase + simulatedValueAmplitude * sin(value)))
+            let prev = simulatedValueBase + simulatedValueAmplitude * sin(value - simulatedValueIncrement)
+            let new = simulatedValueBase + simulatedValueAmplitude * sin(value)
+            let trend: GlucoseTrend? = {
+                switch new - prev {
+                case -0.01...0.01:
+                    return .flat
+                case -2 ..< -0.01:
+                    return .down
+                case -5 ..< -2:
+                    return .downDown
+                case -Double.greatestFiniteMagnitude ..< -5:
+                    return .downDownDown
+                case 0.01...2:
+                    return .up
+                case 2...5:
+                    return .upUp
+                case 5...Double.greatestFiniteMagnitude:
+                    return .upUpUp
+                default:
+                    return nil
+                }
+            }()
+            simulated.append(NewGlucoseSample.simulated(date: startDate, value: new, trend: trend))
 
             if simulated.count >= simulatedLimit {
                 if let error = addSimulatedHistoricalGlucoseObjects(samples: simulated) {
@@ -62,9 +84,10 @@ extension GlucoseStore {
 }
 
 fileprivate extension NewGlucoseSample {
-    static func simulated(date: Date, value: Double, unit: HKUnit = HKUnit.milligramsPerDeciliter) -> NewGlucoseSample {
+    static func simulated(date: Date, value: Double, trend: GlucoseTrend?, unit: HKUnit = HKUnit.milligramsPerDeciliter) -> NewGlucoseSample {
         return NewGlucoseSample(date: date,
                                 quantity: HKQuantity(unit: unit, doubleValue: value),
+                                trend: trend,
                                 isDisplayOnly: false,
                                 wasUserEntered: false,
                                 syncIdentifier: UUID().uuidString)

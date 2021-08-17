@@ -11,6 +11,7 @@ import LoopKit
 @testable import Loop
 
 class MockGlucoseStore: GlucoseStoreProtocol {
+    
     init(for test: DataManagerTestType = .flatAndStable) {
         self.testType = test // The store returns different effect values based on the test type
     }
@@ -38,6 +39,8 @@ class MockGlucoseStore: GlucoseStoreProtocol {
     
     var managedDataInterval: TimeInterval?
     
+    var healthKitStorageDelay = TimeInterval(0)
+
     var authorizationRequired: Bool = false
     
     var sharingDenied: Bool = false
