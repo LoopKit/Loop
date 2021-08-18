@@ -569,12 +569,12 @@ final class DeviceDataManager {
 
                     let report = [
                         Bundle.main.localizedNameAndVersion,
+                        "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
                         "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
                         "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
                         "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
                         "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
-                        "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
@@ -674,7 +674,9 @@ extension DeviceDataManager {
         pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
-                if case .uncertainDelivery = error, !automatic {
+                if case .uncertainDelivery = error {
+                    self.checkDeliveryUncertaintyState()
+                } else if !automatic {
                     NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
                 }
                 self.loopManager.bolusRequestFailed(error) {
