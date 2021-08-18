@@ -153,8 +153,8 @@ class LoopAppManager: NSObject {
         self.state = state.next
 
         closedLoopStatus.$isClosedLoopAllowed
-            .combineLatest(deviceDataManager.loopManager.$settings)
-            .map { $0 && $1.dosingEnabled }
+            .combineLatest(deviceDataManager.loopManager.$dosingEnabled)
+            .map { $0 && $1 }
             .assign(to: \.closedLoopStatus.isClosedLoop, on: self)
             .store(in: &cancellables)
     }

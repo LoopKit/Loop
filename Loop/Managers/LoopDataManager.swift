@@ -82,7 +82,9 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
         self.lockedBasalDeliveryState = Locked(basalDeliveryState)
-        self.settings = settings
+        self.lockedSettings = Locked(settings)
+        self.dosingEnabled = settings.dosingEnabled
+
         self.overrideHistory = overrideHistory
 
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
@@ -187,21 +189,28 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     }
 
     /// Loop-related settings
-    ///
-    /// These are not thread-safe.
 
-    @Published var settings: LoopSettings {
-        didSet {
-            guard settings != oldValue else {
+    private var lockedSettings: Locked<LoopSettings>
+
+    var settings: LoopSettings {
+        get {
+            lockedSettings.value
+        }
+        set {
+            let oldValue = lockedSettings.value
+            guard newValue != oldValue else {
                 return
             }
 
-            if settings.preMealOverride != oldValue.preMealOverride {
+            lockedSettings.value = newValue
+            dosingEnabled = newValue.dosingEnabled
+
+            if newValue.preMealOverride != oldValue.preMealOverride {
                 // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
                 predictedGlucose = nil
             }
 
-            if settings.scheduleOverride != oldValue.scheduleOverride {
+            if newValue.scheduleOverride != oldValue.scheduleOverride {
                 overrideHistory.recordOverride(settings.scheduleOverride)
 
                 // Invalidate cached effects affected by the override
@@ -210,11 +219,13 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
                 self.insulinEffect = nil
             }
 
-            UserDefaults.appGroup?.loopSettings = settings
+            UserDefaults.appGroup?.loopSettings = newValue
             notify(forChange: .preferences)
-            analyticsServicesManager.didChangeLoopSettings(from: oldValue, to: settings)
+            analyticsServicesManager.didChangeLoopSettings(from: oldValue, to: newValue)
         }
     }
+
+    @Published private(set) var dosingEnabled: Bool
 
     let overrideHistory: TemporaryScheduleOverrideHistory
 
