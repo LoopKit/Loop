@@ -67,7 +67,7 @@ class DosingStrategySelectionViewController: UITableViewController, Identifiable
         let cell = tableView.dequeueReusableCell(withIdentifier: TitleSubtitleTextFieldTableViewCell.className, for: indexPath) as! TitleSubtitleTextFieldTableViewCell
         let isSelected = strategy == dosingStrategy
         cell.tintColor = isSelected ? nil : .clear
-        cell.titleLabel.text = strategy.title
+        cell.titleLabel.text = strategy.fullTitle
         cell.subtitleLabel.text = strategy.subtitle
         return cell
     }

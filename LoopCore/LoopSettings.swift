@@ -22,7 +22,16 @@ public extension DosingStrategy {
             return NSLocalizedString("Automatic Bolus", comment: "Title string for automatic bolus dosing strategy")
         }
     }
-    
+
+    var fullTitle: String {
+        switch self {
+        case .automaticBolus:
+            return NSLocalizedString("Automatic Bolus (Experimental)", comment: "Title string for automatic bolus dosing strategy")
+        default:
+            return title
+        }
+    }
+
     var subtitle: String {
         switch self {
         case .tempBasalOnly:
