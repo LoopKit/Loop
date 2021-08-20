@@ -1201,13 +1201,15 @@ extension DeviceDataManager {
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
         if FeatureFlags.remoteOverridesEnabled {
             if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
-                switch command {
-                case .temporaryScheduleOverride(let override):
-                    log.default("Enacting remote temporary override: %{public}@", String(describing: override))
-                    loopManager.settings.scheduleOverride = override
-                case .cancelTemporaryOverride:
-                    log.default("Canceling temporary override from remote command")
-                    loopManager.settings.scheduleOverride = nil
+                loopManager.mutateSettings { settings in
+                    switch command {
+                    case .temporaryScheduleOverride(let override):
+                        log.default("Enacting remote temporary override: %{public}@", String(describing: override))
+                        settings.scheduleOverride = override
+                    case .cancelTemporaryOverride:
+                        log.default("Canceling temporary override from remote command")
+                        settings.scheduleOverride = nil
+                    }
                 }
             } else {
                 log.info("Unhandled remote notification: %{public}@", String(describing: notification))

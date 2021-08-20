@@ -210,7 +210,9 @@ class LoopAppManager: NSObject {
     // MARK: - Remote Notification
 
     func setRemoteNotificationsDeviceToken(_ remoteNotificationsDeviceToken: Data) {
-        deviceDataManager?.loopManager.settings.deviceToken = remoteNotificationsDeviceToken
+        deviceDataManager?.loopManager.mutateSettings {
+            settings in settings.deviceToken = remoteNotificationsDeviceToken
+        }
     }
 
     private func handleRemoteNotificationFromLaunchOptions() {

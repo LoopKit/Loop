@@ -416,14 +416,16 @@ extension WatchDataManager: WCSessionDelegate {
         case LoopSettingsUserInfo.name?:
             if let watchSettings = LoopSettingsUserInfo(rawValue: message)?.settings {
                 // So far we only support watch changes of temporary schedule overrides
-                var settings = deviceManager.loopManager.settings
-                settings.preMealOverride = watchSettings.preMealOverride
-                settings.scheduleOverride = watchSettings.scheduleOverride
-                settings.indefiniteWorkoutOverrideEnabledDate = watchSettings.indefiniteWorkoutOverrideEnabledDate
+                var loopSettings = deviceManager.loopManager.settings
+                loopSettings.preMealOverride = watchSettings.preMealOverride
+                loopSettings.scheduleOverride = watchSettings.scheduleOverride
+                loopSettings.indefiniteWorkoutOverrideEnabledDate = watchSettings.indefiniteWorkoutOverrideEnabledDate
 
                 // Prevent re-sending these updated settings back to the watch
-                lastSentSettings = settings
-                deviceManager.loopManager.settings = settings
+                lastSentSettings = loopSettings
+                deviceManager.loopManager.mutateSettings { settings in
+                    settings = loopSettings
+                }
             }
 
             // Since target range affects recommended bolus, send back a new one

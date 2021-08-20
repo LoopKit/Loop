@@ -1241,21 +1241,29 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
         if preMealMode == true {
-            deviceManager.loopManager.settings.clearOverride(matching: .preMeal)
+            deviceManager.loopManager.mutateSettings { settings in
+                settings.clearOverride(matching: .preMeal)
+            }
         } else {
             let vc = UIAlertController(premealDurationSelectionHandler: { duration in
                 let startDate = Date()
 
                 guard self.workoutMode != true else {
                     // allow cell animation when switching between presets
-                    self.deviceManager.loopManager.settings.clearOverride()
+                    self.deviceManager.loopManager.mutateSettings { settings in
+                        settings.clearOverride()
+                    }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        self.deviceManager.loopManager.settings.enablePreMealOverride(at: startDate, for: duration)
+                        self.deviceManager.loopManager.mutateSettings { settings in
+                            settings.enablePreMealOverride(at: startDate, for: duration)
+                        }
                     }
                     return
                 }
 
-                self.deviceManager.loopManager.settings.enablePreMealOverride(at: startDate, for: duration)
+                self.deviceManager.loopManager.mutateSettings { settings in
+                    settings.enablePreMealOverride(at: startDate, for: duration)
+                }
             })
 
             present(vc, animated: true, completion: nil)
@@ -1264,7 +1272,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
         if workoutMode == true {
-            deviceManager.loopManager.settings.clearOverride()
+            deviceManager.loopManager.mutateSettings { settings in
+                settings.clearOverride()
+            }
         } else {
             if FeatureFlags.sensitivityOverridesEnabled {
                 performSegue(withIdentifier: OverrideSelectionViewController.className, sender: toolbarItems![6])
@@ -1274,14 +1284,20 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
                     guard self.preMealMode != true else {
                         // allow cell animation when switching between presets
-                        self.deviceManager.loopManager.settings.clearOverride(matching: .preMeal)
+                        self.deviceManager.loopManager.mutateSettings { settings in
+                            settings.clearOverride(matching: .preMeal)
+                        }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            self.deviceManager.loopManager.settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
+                            self.deviceManager.loopManager.mutateSettings { settings in
+                                settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
+                            }
                         }
                         return
                     }
 
-                    self.deviceManager.loopManager.settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
+                    self.deviceManager.loopManager.mutateSettings { settings in
+                        settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
+                    }
                 })
 
                 present(vc, animated: true, completion: nil)
@@ -1625,17 +1641,19 @@ final class StatusTableViewController: LoopChartsTableViewController {
         })
         if FeatureFlags.mockTherapySettingsEnabled {
             actionSheet.addAction(UIAlertAction(title: "Mock Therapy Settings", style: .default) { _ in
-                let settings = TherapySettings.mockTherapySettings
-                self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
-                self.deviceManager.loopManager.settings.preMealTargetRange = settings.correctionRangeOverrides?.preMeal
-                self.deviceManager.loopManager.settings.legacyWorkoutTargetRange = settings.correctionRangeOverrides?.workout
-                self.deviceManager.loopManager.settings.suspendThreshold = settings.suspendThreshold
-                self.deviceManager.loopManager.settings.maximumBolus = settings.maximumBolus
-                self.deviceManager.loopManager.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
-                self.deviceManager.loopManager.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
-                self.deviceManager.loopManager.carbRatioSchedule = settings.carbRatioSchedule
-                self.deviceManager.loopManager.basalRateSchedule = settings.basalRateSchedule
-                self.deviceManager.loopManager.defaultRapidActingModel = settings.defaultRapidActingModel
+                let therapySettings = TherapySettings.mockTherapySettings
+                self.deviceManager.loopManager.mutateSettings { settings in
+                    settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule
+                    settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal
+                    settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout
+                    settings.suspendThreshold = therapySettings.suspendThreshold
+                    settings.maximumBolus = therapySettings.maximumBolus
+                    settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
+                }
+                self.deviceManager.loopManager.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
+                self.deviceManager.loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule
+                self.deviceManager.loopManager.basalRateSchedule = therapySettings.basalRateSchedule
+                self.deviceManager.loopManager.defaultRapidActingModel = therapySettings.defaultRapidActingModel
             })
         }
         actionSheet.addAction(UIAlertAction(title: "Crash the App", style: .destructive) { _ in
@@ -1831,11 +1849,15 @@ extension StatusTableViewController: DoseProgressObserver {
 
 extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didUpdatePresets presets: [TemporaryScheduleOverridePreset]) {
-        deviceManager.loopManager.settings.overridePresets = presets
+        deviceManager.loopManager.mutateSettings { settings in
+            settings.overridePresets = presets
+        }
     }
 
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmOverride override: TemporaryScheduleOverride) {
-        deviceManager.loopManager.settings.scheduleOverride = override
+        deviceManager.loopManager.mutateSettings { settings in
+            settings.scheduleOverride = override
+        }
     }
 
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmPreset preset: TemporaryScheduleOverridePreset) {
@@ -1850,21 +1872,29 @@ extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
                 os_log(.error, "Failed to donate intent: %{public}@", String(describing: error))
             }
         }
-        deviceManager.loopManager.settings.scheduleOverride = preset.createOverride(enactTrigger: .local)
+        deviceManager.loopManager.mutateSettings { settings in
+            settings.scheduleOverride = preset.createOverride(enactTrigger: .local)
+        }
     }
 
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didCancelOverride override: TemporaryScheduleOverride) {
-        deviceManager.loopManager.settings.scheduleOverride = nil
+        deviceManager.loopManager.mutateSettings { settings in
+            settings.scheduleOverride = nil
+        }
     }
 }
 
 extension StatusTableViewController: AddEditOverrideTableViewControllerDelegate {
     func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didSaveOverride override: TemporaryScheduleOverride) {
-        deviceManager.loopManager.settings.scheduleOverride = override
+        deviceManager.loopManager.mutateSettings { settings in
+            settings.scheduleOverride = override
+        }
     }
 
     func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didCancelOverride override: TemporaryScheduleOverride) {
-        deviceManager.loopManager.settings.scheduleOverride = nil
+        deviceManager.loopManager.mutateSettings { settings in
+            settings.scheduleOverride = nil
+        }
     }
 }
 
@@ -1917,28 +1947,34 @@ extension StatusTableViewController: BluetoothObserver {
 // MARK: - SettingsViewModel delegation
 extension StatusTableViewController: SettingsViewModelDelegate {
     func dosingEnabledChanged(_ value: Bool) {
-        deviceManager.loopManager.settings.dosingEnabled = value
+        deviceManager.loopManager.mutateSettings { settings in
+            settings.dosingEnabled = value
+        }
     }
     
     func dosingStrategyChanged(_ strategy: DosingStrategy) {
-        self.deviceManager.loopManager.settings.dosingStrategy = strategy
+        self.deviceManager.loopManager.mutateSettings { settings in
+            settings.dosingStrategy = strategy
+        }
     }
 
     func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings) {
         switch therapySetting {
         case .glucoseTargetRange:
-            deviceManager?.loopManager.settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule
+            deviceManager?.loopManager.mutateSettings { settings in settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule }
         case .preMealCorrectionRangeOverride:
-            deviceManager?.loopManager.settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal
+            deviceManager?.loopManager.mutateSettings { settings in settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal }
         case .workoutCorrectionRangeOverride:
-            deviceManager?.loopManager.settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout
+            deviceManager?.loopManager.mutateSettings { settings in settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout }
         case .suspendThreshold:
-            deviceManager?.loopManager.settings.suspendThreshold = therapySettings.suspendThreshold
+            deviceManager?.loopManager.mutateSettings { settings in settings.suspendThreshold = therapySettings.suspendThreshold }
         case .basalRate:
             deviceManager?.loopManager.basalRateSchedule = therapySettings.basalRateSchedule
         case .deliveryLimits:
-            deviceManager?.loopManager.settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
-            deviceManager?.loopManager.settings.maximumBolus = therapySettings.maximumBolus
+            deviceManager?.loopManager.mutateSettings { settings in
+                settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
+                settings.maximumBolus = therapySettings.maximumBolus
+            }
         case .insulinModel:
             if let defaultRapidActingModel = therapySettings.defaultRapidActingModel {
                 deviceManager?.loopManager.defaultRapidActingModel = defaultRapidActingModel

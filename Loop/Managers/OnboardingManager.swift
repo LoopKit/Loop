@@ -207,7 +207,9 @@ extension OnboardingManager: OnboardingDelegate {
 
     func onboarding(_ onboarding: OnboardingUI, hasNewDosingEnabled dosingEnabled: Bool) {
         guard onboarding.onboardingIdentifier == activeOnboarding?.onboardingIdentifier else { return }
-        loopDataManager.settings.dosingEnabled = dosingEnabled
+        loopDataManager.mutateSettings { settings in
+            settings.dosingEnabled = dosingEnabled
+        }
     }
 }
 
