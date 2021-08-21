@@ -374,6 +374,8 @@
 		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
 		A90EF53C25DEF06200F32D61 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		A90EF54425DEF0A000F32D61 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374B5EE209D84BE00D17AA8 /* OSLog.swift */; };
+		A9122E8826D17B6B00CDF0F5 /* Base32.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9122E8526D1506E00CDF0F5 /* Base32.framework */; };
+		A9122E8926D17B6B00CDF0F5 /* Base32.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A9122E8526D1506E00CDF0F5 /* Base32.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A91E4C2124F867A700BE9213 /* StoredAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91E4C2024F867A700BE9213 /* StoredAlertTests.swift */; };
 		A91E4C2324F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */; };
 		A92E557E2464DFFD00DB93BB /* DosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */; };
@@ -400,8 +402,6 @@
 		A9A63F8D246B261100588D5B /* DosingDecisionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9A63F8C246B261100588D5B /* DosingDecisionStoreTests.swift */; };
 		A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		A9B607B0247F000F00792BE4 /* UserNotifications+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B607AF247F000F00792BE4 /* UserNotifications+Loop.swift */; };
-		A9BCFA5C267F9BDC009394BE /* Base32.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA81262325F700AB8C89 /* Base32.xcframework */; };
-		A9BCFA5D267F9BDC009394BE /* Base32.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA81262325F700AB8C89 /* Base32.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A9BCFA5E267F9BE7009394BE /* OneTimePassword.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */; };
 		A9BCFA5F267F9BE7009394BE /* OneTimePassword.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A9C1719725366F780053BCBD /* WatchHistoricalGlucoseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C1719625366F780053BCBD /* WatchHistoricalGlucoseTest.swift */; };
@@ -714,10 +714,10 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				A9122E8926D17B6B00CDF0F5 /* Base32.framework in Embed Frameworks */,
 				4F2C159A1E0C9E5600E160D4 /* LoopUI.framework in Embed Frameworks */,
 				A9BCFA5F267F9BE7009394BE /* OneTimePassword.framework in Embed Frameworks */,
 				43D9FFD721EAE05D00AF44BF /* LoopCore.framework in Embed Frameworks */,
-				A9BCFA5D267F9BDC009394BE /* Base32.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1291,6 +1291,7 @@
 		89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionTime.swift; sourceTree = "<group>"; };
 		89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusPickerValues.swift; sourceTree = "<group>"; };
 		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
+		A9122E8526D1506E00CDF0F5 /* Base32.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Base32.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A91E4C2024F867A700BE9213 /* StoredAlertTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlertTests.swift; sourceTree = "<group>"; };
 		A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalEventLogExportManagerTests.swift; sourceTree = "<group>"; };
 		A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DosingDecisionStore.swift; path = ../Stores/DosingDecisionStore.swift; sourceTree = "<group>"; };
@@ -1510,11 +1511,11 @@
 				C1750AEC255B013300B8011C /* Minizip.framework in Frameworks */,
 				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
-				A9BCFA5C267F9BDC009394BE /* Base32.xcframework in Frameworks */,
 				892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */,
 				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
 				C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */,
 				892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */,
+				A9122E8826D17B6B00CDF0F5 /* Base32.framework in Frameworks */,
 				892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */,
 				4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */,
 			);
@@ -2417,6 +2418,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A9122E8526D1506E00CDF0F5 /* Base32.framework */,
 				A9E2DA81262325F700AB8C89 /* Base32.xcframework */,
 				A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */,
 				1DC63E7325351BDF004605DA /* TrueTime.framework */,
