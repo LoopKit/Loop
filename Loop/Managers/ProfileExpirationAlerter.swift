@@ -1,0 +1,55 @@
+//
+//  ProfileExpirationAlerter.swift
+//  Loop
+//
+//  Created by Pete Schwamb on 8/21/21.
+//  Copyright © 2021 LoopKit Authors. All rights reserved.
+//
+
+import Foundation
+import UserNotifications
+import LoopCore
+
+
+class ProfileExpirationAlerter {
+    
+    static let expirationAlertWindow: TimeInterval = .days(20)
+
+    static func alertIfNeeded(viewControllerToPresentFrom: UIViewController) {
+        
+        let now = Date()
+        
+        guard let profileExpiration = Bundle.main.profileExpiration, now > profileExpiration - expirationAlertWindow else {
+            return
+        }
+        
+        let timeUntilExpiration = profileExpiration.timeIntervalSince(now)
+        
+        let minimumTimeBetweenAlerts: TimeInterval = timeUntilExpiration > .hours(24) ? .days(2) : .hours(1)
+        
+        if let lastAlert = UserDefaults.appGroup?.lastProfileExpirationAlertDate {
+            guard now > lastAlert + minimumTimeBetweenAlerts else {
+                return
+            }
+        }
+        
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.day, .hour]
+        formatter.unitsStyle = .full
+        formatter.zeroFormattingBehavior = .dropLeading
+        formatter.maximumUnitCount = 1
+        let timeUntilExpirationStr = formatter.string(from: timeUntilExpiration)
+
+        let dialog = UIAlertController(
+            title: NSLocalizedString("Profile Expires Soon", comment: "The title for notification of near profile expiration"),
+            message: String(format: NSLocalizedString("Loop will stop working in %@. You will need to update Loop before that, with a new profile.", comment: "Format string for body for notification of near profile expiration. (1: amount of time until expiration"), timeUntilExpirationStr!),
+            preferredStyle: .alert)
+        dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        dialog.addAction(UIAlertAction(title: "More Info", style: .default, handler: { (_) in
+            UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/build/updating/")!)
+        }))
+        viewControllerToPresentFrom.present(dialog, animated: true, completion: nil)
+        
+        UserDefaults.appGroup?.lastProfileExpirationAlertDate = now
+    }
+}
