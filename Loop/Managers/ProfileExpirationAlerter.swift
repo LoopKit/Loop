@@ -44,8 +44,8 @@ class ProfileExpirationAlerter {
             title: NSLocalizedString("Profile Expires Soon", comment: "The title for notification of upcoming profile expiration"),
             message: String(format: NSLocalizedString("Loop will stop working in %@. You will need to update Loop before that, with a new provisioning profile.", comment: "Format string for body for notification of upcoming provisioning profile expiration. (1: amount of time until expiration"), timeUntilExpirationStr!),
             preferredStyle: .alert)
-        dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        dialog.addAction(UIAlertAction(title: "More Info", style: .default, handler: { (_) in
+        dialog.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Text for ok action on notification of upcoming profile expiration"), style: .default, handler: nil))
+        dialog.addAction(UIAlertAction(title: NSLocalizedString("More Info", comment: "Text for more info action on notification of upcoming profile expiration"), style: .default, handler: { (_) in
             UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/build/updating/")!)
         }))
         viewControllerToPresentFrom.present(dialog, animated: true, completion: nil)
