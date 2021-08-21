@@ -41,8 +41,8 @@ class ProfileExpirationAlerter {
         let timeUntilExpirationStr = formatter.string(from: timeUntilExpiration)
 
         let dialog = UIAlertController(
-            title: NSLocalizedString("Profile Expires Soon", comment: "The title for notification of near profile expiration"),
-            message: String(format: NSLocalizedString("Loop will stop working in %@. You will need to update Loop before that, with a new profile.", comment: "Format string for body for notification of near profile expiration. (1: amount of time until expiration"), timeUntilExpirationStr!),
+            title: NSLocalizedString("Profile Expires Soon", comment: "The title for notification of upcoming profile expiration"),
+            message: String(format: NSLocalizedString("Loop will stop working in %@. You will need to update Loop before that, with a new provisioning profile.", comment: "Format string for body for notification of upcoming provisioning profile expiration. (1: amount of time until expiration"), timeUntilExpirationStr!),
             preferredStyle: .alert)
         dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         dialog.addAction(UIAlertAction(title: "More Info", style: .default, handler: { (_) in
