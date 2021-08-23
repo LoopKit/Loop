@@ -65,7 +65,7 @@ extension BolusRecommendationNotice: Equatable {
 }
 
 
-struct BolusRecommendation {
+struct ManualBolusRecommendation {
     let amount: Double
     let pendingInsulin: Double
     var notice: BolusRecommendationNotice?
@@ -78,12 +78,12 @@ struct BolusRecommendation {
 }
 
 
-extension BolusRecommendation: Comparable {
-    static func ==(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+extension ManualBolusRecommendation: Comparable {
+    static func ==(lhs: ManualBolusRecommendation, rhs: ManualBolusRecommendation) -> Bool {
         return lhs.amount == rhs.amount
     }
 
-    static func <(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+    static func <(lhs: ManualBolusRecommendation, rhs: ManualBolusRecommendation) -> Bool {
         return lhs.amount < rhs.amount
     }
 }

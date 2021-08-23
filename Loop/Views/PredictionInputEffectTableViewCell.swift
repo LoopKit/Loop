@@ -14,13 +14,11 @@ class PredictionInputEffectTableViewCell: UITableViewCell {
 
     @IBOutlet weak var subtitleLabel: UILabel!
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        contentView.layoutMargins.left = separatorInset.left
+    override func didMoveToSuperview() {
+        super.didMoveToSuperview()
         contentView.layoutMargins.right = separatorInset.left
     }
-
+    
     var enabled: Bool = true {
         didSet {
             if enabled {
