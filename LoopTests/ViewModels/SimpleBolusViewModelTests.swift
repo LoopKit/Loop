@@ -39,7 +39,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
     
     func testFailedAuthenticationShouldNotSaveDataOrBolus() {
-        let viewModel = SimpleBolusViewModel(delegate: self)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
         viewModel.authenticate = { (description, completion) in
             completion(.failure(MockError.authentication))
         }
@@ -61,7 +61,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
     
     func testIssuingBolus() {
-        let viewModel = SimpleBolusViewModel(delegate: self)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -84,14 +84,14 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
     
     func testMealCarbsAndManualGlucoseWithRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
 
         currentRecommendation = 2.5
 
-        viewModel.enteredCarbAmount = "20"
+        viewModel.enteredCarbString = "20"
         viewModel.manualGlucoseString = "180"
         
         let saveExpectation = expectation(description: "Save completion callback")
@@ -112,7 +112,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
     
     func testMealCarbsWithUserOverridingRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -120,7 +120,7 @@ class SimpleBolusViewModelTests: XCTestCase {
         currentRecommendation = 2.5
 
         // This triggers a recommendation update
-        viewModel.enteredCarbAmount = "20"
+        viewModel.enteredCarbString = "20"
         
         XCTAssertEqual("2.5", viewModel.recommendedBolus)
         XCTAssertEqual("2.5", viewModel.enteredBolusAmount)
@@ -145,26 +145,26 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
 
     func testDeleteCarbsRemovesRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
 
         currentRecommendation = 2.5
 
-        viewModel.enteredCarbAmount = "20"
+        viewModel.enteredCarbString = "20"
 
         XCTAssertEqual("2.5", viewModel.recommendedBolus)
         XCTAssertEqual("2.5", viewModel.enteredBolusAmount)
 
-        viewModel.enteredCarbAmount = ""
+        viewModel.enteredCarbString = ""
 
         XCTAssertEqual("–", viewModel.recommendedBolus)
         XCTAssertEqual("0", viewModel.enteredBolusAmount)
     }
 
     func testDeleteCurrentGlucoseRemovesRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -183,7 +183,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
 
     func testDeleteCurrentGlucoseRemovesActiveInsulin() {
-        let viewModel = SimpleBolusViewModel(delegate: self)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -201,7 +201,7 @@ class SimpleBolusViewModelTests: XCTestCase {
 
     func testManualGlucoseStringMatchesDisplayGlucoseUnit() {
         // used "260" mg/dL ("14.4" mmol/L) since 14.40 mmol/L -> 259 mg/dL and 14.43 mmol/L -> 260 mg/dL
-        let viewModel = SimpleBolusViewModel(delegate: self)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
         XCTAssertEqual(viewModel.manualGlucoseString, "")
         viewModel.manualGlucoseString = "260"
         XCTAssertEqual(viewModel.manualGlucoseString, "260")

@@ -55,6 +55,8 @@ class SimpleBolusViewModel: ObservableObject {
     
     enum Notice: Int {
         case glucoseBelowSuspendThreshold
+        case glucoseBelowRecommendationLimit
+        case glucoseWarning
     }
 
     @Published var activeNotice: Notice?
@@ -65,16 +67,19 @@ class SimpleBolusViewModel: ObservableObject {
     
     @Published var activeInsulin: String?
 
-    @Published var enteredCarbAmount: String = "" {
+    @Published var enteredCarbString: String = "" {
         didSet {
-            if let enteredCarbs = Self.carbAmountFormatter.number(from: enteredCarbAmount)?.doubleValue, enteredCarbs > 0 {
-                carbs = HKQuantity(unit: .gram(), doubleValue: enteredCarbs)
+            if let enteredCarbs = Self.carbAmountFormatter.number(from: enteredCarbString)?.doubleValue, enteredCarbs > 0 {
+                carbQuantity = HKQuantity(unit: .gram(), doubleValue: enteredCarbs)
             } else {
-                carbs = nil
+                carbQuantity = nil
             }
             updateRecommendation()
         }
     }
+    
+    var displayMealEntry: Bool
+
 
     // needed to detect change in display glucose unit when returning to the app
     private var cachedDisplayGlucoseUnit: HKUnit
@@ -99,6 +104,22 @@ class SimpleBolusViewModel: ObservableObject {
             _manualGlucoseString = newValue
         }
     }
+    
+    private func updateNotice() {
+        let minRecommendationGlucose = displayMealEntry ? LoopConstants.simpleBolusCalculatorMinGlucoseMealBolusRecommendation : LoopConstants.simpleBolusCalculatorMinGlucoseBolusRecommendation
+        
+        switch manualGlucoseQuantity {
+        case let g? where g < minRecommendationGlucose:
+            activeNotice = .glucoseBelowRecommendationLimit
+        case let g? where g < LoopConstants.simpleBolusCalculatorGlucoseWarningLimit:
+            activeNotice = .glucoseWarning
+        case let g? where g < suspendThreshold:
+            activeNotice = .glucoseBelowSuspendThreshold
+        default:
+            activeNotice = nil
+        }
+
+    }
 
     @Published private var _manualGlucoseString: String = "" {
         didSet {
@@ -113,11 +134,7 @@ class SimpleBolusViewModel: ObservableObject {
                 _manualGlucoseString != glucoseQuantityFormatter.string(from: manualGlucoseQuantity!, for: cachedDisplayGlucoseUnit, includeUnit: false)
             {
                 manualGlucoseQuantity = HKQuantity(unit: cachedDisplayGlucoseUnit, doubleValue: manualGlucoseValue)
-                if let manualGlucoseQuantity = manualGlucoseQuantity, manualGlucoseQuantity < suspendThreshold {
-                    activeNotice = .glucoseBelowSuspendThreshold
-                } else {
-                    activeNotice = nil
-                }
+                updateNotice()
             }
         }
     }
@@ -132,7 +149,7 @@ class SimpleBolusViewModel: ObservableObject {
         }
     }
     
-    private var carbs: HKQuantity? = nil
+    private var carbQuantity: HKQuantity? = nil
 
     private var manualGlucoseQuantity: HKQuantity? = nil {
         didSet {
@@ -141,6 +158,13 @@ class SimpleBolusViewModel: ObservableObject {
     }
 
     private var bolus: HKQuantity? = nil
+    
+    var bolusRecommended: Bool {
+        if let bolus = bolus, bolus.doubleValue(for: .internationalUnit()) > 0 {
+            return true
+        }
+        return false
+    }
     
     var displayGlucoseUnit: HKUnit { return delegate.displayGlucoseUnitObservable.displayGlucoseUnit }
     
@@ -183,7 +207,7 @@ class SimpleBolusViewModel: ObservableObject {
     }
     
     var hasDataToSave: Bool {
-        return manualGlucoseQuantity != nil || carbs != nil
+        return manualGlucoseQuantity != nil || carbQuantity != nil
     }
     
     var hasBolusEntryReadyToDeliver: Bool {
@@ -213,8 +237,9 @@ class SimpleBolusViewModel: ObservableObject {
         return bolusVolumeFormatter.numberFormatter.string(from: delegate.maximumBolus) ?? String(delegate.maximumBolus)
     }
 
-    init(delegate: SimpleBolusViewModelDelegate) {
+    init(delegate: SimpleBolusViewModelDelegate, displayMealEntry: Bool) {
         self.delegate = delegate
+        self.displayMealEntry = displayMealEntry
         let glucoseQuantityFormatter = QuantityFormatter()
         glucoseQuantityFormatter.setPreferredNumberFormatter(for: delegate.displayGlucoseUnitObservable.displayGlucoseUnit)
         cachedDisplayGlucoseUnit = delegate.displayGlucoseUnitObservable.displayGlucoseUnit
@@ -225,8 +250,8 @@ class SimpleBolusViewModel: ObservableObject {
     
     func updateRecommendation() {
         let recommendationDate = Date()
-        if carbs != nil || manualGlucoseQuantity != nil {
-            dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbs, manualGlucose: manualGlucoseQuantity)
+        if carbQuantity != nil || manualGlucoseQuantity != nil {
+            dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbQuantity, manualGlucose: manualGlucoseQuantity)
             if let decision = dosingDecision, let bolusRecommendation = decision.recommendedBolus {
                 recommendation = bolusRecommendation.amount
             } else {
@@ -264,7 +289,7 @@ class SimpleBolusViewModel: ObservableObject {
             }
         }
         
-        if let carbs = carbs {
+        if let carbs = carbQuantity {
             guard carbs <= LoopConstants.maxCarbEntryQuantity else {
                 presentAlert(.carbEntrySizeTooLarge)
                 completion(false)
@@ -311,7 +336,7 @@ class SimpleBolusViewModel: ObservableObject {
         }
         
         func saveCarbs(_ completion: @escaping (Bool) -> Void) {
-            if let carbs = carbs {
+            if let carbs = carbQuantity {
                 
                 let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
                 interaction.donate { [weak self] (error) in
@@ -391,7 +416,7 @@ class SimpleBolusViewModel: ObservableObject {
     
     func restoreUserActivityState(_ activity: NSUserActivity) {
         if let entry = activity.newCarbEntry {
-            carbs = entry.quantity
+            carbQuantity = entry.quantity
         }
     }
 }

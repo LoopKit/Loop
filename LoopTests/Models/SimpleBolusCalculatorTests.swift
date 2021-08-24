@@ -121,5 +121,29 @@ class SimpleBolusCalculatorTests: XCTestCase {
         
         XCTAssertEqual(2, recommendation.doubleValue(for: .internationalUnit()), accuracy: 0.01)
     }
+    
+    func testPredictionShouldBeZeroWhenGlucoseBelowMealBolusRecommendationLimit() {
+        let recommendation = SimpleBolusCalculator.recommendedInsulin(
+            mealCarbs: HKQuantity(unit: .gram(), doubleValue: 20),
+            manualGlucose: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 54),
+            activeInsulin: HKQuantity(unit: .internationalUnit(), doubleValue: 4),
+            carbRatioSchedule: carbRatioSchedule,
+            correctionRangeSchedule: correctionRangeSchedule,
+            sensitivitySchedule: sensitivitySchedule)
+        
+        XCTAssertEqual(0, recommendation.doubleValue(for: .internationalUnit()), accuracy: 0.01)
+    }
+    
+    func testPredictionShouldBeZeroWhenGlucoseBelowBolusRecommendationLimit() {
+        let recommendation = SimpleBolusCalculator.recommendedInsulin(
+            mealCarbs: nil,
+            manualGlucose: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 69),
+            activeInsulin: HKQuantity(unit: .internationalUnit(), doubleValue: 4),
+            carbRatioSchedule: carbRatioSchedule,
+            correctionRangeSchedule: correctionRangeSchedule,
+            sensitivitySchedule: sensitivitySchedule)
+        
+        XCTAssertEqual(0, recommendation.doubleValue(for: .internationalUnit()), accuracy: 0.01)
+    }
 
 }
