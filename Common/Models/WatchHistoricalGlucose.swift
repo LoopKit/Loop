@@ -41,8 +41,10 @@ extension WatchHistoricalGlucose: RawRepresentable {
         let syncVersions: [Int?]
         let startDates: [Date]
         let quantities: [Double]
+        let trends: [GlucoseTrend?]
         let isDisplayOnlys: [Bool]
         let wasUserEntereds: [Bool]
+        let devices: [Data?]
 
         init(samples: [StoredGlucoseSample]) {
             self.uuids = samples.map { $0.uuid }
@@ -51,29 +53,33 @@ extension WatchHistoricalGlucose: RawRepresentable {
             self.syncVersions = samples.map { $0.syncVersion }
             self.startDates = samples.map { $0.startDate }
             self.quantities = samples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
+            self.trends = samples.map { $0.trend }
             self.isDisplayOnlys = samples.map { $0.isDisplayOnly }
             self.wasUserEntereds = samples.map { $0.wasUserEntered }
+            self.devices = samples.map { try? WatchHistoricalGlucose.encoder.encode($0.device) }
         }
 
         var samples: [StoredGlucoseSample] {
             return (0..<uuids.count).map {
-                StoredGlucoseSample(uuid: uuids[$0],
+                return StoredGlucoseSample(uuid: uuids[$0],
                                     provenanceIdentifier: provenanceIdentifiers[$0],
                                     syncIdentifier: syncIdentifiers[$0],
                                     syncVersion: syncVersions[$0],
                                     startDate: startDates[$0],
                                     quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: quantities[$0]),
+                                    trend: trends[$0],
                                     isDisplayOnly: isDisplayOnlys[$0],
-                                    wasUserEntered: wasUserEntereds[$0])
+                                    wasUserEntered: wasUserEntereds[$0],
+                                    device: devices[$0].flatMap { try? HKDevice(from: $0) })
             }
         }
     }
 
-    private static var encoder: PropertyListEncoder {
+    fileprivate static var encoder: PropertyListEncoder {
         let encoder = PropertyListEncoder()
         encoder.outputFormat = .binary
         return encoder
     }
 
-    private static var decoder: PropertyListDecoder = PropertyListDecoder()
+    fileprivate static var decoder: PropertyListDecoder = PropertyListDecoder()
 }

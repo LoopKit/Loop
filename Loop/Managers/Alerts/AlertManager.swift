@@ -43,6 +43,7 @@ public final class AlertManager {
 
     private let userNotificationCenter: UserNotificationCenter
     private let fileManager: FileManager
+    private let alertPresenter: AlertPresenter
 
     let alertStore: AlertStore
     
@@ -65,6 +66,7 @@ public final class AlertManager {
             }
         }
         self.alertStore = alertStore ?? AlertStore(storageDirectoryURL: alertStoreDirectory, expireAfter: expireAfter)
+        self.alertPresenter = alertPresenter
         self.handlers = handlers ??
             [UserNotificationAlertIssuer(userNotificationCenter: userNotificationCenter),
             InAppModalAlertIssuer(alertPresenter: alertPresenter, alertManagerResponder: self)]
@@ -93,10 +95,30 @@ public final class AlertManager {
 extension AlertManager: AlertManagerResponder {
     func acknowledgeAlert(identifier: Alert.Identifier) {
         if let responder = responders[identifier.managerIdentifier]?.value {
-            responder.acknowledgeAlert(alertIdentifier: identifier.alertIdentifier)
+            responder.acknowledgeAlert(alertIdentifier: identifier.alertIdentifier) { (error) in
+                if let error = error {
+                    self.presentAcknowledgementFailedAlert(error: error)
+                }
+            }
         }
         handlers.map { $0 as? AlertManagerResponder }.forEach { $0?.acknowledgeAlert(identifier: identifier) }
         alertStore.recordAcknowledgement(of: identifier)
+    }
+    
+    func presentAcknowledgementFailedAlert(error: Error) {
+        let message: String
+        if let localizedError = error as? LocalizedError {
+            message = [localizedError.localizedDescription, localizedError.recoverySuggestion].compactMap({$0}).joined(separator: "\n\n")
+        } else {
+            message = String(format: NSLocalizedString("%1$@ is unable to clear the alert from your device", comment: "Message for alert shown when alert acknowledgement fails for a device, and the device does not provide a LocalizedError. (1: app name)"), Bundle.main.bundleDisplayName)
+        }
+        let alert = UIAlertController(
+            title: NSLocalizedString("Unable To Clear Alert", comment: "Title for alert shown when alert acknowledgement fails"),
+            message: message,
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action for alert when alert acknowledgment fails"), style: .default))
+        
+        self.alertPresenter.present(alert, animated: true)
     }
 }
 

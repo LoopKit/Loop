@@ -8,6 +8,7 @@
 
 import XCTest
 import Foundation
+import LoopKit
 // LoopKit is not compiled for Testing in carthage builds. LoopKit private units should be tested in LoopKit
 //@testable import LoopKit
 

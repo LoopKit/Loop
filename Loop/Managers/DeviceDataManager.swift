@@ -19,8 +19,6 @@ final class DeviceDataManager {
 
     private let queue = DispatchQueue(label: "com.loopkit.DeviceManagerQueue", qos: .utility)
     
-    fileprivate let dosingQueue: DispatchQueue = DispatchQueue(label: "com.loopkit.DeviceManagerDosingQueue", qos: .utility)
-
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
@@ -96,6 +94,8 @@ final class DeviceDataManager {
             UserDefaults.appGroup?.pumpManagerRawValue = pumpManager?.rawValue
         }
     }
+    
+    var doseEnactor = DoseEnactor()
     
     // MARK: Stores
     let healthStore: HKHealthStore
@@ -569,12 +569,12 @@ final class DeviceDataManager {
 
                     let report = [
                         Bundle.main.localizedNameAndVersion,
+                        "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
                         "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
                         "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
                         "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
                         "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
-                        "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
@@ -616,6 +616,7 @@ private extension DeviceDataManager {
         cgmManager?.delegateQueue = queue
 
         glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
+        glucoseStore.healthKitStorageDelay = cgmManager.map{ type(of: $0).healthKitStorageDelay } ?? 0
 
         updatePumpManagerBLEHeartbeatPreference()
         if let cgmManager = cgmManager {
@@ -673,7 +674,9 @@ extension DeviceDataManager {
         pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
-                if case .uncertainDelivery = error, !automatic {
+                if case .uncertainDelivery = error {
+                    self.checkDeliveryUncertaintyState()
+                } else if !automatic {
                     NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
                 }
                 self.loopManager.bolusRequestFailed(error) {
@@ -1184,47 +1187,8 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         }
 
         log.default("LoopManager did recommend dose")
-
-        dosingQueue.async {
-            let doseDispatchGroup = DispatchGroup()
-
-            var tempBasalError: Error? = nil
-            var bolusError: Error? = nil
-
-            if let basalAdjustment = automaticDose.recommendation.basalAdjustment {
-                self.log.default("LoopManager did recommend basal change")
-
-                doseDispatchGroup.enter()
-                pumpManager.enactTempBasal(unitsPerHour: basalAdjustment.unitsPerHour, for: basalAdjustment.duration, completion: { error in
-                    if let error = error {
-                        tempBasalError = error
-                    }
-                    doseDispatchGroup.leave()
-                })
-            }
-
-            doseDispatchGroup.wait()
-
-            guard tempBasalError == nil else {
-                completion(tempBasalError)
-                return
-            }
-            
-            if automaticDose.recommendation.bolusUnits > 0 {
-                self.log.default("LoopManager did recommend bolus dose")
-                doseDispatchGroup.enter()
-                pumpManager.enactBolus(units: automaticDose.recommendation.bolusUnits, automatic: true) { (error) in
-                    if let error = error {
-                        bolusError = error
-                    } else {
-                        self.log.default("PumpManager issued bolus command")
-                    }
-                    doseDispatchGroup.leave()
-                }
-            }
-            doseDispatchGroup.wait()
-            completion(bolusError)
-        }
+        
+        doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager, completion: completion)
     }
 }
 

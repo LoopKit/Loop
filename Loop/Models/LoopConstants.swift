@@ -40,7 +40,8 @@ enum LoopConstants {
    
     static let retrospectiveCorrectionEnabled = true
     
-    static let bolusPartialApplicationFactor = 0.4 // %
+    // Percentage of recommended dose to apply as bolus when using automatic bolus dosing strategy
+    static let bolusPartialApplicationFactor = 0.4
 
     /// The interval over which to aggregate changes in glucose for retrospective correction
     static let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)

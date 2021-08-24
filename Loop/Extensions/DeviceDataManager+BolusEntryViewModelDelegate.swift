@@ -10,10 +10,10 @@ import HealthKit
 import LoopCore
 import LoopKit
 
-extension DeviceDataManager: BolusEntryViewModelDelegate, LoggedDoseViewModelDelegate {
+extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDelegate {
     
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?) {
-        loopManager.logOutsideInsulinDose(startDate: startDate, units: units, insulinType: insulinType)
+    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) {
+        loopManager.addManuallyEnteredDose(startDate: startDate, units: units, insulinType: insulinType)
     }
     
     func withLoopState(do block: @escaping (LoopState) -> Void) {

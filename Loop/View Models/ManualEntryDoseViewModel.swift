@@ -1,5 +1,5 @@
 //
-//  LoggedDoseViewModel.swift
+//  ManualEntryDoseViewModel.swift
 //  Loop
 //
 //  Created by Pete Schwamb on 12/29/20.
@@ -17,11 +17,11 @@ import LoopKitUI
 import LoopUI
 import SwiftUI
 
-protocol LoggedDoseViewModelDelegate: AnyObject {
+protocol ManualDoseViewModelDelegate: AnyObject {
     
     func withLoopState(do block: @escaping (LoopState) -> Void)
 
-    func logOutsideInsulinDose(startDate: Date, units: Double, insulinType: InsulinType?)
+    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?)
 
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -44,7 +44,7 @@ protocol LoggedDoseViewModelDelegate: AnyObject {
     var settings: LoopSettings { get }
 }
 
-final class LoggedDoseViewModel: ObservableObject {
+final class ManualEntryDoseViewModel: ObservableObject {
 
     var authenticate: AuthenticationChallenge = LocalAuthentication.deviceOwnerCheck
 
@@ -68,7 +68,7 @@ final class LoggedDoseViewModel: ObservableObject {
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
     private var isInitiatingSaveOrBolus = false
 
-    private let log = OSLog(category: "LoggedDoseViewModel")
+    private let log = OSLog(category: "ManualEntryDoseViewModel")
     private var cancellables: Set<AnyCancellable> = []
 
     let chartManager: ChartsManager = {
@@ -89,7 +89,7 @@ final class LoggedDoseViewModel: ObservableObject {
     var insulinTypePickerOptions: [InsulinType]
     
     // MARK: - Seams
-    private weak var delegate: LoggedDoseViewModelDelegate?
+    private weak var delegate: ManualDoseViewModelDelegate?
     private let now: () -> Date
     private let screenWidth: CGFloat
     private let debounceIntervalMilliseconds: Int
@@ -98,7 +98,7 @@ final class LoggedDoseViewModel: ObservableObject {
     // MARK: - Initialization
 
     init(
-        delegate: LoggedDoseViewModelDelegate,
+        delegate: ManualDoseViewModelDelegate,
         now: @escaping () -> Date = { Date() },
         screenWidth: CGFloat = UIScreen.main.bounds.width,
         debounceIntervalMilliseconds: Int = 400,
@@ -181,7 +181,7 @@ final class LoggedDoseViewModel: ObservableObject {
 
     // MARK: - View API
 
-    func logDose(onSuccess completion: @escaping () -> Void) {
+    func saveManualDose(onSuccess completion: @escaping () -> Void) {
         // Authenticate before saving anything
         if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
             let message = String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt to log an insulin dose"), enteredBolusAmountString)
@@ -205,7 +205,7 @@ final class LoggedDoseViewModel: ObservableObject {
             return
         }
 
-        delegate?.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinType: selectedInsulinType)
+        delegate?.addManuallyEnteredDose(startDate: selectedDoseDate, units: doseVolume, insulinType: selectedInsulinType)
         completion()
     }
 

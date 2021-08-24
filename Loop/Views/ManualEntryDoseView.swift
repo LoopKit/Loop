@@ -1,5 +1,5 @@
 //
-//  LoggedDoseView.swift
+//  ManualEntryDoseView.swift
 //  Loop
 //
 //  Created by Pete Schwamb on 12/29/20.
@@ -14,8 +14,8 @@ import LoopKitUI
 import LoopUI
 
 
-struct LoggedDoseView: View {
-    @ObservedObject var viewModel: LoggedDoseViewModel
+struct ManualEntryDoseView: View {
+    @ObservedObject var viewModel: ManualEntryDoseViewModel
 
     @State private var enteredBolusAmount = ""
     @State private var shouldBolusEntryBecomeFirstResponder = false
@@ -258,7 +258,7 @@ struct LoggedDoseView: View {
     private var actionButton: some View {
         Button<Text>(
             action: {
-                self.viewModel.logDose(onSuccess: self.dismiss)
+                self.viewModel.saveManualDose(onSuccess: self.dismiss)
             },
             label: {
                 return Text("Log Dose", comment: "Button text to log a dose")
