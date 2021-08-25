@@ -20,7 +20,6 @@ struct SimpleBolusView: View {
     @State private var isKeyboardVisible = false
     @State private var isClosedLoopOffInformationalModalVisible = false
 
-    var displayMealEntry: Bool
     @ObservedObject var viewModel: SimpleBolusViewModel
 
     private var enteredManualGlucose: Binding<String> {
@@ -30,13 +29,12 @@ struct SimpleBolusView: View {
         )
     }
 
-    init(displayMealEntry: Bool, viewModel: SimpleBolusViewModel) {
-        self.displayMealEntry = displayMealEntry
+    init(viewModel: SimpleBolusViewModel) {
         self.viewModel = viewModel
     }
     
     var title: String {
-        if displayMealEntry {
+        if viewModel.displayMealEntry {
             return NSLocalizedString("Simple Meal Calculator", comment: "Title of simple bolus view when displaying meal entry")
         } else {
             return NSLocalizedString("Simple Bolus Calculator", comment: "Title of simple bolus view when not displaying meal entry")
@@ -107,7 +105,7 @@ struct SimpleBolusView: View {
     
     private var summarySection: some View {
         Section {
-            if displayMealEntry {
+            if viewModel.displayMealEntry {
                 carbEntryRow
             }
             glucoseEntryRow
@@ -122,7 +120,7 @@ struct SimpleBolusView: View {
             Spacer()
             HStack {
                 DismissibleKeyboardTextField(
-                    text: $viewModel.enteredCarbAmount,
+                    text: $viewModel.enteredCarbString,
                     placeholder: viewModel.carbPlaceholder,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
@@ -319,12 +317,36 @@ struct SimpleBolusView: View {
     }
     
     private func warning(for notice: SimpleBolusViewModel.Notice) -> some View {
+        
         switch notice {
         case .glucoseBelowSuspendThreshold:
+            let title: Text
+            if viewModel.bolusRecommended {
+                title = Text("Low Glucose", comment: "Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended")
+            } else {
+                title = Text("No Bolus Recommended", comment: "Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended")
+            }
             let suspendThresholdString = QuantityFormatter().string(from: viewModel.suspendThreshold, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: viewModel.suspendThreshold)
             return WarningView(
+                title: title,
+                caption: Text(String(format: NSLocalizedString("Your glucose is below your glucose safety limit, %1$@.", comment: "Format string for bolus screen warning when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold)"), suspendThresholdString))
+            )
+        case .glucoseWarning:
+            let warningThresholdString = QuantityFormatter().string(from: LoopConstants.simpleBolusCalculatorGlucoseWarningLimit, for: displayGlucoseUnitObservable.displayGlucoseUnit)!
+            return WarningView(
+                title: Text("Low Glucose", comment: "Title for bolus screen warning when glucose is below glucose warning limit."),
+                caption: Text(String(format: NSLocalizedString("Your glucose is below %1$@. Are you sure you want to bolus?", comment: "Format string for simple bolus screen warning when glucose is below glucose warning limit."), warningThresholdString))
+            )
+        case .glucoseBelowRecommendationLimit:
+            let caption: String
+            if viewModel.displayMealEntry {
+                caption = NSLocalizedString("Your glucose is low. Eat carbs and consider waiting to bolus until your glucose is in a safe range.", comment: "Format string for meal bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold")
+            } else {
+                caption = NSLocalizedString("Your glucose is low. Eat carbs and monitor closely.", comment: "Format string for bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus")
+            }
+            return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text(String(format: NSLocalizedString("Your glucose is below your glucose safety limit, %1$@.", comment: "Format string for bolus screen notice when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold)"), suspendThresholdString))
+                caption: Text(caption)
             )
         }
     }
@@ -391,11 +413,11 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
         }
     }
 
-    static var viewModel: SimpleBolusViewModel = SimpleBolusViewModel(delegate: MockSimpleBolusViewDelegate())
+    static var viewModel: SimpleBolusViewModel = SimpleBolusViewModel(delegate: MockSimpleBolusViewDelegate(), displayMealEntry: true)
     
     static var previews: some View {
         NavigationView {
-            SimpleBolusView(displayMealEntry: true, viewModel: viewModel)
+            SimpleBolusView(viewModel: viewModel)
         }
         .previewDevice("iPod touch (7th generation)")
         .environmentObject(DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter))

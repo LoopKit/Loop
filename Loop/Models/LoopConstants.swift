@@ -58,4 +58,9 @@ enum LoopConstants {
     static let missedMealWarningGlucoseRiseThreshold = 3.0 // mg/dL/m
     static let missedMealWarningGlucoseRecencyWindow = TimeInterval(minutes: 20)
     static let missedMealWarningVelocitySampleMinDuration = TimeInterval(minutes: 12)
+    
+    // Bolus calculator warning thresholds
+    static let simpleBolusCalculatorMinGlucoseBolusRecommendation = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 70)
+    static let simpleBolusCalculatorMinGlucoseMealBolusRecommendation = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 55)
+    static let simpleBolusCalculatorGlucoseWarningLimit = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 70)
 }
