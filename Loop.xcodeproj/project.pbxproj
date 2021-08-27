@@ -375,6 +375,7 @@
 		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
 		A90EF53C25DEF06200F32D61 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		A90EF54425DEF0A000F32D61 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374B5EE209D84BE00D17AA8 /* OSLog.swift */; };
+		A91D2A3F26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91D2A3E26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift */; };
 		A91E4C2124F867A700BE9213 /* StoredAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91E4C2024F867A700BE9213 /* StoredAlertTests.swift */; };
 		A91E4C2324F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */; };
 		A92E557E2464DFFD00DB93BB /* DosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */; };
@@ -1288,6 +1289,7 @@
 		89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionTime.swift; sourceTree = "<group>"; };
 		89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusPickerValues.swift; sourceTree = "<group>"; };
 		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
+		A91D2A3E26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconTitleSubtitleTableViewCell.swift; sourceTree = "<group>"; };
 		A91E4C2024F867A700BE9213 /* StoredAlertTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlertTests.swift; sourceTree = "<group>"; };
 		A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalEventLogExportManagerTests.swift; sourceTree = "<group>"; };
 		A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DosingDecisionStore.swift; path = ../Stores/DosingDecisionStore.swift; sourceTree = "<group>"; };
@@ -2050,6 +2052,7 @@
 				A9A056B224B93C62007CF06D /* CriticalEventLogExportView.swift */,
 				43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */,
 				430D85881F44037000AF2D4F /* HUDViewTableViewCell.swift */,
+				A91D2A3E26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift */,
 				1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */,
 				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
 				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
@@ -3486,6 +3489,7 @@
 				89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */,
 				43E93FB71E469A5100EAB8DB /* HKUnit.swift in Sources */,
 				43C05CAF21EB2C24006FB252 /* NSBundle.swift in Sources */,
+				A91D2A3F26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift in Sources */,
 				A967D94C24F99B9300CDDF8A /* OutputStream.swift in Sources */,
 				1DB1065124467E18005542BD /* AlertManager.swift in Sources */,
 				1D9650C82523FBA100A1370B /* DeviceDataManager+BolusEntryViewModelDelegate.swift in Sources */,

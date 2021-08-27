@@ -30,6 +30,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
 
+    var onboardingManager: OnboardingManager!
+
     var closedLoopStatus: ClosedLoopStatus!
     
     let notificationsCriticalAlertPermissionsViewModel = NotificationsCriticalAlertPermissionsViewModel()
@@ -160,6 +162,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         notificationsCriticalAlertPermissionsViewModel.updateState()
         
         updateBolusProgress()
+
+        onboardingManager.$isComplete
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.updateToolbarItems() }
+            .store(in: &cancellables)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -238,6 +245,17 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private func updateHUDActive() {
         deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
+    }
+
+    private func updateToolbarItems() {
+        let isOnboardingComplete = onboardingManager.isComplete
+        let isClosedLoop = closedLoopStatus.isClosedLoop
+
+        toolbarItems![0].isEnabled = isOnboardingComplete
+        toolbarItems![2].isEnabled = isOnboardingComplete && isClosedLoop
+        toolbarItems![4].isEnabled = isOnboardingComplete
+        toolbarItems![6].isEnabled = isOnboardingComplete
+        toolbarItems![8].isEnabled = true
     }
 
     public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil {
@@ -457,7 +475,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         }
 
-        updatePreMealModeAvailability(allowed: isClosedLoop)
+        updatePreMealModeAvailability(isClosedLoop: isClosedLoop)
 
         if deviceManager.loopManager.settings.preMealTargetRange == nil {
             preMealMode = nil
@@ -625,6 +643,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case bolusing(dose: DoseEntry)
         case cancelingBolus
         case pumpSuspended(resuming: Bool)
+        case onboardingSuspended
         case recommendManualGlucoseEntry
 
         var hasRow: Bool {
@@ -652,7 +671,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             statusRowMode = .pumpSuspended(resuming: true)
         } else if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
             statusRowMode = .bolusing(dose: dose)
-        } else if deviceManager.isGlucoseValueStale {
+        } else if !onboardingManager.isComplete, deviceManager.pumpManager?.isOnboarded == true {
+            statusRowMode = .onboardingSuspended
+        } else if onboardingManager.isComplete, deviceManager.isGlucoseValueStale {
             statusRowMode = .recommendManualGlucoseEntry
         } else if let scheduleOverride = deviceManager.loopManager.settings.scheduleOverride,
             !scheduleOverride.hasFinished()
@@ -746,11 +767,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
             guard oldValue != preMealMode else {
                 return
             }
-            updatePreMealModeAvailability(allowed: closedLoopStatus.isClosedLoop)
+            updatePreMealModeAvailability(isClosedLoop: closedLoopStatus.isClosedLoop)
         }
     }
 
-    private func updatePreMealModeAvailability(allowed: Bool) {
+    private func updatePreMealModeAvailability(isClosedLoop: Bool) {
+        let allowed = onboardingManager.isComplete && isClosedLoop
         toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
 
@@ -761,7 +783,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
 
             if let workoutMode = workoutMode {
-                toolbarItems![6] = createWorkoutButtonItem(selected: workoutMode)
+                let allowed = onboardingManager.isComplete
+                toolbarItems![6] = createWorkoutButtonItem(selected: workoutMode, isEnabled: allowed)
             } else {
                 toolbarItems![6].isEnabled = false
             }
@@ -944,6 +967,18 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     }
                     cell.selectionStyle = .default
                     return cell
+                case .onboardingSuspended:
+                    let cell = tableView.dequeueReusableCell(withIdentifier: IconTitleSubtitleTableViewCell.className, for: indexPath) as! IconTitleSubtitleTableViewCell
+                    cell.selectionStyle = .default
+                    cell.backgroundColor = .secondarySystemBackground
+                    cell.iconImageView.image = UIImage(systemName: "exclamationmark.circle.fill")
+                    cell.iconImageView.tintColor = .warning
+                    cell.iconImageView.contentMode = .scaleAspectFit
+                    cell.iconImageView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 28)
+                    cell.titleLabel.text = NSLocalizedString("Setup Incomplete", comment: "The title of the cell indicating that onboarding is suspended")
+                    cell.subtitleLabel.text = NSLocalizedString("Tap to Resume", comment: "The subtitle of the cell displaying an action to resume onboarding")
+                    cell.accessoryView = nil
+                    return cell
                 case .recommendManualGlucoseEntry:
                     let cell = getTitleSubtitleCell()
                     cell.titleLabel.text = NSLocalizedString("No Recent Glucose", comment: "The title of the cell indicating that there is no recent glucose")
@@ -1077,6 +1112,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                             }
                         }
                     }
+                case .onboardingSuspended:
+                    onboardingManager.resume()
                 case .recommendManualGlucoseEntry:
                     presentBolusEntryView(enableManualGlucoseEntry: true)
                 default:
@@ -1130,6 +1167,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         switch targetViewController {
         case let vc as CarbAbsorptionViewController:
+            vc.isOnboardingComplete = onboardingManager.isComplete
             vc.closedLoopStatus = closedLoopStatus
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
@@ -1223,7 +1261,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         return item
     }
 
-    private func createWorkoutButtonItem(selected: Bool) -> UIBarButtonItem {
+    private func createWorkoutButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
         let item = UIBarButtonItem(image: UIImage.workoutImage(selected: selected), style: .plain, target: self, action: #selector(toggleWorkoutMode(_:)))
         item.accessibilityLabel = NSLocalizedString("Workout Targets", comment: "The label of the workout mode toggle button")
 
@@ -1235,6 +1273,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
 
         item.tintColor = UIColor.glucoseTintColor
+        item.isEnabled = isEnabled
 
         return item
     }
@@ -1323,7 +1362,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let pumpViewModel = PumpManagerViewModel(
             image: { [weak self] in self?.deviceManager.pumpManager?.smallImage },
             name: { [weak self] in self?.deviceManager.pumpManager?.localizedTitle ?? "" },
-            isSetUp: { [weak self] in self?.deviceManager.pumpManager != nil },
+            isSetUp: { [weak self] in self?.deviceManager.pumpManager?.isOnboarded == true },
             availableDevices: deviceManager.availablePumpManagers,
             deleteTestingDataFunc: deletePumpDataFunc,
             onTapped: { [weak self] in
@@ -1336,7 +1375,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let cgmViewModel = CGMManagerViewModel(
             image: {[weak self] in (self?.deviceManager.cgmManager as? DeviceManagerUI)?.smallImage },
             name: {[weak self] in self?.deviceManager.cgmManager?.localizedTitle ?? "" },
-            isSetUp: {[weak self] in self?.deviceManager.cgmManager != nil },
+            isSetUp: {[weak self] in self?.deviceManager.cgmManager?.isOnboarded == true },
             availableDevices: deviceManager.availableCGMManagers,
             deleteTestingDataFunc: deleteCGMDataFunc,
             onTapped: { [weak self] in
@@ -1373,6 +1412,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           supportInfoProvider: deviceManager,
                                           dosingStrategy: deviceManager.loopManager.settings.dosingStrategy,
                                           availableSupports: deviceManager.availableSupports,
+                                          isOnboardingComplete: onboardingManager.isComplete,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel)
@@ -1405,7 +1445,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func closedLoopStatusChanged(_ isClosedLoop: Bool) {
-        updatePreMealModeAvailability(allowed: isClosedLoop)
+        updatePreMealModeAvailability(isClosedLoop: isClosedLoop)
         hudView?.loopCompletionHUD.loopIconClosed = isClosedLoop
     }
 

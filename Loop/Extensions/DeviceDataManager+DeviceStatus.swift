@@ -36,6 +36,8 @@ extension DeviceDataManager {
         let bluetoothState = bluetoothProvider.bluetoothState
         if bluetoothState == .unsupported || bluetoothState == .unauthorized || bluetoothState == .poweredOff {
             return BluetoothState.enableHighlight
+        } else if let onboardingManager = onboardingManager, !onboardingManager.isComplete, pumpManager?.isOnboarded != true {
+            return DeviceDataManager.resumeOnboardingStatusHighlight
         } else if pumpManager == nil {
             return DeviceDataManager.addPumpStatusHighlight
         } else {
@@ -51,6 +53,16 @@ extension DeviceDataManager {
         return pumpManager?.pumpLifecycleProgress
     }
     
+    static var resumeOnboardingStatusHighlight: ResumeOnboardingStatusHighlight {
+        return ResumeOnboardingStatusHighlight()
+    }
+
+    struct ResumeOnboardingStatusHighlight: DeviceStatusHighlight {
+        var localizedMessage: String = NSLocalizedString("Complete Setup", comment: "Title text for button to complete setup")
+        var imageName: String = "exclamationmark.circle.fill"
+        var state: DeviceStatusHighlightState = .warning
+    }
+
     static var addCGMStatusHighlight: AddDeviceStatusHighlight {
         return AddDeviceStatusHighlight(localizedMessage: NSLocalizedString("Add CGM", comment: "Title text for button to set up a CGM"),
                                         state: .critical)
@@ -84,6 +96,9 @@ extension DeviceDataManager {
     func didTapOnPumpStatus(_ view: BaseHUDView? = nil) -> HUDTapAction? {
         if let action = bluetoothProvider.bluetoothState.action {
             return action
+        } else if let onboardingManager = onboardingManager, !onboardingManager.isComplete, pumpManager?.isOnboarded != true {
+            onboardingManager.resume()
+            return .takeNoAction
         } else if let pumpManagerHUDProvider = pumpManagerHUDProvider,
             let view = view,
             let action = pumpManagerHUDProvider.didTapOnHUDView(view, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)

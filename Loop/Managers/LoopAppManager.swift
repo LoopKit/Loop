@@ -148,22 +148,23 @@ class LoopAppManager: NSObject {
                                                    windowProvider: windowProvider,
                                                    userDefaults: UserDefaults.appGroup!)
 
+        deviceDataManager.onboardingManager = onboardingManager
         deviceDataManager.analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
-
-        self.state = state.next
 
         closedLoopStatus.$isClosedLoopAllowed
             .combineLatest(deviceDataManager.loopManager.$dosingEnabled)
             .map { $0 && $1 }
             .assign(to: \.closedLoopStatus.isClosedLoop, on: self)
             .store(in: &cancellables)
+
+        self.state = state.next
     }
 
     private func launchOnboarding() {
         dispatchPrecondition(condition: .onQueue(.main))
         precondition(state == .launchOnboarding)
 
-        onboardingManager.onboard {
+        onboardingManager.launch {
             DispatchQueue.main.async {
                 self.state = self.state.next
                 self.resumeLaunch()
@@ -179,6 +180,7 @@ class LoopAppManager: NSObject {
         let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         statusTableViewController.closedLoopStatus = closedLoopStatus
         statusTableViewController.deviceManager = deviceDataManager
+        statusTableViewController.onboardingManager = onboardingManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
         var rootNavigationController = rootViewController as? RootNavigationController
