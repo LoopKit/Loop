@@ -23,6 +23,7 @@ extension UserDefaults {
         case overrideHistory = "com.loopkit.overrideHistory"
         case lastBedtimeQuery = "com.loopkit.Loop.lastBedtimeQuery"
         case bedtime = "com.loopkit.Loop.bedtime"
+        case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -176,5 +177,9 @@ extension UserDefaults {
         set {
             set(newValue, forKey: Key.bedtime.rawValue)
         }
+    }
+    
+    public var allowDebugFeatures: Bool {
+        return bool(forKey: Key.allowDebugFeatures.rawValue)
     }
 }

@@ -328,7 +328,7 @@ extension OnboardingManager: CGMManagerProvider {
             return .failure(OnboardingError.invalidState)
         }
 
-        return .success(.userInteractionRequired(cgmManagerUI.settingsViewController(bluetoothProvider: self, displayGlucoseUnitObservable: deviceDataManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)))
+        return .success(.userInteractionRequired(cgmManagerUI.settingsViewController(bluetoothProvider: self, displayGlucoseUnitObservable: deviceDataManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)))
     }
 }
 
@@ -367,7 +367,7 @@ extension OnboardingManager: PumpManagerProvider {
             return .success(.createdAndOnboarded(pumpManager))
         }
 
-        return .success(.userInteractionRequired(pumpManager.settingsViewController(bluetoothProvider: self, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled, allowedInsulinTypes: deviceDataManager.allowedInsulinTypes)))
+        return .success(.userInteractionRequired(pumpManager.settingsViewController(bluetoothProvider: self, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, allowedInsulinTypes: deviceDataManager.allowedInsulinTypes)))
     }
 }
 
@@ -405,7 +405,7 @@ extension OnboardingManager: TherapySettingsProvider {
 // MARK: - OnboardingProvider
 
 extension OnboardingManager: OnboardingProvider {
-    var allowDebugFeatures: Bool { FeatureFlags.mockTherapySettingsEnabled }   // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
+    var allowDebugFeatures: Bool { FeatureFlags.allowDebugFeatures }   // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
 }
 
 // MARK: - OnboardingUI

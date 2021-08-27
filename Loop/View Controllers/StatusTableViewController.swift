@@ -1423,7 +1423,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func onPumpTapped() {
-        guard var settingsViewController = deviceManager.pumpManager?.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled, allowedInsulinTypes: deviceManager.allowedInsulinTypes) else {
+        guard var settingsViewController = deviceManager.pumpManager?.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, allowedInsulinTypes: deviceManager.allowedInsulinTypes) else {
             // assert?
             return
         }
@@ -1438,7 +1438,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return
         }
 
-        var settings = cgmManager.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, displayGlucoseUnitObservable: deviceManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)
+        var settings = cgmManager.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, displayGlucoseUnitObservable: deviceManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
         settings.cgmManagerOnboardingDelegate = deviceManager
         settings.completionDelegate = self
         show(settings, sender: self)
@@ -1625,7 +1625,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     var rotateTimer: Timer?
     let rotateTimerTimeout = TimeInterval.seconds(2)
     private func maybeOpenDebugMenu() {
-        guard FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled else {
+        guard FeatureFlags.allowDebugFeatures else {
             return
         }
         // Opens the debug menu if you rotate the phone 6 times (or back & forth 3 times), each rotation within 2 secs.
@@ -1649,14 +1649,18 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        if FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled {
-            if motion == .motionShake {
-                presentDebugMenu()
-            }
+        guard FeatureFlags.allowDebugFeatures else {
+            return
+        }
+        if motion == .motionShake {
+            presentDebugMenu()
         }
     }
 
     private func presentDebugMenu() {
+        guard FeatureFlags.allowDebugFeatures else {
+            return
+        }
         guard FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled else {
             fatalError("\(#function) should be invoked only when scenarios, simulated core data, or mock therapy settings are enabled")
         }

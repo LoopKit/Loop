@@ -157,7 +157,20 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
             "* siriEnabled: \(siriEnabled)",
             "* automaticBolusEnabled: \(automaticBolusEnabled)",
-            "* manualDoseEntryEnabled: \(manualDoseEntryEnabled)"
+            "* manualDoseEntryEnabled: \(manualDoseEntryEnabled)",
+            "* allowDebugFeatures: \(allowDebugFeatures)",
         ].joined(separator: "\n")
+    }
+}
+
+extension FeatureFlagConfiguration {
+    var allowDebugFeatures: Bool {
+        if debugEnabled {
+            return true
+        }
+        if UserDefaults.appGroup?.allowDebugFeatures ?? false {
+            return true
+        }
+        return false
     }
 }
