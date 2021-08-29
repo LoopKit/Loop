@@ -22,6 +22,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
         loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
         loopAppManager.launch()
+        UIApplication.shared.registerForRemoteNotifications()
         return loopAppManager.isLaunchComplete
     }
 
