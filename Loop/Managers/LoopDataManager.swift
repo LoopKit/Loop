@@ -798,7 +798,7 @@ extension LoopDataManager {
                                       maximumBasalRatePerHour: loopSettings.maximumBasalRatePerHour,
                                       maximumBolus: loopSettings.maximumBolus,
                                       suspendThreshold: loopSettings.suspendThreshold,
-                                      deviceToken: loopSettings.deviceToken?.hexadecimalString,
+                                      deviceToken: self.settings.deviceToken?.hexadecimalString, //Not persisting the deviceToken
                                       defaultRapidActingModel: appGroup.defaultRapidActingModel.map(StoredInsulinModel.init),
                                       basalRateSchedule: appGroup.basalRateSchedule,
                                       insulinSensitivitySchedule: appGroup.insulinSensitivitySchedule,
