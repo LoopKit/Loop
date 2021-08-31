@@ -324,10 +324,13 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
         case LoopNotificationCategory.bolusFailure.rawValue,
              LoopNotificationCategory.pumpBatteryLow.rawValue,
              LoopNotificationCategory.pumpExpired.rawValue,
-             LoopNotificationCategory.pumpFault.rawValue:
+             LoopNotificationCategory.pumpFault.rawValue,
+             LoopNotificationCategory.remoteBolus.rawValue,
+             LoopNotificationCategory.remoteBolusFailure.rawValue,
+             LoopNotificationCategory.remoteCarbs.rawValue,
+             LoopNotificationCategory.remoteCarbsFailure.rawValue:
             completionHandler([.badge, .sound, .alert])
         default:
-            // All other userNotifications are not to be displayed while in the foreground
             completionHandler([])
         }
     }
