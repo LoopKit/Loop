@@ -11,6 +11,7 @@ import G4ShareSpy
 import ShareClient
 import MockKit
 import xDripClient
+import NightscoutAPIClient
 //import LibreTransmitterManager
 
 
@@ -21,6 +22,7 @@ let allCGMManagers: [CGMManager.Type] = [
     ShareClientManager.self,
     MockCGMManager.self,
     xDripClientManager.self,
+    NightscoutAPIManager.self,
 //    LibreTransmitterManager.self,
 ]
 

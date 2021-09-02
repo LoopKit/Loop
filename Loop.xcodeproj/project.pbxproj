@@ -23,6 +23,8 @@
 /* Begin PBXBuildFile section */
 		2437055E26129748005FE432 /* xDripClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2437055D26129748005FE432 /* xDripClient.framework */; };
 		2437056026129748005FE432 /* xDripClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2437055F26129748005FE432 /* xDripClientUI.framework */; };
+		24FB169A26E187C300EA9772 /* NightscoutAPIClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24FB169926E187C300EA9772 /* NightscoutAPIClient.framework */; };
+		24FB169C26E187C300EA9772 /* NightscoutAPIClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24FB169B26E187C300EA9772 /* NightscoutAPIClientUI.framework */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
 		4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */; };
@@ -576,6 +578,8 @@
 /* Begin PBXFileReference section */
 		2437055D26129748005FE432 /* xDripClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = xDripClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2437055F26129748005FE432 /* xDripClientUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = xDripClientUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		24FB169926E187C300EA9772 /* NightscoutAPIClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutAPIClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		24FB169B26E187C300EA9772 /* NightscoutAPIClientUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutAPIClientUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		430B29892041F54A00BA9F93 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
@@ -1133,6 +1137,8 @@
 				4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */,
 				2437055E26129748005FE432 /* xDripClient.framework in Frameworks */,
 				2437056026129748005FE432 /* xDripClientUI.framework in Frameworks */,
+				24FB169A26E187C300EA9772 /* NightscoutAPIClient.framework in Frameworks */,
+				24FB169C26E187C300EA9772 /* NightscoutAPIClientUI.framework in Frameworks */,
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
 				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
@@ -1863,6 +1869,8 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				24FB169926E187C300EA9772 /* NightscoutAPIClient.framework */,
+				24FB169B26E187C300EA9772 /* NightscoutAPIClientUI.framework */,
 				2437055D26129748005FE432 /* xDripClient.framework */,
 				2437055F26129748005FE432 /* xDripClientUI.framework */,
 				434FB6451D68F1CD007B9C70 /* Amplitude.framework */,
@@ -2481,6 +2489,8 @@
 				"$(BUILT_PRODUCTS_DIR)/MKRingProgressView.framework/MKRingProgressView",
 				"$(BUILT_PRODUCTS_DIR)/xDripClient.framework/xDripClient",
 				"$(BUILT_PRODUCTS_DIR)/xDripClientUI.framework/xDripClientUI",
+				"$(BUILT_PRODUCTS_DIR)/NightscoutAPIClient.framework/NightscoutAPIClient",
+				"$(BUILT_PRODUCTS_DIR)/NightscoutAPIClientUI.framework/NightscoutAPIClientUI",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
@@ -2501,6 +2511,8 @@
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MKRingProgressView.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripClient.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripClientUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)NightscoutAPIClient.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)NightscoutAPIClientUI.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
