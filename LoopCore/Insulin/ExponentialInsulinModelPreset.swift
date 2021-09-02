@@ -10,6 +10,9 @@ import LoopKit
 
 public enum ExponentialInsulinModelPreset: String {
     case humalogNovologAdult
+    case novoRapid35h
+    case novoRapid40h
+    case novoRapid45h
     case humalogNovologChild
     case fiasp
 }
@@ -21,6 +24,12 @@ extension ExponentialInsulinModelPreset {
         switch self {
         case .humalogNovologAdult:
             return .minutes(360)
+        case .novoRapid35h:
+            return .minutes(210)
+        case .novoRapid40h:
+            return .minutes(240)
+        case .novoRapid45h:
+            return .minutes(270)
         case .humalogNovologChild:
             return .minutes(360)
         case .fiasp:
@@ -32,6 +41,12 @@ extension ExponentialInsulinModelPreset {
         switch self {
         case .humalogNovologAdult:
             return .minutes(75)
+        case .novoRapid35h:
+            return .minutes(65)
+        case .novoRapid40h:
+            return .minutes(65)
+        case .novoRapid45h:
+            return .minutes(65)
         case .humalogNovologChild:
             return .minutes(65)
         case .fiasp:
@@ -43,6 +58,12 @@ extension ExponentialInsulinModelPreset {
         switch self {
         case .humalogNovologAdult:
             return .minutes(10)
+        case .novoRapid35h:
+            return .minutes(12)
+        case .novoRapid40h:
+            return .minutes(12)
+        case .novoRapid45h:
+            return .minutes(12)
         case .humalogNovologChild:
             return .minutes(10)
         case .fiasp:

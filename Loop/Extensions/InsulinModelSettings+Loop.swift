@@ -26,6 +26,12 @@ extension ExponentialInsulinModelPreset {
         switch self {
         case .humalogNovologAdult:
             return NSLocalizedString("Rapid-Acting – Adults", comment: "Title of insulin model preset")
+        case .novoRapid35h:
+            return NSLocalizedString("NovoRapid (3.5h)", comment: "Title of insulin model preset")
+        case .novoRapid40h:
+            return NSLocalizedString("NovoRapid (4h)", comment: "Title of insulin model preset")
+        case .novoRapid45h:
+            return NSLocalizedString("NovoRapid (4.5h)", comment: "Title of insulin model preset")
         case .humalogNovologChild:
             return NSLocalizedString("Rapid-Acting – Children", comment: "Title of insulin model preset")
         case .fiasp:
@@ -37,6 +43,12 @@ extension ExponentialInsulinModelPreset {
         switch self {
         case .humalogNovologAdult:
             return NSLocalizedString("A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults.", comment: "Subtitle of Rapid-Acting – Adult preset")
+        case .novoRapid35h:
+            return NSLocalizedString("A model based on observed absorption of NovoRapid over 3.5h", comment: "Subtitle for NovoRapid(3.5h)")
+        case .novoRapid40h:
+            return NSLocalizedString("A model based on observed absorption of NovoRapid over 4h", comment: "Subtitle for NovoRapid(4h)")
+        case .novoRapid45h:
+            return NSLocalizedString("A model based on observed absorption of NovoRapid over 4.5h", comment: "Subtitle for NovoRapid(4.5h)")
         case .humalogNovologChild:
             return NSLocalizedString("An adjustment to the adult model based on empirical effects in children.", comment: "Subtitle of Rapid-Acting – Children preset")
         case .fiasp:
