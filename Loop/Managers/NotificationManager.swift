@@ -67,14 +67,6 @@ extension NotificationManager {
         center.requestAuthorization(options: authOptions) { (granted, error) in
             UNUserNotificationCenter.current().getNotificationSettings { settings in
                 completion(settings.authorizationStatus)
-                guard settings.authorizationStatus == .authorized else {
-                    return
-                }
-                if FeatureFlags.remoteOverridesEnabled {
-                    DispatchQueue.main.async {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
-                }
             }
         }
         center.setNotificationCategories(notificationCategories)

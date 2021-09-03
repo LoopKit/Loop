@@ -83,6 +83,8 @@ class LoopAppManager: NSObject {
         }
 
         registerBackgroundTasks()
+        
+        registerForRemoteNotifications()
 
         self.state = state.next
     }
@@ -208,6 +210,12 @@ class LoopAppManager: NSObject {
     }
 
     // MARK: - Remote Notification
+    
+    func registerForRemoteNotifications() {
+        if FeatureFlags.remoteOverridesEnabled {
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+    }
 
     func setRemoteNotificationsDeviceToken(_ remoteNotificationsDeviceToken: Data) {
         deviceDataManager?.loopManager.settings.deviceToken = remoteNotificationsDeviceToken
