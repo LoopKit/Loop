@@ -184,10 +184,10 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    static func sendRemoteCarbEntryNotification(amountInGrams: Double, absorptionTime: TimeInterval?) {
+    static func sendRemoteCarbEntryNotification(amountInGrams: Double) {
         let notification = UNMutableNotificationContent()
 
-        let leadingBody = remoteCarbEntryNotificationBody(amountInGrams: amountInGrams, absorptionTime: absorptionTime)
+        let leadingBody = remoteCarbEntryNotificationBody(amountInGrams: amountInGrams)
         let extraBody = "Success!"
         
         let body = [leadingBody, extraBody].joined(separator: "\n")
@@ -204,10 +204,10 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    static func sendRemoteCarbEntryFailureNotification(for error: Error, amountInGrams: Double, absorptionTime: TimeInterval?) {
+    static func sendRemoteCarbEntryFailureNotification(for error: Error, amountInGrams: Double) {
         let notification = UNMutableNotificationContent()
         
-        let leadingBody = remoteCarbEntryNotificationBody(amountInGrams: amountInGrams, absorptionTime: absorptionTime)
+        let leadingBody = remoteCarbEntryNotificationBody(amountInGrams: amountInGrams)
         let extraBody = error.localizedDescription
 
         let body = [leadingBody, extraBody].joined(separator: "\n")
@@ -224,14 +224,8 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    private static func remoteCarbEntryNotificationBody(amountInGrams: Double, absorptionTime: TimeInterval?) -> String {
-        let carbAmountLine = String(format: NSLocalizedString("Remote Carbs Entry: %d grams", comment: "The carb amount message for a remote carbs entry notification. (1: Carb amount in grams)"), Int(amountInGrams))
-        var absorptionLine = ""
-        if let absorptionTime = absorptionTime, absorptionTime > 0.0 {
-            absorptionLine = String(format: NSLocalizedString("Absorption Time: %d hours", comment: "The absorption message for a remote carbs entry. (1: Absorption time in hours)"), Int(absorptionTime.hours))
-        }
-
-        return [carbAmountLine, absorptionLine].joined(separator: "\n")
+    private static func remoteCarbEntryNotificationBody(amountInGrams: Double) -> String {
+        return String(format: NSLocalizedString("Remote Carbs Entry: %d grams", comment: "The carb amount message for a remote carbs entry notification. (1: Carb amount in grams)"), Int(amountInGrams))
     }
 
     static func clearLoopNotRunningNotifications() {

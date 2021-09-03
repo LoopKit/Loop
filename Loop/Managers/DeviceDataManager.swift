@@ -1247,19 +1247,19 @@ extension DeviceDataManager {
                     
                     //Remote carb entry requires validation from its remote source
                     guard remoteDataServicesManager.validatePushNotificationSource(notification) else {
-                        NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidOTP, amountInGrams: candidateCarbsInGrams, absorptionTime: candidateCarbEntry.absorptionTime)
+                        NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidOTP, amountInGrams: candidateCarbsInGrams)
                         log.info("Could not validate notification: %{public}@", String(describing: notification))
                         return
                     }
                     
                     guard candidateCarbsInGrams > 0.0 else {
-                        NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidCarbs, amountInGrams: candidateCarbsInGrams, absorptionTime: candidateCarbEntry.absorptionTime)
+                        NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidCarbs, amountInGrams: candidateCarbsInGrams)
                         log.default("Invalid carb entry amount. Aborting...")
                         return
                     }
                     
                     guard candidateCarbsInGrams <= LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()) else {
-                        NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.exceedsMaxCarbs, amountInGrams: candidateCarbsInGrams, absorptionTime: candidateCarbEntry.absorptionTime)
+                        NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.exceedsMaxCarbs, amountInGrams: candidateCarbsInGrams)
                         log.default("Carbs higher than maximum. Aborting...")
                         return
                     }
@@ -1267,9 +1267,9 @@ extension DeviceDataManager {
                     carbStore.addCarbEntry(candidateCarbEntry) { carbEntryAddResult in
                         switch carbEntryAddResult {
                         case .success(let completedCarbEntry):
-                            NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: completedCarbEntry.quantity.doubleValue(for: .gram()), absorptionTime: completedCarbEntry.absorptionTime)
+                            NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: completedCarbEntry.quantity.doubleValue(for: .gram()))
                         case .failure(let error):
-                            NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: candidateCarbsInGrams, absorptionTime: candidateCarbEntry.absorptionTime)
+                            NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: candidateCarbsInGrams)
                         }
                     }
                 }
