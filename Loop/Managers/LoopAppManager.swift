@@ -339,6 +339,7 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.remoteCarbsFailure.rawValue:
             completionHandler([.badge, .sound, .alert])
         default:
+            // All other userNotifications are not to be displayed while in the foreground
             completionHandler([])
         }
     }
