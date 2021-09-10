@@ -202,6 +202,8 @@ class OnboardingManager {
     }
 
     private func complete() {
+        dispatchPrecondition(condition: .onQueue(.main))
+
         if let completion = completion {
             self.completion = nil
             completion()

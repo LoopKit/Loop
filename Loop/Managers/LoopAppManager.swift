@@ -41,6 +41,7 @@ protocol WindowProvider: AnyObject {
 class LoopAppManager: NSObject {
     private enum State: Int {
         case initialize
+        case checkProtectedDataAvailable
         case launchManagers
         case launchOnboarding
         case launchHomeScreen
@@ -89,25 +90,20 @@ class LoopAppManager: NSObject {
 
     func launch() {
         dispatchPrecondition(condition: .onQueue(.main))
-        precondition(!isLaunchComplete)
-        precondition(state != .initialize)
-
-        guard isProtectedDataAvailable() else {
-            log.default("Protected data not available; deferring launch...")
-            return
-        }
-
-        windowProvider?.window?.tintColor = .loopAccent
-        OrientationLock.deviceOrientationController = self
-        UNUserNotificationCenter.current().delegate = self
+        precondition(isLaunchPending)
 
         resumeLaunch()
         finishLaunch()
     }
 
+    var isLaunchPending: Bool { state == .checkProtectedDataAvailable }
+
     var isLaunchComplete: Bool { state == .launchComplete }
 
     private func resumeLaunch() {
+        if state == .checkProtectedDataAvailable {
+            checkProtectedDataAvailable()
+        }
         if state == .launchManagers {
             launchManagers()
         }
@@ -119,9 +115,25 @@ class LoopAppManager: NSObject {
         }
     }
 
+    private func checkProtectedDataAvailable() {
+        dispatchPrecondition(condition: .onQueue(.main))
+        precondition(state == .checkProtectedDataAvailable)
+
+        guard isProtectedDataAvailable() else {
+            log.default("Protected data not available; deferring launch...")
+            return
+        }
+
+        self.state = state.next
+    }
+
     private func launchManagers() {
         dispatchPrecondition(condition: .onQueue(.main))
         precondition(state == .launchManagers)
+
+        windowProvider?.window?.tintColor = .loopAccent
+        OrientationLock.deviceOrientationController = self
+        UNUserNotificationCenter.current().delegate = self
 
         self.pluginManager = PluginManager()
         self.bluetoothStateManager = BluetoothStateManager()
@@ -200,6 +212,10 @@ class LoopAppManager: NSObject {
     }
 
     private func finishLaunch() {
+        guard !isLaunchPending else {
+            return
+        }
+
         alertManager.playbackAlertsFromPersistence()
     }
 

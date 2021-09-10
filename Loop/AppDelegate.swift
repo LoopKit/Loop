@@ -53,7 +53,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
     func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
         DispatchQueue.main.async {
-            if !self.loopAppManager.isLaunchComplete {
+            if self.loopAppManager.isLaunchPending {
                 self.loopAppManager.launch()
             }
         }
