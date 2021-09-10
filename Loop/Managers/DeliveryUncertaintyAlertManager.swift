@@ -39,7 +39,7 @@ class DeliveryUncertaintyAlertManager {
                 self.showUncertainDeliveryRecoveryView()
             }
             alert.addAction(action)
-            self.alertPresenter.dismiss(animated: false) {
+            self.alertPresenter.dismissTopMost(animated: false) {
                 self.alertPresenter.present(alert, animated: animated)
             }
             self.uncertainDeliveryAlert = alert
