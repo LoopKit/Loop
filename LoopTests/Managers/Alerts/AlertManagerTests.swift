@@ -66,7 +66,8 @@ class AlertManagerTests: XCTestCase {
     
     class MockPresenter: AlertPresenter {
         func present(_ viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) { completion?() }
-        func dismiss(animated: Bool, completion: (() -> Void)?) { completion?() }
+        func dismissTopMost(animated: Bool, completion: (() -> Void)?) { completion?() }
+        func dismissAlert(_ alertToDismiss: UIAlertController, animated: Bool, completion: (() -> Void)?) { completion?() }
     }
 
     class MockSoundVendor: AlertSoundVendor {
