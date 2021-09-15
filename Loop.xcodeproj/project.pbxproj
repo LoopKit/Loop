@@ -33,7 +33,9 @@
 		1D4990E824A25931005CC357 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FB2292456700A3F2AF /* FeatureFlags.swift */; };
 		1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
 		1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
+		1D63DEA526E950D400F46FA5 /* VersionCheckServicesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D63DEA426E950D400F46FA5 /* VersionCheckServicesManager.swift */; };
 		1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */; };
+		1D70C40126EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D70C40026EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift */; };
 		1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80313C24746274002810DF /* AlertStoreTests.swift */; };
 		1D82E6A025377C6B009131FB /* TrustedTimeChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */; };
 		1D8D55BC252274650044DBB6 /* BolusEntryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */; };
@@ -778,7 +780,9 @@
 		1D49795724E7289700948F05 /* ServicesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesViewModel.swift; sourceTree = "<group>"; };
 		1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataClass.swift"; sourceTree = "<group>"; };
 		1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		1D63DEA426E950D400F46FA5 /* VersionCheckServicesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheckServicesManager.swift; sourceTree = "<group>"; };
 		1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPermissionsChecker.swift; sourceTree = "<group>"; };
+		1D70C40026EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheckServicesManagerTests.swift; sourceTree = "<group>"; };
 		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
 		1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedTimeChecker.swift; sourceTree = "<group>"; };
 		1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusEntryViewModelTests.swift; sourceTree = "<group>"; };
@@ -1632,11 +1636,12 @@
 			isa = PBXGroup;
 			children = (
 				1DA7A84024476E98008257F0 /* Alerts */,
-				A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */,
-				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
-				A9F5F1F4251050EC00E7C8A4 /* ZipArchiveTests.swift */,
 				C16575722538AFF6004AE16E /* CGMStalenessMonitorTests.swift */,
+				A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */,
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
+				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
+				1D70C40026EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift */,
+				A9F5F1F4251050EC00E7C8A4 /* ZipArchiveTests.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2100,6 +2105,7 @@
 				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
 				89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */,
 				1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */,
+				1D63DEA426E950D400F46FA5 /* VersionCheckServicesManager.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 				1DA6499D2441266400F61E75 /* Alerts */,
 				E95D37FF24EADE68005E2F50 /* Store Protocols */,
@@ -3532,6 +3538,7 @@
 				899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */,
 				89D1503E24B506EB00EDE253 /* Dictionary.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
+				1D63DEA526E950D400F46FA5 /* VersionCheckServicesManager.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
@@ -3798,6 +3805,7 @@
 				C16575732538AFF6004AE16E /* CGMStalenessMonitorTests.swift in Sources */,
 				A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */,
 				1DA7A84424477698008257F0 /* InAppModalAlertIssuerTests.swift in Sources */,
+				1D70C40126EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift in Sources */,
 				E93E86A824DDCC4400FF40C8 /* MockDoseStore.swift in Sources */,
 				E98A55F124EDD85E0008715D /* MockDosingDecisionStore.swift in Sources */,
 				8968B114240C55F10074BB48 /* LoopSettingsTests.swift in Sources */,

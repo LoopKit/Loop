@@ -312,12 +312,15 @@ final class DeviceDataManager {
             glucoseStore: glucoseStore,
             settingsStore: settingsStore
         )
+        
+        let versionCheckServicesManager = VersionCheckServicesManager()
 
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
-            remoteDataServicesManager: remoteDataServicesManager
+            remoteDataServicesManager: remoteDataServicesManager,
+            versionCheckServicesManager: versionCheckServicesManager
         )
 
         let criticalEventLogs: [CriticalEventLog] = [settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
