@@ -73,6 +73,24 @@ public struct SettingsView: View {
                     if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
                         profileExpirationSection(profileExpiration: profileExpiration)
                     }
+                if FeatureFlags.automaticBolusEnabled {
+                    dosingStrategySection
+                }
+                alertManagementSection
+                retrospectiveCorrectionSection
+                if viewModel.pumpManagerSettingsViewModel.isSetUp() {
+                    configurationSection
+                }
+                deviceSettingsSection
+                if viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice {
+                    deleteDataSection
+                }
+                if viewModel.servicesViewModel.showServices {
+                    servicesSection
+                }
+                supportSection
+                if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
+                    profileExpirationSection(profileExpiration: profileExpiration)
                 }
             }
             .insetGroupedListStyle()
@@ -174,6 +192,19 @@ extension SettingsView {
         }
     }
 
+    private var retrospectiveCorrectionSection: some View {
+        Section(header: SectionHeader(label: NSLocalizedString("Retrospective Correction", comment: "The title of the Retrospective Correction section in settings"))) {
+            
+            NavigationLink(destination: RetrospectiveCorrectionSelectionView(retrospectiveCorrection: $viewModel.retrospectiveCorrection))
+            {
+                HStack {
+                    Text(viewModel.retrospectiveCorrection.title)
+                }
+            }
+        }
+    }
+
+    
     private var alertManagementSection: some View {
         Section {
             NavigationLink(destination: AlertManagementView(checker: viewModel.alertPermissionsChecker, alertMuter: viewModel.alertMuter))
@@ -491,6 +522,24 @@ public struct SettingsView_Previews: PreviewProvider {
     public static var previews: some View {
         let displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
         let viewModel = SettingsViewModel.preview
+ /* DM check
+        let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
+                                          pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
+                                          cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
+                                          servicesViewModel: servicesViewModel,
+                                          criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
+                                          therapySettings: { TherapySettings() },
+                                          pumpSupportedIncrements: nil,
+                                          syncPumpSchedule: nil,
+                                          sensitivityOverridesEnabled: false,
+                                          initialDosingEnabled: true,
+                                          isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
+                                          supportInfoProvider: MockSupportInfoProvider(),
+                                          dosingStrategy: .automaticBolus,
+                                          retrospectiveCorrection: .standardRetrospectiveCorrection,
+                                          availableSupports: [],
+                                          delegate: nil)
+*/
         return Group {
             SettingsView(viewModel: viewModel, localizedAppNameAndVersion: "Loop Demo V1")
                 .colorScheme(.light)

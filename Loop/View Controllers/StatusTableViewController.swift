@@ -1550,6 +1550,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
+                                          retrospectiveCorrection: deviceManager.loopManager.settings.retrospectiveCorrection,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
@@ -2131,6 +2132,10 @@ extension StatusTableViewController: BluetoothObserver {
 extension StatusTableViewController: SettingsViewModelDelegate {
     var closedLoopDescriptiveText: String? {
         return deviceManager.closedLoopDisallowedLocalizedDescription
+    }
+    
+    func retrospectiveCorrectionChanged(_ retrospectiveCorrection: RetrospectiveCorrectionOptions) {
+        self.deviceManager.loopManager.settings.retrospectiveCorrection = retrospectiveCorrection
     }
 
     func dosingEnabledChanged(_ value: Bool) {

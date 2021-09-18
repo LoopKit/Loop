@@ -53,6 +53,7 @@ public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: AutomaticDosingStrategy)
     func didTapIssueReport()
+    func retrospectiveCorrectionChanged(_: RetrospectiveCorrectionOptions)
     var closedLoopDescriptiveText: String? { get }
 }
 
@@ -92,6 +93,12 @@ public class SettingsViewModel: ObservableObject {
             delegate?.dosingStrategyChanged(automaticDosingStrategy)
         }
     }
+    
+    @Published var retrospectiveCorrection: RetrospectiveCorrectionOptions {
+        didSet {
+            delegate?.retrospectiveCorrectionChanged(retrospectiveCorrection)
+        }
+    }
 
     var closedLoopPreference: Bool {
        didSet {
@@ -113,6 +120,7 @@ public class SettingsViewModel: ObservableObject {
                 initialDosingEnabled: Bool,
                 isClosedLoopAllowed: Published<Bool>.Publisher,
                 automaticDosingStrategy: AutomaticDosingStrategy,
+                retrospectiveCorrection: RetrospectiveCorrectionOptions,
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
@@ -130,6 +138,8 @@ public class SettingsViewModel: ObservableObject {
         self.closedLoopPreference = initialDosingEnabled
         self.isClosedLoopAllowed = false
         self.automaticDosingStrategy = automaticDosingStrategy
+        self.retrospectiveCorrection = retrospectiveCorrection
+        self.supportInfoProvider = supportInfoProvider
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
