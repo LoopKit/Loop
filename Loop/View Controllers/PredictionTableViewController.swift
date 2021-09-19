@@ -272,13 +272,21 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             formatter.numberFormatter.positivePrefix = formatter.numberFormatter.plusSign
             values.append(formatter.string(from: lastDiscrepancy.quantity, for: glucoseChart.glucoseUnit) ?? "?")
 
+            let rcFlag: String
+            switch deviceManager.settings.retrospectiveCorrection {
+            case .standardRetrospectiveCorrection:
+                rcFlag = "** S"
+            case .integralRetrospectiveCorrection:
+                rcFlag = "++ I"
+            }
+            
             let retro = String(
                 format: NSLocalizedString("Predicted: %1$@\nActual: %2$@ (%3$@)", comment: "Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference)"),
                 values[0], values[1], values[2]
             )
 
             // Standard retrospective correction
-            subtitleText = String(format: "%@\n%@", subtitleText, retro)
+            subtitleText = String(format: "%@\n%@\n%@", subtitleText, retro, rcFlag)
         }
 
         cell.subtitleLabel?.text = subtitleText
