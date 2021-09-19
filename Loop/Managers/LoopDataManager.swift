@@ -72,7 +72,7 @@ final class LoopDataManager {
             NotificationCenter.default.removeObserver(observer)
         }
     }
-
+    
     init(
         lastLoopCompleted: Date?,
         basalDeliveryState: PumpManagerStatus.BasalDeliveryState?,
@@ -123,7 +123,14 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
 
-        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
+        /// Creates an instance of the enabled retrospective correction implementation
+        // retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
+        switch settings.retrospectiveCorrection {
+        case .standardRetrospectiveCorrection:
+            retrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+        case .integralRetrospectiveCorrection:
+            retrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+        }
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
