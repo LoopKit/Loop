@@ -272,21 +272,29 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             formatter.numberFormatter.positivePrefix = formatter.numberFormatter.plusSign
             values.append(formatter.string(from: lastDiscrepancy.quantity, for: glucoseChart.glucoseUnit) ?? "?")
 
-            let rcFlag: String
-            switch deviceManager.settings.retrospectiveCorrection {
-            case .standardRetrospectiveCorrection:
-                rcFlag = "** S"
-            case .integralRetrospectiveCorrection:
-                rcFlag = "++ I"
-            }
-            
             let retro = String(
                 format: NSLocalizedString("Predicted: %1$@\nActual: %2$@ (%3$@)", comment: "Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference)"),
                 values[0], values[1], values[2]
             )
-
-            // Standard retrospective correction
-            subtitleText = String(format: "%@\n%@\n%@", subtitleText, retro, rcFlag)
+            switch deviceManager.settings.retrospectiveCorrection {
+            case .standardRetrospectiveCorrection:
+                subtitleText = String(format: "%@\n%@", subtitleText, retro)
+            case .integralRetrospectiveCorrection:
+                var integralEffectDisplay = "?"
+                var totalEffectDisplay = "?"
+                if let totalEffect = self.totalRetrospectiveCorrection {
+                    let integralEffectValue = totalEffect.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit)
+                    let integralEffect = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: integralEffectValue)
+                    integralEffectDisplay = formatter.string(from: integralEffect, for: glucoseChart.glucoseUnit) ?? "?"
+                    totalEffectDisplay = formatter.string(from: totalEffect, for: glucoseChart.glucoseUnit) ?? "?"
+                }
+                let integralRetro = String(
+                    format: NSLocalizedString("prediction-description-integral-retrospective-correction", comment: "Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect)"),
+                    integralEffectDisplay, totalEffectDisplay
+                )
+                subtitleText = String(format: "%@\n%@", retro, integralRetro)
+            }
+        
         }
 
         cell.subtitleLabel?.text = subtitleText
