@@ -245,7 +245,7 @@ final class DeviceDataManager {
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
-            lastPumpEventsReconciliation: pumpManager?.lastReconciliation,
+            lastPumpEventsReconciliation: pumpManager?.lastSync,
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
@@ -289,7 +289,7 @@ final class DeviceDataManager {
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
             basalDeliveryState: pumpManager?.status.basalDeliveryState,
             overrideHistory: overrideHistory,
-            lastPumpEventsReconciliation: pumpManager?.lastReconciliation,
+            lastPumpEventsReconciliation: pumpManager?.lastSync,
             analyticsServicesManager: analyticsServicesManager,
             localCacheDuration: localCacheDuration,
             doseStore: doseStore,
@@ -431,7 +431,12 @@ final class DeviceDataManager {
             log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
             loopManager.addGlucoseSamples(values) { result in
                 self.log.default("Asserting current pump data")
-                self.pumpManager?.ensureCurrentPumpData(completion: nil)
+                self.pumpManager?.ensureCurrentPumpData(completion: { (lastSync) in
+                    if let lastSync = lastSync, Date().timeIntervalSince(lastSync) < LoopCoreConstants.inputDataRecencyInterval {
+                        self.log.default("Pump data from %@ is fresh. Triggering loop()", String(describing: type(of: self.pumpManager)))
+                        self.loopManager.loop()
+                    }
+                })
                 if !values.isEmpty {
                     DispatchQueue.main.async {
                         self.cgmStalenessMonitor.cgmGlucoseSamplesAvailable(values)
@@ -1004,11 +1009,11 @@ extension DeviceDataManager: PumpManagerDelegate {
         loopManager.storeDosingDecision(withDate: Date(), withError: error)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastSync: Date?, completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ did read pump events", String(describing: type(of: pumpManager)))
 
-        loopManager.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
+        loopManager.addPumpEvents(events, lastReconciliation: lastSync) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
             }
@@ -1034,12 +1039,6 @@ extension DeviceDataManager: PumpManagerDelegate {
                 completion(.success((newValue: newValue, lastValue: lastValue, areStoredValuesContinuous: areStoredValuesContinuous)))
             }
         }
-    }
-
-    func pumpManagerRecommendsLoop(_ pumpManager: PumpManager) {
-        dispatchPrecondition(condition: .onQueue(queue))
-        log.default("PumpManager:%{public}@ recommends loop", String(describing: type(of: pumpManager)))
-        loopManager.loop()
     }
 
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {

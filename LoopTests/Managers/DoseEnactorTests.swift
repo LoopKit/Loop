@@ -53,7 +53,7 @@ class MockPumpManager: PumpManager {
     
     var pumpReservoirCapacity: Double = 50
     
-    var lastReconciliation: Date?
+    var lastSync: Date?
     
     var status: PumpManagerStatus =
         PumpManagerStatus(
@@ -70,8 +70,8 @@ class MockPumpManager: PumpManager {
     func removeStatusObserver(_ observer: PumpManagerStatusObserver) {
     }
     
-    func ensureCurrentPumpData(completion: (() -> Void)?) {
-        completion?()
+    func ensureCurrentPumpData(completion: ((Date?) -> Void)?) {
+        completion?(Date())
     }
     
     func setMustProvideBLEHeartbeat(_ mustProvideBLEHeartbeat: Bool) {
