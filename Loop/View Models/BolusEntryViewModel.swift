@@ -338,6 +338,7 @@ final class BolusEntryViewModel: ObservableObject {
 
         // Authenticate the bolus before saving anything
         if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
+            isInitiatingSaveOrBolus = true
             let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString)
             authenticate(message) { [weak self] in
                 switch $0 {
