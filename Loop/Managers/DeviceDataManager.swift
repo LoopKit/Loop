@@ -683,9 +683,18 @@ extension DeviceDataManager {
         pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
-                if case .uncertainDelivery = error, !automatic {
-                    NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
+                
+                switch error {
+                case .uncertainDelivery:
+                    // Do not generate notification on uncertain delivery error
+                    break
+                default:
+                    // Do not generate notifications for automatic boluses that fail.
+                    if !automatic {
+                        NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
+                    }
                 }
+                
                 self.loopManager.bolusRequestFailed(error) {
                     completion(error)
                 }

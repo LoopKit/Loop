@@ -417,7 +417,9 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                 deviceDataManager?.analyticsServicesManager.didRetryBolus()
                 
                 deviceDataManager?.enactBolus(units: units, automatic: false) { (_) in
-                    completionHandler()
+                    DispatchQueue.main.async {
+                        completionHandler()
+                    }
                 }
                 return
             }
