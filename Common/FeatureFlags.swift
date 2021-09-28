@@ -177,4 +177,18 @@ extension FeatureFlagConfiguration {
         return false
         #endif
     }
+    
+    var allowSimulators: Bool {
+        if debugEnabled {
+            return true
+        }
+        if UserDefaults.appGroup?.allowSimulators ?? false {
+            return true
+        }
+        #if ALLOW_SIMULATORS_ENABLED
+        return true
+        #else
+        return false
+        #endif
+    }
 }

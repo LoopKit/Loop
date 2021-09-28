@@ -24,6 +24,7 @@ extension UserDefaults {
         case lastBedtimeQuery = "com.loopkit.Loop.lastBedtimeQuery"
         case bedtime = "com.loopkit.Loop.bedtime"
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
+        case allowSimulators = "com.loopkit.Loop.allowSimulators"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -181,5 +182,9 @@ extension UserDefaults {
     
     public var allowDebugFeatures: Bool {
         return bool(forKey: Key.allowDebugFeatures.rawValue)
+    }
+
+    public var allowSimulators: Bool {
+        return bool(forKey: Key.allowSimulators.rawValue)
     }
 }
