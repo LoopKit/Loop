@@ -2113,7 +2113,7 @@ extension LoopDataManager {
 
                 "retrospectiveGlucoseDiscrepancies: [",
                 "* GlucoseEffect(start, mg/dL)",
-                (state.retrospectiveGlucoseDiscrepancies ?? []).reduce(into: "", { (entries, entry) in
+                (manager.retrospectiveGlucoseDiscrepancies ?? []).reduce(into: "", { (entries, entry) in
                     entries.append("* \(entry.startDate), \(entry.quantity.doubleValue(for: .milligramsPerDeciliter))\n")
                 }),
                 "]",
