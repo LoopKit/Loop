@@ -18,7 +18,7 @@ class CGMStalenessMonitorTests: XCTestCase {
     private var fetchExpectation: XCTestExpectation?
     
     private var storedGlucoseSample: StoredGlucoseSample {
-        return StoredGlucoseSample(uuid: UUID(), provenanceIdentifier: UUID().uuidString, syncIdentifier: "syncIdentifier", syncVersion: 1, startDate: Date().addingTimeInterval(-.minutes(5)), quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 120), trend: .flat, isDisplayOnly: false, wasUserEntered: false, device: nil)
+        return StoredGlucoseSample(uuid: UUID(), provenanceIdentifier: UUID().uuidString, syncIdentifier: "syncIdentifier", syncVersion: 1, startDate: Date().addingTimeInterval(-.minutes(5)), quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 120), trend: .flat, isDisplayOnly: false, wasUserEntered: false, device: nil, healthKitEligibleDate: nil)
     }
     
     private var newGlucoseSample: NewGlucoseSample {

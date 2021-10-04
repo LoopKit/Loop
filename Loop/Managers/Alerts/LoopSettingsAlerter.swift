@@ -10,7 +10,8 @@ import LoopKit
 import LoopCore
 
 protocol LoopSettingsAlerterDelegate: AnyObject {
-    var settings: LoopSettings { get set }
+    var settings: LoopSettings { get }
+    func mutateSettings(_ changes: (_ settings: inout LoopSettings) -> Void)
 }
 
 class LoopSettingsAlerter {
@@ -42,7 +43,7 @@ class LoopSettingsAlerter {
         if  -indefiniteWorkoutOverrideEnabledDate.timeIntervalSinceNow > workoutOverrideReminderInterval {
             issueWorkoutOverrideReminder()
             // reset the date to allow the alert to be issued again after the workoutOverrideReminderInterval is surpassed
-            delegate?.settings.indefiniteWorkoutOverrideEnabledDate = Date()
+            delegate?.mutateSettings { settings in settings.indefiniteWorkoutOverrideEnabledDate = Date() }
         }
     }
 

@@ -7,7 +7,7 @@
 //
 
 var debugEnabled: Bool {
-    #if DEBUG || IOS_SIMULATOR
+    #if DEBUG || IOS_SIMULATOR || targetEnvironment(simulator)
     return true
     #else
     return false

@@ -24,7 +24,8 @@ class WatchHistoricalGlucoseTests: XCTestCase {
                                     trend: nil,
                                     isDisplayOnly: false,
                                     wasUserEntered: true,
-                                    device: device),
+                                    device: device,
+                                    healthKitEligibleDate: Date(timeIntervalSinceReferenceDate: .hours(100)).addingTimeInterval(.hours(3))),
                 StoredGlucoseSample(uuid: UUID(),
                                     provenanceIdentifier: UUID().uuidString,
                                     syncIdentifier: UUID().uuidString,
@@ -34,7 +35,8 @@ class WatchHistoricalGlucoseTests: XCTestCase {
                                     trend: .up,
                                     isDisplayOnly: true,
                                     wasUserEntered: false,
-                                    device: device),
+                                    device: device,
+                                    healthKitEligibleDate: nil),
                 StoredGlucoseSample(uuid: nil,
                                     provenanceIdentifier: UUID().uuidString,
                                     syncIdentifier: nil,
@@ -44,7 +46,8 @@ class WatchHistoricalGlucoseTests: XCTestCase {
                                     trend: .downDownDown,
                                     isDisplayOnly: false,
                                     wasUserEntered: false,
-                                    device: nil),
+                                    device: nil,
+                                    healthKitEligibleDate: nil),
         ]
     }()
 

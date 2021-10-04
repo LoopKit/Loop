@@ -21,7 +21,7 @@ extension UIColor {
     // The loopAccent color is intended to be use as the app accent color.
     @nonobjc public static let loopAccent = UIColor(named: "accent") ?? systemBlue
     
-    @nonobjc static let warning = UIColor(named: "warning") ?? systemYellow
+    @nonobjc public static let warning = UIColor(named: "warning") ?? systemYellow
 }
 
 // MARK: - Context for colors
