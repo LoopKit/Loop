@@ -1394,6 +1394,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let syncBasalRateSchedule = { [weak self] in
             self?.deviceManager.pumpManager?.syncBasalRateSchedule
         }
+        let syncDeliveryLimits = { [weak self]  in
+            self?.deviceManager.pumpManager?.syncDeliveryLimits
+        }
         let servicesViewModel = ServicesViewModel(showServices: FeatureFlags.includeServicesInSettingsEnabled,
                                                   availableServices: { [weak self] in self?.deviceManager.servicesManager.availableServices ?? [] },
                                                   activeServices: { [weak self] in self?.deviceManager.servicesManager.activeServices ?? [] },
@@ -1406,6 +1409,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           therapySettings: { [weak self] in self?.deviceManager.loopManager.therapySettings ?? TherapySettings() },
                                           pumpSupportedIncrements: pumpSupportedIncrements,
                                           syncPumpSchedule: syncBasalRateSchedule,
+                                          syncDeliveryLimits: syncDeliveryLimits,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           isClosedLoopAllowed: closedLoopStatus.$isClosedLoopAllowed,

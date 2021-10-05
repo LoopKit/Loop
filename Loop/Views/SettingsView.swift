@@ -135,6 +135,7 @@ extension SettingsView {
                                         viewModel: TherapySettingsViewModel(therapySettings: self.viewModel.therapySettings(),
                                                                             pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
                                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
+                                                                            syncDeliveryLimits: self.viewModel.syncDeliveryLimits,
                                                                             sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                                                             didSave: self.viewModel.didSave))
                         .environmentObject(displayGlucoseUnitObservable)
@@ -416,6 +417,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           therapySettings: { TherapySettings() },
                                           pumpSupportedIncrements: nil,
                                           syncPumpSchedule: nil,
+                                          syncDeliveryLimits: nil,
                                           sensitivityOverridesEnabled: false,
                                           initialDosingEnabled: true,
                                           isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,

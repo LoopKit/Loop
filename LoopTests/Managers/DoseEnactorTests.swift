@@ -24,6 +24,7 @@ extension MockPumpManagerError: LocalizedError {
 class MockPumpManager: PumpManager {
     
     var enactBolusCalled: ((Double, Bool) -> Void)?
+
     var enactTempBasalCalled: ((Double, TimeInterval) -> Void)?
     
     var enactTempBasalError: PumpManagerError?
@@ -105,7 +106,11 @@ class MockPumpManager: PumpManager {
     
     func syncBasalRateSchedule(items scheduleItems: [RepeatingScheduleValue<Double>], completion: @escaping (Result<BasalRateSchedule, Error>) -> Void) {
     }
-    
+
+    func syncDeliveryLimits(limits deliveryLimits: DeliveryLimits, completion: @escaping (Result<DeliveryLimits, Error>) -> Void) {
+
+    }
+
     var managerIdentifier: String = "MockPumpManager"
     
     var localizedTitle: String = "MockPumpManager"

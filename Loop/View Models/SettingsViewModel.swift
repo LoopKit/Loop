@@ -80,8 +80,10 @@ public class SettingsViewModel: ObservableObject {
     let servicesViewModel: ServicesViewModel
     let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     let therapySettings: () -> TherapySettings
+    // TODO This pattern of taking a closure that returns a closure is redundant; we should simplify here.
     let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
-    let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
+    let syncPumpSchedule: (() -> SyncSchedule?)?
+    let syncDeliveryLimits: (() -> SyncDeliveryLimits?)?
     let sensitivityOverridesEnabled: Bool
     let supportInfoProvider: SupportInfoProvider
     let isOnboardingComplete: Bool
@@ -108,7 +110,8 @@ public class SettingsViewModel: ObservableObject {
                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
                 therapySettings: @escaping () -> TherapySettings,
                 pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
-                syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?,
+                syncPumpSchedule: (() -> SyncSchedule?)?,
+                syncDeliveryLimits: (() -> SyncDeliveryLimits?)?,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
                 isClosedLoopAllowed: Published<Bool>.Publisher,
@@ -126,6 +129,7 @@ public class SettingsViewModel: ObservableObject {
         self.therapySettings = therapySettings
         self.pumpSupportedIncrements = pumpSupportedIncrements
         self.syncPumpSchedule = syncPumpSchedule
+        self.syncDeliveryLimits = syncDeliveryLimits
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.closedLoopPreference = initialDosingEnabled
         self.isClosedLoopAllowed = false
