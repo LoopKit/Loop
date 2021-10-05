@@ -20,7 +20,6 @@ struct SimpleBolusView: View {
     @State private var isKeyboardVisible = false
     @State private var isClosedLoopOffInformationalModalVisible = false
 
-    var displayMealEntry: Bool
     @ObservedObject var viewModel: SimpleBolusViewModel
 
     private var enteredManualGlucose: Binding<String> {
@@ -30,13 +29,12 @@ struct SimpleBolusView: View {
         )
     }
 
-    init(displayMealEntry: Bool, viewModel: SimpleBolusViewModel) {
-        self.displayMealEntry = displayMealEntry
+    init(viewModel: SimpleBolusViewModel) {
         self.viewModel = viewModel
     }
     
     var title: String {
-        if displayMealEntry {
+        if viewModel.displayMealEntry {
             return NSLocalizedString("Simple Meal Calculator", comment: "Title of simple bolus view when displaying meal entry")
         } else {
             return NSLocalizedString("Simple Bolus Calculator", comment: "Title of simple bolus view when not displaying meal entry")
@@ -76,6 +74,12 @@ struct SimpleBolusView: View {
         }
     }
     
+    let glucoseFormatter = QuantityFormatter()
+    
+    private func formatGlucose(_ quantity: HKQuantity) -> String {
+        return glucoseFormatter.string(from: quantity, for: displayGlucoseUnitObservable.displayGlucoseUnit)!
+    }
+    
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
         // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
         // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
@@ -107,7 +111,7 @@ struct SimpleBolusView: View {
     
     private var summarySection: some View {
         Section {
-            if displayMealEntry {
+            if viewModel.displayMealEntry {
                 carbEntryRow
             }
             glucoseEntryRow
@@ -122,7 +126,7 @@ struct SimpleBolusView: View {
             Spacer()
             HStack {
                 DismissibleKeyboardTextField(
-                    text: $viewModel.enteredCarbAmount,
+                    text: $viewModel.enteredCarbString,
                     placeholder: viewModel.carbPlaceholder,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
@@ -199,7 +203,7 @@ struct SimpleBolusView: View {
             Spacer()
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
-                    text: $viewModel.enteredBolusAmount,
+                    text: $viewModel.enteredBolusString,
                     placeholder: "",
                     font: .preferredFont(forTextStyle: .title1),
                     textColor: .loopAccent,
@@ -271,41 +275,17 @@ struct SimpleBolusView: View {
                 }
             }
         )
+        .disabled(viewModel.actionButtonDisabled)
         .buttonStyle(ActionButtonStyle(.primary))
         .padding()
     }
     
     private func alert(for alert: SimpleBolusViewModel.Alert) -> SwiftUI.Alert {
         switch alert {
-        case .maxBolusExceeded:
-            guard let maximumBolusAmountString = viewModel.maximumBolusAmountString else {
-                fatalError("Impossible to exceed max bolus without a configured max bolus")
-            }
-            return SwiftUI.Alert(
-                title: Text("Exceeds Maximum Bolus", comment: "Alert title for a maximum bolus validation error"),
-                message: Text(String(format: NSLocalizedString("The maximum bolus amount is %1$@ U.", comment: "Format string for maximum bolus exceeded alert (1: maximumBolusAmount)"), maximumBolusAmountString))
-            )
         case .carbEntryPersistenceFailure:
             return SwiftUI.Alert(
                 title: Text("Unable to Save Carb Entry", comment: "Alert title for a carb entry persistence error"),
                 message: Text("An error occurred while trying to save your carb entry.", comment: "Alert message for a carb entry persistence error")
-            )
-        case .carbEntrySizeTooLarge:
-            let message = String(
-                format: NSLocalizedString("The maximum allowed amount is %1$@ grams", comment: "Alert body displayed for quantity greater than max (1: maximum quantity in grams)"),
-                NumberFormatter.localizedString(from: NSNumber(value: LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram())), number: .none)
-            )
-            return SwiftUI.Alert(
-                title: Text("Carb Entry Too Large", comment: "Alert title for a carb entry too large error"),
-                message: Text(message)
-            )
-        case .manualGlucoseEntryOutOfAcceptableRange:
-            let formatter = QuantityFormatter(for: displayGlucoseUnitObservable.displayGlucoseUnit)
-            let acceptableLowerBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.lowerBound, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.lowerBound)
-            let acceptableUpperBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.upperBound, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.upperBound)
-            return SwiftUI.Alert(
-                title: Text("Glucose Entry Out of Range", comment: "Alert title for a manual glucose entry out of range error"),
-                message: Text(String(format: NSLocalizedString("A manual glucose entry must be between %1$@ and %2$@", comment: "Alert message for a manual glucose entry out of range error. (1: acceptable lower bound) (2: acceptable upper bound)"), acceptableLowerBound, acceptableUpperBound))
             )
         case .manualGlucoseEntryPersistenceFailure:
             return SwiftUI.Alert(
@@ -317,15 +297,58 @@ struct SimpleBolusView: View {
         }
         
     }
-    
+        
     private func warning(for notice: SimpleBolusViewModel.Notice) -> some View {
+        
         switch notice {
         case .glucoseBelowSuspendThreshold:
-            let suspendThresholdString = QuantityFormatter().string(from: viewModel.suspendThreshold, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: viewModel.suspendThreshold)
+            let title: Text
+            if viewModel.bolusRecommended {
+                title = Text("Low Glucose", comment: "Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended")
+            } else {
+                title = Text("No Bolus Recommended", comment: "Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended")
+            }
+            let suspendThresholdString = formatGlucose(viewModel.suspendThreshold)
             return WarningView(
-                title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text(String(format: NSLocalizedString("Your glucose is below your glucose safety limit, %1$@.", comment: "Format string for bolus screen notice when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold)"), suspendThresholdString))
+                title: title,
+                caption: Text(String(format: NSLocalizedString("Your glucose is below your glucose safety limit, %1$@.", comment: "Format string for bolus screen warning when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold)"), suspendThresholdString))
             )
+        case .glucoseWarning:
+            let warningThresholdString = formatGlucose(LoopConstants.simpleBolusCalculatorGlucoseWarningLimit)
+            return WarningView(
+                title: Text("Low Glucose", comment: "Title for bolus screen warning when glucose is below glucose warning limit."),
+                caption: Text(String(format: NSLocalizedString("Your glucose is below %1$@. Are you sure you want to bolus?", comment: "Format string for simple bolus screen warning when glucose is below glucose warning limit."), warningThresholdString))
+            )
+        case .glucoseBelowRecommendationLimit:
+            let caption: String
+            if viewModel.displayMealEntry {
+                caption = NSLocalizedString("Your glucose is low. Eat carbs and consider waiting to bolus until your glucose is in a safe range.", comment: "Format string for meal bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold")
+            } else {
+                caption = NSLocalizedString("Your glucose is low. Eat carbs and monitor closely.", comment: "Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus")
+            }
+            return WarningView(
+                title: Text("No Bolus Recommended", comment: "Title for bolus screen warning when no bolus is recommended"),
+                caption: Text(caption)
+            )
+        case .glucoseOutOfAllowedInputRange:
+            let glucoseMinString = formatGlucose(LoopConstants.validManualGlucoseEntryRange.lowerBound)
+            let glucoseMaxString = formatGlucose(LoopConstants.validManualGlucoseEntryRange.upperBound)
+            return WarningView(
+                title: Text("Glucose Entry Out of Range", comment: "Title for bolus screen warning when glucose entry is out of range"),
+                caption: Text(String(format: NSLocalizedString("A manual glucose entry must be between %1$@ and %2$@.", comment: "Warning for simple bolus when glucose entry is out of range. (1: upper bound) (2: lower bound)"), glucoseMinString, glucoseMaxString)))
+        case .maxBolusExceeded:
+            return WarningView(
+                title: Text("Maximum Bolus Exceeded", comment: "Title for bolus screen warning when max bolus is exceeded"),
+                caption: Text(String(format: NSLocalizedString("Your maximum bolus amount is %1$@.", comment: "Warning for simple bolus when max bolus is exceeded. (1: maximum bolus)"), viewModel.maximumBolusAmountString )))
+        case .recommendationExceedsMaxBolus:
+            return WarningView(
+                title: Text("Recommended Bolus Exceeds Maximum Bolus", comment: "Title for bolus screen warning when recommended bolus exceeds max bolus"),
+                caption: Text(String(format: NSLocalizedString("Your recommended bolus exceeds your maximum bolus amount of %1$@.", comment: "Warning for simple bolus when recommended bolus exceeds max bolus. (1: maximum bolus)"), viewModel.maximumBolusAmountString )))
+        case .carbohydrateEntryTooLarge:
+            let maximumCarbohydrateString = QuantityFormatter().string(from: LoopConstants.maxCarbEntryQuantity, for: .gram())!
+            return WarningView(
+                title: Text("Carbohydrate Entry Too Large", comment: "Title for bolus screen warning when carbohydrate entry is too large"),
+                caption: Text(String(format: NSLocalizedString("The maximum amount allowed is %1$@.", comment: "Warning for simple bolus when carbohydrate entry is too large. (1: maximum carbohydrate entry)"), maximumCarbohydrateString)))
         }
     }
     
@@ -391,11 +414,11 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
         }
     }
 
-    static var viewModel: SimpleBolusViewModel = SimpleBolusViewModel(delegate: MockSimpleBolusViewDelegate())
+    static var viewModel: SimpleBolusViewModel = SimpleBolusViewModel(delegate: MockSimpleBolusViewDelegate(), displayMealEntry: true)
     
     static var previews: some View {
         NavigationView {
-            SimpleBolusView(displayMealEntry: true, viewModel: viewModel)
+            SimpleBolusView(viewModel: viewModel)
         }
         .previewDevice("iPod touch (7th generation)")
         .environmentObject(DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter))

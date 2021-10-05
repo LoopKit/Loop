@@ -12,7 +12,7 @@ import LoopKit
 import LoopCore
 @testable import Loop
 
-class LoopSettingsAlerterTests: XCTestCase, LoopSettingsAlerterDelegate {
+class LoopSettingsAlerterTests: XCTestCase {
 
     private var alertIdentifier: Alert.Identifier?
     private var alert: Alert?
@@ -83,5 +83,11 @@ extension LoopSettingsAlerterTests: AlertIssuer {
 
     func retractAlert(identifier: Alert.Identifier) {
         alertIdentifier = identifier
+    }
+}
+
+extension LoopSettingsAlerterTests: LoopSettingsAlerterDelegate {
+    func mutateSettings(_ changes: (inout LoopSettings) -> Void) {
+        changes(&settings)
     }
 }

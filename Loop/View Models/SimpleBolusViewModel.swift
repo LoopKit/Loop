@@ -43,10 +43,7 @@ class SimpleBolusViewModel: ObservableObject {
     var authenticate: AuthenticationChallenge = LocalAuthentication.deviceOwnerCheck
 
     enum Alert: Int {
-        case maxBolusExceeded
         case carbEntryPersistenceFailure
-        case carbEntrySizeTooLarge
-        case manualGlucoseEntryOutOfAcceptableRange
         case manualGlucoseEntryPersistenceFailure
         case infoPopup
     }
@@ -54,7 +51,13 @@ class SimpleBolusViewModel: ObservableObject {
     @Published var activeAlert: Alert?
     
     enum Notice: Int {
+        case carbohydrateEntryTooLarge
+        case glucoseBelowRecommendationLimit
         case glucoseBelowSuspendThreshold
+        case glucoseOutOfAllowedInputRange
+        case glucoseWarning
+        case maxBolusExceeded
+        case recommendationExceedsMaxBolus
     }
 
     @Published var activeNotice: Notice?
@@ -65,16 +68,19 @@ class SimpleBolusViewModel: ObservableObject {
     
     @Published var activeInsulin: String?
 
-    @Published var enteredCarbAmount: String = "" {
+    @Published var enteredCarbString: String = "" {
         didSet {
-            if let enteredCarbs = Self.carbAmountFormatter.number(from: enteredCarbAmount)?.doubleValue, enteredCarbs > 0 {
-                carbs = HKQuantity(unit: .gram(), doubleValue: enteredCarbs)
+            if let enteredCarbs = Self.carbAmountFormatter.number(from: enteredCarbString)?.doubleValue, enteredCarbs > 0 {
+                carbQuantity = HKQuantity(unit: .gram(), doubleValue: enteredCarbs)
             } else {
-                carbs = nil
+                carbQuantity = nil
             }
             updateRecommendation()
         }
     }
+    
+    var displayMealEntry: Bool
+
 
     // needed to detect change in display glucose unit when returning to the app
     private var cachedDisplayGlucoseUnit: HKUnit
@@ -99,6 +105,53 @@ class SimpleBolusViewModel: ObservableObject {
             _manualGlucoseString = newValue
         }
     }
+    
+    private func updateNotice() {
+        
+        if let carbs = self.carbQuantity {
+            guard carbs <= LoopConstants.maxCarbEntryQuantity else {
+                activeNotice = .carbohydrateEntryTooLarge
+                return
+            }
+        }
+        
+        if let bolus = bolus {
+            guard bolus.doubleValue(for: .internationalUnit()) <= delegate.maximumBolus else {
+                activeNotice = .maxBolusExceeded
+                return
+            }
+        }
+
+        let isAddingCarbs: Bool
+        if let carbQuantity = carbQuantity, carbQuantity.doubleValue(for: .gram()) > 0 {
+            isAddingCarbs = true
+        } else {
+            isAddingCarbs = false
+        }
+        
+        let minRecommendationGlucose =
+            isAddingCarbs ?
+            LoopConstants.simpleBolusCalculatorMinGlucoseMealBolusRecommendation :
+            LoopConstants.simpleBolusCalculatorMinGlucoseBolusRecommendation
+        
+        switch manualGlucoseQuantity {
+        case let .some(g) where !LoopConstants.validManualGlucoseEntryRange.contains(g):
+            activeNotice = .glucoseOutOfAllowedInputRange
+        case let g? where g < minRecommendationGlucose:
+            activeNotice = .glucoseBelowRecommendationLimit
+        case let g? where g < LoopConstants.simpleBolusCalculatorGlucoseWarningLimit:
+            activeNotice = .glucoseWarning
+        case let g? where g < suspendThreshold:
+            activeNotice = .glucoseBelowSuspendThreshold
+        default:
+            if let recommendation = recommendation, recommendation > delegate.maximumBolus {
+                activeNotice = .recommendationExceedsMaxBolus
+            } else {
+                activeNotice = nil
+            }
+        }
+
+    }
 
     @Published private var _manualGlucoseString: String = "" {
         didSet {
@@ -113,26 +166,23 @@ class SimpleBolusViewModel: ObservableObject {
                 _manualGlucoseString != glucoseQuantityFormatter.string(from: manualGlucoseQuantity!, for: cachedDisplayGlucoseUnit, includeUnit: false)
             {
                 manualGlucoseQuantity = HKQuantity(unit: cachedDisplayGlucoseUnit, doubleValue: manualGlucoseValue)
-                if let manualGlucoseQuantity = manualGlucoseQuantity, manualGlucoseQuantity < suspendThreshold {
-                    activeNotice = .glucoseBelowSuspendThreshold
-                } else {
-                    activeNotice = nil
-                }
+                updateNotice()
             }
         }
     }
 
-    @Published var enteredBolusAmount: String {
+    @Published var enteredBolusString: String {
         didSet {
-            if let enteredBolusAmount = Self.doseAmountFormatter.number(from: enteredBolusAmount)?.doubleValue, enteredBolusAmount > 0 {
+            if let enteredBolusAmount = Self.doseAmountFormatter.number(from: enteredBolusString)?.doubleValue, enteredBolusAmount > 0 {
                 bolus = HKQuantity(unit: .internationalUnit(), doubleValue: enteredBolusAmount)
             } else {
                 bolus = nil
             }
+            updateNotice()
         }
     }
     
-    private var carbs: HKQuantity? = nil
+    private var carbQuantity: HKQuantity? = nil
 
     private var manualGlucoseQuantity: HKQuantity? = nil {
         didSet {
@@ -142,18 +192,25 @@ class SimpleBolusViewModel: ObservableObject {
 
     private var bolus: HKQuantity? = nil
     
+    var bolusRecommended: Bool {
+        if let bolus = bolus, bolus.doubleValue(for: .internationalUnit()) > 0 {
+            return true
+        }
+        return false
+    }
+    
     var displayGlucoseUnit: HKUnit { return delegate.displayGlucoseUnitObservable.displayGlucoseUnit }
     
     var suspendThreshold: HKQuantity { return delegate.suspendThreshold }
 
     private var recommendation: Double? = nil {
         didSet {
-            if let recommendation = recommendation, let recommendationString = Self.doseAmountFormatter.string(from: recommendation) {
-                recommendedBolus = recommendationString
-                enteredBolusAmount = recommendationString
+            if let recommendation = recommendation {
+                recommendedBolus = Self.doseAmountFormatter.string(from: recommendation)!
+                enteredBolusString = Self.doseAmountFormatter.string(from: min(recommendation, delegate.maximumBolus))!
             } else {
                 recommendedBolus = NSLocalizedString("–", comment: "String denoting lack of a recommended bolus amount in the simple bolus calculator")
-                enteredBolusAmount = Self.doseAmountFormatter.string(from: 0.0)!
+                enteredBolusString = Self.doseAmountFormatter.string(from: 0.0)!
             }
         }
     }
@@ -183,7 +240,7 @@ class SimpleBolusViewModel: ObservableObject {
     }
     
     var hasDataToSave: Bool {
-        return manualGlucoseQuantity != nil || carbs != nil
+        return manualGlucoseQuantity != nil || carbQuantity != nil
     }
     
     var hasBolusEntryReadyToDeliver: Bool {
@@ -199,6 +256,15 @@ class SimpleBolusViewModel: ObservableObject {
         }
     }
     
+    var actionButtonDisabled: Bool {
+        switch activeNotice {
+        case .glucoseOutOfAllowedInputRange, .maxBolusExceeded, .carbohydrateEntryTooLarge:
+            return true
+        default:
+            return false
+        }
+    }
+    
     var carbPlaceholder: String {
         Self.carbAmountFormatter.string(from: 0.0)!
     }
@@ -209,24 +275,41 @@ class SimpleBolusViewModel: ObservableObject {
     
     private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit())
 
-    var maximumBolusAmountString: String? {
-        return bolusVolumeFormatter.numberFormatter.string(from: delegate.maximumBolus) ?? String(delegate.maximumBolus)
+    var maximumBolusAmountString: String {
+        let maxBolusQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.maximumBolus)
+        return bolusVolumeFormatter.string(from: maxBolusQuantity, for: .internationalUnit())!
     }
 
-    init(delegate: SimpleBolusViewModelDelegate) {
+    init(delegate: SimpleBolusViewModelDelegate, displayMealEntry: Bool) {
         self.delegate = delegate
+        self.displayMealEntry = displayMealEntry
         let glucoseQuantityFormatter = QuantityFormatter()
         glucoseQuantityFormatter.setPreferredNumberFormatter(for: delegate.displayGlucoseUnitObservable.displayGlucoseUnit)
         cachedDisplayGlucoseUnit = delegate.displayGlucoseUnitObservable.displayGlucoseUnit
-        enteredBolusAmount = Self.doseAmountFormatter.string(from: 0.0)!
+        enteredBolusString = Self.doseAmountFormatter.string(from: 0.0)!
         updateRecommendation()
         dosingDecision = BolusDosingDecision()
     }
     
     func updateRecommendation() {
         let recommendationDate = Date()
-        if carbs != nil || manualGlucoseQuantity != nil {
-            dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbs, manualGlucose: manualGlucoseQuantity)
+        
+        if let carbs = self.carbQuantity {
+            guard carbs <= LoopConstants.maxCarbEntryQuantity else {
+                recommendation = nil
+                return
+            }
+        }
+        
+        if let glucose = manualGlucoseQuantity {
+            guard LoopConstants.validManualGlucoseEntryRange.contains(glucose) else {
+                recommendation = nil
+                return
+            }
+        }
+        
+        if carbQuantity != nil || manualGlucoseQuantity != nil {
+            dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbQuantity, manualGlucose: manualGlucoseQuantity)
             if let decision = dosingDecision, let bolusRecommendation = decision.recommendedBolus {
                 recommendation = bolusRecommendation.amount
             } else {
@@ -248,36 +331,13 @@ class SimpleBolusViewModel: ObservableObject {
     }
     
     func saveAndDeliver(completion: @escaping (Bool) -> Void) {
-        if let bolus = bolus {
-            guard bolus.doubleValue(for: .internationalUnit()) <= delegate.maximumBolus else {
-                presentAlert(.maxBolusExceeded)
-                completion(false)
-                return
-            }
-        }
-
-        if let manualGlucoseQuantity = manualGlucoseQuantity {
-            guard LoopConstants.validManualGlucoseEntryRange.contains(manualGlucoseQuantity) else {
-                presentAlert(.manualGlucoseEntryOutOfAcceptableRange)
-                completion(false)
-                return
-            }
-        }
-        
-        if let carbs = carbs {
-            guard carbs <= LoopConstants.maxCarbEntryQuantity else {
-                presentAlert(.carbEntrySizeTooLarge)
-                completion(false)
-                return
-            }
-        }
         
         let saveDate = Date()
 
         // Authenticate the bolus before saving anything
         func authenticateIfNeeded(_ completion: @escaping (Bool) -> Void) {
             if let bolus = bolus, bolus.doubleValue(for: .internationalUnit()) > 0 {
-                let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmount)
+                let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusString)
                 authenticate(message) {
                     switch $0 {
                     case .success:
@@ -316,7 +376,7 @@ class SimpleBolusViewModel: ObservableObject {
         }
         
         func saveCarbs(_ completion: @escaping (Bool) -> Void) {
-            if let carbs = carbs {
+            if let carbs = carbQuantity {
                 
                 let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
                 interaction.donate { [weak self] (error) in
@@ -396,7 +456,7 @@ class SimpleBolusViewModel: ObservableObject {
     
     func restoreUserActivityState(_ activity: NSUserActivity) {
         if let entry = activity.newCarbEntry {
-            carbs = entry.quantity
+            carbQuantity = entry.quantity
         }
     }
 }

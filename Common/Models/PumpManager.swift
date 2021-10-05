@@ -11,17 +11,19 @@ import LoopKitUI
 import MockKit
 import MockKitUI
 
-let staticPumpManagers: [PumpManagerUI.Type] = [
-    MockPumpManager.self,
-]
-
 let staticPumpManagersByIdentifier: [String: PumpManagerUI.Type] = [
     MockPumpManager.managerIdentifier : MockPumpManager.self
 ]
 
-let availableStaticPumpManagers = [
-    PumpManagerDescriptor(identifier: MockPumpManager.managerIdentifier, localizedTitle: MockPumpManager.localizedTitle)
-]
+var availableStaticPumpManagers: [PumpManagerDescriptor] {
+    if FeatureFlags.allowSimulators {
+        return [
+            PumpManagerDescriptor(identifier: MockPumpManager.managerIdentifier, localizedTitle: MockPumpManager.localizedTitle)
+        ]
+    } else {
+        return []
+    }
+}
 
 extension PumpManager {
     var rawValue: [String: Any] {

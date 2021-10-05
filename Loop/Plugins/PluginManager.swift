@@ -26,7 +26,7 @@ class PluginManager {
             do {
                 for pluginURL in try FileManager.default.contentsOfDirectory(at: pluginsURL, includingPropertiesForKeys: nil).filter({$0.path.hasSuffix(".framework")}) {
                     if let bundle = Bundle(url: pluginURL) {
-                        if bundle.isLoopPlugin {
+                        if bundle.isLoopPlugin && (!bundle.isSimulator || FeatureFlags.allowSimulators) {
                             log.debug("Found loop plugin: %{public}@", pluginURL.absoluteString)
                             bundles.append(bundle)
                             if bundle.isSupportPlugin {
@@ -203,6 +203,8 @@ extension Bundle {
 
     var isLoopExtension: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.extensionIdentifier.rawValue) as? String != nil }
 
+    var isSimulator: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.pluginIsSimulator.rawValue) as? Bool == true }
+    
     fileprivate func loadAndInstantiateSupport() throws -> SupportUI? {
         try loadAndReturnError()
 

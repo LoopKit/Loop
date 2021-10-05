@@ -26,6 +26,8 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     
     private var allowEditing: Bool = true
 
+    var isOnboardingComplete: Bool = true
+
     var closedLoopStatus: ClosedLoopStatus!
 
     override func viewDidLoad() {
@@ -59,6 +61,8 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         if let gestureRecognizer = charts.gestureRecognizer {
             tableView.addGestureRecognizer(gestureRecognizer)
         }
+
+        navigationItem.rightBarButtonItem?.isEnabled = isOnboardingComplete
 
         if !closedLoopStatus.isClosedLoop {
             allowEditing = false
@@ -508,8 +512,8 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             carbEntryViewController.preferredCarbUnit = deviceManager.carbStore.preferredUnit
             navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
         } else {
-            let viewModel = SimpleBolusViewModel(delegate: deviceManager)
-            let bolusEntryView = SimpleBolusView(displayMealEntry: true, viewModel: viewModel)
+            let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel)
             let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
             navigationWrapper = UINavigationController(rootViewController: hostingController)
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))

@@ -52,8 +52,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     // MARK: - UIApplicationDelegate - Environment
 
     func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
-        if !loopAppManager.isLaunchComplete {
-            loopAppManager.launch()
+        DispatchQueue.main.async {
+            if self.loopAppManager.isLaunchPending {
+                self.loopAppManager.launch()
+            }
         }
     }
 

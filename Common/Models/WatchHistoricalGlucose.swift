@@ -45,6 +45,7 @@ extension WatchHistoricalGlucose: RawRepresentable {
         let isDisplayOnlys: [Bool]
         let wasUserEntereds: [Bool]
         let devices: [Data?]
+        let healthKitEligibleDates: [Date?]
 
         init(samples: [StoredGlucoseSample]) {
             self.uuids = samples.map { $0.uuid }
@@ -57,20 +58,22 @@ extension WatchHistoricalGlucose: RawRepresentable {
             self.isDisplayOnlys = samples.map { $0.isDisplayOnly }
             self.wasUserEntereds = samples.map { $0.wasUserEntered }
             self.devices = samples.map { try? WatchHistoricalGlucose.encoder.encode($0.device) }
+            self.healthKitEligibleDates = samples.map { $0.healthKitEligibleDate }
         }
 
         var samples: [StoredGlucoseSample] {
             return (0..<uuids.count).map {
                 return StoredGlucoseSample(uuid: uuids[$0],
-                                    provenanceIdentifier: provenanceIdentifiers[$0],
-                                    syncIdentifier: syncIdentifiers[$0],
-                                    syncVersion: syncVersions[$0],
-                                    startDate: startDates[$0],
-                                    quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: quantities[$0]),
-                                    trend: trends[$0],
-                                    isDisplayOnly: isDisplayOnlys[$0],
-                                    wasUserEntered: wasUserEntereds[$0],
-                                    device: devices[$0].flatMap { try? HKDevice(from: $0) })
+                                           provenanceIdentifier: provenanceIdentifiers[$0],
+                                           syncIdentifier: syncIdentifiers[$0],
+                                           syncVersion: syncVersions[$0],
+                                           startDate: startDates[$0],
+                                           quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: quantities[$0]),
+                                           trend: trends[$0],
+                                           isDisplayOnly: isDisplayOnlys[$0],
+                                           wasUserEntered: wasUserEntereds[$0],
+                                           device: devices[$0].flatMap { try? HKDevice(from: $0) },
+                                           healthKitEligibleDate: healthKitEligibleDates[$0])
             }
         }
     }

@@ -11,11 +11,13 @@ import Foundation
 let FeatureFlags = FeatureFlagConfiguration()
 
 struct FeatureFlagConfiguration: Decodable {
+    let automaticBolusEnabled: Bool
     let cgmManagerCategorizeManualGlucoseRangeEnabled: Bool
     let criticalAlertsEnabled: Bool
     let entryDeletionEnabled: Bool
     let fiaspInsulinModelEnabled: Bool
     let includeServicesInSettingsEnabled: Bool
+    let manualDoseEntryEnabled: Bool
     let mockTherapySettingsEnabled: Bool
     let nonlinearCarbModelEnabled: Bool
     let observeHealthKitSamplesFromOtherApps: Bool
@@ -25,10 +27,15 @@ struct FeatureFlagConfiguration: Decodable {
     let sensitivityOverridesEnabled: Bool
     let simulatedCoreDataEnabled: Bool
     let siriEnabled: Bool
-    let automaticBolusEnabled: Bool
-    let manualDoseEntryEnabled: Bool
 
     fileprivate init() {
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if AUTOMATIC_BOLUS_DISABLED
+        self.automaticBolusEnabled = false
+        #else
+        self.automaticBolusEnabled = true
+        #endif
+
         #if CGM_MANAGER_CATEGORIZE_GLUCOSE_RANGE_ENABLED
         self.cgmManagerCategorizeManualGlucoseRangeEnabled = true
         #else
@@ -40,7 +47,7 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.criticalAlertsEnabled = false
         #endif
-        
+
         // Swift compiler config is inverse, since the default state is enabled.
         #if ENTRY_DELETION_DISABLED
         self.entryDeletionEnabled = false
@@ -69,6 +76,13 @@ struct FeatureFlagConfiguration: Decodable {
         self.includeServicesInSettingsEnabled = true
         #endif
         
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if MANUAL_DOSE_ENTRY_DISABLED
+        self.manualDoseEntryEnabled = false
+        #else
+        self.manualDoseEntryEnabled = true
+        #endif
+
         // Swift compiler config is inverse, since the default state is enabled.
         #if MOCK_THERAPY_SETTINGS_ENABLED
         self.mockTherapySettingsEnabled = true
@@ -121,20 +135,6 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.siriEnabled = true
         #endif
-        
-        // Swift compiler config is inverse, since the default state is enabled.
-        #if AUTOMATIC_BOLUS_DISABLED
-        self.automaticBolusEnabled = false
-        #else
-        self.automaticBolusEnabled = true
-        #endif
-        
-        // Swift compiler config is inverse, since the default state is enabled.
-        #if MANUAL_DOSE_ENTRY_DISABLED
-        self.manualDoseEntryEnabled = false
-        #else
-        self.manualDoseEntryEnabled = true
-        #endif
     }
 }
 
@@ -157,7 +157,38 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
             "* siriEnabled: \(siriEnabled)",
             "* automaticBolusEnabled: \(automaticBolusEnabled)",
-            "* manualDoseEntryEnabled: \(manualDoseEntryEnabled)"
+            "* manualDoseEntryEnabled: \(manualDoseEntryEnabled)",
+            "* allowDebugFeatures: \(allowDebugFeatures)",
         ].joined(separator: "\n")
+    }
+}
+
+extension FeatureFlagConfiguration {
+    var allowDebugFeatures: Bool {
+        if debugEnabled {
+            return true
+        }
+        if UserDefaults.appGroup?.allowDebugFeatures ?? false {
+            return true
+        }
+        #if ALLOW_DEBUG_FEATURES_ENABLED
+        return true
+        #else
+        return false
+        #endif
+    }
+    
+    var allowSimulators: Bool {
+        if debugEnabled {
+            return true
+        }
+        if UserDefaults.appGroup?.allowSimulators ?? false {
+            return true
+        }
+        #if ALLOW_SIMULATORS_ENABLED
+        return true
+        #else
+        return false
+        #endif
     }
 }
