@@ -210,7 +210,7 @@ class LoopAppManager: NSObject {
         }
         rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
 
-        deviceDataManager.refreshDeviceData()
+        //deviceDataManager.refreshDeviceData()
 
         handleRemoteNotificationFromLaunchOptions()
 
@@ -230,6 +230,9 @@ class LoopAppManager: NSObject {
     // MARK: - Life Cycle
 
     func didBecomeActive() {
+        if let rootViewController = rootViewController {
+            ProfileExpirationAlerter.alertIfNeeded(viewControllerToPresentFrom: rootViewController)
+        }
         deviceDataManager?.didBecomeActive()
     }
 
