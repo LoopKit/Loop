@@ -11,14 +11,6 @@ import HealthKit
 import LoopKit
 
 extension WatchContext {
-    var glucoseTrend: GlucoseTrend? {
-        if let glucoseTrendRawValue = glucoseTrendRawValue {
-            return GlucoseTrend(rawValue: glucoseTrendRawValue)
-        } else {
-            return nil
-        }
-    }
-
     var activeInsulin: HKQuantity? {
         guard let value = iob else {
             return nil

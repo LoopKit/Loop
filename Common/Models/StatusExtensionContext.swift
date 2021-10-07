@@ -24,6 +24,7 @@ struct GlucoseDisplayableContext: GlucoseDisplayable {
     let isStateValid: Bool
     let stateDescription: String
     let trendType: GlucoseTrend?
+    let trendRate: HKQuantity?
     let isLocal: Bool
     let glucoseRangeCategory: GlucoseRangeCategory?
 }
@@ -136,6 +137,7 @@ extension GlucoseDisplayableContext: RawRepresentable {
         stateDescription = other.stateDescription
         isLocal = other.isLocal
         trendType = other.trendType
+        trendRate = other.trendRate
         glucoseRangeCategory = other.glucoseRangeCategory
     }
 
@@ -158,6 +160,12 @@ extension GlucoseDisplayableContext: RawRepresentable {
             trendType = nil
         }
         
+        if let trendRateUnit = rawValue["trendRateUnit"] as? String, let trendRateValue = rawValue["trendRateValue"] as? Double {
+            trendRate = HKQuantity(unit: HKUnit(from: trendRateUnit), doubleValue: trendRateValue)
+        } else {
+            trendRate = nil
+        }
+
         if let glucoseRangeCategoryRawValue = rawValue["glucoseRangeCategory"] as? GlucoseRangeCategory.RawValue {
             glucoseRangeCategory = GlucoseRangeCategory(rawValue: glucoseRangeCategoryRawValue)
         } else {
@@ -172,6 +180,10 @@ extension GlucoseDisplayableContext: RawRepresentable {
             "isLocal": isLocal
         ]
         raw["trendType"] = trendType?.rawValue
+        if let trendRate = trendRate {
+            raw["trendRateUnit"] = HKUnit.milligramsPerDeciliterPerMinute.unitString
+            raw["trendRateValue"] = trendRate.doubleValue(for: HKUnit.milligramsPerDeciliterPerMinute)
+        }
         raw["glucoseRangeCategory"] = glucoseRangeCategory?.rawValue
 
         return raw

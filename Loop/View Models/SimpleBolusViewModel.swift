@@ -355,7 +355,9 @@ class SimpleBolusViewModel: ObservableObject {
             if let manualGlucoseQuantity = manualGlucoseQuantity {
                 let manualGlucoseSample = NewGlucoseSample(date: saveDate,
                                                            quantity: manualGlucoseQuantity,
-                                                           trend: nil, // All manual glucose entries are assumed to have no trend.
+                                                           condition: nil,  // All manual glucose entries are assumed to have no condition.
+                                                           trend: nil,      // All manual glucose entries are assumed to have no trend.
+                                                           trendRate: nil,  // All manual glucose entries are assumed to have no trend rate.
                                                            isDisplayOnly: false,
                                                            wasUserEntered: true,
                                                            syncIdentifier: UUID().uuidString)

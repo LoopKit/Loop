@@ -502,7 +502,9 @@ final class BolusEntryViewModel: ObservableObject {
             NewGlucoseSample(
                 date: entryDate,
                 quantity: quantity,
-                trend: nil, // All manual glucose entries are assumed to have no trend.
+                condition: nil,     // All manual glucose entries are assumed to have no condition.
+                trend: nil,         // All manual glucose entries are assumed to have no trend.
+                trendRate: nil,     // All manual glucose entries are assumed to have no trend rate.
                 isDisplayOnly: false,
                 wasUserEntered: true,
                 syncIdentifier: uuidProvider()

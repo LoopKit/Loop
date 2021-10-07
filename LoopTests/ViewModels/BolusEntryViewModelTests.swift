@@ -477,7 +477,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
         try saveAndDeliver(BolusEntryViewModelTests.noBolus)
 
-        let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, trend: nil, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
+        let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, condition: nil, trend: nil, trendRate: nil, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
         XCTAssertEqual([expectedGlucoseSample], delegate.glucoseSamplesAdded)
 
         delegate.addGlucoseCompletion?(.success([Self.exampleManualStoredGlucoseSample]))
@@ -532,7 +532,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
         try saveAndDeliver(BolusEntryViewModelTests.exampleBolusQuantity)
         
-        let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, trend: nil, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
+        let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, condition: nil, trend: nil, trendRate: nil, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
         XCTAssertEqual([expectedGlucoseSample], delegate.glucoseSamplesAdded)
         
         delegate.addGlucoseCompletion?(.success([Self.exampleManualStoredGlucoseSample]))
@@ -622,7 +622,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
         try saveAndDeliver(BolusEntryViewModelTests.exampleBolusQuantity)
         
-        let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, trend: nil, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
+        let expectedGlucoseSample = NewGlucoseSample(date: now, quantity: Self.exampleManualGlucoseQuantity, condition: nil, trend: nil, trendRate: nil, isDisplayOnly: false, wasUserEntered: true, syncIdentifier: mockUUID)
         XCTAssertEqual([expectedGlucoseSample], delegate.glucoseSamplesAdded)
         
         delegate.addGlucoseCompletion?(.success([Self.exampleManualStoredGlucoseSample]))
