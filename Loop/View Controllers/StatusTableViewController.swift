@@ -1384,19 +1384,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             didTapAddDevice: { [weak self] in
                 self?.addCGMManager(withIdentifier: $0.identifier)
         })
-        let pumpSupportedIncrements = { [weak self] in
-            self?.deviceManager.pumpManager.map {
-                PumpSupportedIncrements(basalRates: $0.supportedBasalRates,
-                                        bolusVolumes: $0.supportedBolusVolumes,
-                                        maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
-            }
-        }
-        let syncBasalRateSchedule = { [weak self] in
-            self?.deviceManager.pumpManager?.syncBasalRateSchedule
-        }
-        let syncDeliveryLimits = { [weak self]  in
-            self?.deviceManager.pumpManager?.syncDeliveryLimits
-        }
         let servicesViewModel = ServicesViewModel(showServices: FeatureFlags.includeServicesInSettingsEnabled,
                                                   availableServices: { [weak self] in self?.deviceManager.servicesManager.availableServices ?? [] },
                                                   activeServices: { [weak self] in self?.deviceManager.servicesManager.activeServices ?? [] },
@@ -1407,9 +1394,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: deviceManager.criticalEventLogExportManager),
                                           therapySettings: { [weak self] in self?.deviceManager.loopManager.therapySettings ?? TherapySettings() },
-                                          pumpSupportedIncrements: pumpSupportedIncrements,
-                                          syncPumpSchedule: syncBasalRateSchedule,
-                                          syncDeliveryLimits: syncDeliveryLimits,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           isClosedLoopAllowed: closedLoopStatus.$isClosedLoopAllowed,
@@ -1417,6 +1401,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           dosingStrategy: deviceManager.loopManager.settings.dosingStrategy,
                                           availableSupports: deviceManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
+                                          therapySettingsViewModelDelegate: deviceManager,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel)
@@ -2007,38 +1992,6 @@ extension StatusTableViewController: SettingsViewModelDelegate {
     func dosingStrategyChanged(_ strategy: DosingStrategy) {
         self.deviceManager.loopManager.mutateSettings { settings in
             settings.dosingStrategy = strategy
-        }
-    }
-
-    func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings) {
-        switch therapySetting {
-        case .glucoseTargetRange:
-            deviceManager?.loopManager.mutateSettings { settings in settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule }
-        case .preMealCorrectionRangeOverride:
-            deviceManager?.loopManager.mutateSettings { settings in settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal }
-        case .workoutCorrectionRangeOverride:
-            deviceManager?.loopManager.mutateSettings { settings in settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout }
-        case .suspendThreshold:
-            deviceManager?.loopManager.mutateSettings { settings in settings.suspendThreshold = therapySettings.suspendThreshold }
-        case .basalRate:
-            deviceManager?.loopManager.basalRateSchedule = therapySettings.basalRateSchedule
-        case .deliveryLimits:
-            deviceManager?.loopManager.mutateSettings { settings in
-                settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
-                settings.maximumBolus = therapySettings.maximumBolus
-            }
-        case .insulinModel:
-            if let defaultRapidActingModel = therapySettings.defaultRapidActingModel {
-                deviceManager?.loopManager.defaultRapidActingModel = defaultRapidActingModel
-            }
-        case .carbRatio:
-            deviceManager?.loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule
-            deviceManager?.analyticsServicesManager.didChangeCarbRatioSchedule()
-        case .insulinSensitivity:
-            deviceManager?.loopManager.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
-            deviceManager?.analyticsServicesManager.didChangeInsulinSensitivitySchedule()
-        case .none:
-            break // NO-OP
         }
     }
 
