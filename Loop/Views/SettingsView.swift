@@ -133,11 +133,7 @@ extension SettingsView {
                 .sheet(isPresented: $therapySettingsIsPresented) {
                     TherapySettingsView(mode: .settings,
                                         viewModel: TherapySettingsViewModel(therapySettings: self.viewModel.therapySettings(),
-                                                                            pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
-                                                                            syncPumpSchedule: self.viewModel.syncPumpSchedule,
-                                                                            syncDeliveryLimits: self.viewModel.syncDeliveryLimits,
-                                                                            sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
-                                                                            didSave: self.viewModel.didSave))
+                                                                            delegate: self.viewModel.therapySettingsViewModelDelegate))
                         .environmentObject(displayGlucoseUnitObservable)
                         .environment(\.dismissAction, self.dismiss)
                         .environment(\.appName, self.appName)
@@ -415,9 +411,6 @@ public struct SettingsView_Previews: PreviewProvider {
                                           servicesViewModel: servicesViewModel,
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
                                           therapySettings: { TherapySettings() },
-                                          pumpSupportedIncrements: nil,
-                                          syncPumpSchedule: nil,
-                                          syncDeliveryLimits: nil,
                                           sensitivityOverridesEnabled: false,
                                           initialDosingEnabled: true,
                                           isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
@@ -425,6 +418,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           dosingStrategy: .automaticBolus,
                                           availableSupports: [],
                                           isOnboardingComplete: false,
+                                          therapySettingsViewModelDelegate: nil,
                                           delegate: nil)
         return Group {
             SettingsView(viewModel: viewModel)

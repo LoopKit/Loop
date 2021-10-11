@@ -66,6 +66,7 @@ class LoopDataManager {
         carbStore = CarbStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: false,
+            storeEntriesToHealthKit: false,
             cacheStore: cacheStore,
             cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
             defaultAbsorptionTimes: LoopCoreConstants.defaultCarbAbsorptionTimes,
@@ -76,6 +77,7 @@ class LoopDataManager {
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: false,
+            storeSamplesToHealthKit: false,
             cacheStore: cacheStore,
             cacheLength: .hours(4),
             observationInterval: 0,     // No longer use HealthKit as source of recent glucose

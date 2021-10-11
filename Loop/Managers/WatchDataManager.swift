@@ -242,7 +242,11 @@ final class WatchDataManager: NSObject {
             context.loopLastRunDate = manager.lastLoopCompleted
             context.recommendedBolusDose = recommendedBolus?.recommendation.amount
             context.cob = carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
-            context.glucoseTrendRawValue = self.deviceManager.glucoseDisplay(for: glucose)?.trendType?.rawValue
+
+            if let glucoseDisplay = self.deviceManager.glucoseDisplay(for: glucose) {
+                context.glucoseTrend = glucoseDisplay.trendType
+                context.glucoseTrendRate = glucoseDisplay.trendRate
+            }
 
             dosingDecision.carbsOnBoard = carbsOnBoard
             dosingDecision.recommendedBolus = recommendedBolus?.recommendation
@@ -252,10 +256,6 @@ final class WatchDataManager: NSObject {
             let settings = self.deviceManager.loopManager.settings
 
             context.isClosedLoop = settings.dosingEnabled
-            
-            if let trend = self.deviceManager.cgmManager?.glucoseDisplay?.trendType {
-                context.glucoseTrendRawValue = trend.rawValue
-            }
             
             if let potentialCarbEntry = potentialCarbEntry {
                 context.potentialCarbEntry = potentialCarbEntry

@@ -571,19 +571,26 @@ extension LoopDataManager {
         // Cancel active high temp basal
         cancelActiveTempBasal()
     }
-
+    
     /// Cancel the active temp basal
     func cancelActiveTempBasal() {
         guard case .tempBasal(_) = basalDeliveryState else { return }
 
         dataAccessQueue.async {
-            self.recommendedAutomaticDose = (recommendation: AutomaticDoseRecommendation(basalAdjustment: .cancel, bolusUnits: 0), date: self.now())
-            self.enactRecommendedAutomaticDose { (error) -> Void in
-                self.storeDosingDecision(withDate: self.now(), withError: error)
-                self.notify(forChange: .tempBasal)
-            }
+            self.cancelActiveTempBasal(completion: nil)
         }
     }
+    
+    private func cancelActiveTempBasal(completion: ((Error?) -> Void)?) {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+        recommendedAutomaticDose = (recommendation: AutomaticDoseRecommendation(basalAdjustment: .cancel, bolusUnits: 0), date: self.now())
+        enactRecommendedAutomaticDose { (error) -> Void in
+            self.storeDosingDecision(withDate: self.now(), withError: error)
+            self.notify(forChange: .tempBasal)
+            completion?(error)
+        }
+    }
+
 
     /// Adds and stores carb data, and recommends a bolus if needed
     ///
@@ -1622,6 +1629,29 @@ extension LoopDataManager {
             }
         }
     }
+    
+    /// Ensures that the current temp basal is at or below the proposed max temp basal, and if not, cancel it before proceeding.
+    /// Calls the completion with `nil` if successful, or an `error` if canceling the active temp basal fails.
+    func maxTempBasalSavePreflight(unitsPerHour: Double?, completion: @escaping (_ error: Error?) -> Void) {
+        guard let unitsPerHour = unitsPerHour else {
+            completion(nil)
+            return 
+        }
+        dataAccessQueue.async {
+            switch self.basalDeliveryState {
+            case .some(.tempBasal(let dose)):
+                if dose.unitsPerHour > unitsPerHour {
+                    // Temp basal is higher than proposed rate, so should cancel
+                    self.cancelActiveTempBasal(completion: completion)
+                } else {
+                    completion(nil)
+                }
+            default:
+                completion(nil)
+            }
+        }
+    }
+
 }
 
 /// Describes a view into the loop state

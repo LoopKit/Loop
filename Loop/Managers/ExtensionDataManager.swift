@@ -129,6 +129,7 @@ final class ExtensionDataManager {
                     isStateValid: glucoseDisplay.isStateValid,
                     stateDescription: glucoseDisplay.stateDescription,
                     trendType: glucoseDisplay.trendType,
+                    trendRate: glucoseDisplay.trendRate,
                     isLocal: glucoseDisplay.isLocal,
                     glucoseRangeCategory: glucoseDisplay.glucoseRangeCategory
                 )

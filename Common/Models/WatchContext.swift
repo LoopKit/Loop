@@ -21,7 +21,9 @@ final class WatchContext: RawRepresentable {
     var displayGlucoseUnit: HKUnit?
 
     var glucose: HKQuantity?
-    var glucoseTrendRawValue: Int?
+    var glucoseCondition: GlucoseCondition?
+    var glucoseTrend: GlucoseTrend?
+    var glucoseTrendRate: HKQuantity?
     var glucoseDate: Date?
     var glucoseIsDisplayOnly: Bool?
     var glucoseWasUserEntered: Bool?
@@ -68,7 +70,15 @@ final class WatchContext: RawRepresentable {
             glucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
         }
 
-        glucoseTrendRawValue = rawValue["gt"] as? Int
+        if let rawGlucoseCondition = rawValue["gc"] as? GlucoseCondition.RawValue {
+            glucoseCondition = GlucoseCondition(rawValue: rawGlucoseCondition)
+        }
+        if let rawGlucoseTrend = rawValue["gt"] as? GlucoseTrend.RawValue {
+            glucoseTrend = GlucoseTrend(rawValue: rawGlucoseTrend)
+        }
+        if let glucoseTrendRateUnitString = rawValue["gtru"] as? String, let glucoseTrendRateValue = rawValue["gtrv"] as? Double {
+            glucoseTrendRate = HKQuantity(unit: HKUnit(from: glucoseTrendRateUnitString), doubleValue: glucoseTrendRateValue)
+        }
         glucoseDate = rawValue["gd"] as? Date
         glucoseIsDisplayOnly = rawValue["gdo"] as? Bool
         glucoseWasUserEntered = rawValue["gue"] as? Bool
@@ -114,7 +124,13 @@ final class WatchContext: RawRepresentable {
         raw["gu"] = displayGlucoseUnit?.unitString
         raw["gv"] = glucose?.doubleValue(for: unit)
 
-        raw["gt"] = glucoseTrendRawValue
+        raw["gc"] = glucoseCondition?.rawValue
+        raw["gt"] = glucoseTrend?.rawValue
+        if let glucoseTrendRate = glucoseTrendRate {
+            let unitPerMinute = unit.unitDivided(by: .minute())
+            raw["gtru"] = unitPerMinute.unitString
+            raw["gtrv"] = glucoseTrendRate.doubleValue(for: unitPerMinute)
+        }
         raw["gd"] = glucoseDate
         raw["gdo"] = glucoseIsDisplayOnly
         raw["gue"] = glucoseWasUserEntered
@@ -149,7 +165,9 @@ extension WatchContext {
         if let quantity = glucose, let date = glucoseDate, let syncIdentifier = glucoseSyncIdentifier {
             return NewGlucoseSample(date: date,
                                     quantity: quantity,
-                                    trend: glucoseTrendRawValue.flatMap { GlucoseTrend(rawValue: $0) },
+                                    condition: glucoseCondition,
+                                    trend: glucoseTrend,
+                                    trendRate: glucoseTrendRate,
                                     isDisplayOnly: glucoseIsDisplayOnly ?? false,
                                     wasUserEntered: glucoseWasUserEntered ?? false,
                                     syncIdentifier: syncIdentifier, syncVersion: 0)
