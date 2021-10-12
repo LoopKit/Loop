@@ -23,6 +23,7 @@ extension UserDefaults {
         case overrideHistory = "com.loopkit.overrideHistory"
         case lastBedtimeQuery = "com.loopkit.Loop.lastBedtimeQuery"
         case bedtime = "com.loopkit.Loop.bedtime"
+        case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
     }
@@ -68,7 +69,11 @@ extension UserDefaults {
                    let modelRaw = rawValue["model"] as? ExponentialInsulinModelPreset.RawValue,
                    let preset = ExponentialInsulinModelPreset(rawValue: modelRaw)
                 {
-                    removeObject(forKey: Key.legacyInsulinModelSettings.rawValue)
+                    // Keep this for people switching between versions
+                    //removeObject(forKey: Key.legacyInsulinModelSettings.rawValue)
+                    
+                    // Save migrated value
+                    set(preset.rawValue, forKey: Key.defaultRapidActingModel.rawValue)
                     return preset
                 }
             }
@@ -177,6 +182,15 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.bedtime.rawValue)
+        }
+    }
+    
+    public var lastProfileExpirationAlertDate: Date? {
+        get {
+            return object(forKey: Key.lastProfileExpirationAlertDate.rawValue) as? Date
+        }
+        set {
+            set(newValue, forKey: Key.lastProfileExpirationAlertDate.rawValue)
         }
     }
     

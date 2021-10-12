@@ -20,7 +20,6 @@ error() {
 
 warn() {
   echo "WARN: ${*}" >&2
-  exit 0
 }
 
 info() {
@@ -73,7 +72,8 @@ if [ -e .git ]; then
   else
     warn "No git branch found, not setting com-loopkit-Loop-git-branch"
   fi
-fi;
+fi
+
 plutil -replace com-loopkit-Loop-srcroot -string "${git_source_root}" "${info_plist_path}"
 plutil -replace com-loopkit-Loop-build-date -string "$(date)" "${info_plist_path}"
 plutil -replace com-loopkit-Loop-xcode-version -string "${xcode_build_version}" "${info_plist_path}"
@@ -85,4 +85,4 @@ if [ -e "${provisioning_profile_path}" ]; then
   plutil -replace com-loopkit-Loop-profile-expiration -date "${profile_expire_date}" "${info_plist_path}"
 else
   warn "Invalid provisioning profile path ${provisioning_profile_path}"
-fi;
+fi

@@ -287,6 +287,11 @@ struct BolusEntryView: View {
                     maxLength: 5,
                     doneButtonColor: .loopAccent
                 )
+                .onTapGesture {
+                    if typedBolusEntry.wrappedValue == recommendedBolusString {
+                        typedBolusEntry.wrappedValue = ""
+                    }
+                }
                 bolusUnitsLabel
             }
         }
