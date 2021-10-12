@@ -210,7 +210,7 @@ class LoopAppManager: NSObject {
         }
         rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
 
-        //deviceDataManager.refreshDeviceData()
+        deviceDataManager.refreshDeviceData()
 
         handleRemoteNotificationFromLaunchOptions()
 

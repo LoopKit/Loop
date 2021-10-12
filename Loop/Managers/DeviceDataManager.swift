@@ -686,7 +686,6 @@ extension DeviceDataManager {
                 switch error {
                 case .uncertainDelivery:
                     // Do not generate notification on uncertain delivery error
-                    self.checkDeliveryUncertaintyState()
                     break
                 default:
                     // Do not generate notifications for automatic boluses that fail.

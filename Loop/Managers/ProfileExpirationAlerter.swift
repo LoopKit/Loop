@@ -27,8 +27,8 @@ class ProfileExpirationAlerter {
         
         let minimumTimeBetweenAlerts: TimeInterval = timeUntilExpiration > .hours(24) ? .days(2) : .hours(1)
         
-        if let lastAlert = UserDefaults.appGroup?.lastProfileExpirationAlertDate {
-            guard now > lastAlert + minimumTimeBetweenAlerts else {
+        if let lastAlertDate = UserDefaults.appGroup?.lastProfileExpirationAlertDate {
+            guard now > lastAlertDate + minimumTimeBetweenAlerts else {
                 return
             }
         }
@@ -39,10 +39,10 @@ class ProfileExpirationAlerter {
         formatter.zeroFormattingBehavior = .dropLeading
         formatter.maximumUnitCount = 1
         let timeUntilExpirationStr = formatter.string(from: timeUntilExpiration)
-
+        
         let dialog = UIAlertController(
             title: NSLocalizedString("Profile Expires Soon", comment: "The title for notification of upcoming profile expiration"),
-            message: String(format: NSLocalizedString("Loop will stop working in %@. You will need to update Loop before that, with a new provisioning profile.", comment: "Format string for body for notification of upcoming provisioning profile expiration. (1: amount of time until expiration"), timeUntilExpirationStr!),
+            message: String(format: NSLocalizedString("%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile.", comment: "Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration"), Bundle.main.bundleDisplayName, timeUntilExpirationStr!),
             preferredStyle: .alert)
         dialog.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Text for ok action on notification of upcoming profile expiration"), style: .default, handler: nil))
         dialog.addAction(UIAlertAction(title: NSLocalizedString("More Info", comment: "Text for more info action on notification of upcoming profile expiration"), style: .default, handler: { (_) in
