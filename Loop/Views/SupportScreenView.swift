@@ -55,7 +55,7 @@ struct SupportScreenView: View {
     var supportMenuItems: [SupportMenuItem] {
         return availableSupports.compactMap { (support) -> SupportMenuItem? in
             if let view = support.supportMenuItem(supportInfoProvider: supportInfoProvider, urlHandler: openURL) {
-                return SupportMenuItem(id: support.supportIdentifier, menuItemView: view)
+                return SupportMenuItem(id: support.identifier, menuItemView: view)
             } else {
                 return nil
             }

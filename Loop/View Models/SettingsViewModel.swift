@@ -59,6 +59,8 @@ public class SettingsViewModel: ObservableObject {
     
     let notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel
 
+    let versionUpdateViewModel: VersionUpdateViewModel
+    
     private weak var delegate: SettingsViewModelDelegate?
     
     var showWarning: Bool {
@@ -96,6 +98,7 @@ public class SettingsViewModel: ObservableObject {
     lazy private var cancellables = Set<AnyCancellable>()
 
     public init(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel,
+                versionUpdateViewModel: VersionUpdateViewModel,
                 pumpManagerSettingsViewModel: PumpManagerViewModel,
                 cgmManagerSettingsViewModel: CGMManagerViewModel,
                 servicesViewModel: ServicesViewModel,
@@ -112,6 +115,7 @@ public class SettingsViewModel: ObservableObject {
                 delegate: SettingsViewModelDelegate?
     ) {
         self.notificationsCriticalAlertPermissionsViewModel = notificationsCriticalAlertPermissionsViewModel
+        self.versionUpdateViewModel = versionUpdateViewModel
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel
@@ -144,5 +148,47 @@ public class SettingsViewModel: ObservableObject {
         isClosedLoopAllowed
             .assign(to: \.isClosedLoopAllowed, on: self)
             .store(in: &cancellables)
+    }
+}
+
+// For previews only
+extension SettingsViewModel {
+    fileprivate class MockSupportInfoProvider: SupportInfoProvider {
+        var localizedAppNameAndVersion = "Loop v1.2"
+        
+        var pumpStatus: PumpManagerStatus? {
+            return nil
+        }
+        
+        var cgmDevice: HKDevice? {
+            return nil
+        }
+        
+        func generateIssueReport(completion: (String) -> Void) {
+            completion("Mock Issue Report")
+        }
+    }
+
+    fileprivate class FakeClosedLoopAllowedPublisher {
+        @Published var mockIsClosedLoopAllowed: Bool = false
+    }
+
+    static var preview: SettingsViewModel {
+        return SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
+                                 versionUpdateViewModel: VersionUpdateViewModel(supportManager: nil, guidanceColors: GuidanceColors()),
+                                 pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
+                                 cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
+                                 servicesViewModel: ServicesViewModel.preview,
+                                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
+                                 therapySettings: { TherapySettings() },
+                                 sensitivityOverridesEnabled: false,
+                                 initialDosingEnabled: true,
+                                 isClosedLoopAllowed: FakeClosedLoopAllowedPublisher().$mockIsClosedLoopAllowed,
+                                 supportInfoProvider: MockSupportInfoProvider(),
+                                 dosingStrategy: .automaticBolus,
+                                 availableSupports: [],
+                                 isOnboardingComplete: false,
+                                 therapySettingsViewModelDelegate: nil,
+                                 delegate: nil)
     }
 }

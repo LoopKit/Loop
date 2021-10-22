@@ -16,6 +16,9 @@ MAIN_APP_DISPLAY_NAME = Loop
 // Appication icon [DEFAULT]
 APPICON_NAME = AppIcon
 
+// App Store URL
+APP_STORE_URL = 
+
 // Features [DEFAULT]
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)
 

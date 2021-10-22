@@ -36,6 +36,10 @@ extension Bundle {
     var appGroupSuiteName: String {
         return object(forInfoDictionaryKey: "AppGroupIdentifier") as! String
     }
+    
+    var appStoreURL: String? {
+        return object(forInfoDictionaryKey: "AppStoreURL") as? String
+    }
 
     var isAppExtension: Bool {
         return bundleURL.pathExtension == "appex"

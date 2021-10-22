@@ -313,14 +313,11 @@ final class DeviceDataManager {
             settingsStore: settingsStore
         )
         
-        let versionCheckServicesManager = VersionCheckServicesManager()
-
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
-            remoteDataServicesManager: remoteDataServicesManager,
-            versionCheckServicesManager: versionCheckServicesManager
+            remoteDataServicesManager: remoteDataServicesManager
         )
 
         let criticalEventLogs: [CriticalEventLog] = [settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
@@ -1504,8 +1501,5 @@ extension DeviceDataManager {
 }
 
 extension DeviceDataManager {
-    var availableSupports: [SupportUI] {
-        let availableSupports = pluginManager.availableSupports + servicesManager.availableSupports + [cgmManager, pumpManager].compactMap { $0 as? SupportUI }
-        return availableSupports.sorted { $0.supportIdentifier < $1.supportIdentifier } // Provide a consistent ordering
-    }
+    var availableSupports: [SupportUI] { [cgmManager, pumpManager].compactMap { $0 as? SupportUI } }
 }

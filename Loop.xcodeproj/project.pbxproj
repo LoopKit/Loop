@@ -33,9 +33,9 @@
 		1D4990E824A25931005CC357 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FB2292456700A3F2AF /* FeatureFlags.swift */; };
 		1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
 		1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
-		1D63DEA526E950D400F46FA5 /* VersionCheckServicesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D63DEA426E950D400F46FA5 /* VersionCheckServicesManager.swift */; };
+		1D63DEA526E950D400F46FA5 /* SupportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D63DEA426E950D400F46FA5 /* SupportManager.swift */; };
 		1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */; };
-		1D70C40126EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D70C40026EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift */; };
+		1D70C40126EC0F9D00C62570 /* SupportManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D70C40026EC0F9D00C62570 /* SupportManagerTests.swift */; };
 		1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80313C24746274002810DF /* AlertStoreTests.swift */; };
 		1D82E6A025377C6B009131FB /* TrustedTimeChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */; };
 		1D8D55BC252274650044DBB6 /* BolusEntryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */; };
@@ -46,6 +46,7 @@
 		1DA7A84424477698008257F0 /* InAppModalAlertIssuerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA7A84324477698008257F0 /* InAppModalAlertIssuerTests.swift */; };
 		1DB1065124467E18005542BD /* AlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1065024467E18005542BD /* AlertManager.swift */; };
 		1DB1CA4D24A55F0000B3B94C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1CA4C24A55F0000B3B94C /* Image.swift */; };
+		1DB619AC270BAD3D006C9D07 /* VersionUpdateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB619AB270BAD3D006C9D07 /* VersionUpdateViewModel.swift */; };
 		1DC63E7425351BDF004605DA /* TrueTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DC63E7325351BDF004605DA /* TrueTime.framework */; };
 		1DD0B76724EC77AC008A2DC3 /* SupportScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD0B76624EC77AC008A2DC3 /* SupportScreenView.swift */; };
 		1DDE273D24AEA4B000796622 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */; };
@@ -781,9 +782,9 @@
 		1D49795724E7289700948F05 /* ServicesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesViewModel.swift; sourceTree = "<group>"; };
 		1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataClass.swift"; sourceTree = "<group>"; };
 		1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		1D63DEA426E950D400F46FA5 /* VersionCheckServicesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheckServicesManager.swift; sourceTree = "<group>"; };
+		1D63DEA426E950D400F46FA5 /* SupportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportManager.swift; sourceTree = "<group>"; };
 		1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPermissionsChecker.swift; sourceTree = "<group>"; };
-		1D70C40026EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheckServicesManagerTests.swift; sourceTree = "<group>"; };
+		1D70C40026EC0F9D00C62570 /* SupportManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportManagerTests.swift; sourceTree = "<group>"; };
 		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
 		1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedTimeChecker.swift; sourceTree = "<group>"; };
 		1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusEntryViewModelTests.swift; sourceTree = "<group>"; };
@@ -796,6 +797,7 @@
 		1DB1065024467E18005542BD /* AlertManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
 		1DB1CA4C24A55F0000B3B94C /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		1DB619AB270BAD3D006C9D07 /* VersionUpdateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionUpdateViewModel.swift; sourceTree = "<group>"; };
 		1DC63E7325351BDF004605DA /* TrueTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TrueTime.framework; path = Carthage/Build/iOS/TrueTime.framework; sourceTree = "<group>"; };
 		1DD0B76624EC77AC008A2DC3 /* SupportScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportScreenView.swift; sourceTree = "<group>"; };
 		1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -1642,7 +1644,7 @@
 				A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */,
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
-				1D70C40026EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift */,
+				1D70C40026EC0F9D00C62570 /* SupportManagerTests.swift */,
 				A9F5F1F4251050EC00E7C8A4 /* ZipArchiveTests.swift */,
 			);
 			path = Managers;
@@ -2053,16 +2055,17 @@
 		43F5C2CF1B92A2ED003EB13D /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */,
 				897A5A9524C2175B00C4E71D /* BolusEntryView.swift */,
 				C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */,
 				C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */,
 				43B260481ED248FB008CAA77 /* CarbEntryTableViewCell.swift */,
 				431A8C3F1EC6E8AB00823B9C /* CircleMaskView.swift */,
 				A9A056B224B93C62007CF06D /* CriticalEventLogExportView.swift */,
+				C191D2A025B3ACAA00C26C0B /* DosingStrategySelectionView.swift */,
 				43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */,
 				430D85881F44037000AF2D4F /* HUDViewTableViewCell.swift */,
 				A91D2A3E26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift */,
+				C1742331259BEADC00399C9D /* ManualEntryDoseView.swift */,
 				1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */,
 				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
 				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
@@ -2070,11 +2073,10 @@
 				438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */,
 				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
+				C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */,
 				1DD0B76624EC77AC008A2DC3 /* SupportScreenView.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
-				C1742331259BEADC00399C9D /* ManualEntryDoseView.swift */,
-				C191D2A025B3ACAA00C26C0B /* DosingStrategySelectionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2104,10 +2106,10 @@
 				A9C62D872331703000535612 /* ServicesManager.swift */,
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
 				43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */,
+				1D63DEA426E950D400F46FA5 /* SupportManager.swift */,
 				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
 				89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */,
 				1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */,
-				1D63DEA426E950D400F46FA5 /* VersionCheckServicesManager.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 				1DA6499D2441266400F61E75 /* Alerts */,
 				E95D37FF24EADE68005E2F50 /* Store Protocols */,
@@ -2393,6 +2395,7 @@
 				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
 				1D49795724E7289700948F05 /* ServicesViewModel.swift */,
 				C174233B259BEB0F00399C9D /* ManualEntryDoseViewModel.swift */,
+				1DB619AB270BAD3D006C9D07 /* VersionUpdateViewModel.swift */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";
@@ -3525,6 +3528,7 @@
 				A9CBE458248AB564008E7BA2 /* DoseStore+SimulatedCoreData.swift in Sources */,
 				897A5A9924C22DE800C4E71D /* BolusEntryViewModel.swift in Sources */,
 				4374B5EF209D84BF00D17AA8 /* OSLog.swift in Sources */,
+				1DB619AC270BAD3D006C9D07 /* VersionUpdateViewModel.swift in Sources */,
 				A9C62D882331703100535612 /* Service.swift in Sources */,
 				89CAB36324C8FE96009EE3CE /* PredictedGlucoseChartView.swift in Sources */,
 				4F6663941E905FD2009E74FC /* ChartColorPalette+Loop.swift in Sources */,
@@ -3543,7 +3547,7 @@
 				899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */,
 				89D1503E24B506EB00EDE253 /* Dictionary.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
-				1D63DEA526E950D400F46FA5 /* VersionCheckServicesManager.swift in Sources */,
+				1D63DEA526E950D400F46FA5 /* SupportManager.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
@@ -3810,7 +3814,7 @@
 				C16575732538AFF6004AE16E /* CGMStalenessMonitorTests.swift in Sources */,
 				A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */,
 				1DA7A84424477698008257F0 /* InAppModalAlertIssuerTests.swift in Sources */,
-				1D70C40126EC0F9D00C62570 /* VersionCheckServicesManagerTests.swift in Sources */,
+				1D70C40126EC0F9D00C62570 /* SupportManagerTests.swift in Sources */,
 				E93E86A824DDCC4400FF40C8 /* MockDoseStore.swift in Sources */,
 				E98A55F124EDD85E0008715D /* MockDosingDecisionStore.swift in Sources */,
 				8968B114240C55F10074BB48 /* LoopSettingsTests.swift in Sources */,

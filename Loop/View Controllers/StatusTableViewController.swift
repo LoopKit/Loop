@@ -35,6 +35,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     var closedLoopStatus: ClosedLoopStatus!
     
     let notificationsCriticalAlertPermissionsViewModel = NotificationsCriticalAlertPermissionsViewModel()
+    
+    var supportManager: SupportManager!
 
     lazy private var cancellables = Set<AnyCancellable>()
 
@@ -1388,7 +1390,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                                   availableServices: { [weak self] in self?.deviceManager.servicesManager.availableServices ?? [] },
                                                   activeServices: { [weak self] in self?.deviceManager.servicesManager.activeServices ?? [] },
                                                   delegate: self)
+        let versionUpdateViewModel = VersionUpdateViewModel(supportManager: supportManager, guidanceColors: .default)
         let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: notificationsCriticalAlertPermissionsViewModel,
+                                          versionUpdateViewModel: versionUpdateViewModel,
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           servicesViewModel: servicesViewModel,
@@ -1399,7 +1403,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           isClosedLoopAllowed: closedLoopStatus.$isClosedLoopAllowed,
                                           supportInfoProvider: deviceManager,
                                           dosingStrategy: deviceManager.loopManager.settings.dosingStrategy,
-                                          availableSupports: deviceManager.availableSupports,
+                                          availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
                                           delegate: self)
@@ -1505,11 +1509,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     @objc private func showLoopCompletionMessage(_: Any) {
         guard let loopCompletionMessage = hudView?.loopCompletionHUD.loopCompletionMessage else { return }
-        var message = loopCompletionMessage.message
-        if FeatureFlags.allowDebugFeatures {
-            message.append("\n\nVersion \(Bundle.main.shortVersionString): \(deviceManager.servicesManager.versionCheckServicesManager.checkVersion(currentVersion: Bundle.main.shortVersionString).localizedDescription)")
-        }
-        presentLoopCompletionMessage(title: loopCompletionMessage.title, message: message)
+        presentLoopCompletionMessage(title: loopCompletionMessage.title, message: loopCompletionMessage.message)
     }
 
     private func presentLoopCompletionMessage(title: String, message: String) {
