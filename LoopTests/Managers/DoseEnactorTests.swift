@@ -43,6 +43,8 @@ class MockPumpManager: PumpManager {
     var supportedBasalRates: [Double] = [1,2,3]
     
     var supportedBolusVolumes: [Double] = [1,2,3]
+
+    var supportedMaximumBolusVolumes: [Double] = [1,2,3]
     
     var maximumBasalScheduleEntryCount: Int = 24
     
