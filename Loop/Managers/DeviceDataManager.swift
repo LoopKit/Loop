@@ -1473,6 +1473,7 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
         return pumpManager.map {
             PumpSupportedIncrements(basalRates: $0.supportedBasalRates,
                                     bolusVolumes: $0.supportedBolusVolumes,
+                                    maximumBolusVolumes: $0.supportedMaximumBolusVolumes,
                                     maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
         }
     }

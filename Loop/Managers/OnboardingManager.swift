@@ -363,6 +363,7 @@ extension OnboardingManager: PumpManagerProvider {
         }
         return PumpSupportedIncrements(basalRates: pumpManagerType.onboardingSupportedBasalRates,
                                        bolusVolumes: pumpManagerType.onboardingSupportedBolusVolumes,
+                                       maximumBolusVolumes: pumpManagerType.onboardingSupportedMaximumBolusVolumes,
                                        maximumBasalScheduleEntryCount: pumpManagerType.onboardingMaximumBasalScheduleEntryCount)
     }
 

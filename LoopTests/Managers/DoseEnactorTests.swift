@@ -39,6 +39,8 @@ class MockPumpManager: PumpManager {
     static var onboardingSupportedBasalRates: [Double] = [1,2,3]
     
     static var onboardingSupportedBolusVolumes: [Double] = [1,2,3]
+
+    static var onboardingSupportedMaximumBolusVolumes: [Double] = [1,2,3]
     
     var supportedBasalRates: [Double] = [1,2,3]
     
