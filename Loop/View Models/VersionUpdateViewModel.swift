@@ -31,6 +31,17 @@ public class VersionUpdateViewModel: ObservableObject {
         }
     }
     
+    func footer(appName: String) -> String {
+        switch versionUpdate {
+        case .required, .recommended:
+            return String(format: NSLocalizedString("A new version of %@ is available and is recommended to continue using the app.", comment: "Software update available section footer (1: app name)"), appName)
+        case .available:
+            return String(format: NSLocalizedString("A new version of %@ is available.", comment: "Required software update section footer (1: app name)"), appName)
+        default:
+            return ""
+        }
+    }
+    
     @ViewBuilder
     var softwareUpdateView: some View {
         supportManager?.softwareUpdateView(guidanceColors: guidanceColors)
