@@ -68,7 +68,10 @@ fileprivate extension Alert {
         let userNotificationContent = UNMutableNotificationContent()
         userNotificationContent.title = content.title
         userNotificationContent.body = content.body
-        userNotificationContent.sound = getUserNotificationSound()
+        userNotificationContent.sound = userNotificationSound
+        if #available(iOS 15.0, *) {
+            userNotificationContent.interruptionLevel = backgroundContent?.isCritical == true ? .critical : .timeSensitive
+        }
         // TODO: Once we have a final design and approval for custom UserNotification buttons, we'll need to set categoryIdentifier
 //        userNotificationContent.categoryIdentifier = LoopNotificationCategory.alert.rawValue
         userNotificationContent.threadIdentifier = identifier.value // Used to match categoryIdentifier, but I /think/ we want multiple threads for multiple alert types, no?
@@ -78,8 +81,8 @@ fileprivate extension Alert {
         ]
         return userNotificationContent
     }
-
-    private func getUserNotificationSound() -> UNNotificationSound? {
+    
+    private var userNotificationSound: UNNotificationSound? {
         guard let content = backgroundContent else {
             return nil
         }

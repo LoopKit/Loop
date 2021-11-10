@@ -62,11 +62,7 @@ public class SettingsViewModel: ObservableObject {
     let versionUpdateViewModel: VersionUpdateViewModel
     
     private weak var delegate: SettingsViewModelDelegate?
-    
-    var showWarning: Bool {
-        notificationsCriticalAlertPermissionsViewModel.showWarning
-    }
-    
+
     var didTapIssueReport: ((String) -> Void)? {
         delegate?.didTapIssueReport
     }
