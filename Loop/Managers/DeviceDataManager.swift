@@ -805,7 +805,11 @@ extension DeviceDataManager: CGMManagerDelegate {
         log.default("CGM manager with identifier '%{public}@' wants deletion", manager.managerIdentifier)
 
         DispatchQueue.main.async {
+            if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
+                self.removeDisplayGlucoseUnitObserver(cgmManagerUI)
+            }
             self.cgmManager = nil
+            self.displayGlucoseUnitObservers.cleanupDeallocatedElements()
         }
     }
 
