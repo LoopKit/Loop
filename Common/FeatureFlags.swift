@@ -18,6 +18,7 @@ struct FeatureFlagConfiguration: Decodable {
     let fiaspInsulinModelEnabled: Bool
     let includeServicesInSettingsEnabled: Bool
     let manualDoseEntryEnabled: Bool
+    let insulinDeliveryReservoirViewEnabled: Bool
     let mockTherapySettingsEnabled: Bool
     let nonlinearCarbModelEnabled: Bool
     let observeHealthKitSamplesFromOtherApps: Bool
@@ -81,6 +82,13 @@ struct FeatureFlagConfiguration: Decodable {
         self.manualDoseEntryEnabled = false
         #else
         self.manualDoseEntryEnabled = true
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if INSULIN_DELIVERY_RESERVOIR_VIEW_DISABLED
+        self.insulinDeliveryReservoirViewEnabled = false
+        #else
+        self.insulinDeliveryReservoirViewEnabled = true
         #endif
 
         // Swift compiler config is inverse, since the default state is enabled.

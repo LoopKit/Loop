@@ -92,6 +92,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         } else {
             dataSourceSegmentedControl.removeSegment(at: 2, animated: false)
         }
+        if !FeatureFlags.insulinDeliveryReservoirViewEnabled {
+            dataSourceSegmentedControl.removeSegment(at: 1, animated: false)
+        }
     }
 
     public override func viewWillAppear(_ animated: Bool) {
