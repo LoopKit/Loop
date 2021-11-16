@@ -19,6 +19,7 @@ protocol CriticalEventLogExporterFactory {
 extension CriticalEventLogExportManager: CriticalEventLogExporterFactory {}
 
 public class CriticalEventLogExportViewModel: ObservableObject, Identifiable, CriticalEventLogExporterDelegate {
+    @Published var isExporting: Bool = false
     @Published var showingSuccess: Bool = false
     @Published var showingShare: Bool = false
     @Published var showingError: Bool = false
@@ -83,6 +84,12 @@ public class CriticalEventLogExportViewModel: ObservableObject, Identifiable, Cr
     func export() {
         dispatchPrecondition(condition: .onQueue(.main))
 
+        guard !isExporting else {
+            return
+        }
+
+        self.isExporting = true
+
         self.showingSuccess = false
         self.showingShare = false
         self.showingError = false
@@ -126,6 +133,7 @@ public class CriticalEventLogExportViewModel: ObservableObject, Identifiable, Cr
         self.exporter?.cancel()
         self.exporter = nil
         self.activityItems = []
+        self.isExporting = false
     }
 
     // MARK: - CriticalEventLogExporterDelegate
