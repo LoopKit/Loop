@@ -86,12 +86,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 DispatchQueue.main.async {
                     self?.registerPumpManager()
                     self?.configurePumpManagerHUDViews()
+                    self?.updateToolbarItems()
                 }
             },
             notificationCenter.addObserver(forName: .CGMManagerChanged, object: deviceManager, queue: nil) { [weak self] (notification: Notification) in
                 DispatchQueue.main.async {
                     self?.registerCGMManager()
                     self?.configureCGMManagerHUDViews()
+                    self?.updateToolbarItems()
                 }
             },
             notificationCenter.addObserver(forName: .PumpEventsAdded, object: deviceManager, queue: nil) { [weak self] (notification: Notification) in
@@ -155,7 +157,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         onboardingManager.$isComplete
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.updateToolbarItems() }
+            .sink { [weak self] _ in
+                self?.reloadData()
+                self?.updateToolbarItems()
+            }
             .store(in: &cancellables)
     }
 
@@ -238,13 +243,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func updateToolbarItems() {
-        let isOnboardingComplete = onboardingManager.isComplete
+        let isPumpOnboarded = onboardingManager.isComplete || deviceManager.pumpManager?.isOnboarded == true
         let isClosedLoop = closedLoopStatus.isClosedLoop
 
-        toolbarItems![0].isEnabled = isOnboardingComplete
-        toolbarItems![2].isEnabled = isOnboardingComplete && isClosedLoop
-        toolbarItems![4].isEnabled = isOnboardingComplete
-        toolbarItems![6].isEnabled = isOnboardingComplete
+        toolbarItems![0].isEnabled = isPumpOnboarded
+        toolbarItems![2].isEnabled = isPumpOnboarded && isClosedLoop
+        toolbarItems![4].isEnabled = isPumpOnboarded
+        toolbarItems![6].isEnabled = isPumpOnboarded
         toolbarItems![8].isEnabled = true
     }
 
