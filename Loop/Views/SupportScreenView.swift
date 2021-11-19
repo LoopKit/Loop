@@ -70,7 +70,7 @@ struct SupportScreenView_Previews: PreviewProvider {
         
         var pumpStatus: PumpManagerStatus? = nil
         
-        var cgmDevice: HKDevice? = nil
+        var cgmStatus: CGMManagerStatus? = nil
         
         func generateIssueReport(completion: (String) -> Void) {
             completion("Mock Issue Report")

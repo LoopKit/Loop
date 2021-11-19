@@ -13,10 +13,21 @@ extension UIDevice {
 
     // https://stackoverflow.com/questions/26028918/how-to-determine-the-current-iphone-device-model
     var modelIdentifier: String {
-        var info = utsname()
-        uname(&info)
-        let modelCode = withUnsafePointer(to: &info.machine) { $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(validatingUTF8: $0) } }
-        return modelCode ?? "unknown"
+        #if IOS_SIMULATOR
+            return "\(model)Simulator"
+        #else
+            var info = utsname()
+            uname(&info)
+            return withUnsafePointer(to: &info.machine) { $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(validatingUTF8: $0) } } ?? "unknown"
+        #endif
+    }
+
+    public var controllerDevice: StoredSettings.ControllerDevice {
+        return StoredSettings.ControllerDevice(name: name,
+                                               systemName: systemName,
+                                               systemVersion: systemVersion,
+                                               model: model,
+                                               modelIdentifier: modelIdentifier)
     }
 
     public var deviceSettings: StoredDosingDecision.DeviceSettings {

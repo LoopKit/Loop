@@ -299,6 +299,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double { unitsPerHour }
         func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double { units }
         var pumpManagerStatus: PumpManagerStatus?
+        var cgmManagerStatus: CGMManagerStatus?
     }
 
     func waitOnDataQueue(timeout: TimeInterval = 1.0) {

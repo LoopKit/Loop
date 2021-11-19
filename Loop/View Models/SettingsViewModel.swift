@@ -156,7 +156,7 @@ extension SettingsViewModel {
             return nil
         }
         
-        var cgmDevice: HKDevice? {
+        var cgmStatus: CGMManagerStatus? {
             return nil
         }
         

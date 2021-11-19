@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import HealthKit
 import LoopKit
 
 // MARK: - Simulated Core Data
@@ -110,6 +111,39 @@ fileprivate extension StoredSettings {
                                                                RepeatingScheduleValue(startTime: .hours(18), value: 8.0),
                                                                RepeatingScheduleValue(startTime: .hours(21), value: 10.0)],
                                                   timeZone: timeZone)
+        let notificationSettings = NotificationSettings(authorizationStatus: .authorized,
+                                                        soundSetting: .enabled,
+                                                        badgeSetting: .enabled,
+                                                        alertSetting: .enabled,
+                                                        notificationCenterSetting: .enabled,
+                                                        lockScreenSetting: .enabled,
+                                                        carPlaySetting: .enabled,
+                                                        alertStyle: .banner,
+                                                        showPreviewsSetting: .always,
+                                                        criticalAlertSetting: .enabled,
+                                                        providesAppNotificationSettings: true,
+                                                        announcementSetting: .enabled)
+        let controllerDevice = StoredSettings.ControllerDevice(name: "Controller Name",
+                                                               systemName: "Controller System Name",
+                                                               systemVersion: "Controller System Version",
+                                                               model: "Controller Model",
+                                                               modelIdentifier: "Controller Model Identifier")
+        let cgmDevice = HKDevice(name: "CGM Name",
+                                 manufacturer: "CGM Manufacturer",
+                                 model: "CGM Model",
+                                 hardwareVersion: "CGM Hardware Version",
+                                 firmwareVersion: "CGM Firmware Version",
+                                 softwareVersion: "CGM Software Version",
+                                 localIdentifier: "CGM Local Identifier",
+                                 udiDeviceIdentifier: "CGM UDI Device Identifier")
+        let pumpDevice = HKDevice(name: "Pump Name",
+                                  manufacturer: "Pump Manufacturer",
+                                  model: "Pump Model",
+                                  hardwareVersion: "Pump Hardware Version",
+                                  firmwareVersion: "Pump Firmware Version",
+                                  softwareVersion: "Pump Software Version",
+                                  localIdentifier: "Pump Local Identifier",
+                                  udiDeviceIdentifier: "Pump UDI Device Identifier")
         return StoredSettings(date: date,
                               dosingEnabled: true,
                               glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
@@ -122,11 +156,15 @@ fileprivate extension StoredSettings {
                               maximumBolus: 10.0,
                               suspendThreshold: GlucoseThreshold(unit: .milligramsPerDeciliter, value: 75.0),
                               deviceToken: UUID().uuidString,
+                              insulinType: .humalog,
                               defaultRapidActingModel: StoredInsulinModel(ExponentialInsulinModelPreset.rapidActingAdult),
                               basalRateSchedule: basalRateSchedule,
                               insulinSensitivitySchedule: insulinSensitivitySchedule,
                               carbRatioSchedule: carbRatioSchedule,
-                              bloodGlucoseUnit: .milligramsPerDeciliter,
-                              syncIdentifier: UUID().uuidString)
+                              notificationSettings: notificationSettings,
+                              controllerDevice: controllerDevice,
+                              cgmDevice: cgmDevice,
+                              pumpDevice: pumpDevice,
+                              bloodGlucoseUnit: .milligramsPerDeciliter)
     }
 }
