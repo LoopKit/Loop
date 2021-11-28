@@ -9,16 +9,19 @@ import LoopKit
 import LoopKitUI
 import MockKit
 
-// TODO: Need a flag other than Debug for including MockCGMManager
-let staticCGMManagers: [CGMManager.Type] = [MockCGMManager.self]
-
 let staticCGMManagersByIdentifier: [String: CGMManager.Type] = [
     MockCGMManager.managerIdentifier: MockCGMManager.self
 ]
 
-let availableStaticCGMManagers = [
-    CGMManagerDescriptor(identifier: MockCGMManager.managerIdentifier, localizedTitle: MockCGMManager.localizedTitle)
-]
+var availableStaticCGMManagers: [CGMManagerDescriptor] {
+    if FeatureFlags.allowSimulators {
+        return [
+            CGMManagerDescriptor(identifier: MockCGMManager.managerIdentifier, localizedTitle: MockCGMManager.localizedTitle)
+        ]
+    } else {
+        return []
+    }
+}
 
 func CGMManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManager? {
     guard let managerIdentifier = rawValue["managerIdentifier"] as? String,

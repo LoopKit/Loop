@@ -24,6 +24,7 @@ final class DeviceDataManager {
     let pluginManager: PluginManager
     weak var alertManager: AlertManager!
     let bluetoothProvider: BluetoothProvider
+    weak var onboardingManager: OnboardingManager?
 
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
@@ -244,7 +245,7 @@ final class DeviceDataManager {
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
-            lastPumpEventsReconciliation: pumpManager?.lastReconciliation,
+            lastPumpEventsReconciliation: pumpManager?.lastSync,
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
@@ -288,7 +289,7 @@ final class DeviceDataManager {
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
             basalDeliveryState: pumpManager?.status.basalDeliveryState,
             overrideHistory: overrideHistory,
-            lastPumpEventsReconciliation: pumpManager?.lastReconciliation,
+            lastPumpEventsReconciliation: pumpManager?.lastSync,
             analyticsServicesManager: analyticsServicesManager,
             localCacheDuration: localCacheDuration,
             doseStore: doseStore,
@@ -311,12 +312,15 @@ final class DeviceDataManager {
             glucoseStore: glucoseStore,
             settingsStore: settingsStore
         )
+        
+        let versionCheckServicesManager = VersionCheckServicesManager()
 
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
-            remoteDataServicesManager: remoteDataServicesManager
+            remoteDataServicesManager: remoteDataServicesManager,
+            versionCheckServicesManager: versionCheckServicesManager
         )
 
         let criticalEventLogs: [CriticalEventLog] = [settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
@@ -390,7 +394,7 @@ final class DeviceDataManager {
             return .failure(UnknownPumpManagerIdentifierError())
         }
 
-        let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled, allowedInsulinTypes: allowedInsulinTypes)
+        let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, allowedInsulinTypes: allowedInsulinTypes)
         if case .createdAndOnboarded(let pumpManagerUI) = result {
             pumpManagerOnboarding(didCreatePumpManager: pumpManagerUI)
             pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI)
@@ -427,7 +431,12 @@ final class DeviceDataManager {
             log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
             loopManager.addGlucoseSamples(values) { result in
                 self.log.default("Asserting current pump data")
-                self.pumpManager?.ensureCurrentPumpData(completion: nil)
+                self.pumpManager?.ensureCurrentPumpData(completion: { (lastSync) in
+                    if let lastSync = lastSync, Date().timeIntervalSince(lastSync) < LoopCoreConstants.inputDataRecencyInterval {
+                        self.log.default("Pump data from %@ is fresh. Triggering loop()", String(describing: type(of: self.pumpManager)))
+                        self.loopManager.loop()
+                    }
+                })
                 if !values.isEmpty {
                     DispatchQueue.main.async {
                         self.cgmStalenessMonitor.cgmGlucoseSamplesAvailable(values)
@@ -483,7 +492,7 @@ final class DeviceDataManager {
             return .failure(UnknownCGMManagerIdentifierError())
         }
 
-        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.mockTherapySettingsEnabled)
+        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
         if case .createdAndOnboarded(let cgmManagerUI) = result {
             cgmManagerOnboarding(didCreateCGMManager: cgmManagerUI)
             cgmManagerOnboarding(didOnboardCGMManager: cgmManagerUI)
@@ -674,11 +683,18 @@ extension DeviceDataManager {
         pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
-                if case .uncertainDelivery = error {
+                switch error {
+                case .uncertainDelivery:
+                    // Do not generate notification on uncertain delivery error
                     self.checkDeliveryUncertaintyState()
-                } else if !automatic {
-                    NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
+                    break
+                default:
+                    // Do not generate notifications for automatic boluses that fail.
+                    if !automatic {
+                        NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
+                    }
                 }
+                
                 self.loopManager.bolusRequestFailed(error) {
                     completion(error)
                 }
@@ -752,7 +768,7 @@ extension DeviceDataManager: DeviceManagerDelegate {
     }
     
     var allowDebugFeatures: Bool {
-        FeatureFlags.mockTherapySettingsEnabled // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
+        FeatureFlags.allowDebugFeatures // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
     }
 }
 
@@ -838,6 +854,10 @@ extension DeviceDataManager: CGMManagerOnboardingDelegate {
     func cgmManagerOnboarding(didOnboardCGMManager cgmManager: CGMManagerUI) {
         precondition(cgmManager.isOnboarded)
         log.default("CGM manager with identifier '%{public}@' onboarded", cgmManager.managerIdentifier)
+
+        DispatchQueue.main.async {
+            self.refreshDeviceData()
+        }
     }
 }
 
@@ -908,7 +928,10 @@ extension DeviceDataManager: PumpManagerDelegate {
     func refreshDeviceData() {
         refreshCGM() {
             self.queue.async {
-                self.pumpManager?.ensureCurrentPumpData(completion: nil)
+                guard let pumpManager = self.pumpManager, pumpManager.isOnboarded else {
+                    return
+                }
+                pumpManager.ensureCurrentPumpData(completion: nil)
             }
         }
     }
@@ -995,11 +1018,11 @@ extension DeviceDataManager: PumpManagerDelegate {
         loopManager.storeDosingDecision(withDate: Date(), withError: error)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastSync: Date?, completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ did read pump events", String(describing: type(of: pumpManager)))
 
-        loopManager.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
+        loopManager.addPumpEvents(events, lastReconciliation: lastSync) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
             }
@@ -1027,12 +1050,6 @@ extension DeviceDataManager: PumpManagerDelegate {
         }
     }
 
-    func pumpManagerRecommendsLoop(_ pumpManager: PumpManager) {
-        dispatchPrecondition(condition: .onQueue(queue))
-        log.default("PumpManager:%{public}@ recommends loop", String(describing: type(of: pumpManager)))
-        loopManager.loop()
-    }
-
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
         dispatchPrecondition(condition: .onQueue(queue))
         return doseStore.pumpEventQueryAfterDate
@@ -1045,12 +1062,15 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
     func pumpManagerOnboarding(didCreatePumpManager pumpManager: PumpManagerUI) {
         log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
         self.pumpManager = pumpManager
-        self.deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
     }
 
     func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI) {
         precondition(pumpManager.isOnboarded)
         log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.managerIdentifier)
+
+        DispatchQueue.main.async {
+            self.refreshDeviceData()
+        }
     }
 }
 
@@ -1207,10 +1227,10 @@ extension DeviceDataManager {
                 switch command {
                 case .temporaryScheduleOverride(let override):
                     log.default("Enacting remote temporary override: %{public}@", String(describing: override))
-                    loopManager.settings.scheduleOverride = override
+                    loopManager.mutateSettings { settings in settings.scheduleOverride = override }
                 case .cancelTemporaryOverride:
                     log.default("Canceling temporary override from remote command")
-                    loopManager.settings.scheduleOverride = nil
+                    loopManager.mutateSettings { settings in settings.scheduleOverride = nil }
                 case .bolusEntry(let bolusAmount):
                     log.default("Enacting remote bolus entry: %{public}@", String(describing: bolusAmount))
                     

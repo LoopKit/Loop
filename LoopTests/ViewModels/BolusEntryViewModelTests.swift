@@ -395,7 +395,7 @@ class BolusEntryViewModelTests: XCTestCase {
         try triggerLoopStateUpdatedWithDataAndWait()
         XCTAssertTrue(bolusEntryViewModel.isRefreshingPump)
         let completion = try XCTUnwrap(delegate.ensureCurrentPumpDataCompletion)
-        completion()
+        completion(Date())
         // Need to once again trigger loop state
         try triggerLoopStateResult(with: MockLoopState())
         // then wait on main again (sigh)
@@ -946,8 +946,8 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         }
     }
     
-    var ensureCurrentPumpDataCompletion: (() -> Void)?
-    func ensureCurrentPumpData(completion: @escaping () -> Void) {
+    var ensureCurrentPumpDataCompletion: ((Date?) -> Void)?
+    func ensureCurrentPumpData(completion: @escaping (Date?) -> Void) {
         ensureCurrentPumpDataCompletion = completion
     }
     

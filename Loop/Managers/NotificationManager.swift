@@ -78,14 +78,14 @@ extension NotificationManager {
     static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date) {
         let notification = UNMutableNotificationContent()
 
-        notification.title = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")
+        notification.title = NSLocalizedString("Bolus Issue", comment: "The notification title for a bolus issue")
 
-        let sentenceFormat = NSLocalizedString("%@.", comment: "Appends a full-stop to a statement")
+        let fullStopCharacter = NSLocalizedString(".", comment: "Full stop character")
+        let sentenceFormat = NSLocalizedString("%1@%2@", comment: "Adds a full-stop to a statement (1: statement, 2: full stop character)")
 
-        notification.subtitle = error.errorDescription ?? "Bolus Failure"
-
-        let body = [error.failureReason, error.recoverySuggestion].compactMap({ $0 }).map({
-            String(format: sentenceFormat, $0)
+        let body = [error.errorDescription, error.failureReason, error.recoverySuggestion].compactMap({ $0 }).map({
+            // Avoids the double period at the end of a sentence.
+            $0.hasSuffix(fullStopCharacter) ? $0 : String(format: sentenceFormat, $0, fullStopCharacter)
         }).joined(separator: " ")
 
         notification.body = body

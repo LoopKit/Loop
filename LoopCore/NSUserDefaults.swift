@@ -24,6 +24,8 @@ extension UserDefaults {
         case lastBedtimeQuery = "com.loopkit.Loop.lastBedtimeQuery"
         case bedtime = "com.loopkit.Loop.bedtime"
         case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
+        case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
+        case allowSimulators = "com.loopkit.Loop.allowSimulators"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -194,5 +196,13 @@ extension UserDefaults {
         set {
             set(newValue, forKey: Key.lastProfileExpirationAlertDate.rawValue)
         }
+    }
+    
+    public var allowDebugFeatures: Bool {
+        return bool(forKey: Key.allowDebugFeatures.rawValue)
+    }
+
+    public var allowSimulators: Bool {
+        return bool(forKey: Key.allowSimulators.rawValue)
     }
 }

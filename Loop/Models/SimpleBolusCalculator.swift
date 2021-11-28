@@ -35,6 +35,12 @@ struct SimpleBolusCalculator {
                     recommendedBolus += correctionBolus
                 }
             }
+            
+            let recommendationLimit = mealCarbs != nil ? LoopConstants.simpleBolusCalculatorMinGlucoseMealBolusRecommendation : LoopConstants.simpleBolusCalculatorMinGlucoseBolusRecommendation
+            
+            if manualGlucose < recommendationLimit {
+                recommendedBolus = 0
+            }
         }
         
         // No negative recommendation

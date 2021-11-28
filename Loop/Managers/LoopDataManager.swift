@@ -82,7 +82,9 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
         self.lockedBasalDeliveryState = Locked(basalDeliveryState)
-        self.settings = settings
+        self.lockedSettings = Locked(settings)
+        self.dosingEnabled = settings.dosingEnabled
+
         self.overrideHistory = overrideHistory
 
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
@@ -119,7 +121,9 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
             }
             
             self?.logger.default("Override Intent: setting override named '%s'", String(describing: name))
-            self?.settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
+            self?.mutateSettings { settings in
+                settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
+            }
             // Remove the override from UserDefaults so we don't set it multiple times
             appGroup.intentExtensionOverrideToSet = nil
         })
@@ -180,41 +184,55 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { if !$0 {
-                self.settings.clearOverride(matching: .preMeal)
+                self.mutateSettings { settings in
+                    settings.clearOverride(matching: .preMeal)
+                }
                 self.cancelActiveTempBasal()
             } }
             .store(in: &cancellables)
     }
 
     /// Loop-related settings
-    ///
-    /// These are not thread-safe.
 
-    @Published var settings: LoopSettings {
-        didSet {
-            guard settings != oldValue else {
-                return
-            }
+    private var lockedSettings: Locked<LoopSettings>
 
-            if settings.preMealOverride != oldValue.preMealOverride {
-                // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
-                predictedGlucose = nil
-            }
-
-            if settings.scheduleOverride != oldValue.scheduleOverride {
-                overrideHistory.recordOverride(settings.scheduleOverride)
-
-                // Invalidate cached effects affected by the override
-                self.carbEffect = nil
-                self.carbsOnBoard = nil
-                self.insulinEffect = nil
-            }
-
-            UserDefaults.appGroup?.loopSettings = settings
-            notify(forChange: .preferences)
-            analyticsServicesManager.didChangeLoopSettings(from: oldValue, to: settings)
-        }
+    var settings: LoopSettings {
+        lockedSettings.value
     }
+
+    func mutateSettings(_ changes: (_ settings: inout LoopSettings) -> Void) {
+        var oldValue: LoopSettings!
+        let newValue = lockedSettings.mutate { settings in
+            oldValue = settings
+            changes(&settings)
+        }
+
+        guard oldValue != newValue else {
+            return
+        }
+
+        dosingEnabled = newValue.dosingEnabled
+
+        if newValue.preMealOverride != oldValue.preMealOverride {
+            // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
+            predictedGlucose = nil
+        }
+
+        if newValue.scheduleOverride != oldValue.scheduleOverride {
+            overrideHistory.recordOverride(settings.scheduleOverride)
+
+            // Invalidate cached effects affected by the override
+            self.carbEffect = nil
+            self.carbsOnBoard = nil
+            self.insulinEffect = nil
+        }
+
+        UserDefaults.appGroup?.loopSettings = newValue
+        notify(forChange: .preferences)
+        analyticsServicesManager.didChangeLoopSettings(from: oldValue, to: newValue)
+    }
+
+    @Published private(set) var dosingEnabled: Bool
 
     let overrideHistory: TemporaryScheduleOverrideHistory
 
@@ -502,7 +520,9 @@ extension LoopDataManager {
         }
 
         if timeZone != settings.glucoseTargetRangeSchedule?.timeZone {
-            settings.glucoseTargetRangeSchedule?.timeZone = timeZone
+            mutateSettings { settings in
+                settings.glucoseTargetRangeSchedule?.timeZone = timeZone
+            }
         }
     }
 }
@@ -577,7 +597,9 @@ extension LoopDataManager {
                 switch result {
                 case .success(let storedCarbEntry):
                     // Remove the active pre-meal target override
-                    self.settings.clearOverride(matching: .preMeal)
+                    self.mutateSettings { settings in
+                        settings.clearOverride(matching: .preMeal)
+                    }
 
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
@@ -2128,7 +2150,8 @@ extension LoopDataManager {
 extension LoopDataManager {
     public var therapySettings: TherapySettings {
         get {
-            TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
+            let settings = settings
+            return TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
                             correctionRangeOverrides: CorrectionRangeOverrides(preMeal: settings.preMealTargetRange, workout: settings.legacyWorkoutTargetRange),
                             maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
                             maximumBolus: settings.maximumBolus,
@@ -2140,12 +2163,14 @@ extension LoopDataManager {
         }
         
         set {
-            settings.glucoseTargetRangeSchedule = newValue.glucoseTargetRangeSchedule
-            settings.preMealTargetRange = newValue.correctionRangeOverrides?.preMeal
-            settings.legacyWorkoutTargetRange = newValue.correctionRangeOverrides?.workout
-            settings.suspendThreshold = newValue.suspendThreshold
-            settings.maximumBolus = newValue.maximumBolus
-            settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
+            mutateSettings { settings in
+                settings.glucoseTargetRangeSchedule = newValue.glucoseTargetRangeSchedule
+                settings.preMealTargetRange = newValue.correctionRangeOverrides?.preMeal
+                settings.legacyWorkoutTargetRange = newValue.correctionRangeOverrides?.workout
+                settings.suspendThreshold = newValue.suspendThreshold
+                settings.maximumBolus = newValue.maximumBolus
+                settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
+            }
             insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
             carbRatioSchedule = newValue.carbRatioSchedule
             basalRateSchedule = newValue.basalRateSchedule

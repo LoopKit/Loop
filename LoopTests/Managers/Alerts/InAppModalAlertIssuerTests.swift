@@ -42,10 +42,26 @@ class InAppModalAlertIssuerTests: XCTestCase {
     
     class MockViewController: UIViewController, AlertPresenter {
         var viewControllerPresented: UIViewController?
+        var alertDismissed: UIAlertController?
         var autoComplete = true
         var completion: (() -> Void)?
         override func present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil) {
             viewControllerPresented = viewControllerToPresent
+            if autoComplete {
+                completion?()
+            } else {
+                self.completion = completion
+            }
+        }
+        func dismissTopMost(animated: Bool, completion: (() -> Void)?) {
+            if autoComplete {
+                completion?()
+            } else {
+                self.completion = completion
+            }
+        }
+        func dismissAlert(_ alertToDismiss: UIAlertController, animated: Bool, completion: (() -> Void)?) {
+            alertDismissed = alertToDismiss
             if autoComplete {
                 completion?()
             } else {
@@ -170,14 +186,17 @@ class InAppModalAlertIssuerTests: XCTestCase {
         inAppModalAlertIssuer.issueAlert(alert)
         
         waitOnMain()
+        let alertControllerPresented = mockViewController.viewControllerPresented as? UIAlertController
+        XCTAssertNotNil(alertControllerPresented)
+
         var dismissed = false
-        inAppModalAlertIssuer.removeDeliveredAlert(identifier: alert.identifier) {
+        inAppModalAlertIssuer.removePresentedAlert(identifier: alert.identifier) {
             dismissed = true
         }
-        
+
         waitOnMain()
-        let alertController = mockViewController.viewControllerPresented as? UIAlertController
-        XCTAssertNotNil(alertController)
+        let alertDimissed = mockViewController.alertDismissed
+        XCTAssertNotNil(alertDimissed)
         XCTAssertTrue(dismissed)
     }
     
