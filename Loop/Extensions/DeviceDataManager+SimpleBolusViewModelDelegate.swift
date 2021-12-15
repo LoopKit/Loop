@@ -11,15 +11,8 @@ import LoopCore
 import LoopKit
 
 extension DeviceDataManager: SimpleBolusViewModelDelegate {
-    func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Error?) -> Void) {
-        loopManager.addGlucoseSamples(samples) { (result) in
-            switch result {
-            case .failure(let error):
-                completion(error)
-            case .success:
-                completion(nil)
-            }
-        }
+    func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
+        loopManager.addGlucoseSamples(samples, completion: completion)
     }
     
     func enactBolus(units: Double, automatic: Bool) {

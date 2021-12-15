@@ -223,7 +223,7 @@ final class WatchDataManager: NSObject {
     }
 
     private func createWatchContext(recommendingBolusFor potentialCarbEntry: NewCarbEntry? = nil, _ completion: @escaping (_ context: WatchContext) -> Void) {
-        var dosingDecision = BolusDosingDecision()
+        var dosingDecision = BolusDosingDecision(for: .watchBolus)
 
         let loopManager = deviceManager.loopManager!
 
@@ -249,7 +249,7 @@ final class WatchDataManager: NSObject {
             }
 
             dosingDecision.carbsOnBoard = carbsOnBoard
-            dosingDecision.recommendedBolus = recommendedBolus?.recommendation
+            dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendedBolus)
 
             context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
         
@@ -261,13 +261,16 @@ final class WatchDataManager: NSObject {
                 context.potentialCarbEntry = potentialCarbEntry
                 if let recommendedBolusDoseConsideringPotentialCarbEntry = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil) {
                     context.recommendedBolusDoseConsideringPotentialCarbEntry = recommendedBolusDoseConsideringPotentialCarbEntry.amount
-                    dosingDecision.recommendedBolus = recommendedBolusDoseConsideringPotentialCarbEntry
+                    dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: recommendedBolusDoseConsideringPotentialCarbEntry,
+                                                                                                 date: Date())
                 }
             }
             
+            var historicalGlucose: [HistoricalGlucoseValue]?
             if let glucose = glucose {
                 updateGroup.enter()
-                self.deviceManager.glucoseStore.getGlucoseSamples(start: glucose.startDate, end: nil) { (result) in
+                let historicalGlucoseStartDate = Date(timeIntervalSinceNow: -LoopCoreConstants.dosingDecisionHistoricalGlucoseInterval)
+                self.deviceManager.glucoseStore.getGlucoseSamples(start: min(historicalGlucoseStartDate, glucose.startDate), end: nil) { (result) in
                     var sample: StoredGlucoseSample?
                     switch result {
                     case .failure(let error):
@@ -275,6 +278,7 @@ final class WatchDataManager: NSObject {
                         sample = nil
                     case .success(let samples):
                         sample = samples.last
+                        historicalGlucose = samples.filter { $0.startDate >= historicalGlucoseStartDate }.map { HistoricalGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) }
                     }
                     context.glucose = sample?.quantity
                     context.glucoseDate = sample?.startDate
@@ -285,18 +289,23 @@ final class WatchDataManager: NSObject {
                 }
             }
 
+            var insulinOnBoard: InsulinValue?
             updateGroup.enter()
             self.deviceManager.doseStore.insulinOnBoard(at: Date()) { (result) in
                 switch result {
                 case .success(let iobValue):
                     context.iob = iobValue.value
-                    dosingDecision.insulinOnBoard = iobValue
+                    insulinOnBoard = iobValue
                 case .failure:
                     context.iob = nil
-                    dosingDecision.insulinOnBoard = nil
                 }
                 updateGroup.leave()
             }
+
+            _ = updateGroup.wait(timeout: .distantFuture)
+
+            dosingDecision.historicalGlucose = historicalGlucose
+            dosingDecision.insulinOnBoard = insulinOnBoard
 
             if let basalDeliveryState = basalDeliveryState,
                 let basalSchedule = manager.basalRateScheduleApplyingOverrideHistory,
@@ -306,14 +315,14 @@ final class WatchDataManager: NSObject {
             }
 
             if let predictedGlucose = state.predictedGlucoseIncludingPendingInsulin {
-                dosingDecision.predictedGlucoseIncludingPendingInsulin = predictedGlucose
-
                 // Drop the first element in predictedGlucose because it is the current glucose
                 let filteredPredictedGlucose = predictedGlucose.dropFirst()
                 if filteredPredictedGlucose.count > 0 {
                     context.predictedGlucose = WatchPredictedGlucose(values: Array(filteredPredictedGlucose))
                 }
             }
+
+            dosingDecision.predictedGlucose = state.predictedGlucoseIncludingPendingInsulin ?? state.predictedGlucose
 
             var preMealOverride = settings.preMealOverride
             if preMealOverride?.hasFinished() == true {
@@ -325,15 +334,13 @@ final class WatchDataManager: NSObject {
                 scheduleOverride = nil
             }
 
-            dosingDecision.scheduleOverride = preMealOverride ?? scheduleOverride
-            dosingDecision.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
-            if scheduleOverride != nil || preMealOverride != nil {
-                dosingDecision.effectiveGlucoseTargetRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
-            } else {
-                dosingDecision.effectiveGlucoseTargetRangeSchedule = nil
-            }
+            dosingDecision.scheduleOverride = scheduleOverride
 
-            _ = updateGroup.wait(timeout: .distantFuture)
+            if scheduleOverride != nil || preMealOverride != nil {
+                dosingDecision.glucoseTargetRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
+            } else {
+                dosingDecision.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
+            }
 
             // Remove any expired context dosing decisions and add new
             self.contextDosingDecisions = self.contextDosingDecisions.filter { (date, _) in date.timeIntervalSinceNow > self.contextDosingDecisionExpirationDuration }
@@ -353,12 +360,12 @@ final class WatchDataManager: NSObject {
         if let contextDate = bolus.contextDate, let contextDosingDecision = contextDosingDecisions[contextDate] {
             dosingDecision = contextDosingDecision
         } else {
-            dosingDecision = BolusDosingDecision()  // The user saved without waiting for recommendation (no bolus)
+            dosingDecision = BolusDosingDecision(for: .watchBolus)  // The user saved without waiting for recommendation (no bolus)
         }
 
         func enactBolus() {
-            dosingDecision.requestedBolus = bolus.value
-            deviceManager.loopManager.storeBolusDosingDecision(dosingDecision, withDate: bolus.startDate)
+            dosingDecision.manualBolusRequested = bolus.value
+            deviceManager.loopManager.storeManualBolusDosingDecision(dosingDecision, withDate: bolus.startDate)
 
             guard bolus.value > 0 else {
                 // Ensure active carbs is updated in the absence of a bolus

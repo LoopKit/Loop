@@ -364,8 +364,8 @@ struct SimpleBolusView: View {
 
 struct SimpleBolusCalculatorView_Previews: PreviewProvider {
     class MockSimpleBolusViewDelegate: SimpleBolusViewModelDelegate {
-        func addGlucose(_ samples: [NewGlucoseSample], completion: (Error?) -> Void) {
-            completion(nil)
+        func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
+            completion(.success([]))
         }
         
         func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
@@ -393,12 +393,13 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
         }
         
         func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
-            var decision = BolusDosingDecision()
-            decision.recommendedBolus = ManualBolusRecommendation(amount: 3, pendingInsulin: 0)
+            var decision = BolusDosingDecision(for: .simpleBolus)
+            decision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 3, pendingInsulin: 0),
+                                                                                   date: Date())
             return decision
         }
         
-        func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
+        func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
         }
         
         var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable {

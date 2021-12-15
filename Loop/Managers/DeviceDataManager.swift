@@ -1023,7 +1023,6 @@ extension DeviceDataManager: PumpManagerDelegate {
         log.error("PumpManager:%{public}@ did error: %{public}@", String(describing: type(of: pumpManager)), String(describing: error))
 
         setLastError(error: error)
-        loopManager.storeDosingDecision(withDate: Date(), withError: error)
     }
 
     func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastSync: Date?, completion: @escaping (_ error: Error?) -> Void) {
@@ -1203,7 +1202,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
     func loopDataManager(
         _ manager: LoopDataManager,
         didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date),
-        completion: @escaping (Error?) -> Void
+        completion: @escaping (LoopError?) -> Void
     ) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
@@ -1217,7 +1216,9 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 
         log.default("LoopManager did recommend dose")
         
-        doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager, completion: completion)
+        doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager) { pumpManagerError in
+            completion(pumpManagerError.map { .pumpManagerError($0) })
+        }
     }
 }
 

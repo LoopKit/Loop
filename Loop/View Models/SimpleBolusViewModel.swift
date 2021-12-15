@@ -18,12 +18,12 @@ import LocalAuthentication
 
 protocol SimpleBolusViewModelDelegate: AnyObject {
     
-    func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Error?) -> Void)
+    func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void)
     
     func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry? ,
                       completion: @escaping (_ result: Result<StoredCarbEntry>) -> Void)
 
-    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
+    func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
     func enactBolus(units: Double, automatic: Bool)
 
@@ -288,7 +288,7 @@ class SimpleBolusViewModel: ObservableObject {
         cachedDisplayGlucoseUnit = delegate.displayGlucoseUnitObservable.displayGlucoseUnit
         enteredBolusString = Self.doseAmountFormatter.string(from: 0.0)!
         updateRecommendation()
-        dosingDecision = BolusDosingDecision()
+        dosingDecision = BolusDosingDecision(for: .simpleBolus)
     }
     
     func updateRecommendation() {
@@ -310,8 +310,8 @@ class SimpleBolusViewModel: ObservableObject {
         
         if carbQuantity != nil || manualGlucoseQuantity != nil {
             dosingDecision = delegate.computeSimpleBolusRecommendation(at: recommendationDate, mealCarbs: carbQuantity, manualGlucose: manualGlucoseQuantity)
-            if let decision = dosingDecision, let bolusRecommendation = decision.recommendedBolus {
-                recommendation = bolusRecommendation.amount
+            if let decision = dosingDecision, let bolusRecommendation = decision.manualBolusRecommendation {
+                recommendation = bolusRecommendation.recommendation.amount
             } else {
                 recommendation = nil
             }
@@ -361,13 +361,15 @@ class SimpleBolusViewModel: ObservableObject {
                                                            isDisplayOnly: false,
                                                            wasUserEntered: true,
                                                            syncIdentifier: UUID().uuidString)
-                delegate.addGlucose([manualGlucoseSample]) { error in
+                delegate.addGlucose([manualGlucoseSample]) { result in
                     DispatchQueue.main.async {
-                        if let error = error {
+                        switch result {
+                        case .failure(let error):
                             self.presentAlert(.manualGlucoseEntryPersistenceFailure)
                             self.log.error("Failed to add manual glucose entry: %{public}@", String(describing: error))
                             completion(false)
-                        } else {
+                        case .success(let storedSamples):
+                            self.dosingDecision?.manualGlucoseSample = storedSamples.first
                             completion(true)
                         }
                     }
@@ -410,13 +412,13 @@ class SimpleBolusViewModel: ObservableObject {
         func enactBolus() {
             if let bolusVolume = bolus?.doubleValue(for: .internationalUnit()), bolusVolume > 0 {
                 delegate.enactBolus(units: bolusVolume, automatic: false)
-                dosingDecision?.requestedBolus = bolusVolume
+                dosingDecision?.manualBolusRequested = bolusVolume
             }
         }
         
         func saveBolusDecision() {
             if let decision = dosingDecision, let recommendationDate = recommendationDate {
-                delegate.storeBolusDosingDecision(decision, withDate: recommendationDate)
+                delegate.storeManualBolusDosingDecision(decision, withDate: recommendationDate)
             }
         }
         

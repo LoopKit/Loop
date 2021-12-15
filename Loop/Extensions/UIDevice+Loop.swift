@@ -30,14 +30,9 @@ extension UIDevice {
                                                modelIdentifier: modelIdentifier)
     }
 
-    public var deviceSettings: StoredDosingDecision.DeviceSettings {
-        return StoredDosingDecision.DeviceSettings(name: name,
-                                                   systemName: systemName,
-                                                   systemVersion: systemVersion,
-                                                   model: model,
-                                                   modelIdentifier: modelIdentifier,
-                                                   batteryLevel: isBatteryMonitoringEnabled ? batteryLevel : nil,
-                                                   batteryState: isBatteryMonitoringEnabled ? batteryState.batteryState : nil)
+    public var controllerStatus: StoredDosingDecision.ControllerStatus {
+        return StoredDosingDecision.ControllerStatus(batteryState: isBatteryMonitoringEnabled ? batteryState.batteryState : nil,
+                                                     batteryLevel: isBatteryMonitoringEnabled && batteryLevel != -1.0 ? batteryLevel : nil)   // -1.0 indicates unknown
     }
 }
 
@@ -63,7 +58,7 @@ extension UIDevice {
 }
 
 extension UIDevice.BatteryState {
-    public var batteryState: StoredDosingDecision.DeviceSettings.BatteryState {
+    public var batteryState: StoredDosingDecision.ControllerStatus.BatteryState {
         switch self {
         case .unknown:
             return .unknown

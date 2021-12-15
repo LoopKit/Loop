@@ -60,7 +60,8 @@ extension SettingsStore {
 
 fileprivate extension StoredSettings {
     static func simulated(date: Date) -> StoredSettings {
-        let timeZone = TimeZone(identifier: "America/Los_Angeles")!
+        let controllerTimeZone = TimeZone(identifier: "America/Los_Angeles")!
+        let scheduleTimeZone = TimeZone(secondsFromGMT: TimeZone(identifier: "America/Phoenix")!.secondsFromGMT())!
         let glucoseTargetRangeSchedule =  GlucoseRangeSchedule(rangeSchedule: DailyQuantitySchedule(unit: .milligramsPerDeciliter,
                                                                                                     dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: DoubleRange(minValue: 100.0, maxValue: 110.0)),
                                                                                                                  RepeatingScheduleValue(startTime: .hours(8), value: DoubleRange(minValue: 95.0, maxValue: 105.0)),
@@ -70,7 +71,7 @@ fileprivate extension StoredSettings {
                                                                                                                  RepeatingScheduleValue(startTime: .hours(16), value: DoubleRange(minValue: 100.0, maxValue: 110.0)),
                                                                                                                  RepeatingScheduleValue(startTime: .hours(18), value: DoubleRange(minValue: 90.0, maxValue: 100.0)),
                                                                                                                  RepeatingScheduleValue(startTime: .hours(21), value: DoubleRange(minValue: 110.0, maxValue: 120.0))],
-                                                                                                    timeZone: timeZone)!,
+                                                                                                    timeZone: scheduleTimeZone)!,
                                                                override: GlucoseRangeSchedule.Override(value: DoubleRange(minValue: 80.0, maxValue: 90.0),
                                                                                                        start: date.addingTimeInterval(-.minutes(30)),
                                                                                                        end: date.addingTimeInterval(.minutes(30))))
@@ -90,7 +91,7 @@ fileprivate extension StoredSettings {
                                                                RepeatingScheduleValue(startTime: .hours(16), value: 1.5),
                                                                RepeatingScheduleValue(startTime: .hours(18), value: 1.25),
                                                                RepeatingScheduleValue(startTime: .hours(21), value: 1.0)],
-                                                  timeZone: timeZone)
+                                                  timeZone: scheduleTimeZone)
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: .milligramsPerDeciliter,
                                                                     dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: 45.0),
                                                                                  RepeatingScheduleValue(startTime: .hours(8), value: 40.0),
@@ -100,7 +101,7 @@ fileprivate extension StoredSettings {
                                                                                  RepeatingScheduleValue(startTime: .hours(16), value: 40.0),
                                                                                  RepeatingScheduleValue(startTime: .hours(18), value: 45.0),
                                                                                  RepeatingScheduleValue(startTime: .hours(21), value: 50.0)],
-                                                                    timeZone: timeZone)
+                                                                    timeZone: scheduleTimeZone)
         let carbRatioSchedule = CarbRatioSchedule(unit: .gram(),
                                                   dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: 10.0),
                                                                RepeatingScheduleValue(startTime: .hours(8), value: 12.0),
@@ -110,7 +111,7 @@ fileprivate extension StoredSettings {
                                                                RepeatingScheduleValue(startTime: .hours(16), value: 12.0),
                                                                RepeatingScheduleValue(startTime: .hours(18), value: 8.0),
                                                                RepeatingScheduleValue(startTime: .hours(21), value: 10.0)],
-                                                  timeZone: timeZone)
+                                                  timeZone: scheduleTimeZone)
         let notificationSettings = NotificationSettings(authorizationStatus: .authorized,
                                                         soundSetting: .enabled,
                                                         badgeSetting: .enabled,
@@ -145,6 +146,7 @@ fileprivate extension StoredSettings {
                                   localIdentifier: "Pump Local Identifier",
                                   udiDeviceIdentifier: "Pump UDI Device Identifier")
         return StoredSettings(date: date,
+                              controllerTimeZone: controllerTimeZone,
                               dosingEnabled: true,
                               glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
                               preMealTargetRange: DoubleRange(minValue: 80.0, maxValue: 90.0).quantityRange(for: .milligramsPerDeciliter),

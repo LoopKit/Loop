@@ -15,13 +15,13 @@ class DoseEnactor {
     
     private let log = DiagnosticLog(category: "DoseEnactor")
 
-    func enact(recommendation: AutomaticDoseRecommendation, with pumpManager: PumpManager, completion: @escaping (Error?) -> Void) {
+    func enact(recommendation: AutomaticDoseRecommendation, with pumpManager: PumpManager, completion: @escaping (PumpManagerError?) -> Void) {
         
         dosingQueue.async {
             let doseDispatchGroup = DispatchGroup()
 
-            var tempBasalError: Error? = nil
-            var bolusError: Error? = nil
+            var tempBasalError: PumpManagerError? = nil
+            var bolusError: PumpManagerError? = nil
 
             if let basalAdjustment = recommendation.basalAdjustment {
                 self.log.default("Enacting recommend basal change")
@@ -42,10 +42,10 @@ class DoseEnactor {
                 return
             }
             
-            if recommendation.bolusUnits > 0 {
+            if let bolusUnits = recommendation.bolusUnits, bolusUnits > 0 {
                 self.log.default("Enacting recommended bolus dose")
                 doseDispatchGroup.enter()
-                pumpManager.enactBolus(units: recommendation.bolusUnits, automatic: true) { (error) in
+                pumpManager.enactBolus(units: bolusUnits, automatic: true) { (error) in
                     if let error = error {
                         bolusError = error
                     } else {
