@@ -34,7 +34,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     var closedLoopStatus: ClosedLoopStatus!
     
-    let notificationsCriticalAlertPermissionsViewModel = NotificationsCriticalAlertPermissionsViewModel()
+    var alertPermissionsChecker: AlertPermissionsChecker!
     
     var supportManager: SupportManager!
 
@@ -42,6 +42,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
+        tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
 
         if FeatureFlags.predictedGlucoseChartClampEnabled {
             statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
@@ -126,13 +128,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
         toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
         toolbarItems![8].tintColor = UIColor.secondaryLabel
 
-        tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
-
         addScenarioStepGestureRecognizers()
 
         tableView.backgroundColor = .secondarySystemBackground
     
-        tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
     }
 
     override func didReceiveMemoryWarning() {
@@ -151,7 +150,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         navigationController?.setToolbarHidden(false, animated: animated)
 
-        notificationsCriticalAlertPermissionsViewModel.updateState()
+        alertPermissionsChecker.checkNow()
         
         updateBolusProgress()
 
@@ -689,7 +688,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     private func updateBannerRow(animated: Bool) {
         let warningWasVisible = tableView.numberOfRows(inSection: Section.alertPermissionsDisabledWarning.rawValue) != 0
-        let showWarning = notificationsCriticalAlertPermissionsViewModel.showWarning
+        let showWarning = alertPermissionsChecker.showWarning
         if !showWarning && warningWasVisible {
             tableView.deleteRows(at: [IndexPath(row: 0, section: Section.alertPermissionsDisabledWarning.rawValue)], with: animated ? .top : .none)
         } else if showWarning && !warningWasVisible {
@@ -809,7 +808,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
         case .alertPermissionsDisabledWarning:
-            return notificationsCriticalAlertPermissionsViewModel.showWarning ? 1 : 0
+            return alertPermissionsChecker.showWarning ? 1 : 0
         case .hud:
             return shouldShowHUD ? 1 : 0
         case .charts:
@@ -820,10 +819,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private class AlertPermissionsDisabledWarningCell: UITableViewCell {
-  
+         
         override func updateConfiguration(using state: UICellConfigurationState) {
             super.updateConfiguration(using: state)
-            let content = NSLocalizedString("Alert Permissions Disabled", comment: "Warning text for when Notifications or Critical Alerts Permissions is disabled")
+            let content = NSLocalizedString("Review Alert Permissions", comment: "Warning text for when Notifications or Critical Alerts Permissions is disabled")
             var contentConfig = defaultContentConfiguration().updated(for: state)
             contentConfig.text = content
             contentConfig.textProperties.color = .red
@@ -842,7 +841,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch Section(rawValue: indexPath.section)! {
         case .alertPermissionsDisabledWarning:
-            return tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
+            return cell
         case .hud:
             let cell = tableView.dequeueReusableCell(withIdentifier: HUDViewTableViewCell.className, for: indexPath) as! HUDViewTableViewCell
             hudView = cell.hudView
@@ -1398,7 +1398,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                                   activeServices: { [weak self] in self?.deviceManager.servicesManager.activeServices ?? [] },
                                                   delegate: self)
         let versionUpdateViewModel = VersionUpdateViewModel(supportManager: supportManager, guidanceColors: .default)
-        let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: notificationsCriticalAlertPermissionsViewModel,
+        let viewModel = SettingsViewModel(alertPermissionsChecker: alertPermissionsChecker,
                                           versionUpdateViewModel: versionUpdateViewModel,
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,

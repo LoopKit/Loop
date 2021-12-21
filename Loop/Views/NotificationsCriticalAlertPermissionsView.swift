@@ -14,7 +14,7 @@ public struct NotificationsCriticalAlertPermissionsView: View {
     @Environment(\.appName) private var appName
 
     private let backButtonText: String
-    @ObservedObject private var viewModel: NotificationsCriticalAlertPermissionsViewModel
+    @ObservedObject private var checker: AlertPermissionsChecker
 
     // TODO: This screen is used in both the 'old Settings UI' and the 'new Settings UI'.  This is temporary.
     // In the old UI, it is a "top level" navigation view.  In the new UI, it is just part of the "flow".  This
@@ -24,9 +24,9 @@ public struct NotificationsCriticalAlertPermissionsView: View {
     }
     private let mode: PresentationMode
     
-    public init(backButtonText: String = "", mode: PresentationMode = .topLevel, viewModel: NotificationsCriticalAlertPermissionsViewModel) {
+    public init(backButtonText: String = "", mode: PresentationMode = .topLevel, checker: AlertPermissionsChecker) {
         self.backButtonText = backButtonText
-        self.viewModel = viewModel
+        self.checker = checker
         self.mode = mode
     }
     
@@ -45,68 +45,97 @@ public struct NotificationsCriticalAlertPermissionsView: View {
     
     private func content() -> some View {
         List {
-            manageNotificationsSection
-            manageCriticalAlertsSection
+            Section(footer: DescriptiveText(label: String(format: NSLocalizedString("""
+                Notifications give you important %1$@ app information without requiring you to open the app.
+                
+                Keep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications.
+                """, comment: "Alert Permissions descriptive text (1: app name)"), appName)))
+            {
+                manageNotifications
+                notificationsEnabledStatus
+                if #available(iOS 15.0, *) {
+                    if !checker.notificationCenterSettings.notificationsDisabled {
+                        notificationDelivery
+                    }
+                }
+                criticalAlertsStatus
+                if #available(iOS 15.0, *) {
+                    if !checker.notificationCenterSettings.notificationsDisabled {
+                        timeSensitiveStatus
+                    }
+                }
+            }
             notificationAndCriticalAlertPermissionSupportSection
         }
         .insetGroupedListStyle()
         .navigationBarTitle(Text(NSLocalizedString("Alert Permissions", comment: "Notification & Critical Alert Permissions screen title")))
-        .navigationBarItems(leading: dismissButton)
     }
 }
 
 extension NotificationsCriticalAlertPermissionsView {
-    
-    // TODO: Remove this when the new SettingsView is in place
-    private var dismissButton: some View {
-        Button( action: { self.dismiss() }) {
-            Text(backButtonText)
-        }
-    }
-    
-    private var manageNotificationsSection: some View {
-        Section(header: Spacer(),
-                footer: DescriptiveText(label: NSLocalizedString("""
-            Notifications appear on your Lock screen or pop up while you’re using other apps.
-            
-            Notifications give you important \(appName) app information without requiring you to open the app.  You can customize when and how you want to receive these notifications.
-            """, comment: "Manage Notifications in Settings descriptive text")))
-        {
-            Button( action: { self.viewModel.gotoSettings() } ) {
-                HStack {
-                    Text(NSLocalizedString("Manage Notifications in Settings", comment: "Manage Notifications in Settings button text"))
-                    Spacer()
-                    if !viewModel.notificationsPermissionsGiven {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.warning)
-                    }
-                    Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
-                }
+        
+    @ViewBuilder
+    private func onOff(_ val: Bool) -> some View {
+        if val {
+            Text("On", comment: "Notification Setting Status is On")
+        } else {
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.critical)
+                Text("Off", comment: "Notification Setting Status is Off")
             }
-            .accentColor(.primary)
         }
     }
     
-    private var manageCriticalAlertsSection: some View {
-        Section(footer: DescriptiveText(label: NSLocalizedString("""
-            Critical Alerts will always play a sound and appear on the Lock screen even if your iPhone is muted or Do Not Disturb is on.
-            """, comment: "Manage Notifications in Settings descriptive text")))
-        {
-            Button( action: { self.viewModel.gotoSettings() } ) {
-                HStack {
-                    Text(NSLocalizedString("Manage Critical Alerts in Settings", comment: "Manage Critical Alerts in Settings button text"))
-                    Spacer()
-                    if !viewModel.criticalAlertsPermissionsGiven {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.critical)
-                    }
-                    Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
-                }
+    private var manageNotifications: some View {
+        Button( action: { self.checker.gotoSettings() } ) {
+            HStack {
+                Text(NSLocalizedString("Manage Permissions in Settings", comment: "Manage Permissions in Settings button text"))
+                Spacer()
+                Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
             }
-            .accentColor(.primary)
+        }
+        .accentColor(.primary)
+    }
+    
+    private var notificationsEnabledStatus: some View {
+        HStack {
+            Text("Notifications", comment: "Notifications Status text")
+            Spacer()
+            onOff(!checker.notificationCenterSettings.notificationsDisabled)
+        }
+    }
+        
+    private var criticalAlertsStatus: some View {
+        HStack {
+            Text("Critical Alerts", comment: "Critical Alerts Status text")
+            Spacer()
+            onOff(!checker.notificationCenterSettings.criticalAlertsDisabled)
+        }
+    }
+
+    @available(iOS 15.0, *)
+    private var timeSensitiveStatus: some View {
+        HStack {
+            Text("Time Sensitive Notifications", comment: "Time Sensitive Status text")
+            Spacer()
+            onOff(!checker.notificationCenterSettings.timeSensitiveNotificationsDisabled)
         }
     }
     
+    @available(iOS 15.0, *)
+    private var notificationDelivery: some View {
+        HStack {
+            Text("Notification Delivery", comment: "Notification Delivery Status text")
+            Spacer()
+            if checker.notificationCenterSettings.scheduledDeliveryEnabled {
+                Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.critical)
+                Text("Scheduled", comment: "Scheduled Delivery status text")
+            } else {
+                Text("Immediate", comment: "Immediate Delivery status text")
+            }
+        }
+    }
+
     private var notificationAndCriticalAlertPermissionSupportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "Section title for Support"))) {
             NavigationLink(destination: Text("Get help with Notification & Critical Alert Permissions screen")) {
@@ -120,11 +149,11 @@ extension NotificationsCriticalAlertPermissionsView {
 struct NotificationsCriticalAlertPermissionsView_Previews: PreviewProvider {
     static var previews: some View {
         return Group {
-            NotificationsCriticalAlertPermissionsView(viewModel: NotificationsCriticalAlertPermissionsViewModel(criticalAlertsPermissionsGiven: false))
+            NotificationsCriticalAlertPermissionsView(checker: AlertPermissionsChecker())
                 .colorScheme(.light)
                 .previewDevice(PreviewDevice(rawValue: "iPhone SE"))
                 .previewDisplayName("SE light")
-            NotificationsCriticalAlertPermissionsView(viewModel: NotificationsCriticalAlertPermissionsViewModel())
+            NotificationsCriticalAlertPermissionsView(checker: AlertPermissionsChecker())
                 .colorScheme(.dark)
                 .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
                 .previewDisplayName("XS Max dark")

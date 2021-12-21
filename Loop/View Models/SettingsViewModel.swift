@@ -57,7 +57,7 @@ public protocol SettingsViewModelDelegate: AnyObject {
 
 public class SettingsViewModel: ObservableObject {
     
-    let notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel
+    let alertPermissionsChecker: AlertPermissionsChecker
 
     let versionUpdateViewModel: VersionUpdateViewModel
     
@@ -93,7 +93,7 @@ public class SettingsViewModel: ObservableObject {
 
     lazy private var cancellables = Set<AnyCancellable>()
 
-    public init(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel,
+    public init(alertPermissionsChecker: AlertPermissionsChecker,
                 versionUpdateViewModel: VersionUpdateViewModel,
                 pumpManagerSettingsViewModel: PumpManagerViewModel,
                 cgmManagerSettingsViewModel: CGMManagerViewModel,
@@ -110,7 +110,7 @@ public class SettingsViewModel: ObservableObject {
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
                 delegate: SettingsViewModelDelegate?
     ) {
-        self.notificationsCriticalAlertPermissionsViewModel = notificationsCriticalAlertPermissionsViewModel
+        self.alertPermissionsChecker = alertPermissionsChecker
         self.versionUpdateViewModel = versionUpdateViewModel
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
@@ -128,7 +128,7 @@ public class SettingsViewModel: ObservableObject {
         self.delegate = delegate
 
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
-        notificationsCriticalAlertPermissionsViewModel.objectWillChange.sink { [weak self] in
+        alertPermissionsChecker.objectWillChange.sink { [weak self] in
             self?.objectWillChange.send()
         }
         .store(in: &cancellables)
@@ -170,7 +170,7 @@ extension SettingsViewModel {
     }
 
     static var preview: SettingsViewModel {
-        return SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
+        return SettingsViewModel(alertPermissionsChecker: AlertPermissionsChecker(),
                                  versionUpdateViewModel: VersionUpdateViewModel(supportManager: nil, guidanceColors: GuidanceColors()),
                                  pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
                                  cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
