@@ -137,7 +137,7 @@ fileprivate extension AlertPermissionsChecker {
     private static let scheduledDeliveryEnabledAlertIdentifier = Alert.Identifier(managerIdentifier: "LoopAppManager",
                                                                                   alertIdentifier: "scheduledDeliveryEnabledAlert")
     private static let scheduledDeliveryEnabledAlertContent = Alert.Content(
-        title: NSLocalizedString("Alert Permissions Might Need Attention",
+        title: NSLocalizedString("Notifications Delayed",
                                  comment: "Scheduled Delivery Enabled alert title"),
         body: String(format: NSLocalizedString("""
             Notification delivery is set to Scheduled Summary in your phone’s settings.
