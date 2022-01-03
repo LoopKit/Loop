@@ -155,6 +155,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         updateBolusProgress()
 
         onboardingManager.$isComplete
+            .merge(with: onboardingManager.$isSuspended)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.reloadData()

@@ -19,7 +19,7 @@ class OnboardingManager {
     private weak var windowProvider: WindowProvider?
     private let userDefaults: UserDefaults
 
-    private var isSuspended: Bool {
+    @Published public private(set) var isSuspended: Bool {
         didSet { userDefaults.onboardingManagerIsSuspended = isSuspended }
     }
 
