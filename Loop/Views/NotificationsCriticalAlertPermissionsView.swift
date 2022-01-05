@@ -138,8 +138,8 @@ extension NotificationsCriticalAlertPermissionsView {
 
     private var notificationAndCriticalAlertPermissionSupportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "Section title for Support"))) {
-            NavigationLink(destination: Text("Get help with Notification & Critical Alert Permissions screen")) {
-                Text(NSLocalizedString("Get help with Notification & Critical Alert Permissions", comment: "Get help with Notification & Critical Alert Permissions support button text"))
+            NavigationLink(destination: Text("Get help with Alert Permissions")) {
+                Text(NSLocalizedString("Get help with Alert Permissions", comment: "Get help with Alert Permissions support button text"))
             }
         }
     }
