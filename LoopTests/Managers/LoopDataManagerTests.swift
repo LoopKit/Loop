@@ -431,10 +431,12 @@ class LoopDataManagerDosingTests: XCTestCase {
         let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.577747629410191, duration: .minutes(30)))
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
-        XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "loop")
-        XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].automaticDoseRecommendation, expectedAutomaticDoseRecommendation)
-        XCTAssertNil(dosingDecisionStore.dosingDecisions[0].manualBolusRecommendation)
-        XCTAssertNil(dosingDecisionStore.dosingDecisions[0].manualBolusRequested)
+        if dosingDecisionStore.dosingDecisions.count == 1 {
+            XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "loop")
+            XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].automaticDoseRecommendation, expectedAutomaticDoseRecommendation)
+            XCTAssertNil(dosingDecisionStore.dosingDecisions[0].manualBolusRecommendation)
+            XCTAssertNil(dosingDecisionStore.dosingDecisions[0].manualBolusRequested)
+        }
         NotificationCenter.default.removeObserver(observer)
     }
 

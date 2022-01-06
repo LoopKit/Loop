@@ -8,6 +8,7 @@
 
 import CoreData
 import LoopKit
+import UIKit
 
 extension StoredAlert {
     
@@ -16,13 +17,18 @@ extension StoredAlert {
           
     convenience init(from alert: Alert, context: NSManagedObjectContext, issuedDate: Date = Date()) {
         do {
-            self.init(context: context)
+            /// This code, using the `init(entity:insertInto:)` instead of the `init(context:)` avoids warnings during unit testing that look like this:
+            /// `CoreData: warning: Multiple NSEntityDescriptions claim the NSManagedObject subclass 'Loop.StoredAlert' so +entity is unable to disambiguate.`
+            /// This mitigates that.  See https://stackoverflow.com/a/54126839 for more info.
+            let name = String(describing: type(of: self))
+            let entity = NSEntityDescription.entity(forEntityName: name, in: context)!
+            self.init(entity: entity, insertInto: context)
             self.issuedDate = issuedDate
             alertIdentifier = alert.identifier.alertIdentifier
             managerIdentifier = alert.identifier.managerIdentifier
             triggerType = alert.trigger.storedType
             triggerInterval = alert.trigger.storedInterval
-            isCritical = alert.foregroundContent?.isCritical ?? false || alert.backgroundContent?.isCritical ?? false
+            interruptionLevel = alert.interruptionLevel
             // Encode as JSON strings
             let encoder = StoredAlert.encoder
             sound = try encoder.encodeToStringIfPresent(alert.sound)
@@ -64,6 +70,7 @@ extension Alert {
                   foregroundContent: fgContent,
                   backgroundContent: bgContent,
                   trigger: trigger,
+                  interruptionLevel: storedAlert.interruptionLevel,
                   sound: sound)
     }
 }
@@ -144,6 +151,48 @@ extension Alert.Trigger {
         }
     }
 }
+
+extension Alert.InterruptionLevel {
+    
+    var storedValue: NSNumber {
+        // Since this is arbitrary anyway, might as well make it match iOS's values
+        switch self {
+        case .active:
+            if #available(iOS 15.0, *) {
+                return NSNumber(value: UNNotificationInterruptionLevel.active.rawValue)
+            } else {
+                // https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel/active
+                return 1
+            }
+        case .timeSensitive:
+            if #available(iOS 15.0, *) {
+                return NSNumber(value: UNNotificationInterruptionLevel.timeSensitive.rawValue)
+            } else {
+                // https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel/timesensitive
+                return 2
+            }
+        case .critical:
+            if #available(iOS 15.0, *) {
+                return NSNumber(value: UNNotificationInterruptionLevel.critical.rawValue)
+            } else {
+                // https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel/critical
+                return 3
+            }
+        }
+    }
+    
+    init?(storedValue: NSNumber) {
+        switch storedValue {
+        case Self.active.storedValue: self = .active
+        case Self.timeSensitive.storedValue: self = .timeSensitive
+        case Self.critical.storedValue: self = .critical
+        default:
+            return nil
+        }
+    }
+}
+
+
 
 enum JSONEncoderError: Swift.Error {
     case stringEncodingError
