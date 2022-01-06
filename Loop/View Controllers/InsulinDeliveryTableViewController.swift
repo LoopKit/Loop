@@ -15,6 +15,8 @@ private let ReuseIdentifier = "Right Detail"
 
 
 public final class InsulinDeliveryTableViewController: UITableViewController {
+    
+    private static let historicDataDisplayTimeInterval = TimeInterval.hours(24)
 
     @IBOutlet var needsConfigurationMessageView: ErrorBackgroundView!
 
@@ -221,6 +223,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     }
 
     private func reloadData() {
+        let sinceDate = Date().addingTimeInterval(-InsulinDeliveryTableViewController.historicDataDisplayTimeInterval)
         switch state {
         case .unknown:
             break
@@ -239,7 +242,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
             switch DataSourceSegment(rawValue: dataSourceSegmentedControl.selectedSegmentIndex)! {
             case .reservoir:
-                doseStore?.getReservoirValues(since: Date.distantPast) { (result) in
+                doseStore?.getReservoirValues(since: sinceDate) { (result) in
                     DispatchQueue.main.async { () -> Void in
                         switch result {
                         case .failure(let error):
@@ -254,7 +257,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     self.updateTotal()
                 }
             case .history:
-                doseStore?.getPumpEventValues(since: Date.distantPast) { (result) in
+                doseStore?.getPumpEventValues(since: sinceDate) { (result) in
                     DispatchQueue.main.async { () -> Void in
                         switch result {
                         case .failure(let error):
@@ -269,7 +272,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     self.updateTotal()
                 }
             case .manualEntryDose:
-                doseStore?.getManuallyEnteredDoses(since: Date.distantPast) { (result) in
+                doseStore?.getManuallyEnteredDoses(since: sinceDate) { (result) in
                     DispatchQueue.main.async { () -> Void in
                         switch result {
                         case .failure(let error):
