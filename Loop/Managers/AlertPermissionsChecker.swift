@@ -66,14 +66,16 @@ public class AlertPermissionsChecker: ObservableObject {
     private func check(then completion: (() -> Void)? = nil) {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
-                self.notificationCenterSettings.notificationsDisabled = settings.alertSetting == .disabled
+                var newSettings = self.notificationCenterSettings
+                newSettings.notificationsDisabled = settings.alertSetting == .disabled
                 if FeatureFlags.criticalAlertsEnabled {
-                    self.notificationCenterSettings.criticalAlertsDisabled = settings.criticalAlertSetting == .disabled
+                    newSettings.criticalAlertsDisabled = settings.criticalAlertSetting == .disabled
                 }
                 if #available(iOS 15.0, *) {
-                    self.notificationCenterSettings.scheduledDeliveryEnabled = settings.scheduledDeliverySetting == .enabled
-                    self.notificationCenterSettings.timeSensitiveNotificationsDisabled = settings.alertSetting != .disabled && settings.timeSensitiveSetting == .disabled
+                    newSettings.scheduledDeliveryEnabled = settings.scheduledDeliverySetting == .enabled
+                    newSettings.timeSensitiveNotificationsDisabled = settings.alertSetting != .disabled && settings.timeSensitiveSetting == .disabled
                 }
+                self.notificationCenterSettings = newSettings
                 completion?()
             }
         }
@@ -98,20 +100,30 @@ fileprivate extension AlertPermissionsChecker {
     }
     
     private func notificationCenterSettingsChanged(_ newValue: NotificationCenterSettingsFlags) {
-        if newValue.requiresRiskMitigation && !UserDefaults.standard.hasIssuedRiskMitigatingAlert {
-            alertManager?.issueAlert(AlertPermissionsChecker.riskMitigatingAlert)
-            UserDefaults.standard.hasIssuedRiskMitigatingAlert = true
-        } else if newValue.scheduledDeliveryEnabled && !UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert {
-            alertManager?.issueAlert(AlertPermissionsChecker.scheduledDeliveryEnabledAlert)
-            UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert = true
+        if !issueOrRetract(alert: Self.riskMitigatingAlert,
+                           condition: newValue.requiresRiskMitigation,
+                           alreadyIssued: UserDefaults.standard.hasIssuedRiskMitigatingAlert,
+                           setAlreadyIssued: {UserDefaults.standard.hasIssuedRiskMitigatingAlert = $0}) {
+            _ = issueOrRetract(alert: Self.scheduledDeliveryEnabledAlert,
+                               condition: newValue.scheduledDeliveryEnabled,
+                               alreadyIssued: UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert,
+                               setAlreadyIssued: {UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert = $0})
         }
-        if !newValue.requiresRiskMitigation {
-            UserDefaults.standard.hasIssuedRiskMitigatingAlert = false
-            alertManager?.retractAlert(identifier: AlertPermissionsChecker.riskMitigatingAlertIdentifier)
-        }
-        if !newValue.scheduledDeliveryEnabled {
-            UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert = false
-            alertManager?.retractAlert(identifier: AlertPermissionsChecker.scheduledDeliveryEnabledAlertIdentifier)
+    }
+    
+    private func issueOrRetract(alert: LoopKit.Alert, condition: Bool, alreadyIssued: Bool, setAlreadyIssued: (Bool) -> Void) -> Bool {
+        if condition {
+            if !alreadyIssued {
+                alertManager?.issueAlert(alert)
+                setAlreadyIssued(true)
+            }
+            return true
+        } else {
+            if alreadyIssued {
+                setAlreadyIssued(false)
+                alertManager?.retractAlert(identifier: alert.identifier)
+            }
+            return false
         }
     }
 }
