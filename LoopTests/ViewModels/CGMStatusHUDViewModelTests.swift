@@ -41,6 +41,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
     func testSetGlucoseQuantityCGM() {
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
+                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -65,6 +66,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
     func testSetGlucoseQuantityCGMStale() {
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
+                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -92,6 +94,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         testExpect = self.expectation(description: #function)
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
+                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -119,6 +122,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
     func testSetGlucoseQuantityManualGlucose() {
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
+                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -144,6 +148,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
     func testSetGlucoseQuantityCalibrationDoesNotShow() {
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
+                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -182,6 +187,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         // when there is a manual glucose override icon, the status highlight isn't returned to be presented
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
+                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -213,6 +219,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         // add manual glucose
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
+                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let staleGlucoseAge: TimeInterval = .minutes(15)
@@ -329,6 +336,8 @@ extension CGMStatusHUDViewModelTests {
         var isStateValid: Bool
         
         var trendType: GlucoseTrend?
+
+        var trendRate: HKQuantity?
         
         var isLocal: Bool
         

@@ -187,11 +187,7 @@ extension UserDefaults {
     
     public var lastProfileExpirationAlertDate: Date? {
         get {
-            if let rawValue = object(forKey: Key.lastProfileExpirationAlertDate.rawValue) as? Date {
-                return rawValue
-            } else {
-                return nil
-            }
+            return object(forKey: Key.lastProfileExpirationAlertDate.rawValue) as? Date
         }
         set {
             set(newValue, forKey: Key.lastProfileExpirationAlertDate.rawValue)

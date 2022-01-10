@@ -11,6 +11,7 @@ import Intents
 import Combine
 import LoopKit
 import LoopKitUI
+import MockKit
 
 public protocol AlertPresenter: AnyObject {
     /// Present the alert view controller, with or without animation.
@@ -69,6 +70,7 @@ class LoopAppManager: NSObject {
     private var deviceDataManager: DeviceDataManager!
     private var onboardingManager: OnboardingManager!
     private var alertPermissionsChecker: AlertPermissionsChecker!
+    private var supportManager: SupportManager!
 
     private var state: State = .initialize
 
@@ -171,6 +173,11 @@ class LoopAppManager: NSObject {
         deviceDataManager.onboardingManager = onboardingManager
         deviceDataManager.analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
 
+        supportManager = SupportManager(pluginManager: pluginManager,
+                                        deviceDataManager: deviceDataManager,
+                                        servicesManager: deviceDataManager.servicesManager,
+                                        alertIssuer: alertManager)
+
         closedLoopStatus.$isClosedLoopAllowed
             .combineLatest(deviceDataManager.loopManager.$dosingEnabled)
             .map { $0 && $1 }
@@ -198,9 +205,11 @@ class LoopAppManager: NSObject {
 
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle(for: Self.self))
         let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
+        statusTableViewController.alertPermissionsChecker = alertPermissionsChecker
         statusTableViewController.closedLoopStatus = closedLoopStatus
         statusTableViewController.deviceManager = deviceDataManager
         statusTableViewController.onboardingManager = onboardingManager
+        statusTableViewController.supportManager = supportManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
         var rootNavigationController = rootViewController as? RootNavigationController
@@ -210,7 +219,7 @@ class LoopAppManager: NSObject {
         }
         rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
 
-        //deviceDataManager.refreshDeviceData()
+        deviceDataManager.refreshDeviceData()
 
         handleRemoteNotificationFromLaunchOptions()
 
@@ -403,7 +412,7 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.pumpBatteryLow.rawValue,
              LoopNotificationCategory.pumpExpired.rawValue,
              LoopNotificationCategory.pumpFault.rawValue:
-            completionHandler([.badge, .sound, .alert])
+            completionHandler([.badge, .sound, .list, .banner])
         default:
             // All other userNotifications are not to be displayed while in the foreground
             completionHandler([])

@@ -107,7 +107,7 @@ class SimpleBolusViewModelTests: XCTestCase {
         
         XCTAssertEqual(2.5, enactedBolus?.units)
         
-        XCTAssertEqual(storedBolusDecision?.recommendedBolus?.amount, 2.5)
+        XCTAssertEqual(storedBolusDecision?.manualBolusRecommendation?.recommendation.amount, 2.5)
         XCTAssertEqual(storedBolusDecision?.carbEntry?.quantity, addedCarbEntry?.quantity)
     }
     
@@ -139,8 +139,8 @@ class SimpleBolusViewModelTests: XCTestCase {
         
         XCTAssertEqual(0.1, enactedBolus?.units)
         
-        XCTAssertEqual(0.1, storedBolusDecision?.requestedBolus)
-        XCTAssertEqual(2.5, storedBolusDecision?.recommendedBolus?.amount)
+        XCTAssertEqual(0.1, storedBolusDecision?.manualBolusRequested)
+        XCTAssertEqual(2.5, storedBolusDecision?.manualBolusRecommendation?.recommendation.amount)
         XCTAssertEqual(addedCarbEntry?.quantity, storedBolusDecision?.carbEntry?.quantity)
     }
 
@@ -285,9 +285,9 @@ class SimpleBolusViewModelTests: XCTestCase {
 }
 
 extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
-    func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Error?) -> Void) {
+    func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
         addedGlucose = samples
-        completion(nil)
+        completion(.success([]))
     }
     
     func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
@@ -318,13 +318,14 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
     
     func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
         
-        var decision = BolusDosingDecision()
-        decision.recommendedBolus = ManualBolusRecommendation(amount: currentRecommendation, pendingInsulin: 0, notice: .none)
+        var decision = BolusDosingDecision(for: .simpleBolus)
+        decision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: currentRecommendation, pendingInsulin: 0, notice: .none),
+                                                                               date: date)
         decision.insulinOnBoard = currentIOB
         return decision
     }
     
-    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
+    func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
         storedBolusDecision = bolusDosingDecision
     }
 

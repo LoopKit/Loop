@@ -55,7 +55,7 @@ struct SupportScreenView: View {
     var supportMenuItems: [SupportMenuItem] {
         return availableSupports.compactMap { (support) -> SupportMenuItem? in
             if let view = support.supportMenuItem(supportInfoProvider: supportInfoProvider, urlHandler: openURL) {
-                return SupportMenuItem(id: support.supportIdentifier, menuItemView: view)
+                return SupportMenuItem(id: support.identifier, menuItemView: view)
             } else {
                 return nil
             }
@@ -70,7 +70,7 @@ struct SupportScreenView_Previews: PreviewProvider {
         
         var pumpStatus: PumpManagerStatus? = nil
         
-        var cgmDevice: HKDevice? = nil
+        var cgmStatus: CGMManagerStatus? = nil
         
         func generateIssueReport(completion: (String) -> Void) {
             completion("Mock Issue Report")

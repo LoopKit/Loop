@@ -14,4 +14,8 @@ public enum LoopCoreConstants {
     public static let inputDataRecencyInterval = TimeInterval(minutes: 15)
     
     public static let defaultCarbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .minutes(30), medium: .hours(3), slow: .hours(5))
+
+    /// How much historical glucose to include in a dosing decision
+    /// Somewhat arbitrary, but typical maximum visible in bolus glucose preview
+    public static let dosingDecisionHistoricalGlucoseInterval = TimeInterval(hours: 2)
 }

@@ -52,24 +52,17 @@ public typealias PumpManagerViewModel = DeviceViewModel<PumpManagerDescriptor>
 public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: DosingStrategy)
-    func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings)
     func didTapIssueReport(title: String)
 }
 
 public class SettingsViewModel: ObservableObject {
     
-    let notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel
+    let alertPermissionsChecker: AlertPermissionsChecker
 
+    let versionUpdateViewModel: VersionUpdateViewModel
+    
     private weak var delegate: SettingsViewModelDelegate?
-    
-    var showWarning: Bool {
-        notificationsCriticalAlertPermissionsViewModel.showWarning
-    }
-    
-    var didSave: TherapySettingsViewModel.SaveCompletion? {
-        delegate?.didSave
-    }
-    
+
     var didTapIssueReport: ((String) -> Void)? {
         delegate?.didTapIssueReport
     }
@@ -80,11 +73,10 @@ public class SettingsViewModel: ObservableObject {
     let servicesViewModel: ServicesViewModel
     let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     let therapySettings: () -> TherapySettings
-    let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
-    let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
     let supportInfoProvider: SupportInfoProvider
     let isOnboardingComplete: Bool
+    let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
 
     @Published var isClosedLoopAllowed: Bool
     @Published var dosingStrategy: DosingStrategy {
@@ -101,14 +93,13 @@ public class SettingsViewModel: ObservableObject {
 
     lazy private var cancellables = Set<AnyCancellable>()
 
-    public init(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel,
+    public init(alertPermissionsChecker: AlertPermissionsChecker,
+                versionUpdateViewModel: VersionUpdateViewModel,
                 pumpManagerSettingsViewModel: PumpManagerViewModel,
                 cgmManagerSettingsViewModel: CGMManagerViewModel,
                 servicesViewModel: ServicesViewModel,
                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
                 therapySettings: @escaping () -> TherapySettings,
-                pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
-                syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
                 isClosedLoopAllowed: Published<Bool>.Publisher,
@@ -116,16 +107,16 @@ public class SettingsViewModel: ObservableObject {
                 dosingStrategy: DosingStrategy,
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
+                therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
                 delegate: SettingsViewModelDelegate?
     ) {
-        self.notificationsCriticalAlertPermissionsViewModel = notificationsCriticalAlertPermissionsViewModel
+        self.alertPermissionsChecker = alertPermissionsChecker
+        self.versionUpdateViewModel = versionUpdateViewModel
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel
         self.criticalEventLogExportViewModel = criticalEventLogExportViewModel
         self.therapySettings = therapySettings
-        self.pumpSupportedIncrements = pumpSupportedIncrements
-        self.syncPumpSchedule = syncPumpSchedule
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.closedLoopPreference = initialDosingEnabled
         self.isClosedLoopAllowed = false
@@ -133,10 +124,11 @@ public class SettingsViewModel: ObservableObject {
         self.supportInfoProvider = supportInfoProvider
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
+        self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
         self.delegate = delegate
 
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
-        notificationsCriticalAlertPermissionsViewModel.objectWillChange.sink { [weak self] in
+        alertPermissionsChecker.objectWillChange.sink { [weak self] in
             self?.objectWillChange.send()
         }
         .store(in: &cancellables)
@@ -152,5 +144,47 @@ public class SettingsViewModel: ObservableObject {
         isClosedLoopAllowed
             .assign(to: \.isClosedLoopAllowed, on: self)
             .store(in: &cancellables)
+    }
+}
+
+// For previews only
+extension SettingsViewModel {
+    fileprivate class MockSupportInfoProvider: SupportInfoProvider {
+        var localizedAppNameAndVersion = "Loop v1.2"
+        
+        var pumpStatus: PumpManagerStatus? {
+            return nil
+        }
+        
+        var cgmStatus: CGMManagerStatus? {
+            return nil
+        }
+        
+        func generateIssueReport(completion: (String) -> Void) {
+            completion("Mock Issue Report")
+        }
+    }
+
+    fileprivate class FakeClosedLoopAllowedPublisher {
+        @Published var mockIsClosedLoopAllowed: Bool = false
+    }
+
+    static var preview: SettingsViewModel {
+        return SettingsViewModel(alertPermissionsChecker: AlertPermissionsChecker(),
+                                 versionUpdateViewModel: VersionUpdateViewModel(supportManager: nil, guidanceColors: GuidanceColors()),
+                                 pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
+                                 cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
+                                 servicesViewModel: ServicesViewModel.preview,
+                                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
+                                 therapySettings: { TherapySettings() },
+                                 sensitivityOverridesEnabled: false,
+                                 initialDosingEnabled: true,
+                                 isClosedLoopAllowed: FakeClosedLoopAllowedPublisher().$mockIsClosedLoopAllowed,
+                                 supportInfoProvider: MockSupportInfoProvider(),
+                                 dosingStrategy: .automaticBolus,
+                                 availableSupports: [],
+                                 isOnboardingComplete: false,
+                                 therapySettingsViewModelDelegate: nil,
+                                 delegate: nil)
     }
 }

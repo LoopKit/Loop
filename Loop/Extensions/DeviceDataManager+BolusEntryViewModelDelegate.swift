@@ -28,8 +28,8 @@ extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDel
         loopManager.addCarbEntry(carbEntry, replacing: replacingEntry, completion: completion)
     }
 
-    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
-        loopManager.storeBolusDosingDecision(bolusDosingDecision, withDate: date)
+    func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
+        loopManager.storeManualBolusDosingDecision(bolusDosingDecision, withDate: date)
     }
 
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {

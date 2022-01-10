@@ -68,7 +68,10 @@ fileprivate extension Alert {
         let userNotificationContent = UNMutableNotificationContent()
         userNotificationContent.title = content.title
         userNotificationContent.body = content.body
-        userNotificationContent.sound = getUserNotificationSound()
+        userNotificationContent.sound = userNotificationSound
+        if #available(iOS 15.0, *) {
+            userNotificationContent.interruptionLevel = interruptionLevel.userNotificationInterruptLevel
+        }
         // TODO: Once we have a final design and approval for custom UserNotification buttons, we'll need to set categoryIdentifier
 //        userNotificationContent.categoryIdentifier = LoopNotificationCategory.alert.rawValue
         userNotificationContent.threadIdentifier = identifier.value // Used to match categoryIdentifier, but I /think/ we want multiple threads for multiple alert types, no?
@@ -78,8 +81,8 @@ fileprivate extension Alert {
         ]
         return userNotificationContent
     }
-
-    private func getUserNotificationSound() -> UNNotificationSound? {
+    
+    private var userNotificationSound: UNNotificationSound? {
         guard let content = backgroundContent else {
             return nil
         }
@@ -94,12 +97,26 @@ fileprivate extension Alert {
             default:
                 if let actualFileName = AlertManager.soundURL(for: self)?.lastPathComponent {
                     let unname = UNNotificationSoundName(rawValue: actualFileName)
-                    return content.isCritical ? UNNotificationSound.criticalSoundNamed(unname) : UNNotificationSound(named: unname)
+                    return interruptionLevel == .critical ? UNNotificationSound.criticalSoundNamed(unname) : UNNotificationSound(named: unname)
                 }
             }
         }
 
-        return content.isCritical ? .defaultCritical : .default
+        return interruptionLevel == .critical ? .defaultCritical : .default
+    }
+}
+
+fileprivate extension Alert.InterruptionLevel {
+    @available(iOS 15.0, *)
+    var userNotificationInterruptLevel: UNNotificationInterruptionLevel {
+        switch self {
+        case .critical:
+            return .critical
+        case .timeSensitive:
+            return .timeSensitive
+        case .active:
+            return .active
+        }
     }
 }
 

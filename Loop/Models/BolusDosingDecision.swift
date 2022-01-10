@@ -9,17 +9,26 @@
 import LoopKit
 
 struct BolusDosingDecision {
-    var insulinOnBoard: InsulinValue?
-    var carbsOnBoard: CarbValue?
+    enum Reason: String {
+        case normalBolus
+        case simpleBolus
+        case watchBolus
+    }
+
+    var reason: Reason
     var scheduleOverride: TemporaryScheduleOverride?
-    var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
-    var effectiveGlucoseTargetRangeSchedule: GlucoseRangeSchedule?
-    var predictedGlucoseIncludingPendingInsulin: [PredictedGlucoseValue]?
-    var manualGlucose: GlucoseValue?
+    var historicalGlucose: [HistoricalGlucoseValue]?
     var originalCarbEntry: StoredCarbEntry?
     var carbEntry: StoredCarbEntry?
-    var recommendedBolus: ManualBolusRecommendation?
-    var requestedBolus: Double?
+    var manualGlucoseSample: StoredGlucoseSample?
+    var carbsOnBoard: CarbValue?
+    var insulinOnBoard: InsulinValue?
+    var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
+    var predictedGlucose: [PredictedGlucoseValue]?
+    var manualBolusRecommendation: ManualBolusRecommendationWithDate?
+    var manualBolusRequested: Double?
     
-    init() {}
+    init(for reason: Reason) {
+        self.reason = reason
+    }
 }

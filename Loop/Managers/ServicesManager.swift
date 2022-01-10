@@ -20,8 +20,6 @@ class ServicesManager {
 
     let remoteDataServicesManager: RemoteDataServicesManager
     
-    let versionCheckServicesManager: VersionCheckServicesManager
-
     private var services = [Service]()
 
     private let servicesLock = UnfairLock()
@@ -32,14 +30,12 @@ class ServicesManager {
         pluginManager: PluginManager,
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
-        remoteDataServicesManager: RemoteDataServicesManager,
-        versionCheckServicesManager: VersionCheckServicesManager
+        remoteDataServicesManager: RemoteDataServicesManager
     ) {
         self.pluginManager = pluginManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
-        self.versionCheckServicesManager = versionCheckServicesManager
         restoreState()
     }
 
@@ -118,9 +114,6 @@ class ServicesManager {
             if let remoteDataService = service as? RemoteDataService {
                 remoteDataServicesManager.addService(remoteDataService)
             }
-            if let versionCheckService = service as? VersionCheckService {
-                versionCheckServicesManager.addService(versionCheckService)
-            }
 
             saveState()
         }
@@ -136,9 +129,6 @@ class ServicesManager {
             }
             if let analyticsService = service as? AnalyticsService {
                 analyticsServicesManager.removeService(analyticsService)
-            }
-            if let versionCheckService = service as? VersionCheckService {
-                versionCheckServicesManager.removeService(versionCheckService)
             }
 
             services.removeAll { $0.serviceIdentifier == service.serviceIdentifier }
@@ -168,9 +158,6 @@ class ServicesManager {
                 }
                 if let remoteDataService = service as? RemoteDataService {
                     remoteDataServicesManager.restoreService(remoteDataService)
-                }
-                if let versionCheckService = service as? VersionCheckService {
-                    versionCheckServicesManager.restoreService(versionCheckService)
                 }
             }
         }

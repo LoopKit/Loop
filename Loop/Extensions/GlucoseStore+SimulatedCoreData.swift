@@ -28,10 +28,11 @@ extension GlucoseStore {
         var simulated = [NewGlucoseSample]()
 
         while startDate < endDate {
-            let prev = simulatedValueBase + simulatedValueAmplitude * sin(value - simulatedValueIncrement)
+            let previous = simulatedValueBase + simulatedValueAmplitude * sin(value - simulatedValueIncrement)
             let new = simulatedValueBase + simulatedValueAmplitude * sin(value)
+            let trendRateValue = new - previous
             let trend: GlucoseTrend? = {
-                switch new - prev {
+                switch trendRateValue {
                 case -0.01...0.01:
                     return .flat
                 case -2 ..< -0.01:
@@ -50,7 +51,10 @@ extension GlucoseStore {
                     return nil
                 }
             }()
-            simulated.append(NewGlucoseSample.simulated(date: startDate, value: new, trend: trend))
+            simulated.append(NewGlucoseSample.simulated(date: startDate,
+                                                        quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: new),
+                                                        trend: trend,
+                                                        trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: trendRateValue)))
 
             if simulated.count >= simulatedLimit {
                 if let error = addSimulatedHistoricalGlucoseObjects(samples: simulated) {
@@ -84,10 +88,12 @@ extension GlucoseStore {
 }
 
 fileprivate extension NewGlucoseSample {
-    static func simulated(date: Date, value: Double, trend: GlucoseTrend?, unit: HKUnit = HKUnit.milligramsPerDeciliter) -> NewGlucoseSample {
+    static func simulated(date: Date, quantity: HKQuantity, trend: GlucoseTrend?, trendRate: HKQuantity?) -> NewGlucoseSample {
         return NewGlucoseSample(date: date,
-                                quantity: HKQuantity(unit: unit, doubleValue: value),
+                                quantity: quantity,
+                                condition: nil,
                                 trend: trend,
+                                trendRate: trendRate,
                                 isDisplayOnly: false,
                                 wasUserEntered: false,
                                 syncIdentifier: UUID().uuidString)

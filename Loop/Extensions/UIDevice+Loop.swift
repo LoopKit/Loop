@@ -13,20 +13,26 @@ extension UIDevice {
 
     // https://stackoverflow.com/questions/26028918/how-to-determine-the-current-iphone-device-model
     var modelIdentifier: String {
-        var info = utsname()
-        uname(&info)
-        let modelCode = withUnsafePointer(to: &info.machine) { $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(validatingUTF8: $0) } }
-        return modelCode ?? "unknown"
+        #if IOS_SIMULATOR
+            return "\(model)Simulator"
+        #else
+            var info = utsname()
+            uname(&info)
+            return withUnsafePointer(to: &info.machine) { $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(validatingUTF8: $0) } } ?? "unknown"
+        #endif
     }
 
-    public var deviceSettings: StoredDosingDecision.DeviceSettings {
-        return StoredDosingDecision.DeviceSettings(name: name,
-                                                   systemName: systemName,
-                                                   systemVersion: systemVersion,
-                                                   model: model,
-                                                   modelIdentifier: modelIdentifier,
-                                                   batteryLevel: isBatteryMonitoringEnabled ? batteryLevel : nil,
-                                                   batteryState: isBatteryMonitoringEnabled ? batteryState.batteryState : nil)
+    public var controllerDevice: StoredSettings.ControllerDevice {
+        return StoredSettings.ControllerDevice(name: name,
+                                               systemName: systemName,
+                                               systemVersion: systemVersion,
+                                               model: model,
+                                               modelIdentifier: modelIdentifier)
+    }
+
+    public var controllerStatus: StoredDosingDecision.ControllerStatus {
+        return StoredDosingDecision.ControllerStatus(batteryState: isBatteryMonitoringEnabled ? batteryState.batteryState : nil,
+                                                     batteryLevel: isBatteryMonitoringEnabled && batteryLevel != -1.0 ? batteryLevel : nil)   // -1.0 indicates unknown
     }
 }
 
@@ -52,7 +58,7 @@ extension UIDevice {
 }
 
 extension UIDevice.BatteryState {
-    public var batteryState: StoredDosingDecision.DeviceSettings.BatteryState {
+    public var batteryState: StoredDosingDecision.ControllerStatus.BatteryState {
         switch self {
         case .unknown:
             return .unknown

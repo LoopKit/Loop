@@ -313,14 +313,11 @@ final class DeviceDataManager {
             settingsStore: settingsStore
         )
         
-        let versionCheckServicesManager = VersionCheckServicesManager()
-
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
-            remoteDataServicesManager: remoteDataServicesManager,
-            versionCheckServicesManager: versionCheckServicesManager
+            remoteDataServicesManager: remoteDataServicesManager
         )
 
         let criticalEventLogs: [CriticalEventLog] = [settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
@@ -686,7 +683,6 @@ extension DeviceDataManager {
                 switch error {
                 case .uncertainDelivery:
                     // Do not generate notification on uncertain delivery error
-                    self.checkDeliveryUncertaintyState()
                     break
                 default:
                     // Do not generate notifications for automatic boluses that fail.
@@ -708,6 +704,10 @@ extension DeviceDataManager {
 
     var pumpManagerStatus: PumpManagerStatus? {
         return pumpManager?.status
+    }
+
+    var cgmManagerStatus: CGMManagerStatus? {
+        return cgmManager?.cgmManagerStatus
     }
 
     func glucoseDisplay(for glucose: GlucoseSampleValue?) -> GlucoseDisplayable? {
@@ -753,6 +753,7 @@ extension DeviceDataManager {
 
     func didBecomeActive() {
         updatePumpManagerBLEHeartbeatPreference()
+        loopManager.didBecomeActive()
     }
 
     func updatePumpManagerBLEHeartbeatPreference() {
@@ -809,7 +810,12 @@ extension DeviceDataManager: CGMManagerDelegate {
         log.default("CGM manager with identifier '%{public}@' wants deletion", manager.managerIdentifier)
 
         DispatchQueue.main.async {
+            if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
+                self.removeDisplayGlucoseUnitObserver(cgmManagerUI)
+            }
             self.cgmManager = nil
+            self.displayGlucoseUnitObservers.cleanupDeallocatedElements()
+            self.loopManager.storeSettings()
         }
     }
 
@@ -857,6 +863,7 @@ extension DeviceDataManager: CGMManagerOnboardingDelegate {
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
+            self.loopManager.storeSettings()
         }
     }
 }
@@ -1000,6 +1007,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         DispatchQueue.main.async {
             self.pumpManager = nil
             self.deliveryUncertaintyAlertManager = nil
+            self.loopManager.storeSettings()
         }
     }
 
@@ -1015,7 +1023,6 @@ extension DeviceDataManager: PumpManagerDelegate {
         log.error("PumpManager:%{public}@ did error: %{public}@", String(describing: type(of: pumpManager)), String(describing: error))
 
         setLastError(error: error)
-        loopManager.storeDosingDecision(withDate: Date(), withError: error)
     }
 
     func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastSync: Date?, completion: @escaping (_ error: Error?) -> Void) {
@@ -1070,6 +1077,7 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
+            self.loopManager.storeSettings()
         }
     }
 }
@@ -1194,7 +1202,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
     func loopDataManager(
         _ manager: LoopDataManager,
         didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date),
-        completion: @escaping (Error?) -> Void
+        completion: @escaping (LoopError?) -> Void
     ) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
@@ -1208,7 +1216,9 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 
         log.default("LoopManager did recommend dose")
         
-        doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager, completion: completion)
+        doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager) { pumpManagerError in
+            completion(pumpManagerError.map { .pumpManagerError($0) })
+        }
     }
 }
 
@@ -1390,14 +1400,97 @@ extension DeviceDataManager: SupportInfoProvider {
         return pumpManager?.status
     }
     
-    public var cgmDevice: HKDevice? {
-        return cgmManager?.device
+    public var cgmStatus: CGMManagerStatus? {
+        return cgmManager?.cgmManagerStatus
     }
     
     public func generateIssueReport(completion: @escaping (String) -> Void) {
         generateDiagnosticReport(completion)
     }
     
+}
+
+//MARK: TherapySettingsViewModelDelegate
+struct CancelTempBasalFailedError: LocalizedError {
+    let reason: Error?
+    
+    var errorDescription: String? {
+        return String(format: NSLocalizedString("%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place.",
+                                                comment: "Alert text for failing to cancel temp basal (1: reason description, 2: app name)"),
+                      reasonString, Bundle.main.bundleDisplayName)
+    }
+    
+    private var reasonString: String {
+        let paragraphEnd = ".\n\n"
+        if let localizedError = reason as? LocalizedError {
+            let errors = [localizedError.errorDescription, localizedError.failureReason, localizedError.recoverySuggestion].compactMap { $0 }
+            if !errors.isEmpty {
+                return errors.joined(separator: ". ") + paragraphEnd
+            }
+        }
+        return reason.map { $0.localizedDescription + paragraphEnd } ?? ""
+    }
+}
+
+extension DeviceDataManager: TherapySettingsViewModelDelegate {
+    
+    func syncBasalRateSchedule(items: [RepeatingScheduleValue<Double>], completion: @escaping (Swift.Result<BasalRateSchedule, Error>) -> Void) {
+        pumpManager?.syncBasalRateSchedule(items: items, completion: completion)
+    }
+    
+    func syncDeliveryLimits(deliveryLimits: DeliveryLimits, completion: @escaping (Swift.Result<DeliveryLimits, Error>) -> Void) {
+        // FIRST we need to check to make sure if we have to cancel temp basal first
+        loopManager.maxTempBasalSavePreflight(unitsPerHour: deliveryLimits.maximumBasalRate?.doubleValue(for: .internationalUnitsPerHour)) { [weak self] error in
+            if let error = error {
+                completion(.failure(CancelTempBasalFailedError(reason: error)))
+            } else if let pumpManager = self?.pumpManager {
+                pumpManager.syncDeliveryLimits(limits: deliveryLimits, completion: completion)
+            } else {
+                completion(.success(deliveryLimits))
+            }
+        }
+    }
+    
+    func saveCompletion(for therapySetting: TherapySetting, therapySettings: TherapySettings) {
+        switch therapySetting {
+        case .glucoseTargetRange:
+            loopManager.mutateSettings { settings in settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule }
+        case .preMealCorrectionRangeOverride:
+            loopManager.mutateSettings { settings in settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal }
+        case .workoutCorrectionRangeOverride:
+            loopManager.mutateSettings { settings in settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout }
+        case .suspendThreshold:
+            loopManager.mutateSettings { settings in settings.suspendThreshold = therapySettings.suspendThreshold }
+        case .basalRate:
+            loopManager.basalRateSchedule = therapySettings.basalRateSchedule
+        case .deliveryLimits:
+            loopManager.mutateSettings { settings in
+                settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
+                settings.maximumBolus = therapySettings.maximumBolus
+            }
+        case .insulinModel:
+            if let defaultRapidActingModel = therapySettings.defaultRapidActingModel {
+                loopManager.defaultRapidActingModel = defaultRapidActingModel
+            }
+        case .carbRatio:
+            loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule
+            analyticsServicesManager.didChangeCarbRatioSchedule()
+        case .insulinSensitivity:
+            loopManager.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
+            analyticsServicesManager.didChangeInsulinSensitivitySchedule()
+        case .none:
+            break // NO-OP
+        }
+    }
+    
+    func pumpSupportedIncrements() -> PumpSupportedIncrements? {
+        return pumpManager.map {
+            PumpSupportedIncrements(basalRates: $0.supportedBasalRates,
+                                    bolusVolumes: $0.supportedBolusVolumes,
+                                    maximumBolusVolumes: $0.supportedMaximumBolusVolumes,
+                                    maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
+        }
+    }
 }
 
 extension DeviceDataManager {
@@ -1423,8 +1516,5 @@ extension DeviceDataManager {
 }
 
 extension DeviceDataManager {
-    var availableSupports: [SupportUI] {
-        let availableSupports = pluginManager.availableSupports + servicesManager.availableSupports + [cgmManager, pumpManager].compactMap { $0 as? SupportUI }
-        return availableSupports.sorted { $0.supportIdentifier < $1.supportIdentifier } // Provide a consistent ordering
-    }
+    var availableSupports: [SupportUI] { [cgmManager, pumpManager].compactMap { $0 as? SupportUI } }
 }

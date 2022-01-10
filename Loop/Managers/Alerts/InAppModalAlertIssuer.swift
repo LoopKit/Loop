@@ -106,7 +106,7 @@ extension InAppModalAlertIssuer {
             let alertController = self.constructAlert(title: content.title,
                                                       message: content.body,
                                                       action: content.acknowledgeActionButtonLabel,
-                                                      isCritical: content.isCritical) { [weak self] in
+                                                      isCritical: alert.interruptionLevel == .critical) { [weak self] in
                 // the completion is called after the alert is acknowledged
                 self?.clearPresentedAlert(identifier: alert.identifier)
                 self?.alertManagerResponder?.acknowledgeAlert(identifier: alert.identifier)

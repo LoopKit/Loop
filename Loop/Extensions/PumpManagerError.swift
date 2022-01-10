@@ -8,64 +8,33 @@
 
 import LoopKit
 
-extension PumpManagerError: Codable {
-    public init(from decoder: Decoder) throws {
-        if let string = try? decoder.singleValueContainer().decode(String.self) {
-            switch string {
-            case CodableKeys.uncertainDelivery.rawValue:
-                self = .uncertainDelivery
-            default:
-                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "invalid enumeration"))
-            }
-        } else {
-            let container = try decoder.container(keyedBy: CodableKeys.self)
-            if let associated = try container.decodeIfPresent(Associated.self, forKey: .configuration) {
-                self = .configuration(associated.localizedError)
-            } else if let associated = try container.decodeIfPresent(Associated.self, forKey: .connection) {
-                self = .connection(associated.localizedError)
-            } else if let associated = try container.decodeIfPresent(Associated.self, forKey: .communication) {
-                self = .communication(associated.localizedError)
-            } else if let associated = try container.decodeIfPresent(Associated.self, forKey: .deviceState) {
-                self = .deviceState(associated.localizedError)
-            } else {
-                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "invalid enumeration"))
-            }
-        }
-    }
-    
-    public func encode(to encoder: Encoder) throws {
+extension PumpManagerError {
+    var issueId: String {
         switch self {
-        case .configuration(let localizedError):
-            var container = encoder.container(keyedBy: CodableKeys.self)
-            try container.encode(Associated(localizedError: localizedError), forKey: .configuration)
-        case .connection(let localizedError):
-            var container = encoder.container(keyedBy: CodableKeys.self)
-            try container.encode(Associated(localizedError: localizedError), forKey: .connection)
-        case .communication(let localizedError):
-            var container = encoder.container(keyedBy: CodableKeys.self)
-            try container.encode(Associated(localizedError: localizedError), forKey: .communication)
-        case .deviceState(let localizedError):
-            var container = encoder.container(keyedBy: CodableKeys.self)
-            try container.encode(Associated(localizedError: localizedError), forKey: .deviceState)
+        case .configuration:
+            return "configuration"
+        case .connection:
+            return "connection"
+        case .communication:
+            return "communication"
+        case .deviceState:
+            return "deviceState"
         case .uncertainDelivery:
-            var container = encoder.singleValueContainer()
-            try container.encode(CodableKeys.uncertainDelivery.rawValue)
+            return "uncertainDelivery"
         }
     }
-    
-    private struct Associated: Codable {
-        let localizedError: CodableLocalizedError?
-        
-        init(localizedError: LocalizedError?) {
-            self.localizedError = CodableLocalizedError(localizedError)
+
+    var issueDetails: [String: String] {
+        var details = ["detail": issueId]
+        switch self {
+        case .configuration(let localizedError),
+             .connection(let localizedError),
+             .communication(let localizedError),
+             .deviceState(let localizedError):
+            details["error"] = StoredDosingDecisionIssue.description(for: localizedError)
+        default:
+            break
         }
-    }
-    
-    private enum CodableKeys: String, CodingKey {
-        case configuration
-        case connection
-        case communication
-        case deviceState
-        case uncertainDelivery
+        return details
     }
 }
