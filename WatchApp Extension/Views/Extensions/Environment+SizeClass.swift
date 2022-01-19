@@ -33,6 +33,7 @@ extension WKInterfaceDevice {
         case size44mm
         
         // Apple Watch Series 7
+        case size41mm
         case size45mm
     }
 
@@ -64,6 +65,8 @@ extension WKInterfaceDevice.SizeClass {
             return CGSize(width: 156, height: 195)
         case .size40mm:
             return CGSize(width: 162, height: 197)
+        case .size41mm:
+            return CGSize(width: 176, height: 215)
         case .size44mm:
             return CGSize(width: 184, height: 224)
         case .size45mm:

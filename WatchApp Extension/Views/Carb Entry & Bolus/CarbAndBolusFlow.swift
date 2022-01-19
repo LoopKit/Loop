@@ -158,7 +158,7 @@ extension CarbAndBolusFlow {
             return 2
         case .size42mm:
             return 0
-        case .size40mm:
+        case .size40mm, .size41mm:
             return configuration == .carbEntry ? 7 : 19
         case .size44mm, .size45mm:
             return 5
@@ -228,7 +228,7 @@ extension CarbAndBolusFlow {
         switch sizeClass {
         case .size38mm, .size42mm:
             return 0
-        case .size40mm:
+        case .size40mm, .size41mm:
             return 20
         case .size44mm, .size45mm:
             return 27
