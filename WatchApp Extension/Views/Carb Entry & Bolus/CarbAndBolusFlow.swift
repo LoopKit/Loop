@@ -160,7 +160,7 @@ extension CarbAndBolusFlow {
             return 0
         case .size40mm:
             return configuration == .carbEntry ? 7 : 19
-        case .size44mm:
+        case .size44mm, .size45mm:
             return 5
         }
     }
@@ -230,7 +230,7 @@ extension CarbAndBolusFlow {
             return 0
         case .size40mm:
             return 20
-        case .size44mm:
+        case .size44mm, .size45mm:
             return 27
         }
     }
