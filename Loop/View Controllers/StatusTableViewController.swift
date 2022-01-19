@@ -158,7 +158,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             .merge(with: onboardingManager.$isSuspended)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.reloadData()
+                self?.refreshContext.update(with: .status)
+                self?.reloadData(animated: true)
                 self?.updateToolbarItems()
             }
             .store(in: &cancellables)
