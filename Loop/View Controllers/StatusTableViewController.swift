@@ -1211,7 +1211,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentCarbEntryScreen(_ activity: NSUserActivity?) {
         let navigationWrapper: UINavigationController
-        if closedLoopStatus.isClosedLoop {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
+            let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
+            if let activity = activity {
+                viewModel.restoreUserActivityState(activity)
+            }
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+            navigationWrapper = UINavigationController(rootViewController: hostingController)
+            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+        } else {
             let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
 
             carbEntryViewController.deviceManager = deviceManager
@@ -1221,15 +1230,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 carbEntryViewController.restoreUserActivityState(activity)
             }
             navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
-        } else {
-            let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
-            if let activity = activity {
-                viewModel.restoreUserActivityState(activity)
-            }
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
-            let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
-            navigationWrapper = UINavigationController(rootViewController: hostingController)
-            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
         }
         present(navigationWrapper, animated: true)
     }
@@ -1240,13 +1240,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentBolusEntryView(enableManualGlucoseEntry: Bool = false) {
         let hostingController: DismissibleHostingController
-        if closedLoopStatus.isClosedLoop {
-            let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
-            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
-            hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
-        } else {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: false)
             let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+        } else {
+            let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
+            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         }
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
