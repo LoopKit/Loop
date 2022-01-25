@@ -63,11 +63,9 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         }
 
         navigationItem.rightBarButtonItem?.isEnabled = isOnboardingComplete
-
-        if !closedLoopStatus.isClosedLoop {
-            allowEditing = false
-        }
         
+        allowEditing = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
+
         if allowEditing {
             navigationItem.rightBarButtonItems?.append(editButtonItem)
         }
@@ -504,19 +502,19 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     
     @IBAction func presentCarbEntryScreen() {
         let navigationWrapper: UINavigationController
-        if closedLoopStatus.isClosedLoop {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
+            let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter))
+            let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+            navigationWrapper = UINavigationController(rootViewController: hostingController)
+            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+        } else {
             let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
             
             carbEntryViewController.deviceManager = deviceManager
             carbEntryViewController.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
             carbEntryViewController.preferredCarbUnit = deviceManager.carbStore.preferredUnit
             navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
-        } else {
-            let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter))
-            let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
-            navigationWrapper = UINavigationController(rootViewController: hostingController)
-            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
         }
         self.present(navigationWrapper, animated: true)
     }
