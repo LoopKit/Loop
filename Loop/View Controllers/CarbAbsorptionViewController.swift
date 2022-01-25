@@ -63,11 +63,9 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         }
 
         navigationItem.rightBarButtonItem?.isEnabled = isOnboardingComplete
-
-        if !closedLoopStatus.isClosedLoop {
-            allowEditing = false
-        }
         
+        allowEditing = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
+
         if allowEditing {
             navigationItem.rightBarButtonItems?.append(editButtonItem)
         }
