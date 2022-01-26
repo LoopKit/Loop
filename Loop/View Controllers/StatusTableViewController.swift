@@ -1662,9 +1662,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         guard FeatureFlags.allowDebugFeatures else {
             return
         }
-        guard FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled else {
-            fatalError("\(#function) should be invoked only when scenarios, simulated core data, or mock therapy settings are enabled")
-        }
 
         let actionSheet = UIAlertController(title: "Debug", message: nil, preferredStyle: .actionSheet)
         if FeatureFlags.scenariosEnabled {
