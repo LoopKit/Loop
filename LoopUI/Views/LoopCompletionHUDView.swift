@@ -142,7 +142,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
             }
         } else {
             caption?.text = "–"
-            accessibilityLabel = LocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
+            accessibilityLabel = LocalizedString("Waiting for first run", comment: "Accessibility label describing completion HUD waiting for first run")
         }
 
         if loopIconClosed {
