@@ -247,7 +247,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let isClosedLoop = closedLoopStatus.isClosedLoop
 
         toolbarItems![0].isEnabled = isPumpOnboarded
-        toolbarItems![2].isEnabled = isPumpOnboarded && isClosedLoop
+        toolbarItems![2].isEnabled = isPumpOnboarded && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
         toolbarItems![4].isEnabled = isPumpOnboarded
         toolbarItems![6].isEnabled = isPumpOnboarded
         toolbarItems![8].isEnabled = true
@@ -493,7 +493,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let glucoseSamples = glucoseSamples {
                 self.statusCharts.setGlucoseValues(glucoseSamples)
             }
-            if isClosedLoop, let predictedGlucoseValues = predictedGlucoseValues {
+            if (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled), let predictedGlucoseValues = predictedGlucoseValues {
                 self.statusCharts.setPredictedGlucoseValues(predictedGlucoseValues)
             } else {
                 self.statusCharts.setPredictedGlucoseValues([])
@@ -781,7 +781,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func updatePreMealModeAvailability(isClosedLoop: Bool) {
-        let allowed = onboardingManager.isComplete && isClosedLoop
+        let allowed = onboardingManager.isComplete && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
         toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
 
@@ -858,7 +858,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     return self?.statusCharts.glucoseChart(withFrame: frame)?.view
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
-                cell.doesNavigate = closedLoopStatus.isClosedLoop
+                cell.doesNavigate = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.iobChart(withFrame: frame)?.view
@@ -1013,7 +1013,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 } else {
                     cell.setSubtitleLabel(label: nil)
                 }
-                cell.doesNavigate = closedLoopStatus.isClosedLoop
+                cell.doesNavigate = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 if let currentIOB = currentIOBDescription {
                     cell.setSubtitleLabel(label: currentIOB)
@@ -1133,7 +1133,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
-                if closedLoopStatus.isClosedLoop {
+                if closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled {
                     performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
                 }
             case .iob, .dose:
