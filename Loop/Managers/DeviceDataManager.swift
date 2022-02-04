@@ -35,9 +35,6 @@ final class DeviceDataManager {
     /// Should be accessed only on the main queue
     private(set) var lastError: (date: Date, error: Error)?
 
-    /// The last time a BLE heartbeat was received and acted upon.
-    private var lastBLEDrivenUpdate = Date.distantPast
-
     private var deviceLog: PersistentDeviceLog
 
     // MARK: - App-level responsibilities
@@ -421,19 +418,23 @@ final class DeviceDataManager {
 
         return Manager.init(rawState: rawState) as? PumpManagerUI
     }
+    
+    private func checkPumpDataAndLoop() {
+        self.log.default("Asserting current pump data")
+        self.pumpManager?.ensureCurrentPumpData(completion: { (lastSync) in
+            if let lastSync = lastSync, Date().timeIntervalSince(lastSync) < LoopCoreConstants.inputDataRecencyInterval {
+                self.log.default("Pump data from %@ is fresh. Triggering loop()", String(describing: type(of: self.pumpManager)))
+                self.loopManager.loop()
+            }
+        })
+    }
 
     private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult) {
         switch readingResult {
         case .newData(let values):
             log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
             loopManager.addGlucoseSamples(values) { result in
-                self.log.default("Asserting current pump data")
-                self.pumpManager?.ensureCurrentPumpData(completion: { (lastSync) in
-                    if let lastSync = lastSync, Date().timeIntervalSince(lastSync) < LoopCoreConstants.inputDataRecencyInterval {
-                        self.log.default("Pump data from %@ is fresh. Triggering loop()", String(describing: type(of: self.pumpManager)))
-                        self.loopManager.loop()
-                    }
-                })
+                self.checkPumpDataAndLoop()
                 if !values.isEmpty {
                     DispatchQueue.main.async {
                         self.cgmStalenessMonitor.cgmGlucoseSamplesAvailable(values)
@@ -444,13 +445,14 @@ final class DeviceDataManager {
             loopManager.receivedUnreliableCGMReading()
         case .noData:
             log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
-            pumpManager?.ensureCurrentPumpData(completion: nil)
+            // Attempt Loop even if this fetch didn't produce new data; a previous fetch may have produced recent-enough data
+            self.checkPumpDataAndLoop()
         case .error(let error):
             log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
 
             self.setLastError(error: error)
-            log.default("Asserting current pump data")
-            pumpManager?.ensureCurrentPumpData(completion: nil)
+            // Attempt Loop even if this fetch didn't produce new data; a previous fetch may have produced recent-enough data
+            self.checkPumpDataAndLoop()
         }
 
         updatePumpManagerBLEHeartbeatPreference()
@@ -588,7 +590,6 @@ final class DeviceDataManager {
                         "## DeviceDataManager",
                         "* launchDate: \(self.launchDate)",
                         "* lastError: \(String(describing: self.lastError))",
-                        "* lastBLEDrivenUpdate: \(self.lastBLEDrivenUpdate)",
                         "",
                         "cacheStore: \(String(reflecting: self.cacheStore))",
                         "",
@@ -821,7 +822,6 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
         dispatchPrecondition(condition: .onQueue(queue))
-        lastBLEDrivenUpdate = Date()
         processCGMReadingResult(manager, readingResult: readingResult);
     }
 
@@ -886,31 +886,7 @@ extension DeviceDataManager: PumpManagerDelegate {
 
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
-        log.default("PumpManager:%{public}@ did fire BLE heartbeat", String(describing: type(of: pumpManager)))
-
-        let bleHeartbeatUpdateInterval: TimeInterval
-        switch loopManager.lastLoopCompleted?.timeIntervalSinceNow {
-        case .none:
-            // If we haven't looped successfully, retry only every 5 minutes
-            bleHeartbeatUpdateInterval = .minutes(5)
-        case let interval? where interval < .minutes(-10):
-            // If we haven't looped successfully in more than 10 minutes, retry only every 5 minutes
-            bleHeartbeatUpdateInterval = .minutes(5)
-        case let interval? where interval <= .minutes(-5):
-            // If we haven't looped successfully in more than 5 minutes, retry every minute
-            bleHeartbeatUpdateInterval = .minutes(1)
-        case let interval?:
-            // If we looped successfully less than 5 minutes ago, ignore the heartbeat.
-            log.default("PumpManager:%{public}@ ignoring heartbeat. Last loop completed %{public}@ minutes ago", String(describing: type(of: pumpManager)), String(describing: interval.minutes))
-            return
-        }
-
-        guard lastBLEDrivenUpdate.timeIntervalSinceNow <= -bleHeartbeatUpdateInterval else {
-            log.default("PumpManager:%{public}@ ignoring heartbeat. Last update %{public}@", String(describing: type(of: pumpManager)), String(describing: lastBLEDrivenUpdate))
-            return
-        }
-        lastBLEDrivenUpdate = Date()
-
+        log.default("PumpManager:%{public}@ did fire heartbeat", String(describing: type(of: pumpManager)))
         refreshCGM()
     }
     

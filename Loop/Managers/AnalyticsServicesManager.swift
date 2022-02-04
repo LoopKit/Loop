@@ -143,8 +143,8 @@ final class AnalyticsServicesManager {
         logEvent("Loop success", withProperties: ["duration": duration], outOfSession: true)
     }
 
-    func loopDidError() {
-        logEvent("Loop error", outOfSession: true)
+    func loopDidError(error: Error) {
+        logEvent("Loop error", withProperties: ["description": error.localizedDescription], outOfSession: true)
     }
 
 }
