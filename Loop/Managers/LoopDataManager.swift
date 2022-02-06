@@ -381,7 +381,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     private func loopDidError(date: Date, error: LoopError, dosingDecision: StoredDosingDecision, duration: TimeInterval) {
         logger.error("%{public}@", String(describing: error))
         lastLoopError = error
-        analyticsServicesManager.loopDidError()
+        analyticsServicesManager.loopDidError(error: error)
         dosingDecisionStore.storeDosingDecision(dosingDecision) {}
     }
 }
@@ -601,15 +601,15 @@ extension LoopDataManager {
         dosingDecision.lastReservoirValue = StoredDosingDecision.LastReservoirValue(doseStore.lastReservoirValue)
         dosingDecision.automaticDoseRecommendation = recommendation
 
-        enactRecommendedAutomaticDose { error in
-            if let error = error {
-                dosingDecision.appendError(error)
-            }
-            self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
-
-            self.notify(forChange: .tempBasal)
-            completion?(error)
+        let error = enactRecommendedAutomaticDose()
+        
+        if let error = error {
+            dosingDecision.appendError(error)
         }
+        self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
+
+        self.notify(forChange: .tempBasal)
+        completion?(error)
     }
 
 
@@ -703,11 +703,12 @@ extension LoopDataManager {
     ///   - error: An error explaining why the events could not be saved.
     func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
+            completion(error)
+            
             self.dataAccessQueue.async {
                 if error == nil {
                     self.insulinEffect = nil
                 }
-                completion(error)
             }
         }
     }
@@ -844,6 +845,14 @@ extension LoopDataManager {
     func loop() {
         
         dataAccessQueue.async {
+            
+            // Ensure Loop does not happen more than once every 4.5 minutes; this is important for correct usage of automatic bolus
+            // partial application factor
+            if let lastLoopCompleted = self.lastLoopCompleted, Date().timeIntervalSince(lastLoopCompleted) < TimeInterval(minutes: 4.5) {
+                self.logger.default("Skipping loop() attempt as last loop completed at %{public}@", String(describing: lastLoopCompleted))
+                return
+            }
+
             self.logger.default("Loop running")
             NotificationCenter.default.post(name: .LoopRunning, object: self)
 
@@ -862,9 +871,9 @@ extension LoopDataManager {
                 return
             }
 
-            self.enactRecommendedAutomaticDose { error in
-                self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
-            }
+            error = self.enactRecommendedAutomaticDose()
+            
+            self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
         }
     }
 
@@ -1709,32 +1718,36 @@ extension LoopDataManager {
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
-    private func enactRecommendedAutomaticDose(_ completion: @escaping (_ error: LoopError?) -> Void) {
+    private func enactRecommendedAutomaticDose() -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let recommendedDose = self.recommendedAutomaticDose else {
-            completion(nil)
-            return
+            return nil
         }
 
         guard abs(recommendedDose.date.timeIntervalSince(now())) < TimeInterval(minutes: 5) else {
-            completion(LoopError.recommendationExpired(date: recommendedDose.date))
-            return
+            return LoopError.recommendationExpired(date: recommendedDose.date)
         }
         
         if case .suspended = basalDeliveryState {
-            completion(LoopError.pumpSuspended)
-            return
+            return LoopError.pumpSuspended
         }
 
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var delegateError: LoopError?
+
         delegate?.loopDataManager(self, didRecommend: recommendedDose) { (error) in
-            self.dataAccessQueue.async {
-                if error == nil {
-                    self.recommendedAutomaticDose = nil
-                }
-                completion(error)
-            }
+            delegateError = error
+            updateGroup.leave()
         }
+
+        updateGroup.wait()
+        if delegateError == nil {
+            self.recommendedAutomaticDose = nil
+        }
+        
+        return delegateError
     }
     
     /// Ensures that the current temp basal is at or below the proposed max temp basal, and if not, cancel it before proceeding.
