@@ -39,7 +39,9 @@
                                         </group>
                                     </items>
                                     <variation key="device=watch40mm" widthAdjustment="-8.5"/>
+                                    <variation key="device=watch41mm" widthAdjustment="-8.5"/>
                                     <variation key="device=watch44mm" widthAdjustment="-9.5"/>
+                                    <variation key="device=watch45mm" widthAdjustment="-9.5"/>
                                 </group>
                             </items>
                         </group>
@@ -196,7 +198,9 @@
                                         </group>
                                     </items>
                                     <variation key="device=watch40mm" widthAdjustment="-8.5"/>
+                                    <variation key="device=watch41mm" widthAdjustment="-8.5"/>
                                     <variation key="device=watch44mm" widthAdjustment="-9.5"/>
+                                    <variation key="device=watch45mm" widthAdjustment="-9.5"/>
                                 </group>
                             </items>
                         </group>
@@ -206,6 +210,7 @@
                             </items>
                             <variation key="device=watch38mm" height="73"/>
                             <variation key="device=watch44mm" height="111"/>
+                            <variation key="device=watch45mm" height="115"/>
                         </group>
                         <table alignment="left" spacing="8" id="Atz-83-hgn">
                             <items>
@@ -385,7 +390,7 @@
     <resources>
         <image name="bolus" width="44" height="44"/>
         <image name="carbs" width="44" height="44"/>
-        <image name="loop_unknown" width="26" height="26"/>
+        <image name="loop_unknown" width="29" height="29"/>
         <image name="pre-meal" width="44" height="44"/>
         <image name="workout" width="44" height="44"/>
         <namedColor name="carbs">

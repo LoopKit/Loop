@@ -14,8 +14,7 @@ extension WKInterfaceLabel {
             return
         }
 
-        if #available(watchOSApplicationExtension 5.2, *),
-            let descriptor = UIFontDescriptor.rounded(style: style, traits: traits)
+        if let descriptor = UIFontDescriptor.rounded(style: style, traits: traits)
         {
             setAttributedText(NSAttributedString(string: text, attributes: [NSAttributedString.Key.font: UIFont(descriptor: descriptor, size: 0)]))
         } else {
@@ -24,16 +23,11 @@ extension WKInterfaceLabel {
     }
 
     func setLargeBoldRoundedText(_ text: String?) {
-        if #available(watchOSApplicationExtension 5.0, *) {
-            setRoundedText(text, style: .largeTitle, traits: .traitBold)
-        } else {
-            setRoundedText(text, style: .title1, traits: .traitBold)
-        }
+        setRoundedText(text, style: .largeTitle, traits: .traitBold)
     }
 }
 
 extension UIFontDescriptor {
-    @available(watchOSApplicationExtension 5.2, *)
     class func rounded(style: UIFont.TextStyle, traits: UIFontDescriptor.SymbolicTraits) -> UIFontDescriptor? {
         let descriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: style)
         return descriptor.withDesign(.rounded)?.withSymbolicTraits(.traitBold)

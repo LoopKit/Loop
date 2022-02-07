@@ -80,7 +80,6 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         updateChartManagerIfNeeded(completion: {
             let entry: CLKComplicationTimelineEntry?
             
-            let settings = ExtensionDelegate.shared().loopManager.settings
             let timelineDate = Date()
             
             self.log.default("Updating current complication timeline entry")
@@ -110,8 +109,6 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     func getTimelineEntries(for complication: CLKComplication, after date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
         updateChartManagerIfNeeded {
             let entries: [CLKComplicationTimelineEntry]?
-            
-            let settings = ExtensionDelegate.shared().loopManager.settings
             
             guard let context = ExtensionDelegate.shared().loopManager.activeContext,
                 let glucoseDate = context.glucoseDate else

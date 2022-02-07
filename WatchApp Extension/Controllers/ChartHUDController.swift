@@ -91,9 +91,14 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             self?.scene.setNeedsUpdate()
         }
 
-        if #available(watchOSApplicationExtension 5.0, *) {
-            scene.textInsets.left = max(scene.textInsets.left, systemMinimumLayoutMargins.leading)
-            scene.textInsets.right = max(scene.textInsets.right, systemMinimumLayoutMargins.trailing)
+        // These margins are only available after we appear (sadly)
+
+        scene.textInsets.left = max(scene.textInsets.left, systemMinimumLayoutMargins.leading)
+        scene.textInsets.right = max(scene.textInsets.right, systemMinimumLayoutMargins.trailing)
+
+        for row in TableRow.allCases {
+            let cell = table.rowController(at: row.rawValue) as! HUDRowController
+            cell.setContentInset(systemMinimumLayoutMargins)
         }
     }
 
@@ -155,9 +160,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             let cell = table.rowController(at: row.rawValue) as! HUDRowController
             cell.setTitle(row.title)
             cell.setIsLastRow(row.isLast)
-            if #available(watchOSApplicationExtension 5.0, *) {
-                cell.setContentInset(systemMinimumLayoutMargins)
-            }
+            cell.setContentInset(systemMinimumLayoutMargins)
 
             let isActiveContextStale = Date().timeIntervalSince(activeContext.creationDate) > LoopCoreConstants.inputDataRecencyInterval
 
