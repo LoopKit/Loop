@@ -236,6 +236,8 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             } else {
                 return nil
             }
+        case .graphicExtraLarge:
+            return nil
         @unknown default:
             return nil
         }

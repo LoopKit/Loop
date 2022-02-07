@@ -42,15 +42,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     @IBOutlet private weak var table: WKInterfaceTable!
 
     @IBOutlet private weak var glucoseScene: WKInterfaceSKScene!
-    @IBAction private func setChartWindow1Hour() {
-        scene.visibleDuration = .hours(2)
-    }
-    @IBAction private func setChartWindow2Hours() {
-        scene.visibleDuration = .hours(4)
-    }
-    @IBAction private func setChartWindow3Hours() {
-        scene.visibleDuration = .hours(6)
-    }
     private let scene = GlucoseChartScene()
     private var timer: Timer? {
         didSet {
