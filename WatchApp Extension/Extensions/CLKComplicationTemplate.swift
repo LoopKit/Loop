@@ -202,6 +202,8 @@ extension CLKComplicationTemplate {
             } else {
                 return nil
             }
+        case .graphicExtraLarge:
+            return nil
         @unknown default:
             return nil
         }
