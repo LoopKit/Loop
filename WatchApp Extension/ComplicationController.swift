@@ -167,72 +167,50 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
 
         switch family {
         case .modularSmall:
-            let template = CLKComplicationTemplateModularSmallStackText()
-            template.line1TextProvider = glucoseAndTrendText
-            template.line2TextProvider = timeText
-            return template
+            return CLKComplicationTemplateModularSmallStackText(line1TextProvider: glucoseAndTrendText, line2TextProvider: timeText)
         case .modularLarge:
-            let template = CLKComplicationTemplateModularLargeTallBody()
-            template.bodyTextProvider = glucoseAndTrendText
-            template.headerTextProvider = timeText
-            return template
+            return CLKComplicationTemplateModularLargeTallBody(headerTextProvider: timeText, bodyTextProvider: glucoseAndTrendText)
         case .circularSmall:
-            let template = CLKComplicationTemplateCircularSmallSimpleText()
-            template.textProvider = glucoseAndTrendText
-            return template
+            return CLKComplicationTemplateCircularSmallSimpleText(textProvider: glucoseAndTrendText)
         case .extraLarge:
-            let template = CLKComplicationTemplateExtraLargeStackText()
-            template.line1TextProvider = glucoseAndTrendText
-            template.line2TextProvider = timeText
-            return template
+            return CLKComplicationTemplateExtraLargeStackText(line1TextProvider: glucoseAndTrendText, line2TextProvider: timeText)
         case .utilitarianSmall, .utilitarianSmallFlat:
-            let template = CLKComplicationTemplateUtilitarianSmallFlat()
-            template.textProvider = glucoseAndTrendText
-            return template
+            return CLKComplicationTemplateUtilitarianSmallFlat(textProvider: glucoseAndTrendText)
         case .utilitarianLarge:
-            let template = CLKComplicationTemplateUtilitarianLargeFlat()
             let eventualGlucoseText = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "75")
-            template.textProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianLargeFlat", textProviders: [glucoseAndTrendText, eventualGlucoseText, CLKTimeTextProvider(date: Date())])
-            return template
+            return CLKComplicationTemplateUtilitarianLargeFlat(textProvider: CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianLargeFlat", textProviders: [glucoseAndTrendText, eventualGlucoseText, CLKTimeTextProvider(date: Date())]))
         case .graphicCorner:
             if #available(watchOSApplicationExtension 5.0, *) {
-                let template = CLKComplicationTemplateGraphicCornerStackText()
+                let template = CLKComplicationTemplateGraphicCornerStackText(innerTextProvider: timeText, outerTextProvider: glucoseAndTrendText)
                 timeText.tintColor = .tintColor
-                template.innerTextProvider = timeText
-                template.outerTextProvider = glucoseAndTrendText
                 return template
             } else {
                 return nil
             }
         case .graphicCircular:
             if #available(watchOSApplicationExtension 5.0, *) {
-                let template = CLKComplicationTemplateGraphicCircularOpenGaugeSimpleText()
-                template.centerTextProvider = glucoseText
-                template.bottomTextProvider = CLKSimpleTextProvider(text: "↘︎")
-                template.gaugeProvider = CLKSimpleGaugeProvider(style: .fill, gaugeColor: .tintColor, fillFraction: 1)
-                return template
+                return CLKComplicationTemplateGraphicCircularOpenGaugeSimpleText(
+                    gaugeProvider: CLKSimpleGaugeProvider(style: .fill, gaugeColor: .tintColor, fillFraction: 1),
+                    bottomTextProvider: glucoseText,
+                    centerTextProvider: CLKSimpleTextProvider(text: "↘︎")
+                )
             } else {
                 return nil
             }
         case .graphicBezel:
             if #available(watchOSApplicationExtension 5.0, *) {
-                let template = CLKComplicationTemplateGraphicBezelCircularText()
                 guard let circularTemplate = getLocalizableSampleTemplate(for: .graphicCircular) as? CLKComplicationTemplateGraphicCircular else {
                     fatalError("\(#function) invoked with .graphicCircular must return a subclass of CLKComplicationTemplateGraphicCircular")
                 }
-                template.circularTemplate = circularTemplate
-                template.textProvider = timeText
-                return template
+                return CLKComplicationTemplateGraphicBezelCircularText(circularTemplate: circularTemplate, textProvider: timeText)
             } else {
                 return nil
             }
         case .graphicRectangular:
             if #available(watchOSApplicationExtension 5.0, *) {
-                let template = CLKComplicationTemplateGraphicRectangularLargeImage()
                 // TODO: Better placeholder image here
-                template.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage())
-                template.textProvider = glucoseAndTrendText
-                return template
+                return CLKComplicationTemplateGraphicRectangularLargeImage(textProvider: glucoseAndTrendText, imageProvider: CLKFullColorImageProvider(fullColorImage: UIImage()))
+
             } else {
                 return nil
             }
