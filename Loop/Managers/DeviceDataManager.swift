@@ -564,9 +564,10 @@ final class DeviceDataManager {
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
         self.loopManager.generateDiagnosticReport { (loopReport) in
 
-            self.alertManager.getStoredEntries(startDate: Date() - .hours(48)) { (alertReport) in
+            let logDurationHours = 84.0
 
-                self.deviceLog.getLogEntries(startDate: Date() - .hours(48)) { (result) in
+            self.alertManager.getStoredEntries(startDate: Date() - .hours(logDurationHours)) { (alertReport) in
+                self.deviceLog.getLogEntries(startDate: Date() - .hours(logDurationHours)) { (result) in
                     let deviceLogReport: String
                     switch result {
                     case .failure(let error):
@@ -576,7 +577,8 @@ final class DeviceDataManager {
                     }
 
                     let report = [
-                        Bundle.main.localizedNameAndVersion,
+                        "## Version",
+                        "* codeVersion: \(Bundle.main.localizedNameAndVersion)",
                         "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
                         "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
@@ -600,11 +602,11 @@ final class DeviceDataManager {
                         "## Device Communication Log",
                         deviceLogReport,
                         "",
-                        String(reflecting: self.watchManager!),
-                        "",
-                        String(reflecting: self.statusExtensionManager!),
-                        "",
-                        loopReport,
+                        // String(reflecting: self.watchManager!),
+                        // "",
+                        // String(reflecting: self.statusExtensionManager!),
+                        // "",
+                        // loopReport,
                         alertReport
                         ].joined(separator: "\n")
 
