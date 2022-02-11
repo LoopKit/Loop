@@ -577,7 +577,7 @@ final class DeviceDataManager {
                     }
 
                     let report = [
-                        "## Version",
+                        "## Build Details",
                         "* appNameAndVersion: \(Bundle.main.localizedNameAndVersion)",
                         "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
