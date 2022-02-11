@@ -606,7 +606,7 @@ final class DeviceDataManager {
                         "",
                         String(reflecting: self.statusExtensionManager!),
                         "",
-                        // loopReport,
+                        loopReport,
                         alertReport
                         ].joined(separator: "\n")
 
