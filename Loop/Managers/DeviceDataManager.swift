@@ -578,7 +578,7 @@ final class DeviceDataManager {
 
                     let report = [
                         "## Version",
-                        "* codeVersion: \(Bundle.main.localizedNameAndVersion)",
+                        "* appNameAndVersion: \(Bundle.main.localizedNameAndVersion)",
                         "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
                         "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
@@ -602,10 +602,10 @@ final class DeviceDataManager {
                         "## Device Communication Log",
                         deviceLogReport,
                         "",
-                        // String(reflecting: self.watchManager!),
-                        // "",
-                        // String(reflecting: self.statusExtensionManager!),
-                        // "",
+                        String(reflecting: self.watchManager!),
+                        "",
+                        String(reflecting: self.statusExtensionManager!),
+                        "",
                         // loopReport,
                         alertReport
                         ].joined(separator: "\n")
