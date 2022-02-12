@@ -242,7 +242,7 @@ final class DeviceDataManager {
             basalProfile: UserDefaults.appGroup?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
-            lastPumpEventsReconciliation: pumpManager?.lastSync,
+            lastPumpEventsReconciliation: nil, // PumpManager is nil at this point. Will update this via addPumpEvents below
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
@@ -269,6 +269,10 @@ final class DeviceDataManager {
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
+            // Update lastPumpEventsReconciliation on DoseStore
+            if let lastSync = pumpManager?.lastSync {
+                doseStore.addPumpEvents([], lastReconciliation: lastSync) { _ in }
+            }
         } else {
             pumpManager = nil
         }
@@ -286,7 +290,6 @@ final class DeviceDataManager {
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
             basalDeliveryState: pumpManager?.status.basalDeliveryState,
             overrideHistory: overrideHistory,
-            lastPumpEventsReconciliation: pumpManager?.lastSync,
             analyticsServicesManager: analyticsServicesManager,
             localCacheDuration: localCacheDuration,
             doseStore: doseStore,

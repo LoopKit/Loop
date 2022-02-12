@@ -202,6 +202,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     // MARK: - State
 
+    // This reflects whether the application is active 
     override var active: Bool {
         didSet {
             hudView?.loopCompletionHUD.assertTimer(active)
