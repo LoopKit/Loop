@@ -222,9 +222,11 @@ extension SettingsView {
     }
     
     private var cgmChoices: [ActionSheet.Button] {
-        var result = viewModel.cgmManagerSettingsViewModel.availableDevices.map { availableDevice in
-            ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
-                self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
+        var result = viewModel.cgmManagerSettingsViewModel.availableDevices
+            .sorted(by: {$0.localizedTitle < $1.localizedTitle})
+            .map { availableDevice in
+                ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+                    self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
             }
         }
         result.append(.cancel())
