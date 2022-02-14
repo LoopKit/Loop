@@ -306,6 +306,7 @@ final class DeviceDataManager {
         watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 
         let remoteDataServicesManager = RemoteDataServicesManager(
+            alertStore: alertManager.alertStore,
             carbStore: carbStore,
             doseStore: doseStore,
             dosingDecisionStore: dosingDecisionStore,
@@ -331,6 +332,7 @@ final class DeviceDataManager {
 
         loopManager.delegate = self
 
+        alertManager.alertStore.delegate = self
         carbStore.delegate = self
         doseStore.delegate = self
         dosingDecisionStore.delegate = self
@@ -1080,6 +1082,15 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
             self.loopManager.storeSettings()
         }
     }
+}
+
+// MARK: - AlertStoreDelegate
+extension DeviceDataManager: AlertStoreDelegate {
+
+    func alertStoreHasUpdatedAlertData(_ alertStore: AlertStore) {
+        remoteDataServicesManager.alertStoreHasUpdatedAlertData(alertStore)
+    }
+
 }
 
 // MARK: - CarbStoreDelegate
