@@ -41,7 +41,7 @@ extension WKInterfaceDevice {
         if let sizeClass = SizeClass(screenSize: screenBounds.size) {
             return sizeClass
         } else {
-            //assertionFailure("Unrecognized Watch size \(screenBounds.size)")
+            // Future sizes, if not explicitly supported, will use 40mm class.
             return .size40mm
         }
     }
