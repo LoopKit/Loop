@@ -28,16 +28,20 @@ extension WKInterfaceDevice {
         case size38mm
         case size42mm
 
-        // Apple Watch Series 4 and later
+        // Apple Watch Series 4 - 6
         case size40mm
         case size44mm
+        
+        // Apple Watch Series 7
+        case size41mm
+        case size45mm
     }
 
     var sizeClass: SizeClass {
         if let sizeClass = SizeClass(screenSize: screenBounds.size) {
             return sizeClass
         } else {
-            assertionFailure("Unrecognized Watch size \(screenBounds.size)")
+            // Future sizes, if not explicitly supported, will use 40mm class.
             return .size40mm
         }
     }
@@ -61,8 +65,12 @@ extension WKInterfaceDevice.SizeClass {
             return CGSize(width: 156, height: 195)
         case .size40mm:
             return CGSize(width: 162, height: 197)
+        case .size41mm:
+            return CGSize(width: 176, height: 215)
         case .size44mm:
             return CGSize(width: 184, height: 224)
+        case .size45mm:
+            return CGSize(width: 198, height: 242)
         }
     }
 

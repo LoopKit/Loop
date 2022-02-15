@@ -28,6 +28,7 @@ struct FeatureFlagConfiguration: Decodable {
     let sensitivityOverridesEnabled: Bool
     let simulatedCoreDataEnabled: Bool
     let siriEnabled: Bool
+    let simpleBolusCalculatorEnabled: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -143,6 +144,12 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.siriEnabled = true
         #endif
+        
+        #if SIMPLE_BOLUS_CALCULATOR_ENABLED
+        self.simpleBolusCalculatorEnabled = true
+        #else
+        self.simpleBolusCalculatorEnabled = false
+        #endif
     }
 }
 
@@ -167,6 +174,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* automaticBolusEnabled: \(automaticBolusEnabled)",
             "* manualDoseEntryEnabled: \(manualDoseEntryEnabled)",
             "* allowDebugFeatures: \(allowDebugFeatures)",
+            "* simpleBolusCalculatorEnabled: \(simpleBolusCalculatorEnabled)",
         ].joined(separator: "\n")
     }
 }
