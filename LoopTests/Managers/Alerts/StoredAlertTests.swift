@@ -41,7 +41,7 @@ class StoredAlertEncodableTests: XCTestCase {
     func testInterruptionLevel() throws {
         managedObjectContext.performAndWait {
             let alert = Alert(identifier: Alert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate, interruptionLevel: .active)
-            let storedAlert = StoredAlert(from: alert, context: managedObjectContext)
+            let storedAlert = StoredAlert(from: alert, context: managedObjectContext, syncIdentifier: UUID(uuidString: "A7073F28-0322-4506-A733-CF6E0687BAF7")!)
             XCTAssertEqual(.active, storedAlert.interruptionLevel)
             storedAlert.issuedDate = dateFormatter.date(from: "2020-05-14T21:00:12Z")!
             try! assertStoredAlertEncodable(storedAlert, encodesJSON: """
@@ -51,6 +51,7 @@ class StoredAlertEncodableTests: XCTestCase {
               "issuedDate" : "2020-05-14T21:00:12Z",
               "managerIdentifier" : "foo",
               "modificationCounter" : 1,
+              "syncIdentifier" : "A7073F28-0322-4506-A733-CF6E0687BAF7",
               "triggerType" : 0
             }
             """
@@ -65,6 +66,7 @@ class StoredAlertEncodableTests: XCTestCase {
               "issuedDate" : "2020-05-14T21:00:12Z",
               "managerIdentifier" : "foo",
               "modificationCounter" : 1,
+              "syncIdentifier" : "A7073F28-0322-4506-A733-CF6E0687BAF7",
               "triggerType" : 0
             }
             """
@@ -86,6 +88,7 @@ class StoredAlertEncodableTests: XCTestCase {
             storedAlert.sound = "Sound 1"
             storedAlert.triggerInterval = 900
             storedAlert.triggerType = Alert.Trigger.delayed(interval: .minutes(15)).storedType
+            storedAlert.metadata = "{\"one\": 1}"
             try! assertStoredAlertEncodable(storedAlert, encodesJSON: """
             {
               "acknowledgedDate" : "2020-05-14T22:38:14Z",
@@ -95,6 +98,7 @@ class StoredAlertEncodableTests: XCTestCase {
               "interruptionLevel" : "timeSensitive",
               "issuedDate" : "2020-05-14T21:00:12Z",
               "managerIdentifier" : "Manager Identifier 1",
+              "metadata" : "{\\\"one\\\": 1}",
               "modificationCounter" : 123,
               "retractedDate" : "2020-05-14T23:34:07Z",
               "sound" : "Sound 1",

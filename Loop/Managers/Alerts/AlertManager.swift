@@ -226,21 +226,22 @@ extension AlertManager {
             switch result {
             case .failure(let error):
                 completion("Error: \(error)")
-            case .success(let entries):
-                let report = "## Alerts\n" + entries.1.map { storedAlert in
+            case .success(_, let objects):
+                let encoder = JSONEncoder()
+                let report = "## Alerts\n" + objects.map { object in
                     return """
-                    **\(storedAlert.title ?? "??")**
+                    **\(object.title ?? "??")**
 
-                    * alertIdentifier: \(storedAlert.alertIdentifier)
-                    * managerIdentifier: \(storedAlert.managerIdentifier)
-                    * issued: \(storedAlert.issuedDate)
-                    * acknowledged: \(storedAlert.acknowledgedDate?.description ?? "n/a")
-                    * retracted: \(storedAlert.retractedDate?.description ?? "n/a")
-                    * trigger: \(storedAlert.trigger)
-                    * interruptionLevel: \(storedAlert.interruptionLevel)
-                    * foregroundContent: \(storedAlert.foregroundContent ?? "n/a")
-                    * backgroundContent: \(storedAlert.backgroundContent ?? "n/a")
-                    * sound: \(storedAlert.sound ?? "n/a")
+                    * identifier: \(object.identifier.value)
+                    * issued: \(object.issuedDate)
+                    * acknowledged: \(object.acknowledgedDate?.description ?? "n/a")
+                    * retracted: \(object.retractedDate?.description ?? "n/a")
+                    * trigger: \(object.trigger)
+                    * interruptionLevel: \(object.interruptionLevel)
+                    * foregroundContent: \((try? encoder.encodeToStringIfPresent(object.foregroundContent)) ?? "n/a")
+                    * backgroundContent: \((try? encoder.encodeToStringIfPresent(object.backgroundContent)) ?? "n/a")
+                    * sound: \((try? encoder.encodeToStringIfPresent(object.sound)) ?? "n/a")
+                    * metadata: \((try? encoder.encodeToStringIfPresent(object.metadata)) ?? "n/a")
 
                     """
                 }.joined(separator: "\n")
@@ -251,6 +252,12 @@ extension AlertManager {
 }
 
 // MARK: Extensions
+
+fileprivate extension SyncAlertObject {
+    var title: String? {
+        return foregroundContent?.title ?? backgroundContent?.title
+    }
+}
 
 extension FileManager {
     
