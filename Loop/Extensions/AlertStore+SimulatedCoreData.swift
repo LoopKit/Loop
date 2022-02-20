@@ -57,7 +57,8 @@ fileprivate extension AlertStore.DatedAlert {
                                                            body: "The body of a background simulated alert approximates an actual alert body.",
                                                            acknowledgeActionButtonLabel: "Acknowledged"),
                           trigger: .delayed(interval: 60),
-                          sound: .sound(name: "simulated"))
-        return AlertStore.DatedAlert(date: date, alert: alert)
+                          sound: .sound(name: "simulated"),
+                          metadata: Alert.Metadata(dict: ["simulated": true]))
+        return AlertStore.DatedAlert(date: date, alert: alert, syncIdentifier: UUID())
     }
 }

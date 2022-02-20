@@ -9,7 +9,17 @@
 import CoreData
 import LoopKit
 
+public protocol AlertStoreDelegate: AnyObject {
+    /**
+     Informs the delegate that the alert store has updated alert data.
+
+     - Parameter alertStore: The alert store that has updated alert data.
+     */
+    func alertStoreHasUpdatedAlertData(_ alertStore: AlertStore)
+}
+
 public class AlertStore {
+    public weak var delegate: AlertStoreDelegate?
 
     static let totalFetchLimit = 500
     
@@ -79,6 +89,7 @@ public class AlertStore {
                 try self.managedObjectContext.save()
                 self.log.default("Recorded alert: %{public}@", alert.identifier.value)
                 self.purgeExpired()
+                self.delegate?.alertStoreHasUpdatedAlertData(self)
                 completion?(.success)
             } catch {
                 self.log.error("Could not store alert: %{public}@, %{public}@", alert.identifier.value, String(describing: error))
@@ -215,6 +226,7 @@ extension AlertStore {
             return .failure(error)
         }
         self.purgeExpired()
+        self.delegate?.alertStoreHasUpdatedAlertData(self)
         return .success
     }
     
@@ -292,46 +304,41 @@ extension AlertStore {
 
 // MARK: Query Support
 
-public protocol QueryFilter: Equatable {
+public protocol QueryFilter {
     var predicate: NSPredicate? { get }
 }
 
 extension AlertStore {
 
-    public struct QueryAnchor<Filter: QueryFilter>: RawRepresentable, Equatable {
+    public struct QueryAnchor: RawRepresentable, Equatable {
         public typealias RawValue = [String: Any]
+
         internal var modificationCounter: Int64
-        internal var filter: Filter?
+
         public init() {
             self.modificationCounter = 0
         }
-        init(modificationCounter: Int64? = nil, filter: Filter?) {
-            self.modificationCounter = modificationCounter ?? 0
-            self.filter = filter
-        }
+
         public init?(rawValue: RawValue) {
             guard let modificationCounter = rawValue["modificationCounter"] as? Int64 else {
                 return nil
             }
             self.modificationCounter = modificationCounter
         }
+
         public var rawValue: RawValue {
             var rawValue: RawValue = [:]
             rawValue["modificationCounter"] = modificationCounter
             return rawValue
         }
     }
-    typealias QueryResult<Filter: QueryFilter> = Result<(QueryAnchor<Filter>, [StoredAlert]), Error>
 
-    struct NoFilter: QueryFilter {
-        let predicate: NSPredicate?
-    }
-    struct SinceDateFilter: QueryFilter {
-        let predicateExpressionNotYetExpired: String
-        let date: Date
-        let excludingFutureAlerts: Bool
-        let now: Date
-        var predicate: NSPredicate? {
+    public struct SinceDateFilter: QueryFilter {
+        public let predicateExpressionNotYetExpired: String
+        public let date: Date
+        public let excludingFutureAlerts: Bool
+        public let now: Date
+        public var predicate: NSPredicate? {
             let datePredicate = NSPredicate(format: "issuedDate >= %@", date as NSDate)
             // This predicate only _includes_ a record if it either has no interval (i.e. is 'immediate')
             // _or_ it is a 'delayed' or 'repeating' alert (a non-nil triggerInterval) whose time has already come
@@ -343,46 +350,59 @@ extension AlertStore {
         }
     }
 
-    func executeQuery(since date: Date, excludingFutureAlerts: Bool = true, now: Date = Date(), limit: Int, completion: @escaping (QueryResult<SinceDateFilter>) -> Void) {
+    public enum AlertQueryResult {
+        case success(QueryAnchor, [SyncAlertObject])
+        case failure(Error)
+    }
+
+    func executeQuery(fromQueryAnchor queryAnchor: QueryAnchor? = nil, since date: Date, excludingFutureAlerts: Bool = true, now: Date = Date(), limit: Int, completion: @escaping (AlertQueryResult) -> Void) {
         let sinceDateFilter = SinceDateFilter(predicateExpressionNotYetExpired: predicateExpressionNotYetExpired,
                                               date: date,
                                               excludingFutureAlerts: excludingFutureAlerts,
                                               now: now)
-        executeAlertQuery(from: QueryAnchor(filter: sinceDateFilter), limit: limit, completion: completion)
+        executeAlertQuery(fromQueryAnchor: queryAnchor, queryFilter: sinceDateFilter, limit: limit, completion: completion)
     }
 
-    func continueQuery<Filter: QueryFilter>(from anchor: QueryAnchor<Filter>, limit: Int, completion: @escaping (QueryResult<Filter>) -> Void) {
-        executeAlertQuery(from: anchor, limit: limit, completion: completion)
-    }
+    func executeAlertQuery(fromQueryAnchor queryAnchor: QueryAnchor?, queryFilter: QueryFilter? = nil, limit: Int, completion: @escaping (AlertQueryResult) -> Void) {
+        var queryAnchor = queryAnchor ?? QueryAnchor()
+        var queryResult = [SyncAlertObject]()
+        var queryError: Error?
 
-    private func executeAlertQuery<Filter: QueryFilter>(from anchor: QueryAnchor<Filter>, limit: Int, completion: @escaping (QueryResult<Filter>) -> Void) {
-        self.managedObjectContext.perform {
-            guard limit > 0 else {
-                completion(.success((anchor, [])))
-                return
-            }
+        guard limit > 0 else {
+            completion(.success(queryAnchor, []))
+            return
+        }
+
+        self.managedObjectContext.performAndWait {
             let storedRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
-            let anchorPredicate = NSPredicate(format: "modificationCounter > %d", anchor.modificationCounter)
-            if let filterPredicate = anchor.filter?.predicate {
-                storedRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-                    anchorPredicate,
-                    filterPredicate
-                ])
+
+            let queryAnchorPredicate = NSPredicate(format: "modificationCounter > %d", queryAnchor.modificationCounter)
+            if let queryFilterPredicate = queryFilter?.predicate {
+                storedRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [queryAnchorPredicate, queryFilterPredicate])
             } else {
-                storedRequest.predicate = anchorPredicate
+                storedRequest.predicate = queryAnchorPredicate
             }
             storedRequest.sortDescriptors = [NSSortDescriptor(key: "modificationCounter", ascending: true)]
             storedRequest.fetchLimit = limit
 
             do {
                 let stored = try self.managedObjectContext.fetch(storedRequest)
-                let modificationCounter = stored.max(by: { $0.modificationCounter < $1.modificationCounter })?.modificationCounter
-                let newAnchor = QueryAnchor<Filter>(modificationCounter: modificationCounter, filter: anchor.filter)
-                completion(.success((newAnchor, stored)))
+                if let modificationCounter = stored.max(by: { $0.modificationCounter < $1.modificationCounter })?.modificationCounter {
+                    queryAnchor.modificationCounter = modificationCounter
+                }
+                queryResult.append(contentsOf: stored.compactMap { try? SyncAlertObject(managedObject: $0) })
             } catch let error {
-                completion(.failure(error))
+                queryError = error
+                return
             }
         }
+
+        if let queryError = queryError {
+            completion(.failure(queryError))
+            return
+        }
+
+        completion(.success(queryAnchor, queryResult))
     }
 
     // At the moment, this is only used for unit testing
@@ -514,6 +534,7 @@ extension AlertStore {
     struct DatedAlert {
         let date: Date
         let alert: Alert
+        let syncIdentifier: UUID
     }
 
     func addAlerts(alerts: [DatedAlert]) -> Error? {
@@ -525,7 +546,7 @@ extension AlertStore {
 
         self.managedObjectContext.performAndWait {
             for alert in alerts {
-                let storedAlert = StoredAlert(from: alert.alert, context: self.managedObjectContext, issuedDate: alert.date)
+                let storedAlert = StoredAlert(from: alert.alert, context: self.managedObjectContext, issuedDate: alert.date, syncIdentifier: alert.syncIdentifier)
                 storedAlert.acknowledgedDate = alert.date
             }
 
@@ -539,6 +560,8 @@ extension AlertStore {
         guard error == nil else {
             return error
         }
+
+        self.delegate?.alertStoreHasUpdatedAlertData(self)
 
         self.log.info("Added %d StoredAlerts", alerts.count)
         return nil
