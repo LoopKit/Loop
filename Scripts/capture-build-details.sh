@@ -86,3 +86,20 @@ if [ -e "${provisioning_profile_path}" ]; then
 else
   warn "Invalid provisioning profile path ${provisioning_profile_path}"
 fi
+
+# determine if this is a workspace build
+# if so, fill out the git revision and branch
+if [ -e ../Loop.xcworkspace ]
+then
+    pushd . > /dev/null
+    cd ..
+    workspaceBuild="Yes"
+    plutil -replace com-loopkit-LoopWorkspace-y-n -string "${workspaceBuild}" "${info_plist_path}"
+    rev=$(git rev-parse HEAD)
+    plutil -replace com-loopkit-LoopWorkspace-git-revision -string "${rev:0:7}" "${info_plist_path}"
+    branch=$(git branch --show-current)
+    if [ -n "$branch" ]; then
+        plutil -replace com-loopkit-LoopWorkspace-git-branch -string "${branch}" "${info_plist_path}"
+    fi
+    popd . > /dev/null
+fi

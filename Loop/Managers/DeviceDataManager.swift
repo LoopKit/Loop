@@ -587,12 +587,17 @@ final class DeviceDataManager {
                         "* profileExpiration: \(Bundle.main.profileExpirationString)",
                         "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
                         "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
+                        "* isWorkspaceBuild: \(Bundle.main.workspaceBuild ?? "No")",
+                        "* gitRevWorkspace: \(Bundle.main.gitRevWs ?? "N/A")",
+                        "* gitBranchWorkspace: \(Bundle.main.gitBranchWs ?? "N/A")",
                         "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
                         "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
                         "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
+                        "",
+                        alertReport,
                         "",
                         "## DeviceDataManager",
                         "* launchDate: \(self.launchDate)",
@@ -612,7 +617,6 @@ final class DeviceDataManager {
                         String(reflecting: self.statusExtensionManager!),
                         "",
                         loopReport,
-                        alertReport
                         ].joined(separator: "\n")
 
                     completion(report)

@@ -85,6 +85,19 @@ extension Bundle {
         }
     }
 
+    // These strings are only configured if it is a workspace build
+    var workspaceBuild: String? {
+        return object(forInfoDictionaryKey: "com-loopkit-LoopWorkspace-y-n") as? String
+    }
+
+    var gitRevWs: String? {
+        return object(forInfoDictionaryKey: "com-loopkit-LoopWorkspace-git-revision") as? String
+    }
+
+    var gitBranchWs: String? {
+       return object(forInfoDictionaryKey: "com-loopkit-LoopWorkspace-git-branch") as? String
+   }
+
     var localCacheDuration: TimeInterval {
         guard let localCacheDurationDaysString = object(forInfoDictionaryKey: "LoopLocalCacheDurationDays") as? String,
             let localCacheDurationDays = Double(localCacheDurationDaysString) else {
