@@ -181,6 +181,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         // The dispatch is necessary in case this is coming from a didSet already on the settings struct.
         self.automaticDosingStatus.$isClosedLoop
             .removeDuplicates()
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { if !$0 {
                 self.mutateSettings { settings in
