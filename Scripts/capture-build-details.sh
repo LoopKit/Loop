@@ -93,8 +93,6 @@ if [ -e ../Loop.xcworkspace ]
 then
     pushd . > /dev/null
     cd ..
-    workspaceBuild="Yes"
-    plutil -replace com-loopkit-LoopWorkspace-y-n -string "${workspaceBuild}" "${info_plist_path}"
     rev=$(git rev-parse HEAD)
     plutil -replace com-loopkit-LoopWorkspace-git-revision -string "${rev:0:7}" "${info_plist_path}"
     branch=$(git branch --show-current)

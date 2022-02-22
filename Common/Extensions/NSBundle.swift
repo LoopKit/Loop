@@ -86,15 +86,11 @@ extension Bundle {
     }
 
     // These strings are only configured if it is a workspace build
-    var workspaceBuild: String? {
-        return object(forInfoDictionaryKey: "com-loopkit-LoopWorkspace-y-n") as? String
-    }
-
-    var gitRevWs: String? {
+    var workspaceGitRevision: String? {
         return object(forInfoDictionaryKey: "com-loopkit-LoopWorkspace-git-revision") as? String
     }
 
-    var gitBranchWs: String? {
+    var workspaceGitBranch: String? {
        return object(forInfoDictionaryKey: "com-loopkit-LoopWorkspace-git-branch") as? String
    }
 
