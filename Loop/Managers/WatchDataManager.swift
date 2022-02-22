@@ -259,7 +259,7 @@ final class WatchDataManager: NSObject {
             
             if let potentialCarbEntry = potentialCarbEntry {
                 context.potentialCarbEntry = potentialCarbEntry
-                if let recommendedBolusDoseConsideringPotentialCarbEntry = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil) {
+                if let recommendedBolusDoseConsideringPotentialCarbEntry = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false) {
                     context.recommendedBolusDoseConsideringPotentialCarbEntry = recommendedBolusDoseConsideringPotentialCarbEntry.amount
                     dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: recommendedBolusDoseConsideringPotentialCarbEntry,
                                                                                                  date: Date())

@@ -878,14 +878,14 @@ fileprivate class MockLoopState: LoopState {
     var bolusRecommendationError: Error?
     var consideringPotentialCarbEntryPassed: NewCarbEntry??
     var replacingCarbEntryPassed: StoredCarbEntry??
-    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
+    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, considerPositiveVelocityAndRC: Bool) throws -> ManualBolusRecommendation? {
         consideringPotentialCarbEntryPassed = potentialCarbEntry
         replacingCarbEntryPassed = replacedCarbEntry
         if let error = bolusRecommendationError { throw error }
         return bolusRecommendationResult
     }
     
-    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
+    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, considerPositiveVelocityAndRC: Bool) throws -> ManualBolusRecommendation? {
         consideringPotentialCarbEntryPassed = potentialCarbEntry
         replacingCarbEntryPassed = replacedCarbEntry
         if let error = bolusRecommendationError { throw error }
