@@ -2351,6 +2351,7 @@ extension LoopDataManager {
                 settings.suspendThreshold = newValue.suspendThreshold
                 settings.maximumBolus = newValue.maximumBolus
                 settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
+                settings.overridePresets = newValue.overridePresets ?? []
             }
             insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
             carbRatioSchedule = newValue.carbRatioSchedule
