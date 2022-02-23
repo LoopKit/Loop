@@ -288,7 +288,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     fileprivate var predictedGlucose: [PredictedGlucoseValue]? {
         didSet {
             recommendedAutomaticDose = nil
-            recommendedManualBolus = nil
             predictedGlucoseIncludingPendingInsulin = nil
         }
     }
@@ -298,8 +297,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     private var recentCarbEntries: [StoredCarbEntry]?
 
     fileprivate var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)?
-
-    fileprivate var recommendedManualBolus: (recommendation: ManualBolusRecommendation, date: Date)?
 
     fileprivate var carbsOnBoard: CarbValue?
 
@@ -668,7 +665,6 @@ extension LoopDataManager {
         self.dataAccessQueue.async {
             self.logger.debug("bolusConfirmed")
             self.lastRequestedBolus = nil
-            self.recommendedManualBolus = nil
             self.recommendedAutomaticDose = nil
             self.insulinEffect = nil
             self.notify(forChange: .bolus)
@@ -724,7 +720,6 @@ extension LoopDataManager {
 
         doseStore.addDoses([dose]) { (error) in
             if error == nil {
-                self.recommendedManualBolus = nil
                 self.recommendedAutomaticDose = nil
                 self.insulinEffect = nil
                 self.notify(forChange: .bolus)
@@ -1079,7 +1074,6 @@ extension LoopDataManager {
         // These will be updated by updatePredictedGlucoseAndRecommendedDose, if possible
         dosingDecision.predictedGlucose = predictedGlucose
         dosingDecision.automaticDoseRecommendation = recommendedAutomaticDose?.recommendation
-        dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendedManualBolus)
 
         // If the glucose prediction hasn't changed, then nothing has changed, so just use pre-existing recommendations
         guard predictedGlucose == nil else {
@@ -1252,6 +1246,8 @@ extension LoopDataManager {
 
         if inputs.contains(.momentum), let momentumEffect = self.glucoseMomentumEffect {
             if !includingPositiveVelocityAndRC, let netMomentum = momentumEffect.netEffect(), netMomentum.quantity.doubleValue(for: .milligramsPerDeciliter) > 0 {
+                print("Not using positive momentum of \(netMomentum)")
+                print("momentumEffect = \(momentumEffect)")
                 momentum = []
             } else {
                 momentum = momentumEffect
@@ -1260,6 +1256,8 @@ extension LoopDataManager {
 
         if inputs.contains(.retrospection) {
             if !includingPositiveVelocityAndRC, let netRC = retrospectiveGlucoseEffect.netEffect(), netRC.quantity.doubleValue(for: .milligramsPerDeciliter) > 0 {
+                print("Not using positive RC of \(netRC)")
+                print("rc effect = \(retrospectiveGlucoseEffect)")
                 // positive RC is turned off
             } else {
                 effects.append(retrospectiveGlucoseEffect)
@@ -1383,7 +1381,7 @@ extension LoopDataManager {
         let pendingInsulin = try getPendingInsulin()
         let shouldIncludePendingInsulin = pendingInsulin > 0
         let prediction = try predictGlucoseFromManualGlucose(glucose, potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, considerPositiveVelocityAndRC: considerPositiveVelocityAndRC)
-        return try recommendBolus(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
+        return try recommendManualBolus(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
     }
 
     /// - Throws: LoopError.missingDataError
@@ -1435,11 +1433,11 @@ extension LoopDataManager {
             throw LoopError.missingDataError(.insulinEffect)
         }
 
-        return try recommendBolus(forPrediction: predictedGlucose, consideringPotentialCarbEntry: potentialCarbEntry)
+        return try recommendManualBolus(forPrediction: predictedGlucose, consideringPotentialCarbEntry: potentialCarbEntry)
     }
     
     /// - Throws: LoopError.configurationError
-    private func recommendBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
+    private func recommendManualBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
                                                       consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> ManualBolusRecommendation? {
         guard let glucoseTargetRange = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil) else {
             throw LoopError.configurationError(.glucoseTargetRangeSchedule)
@@ -1467,6 +1465,7 @@ extension LoopDataManager {
 
         return predictedGlucose.recommendedManualBolus(
             to: glucoseTargetRange,
+            at: now(),
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
@@ -1687,27 +1686,6 @@ extension LoopDataManager {
             }
 
             dosingDecision.automaticDoseRecommendation = recommendedAutomaticDose?.recommendation
-
-            let volumeRounder = { (_ units: Double) in
-                return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
-            }
-
-            let pendingInsulin = try getPendingInsulin()
-            let predictionDrivingBolusRecommendation = pendingInsulin > 0 ? predictedGlucoseIncludingPendingInsulin : predictedGlucose
-            let recommendation = predictionDrivingBolusRecommendation.recommendedManualBolus(
-                to: glucoseTargetRange!,
-                at: predictedGlucose[0].startDate,
-                suspendThreshold: settings.suspendThreshold?.quantity,
-                sensitivity: insulinSensitivity!,
-                model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
-                pendingInsulin: 0, // Pending insulin is already reflected in the prediction
-                maxBolus: maxBolus!,
-                volumeRounder: volumeRounder
-            )
-            recommendedManualBolus = (recommendation: recommendation, date: startDate)
-            self.logger.debug("Recommending bolus: %{public}@", String(describing: recommendedManualBolus))
-
-            dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendedManualBolus)
         } catch let error {
             loopError = error as? LoopError ?? .unknownError(error)
             if let loopError = loopError {
@@ -1791,8 +1769,6 @@ protocol LoopState {
 
     /// The recommended temp basal based on predicted glucose
     var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)? { get }
-
-    var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)? { get }
 
     /// The difference in predicted vs actual glucose over a recent period
     var retrospectiveGlucoseDiscrepancies: [GlucoseChange]? { get }
@@ -1907,14 +1883,6 @@ extension LoopDataManager {
                 return nil
             }
             return loopDataManager.recommendedAutomaticDose
-        }
-
-        var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)? {
-            dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
-            guard loopDataManager.lastRequestedBolus == nil else {
-                return nil
-            }
-            return loopDataManager.recommendedManualBolus
         }
 
         var retrospectiveGlucoseDiscrepancies: [GlucoseChange]? {
@@ -2122,7 +2090,6 @@ extension LoopDataManager {
                 "glucoseMomentumEffect: \(manager.glucoseMomentumEffect ?? [])",
                 "retrospectiveGlucoseEffect: \(manager.retrospectiveGlucoseEffect)",
                 "recommendedAutomaticDose: \(String(describing: state.recommendedAutomaticDose))",
-                "recommendedBolus: \(String(describing: state.recommendedBolus))",
                 "lastBolus: \(String(describing: manager.lastRequestedBolus))",
                 "lastLoopCompleted: \(String(describing: manager.lastLoopCompleted))",
                 "basalDeliveryState: \(String(describing: manager.basalDeliveryState))",

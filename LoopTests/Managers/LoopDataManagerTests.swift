@@ -223,7 +223,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         var recommendedBolus: ManualBolusRecommendation?
         self.loopDataManager.getLoopState { _, state in
             predictedGlucose = state.predictedGlucose
-            recommendedBolus = state.recommendedBolus?.recommendation
+            recommendedBolus = try? state.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
             updateGroup.leave()
         }
         // We need to wait until the task completes to get outputs
@@ -464,16 +464,44 @@ class LoopDataManagerDosingTests: XCTestCase {
 
     func testLoopGetStateRecommendsManualBolus() {
         setUp(for: .highAndStable)
-        waitOnDataQueue()
         let exp = expectation(description: #function)
-        var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)?
+        var recommendedBolus: ManualBolusRecommendation?
         loopDataManager.getLoopState { (_, loopState) in
+            do {
+                recommendedBolus = try loopState.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
+            } catch {
+                print("Here: error = \(error)")
+            }
             exp.fulfill()
-            recommendedBolus = loopState.recommendedBolus
+        }
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 1.82, accuracy: 0.01)
+    }
+
+    func testLoopGetStateRecommendsManualBolusWithMomentum() {
+        setUp(for: .highAndRisingWithCOB)
+        let exp = expectation(description: #function)
+        var recommendedBolus: ManualBolusRecommendation?
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
+            exp.fulfill()
         }
         wait(for: [exp], timeout: 1.0)
-        XCTAssertEqual(recommendedBolus?.recommendation.amount, 1.7888738147050955)
+        XCTAssertEqual(recommendedBolus!.amount, 1.62, accuracy: 0.01)
     }
+
+    func testLoopGetStateRecommendsManualBolusWithoutMomentum() {
+        setUp(for: .highAndRisingWithCOB)
+        let exp = expectation(description: #function)
+        var recommendedBolus: ManualBolusRecommendation?
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1.0)
+        XCTAssertEqual(recommendedBolus!.amount, 1.52, accuracy: 0.01)
+    }
+
 }
 
 extension LoopDataManagerDosingTests {
