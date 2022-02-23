@@ -72,7 +72,7 @@ final class ActionHUDController: HUDInterfaceController {
 
         let isClosedLoop = loopManager.activeContext?.isClosedLoop ?? false
         
-        if !isClosedLoop {
+        if !isClosedLoop && FeatureFlags.simpleBolusCalculatorEnabled {
             preMealButtonGroup.state = .disabled
             overrideButtonGroup.state = .disabled
             carbsButtonGroup.state = .disabled

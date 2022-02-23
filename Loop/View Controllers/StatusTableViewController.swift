@@ -248,7 +248,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let isClosedLoop = closedLoopStatus.isClosedLoop
 
         toolbarItems![0].isEnabled = isPumpOnboarded
-        toolbarItems![2].isEnabled = isPumpOnboarded && isClosedLoop
+        toolbarItems![2].isEnabled = isPumpOnboarded && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
         toolbarItems![4].isEnabled = isPumpOnboarded
         toolbarItems![6].isEnabled = isPumpOnboarded
         toolbarItems![8].isEnabled = true
@@ -494,7 +494,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let glucoseSamples = glucoseSamples {
                 self.statusCharts.setGlucoseValues(glucoseSamples)
             }
-            if isClosedLoop, let predictedGlucoseValues = predictedGlucoseValues {
+            if (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled), let predictedGlucoseValues = predictedGlucoseValues {
                 self.statusCharts.setPredictedGlucoseValues(predictedGlucoseValues)
             } else {
                 self.statusCharts.setPredictedGlucoseValues([])
@@ -782,7 +782,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func updatePreMealModeAvailability(isClosedLoop: Bool) {
-        let allowed = onboardingManager.isComplete && isClosedLoop
+        let allowed = onboardingManager.isComplete && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
         toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
 
@@ -859,7 +859,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     return self?.statusCharts.glucoseChart(withFrame: frame)?.view
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
-                cell.doesNavigate = closedLoopStatus.isClosedLoop
+                cell.doesNavigate = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.iobChart(withFrame: frame)?.view
@@ -1014,7 +1014,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 } else {
                     cell.setSubtitleLabel(label: nil)
                 }
-                cell.doesNavigate = closedLoopStatus.isClosedLoop
+                cell.doesNavigate = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 if let currentIOB = currentIOBDescription {
                     cell.setSubtitleLabel(label: currentIOB)
@@ -1134,7 +1134,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
-                if closedLoopStatus.isClosedLoop {
+                if closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled {
                     performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
                 }
             case .iob, .dose:
@@ -1212,7 +1212,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentCarbEntryScreen(_ activity: NSUserActivity?) {
         let navigationWrapper: UINavigationController
-        if closedLoopStatus.isClosedLoop {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
+            let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
+            if let activity = activity {
+                viewModel.restoreUserActivityState(activity)
+            }
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+            navigationWrapper = UINavigationController(rootViewController: hostingController)
+            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+        } else {
             let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
 
             carbEntryViewController.deviceManager = deviceManager
@@ -1222,15 +1231,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 carbEntryViewController.restoreUserActivityState(activity)
             }
             navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
-        } else {
-            let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
-            if let activity = activity {
-                viewModel.restoreUserActivityState(activity)
-            }
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
-            let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
-            navigationWrapper = UINavigationController(rootViewController: hostingController)
-            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
         }
         present(navigationWrapper, animated: true)
     }
@@ -1241,13 +1241,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentBolusEntryView(enableManualGlucoseEntry: Bool = false) {
         let hostingController: DismissibleHostingController
-        if closedLoopStatus.isClosedLoop {
-            let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
-            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
-            hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
-        } else {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: false)
             let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+        } else {
+            let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
+            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         }
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
@@ -1662,9 +1662,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private func presentDebugMenu() {
         guard FeatureFlags.allowDebugFeatures else {
             return
-        }
-        guard FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled else {
-            fatalError("\(#function) should be invoked only when scenarios, simulated core data, or mock therapy settings are enabled")
         }
 
         let actionSheet = UIAlertController(title: "Debug", message: nil, preferredStyle: .actionSheet)

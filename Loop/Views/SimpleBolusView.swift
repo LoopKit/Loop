@@ -355,7 +355,7 @@ struct SimpleBolusView: View {
     private func closedLoopOffInformationalModal() -> SwiftUI.Alert {
         return SwiftUI.Alert(
             title: Text("Closed Loop OFF", comment: "Alert title for closed loop off informational modal"),
-            message: Text(String(format: NSLocalizedString("%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but your basal insulin will not adjust automatically.", comment: "Alert message for closed loop off informational modal. (1: app name)"), Bundle.main.bundleDisplayName))
+            message: Text(String(format: NSLocalizedString("%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.", comment: "Alert message for closed loop off informational modal. (1: app name)"), Bundle.main.bundleDisplayName))
         )
     }
 
