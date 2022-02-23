@@ -255,7 +255,7 @@ final class WatchDataManager: NSObject {
             context.isClosedLoop = settings.dosingEnabled
 
             context.potentialCarbEntry = potentialCarbEntry
-            if let recommendedBolus = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            if let recommendedBolus = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses)
             {
                 context.recommendedBolusDose = recommendedBolus.amount
                 dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: recommendedBolus,

@@ -751,13 +751,13 @@ final class BolusEntryViewModel: ObservableObject {
                 manualGlucoseSample!,
                 consideringPotentialCarbEntry: potentialCarbEntry,
                 replacingCarbEntry: originalCarbEntry,
-                considerPositiveVelocityAndRC: false
+                considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses
             )
         } else {
             return try state.recommendBolus(
                 consideringPotentialCarbEntry: potentialCarbEntry,
                 replacingCarbEntry: originalCarbEntry,
-                considerPositiveVelocityAndRC: false
+                considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses
             )
         }
     }
