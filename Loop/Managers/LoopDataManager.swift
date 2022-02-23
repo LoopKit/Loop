@@ -1246,8 +1246,6 @@ extension LoopDataManager {
 
         if inputs.contains(.momentum), let momentumEffect = self.glucoseMomentumEffect {
             if !includingPositiveVelocityAndRC, let netMomentum = momentumEffect.netEffect(), netMomentum.quantity.doubleValue(for: .milligramsPerDeciliter) > 0 {
-                print("Not using positive momentum of \(netMomentum)")
-                print("momentumEffect = \(momentumEffect)")
                 momentum = []
             } else {
                 momentum = momentumEffect
@@ -1256,8 +1254,6 @@ extension LoopDataManager {
 
         if inputs.contains(.retrospection) {
             if !includingPositiveVelocityAndRC, let netRC = retrospectiveGlucoseEffect.netEffect(), netRC.quantity.doubleValue(for: .milligramsPerDeciliter) > 0 {
-                print("Not using positive RC of \(netRC)")
-                print("rc effect = \(retrospectiveGlucoseEffect)")
                 // positive RC is turned off
             } else {
                 effects.append(retrospectiveGlucoseEffect)

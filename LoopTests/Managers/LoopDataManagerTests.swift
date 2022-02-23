@@ -467,11 +467,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         let exp = expectation(description: #function)
         var recommendedBolus: ManualBolusRecommendation?
         loopDataManager.getLoopState { (_, loopState) in
-            do {
-                recommendedBolus = try loopState.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
-            } catch {
-                print("Here: error = \(error)")
-            }
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
             exp.fulfill()
         }
         wait(for: [exp], timeout: 100000.0)
