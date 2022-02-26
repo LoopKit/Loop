@@ -54,6 +54,9 @@ final class DeviceDataManager {
         if !FeatureFlags.fiaspInsulinModelEnabled {
             allowed.remove(.fiasp)
         }
+        if !FeatureFlags.lyumjevInsulinModelEnabled {
+            allowed.remove(.lyumjev)
+        }
         return allowed
     }()
 
