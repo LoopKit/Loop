@@ -103,12 +103,10 @@ final class DeviceDataManager {
     let doseStore: DoseStore
     
     let glucoseStore: GlucoseStore
-    
+
     private let cacheStore: PersistenceController
-    
+
     let dosingDecisionStore: DosingDecisionStore
-    
-    let settingsStore: SettingsStore
     
     /// All the HealthKit types to be read by stores
     private var readTypes: Set<HKSampleType> {
@@ -165,6 +163,8 @@ final class DeviceDataManager {
 
     var loggingServicesManager: LoggingServicesManager
 
+    var settingsManager: SettingsManager
+
     var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
 
     var criticalEventLogExportManager: CriticalEventLogExportManager!
@@ -185,11 +185,13 @@ final class DeviceDataManager {
 
     init(pluginManager: PluginManager,
          alertManager: AlertManager,
+         settingsManager: SettingsManager,
          bluetoothProvider: BluetoothProvider,
          alertPresenter: AlertPresenter,
-         closedLoopStatus: ClosedLoopStatus)
+         closedLoopStatus: ClosedLoopStatus,
+         cacheStore: PersistenceController,
+         localCacheDuration: TimeInterval)
     {
-        let localCacheDuration = Bundle.main.localCacheDuration
 
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -212,8 +214,9 @@ final class DeviceDataManager {
         self.alertPresenter = alertPresenter
         
         self.healthStore = HKHealthStore()
-        self.cacheStore = PersistenceController.controllerInAppGroupDirectory()
-        
+        self.cacheStore = cacheStore
+        self.settingsManager = settingsManager
+
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
         let sensitivitySchedule = UserDefaults.appGroup?.insulinSensitivitySchedule
         let overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
@@ -259,7 +262,6 @@ final class DeviceDataManager {
         cgmStalenessMonitor.delegate = glucoseStore
         
         self.dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
-        self.settingsStore = SettingsStore(store: cacheStore, expireAfter: localCacheDuration)
         
         self.cgmHasValidSensorSession = false
         self.closedLoopStatus = closedLoopStatus
@@ -296,7 +298,7 @@ final class DeviceDataManager {
             glucoseStore: glucoseStore,
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
-            settingsStore: settingsStore,
+            latestStoredSettingsProvider: settingsManager,
             alertIssuer: alertManager,
             pumpInsulinType: pumpManager?.status.insulinType,
             automaticDosingStatus: closedLoopStatus
@@ -311,8 +313,10 @@ final class DeviceDataManager {
             doseStore: doseStore,
             dosingDecisionStore: dosingDecisionStore,
             glucoseStore: glucoseStore,
-            settingsStore: settingsStore
+            settingsStore: settingsManager.settingsStore
         )
+
+        settingsManager.remoteDataServicesManager = remoteDataServicesManager
         
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
@@ -321,7 +325,7 @@ final class DeviceDataManager {
             remoteDataServicesManager: remoteDataServicesManager
         )
 
-        let criticalEventLogs: [CriticalEventLog] = [settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
+        let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
                                                                       directory: FileManager.default.exportsDirectoryURL,
                                                                       historicalDuration: Bundle.main.localCacheDuration)
@@ -337,7 +341,6 @@ final class DeviceDataManager {
         doseStore.delegate = self
         dosingDecisionStore.delegate = self
         glucoseStore.delegate = self
-        settingsStore.delegate = self
 
         setupPump()
         setupCGM()
@@ -764,7 +767,6 @@ extension DeviceDataManager {
 
     func didBecomeActive() {
         updatePumpManagerBLEHeartbeatPreference()
-        loopManager.didBecomeActive()
     }
 
     func updatePumpManagerBLEHeartbeatPreference() {
@@ -810,7 +812,7 @@ extension DeviceDataManager: CGMManagerDelegate {
             }
             self.cgmManager = nil
             self.displayGlucoseUnitObservers.cleanupDeallocatedElements()
-            self.loopManager.storeSettings()
+            self.settingsManager.storeSettings()
         }
     }
 
@@ -857,7 +859,7 @@ extension DeviceDataManager: CGMManagerOnboardingDelegate {
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
-            self.loopManager.storeSettings()
+            self.settingsManager.storeSettings()
         }
     }
 }
@@ -969,7 +971,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         DispatchQueue.main.async {
             self.pumpManager = nil
             self.deliveryUncertaintyAlertManager = nil
-            self.loopManager.storeSettings()
+            self.settingsManager.storeSettings()
         }
     }
 
@@ -1039,7 +1041,7 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
-            self.loopManager.storeSettings()
+            self.settingsManager.storeSettings()
         }
     }
 }
@@ -1091,15 +1093,6 @@ extension DeviceDataManager: GlucoseStoreDelegate {
 
     func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
         remoteDataServicesManager.glucoseStoreHasUpdatedGlucoseData(glucoseStore)
-    }
-
-}
-
-// MARK: - SettingsStoreDelegate
-extension DeviceDataManager: SettingsStoreDelegate {
-
-    func settingsStoreHasUpdatedSettingsData(_ settingsStore: SettingsStore) {
-        remoteDataServicesManager.settingsStoreHasUpdatedSettingsData(settingsStore)
     }
 
 }
@@ -1299,17 +1292,23 @@ extension DeviceDataManager {
             fatalError("\(#function) should be invoked only when simulated core data is enabled")
         }
 
-        self.loopManager.generateSimulatedHistoricalCoreData() { error in
+        settingsManager.settingsStore.generateSimulatedHistoricalSettingsObjects() { error in
             guard error == nil else {
                 completion(error)
                 return
             }
-            self.deviceLog.generateSimulatedHistoricalDeviceLogEntries() { error in
+            self.loopManager.generateSimulatedHistoricalCoreData() { error in
                 guard error == nil else {
                     completion(error)
                     return
                 }
-                self.alertManager.alertStore.generateSimulatedHistoricalStoredAlerts(completion: completion)
+                self.deviceLog.generateSimulatedHistoricalDeviceLogEntries() { error in
+                    guard error == nil else {
+                        completion(error)
+                        return
+                    }
+                    self.alertManager.alertStore.generateSimulatedHistoricalStoredAlerts(completion: completion)
+                }
             }
         }
     }
@@ -1329,7 +1328,13 @@ extension DeviceDataManager {
                     completion(error)
                     return
                 }
-                self.loopManager.purgeHistoricalCoreData(completion: completion)
+                self.loopManager.purgeHistoricalCoreData { error in
+                    guard error == nil else {
+                        completion(error)
+                        return
+                    }
+                    self.settingsManager.purgeHistoricalSettingsObjects(completion: completion)
+                }
             }
         }
     }
@@ -1489,3 +1494,5 @@ extension DeviceDataManager {
 extension DeviceDataManager {
     var availableSupports: [SupportUI] { [cgmManager, pumpManager].compactMap { $0 as? SupportUI } }
 }
+
+extension DeviceDataManager: DeviceStatusProvider {}
