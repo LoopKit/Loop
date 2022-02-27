@@ -36,7 +36,14 @@ class MockCarbStore: CarbStoreProtocol {
         timeZone: .utcTimeZone
     )!
     
-    var carbRatioScheduleApplyingOverrideHistory: CarbRatioSchedule?
+    var carbRatioScheduleApplyingOverrideHistory: CarbRatioSchedule? = CarbRatioSchedule(
+        unit: .gram(),
+        dailyItems: [
+            RepeatingScheduleValue(startTime: 0.0, value: 10.0),
+            RepeatingScheduleValue(startTime: 32400.0, value: 12.0)
+        ],
+        timeZone: .utcTimeZone
+    )!
     
     var maximumAbsorptionTimeInterval: TimeInterval {
         return defaultAbsorptionTimes.slow * 2

@@ -49,3 +49,33 @@ public class ServicesViewModel: ObservableObject {
         delegate?.addService(withIdentifier: availableService.identifier)
     }
 }
+
+// For previews only
+extension ServicesViewModel {
+    fileprivate class FakeService1: Service {
+        static var localizedTitle: String = "Service 1"
+        static var serviceIdentifier: String = "FakeService1"
+        var serviceDelegate: ServiceDelegate?
+        var rawState: RawStateValue = [:]
+        required init() {}
+        required init?(rawState: RawStateValue) {}
+        let isOnboarded = true
+        var available: ServiceDescriptor { ServiceDescriptor(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+    }
+    fileprivate class FakeService2: Service {
+        static var localizedTitle: String = "Service 2"
+        static var serviceIdentifier: String = "FakeService2"
+        var serviceDelegate: ServiceDelegate?
+        var rawState: RawStateValue = [:]
+        required init() {}
+        required init?(rawState: RawStateValue) {}
+        let isOnboarded = true
+        var available: ServiceDescriptor { ServiceDescriptor(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+    }
+
+    static var preview: ServicesViewModel {
+        return ServicesViewModel(showServices: true,
+                                 availableServices: { [FakeService1().available, FakeService2().available] },
+                                 activeServices: { [FakeService1()] })
+    }
+}

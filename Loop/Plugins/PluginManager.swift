@@ -189,6 +189,32 @@ class PluginManager {
             return bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.onboardingIdentifier.rawValue) as? String
         })
     }
+
+    func getSupportUITypeByIdentifier(_ identifier: String) -> SupportUI.Type? {
+        for bundle in pluginBundles {
+            if let name = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.supportIdentifier.rawValue) as? String, name == identifier {
+                do {
+                    try bundle.loadAndReturnError()
+
+                    if let principalClass = bundle.principalClass as? NSObject.Type {
+
+                        if let plugin = principalClass.init() as? SupportUIPlugin {
+                            return type(of: plugin.support)
+                        } else {
+                            fatalError("PrincipalClass does not conform to SupportUIPlugin")
+                        }
+
+                    } else {
+                        fatalError("PrincipalClass not found")
+                    }
+                } catch let error {
+                    log.error("Error loading plugin: %{public}@", String(describing: error))
+                }
+            }
+        }
+        return nil
+    }
+
 }
 
 

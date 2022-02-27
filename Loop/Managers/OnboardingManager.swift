@@ -19,7 +19,7 @@ class OnboardingManager {
     private weak var windowProvider: WindowProvider?
     private let userDefaults: UserDefaults
 
-    private var isSuspended: Bool {
+    @Published public private(set) var isSuspended: Bool {
         didSet { userDefaults.onboardingManagerIsSuspended = isSuspended }
     }
 
@@ -363,6 +363,7 @@ extension OnboardingManager: PumpManagerProvider {
         }
         return PumpSupportedIncrements(basalRates: pumpManagerType.onboardingSupportedBasalRates,
                                        bolusVolumes: pumpManagerType.onboardingSupportedBolusVolumes,
+                                       maximumBolusVolumes: pumpManagerType.onboardingSupportedMaximumBolusVolumes,
                                        maximumBasalScheduleEntryCount: pumpManagerType.onboardingMaximumBasalScheduleEntryCount)
     }
 

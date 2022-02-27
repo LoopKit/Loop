@@ -65,7 +65,7 @@ cd "${git_source_root}"
 
 if [ -e .git ]; then
   rev=$(git rev-parse HEAD)
-  plutil -replace com-loopkit-Loop-git-revision -string ${rev} "${info_plist_path}"
+  plutil -replace com-loopkit-Loop-git-revision -string ${rev:0:7} "${info_plist_path}"
   branch=$(git branch --show-current)
   if [ -n "$branch" ]; then
     plutil -replace com-loopkit-Loop-git-branch -string "${branch}" "${info_plist_path}"
@@ -85,4 +85,19 @@ if [ -e "${provisioning_profile_path}" ]; then
   plutil -replace com-loopkit-Loop-profile-expiration -date "${profile_expire_date}" "${info_plist_path}"
 else
   warn "Invalid provisioning profile path ${provisioning_profile_path}"
+fi
+
+# determine if this is a workspace build
+# if so, fill out the git revision and branch
+if [ -e ../Loop.xcworkspace ]
+then
+    pushd . > /dev/null
+    cd ..
+    rev=$(git rev-parse HEAD)
+    plutil -replace com-loopkit-LoopWorkspace-git-revision -string "${rev:0:7}" "${info_plist_path}"
+    branch=$(git branch --show-current)
+    if [ -n "$branch" ]; then
+        plutil -replace com-loopkit-LoopWorkspace-git-branch -string "${branch}" "${info_plist_path}"
+    fi
+    popd . > /dev/null
 fi

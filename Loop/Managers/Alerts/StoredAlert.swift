@@ -8,26 +8,34 @@
 
 import CoreData
 import LoopKit
+import UIKit
 
 extension StoredAlert {
     
     static var encoder = JSONEncoder()
     static var decoder = JSONDecoder()
           
-    convenience init(from alert: Alert, context: NSManagedObjectContext, issuedDate: Date = Date()) {
+    convenience init(from alert: Alert, context: NSManagedObjectContext, issuedDate: Date = Date(), syncIdentifier: UUID = UUID()) {
         do {
-            self.init(context: context)
+            /// This code, using the `init(entity:insertInto:)` instead of the `init(context:)` avoids warnings during unit testing that look like this:
+            /// `CoreData: warning: Multiple NSEntityDescriptions claim the NSManagedObject subclass 'Loop.StoredAlert' so +entity is unable to disambiguate.`
+            /// This mitigates that.  See https://stackoverflow.com/a/54126839 for more info.
+            let name = String(describing: type(of: self))
+            let entity = NSEntityDescription.entity(forEntityName: name, in: context)!
+            self.init(entity: entity, insertInto: context)
             self.issuedDate = issuedDate
-            alertIdentifier = alert.identifier.alertIdentifier
-            managerIdentifier = alert.identifier.managerIdentifier
-            triggerType = alert.trigger.storedType
-            triggerInterval = alert.trigger.storedInterval
-            isCritical = alert.foregroundContent?.isCritical ?? false || alert.backgroundContent?.isCritical ?? false
+            self.alertIdentifier = alert.identifier.alertIdentifier
+            self.managerIdentifier = alert.identifier.managerIdentifier
+            self.triggerType = alert.trigger.storedType
+            self.triggerInterval = alert.trigger.storedInterval
+            self.interruptionLevel = alert.interruptionLevel
+            self.syncIdentifier = syncIdentifier
             // Encode as JSON strings
             let encoder = StoredAlert.encoder
-            sound = try encoder.encodeToStringIfPresent(alert.sound)
-            foregroundContent = try encoder.encodeToStringIfPresent(alert.foregroundContent)
-            backgroundContent = try encoder.encodeToStringIfPresent(alert.backgroundContent)
+            self.sound = try encoder.encodeToStringIfPresent(alert.sound)
+            self.foregroundContent = try encoder.encodeToStringIfPresent(alert.foregroundContent)
+            self.backgroundContent = try encoder.encodeToStringIfPresent(alert.backgroundContent)
+            self.metadata = try encoder.encodeToStringIfPresent(alert.metadata)
         } catch {
             fatalError("Failed to encode: \(error)")
         }
@@ -57,6 +65,7 @@ extension Alert {
         let fgContent = try Alert.Content(contentString: storedAlert.foregroundContent)
         let bgContent = try Alert.Content(contentString: storedAlert.backgroundContent)
         let sound = try Alert.Sound(soundString: storedAlert.sound)
+        let metadata = try Alert.Metadata(metadataString: storedAlert.metadata)
         let trigger = try Alert.Trigger(storedType: storedAlert.triggerType,
                                         storedInterval: storedAlert.triggerInterval,
                                         storageDate: adjustedForStorageTime ? storedAlert.issuedDate : nil)
@@ -64,7 +73,9 @@ extension Alert {
                   foregroundContent: fgContent,
                   backgroundContent: bgContent,
                   trigger: trigger,
-                  sound: sound)
+                  interruptionLevel: storedAlert.interruptionLevel,
+                  sound: sound,
+                  metadata: metadata)
     }
 }
 
@@ -89,6 +100,18 @@ extension Alert.Sound {
             throw JSONEncoderError.stringEncodingError
         }
         self = try StoredAlert.decoder.decode(Alert.Sound.self, from: soundData)
+    }
+}
+
+extension Alert.Metadata {
+    init?(metadataString: String?) throws {
+        guard let metadataString = metadataString else {
+            return nil
+        }
+        guard let metadataData = metadataString.data(using: .utf8) else {
+            throw JSONEncoderError.stringEncodingError
+        }
+        self = try StoredAlert.decoder.decode(Alert.Metadata.self, from: metadataData)
     }
 }
 
@@ -145,11 +168,53 @@ extension Alert.Trigger {
     }
 }
 
+extension Alert.InterruptionLevel {
+    
+    var storedValue: NSNumber {
+        // Since this is arbitrary anyway, might as well make it match iOS's values
+        switch self {
+        case .active:
+            if #available(iOS 15.0, *) {
+                return NSNumber(value: UNNotificationInterruptionLevel.active.rawValue)
+            } else {
+                // https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel/active
+                return 1
+            }
+        case .timeSensitive:
+            if #available(iOS 15.0, *) {
+                return NSNumber(value: UNNotificationInterruptionLevel.timeSensitive.rawValue)
+            } else {
+                // https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel/timesensitive
+                return 2
+            }
+        case .critical:
+            if #available(iOS 15.0, *) {
+                return NSNumber(value: UNNotificationInterruptionLevel.critical.rawValue)
+            } else {
+                // https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel/critical
+                return 3
+            }
+        }
+    }
+    
+    init?(storedValue: NSNumber) {
+        switch storedValue {
+        case Self.active.storedValue: self = .active
+        case Self.timeSensitive.storedValue: self = .timeSensitive
+        case Self.critical.storedValue: self = .critical
+        default:
+            return nil
+        }
+    }
+}
+
+
+
 enum JSONEncoderError: Swift.Error {
     case stringEncodingError
 }
 
-fileprivate extension JSONEncoder {
+extension JSONEncoder {
     func encodeToStringIfPresent<T>(_ encodable: T?) throws -> String? where T: Encodable {
         guard let encodable = encodable else { return nil }
         let data = try self.encode(encodable)
@@ -157,5 +222,25 @@ fileprivate extension JSONEncoder {
             throw JSONEncoderError.stringEncodingError
         }
         return result
+    }
+}
+
+extension SyncAlertObject {
+    init?(managedObject: StoredAlert) throws {
+        guard let syncIdentifier = managedObject.syncIdentifier else {
+            return nil
+        }
+        self.init(identifier: managedObject.identifier,
+                  trigger: try Alert.Trigger(storedType: managedObject.triggerType, storedInterval: managedObject.triggerInterval),
+                  interruptionLevel: managedObject.interruptionLevel,
+                  foregroundContent: try Alert.Content(contentString: managedObject.foregroundContent),
+                  backgroundContent: try Alert.Content(contentString: managedObject.backgroundContent),
+                  sound: try Alert.Sound(soundString: managedObject.sound),
+                  metadata: try Alert.Metadata(metadataString: managedObject.metadata),
+                  issuedDate: managedObject.issuedDate,
+                  acknowledgedDate: managedObject.acknowledgedDate,
+                  retractedDate: managedObject.retractedDate,
+                  syncIdentifier: syncIdentifier
+        )
     }
 }

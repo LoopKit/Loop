@@ -27,10 +27,12 @@ extension UserDefaults {
 
     var visibleDuration: TimeInterval  {
         get {
-            if let value = object(forKey: Key.VisibleDuration.rawValue) as? TimeInterval {
-                return value
-            }
-            return TimeInterval (hours: 6)
+            // Menus are deprecated.
+            // TODO: Add a settings bundle to allow users to set this
+//            if let value = object(forKey: Key.VisibleDuration.rawValue) as? TimeInterval {
+//                return value
+//            }
+            return TimeInterval(hours: 6)
         }
         set {
             set(newValue.rawValue, forKey: Key.VisibleDuration.rawValue)

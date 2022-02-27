@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17511" systemVersion="20C69" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19574" systemVersion="21D49" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="StoredAlert" representedClassName=".StoredAlert" syncable="YES">
         <attribute name="acknowledgedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="alertIdentifier" attributeType="String"/>
         <attribute name="backgroundContent" optional="YES" attributeType="String"/>
         <attribute name="foregroundContent" optional="YES" attributeType="String"/>
-        <attribute name="isCritical" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="interruptionLevel" attributeType="Integer 16" defaultValueString="2" usesScalarValueType="YES"/>
         <attribute name="issuedDate" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="managerIdentifier" attributeType="String"/>
+        <attribute name="metadata" optional="YES" attributeType="String"/>
         <attribute name="modificationCounter" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="retractedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="sound" optional="YES" attributeType="String"/>
+        <attribute name="syncIdentifier" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="triggerInterval" optional="YES" attributeType="Double" usesScalarValueType="NO"/>
         <attribute name="triggerType" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <fetchIndex name="byModificationCounter">
@@ -18,6 +20,6 @@
         </fetchIndex>
     </entity>
     <elements>
-        <element name="StoredAlert" positionX="-63" positionY="-18" width="128" height="209"/>
+        <element name="StoredAlert" positionX="-63" positionY="-18" width="128" height="239"/>
     </elements>
 </model>

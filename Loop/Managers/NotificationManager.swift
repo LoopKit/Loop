@@ -90,6 +90,9 @@ extension NotificationManager {
 
         notification.body = body
         notification.sound = .default
+        if #available(iOS 15.0, *) {
+            notification.interruptionLevel = .timeSensitive
+        }
 
         if startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5) {
             notification.categoryIdentifier = LoopNotificationCategory.bolusFailure.rawValue
@@ -123,14 +126,20 @@ extension NotificationManager {
             formatter.allowedUnits = [.hour, .minute]
             formatter.unitsStyle = .full
 
-            if let failueIntervalString = formatter.string(from: failureInterval)?.localizedLowercase {
-                notification.body = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failueIntervalString)
+            if let failureIntervalString = formatter.string(from: failureInterval)?.localizedLowercase {
+                notification.body = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failureIntervalString)
             }
 
             notification.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
             if isCritical, FeatureFlags.criticalAlertsEnabled {
+                if #available(iOS 15.0, *) {
+                    notification.interruptionLevel = .critical
+                }
                 notification.sound = .defaultCritical
             } else {
+                if #available(iOS 15.0, *) {
+                    notification.interruptionLevel = .timeSensitive
+                }
                 notification.sound = .default
             }
             notification.categoryIdentifier = LoopNotificationCategory.loopNotRunning.rawValue

@@ -80,6 +80,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     lazy var glucoseStore = GlucoseStore(
         healthStore: healthStore,
         observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+        storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
         observationEnabled: false,
         provenanceIdentifier: HKSource.default().bundleIdentifier
@@ -88,6 +89,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     lazy var doseStore = DoseStore(
         healthStore: healthStore,
         observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+        storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
         observationEnabled: false,
         insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: defaults?.defaultRapidActingModel),

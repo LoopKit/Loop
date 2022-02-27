@@ -30,7 +30,6 @@ struct CriticalEventLogExportView: View {
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: cancelButton)
         .onAppear { self.viewModel.export() }
-        .onDisappear { self.viewModel.cancel() }
         .alert(isPresented: $viewModel.showingError) {
             errorAlert
         }

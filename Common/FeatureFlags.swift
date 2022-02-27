@@ -18,6 +18,7 @@ struct FeatureFlagConfiguration: Decodable {
     let fiaspInsulinModelEnabled: Bool
     let includeServicesInSettingsEnabled: Bool
     let manualDoseEntryEnabled: Bool
+    let insulinDeliveryReservoirViewEnabled: Bool
     let mockTherapySettingsEnabled: Bool
     let nonlinearCarbModelEnabled: Bool
     let observeHealthKitSamplesFromOtherApps: Bool
@@ -27,6 +28,7 @@ struct FeatureFlagConfiguration: Decodable {
     let sensitivityOverridesEnabled: Bool
     let simulatedCoreDataEnabled: Bool
     let siriEnabled: Bool
+    let simpleBolusCalculatorEnabled: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -84,6 +86,13 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         // Swift compiler config is inverse, since the default state is enabled.
+        #if INSULIN_DELIVERY_RESERVOIR_VIEW_DISABLED
+        self.insulinDeliveryReservoirViewEnabled = false
+        #else
+        self.insulinDeliveryReservoirViewEnabled = true
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
         #if MOCK_THERAPY_SETTINGS_ENABLED
         self.mockTherapySettingsEnabled = true
         #else
@@ -135,6 +144,12 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.siriEnabled = true
         #endif
+        
+        #if SIMPLE_BOLUS_CALCULATOR_ENABLED
+        self.simpleBolusCalculatorEnabled = true
+        #else
+        self.simpleBolusCalculatorEnabled = false
+        #endif
     }
 }
 
@@ -159,34 +174,35 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* automaticBolusEnabled: \(automaticBolusEnabled)",
             "* manualDoseEntryEnabled: \(manualDoseEntryEnabled)",
             "* allowDebugFeatures: \(allowDebugFeatures)",
+            "* simpleBolusCalculatorEnabled: \(simpleBolusCalculatorEnabled)",
         ].joined(separator: "\n")
     }
 }
 
 extension FeatureFlagConfiguration {
     var allowDebugFeatures: Bool {
+        #if ALLOW_DEBUG_FEATURES_ENABLED
         if debugEnabled {
             return true
-        }
-        if UserDefaults.appGroup?.allowDebugFeatures ?? false {
+        } else if UserDefaults.appGroup?.allowDebugFeatures ?? false {
             return true
+        } else {
+            return false
         }
-        #if ALLOW_DEBUG_FEATURES_ENABLED
-        return true
         #else
         return false
         #endif
     }
     
     var allowSimulators: Bool {
+        #if ALLOW_SIMULATORS_ENABLED
         if debugEnabled {
             return true
-        }
-        if UserDefaults.appGroup?.allowSimulators ?? false {
+        } else if UserDefaults.appGroup?.allowSimulators ?? false {
             return true
+        } else {
+            return false
         }
-        #if ALLOW_SIMULATORS_ENABLED
-        return true
         #else
         return false
         #endif

@@ -50,7 +50,11 @@ public class LoopAlertsManager {
         let fgcontent = Alert.Content(title: title,
                                       body: fgBody,
                                       acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
-        alertManager?.issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier, foregroundContent: fgcontent, backgroundContent: bgcontent, trigger: .immediate))
+        alertManager?.issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier,
+                                       foregroundContent: fgcontent,
+                                       backgroundContent: bgcontent,
+                                       trigger: .immediate,
+                                       interruptionLevel: .critical))
     }
 
 }

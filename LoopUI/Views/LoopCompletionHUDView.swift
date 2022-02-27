@@ -142,7 +142,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
             }
         } else {
             caption?.text = "–"
-            accessibilityLabel = LocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
+            accessibilityLabel = LocalizedString("Waiting for first run", comment: "Accessibility label describing completion HUD waiting for first run")
         }
 
         if loopIconClosed {
@@ -165,7 +165,7 @@ extension LoopCompletionHUDView {
         case .fresh:
             if loopStateView.open {
                 return (title: LocalizedString("Closed Loop OFF", comment: "Title of green open loop OFF message"),
-                        message: String(format: NSLocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but your basal insulin will not adjust automatically.\n\nTap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Green closed loop OFF message (1: app name)"), Bundle.main.bundleDisplayName))
+                        message: String(format: NSLocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\nTap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Green closed loop OFF message (1: app name)"), Bundle.main.bundleDisplayName))
             } else {
                 return (title: LocalizedString("Closed Loop ON", comment: "Title of green closed loop ON message"),
                         message: String(format: LocalizedString("\n%1$@ is operating with Closed Loop in the ON position. Your last loop was successful within the last 5 minutes.", comment: "Green closed loop ON message (1: app name)"), Bundle.main.bundleDisplayName))

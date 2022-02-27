@@ -355,7 +355,7 @@ struct SimpleBolusView: View {
     private func closedLoopOffInformationalModal() -> SwiftUI.Alert {
         return SwiftUI.Alert(
             title: Text("Closed Loop OFF", comment: "Alert title for closed loop off informational modal"),
-            message: Text(String(format: NSLocalizedString("%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but your basal insulin will not adjust automatically.", comment: "Alert message for closed loop off informational modal. (1: app name)"), Bundle.main.bundleDisplayName))
+            message: Text(String(format: NSLocalizedString("%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.", comment: "Alert message for closed loop off informational modal. (1: app name)"), Bundle.main.bundleDisplayName))
         )
     }
 
@@ -364,8 +364,8 @@ struct SimpleBolusView: View {
 
 struct SimpleBolusCalculatorView_Previews: PreviewProvider {
     class MockSimpleBolusViewDelegate: SimpleBolusViewModelDelegate {
-        func addGlucose(_ samples: [NewGlucoseSample], completion: (Error?) -> Void) {
-            completion(nil)
+        func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
+            completion(.success([]))
         }
         
         func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
@@ -393,12 +393,13 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
         }
         
         func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
-            var decision = BolusDosingDecision()
-            decision.recommendedBolus = ManualBolusRecommendation(amount: 3, pendingInsulin: 0)
+            var decision = BolusDosingDecision(for: .simpleBolus)
+            decision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 3, pendingInsulin: 0),
+                                                                                   date: Date())
             return decision
         }
         
-        func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
+        func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
         }
         
         var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable {

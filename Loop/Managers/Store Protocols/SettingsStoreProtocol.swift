@@ -9,6 +9,7 @@
 import LoopKit
 
 protocol SettingsStoreProtocol: AnyObject {
+    var latestSettings: StoredSettings? { get }
     func storeSettings(_ settings: StoredSettings, completion: @escaping () -> Void)
 }
 

@@ -10,7 +10,10 @@ import LoopKit
 @testable import Loop
 
 class MockDosingDecisionStore: DosingDecisionStoreProtocol {
+    var dosingDecisions: [StoredDosingDecision] = []
+
     func storeDosingDecision(_ dosingDecision: StoredDosingDecision, completion: @escaping () -> Void) {
+        dosingDecisions.append(dosingDecision)
         completion()
     }
 }

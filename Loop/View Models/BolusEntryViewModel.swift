@@ -26,7 +26,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry? ,
                       completion: @escaping (_ result: Result<StoredCarbEntry>) -> Void)
 
-    func storeBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
+    func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
     func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void)
     
@@ -103,7 +103,7 @@ final class BolusEntryViewModel: ObservableObject {
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
     private var isInitiatingSaveOrBolus = false
 
-    private var dosingDecision = BolusDosingDecision()
+    private var dosingDecision = BolusDosingDecision(for: .normalBolus)
 
     @Published var activeAlert: Alert?
     @Published var activeNotice: Notice?
@@ -365,7 +365,7 @@ final class BolusEntryViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let glucoseValues):
-                        self.dosingDecision.manualGlucose = glucoseValues.first
+                        self.dosingDecision.manualGlucoseSample = glucoseValues.first
                         self.saveCarbsAndDeliverBolus(onSuccess: completion)
                     case .failure(let error):
                         self.isInitiatingSaveOrBolus = false
@@ -375,7 +375,7 @@ final class BolusEntryViewModel: ObservableObject {
                 }
             }
         } else {
-            self.dosingDecision.manualGlucose = nil
+            self.dosingDecision.manualGlucoseSample = nil
             saveCarbsAndDeliverBolus(onSuccess: completion)
         }
     }
@@ -416,8 +416,8 @@ final class BolusEntryViewModel: ObservableObject {
         let now = self.now()
         let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
 
-        dosingDecision.requestedBolus = bolusVolume
-        delegate?.storeBolusDosingDecision(dosingDecision, withDate: now)
+        dosingDecision.manualBolusRequested = bolusVolume
+        delegate?.storeManualBolusDosingDecision(dosingDecision, withDate: now)
 
         guard bolusVolume > 0 else {
             completion()
@@ -503,7 +503,9 @@ final class BolusEntryViewModel: ObservableObject {
             NewGlucoseSample(
                 date: entryDate,
                 quantity: quantity,
-                trend: nil, // All manual glucose entries are assumed to have no trend.
+                condition: nil,     // All manual glucose entries are assumed to have no condition.
+                trend: nil,         // All manual glucose entries are assumed to have no trend.
+                trendRate: nil,     // All manual glucose entries are assumed to have no trend rate.
                 isDisplayOnly: false,
                 wasUserEntered: true,
                 syncIdentifier: uuidProvider()
@@ -537,15 +539,19 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateStoredGlucoseValues() {
-        delegate?.getGlucoseSamples(start: chartDateInterval.start, end: nil) { [weak self] result in
+        let historicalGlucoseStartDate = Date(timeInterval: -LoopCoreConstants.dosingDecisionHistoricalGlucoseInterval, since: now())
+        let chartStartDate = chartDateInterval.start
+        delegate?.getGlucoseSamples(start: min(historicalGlucoseStartDate, chartStartDate), end: nil) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 switch result {
                 case .failure(let error):
                     self.log.error("Failure getting glucose samples: %{public}@", String(describing: error))
                     self.storedGlucoseValues = []
+                    self.dosingDecision.historicalGlucose = []
                 case .success(let samples):
-                    self.storedGlucoseValues = samples
+                    self.storedGlucoseValues = samples.filter { $0.startDate >= chartStartDate }
+                    self.dosingDecision.historicalGlucose = samples.filter { $0.startDate >= historicalGlucoseStartDate }.map { HistoricalGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) }
                 }
                 self.updateGlucoseChartValues()
             }
@@ -596,7 +602,7 @@ final class BolusEntryViewModel: ObservableObject {
 
         DispatchQueue.main.async {
             self.predictedGlucoseValues = predictedGlucoseValues
-            self.dosingDecision.predictedGlucoseIncludingPendingInsulin = predictedGlucoseValues
+            self.dosingDecision.predictedGlucose = predictedGlucoseValues
             completion()
         }
     }
@@ -675,6 +681,7 @@ final class BolusEntryViewModel: ObservableObject {
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
+        let now = Date()
         var recommendation: ManualBolusRecommendation?
         let recommendedBolus: HKQuantity?
         let notice: Notice?
@@ -717,7 +724,7 @@ final class BolusEntryViewModel: ObservableObject {
         DispatchQueue.main.async {
             let priorRecommendedBolus = self.recommendedBolus
             self.recommendedBolus = recommendedBolus
-            self.dosingDecision.recommendedBolus = recommendation
+            self.dosingDecision.manualBolusRecommendation = recommendation.map { ManualBolusRecommendationWithDate(recommendation: $0, date: now) }
             self.activeNotice = notice
 
             if priorRecommendedBolus != recommendedBolus,
@@ -775,12 +782,12 @@ final class BolusEntryViewModel: ObservableObject {
             HKQuantity(unit: .internationalUnit(), doubleValue: maxBolusAmount)
         }
 
-        dosingDecision.scheduleOverride = preMealOverride ?? scheduleOverride
-        dosingDecision.glucoseTargetRangeSchedule = targetGlucoseSchedule
+        dosingDecision.scheduleOverride = scheduleOverride
+
         if scheduleOverride != nil || preMealOverride != nil {
-            dosingDecision.effectiveGlucoseTargetRangeSchedule = delegate.settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
+            dosingDecision.glucoseTargetRangeSchedule = delegate.settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
         } else {
-            dosingDecision.effectiveGlucoseTargetRangeSchedule = nil
+            dosingDecision.glucoseTargetRangeSchedule = targetGlucoseSchedule
         }
     }
 

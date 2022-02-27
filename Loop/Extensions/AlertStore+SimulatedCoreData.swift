@@ -52,14 +52,13 @@ fileprivate extension AlertStore.DatedAlert {
                                                        alertIdentifier: "simulatedAlertIdentifier"),
                           foregroundContent: Alert.Content(title: "Simulated Alert Foreground Title",
                                                            body: "The body of a foreground simulated alert approximates an actual alert body.",
-                                                           acknowledgeActionButtonLabel: "Acknowledged",
-                                                           isCritical: false),
+                                                           acknowledgeActionButtonLabel: "Acknowledged"),
                           backgroundContent: Alert.Content(title: "Simulated Alert Background Title",
                                                            body: "The body of a background simulated alert approximates an actual alert body.",
-                                                           acknowledgeActionButtonLabel: "Acknowledged",
-                                                           isCritical: false),
+                                                           acknowledgeActionButtonLabel: "Acknowledged"),
                           trigger: .delayed(interval: 60),
-                          sound: .sound(name: "simulated"))
-        return AlertStore.DatedAlert(date: date, alert: alert)
+                          sound: .sound(name: "simulated"),
+                          metadata: Alert.Metadata(dict: ["simulated": true]))
+        return AlertStore.DatedAlert(date: date, alert: alert, syncIdentifier: UUID())
     }
 }

@@ -4,6 +4,8 @@
 <dict>
 	<key>AppGroupIdentifier</key>
 	<string>$(APP_GROUP_IDENTIFIER)</string>
+	<key>AppStoreURL</key>
+	<string>$(APP_STORE_URL)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.loopkit.background-task.critical-event-log.historical-export</string>
