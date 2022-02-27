@@ -155,7 +155,7 @@ class LoopAppManager: NSObject {
         UNUserNotificationCenter.current().delegate = self
 
         let localCacheDuration = Bundle.main.localCacheDuration
-        let cacheStore = PersistenceController.controllerInLocalDirectory()
+        let cacheStore = PersistenceController.controllerInAppGroupDirectory()
 
         self.pluginManager = PluginManager()
         self.bluetoothStateManager = BluetoothStateManager()
