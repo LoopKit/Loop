@@ -966,6 +966,10 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
         }
     }
+
+    func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
+        doseStore.resetPumpData(completion: nil)
+    }
     
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
