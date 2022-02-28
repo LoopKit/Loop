@@ -152,4 +152,3 @@ private extension NotificationSettings {
                   announcementSetting: NotificationSettings.NotificationSetting(notificationSettings.announcementSetting))
     }
 }
-

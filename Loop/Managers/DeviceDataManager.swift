@@ -193,7 +193,8 @@ final class DeviceDataManager {
          alertPresenter: AlertPresenter,
          closedLoopStatus: ClosedLoopStatus,
          cacheStore: PersistenceController,
-         localCacheDuration: TimeInterval)
+         localCacheDuration: TimeInterval,
+         overrideHistory: TemporaryScheduleOverrideHistory)
     {
 
         let fileManager = FileManager.default
@@ -222,7 +223,6 @@ final class DeviceDataManager {
 
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
         let sensitivitySchedule = UserDefaults.appGroup?.insulinSensitivitySchedule
-        let overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
         
         self.carbStore = CarbStore(
             healthStore: healthStore,
@@ -316,8 +316,10 @@ final class DeviceDataManager {
             doseStore: doseStore,
             dosingDecisionStore: dosingDecisionStore,
             glucoseStore: glucoseStore,
-            settingsStore: settingsManager.settingsStore
+            settingsStore: settingsManager.settingsStore,
+            overrideHistory: overrideHistory
         )
+        
 
         settingsManager.remoteDataServicesManager = remoteDataServicesManager
         

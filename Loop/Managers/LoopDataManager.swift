@@ -127,8 +127,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
             appGroup.intentExtensionOverrideToSet = nil
         })
 
-        overrideHistory.delegate = self
-
         // Required for device settings in stored dosing decisions
         UIDevice.current.isBatteryMonitoringEnabled = true
 
@@ -394,14 +392,6 @@ extension LoopDataManager: PersistenceControllerDelegate {
 
     func persistenceControllerDidSave(_ controller: PersistenceController, error: PersistenceController.PersistenceControllerError?) {
         endBackgroundTask()
-    }
-}
-
-
-// MARK: Override history tracking
-extension LoopDataManager: TemporaryScheduleOverrideHistoryDelegate {
-    func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
-        UserDefaults.appGroup?.overrideHistory = history
     }
 }
 

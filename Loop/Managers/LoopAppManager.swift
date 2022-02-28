@@ -73,6 +73,7 @@ class LoopAppManager: NSObject {
     private var alertPermissionsChecker: AlertPermissionsChecker!
     private var supportManager: SupportManager!
     private var settingsManager: SettingsManager!
+    private var overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
 
     private var state: State = .initialize
 
@@ -175,9 +176,12 @@ class LoopAppManager: NSObject {
                                                    alertPresenter: self,
                                                    closedLoopStatus: closedLoopStatus,
                                                    cacheStore: cacheStore,
-                                                   localCacheDuration: localCacheDuration)
-
+                                                   localCacheDuration: localCacheDuration,
+                                                   overrideHistory: overrideHistory
+        )
         settingsManager.deviceStatusProvider = deviceDataManager
+
+        overrideHistory.delegate = self
 
         SharedLogging.instance = deviceDataManager.loggingServicesManager
 
@@ -468,3 +472,15 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
     }
 
 }
+
+
+// MARK: - UNUserNotificationCenterDelegate
+
+extension LoopAppManager: TemporaryScheduleOverrideHistoryDelegate {
+    func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
+        UserDefaults.appGroup?.overrideHistory = history
+
+        deviceDataManager.remoteDataServicesManager.temporaryScheduleOverrideHistoryDidUpdate()
+    }
+}
+

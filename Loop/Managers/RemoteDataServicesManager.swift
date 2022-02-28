@@ -18,6 +18,7 @@ enum RemoteDataType: String {
     case glucose = "Glucose"
     case pumpEvent = "PumpEvent"
     case settings = "Settings"
+    case overrides = "Overrides"
 }
 
 final class RemoteDataServicesManager {
@@ -44,13 +45,16 @@ final class RemoteDataServicesManager {
 
     private var settingsStore: SettingsStore
 
+    private var overrideHistory: TemporaryScheduleOverrideHistory
+
     init(
         alertStore: AlertStore,
         carbStore: CarbStore,
         doseStore: DoseStore,
         dosingDecisionStore: DosingDecisionStore,
         glucoseStore: GlucoseStore,
-        settingsStore: SettingsStore
+        settingsStore: SettingsStore,
+        overrideHistory: TemporaryScheduleOverrideHistory
     ) {
         self.alertStore = alertStore
         self.carbStore = carbStore
@@ -58,6 +62,7 @@ final class RemoteDataServicesManager {
         self.dosingDecisionStore = dosingDecisionStore
         self.glucoseStore = glucoseStore
         self.settingsStore = settingsStore
+        self.overrideHistory = overrideHistory
     }
 
     func addService(_ remoteDataService: RemoteDataService) {
@@ -408,6 +413,43 @@ extension RemoteDataServicesManager {
     }
 
 }
+
+extension RemoteDataServicesManager {
+
+    public func temporaryScheduleOverrideHistoryDidUpdate() {
+        remoteDataServices.forEach { self.uploadTemporaryOverrideData(to: $0) }
+    }
+
+    private func uploadTemporaryOverrideData(to remoteDataService: RemoteDataService) {
+        dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
+            let semaphore = DispatchSemaphore(value: 0)
+
+            let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides) ?? TemporaryScheduleOverrideHistory.QueryAnchor()
+
+            let (overrides, deletedOverrides, newAnchor) = self.overrideHistory.queryByAnchor(queryAnchor)
+
+            remoteDataService.uploadTemporaryOverrideData(updated: overrides, deleted: deletedOverrides) { result in
+                switch result {
+                case .failure(let error):
+                    self.log.error("Error synchronizing temporary override data: %{public}@", String(describing: error))
+                case .success:
+                    UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides, newAnchor)
+                }
+                semaphore.signal()
+            }
+
+            semaphore.wait()
+        }
+    }
+
+    private func clearTemporaryOverrideQueryAnchor(for remoteDataService: RemoteDataService) {
+        dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
+            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides)
+        }
+    }
+
+}
+
 
 fileprivate extension UserDefaults {
 
