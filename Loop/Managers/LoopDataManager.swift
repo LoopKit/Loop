@@ -847,10 +847,7 @@ extension LoopDataManager {
             self.lastLoopError = nil
             let startDate = self.now()
 
-            var (dosingDecision, error) = self.update(for: .loop)
-
-            // The manual bolus recommendation is ignored for looping, so clear
-            dosingDecision.manualBolusRecommendation = nil
+            let (dosingDecision, error) = self.update(for: .loop)
 
             guard error == nil, self.automaticDosingStatus.isClosedLoop == true else {
                 self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
