@@ -82,6 +82,12 @@ class SettingsManager {
                                       cgmDevice: cgmDevice ?? deviceStatusProvider?.cgmManagerStatus?.device,
                                       pumpDevice: pumpDevice ?? deviceStatusProvider?.pumpManagerStatus?.device,
                                       bloodGlucoseUnit: loopSettings.glucoseUnit)
+
+        if let latestSettings = latestSettings, latestSettings == settings {
+            // Skipping unchanged settings store
+            return
+        }
+
         settingsStore.storeSettings(settings) {}
     }
 

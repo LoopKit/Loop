@@ -829,7 +829,9 @@ extension BolusEntryViewModelTests {
     }
     
     func triggerLoopStateUpdated(with state: LoopState, function: String = #function) throws {
-        NotificationCenter.default.post(name: .LoopDataUpdated, object: nil)
+        NotificationCenter.default.post(name: .LoopDataUpdated, object: nil, userInfo: [
+            LoopDataManager.LoopUpdateContextKey: LoopDataManager.LoopUpdateContext.tempBasal.rawValue
+        ])
         try triggerLoopStateResult(with: state, function: function)
     }
     
