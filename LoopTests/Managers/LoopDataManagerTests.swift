@@ -107,7 +107,7 @@ class LoopDataManagerDosingTests: XCTestCase {
             glucoseStore: glucoseStore,
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
-            settingsStore: MockSettingsStore(),
+            latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
             now: { currentDate },
             pumpInsulinType: .novolog,
             automaticDosingStatus: automaticDosingStatus

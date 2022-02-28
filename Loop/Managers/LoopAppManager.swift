@@ -12,6 +12,7 @@ import Combine
 import LoopKit
 import LoopKitUI
 import MockKit
+import HealthKit
 
 public protocol AlertPresenter: AnyObject {
     /// Present the alert view controller, with or without animation.
@@ -71,6 +72,7 @@ class LoopAppManager: NSObject {
     private var onboardingManager: OnboardingManager!
     private var alertPermissionsChecker: AlertPermissionsChecker!
     private var supportManager: SupportManager!
+    private var settingsManager: SettingsManager!
 
     private var state: State = .initialize
 
@@ -79,8 +81,6 @@ class LoopAppManager: NSObject {
     private let closedLoopStatus = ClosedLoopStatus(isClosedLoop: false, isClosedLoopAllowed: false)
 
     lazy private var cancellables = Set<AnyCancellable>()
-
-    // MARK: - Initialization
 
     func initialize(windowProvider: WindowProvider, launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
         dispatchPrecondition(condition: .onQueue(.main))
@@ -94,6 +94,15 @@ class LoopAppManager: NSObject {
         }
 
         registerBackgroundTasks()
+
+
+        if FeatureFlags.remoteOverridesEnabled {
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+
+
 
         self.state = state.next
     }
@@ -145,6 +154,9 @@ class LoopAppManager: NSObject {
         OrientationLock.deviceOrientationController = self
         UNUserNotificationCenter.current().delegate = self
 
+        let localCacheDuration = Bundle.main.localCacheDuration
+        let cacheStore = PersistenceController.controllerInAppGroupDirectory()
+
         self.pluginManager = PluginManager()
         self.bluetoothStateManager = BluetoothStateManager()
         self.alertManager = AlertManager(alertPresenter: self,
@@ -153,11 +165,20 @@ class LoopAppManager: NSObject {
         self.loopAlertsManager = LoopAlertsManager(alertManager: alertManager,
                                                    bluetoothProvider: bluetoothStateManager)
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
+
+        self.settingsManager = SettingsManager(cacheStore: cacheStore, expireAfter: localCacheDuration)
+
         self.deviceDataManager = DeviceDataManager(pluginManager: pluginManager,
                                                    alertManager: alertManager,
+                                                   settingsManager: settingsManager,
                                                    bluetoothProvider: bluetoothStateManager,
                                                    alertPresenter: self,
-                                                   closedLoopStatus: closedLoopStatus)
+                                                   closedLoopStatus: closedLoopStatus,
+                                                   cacheStore: cacheStore,
+                                                   localCacheDuration: localCacheDuration)
+
+        settingsManager.deviceStatusProvider = deviceDataManager
+
         SharedLogging.instance = deviceDataManager.loggingServicesManager
 
         scheduleBackgroundTasks()
@@ -242,15 +263,13 @@ class LoopAppManager: NSObject {
         if let rootViewController = rootViewController {
             ProfileExpirationAlerter.alertIfNeeded(viewControllerToPresentFrom: rootViewController)
         }
-        deviceDataManager?.didBecomeActive()
+        settingsManager?.didBecomeActive()
     }
 
     // MARK: - Remote Notification
 
     func setRemoteNotificationsDeviceToken(_ remoteNotificationsDeviceToken: Data) {
-        deviceDataManager?.loopManager.mutateSettings {
-            settings in settings.deviceToken = remoteNotificationsDeviceToken
-        }
+        settingsManager.hasNewDeviceToken(token: remoteNotificationsDeviceToken)
     }
 
     private func handleRemoteNotificationFromLaunchOptions() {
@@ -447,4 +466,5 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
 
         completionHandler()
     }
+
 }

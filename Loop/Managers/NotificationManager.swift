@@ -70,11 +70,6 @@ extension NotificationManager {
                 guard settings.authorizationStatus == .authorized else {
                     return
                 }
-                if FeatureFlags.remoteOverridesEnabled {
-                    DispatchQueue.main.async {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
-                }
             }
         }
         center.setNotificationCategories(notificationCategories)

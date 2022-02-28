@@ -509,6 +509,7 @@
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; };
 		C1F2075C26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */; };
+		C1F7822627CC056900C0919A /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F7822527CC056900C0919A /* SettingsManager.swift */; };
 		C1F8B243223E73FD00DD66CF /* BolusProgressTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */; };
 		C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428B217806A300FAB378 /* StateColorPalette.swift */; };
 		C1FB428D21791D2500FAB378 /* PumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6F620BBCAA30026CAFA /* PumpManager.swift */; };
@@ -556,7 +557,7 @@
 		E95D380124EADE7C005E2F50 /* DoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */; };
 		E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */; };
 		E95D380524EADF78005E2F50 /* GlucoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */; };
-		E98A55ED24EDD6380008715D /* SettingsStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55EC24EDD6380008715D /* SettingsStoreProtocol.swift */; };
+		E98A55ED24EDD6380008715D /* LatestStoredSettingsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55EC24EDD6380008715D /* LatestStoredSettingsProvider.swift */; };
 		E98A55EF24EDD6E60008715D /* DosingDecisionStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55EE24EDD6E60008715D /* DosingDecisionStoreProtocol.swift */; };
 		E98A55F124EDD85E0008715D /* MockDosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F024EDD85E0008715D /* MockDosingDecisionStore.swift */; };
 		E98A55F324EDD9530008715D /* MockSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F224EDD9530008715D /* MockSettingsStore.swift */; };
@@ -1417,6 +1418,7 @@
 		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
 		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MKRingProgressView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileExpirationAlerter.swift; sourceTree = "<group>"; };
+		C1F7822527CC056900C0919A /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusProgressTableViewCell.swift; sourceTree = "<group>"; };
 		C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BolusProgressTableViewCell.xib; sourceTree = "<group>"; };
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
@@ -1461,7 +1463,7 @@
 		E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStoreProtocol.swift; sourceTree = "<group>"; };
-		E98A55EC24EDD6380008715D /* SettingsStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStoreProtocol.swift; sourceTree = "<group>"; };
+		E98A55EC24EDD6380008715D /* LatestStoredSettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatestStoredSettingsProvider.swift; sourceTree = "<group>"; };
 		E98A55EE24EDD6E60008715D /* DosingDecisionStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DosingDecisionStoreProtocol.swift; sourceTree = "<group>"; };
 		E98A55F024EDD85E0008715D /* MockDosingDecisionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDosingDecisionStore.swift; sourceTree = "<group>"; };
 		E98A55F224EDD9530008715D /* MockSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSettingsStore.swift; sourceTree = "<group>"; };
@@ -2089,6 +2091,7 @@
 				432E73CA1D24B3D6009AD15D /* RemoteDataServicesManager.swift */,
 				A9C62D852331703000535612 /* Service.swift */,
 				A9C62D872331703000535612 /* ServicesManager.swift */,
+				C1F7822527CC056900C0919A /* SettingsManager.swift */,
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
 				43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */,
 				1D63DEA426E950D400F46FA5 /* SupportManager.swift */,
@@ -2610,7 +2613,7 @@
 				E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */,
 				E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */,
 				E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */,
-				E98A55EC24EDD6380008715D /* SettingsStoreProtocol.swift */,
+				E98A55EC24EDD6380008715D /* LatestStoredSettingsProvider.swift */,
 				E98A55EE24EDD6E60008715D /* DosingDecisionStoreProtocol.swift */,
 			);
 			path = "Store Protocols";
@@ -2913,7 +2916,7 @@
 					43776F8B1B8022E90074EA36 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2935,7 +2938,7 @@
 					43A943711B926B7B0051FA24 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 0800;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -2948,7 +2951,7 @@
 					43A9437D1B926B7B0051FA24 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -3003,7 +3006,7 @@
 					4F70C1DB1DE8DCA7006380B7 = {
 						CreatedOnToolsVersion = 8.1;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -3016,7 +3019,7 @@
 						ProvisioningStyle = Automatic;
 					};
 					E9B07F7B253BBA6500BAD8F8 = {
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -3431,7 +3434,7 @@
 				C1F2075C26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift in Sources */,
 				B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */,
 				E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */,
-				E98A55ED24EDD6380008715D /* SettingsStoreProtocol.swift in Sources */,
+				E98A55ED24EDD6380008715D /* LatestStoredSettingsProvider.swift in Sources */,
 				C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */,
 				A9B996F227238705002DC09C /* DosingDecisionStore.swift in Sources */,
 				43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */,
@@ -3441,6 +3444,7 @@
 				430B29932041F5B300BA9F93 /* UserDefaults+Loop.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */,
 				E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */,
+				C1F7822627CC056900C0919A /* SettingsManager.swift in Sources */,
 				C16575712538A36B004AE16E /* CGMStalenessMonitor.swift in Sources */,
 				B4CAD8612549D1530057946B /* LoopSettingsAlerter.swift in Sources */,
 				1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */,
