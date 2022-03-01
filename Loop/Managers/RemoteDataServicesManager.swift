@@ -31,6 +31,8 @@ final class RemoteDataServicesManager {
 
     private var unlockedDispatchQueues = [String: DispatchQueue]()
 
+    let uploadGroup = DispatchGroup()
+
     private let log = OSLog(category: "RemoteDataServicesManager")
     
     private var alertStore: AlertStore
@@ -125,6 +127,9 @@ final class RemoteDataServicesManager {
         return "com.loopkit.Loop.RemoteDataServicesManager.\(remoteDataService.serviceIdentifier).\(remoteDataType.rawValue)DispatchQueue"
     }
 
+    public func waitForUploadsToFinish(timeout: DispatchTime = .now() + TimeInterval(10)) -> DispatchTimeoutResult {
+        return uploadGroup.wait(timeout: timeout)
+    }
 }
 
 extension RemoteDataServicesManager {
@@ -134,6 +139,8 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadAlertData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
+
         dispatchQueue(for: remoteDataService, withRemoteDataType: .alert).async {
             let semaphore = DispatchSemaphore(value: 0)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .alert) ?? AlertStore.QueryAnchor()
@@ -155,8 +162,8 @@ extension RemoteDataServicesManager {
                     }
                 }
             }
-
             semaphore.wait()
+            self.uploadGroup.leave()
         }
     }
 
@@ -175,6 +182,7 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadCarbData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
         dispatchQueue(for: remoteDataService, withRemoteDataType: .carb).async {
             let semaphore = DispatchSemaphore(value: 0)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .carb) ?? CarbStore.QueryAnchor()
@@ -198,6 +206,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadGroup.leave()
         }
     }
 
@@ -216,6 +225,7 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadDoseData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
         dispatchQueue(for: remoteDataService, withRemoteDataType: .dose).async {
             let semaphore = DispatchSemaphore(value: 0)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .dose) ?? DoseStore.QueryAnchor()
@@ -239,6 +249,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadGroup.leave()
         }
     }
 
@@ -257,6 +268,7 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadDosingDecisionData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
         dispatchQueue(for: remoteDataService, withRemoteDataType: .dosingDecision).async {
             let semaphore = DispatchSemaphore(value: 0)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .dosingDecision) ?? DosingDecisionStore.QueryAnchor()
@@ -280,6 +292,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadGroup.leave()
         }
     }
 
@@ -298,6 +311,7 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadGlucoseData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
         dispatchQueue(for: remoteDataService, withRemoteDataType: .glucose).async {
             let semaphore = DispatchSemaphore(value: 0)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose) ?? GlucoseStore.QueryAnchor()
@@ -321,6 +335,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadGroup.leave()
         }
     }
 
@@ -339,6 +354,7 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadPumpEventData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
         dispatchQueue(for: remoteDataService, withRemoteDataType: .pumpEvent).async {
             let semaphore = DispatchSemaphore(value: 0)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent) ?? DoseStore.QueryAnchor()
@@ -362,6 +378,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadGroup.leave()
         }
     }
 
@@ -380,6 +397,7 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadSettingsData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
         dispatchQueue(for: remoteDataService, withRemoteDataType: .settings).async {
             let semaphore = DispatchSemaphore(value: 0)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .settings) ?? SettingsStore.QueryAnchor()
@@ -403,6 +421,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadGroup.leave()
         }
     }
 
@@ -421,6 +440,7 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadTemporaryOverrideData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
         dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
             let semaphore = DispatchSemaphore(value: 0)
 
@@ -439,6 +459,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadGroup.leave()
         }
     }
 

@@ -1214,10 +1214,13 @@ extension DeviceDataManager {
                     log.default("Canceling temporary override from remote command")
                     loopManager.mutateSettings { settings in settings.scheduleOverride = nil }
                 }
+                // Wait up to 25 seconds for uploads to finish
+                let _ = remoteDataServicesManager.waitForUploadsToFinish(timeout: .now() + TimeInterval(25))
             } else {
                 log.info("Unhandled remote notification: %{public}@", String(describing: notification))
             }
         }
+        log.info("Finished handling remote notification")
     }
 }
 
