@@ -226,7 +226,7 @@ final class DeviceDataManager {
         
         self.carbStore = CarbStore(
             healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+            observeHealthKitSamplesFromOtherApps: false, // At some point we should let the user decide which apps they would like to import from.
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             defaultAbsorptionTimes: absorptionTimes,
