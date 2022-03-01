@@ -10,10 +10,8 @@ import UIKit
 
 #if FORCE_ENGLISH
 UserDefaults.standard.set(["en"], forKey: "AppleLanguages")
-#else
-UserDefaults.standard.set(nil, forKey: "AppleLanguages")
-#endif
 UserDefaults.standard.synchronize()
+#endif
 
 UIApplicationMain(
     CommandLine.argc,
