@@ -859,33 +859,31 @@ fileprivate class MockLoopState: LoopState {
     
     var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)?
     
-    var recommendedBolus: (recommendation: ManualBolusRecommendation, date: Date)?
-    
     var retrospectiveGlucoseDiscrepancies: [GlucoseChange]?
     
     var totalRetrospectiveCorrection: HKQuantity?
     
     var predictGlucoseValueResult: [PredictedGlucoseValue] = []
-    func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool) throws -> [PredictedGlucoseValue] {
+    func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool) throws -> [PredictedGlucoseValue] {
         return predictGlucoseValueResult
     }
 
-    func predictGlucoseFromManualGlucose(_ glucose: NewGlucoseSample, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool) throws -> [PredictedGlucoseValue] {
+    func predictGlucoseFromManualGlucose(_ glucose: NewGlucoseSample, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool) throws -> [PredictedGlucoseValue] {
         return predictGlucoseValueResult
     }
-    
+
     var bolusRecommendationResult: ManualBolusRecommendation?
     var bolusRecommendationError: Error?
     var consideringPotentialCarbEntryPassed: NewCarbEntry??
     var replacingCarbEntryPassed: StoredCarbEntry??
-    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
+    func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, considerPositiveVelocityAndRC: Bool) throws -> ManualBolusRecommendation? {
         consideringPotentialCarbEntryPassed = potentialCarbEntry
         replacingCarbEntryPassed = replacedCarbEntry
         if let error = bolusRecommendationError { throw error }
         return bolusRecommendationResult
     }
     
-    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> ManualBolusRecommendation? {
+    func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, considerPositiveVelocityAndRC: Bool) throws -> ManualBolusRecommendation? {
         consideringPotentialCarbEntryPassed = potentialCarbEntry
         replacingCarbEntryPassed = replacedCarbEntry
         if let error = bolusRecommendationError { throw error }

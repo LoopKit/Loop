@@ -585,7 +585,8 @@ final class BolusEntryViewModel: ObservableObject {
                     potentialBolus: enteredBolusDose,
                     potentialCarbEntry: potentialCarbEntry,
                     replacingCarbEntry: originalCarbEntry,
-                    includingPendingInsulin: true
+                    includingPendingInsulin: true,
+                    considerPositiveVelocityAndRC: true
                 )
             } else {
                 predictedGlucoseValues = try state.predictGlucose(
@@ -593,7 +594,8 @@ final class BolusEntryViewModel: ObservableObject {
                     potentialBolus: enteredBolusDose,
                     potentialCarbEntry: potentialCarbEntry,
                     replacingCarbEntry: originalCarbEntry,
-                    includingPendingInsulin: true
+                    includingPendingInsulin: true,
+                    considerPositiveVelocityAndRC: true
                 )
             }
         } catch {
@@ -748,12 +750,14 @@ final class BolusEntryViewModel: ObservableObject {
             return try state.recommendBolusForManualGlucose(
                 manualGlucoseSample!,
                 consideringPotentialCarbEntry: potentialCarbEntry,
-                replacingCarbEntry: originalCarbEntry
+                replacingCarbEntry: originalCarbEntry,
+                considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses
             )
         } else {
             return try state.recommendBolus(
                 consideringPotentialCarbEntry: potentialCarbEntry,
-                replacingCarbEntry: originalCarbEntry
+                replacingCarbEntry: originalCarbEntry,
+                considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses
             )
         }
     }
