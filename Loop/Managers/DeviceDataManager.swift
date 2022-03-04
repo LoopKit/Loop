@@ -117,7 +117,6 @@ final class DeviceDataManager {
 
         if FeatureFlags.observeHealthKitSamplesFromOtherApps {
             readTypes.insert(glucoseStore.sampleType)
-            readTypes.insert(carbStore.sampleType)
             readTypes.insert(doseStore.sampleType)
         }
         readTypes.insert(HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!)
@@ -565,7 +564,7 @@ final class DeviceDataManager {
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
                 // Call the individual authorization methods to trigger query creation
-                self.carbStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
+                self.carbStore.authorize(toShare: true, read: false, { _ in })
                 self.doseStore.insulinDeliveryStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
                 self.glucoseStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
             }
