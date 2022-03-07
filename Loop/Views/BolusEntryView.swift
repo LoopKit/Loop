@@ -57,7 +57,7 @@ struct BolusEntryView: View {
                     self.shouldBolusEntryBecomeFirstResponder = false
                 } else {
                     if !editedBolusAmount {
-                        typedBolusEntry.wrappedValue = ""
+                        enteredBolusAmount = ""
                         editedBolusAmount = true
                     }
                 }
