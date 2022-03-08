@@ -58,6 +58,7 @@ struct BolusEntryView: View {
                 } else {
                     if !editedBolusAmount {
                         enteredBolusAmount = ""
+                        self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
                         editedBolusAmount = true
                     }
                 }
