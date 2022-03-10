@@ -718,7 +718,7 @@ extension LoopDataManager {
         let syncIdentifier = Data(UUID().uuidString.utf8).hexadecimalString
         let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinType: insulinType, manuallyEntered: true)
 
-        doseStore.addDoses([dose]) { (error) in
+        doseStore.addDoses([dose], from: nil) { (error) in
             if error == nil {
                 self.recommendedAutomaticDose = nil
                 self.insulinEffect = nil
@@ -726,18 +726,6 @@ extension LoopDataManager {
             }
         }
     }
-
-//    /// Logs a new external bolus insulin dose in the DoseStore and HealthKit
-//    ///
-//    /// - Parameters:
-//    ///   - dose: The dose to be added.
-//    func addDose(dose: DoseEntry, completion: @escaping (_ error: Error?) -> Void) {
-//        doseStore.addDoses([dose]) { (error) in
-//            if let error = error {
-//                completion(error)
-//            }
-//        }
-//    }
 
     /// Adds and stores a pump reservoir volume
     ///

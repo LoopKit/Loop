@@ -311,6 +311,7 @@ final class DeviceDataManager {
             doseStore: doseStore,
             dosingDecisionStore: dosingDecisionStore,
             glucoseStore: glucoseStore,
+            insulinDeliveryStore: doseStore.insulinDeliveryStore,
             settingsStore: settingsStore
         )
         
@@ -337,6 +338,7 @@ final class DeviceDataManager {
         doseStore.delegate = self
         dosingDecisionStore.delegate = self
         glucoseStore.delegate = self
+        doseStore.insulinDeliveryStore.delegate = self
         settingsStore.delegate = self
 
         setupPump()
@@ -678,7 +680,7 @@ extension DeviceDataManager {
             return
         }
 
-        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
+        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true), completion: nil)
         pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
@@ -1083,10 +1085,6 @@ extension DeviceDataManager: CarbStoreDelegate {
 // MARK: - DoseStoreDelegate
 extension DeviceDataManager: DoseStoreDelegate {
 
-    func doseStoreHasUpdatedDoseData(_ doseStore: DoseStore) {
-        remoteDataServicesManager.doseStoreHasUpdatedDoseData(doseStore)
-    }
-
     func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
         remoteDataServicesManager.doseStoreHasUpdatedPumpEventData(doseStore)
     }
@@ -1107,6 +1105,15 @@ extension DeviceDataManager: GlucoseStoreDelegate {
 
     func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
         remoteDataServicesManager.glucoseStoreHasUpdatedGlucoseData(glucoseStore)
+    }
+
+}
+
+// MARK: - InsulinDeliveryStoreDelegate
+extension DeviceDataManager: InsulinDeliveryStoreDelegate {
+
+    func insulinDeliveryStoreHasUpdatedDoseData(_ insulinDeliveryStore: InsulinDeliveryStore) {
+        remoteDataServicesManager.insulinDeliveryStoreHasUpdatedDoseData(insulinDeliveryStore)
     }
 
 }
@@ -1144,7 +1151,7 @@ extension DeviceDataManager {
 
             healthStore.deleteObjects(of: self.doseStore.sampleType, predicate: devicePredicate) { success, deletedObjectCount, error in
                 if success {
-                    insulinDeliveryStore.test_lastBasalEndDate = nil
+                    insulinDeliveryStore.test_lastImmutableBasalEndDate = nil
                 }
                 completion?(error)
             }
