@@ -73,7 +73,8 @@ extension NotificationManager {
             }
         }
         center.setNotificationCategories(notificationCategories)
-    }    
+    }
+    
 
     // MARK: - Notifications
 

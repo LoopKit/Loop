@@ -312,7 +312,7 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
         raw["dosingStrategy"] = dosingStrategy.rawValue
-        
+
         return raw
     }
 }

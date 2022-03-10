@@ -95,8 +95,6 @@ class LoopAppManager: NSObject {
         }
 
         registerBackgroundTasks()
-        
-        registerForRemoteNotifications()
 
 
         if FeatureFlags.remoteOverridesEnabled {
