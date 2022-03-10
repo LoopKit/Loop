@@ -111,7 +111,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
         self.debounceIntervalMilliseconds = debounceIntervalMilliseconds
         self.uuidProvider = uuidProvider
         
-        self.insulinTypePickerOptions = [.novolog, .humalog, .apidra, .fiasp]
+        self.insulinTypePickerOptions = [.novolog, .humalog, .apidra, .fiasp, .lyumjev]
         
         self.chartDateInterval = DateInterval(start: Date(timeInterval: .hours(-1), since: now()), duration: .hours(7))
         

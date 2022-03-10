@@ -29,6 +29,7 @@ struct BolusEntryView: View {
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
     @State private var pickerShouldExpand = false
+    @State private var editedBolusAmount = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -54,6 +55,11 @@ struct BolusEntryView: View {
                 if state.height == 0 {
                     // Ensure tapping 'Enter Bolus' can make the text field the first responder again
                     self.shouldBolusEntryBecomeFirstResponder = false
+                } else {
+                    if !editedBolusAmount {
+                        typedBolusEntry.wrappedValue = ""
+                        editedBolusAmount = true
+                    }
                 }
             }
             .keyboardAware()
@@ -287,11 +293,6 @@ struct BolusEntryView: View {
                     maxLength: 5,
                     doneButtonColor: .loopAccent
                 )
-                .onTapGesture {
-                    if typedBolusEntry.wrappedValue == recommendedBolusString {
-                        typedBolusEntry.wrappedValue = ""
-                    }
-                }
                 bolusUnitsLabel
             }
         }

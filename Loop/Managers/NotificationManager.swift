@@ -67,11 +67,13 @@ extension NotificationManager {
         center.requestAuthorization(options: authOptions) { (granted, error) in
             UNUserNotificationCenter.current().getNotificationSettings { settings in
                 completion(settings.authorizationStatus)
+                guard settings.authorizationStatus == .authorized else {
+                    return
+                }
             }
         }
         center.setNotificationCategories(notificationCategories)
-    }
-    
+    }    
 
     // MARK: - Notifications
 

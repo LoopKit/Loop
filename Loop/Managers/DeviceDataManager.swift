@@ -54,6 +54,9 @@ final class DeviceDataManager {
         if !FeatureFlags.fiaspInsulinModelEnabled {
             allowed.remove(.fiasp)
         }
+        if !FeatureFlags.lyumjevInsulinModelEnabled {
+            allowed.remove(.lyumjev)
+        }
         return allowed
     }()
 
@@ -103,12 +106,10 @@ final class DeviceDataManager {
     let doseStore: DoseStore
     
     let glucoseStore: GlucoseStore
-    
+
     private let cacheStore: PersistenceController
-    
+
     let dosingDecisionStore: DosingDecisionStore
-    
-    let settingsStore: SettingsStore
     
     /// All the HealthKit types to be read by stores
     private var readTypes: Set<HKSampleType> {
@@ -116,7 +117,6 @@ final class DeviceDataManager {
 
         if FeatureFlags.observeHealthKitSamplesFromOtherApps {
             readTypes.insert(glucoseStore.sampleType)
-            readTypes.insert(carbStore.sampleType)
             readTypes.insert(doseStore.sampleType)
         }
         readTypes.insert(HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!)
@@ -165,6 +165,8 @@ final class DeviceDataManager {
 
     var loggingServicesManager: LoggingServicesManager
 
+    var settingsManager: SettingsManager
+
     var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
 
     var criticalEventLogExportManager: CriticalEventLogExportManager!
@@ -185,11 +187,14 @@ final class DeviceDataManager {
 
     init(pluginManager: PluginManager,
          alertManager: AlertManager,
+         settingsManager: SettingsManager,
          bluetoothProvider: BluetoothProvider,
          alertPresenter: AlertPresenter,
-         closedLoopStatus: ClosedLoopStatus)
+         closedLoopStatus: ClosedLoopStatus,
+         cacheStore: PersistenceController,
+         localCacheDuration: TimeInterval,
+         overrideHistory: TemporaryScheduleOverrideHistory)
     {
-        let localCacheDuration = Bundle.main.localCacheDuration
 
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -212,15 +217,15 @@ final class DeviceDataManager {
         self.alertPresenter = alertPresenter
         
         self.healthStore = HKHealthStore()
-        self.cacheStore = PersistenceController.controllerInAppGroupDirectory()
-        
+        self.cacheStore = cacheStore
+        self.settingsManager = settingsManager
+
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
         let sensitivitySchedule = UserDefaults.appGroup?.insulinSensitivitySchedule
-        let overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
         
         self.carbStore = CarbStore(
             healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+            observeHealthKitSamplesFromOtherApps: false, // At some point we should let the user decide which apps they would like to import from.
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             defaultAbsorptionTimes: absorptionTimes,
@@ -259,7 +264,6 @@ final class DeviceDataManager {
         cgmStalenessMonitor.delegate = glucoseStore
         
         self.dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
-        self.settingsStore = SettingsStore(store: cacheStore, expireAfter: localCacheDuration)
         
         self.cgmHasValidSensorSession = false
         self.closedLoopStatus = closedLoopStatus
@@ -296,7 +300,7 @@ final class DeviceDataManager {
             glucoseStore: glucoseStore,
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
-            settingsStore: settingsStore,
+            latestStoredSettingsProvider: settingsManager,
             alertIssuer: alertManager,
             pumpInsulinType: pumpManager?.status.insulinType,
             automaticDosingStatus: closedLoopStatus
@@ -311,8 +315,12 @@ final class DeviceDataManager {
             doseStore: doseStore,
             dosingDecisionStore: dosingDecisionStore,
             glucoseStore: glucoseStore,
-            settingsStore: settingsStore
+            settingsStore: settingsManager.settingsStore,
+            overrideHistory: overrideHistory
         )
+        
+
+        settingsManager.remoteDataServicesManager = remoteDataServicesManager
         
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
@@ -321,7 +329,7 @@ final class DeviceDataManager {
             remoteDataServicesManager: remoteDataServicesManager
         )
 
-        let criticalEventLogs: [CriticalEventLog] = [settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
+        let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
                                                                       directory: FileManager.default.exportsDirectoryURL,
                                                                       historicalDuration: Bundle.main.localCacheDuration)
@@ -337,7 +345,6 @@ final class DeviceDataManager {
         doseStore.delegate = self
         dosingDecisionStore.delegate = self
         glucoseStore.delegate = self
-        settingsStore.delegate = self
 
         setupPump()
         setupCGM()
@@ -557,7 +564,7 @@ final class DeviceDataManager {
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
                 // Call the individual authorization methods to trigger query creation
-                self.carbStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
+                self.carbStore.authorize(toShare: true, read: false, { _ in })
                 self.doseStore.insulinDeliveryStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
                 self.glucoseStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
             }
@@ -764,7 +771,6 @@ extension DeviceDataManager {
 
     func didBecomeActive() {
         updatePumpManagerBLEHeartbeatPreference()
-        loopManager.didBecomeActive()
     }
 
     func updatePumpManagerBLEHeartbeatPreference() {
@@ -810,7 +816,7 @@ extension DeviceDataManager: CGMManagerDelegate {
             }
             self.cgmManager = nil
             self.displayGlucoseUnitObservers.cleanupDeallocatedElements()
-            self.loopManager.storeSettings()
+            self.settingsManager.storeSettings()
         }
     }
 
@@ -857,7 +863,7 @@ extension DeviceDataManager: CGMManagerOnboardingDelegate {
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
-            self.loopManager.storeSettings()
+            self.settingsManager.storeSettings()
         }
     }
 }
@@ -959,6 +965,10 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
         }
     }
+
+    func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
+        doseStore.resetPumpData(completion: nil)
+    }
     
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
@@ -969,7 +979,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         DispatchQueue.main.async {
             self.pumpManager = nil
             self.deliveryUncertaintyAlertManager = nil
-            self.loopManager.storeSettings()
+            self.settingsManager.storeSettings()
         }
     }
 
@@ -1039,7 +1049,7 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
-            self.loopManager.storeSettings()
+            self.settingsManager.storeSettings()
         }
     }
 }
@@ -1091,15 +1101,6 @@ extension DeviceDataManager: GlucoseStoreDelegate {
 
     func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
         remoteDataServicesManager.glucoseStoreHasUpdatedGlucoseData(glucoseStore)
-    }
-
-}
-
-// MARK: - SettingsStoreDelegate
-extension DeviceDataManager: SettingsStoreDelegate {
-
-    func settingsStoreHasUpdatedSettingsData(_ settingsStore: SettingsStore) {
-        remoteDataServicesManager.settingsStoreHasUpdatedSettingsData(settingsStore)
     }
 
 }
@@ -1274,10 +1275,13 @@ extension DeviceDataManager {
                         }
                     }
                 }
+                // Wait up to 25 seconds for uploads to finish
+                let _ = remoteDataServicesManager.waitForUploadsToFinish(timeout: .now() + TimeInterval(25))
             } else {
                 log.info("Unhandled remote notification: %{public}@", String(describing: notification))
             }
         }
+        log.info("Finished handling remote notification")
     }
 }
 
@@ -1361,17 +1365,23 @@ extension DeviceDataManager {
             fatalError("\(#function) should be invoked only when simulated core data is enabled")
         }
 
-        self.loopManager.generateSimulatedHistoricalCoreData() { error in
+        settingsManager.settingsStore.generateSimulatedHistoricalSettingsObjects() { error in
             guard error == nil else {
                 completion(error)
                 return
             }
-            self.deviceLog.generateSimulatedHistoricalDeviceLogEntries() { error in
+            self.loopManager.generateSimulatedHistoricalCoreData() { error in
                 guard error == nil else {
                     completion(error)
                     return
                 }
-                self.alertManager.alertStore.generateSimulatedHistoricalStoredAlerts(completion: completion)
+                self.deviceLog.generateSimulatedHistoricalDeviceLogEntries() { error in
+                    guard error == nil else {
+                        completion(error)
+                        return
+                    }
+                    self.alertManager.alertStore.generateSimulatedHistoricalStoredAlerts(completion: completion)
+                }
             }
         }
     }
@@ -1391,7 +1401,13 @@ extension DeviceDataManager {
                     completion(error)
                     return
                 }
-                self.loopManager.purgeHistoricalCoreData(completion: completion)
+                self.loopManager.purgeHistoricalCoreData { error in
+                    guard error == nil else {
+                        completion(error)
+                        return
+                    }
+                    self.settingsManager.purgeHistoricalSettingsObjects(completion: completion)
+                }
             }
         }
     }
@@ -1551,3 +1567,5 @@ extension DeviceDataManager {
 extension DeviceDataManager {
     var availableSupports: [SupportUI] { [cgmManager, pumpManager].compactMap { $0 as? SupportUI } }
 }
+
+extension DeviceDataManager: DeviceStatusProvider {}

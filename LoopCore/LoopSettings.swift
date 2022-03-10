@@ -80,9 +80,6 @@ public struct LoopSettings: Equatable {
         return glucoseTargetRangeSchedule?.unit
     }
     
-    // MARK - Push Notifications
-    
-    public var deviceToken: Data?
     
     // MARK - Guardrails
 

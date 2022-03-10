@@ -16,6 +16,7 @@ struct FeatureFlagConfiguration: Decodable {
     let criticalAlertsEnabled: Bool
     let entryDeletionEnabled: Bool
     let fiaspInsulinModelEnabled: Bool
+    let lyumjevInsulinModelEnabled: Bool
     let includeServicesInSettingsEnabled: Bool
     let manualDoseEntryEnabled: Bool
     let insulinDeliveryReservoirViewEnabled: Bool
@@ -69,6 +70,13 @@ struct FeatureFlagConfiguration: Decodable {
         self.fiaspInsulinModelEnabled = false
         #else
         self.fiaspInsulinModelEnabled = true
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if LYUMJEV_INSULIN_MODEL_DISABLED
+        self.lyumjevInsulinModelEnabled = false
+        #else
+        self.lyumjevInsulinModelEnabled = true
         #endif
         
         // Swift compiler config is inverse, since the default state is enabled.
@@ -161,6 +169,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* criticalAlertsEnabled: \(criticalAlertsEnabled)",
             "* entryDeletionEnabled: \(entryDeletionEnabled)",
             "* fiaspInsulinModelEnabled: \(fiaspInsulinModelEnabled)",
+            "* lyumjevInsulinModelEnabled: \(lyumjevInsulinModelEnabled)",
             "* includeServicesInSettingsEnabled: \(includeServicesInSettingsEnabled)",
             "* mockTherapySettingsEnabled: \(mockTherapySettingsEnabled)",
             "* nonlinearCarbModelEnabled: \(nonlinearCarbModelEnabled)",
