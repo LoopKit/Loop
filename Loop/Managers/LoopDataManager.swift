@@ -1226,6 +1226,10 @@ extension LoopDataManager {
             prediction.append(PredictedGlucoseValue(startDate: finalDate, quantity: last.quantity))
         }
 
+        if prediction.count > 1 && prediction.count < 50 {
+            print("**** Short forecast: \(prediction)")
+        }
+
         return prediction
     }
 

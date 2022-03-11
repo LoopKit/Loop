@@ -36,8 +36,6 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     
     func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ result: CarbStoreResult<CarbValue>) -> Void)
     
-    func ensureCurrentPumpData(completion: @escaping (Date?) -> Void)
-    
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
 
     var mostRecentGlucoseDataDate: Date? { get }
@@ -217,6 +215,7 @@ final class BolusEntryViewModel: ObservableObject {
         observeEnteredManualGlucoseChanges()
         observeElapsedTime()
         observeRecommendedBolusChanges()
+        self.log.debug("calling update() from constructor")
         update()
     }
         
@@ -225,6 +224,7 @@ final class BolusEntryViewModel: ObservableObject {
             .publisher(for: .LoopDataUpdated)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
+                self?.log.debug("calling update() from LoopDataUpdated notification")
                 self?.update()
             }
             .store(in: &cancellables)
@@ -232,9 +232,11 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func observeEnteredBolusChanges() {
         $enteredBolus
+            .dropFirst()
             .removeDuplicates()
             .debounce(for: .milliseconds(debounceIntervalMilliseconds), scheduler: RunLoop.main)
             .sink { [weak self] _ in
+                self?.log.debug("calling withLoopState: observeEnteredBolusChanges")
                 self?.delegate?.withLoopState { [weak self] state in
                     self?.updatePredictedGlucoseValues(from: state)
                 }
@@ -247,21 +249,24 @@ final class BolusEntryViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .milliseconds(debounceIntervalMilliseconds), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.setRecommendedBolus()
+                self?.recommendedBolusDidChange()
             }
             .store(in: &cancellables)
     }
 
     private func observeEnteredManualGlucoseChanges() {
         $manualGlucoseQuantity
+            .dropFirst()
             .debounce(for: .milliseconds(debounceIntervalMilliseconds), scheduler: RunLoop.main)
             .sink { [weak self] enteredManualGlucose in
                 guard let self = self else { return }
 
                 self.updateManualGlucoseSample(enteredAt: self.now())
 
-                // Clear out any entered bolus whenever the manual entry changes
+                // Clear out any entered bolus whenever the glucose entry changes
                 self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+
+                self.log.debug("calling withLoopState: observeEnteredManualGlucoseChanges")
 
                 self.delegate?.withLoopState { [weak self] state in
                     self?.updatePredictedGlucoseValues(from: state, completion: {
@@ -269,9 +274,7 @@ final class BolusEntryViewModel: ObservableObject {
                         self?.updateGlucoseChartValues()
                     })
 
-                    self?.ensurePumpDataIsFresh { [weak self] in
-                        self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
-                    }
+                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
                 }
             }
             .store(in: &cancellables)
@@ -290,6 +293,7 @@ final class BolusEntryViewModel: ObservableObject {
 
                 // Update the manual glucose sample's timestamp, which should always be "now"
                 self.updateManualGlucoseSample(enteredAt: self.now())
+                self.log.debug("calling update() from observeElapsedTime")
                 self.update()
             }
             .store(in: &cancellables)
@@ -305,10 +309,10 @@ final class BolusEntryViewModel: ObservableObject {
         return recommendedBolus.doubleValue(for: .internationalUnit()) > 0
     }
 
-    func setRecommendedBolus() {
+    func recommendedBolusDidChange() {
         guard isBolusRecommended else { return }
-        enteredBolus = recommendedBolus!
         isRefreshingPump = false
+        log.debug("calling withLoopState: recommendedBolusDidChange")
         delegate?.withLoopState { [weak self] state in
             self?.updatePredictedGlucoseValues(from: state)
         }
@@ -522,7 +526,7 @@ final class BolusEntryViewModel: ObservableObject {
         disableManualGlucoseEntryIfNecessary()
         updateChartDateInterval()
         updateStoredGlucoseValues()
-        updateFromLoopState()
+        updatePredictionAndRecommendation()
         updateActiveInsulin()
     }
 
@@ -624,15 +628,15 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func updateFromLoopState() {
+    private func updatePredictionAndRecommendation() {
+        log.debug("calling withLoopState: updatePredictionAndRecommendation")
+
         delegate?.withLoopState { [weak self] state in
             self?.updatePredictedGlucoseValues(from: state)
             self?.updateCarbsOnBoard(from: state)
-            self?.ensurePumpDataIsFresh { [weak self] in
-                self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
-                DispatchQueue.main.async {
-                    self?.updateSettings()
-                }
+            self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
+            DispatchQueue.main.async {
+                self?.updateSettings()
             }
         }
     }
@@ -652,32 +656,6 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func ensurePumpDataIsFresh(then completion: @escaping () -> Void) {
-        if !isPumpDataStale {
-            completion()
-            return
-        }
-        
-        DispatchQueue.main.async {
-            // v-- This needs to happen on the main queue
-            self.isRefreshingPump = true
-            let wrappedCompletion: (Date?) -> Void = { [weak self] (lastSync) in
-                self?.delegate?.withLoopState { [weak self] _ in
-                    // v-- This needs to happen in LoopDataManager's dataQueue
-                    completion()
-                    // ^v-- Unfortunately, these two things might happen concurrently, so in theory the
-                    // completion above may not "complete" by the time we clear isRefreshingPump.  To fix that
-                    // would require some very confusing wiring, but I think it is a minor issue.
-                    DispatchQueue.main.async {
-                        // v-- This needs to happen on the main queue
-                        self?.isRefreshingPump = false
-                    }
-                }
-            }
-            self.delegate?.ensureCurrentPumpData(completion: wrappedCompletion)
-        }
-    }
-    
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
@@ -731,7 +709,7 @@ final class BolusEntryViewModel: ObservableObject {
                 self.enteredBolus.doubleValue(for: .internationalUnit()) > 0,
                 !self.isInitiatingSaveOrBolus
             {
-                self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+                //self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
 
                 if !isUpdatingFromUserInput {
                     self.presentAlert(.recommendationChanged)
