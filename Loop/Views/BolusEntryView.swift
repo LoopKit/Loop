@@ -55,12 +55,6 @@ struct BolusEntryView: View {
                 if state.height == 0 {
                     // Ensure tapping 'Enter Bolus' can make the text field the first responder again
                     self.shouldBolusEntryBecomeFirstResponder = false
-                } else {
-                    if !editedBolusAmount {
-                        enteredBolusString = ""
-                        self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
-                        editedBolusAmount = true
-                    }
                 }
             }
             .keyboardAware()
@@ -268,7 +262,6 @@ struct BolusEntryView: View {
         HStack {
             Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
             Spacer()
-            ActivityIndicator(isAnimating: $viewModel.isRefreshingPump, style: .default)
             HStack(alignment: .firstTextBaseline) {
                 Text(recommendedBolusString)
                     .font(.title)
@@ -286,6 +279,14 @@ struct BolusEntryView: View {
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }
 
+    private func didBeginEditing() {
+        if !editedBolusAmount {
+            enteredBolusString = ""
+            self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+            editedBolusAmount = true
+        }
+    }
+
     private var bolusEntryRow: some View {
         HStack {
             Text("Bolus", comment: "Label for bolus entry row on bolus screen")
@@ -300,7 +301,8 @@ struct BolusEntryView: View {
                     keyboardType: .decimalPad,
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
                     maxLength: 5,
-                    doneButtonColor: .loopAccent
+                    doneButtonColor: .loopAccent,
+                    textFieldDidBeginEditing: didBeginEditing
                 )
                 bolusUnitsLabel
             }
