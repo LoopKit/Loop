@@ -99,6 +99,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     @Published var recommendedBolus: HKQuantity?
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+    private var userChangedBolusAmount = false
     private var isInitiatingSaveOrBolus = false
 
     private var dosingDecision = BolusDosingDecision(for: .normalBolus)
@@ -208,16 +209,19 @@ final class BolusEntryViewModel: ObservableObject {
         self.dosingDecision.originalCarbEntry = originalCarbEntry
 
         self.cachedDisplayGlucoseUnit = delegate.displayGlucoseUnitObservable.displayGlucoseUnit
-        
+    }
+
+    public func generateRecommendationAndStartObserving(_ completion: (() -> Void)? = nil) {
         update() {
             // Only start observing after first update is complete
             self.observeLoopUpdates()
             self.observeEnteredManualGlucoseChanges()
             self.observeElapsedTime()
             self.observeEnteredBolusChanges()
+            completion?()
         }
     }
-        
+
     private func observeLoopUpdates() {
         NotificationCenter.default
             .publisher(for: .LoopDataUpdated)
@@ -498,7 +502,10 @@ final class BolusEntryViewModel: ObservableObject {
         dispatchPrecondition(condition: .onQueue(.main))
 
         // Prevent any UI updates after a bolus has been initiated.
-        guard !isInitiatingSaveOrBolus else { return }
+        guard !isInitiatingSaveOrBolus else {
+            completion?()
+            return
+        }
 
         disableManualGlucoseEntryIfNecessary()
         updateChartDateInterval()

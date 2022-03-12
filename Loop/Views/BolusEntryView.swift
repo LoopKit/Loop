@@ -74,11 +74,11 @@ struct BolusEntryView: View {
                         }
                         enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                     }
-            }
-            .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
-                // The view model can disable manual glucose entry if CGM data returns.
-                self.isManualGlucoseEntryRowVisible = isManualGlucoseEntryEnabled
-            }
+                }
+                .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
+                    // The view model can disable manual glucose entry if CGM data returns.
+                    self.isManualGlucoseEntryRowVisible = isManualGlucoseEntryEnabled
+                }
         }
     }
     

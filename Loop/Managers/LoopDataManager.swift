@@ -1133,8 +1133,6 @@ extension LoopDataManager {
             throw LoopError.pumpDataTooOld(date: pumpStatusDate)
         }
 
-        logger.default("*************** predict glucose")
-
         var momentum: [GlucoseEffect] = []
         var retrospectiveGlucoseEffect = self.retrospectiveGlucoseEffect
         var effects: [[GlucoseEffect]] = []
