@@ -707,8 +707,6 @@ final class BolusEntryViewModel: ObservableObject {
     private func computeBolusRecommendation(from state: LoopState) throws -> ManualBolusRecommendation? {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        log.debug("getting bolus recommendation")
-
         let manualGlucoseSample = DispatchQueue.main.sync { self.manualGlucoseSample }
         if manualGlucoseSample != nil {
             return try state.recommendBolusForManualGlucose(
