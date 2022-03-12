@@ -1910,8 +1910,6 @@ extension LoopDataManager {
     /// - Parameter state: The current state of the manager. This is invalid to access outside of the closure.
     func getLoopState(_ handler: @escaping (_ manager: LoopDataManager, _ state: LoopState) -> Void) {
         dataAccessQueue.async {
-            self.logger.debug("getLoopState: update()")
-
             let (_, updateError) = self.update(for: .getLoopState)
 
             handler(self, LoopStateView(loopDataManager: self, updateError: updateError))
