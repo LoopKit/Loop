@@ -462,6 +462,7 @@
 		B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */; };
 		B4FACBB12541FAB700199981 /* LoopSettingsAlerterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FACBB02541FAB700199981 /* LoopSettingsAlerterTests.swift */; };
 		B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */; };
+		C101947227DD473C004E7EB8 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11BD0552523CFED00236B08 /* SimpleBolusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
@@ -1366,6 +1367,7 @@
 		B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
 		B4FACBB02541FAB700199981 /* LoopSettingsAlerterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettingsAlerterTests.swift; sourceTree = "<group>"; };
 		B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+DeviceStatus.swift"; sourceTree = "<group>"; };
+		C101947127DD473C004E7EB8 /* MockKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
 		C11AA5C7258736CF00BDE12F /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
 		C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBolusViewModel.swift; sourceTree = "<group>"; };
@@ -1578,6 +1580,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C101947227DD473C004E7EB8 /* MockKitUI.framework in Frameworks */,
 				43D9000B21EB0BE000AF44BF /* LoopCore.framework in Frameworks */,
 				43FCEEC022220D1F0013DD30 /* LoopKit.framework in Frameworks */,
 				43FCEEBF22220CF30013DD30 /* LoopKitUI.framework in Frameworks */,
@@ -2418,6 +2421,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C101947127DD473C004E7EB8 /* MockKitUI.framework */,
 				1DC63E7325351BDF004605DA /* TrueTime.framework */,
 				4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */,
 				C1750AEB255B013300B8011C /* Minizip.framework */,
