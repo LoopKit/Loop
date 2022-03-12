@@ -1108,9 +1108,6 @@ extension DeviceDataManager: GlucoseStoreDelegate {
 // MARK: - TestingPumpManager
 extension DeviceDataManager {
     func deleteTestingPumpData(completion: ((Error?) -> Void)? = nil) {
-//        guard FeatureFlags.scenariosEnabled else {
-//            fatalError("\(#function) should be invoked only when scenarios are enabled")
-//        }
 
         guard let testingPumpManager = pumpManager as? TestingPumpManager else {
             assertionFailure("\(#function) should be invoked only when a testing pump manager is in use")

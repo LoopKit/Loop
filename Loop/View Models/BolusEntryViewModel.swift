@@ -227,7 +227,6 @@ final class BolusEntryViewModel: ObservableObject {
             .publisher(for: .LoopDataUpdated)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.log.debug("calling update() from LoopDataUpdated notification")
                 self?.update()
             }
             .store(in: &cancellables)
@@ -283,7 +282,6 @@ final class BolusEntryViewModel: ObservableObject {
 
                 // Update the manual glucose sample's timestamp, which should always be "now"
                 self.updateManualGlucoseSample(enteredAt: self.now())
-                self.log.debug("calling update() from observeElapsedTime")
                 self.update()
             }
             .store(in: &cancellables)
@@ -569,7 +567,6 @@ final class BolusEntryViewModel: ObservableObject {
 
         let predictedGlucoseValues: [PredictedGlucoseValue]
         do {
-            log.debug("predicting glucose with enteredDose: %@", enteredBolus)
             if let manualGlucoseEntry = manualGlucoseSample {
                 predictedGlucoseValues = try state.predictGlucoseFromManualGlucose(
                     manualGlucoseEntry,
