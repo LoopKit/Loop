@@ -271,6 +271,12 @@ class LoopAppManager: NSObject {
     }
 
     // MARK: - Remote Notification
+    
+    func registerForRemoteNotifications() {
+        if FeatureFlags.remoteOverridesEnabled {
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+    }
 
     func setRemoteNotificationsDeviceToken(_ remoteNotificationsDeviceToken: Data) {
         settingsManager.hasNewDeviceToken(token: remoteNotificationsDeviceToken)
@@ -434,7 +440,11 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
         case LoopNotificationCategory.bolusFailure.rawValue,
              LoopNotificationCategory.pumpBatteryLow.rawValue,
              LoopNotificationCategory.pumpExpired.rawValue,
-             LoopNotificationCategory.pumpFault.rawValue:
+             LoopNotificationCategory.pumpFault.rawValue,
+             LoopNotificationCategory.remoteBolus.rawValue,
+             LoopNotificationCategory.remoteBolusFailure.rawValue,
+             LoopNotificationCategory.remoteCarbs.rawValue,
+             LoopNotificationCategory.remoteCarbsFailure.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:
             // All other userNotifications are not to be displayed while in the foreground
