@@ -21,7 +21,7 @@ struct BolusEntryView: View {
     
     @ObservedObject var viewModel: BolusEntryViewModel
 
-    @State private var enteredBolusAmount = ""
+    @State private var enteredBolusString = ""
     @State private var shouldBolusEntryBecomeFirstResponder = false
 
     @State private var isManualGlucoseEntryRowVisible = false
@@ -29,6 +29,7 @@ struct BolusEntryView: View {
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
     @State private var pickerShouldExpand = false
+    @State private var editedBolusAmount = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -61,15 +62,23 @@ struct BolusEntryView: View {
             .navigationBarTitle(self.title)
                 .supportedInterfaceOrientations(.portrait)
                 .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
-                .onReceive(self.viewModel.$enteredBolus) { updatedBolusEntry in
-                    // The view model can update the user's entered bolus when the recommendation changes; ensure the text entry updates in tandem.
-                    let amount = updatedBolusEntry.doubleValue(for: .internationalUnit())
-                    self.enteredBolusAmount = amount == 0 ? "" : Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-            }
-            .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
-                // The view model can disable manual glucose entry if CGM data returns.
-                self.isManualGlucoseEntryRowVisible = isManualGlucoseEntryEnabled
-            }
+                .onReceive(self.viewModel.$recommendedBolus) { recommendation in
+                    // If the recommendation changes, and the user has not edited the bolus amount, update the bolus amount
+                    let amount = recommendation?.doubleValue(for: .internationalUnit()) ?? 0
+                    if !editedBolusAmount {
+                        var newEnteredBolusString: String
+                        if amount == 0 {
+                            newEnteredBolusString = ""
+                        } else {
+                            newEnteredBolusString = Self.doseAmountFormatter.string(from: amount) ?? String(amount)
+                        }
+                        enteredBolusStringBinding.wrappedValue = newEnteredBolusString
+                    }
+                }
+                .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
+                    // The view model can disable manual glucose entry if CGM data returns.
+                    self.isManualGlucoseEntryRowVisible = isManualGlucoseEntryEnabled
+                }
         }
     }
     
@@ -253,7 +262,6 @@ struct BolusEntryView: View {
         HStack {
             Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
             Spacer()
-            ActivityIndicator(isAnimating: $viewModel.isRefreshingPump, style: .default)
             HStack(alignment: .firstTextBaseline) {
                 Text(recommendedBolusString)
                     .font(.title)
@@ -271,13 +279,21 @@ struct BolusEntryView: View {
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }
 
+    private func didBeginEditing() {
+        if !editedBolusAmount {
+            enteredBolusString = ""
+            self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+            editedBolusAmount = true
+        }
+    }
+
     private var bolusEntryRow: some View {
         HStack {
             Text("Bolus", comment: "Label for bolus entry row on bolus screen")
             Spacer()
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
-                    text: typedBolusEntry,
+                    text: enteredBolusStringBinding,
                     placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
                     font: .preferredFont(forTextStyle: .title1),
                     textColor: .loopAccent,
@@ -285,13 +301,9 @@ struct BolusEntryView: View {
                     keyboardType: .decimalPad,
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
                     maxLength: 5,
-                    doneButtonColor: .loopAccent
+                    doneButtonColor: .loopAccent,
+                    textFieldDidBeginEditing: didBeginEditing
                 )
-                .onTapGesture {
-                    if typedBolusEntry.wrappedValue == recommendedBolusString {
-                        typedBolusEntry.wrappedValue = ""
-                    }
-                }
                 bolusUnitsLabel
             }
         }
@@ -303,12 +315,12 @@ struct BolusEntryView: View {
             .foregroundColor(Color(.secondaryLabel))
     }
 
-    private var typedBolusEntry: Binding<String> {
+    private var enteredBolusStringBinding: Binding<String> {
         Binding(
-            get: { self.enteredBolusAmount },
+            get: { self.enteredBolusString },
             set: { newValue in
                 self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: Self.doseAmountFormatter.number(from: newValue)?.doubleValue ?? 0)
-                self.enteredBolusAmount = newValue
+                self.enteredBolusString = newValue
             }
         )
     }
