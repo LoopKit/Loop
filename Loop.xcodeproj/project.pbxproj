@@ -380,8 +380,6 @@
 		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
 		A90EF53C25DEF06200F32D61 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		A90EF54425DEF0A000F32D61 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374B5EE209D84BE00D17AA8 /* OSLog.swift */; };
-		A9122E8826D17B6B00CDF0F5 /* Base32.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9122E8526D1506E00CDF0F5 /* Base32.framework */; };
-		A9122E8926D17B6B00CDF0F5 /* Base32.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A9122E8526D1506E00CDF0F5 /* Base32.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A91D2A3F26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91D2A3E26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift */; };
 		A91E4C2124F867A700BE9213 /* StoredAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91E4C2024F867A700BE9213 /* StoredAlertTests.swift */; };
 		A91E4C2324F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */; };
@@ -404,8 +402,6 @@
 		A9A056B524B94123007CF06D /* CriticalEventLogExportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9A056B424B94123007CF06D /* CriticalEventLogExportViewModel.swift */; };
 		A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		A9B607B0247F000F00792BE4 /* UserNotifications+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B607AF247F000F00792BE4 /* UserNotifications+Loop.swift */; };
-		A9BCFA5E267F9BE7009394BE /* OneTimePassword.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */; };
-		A9BCFA5F267F9BE7009394BE /* OneTimePassword.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A9B996F027235191002DC09C /* LoopWarning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B996EF27235191002DC09C /* LoopWarning.swift */; };
 		A9B996F227238705002DC09C /* DosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B996F127238705002DC09C /* DosingDecisionStore.swift */; };
 		A9BD28E7272226B40071DF15 /* TestLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9BD28E6272226B40071DF15 /* TestLocalizedError.swift */; };
@@ -719,9 +715,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				A9122E8926D17B6B00CDF0F5 /* Base32.framework in Embed Frameworks */,
 				4F2C159A1E0C9E5600E160D4 /* LoopUI.framework in Embed Frameworks */,
-				A9BCFA5F267F9BE7009394BE /* OneTimePassword.framework in Embed Frameworks */,
 				43D9FFD721EAE05D00AF44BF /* LoopCore.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -1341,11 +1335,6 @@
 		A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBackfillRequestUserInfoTests.swift; sourceTree = "<group>"; };
 		A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHistoricalCarbsTests.swift; sourceTree = "<group>"; };
 		A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = OneTimePassword.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		A9E2DA81262325F700AB8C89 /* Base32.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Base32.xcframework; path = ../OneTimePassword/Carthage/Build/Base32.xcframework; sourceTree = "<group>"; };
-		A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreTests.swift; sourceTree = "<group>"; };
-		A9E6DFE7246A043C005B1A1C /* DoseStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreTests.swift; sourceTree = "<group>"; };
-		A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerErrorTests.swift; sourceTree = "<group>"; };
-		A9E6DFEE246A0474005B1A1C /* LoopErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopErrorTests.swift; sourceTree = "<group>"; };
 		A9F5F1F4251050EC00E7C8A4 /* ZipArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipArchiveTests.swift; sourceTree = "<group>"; };
 		A9F66FC2247F451500096EA7 /* UIDevice+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Loop.swift"; sourceTree = "<group>"; };
 		A9F703722489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CarbStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
@@ -1518,7 +1507,6 @@
 			files = (
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
 				1DC63E7425351BDF004605DA /* TrueTime.framework in Frameworks */,
-				A9BCFA5E267F9BE7009394BE /* OneTimePassword.framework in Frameworks */,
 				C1750AEC255B013300B8011C /* Minizip.framework in Frameworks */,
 				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
@@ -1526,7 +1514,6 @@
 				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
 				C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */,
 				892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */,
-				A9122E8826D17B6B00CDF0F5 /* Base32.framework in Frameworks */,
 				892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */,
 				4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */,
 			);
@@ -1769,6 +1756,7 @@
 				43776F8D1B8022E90074EA36 /* Products */,
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
 				A951C5FF23E8AB51003E26DC /* Version.xcconfig */,
+				C1E820BA27DD5C730096F926 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2540,6 +2528,15 @@
 				C18A491322FCC22900FDA733 /* make_scenario.py */,
 			);
 			path = Scripts;
+			sourceTree = "<group>";
+		};
+		C1E820BA27DD5C730096F926 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				A9E2DA7F262325E500AB8C89 /* OneTimePassword.framework */,
+				A9122E8526D1506E00CDF0F5 /* Base32.framework */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		E90909CB24E34A7A00F963D2 /* high_and_rising_with_cob */ = {

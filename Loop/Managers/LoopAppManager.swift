@@ -279,6 +279,7 @@ class LoopAppManager: NSObject {
     }
 
     func setRemoteNotificationsDeviceToken(_ remoteNotificationsDeviceToken: Data) {
+        log.default("DeviceToken: %{public}@", remoteNotificationsDeviceToken.hexadecimalString)
         settingsManager.hasNewDeviceToken(token: remoteNotificationsDeviceToken)
     }
 
