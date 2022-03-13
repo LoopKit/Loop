@@ -435,6 +435,17 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
 
+    func validatePushNotificationSource(_ notification: [String: AnyObject]) -> Bool {
+        for service in remoteDataServices {
+            let validated = service.validatePushNotificationSource(notification)
+            if validated {
+                return validated
+            }
+        }
+        
+        return false
+    }
+    
     public func temporaryScheduleOverrideHistoryDidUpdate() {
         remoteDataServices.forEach { self.uploadTemporaryOverrideData(to: $0) }
     }
