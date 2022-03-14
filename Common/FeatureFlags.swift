@@ -30,6 +30,7 @@ struct FeatureFlagConfiguration: Decodable {
     let simulatedCoreDataEnabled: Bool
     let siriEnabled: Bool
     let simpleBolusCalculatorEnabled: Bool
+    let usePositiveMomentumAndRCForManualBoluses: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -158,6 +159,13 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.simpleBolusCalculatorEnabled = false
         #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if DISABLE_POSITIVE_MOMENTUM_AND_RC_FOR_MANUAL_BOLUSES
+        self.usePositiveMomentumAndRCForManualBoluses = false
+        #else
+        self.usePositiveMomentumAndRCForManualBoluses = true
+        #endif
     }
 }
 
@@ -184,6 +192,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* manualDoseEntryEnabled: \(manualDoseEntryEnabled)",
             "* allowDebugFeatures: \(allowDebugFeatures)",
             "* simpleBolusCalculatorEnabled: \(simpleBolusCalculatorEnabled)",
+            "* usePositiveMomentumAndRCForManualBoluses: \(usePositiveMomentumAndRCForManualBoluses)",
         ].joined(separator: "\n")
     }
 }

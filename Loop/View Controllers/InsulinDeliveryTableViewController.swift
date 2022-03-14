@@ -398,13 +398,15 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             }
         }
 
+        let sinceDate = Date().addingTimeInterval(-InsulinDeliveryTableViewController.historicDataDisplayTimeInterval)
+
         switch DataSourceSegment(rawValue: dataSourceSegmentedControl.selectedSegmentIndex)! {
         case .reservoir:
             doseStore?.deleteAllReservoirValues(completion)
         case .history:
             doseStore?.deleteAllPumpEvents(completion)
         case .manualEntryDose:
-            doseStore?.deleteAllManuallyEnteredDoses(completion)
+            doseStore?.deleteAllManuallyEnteredDoses(since: sinceDate, completion)
         }
     }
 
