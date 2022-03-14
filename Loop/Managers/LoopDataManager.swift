@@ -798,7 +798,7 @@ extension LoopDataManager {
             self.lastLoopError = nil
             let startDate = self.now()
 
-            let (dosingDecision, error) = self.update(for: .loop)
+            var (dosingDecision, error) = self.update(for: .loop)
 
             guard error == nil, self.automaticDosingStatus.isClosedLoop == true else {
                 self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
