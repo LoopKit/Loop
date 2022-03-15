@@ -160,6 +160,85 @@ extension NotificationManager {
             UNUserNotificationCenter.current().add(request)
         }
     }
+    
+    static func sendRemoteBolusNotification(amount: Double) {
+        let notification = UNMutableNotificationContent()
+
+        notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %.1f U", comment: "The notification title for a remote bolus. (1: Bolus amount)"), amount)
+        
+        let body = "Success!"
+
+        notification.body = body
+        notification.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: LoopNotificationCategory.remoteBolus.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
+    }
+    
+    static func sendRemoteBolusFailureNotification(for error: Error, amount: Double) {
+        let notification = UNMutableNotificationContent()
+
+        notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %.1f U", comment: "The notification title for a remote failure. (1: Bolus amount)"), amount)
+        notification.body = error.localizedDescription
+        notification.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: LoopNotificationCategory.remoteBolusFailure.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
+    }
+    
+    static func sendRemoteCarbEntryNotification(amountInGrams: Double) {
+        let notification = UNMutableNotificationContent()
+
+        let leadingBody = remoteCarbEntryNotificationBody(amountInGrams: amountInGrams)
+        let extraBody = "Success!"
+        
+        let body = [leadingBody, extraBody].joined(separator: "\n")
+
+        notification.body = body
+        notification.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: LoopNotificationCategory.remoteCarbs.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
+    }
+    
+    static func sendRemoteCarbEntryFailureNotification(for error: Error, amountInGrams: Double) {
+        let notification = UNMutableNotificationContent()
+        
+        let leadingBody = remoteCarbEntryNotificationBody(amountInGrams: amountInGrams)
+        let extraBody = error.localizedDescription
+
+        let body = [leadingBody, extraBody].joined(separator: "\n")
+        
+        notification.body = body
+        notification.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: LoopNotificationCategory.remoteCarbsFailure.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
+    }
+    
+    private static func remoteCarbEntryNotificationBody(amountInGrams: Double) -> String {
+        return String(format: NSLocalizedString("Remote Carbs Entry: %d grams", comment: "The carb amount message for a remote carbs entry notification. (1: Carb amount in grams)"), Int(amountInGrams))
+    }
 
     static func clearLoopNotRunningNotifications() {
         // Clear out any existing not-running notifications
