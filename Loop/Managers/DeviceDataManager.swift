@@ -1202,6 +1202,21 @@ extension DeviceDataManager {
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
 
         if FeatureFlags.remoteOverridesEnabled {
+
+            if let expirationStr = notification["expiration"] as? String {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
+                if let expiration = formatter.date(from: expirationStr) {
+                    guard expiration > Date() else {
+                        log.error("Expired notification: %{public}@", String(describing: notification))
+                        return
+                    }
+                } else {
+                    log.error("Invalid expiration: %{public}@", expirationStr)
+                    return
+                }
+            }
+
             if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
                 switch command {
                 case .temporaryScheduleOverride(let override):
@@ -1272,10 +1287,10 @@ extension DeviceDataManager {
                         }
                     }
                 }
-                // Wait up to 25 seconds for uploads to finish
+                // Wait up to 25 seconds for uploads triggered by these commands to finish
                 let _ = remoteDataServicesManager.waitForUploadsToFinish(timeout: .now() + TimeInterval(25))
             } else {
-                log.info("Unhandled remote notification: %{public}@", String(describing: notification))
+                log.error("Unhandled remote notification: %{public}@", String(describing: notification))
             }
         }
         log.info("Finished handling remote notification")
