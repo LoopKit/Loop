@@ -2120,9 +2120,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4F7528921DFE1DC600C322D6 /* Build configuration list for PBXNativeTarget "LoopUI" */;
 			buildPhases = (
+				4F7528881DFE1DC600C322D6 /* Headers */,
 				4F7528861DFE1DC600C322D6 /* Sources */,
 				4F7528871DFE1DC600C322D6 /* Frameworks */,
-				4F7528881DFE1DC600C322D6 /* Headers */,
 				4F7528891DFE1DC600C322D6 /* Resources */,
 			);
 			buildRules = (
