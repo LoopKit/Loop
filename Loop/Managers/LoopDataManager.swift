@@ -181,6 +181,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         // Cancel any active temp basal when going into closed loop off mode
         // The dispatch is necessary in case this is coming from a didSet already on the settings struct.
         self.automaticDosingStatus.$isClosedLoop
+            .dropFirst()
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { if !$0 {
