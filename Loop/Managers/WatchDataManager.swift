@@ -235,12 +235,10 @@ final class WatchDataManager: NSObject {
             let updateGroup = DispatchGroup()
 
             let carbsOnBoard = state.carbsOnBoard
-            let recommendedBolus = state.recommendedBolus
 
             let context = WatchContext(glucose: glucose, glucoseUnit: self.deviceManager.glucoseStore.preferredUnit)
             context.reservoir = reservoir?.unitVolume
             context.loopLastRunDate = manager.lastLoopCompleted
-            context.recommendedBolusDose = recommendedBolus?.recommendation.amount
             context.cob = carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
 
             if let glucoseDisplay = self.deviceManager.glucoseDisplay(for: glucose) {
@@ -249,23 +247,21 @@ final class WatchDataManager: NSObject {
             }
 
             dosingDecision.carbsOnBoard = carbsOnBoard
-            dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendedBolus)
 
             context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
         
             let settings = self.deviceManager.loopManager.settings
 
             context.isClosedLoop = settings.dosingEnabled
-            
-            if let potentialCarbEntry = potentialCarbEntry {
-                context.potentialCarbEntry = potentialCarbEntry
-                if let recommendedBolusDoseConsideringPotentialCarbEntry = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil) {
-                    context.recommendedBolusDoseConsideringPotentialCarbEntry = recommendedBolusDoseConsideringPotentialCarbEntry.amount
-                    dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: recommendedBolusDoseConsideringPotentialCarbEntry,
-                                                                                                 date: Date())
-                }
+
+            context.potentialCarbEntry = potentialCarbEntry
+            if let recommendedBolus = try? state.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses)
+            {
+                context.recommendedBolusDose = recommendedBolus.amount
+                dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: recommendedBolus,
+                                                                                             date: Date())
             }
-            
+
             var historicalGlucose: [HistoricalGlucoseValue]?
             if let glucose = glucose {
                 updateGroup.enter()
