@@ -40,7 +40,6 @@ final class WatchContext: RawRepresentable {
     var recommendedBolusDose: Double?
 
     var potentialCarbEntry: NewCarbEntry?
-    var recommendedBolusDoseConsideringPotentialCarbEntry: Double?
 
     var cob: Double?
     var iob: Double?
@@ -95,7 +94,6 @@ final class WatchContext: RawRepresentable {
         if let rawPotentialCarbEntry = rawValue["pce"] as? NewCarbEntry.RawValue {
             potentialCarbEntry = NewCarbEntry(rawValue: rawPotentialCarbEntry)
         }
-        recommendedBolusDoseConsideringPotentialCarbEntry = rawValue["rbce"] as? Double
         cob = rawValue["cob"] as? Double
 
         cgmManagerState = rawValue["cgmManagerState"] as? CGMManager.RawStateValue
@@ -140,7 +138,6 @@ final class WatchContext: RawRepresentable {
         raw["r"] = reservoir
         raw["rbo"] = recommendedBolusDose
         raw["pce"] = potentialCarbEntry?.rawValue
-        raw["rbce"] = recommendedBolusDoseConsideringPotentialCarbEntry
         raw["rp"] = reservoirPercentage
 
         raw["pg"] = predictedGlucose?.rawValue

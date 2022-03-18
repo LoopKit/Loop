@@ -67,7 +67,7 @@ class MockDoseStore: DoseStoreProtocol {
         completion("")
     }
     
-    func addDoses(_ doses: [DoseEntry], completion: @escaping (Error?) -> Void) {
+    func addDoses(_ doses: [DoseEntry], from device: HKDevice?, completion: @escaping (Error?) -> Void) {
         completion(nil)
     }
     
@@ -84,10 +84,6 @@ class MockDoseStore: DoseStoreProtocol {
     }
     
     func executePumpEventQuery(fromQueryAnchor queryAnchor: DoseStore.QueryAnchor?, limit: Int, completion: @escaping (DoseStore.PumpEventQueryResult) -> Void) {
-        completion(.failure(DoseStore.DoseStoreError.configurationError))
-    }
-    
-    func executeDoseQuery(fromQueryAnchor queryAnchor: DoseStore.QueryAnchor?, limit: Int, completion: @escaping (DoseStore.DoseQueryResult) -> Void) {
         completion(.failure(DoseStore.DoseStoreError.configurationError))
     }
     
