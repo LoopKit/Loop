@@ -17,7 +17,7 @@ import LoopUI
 struct ManualEntryDoseView: View {
     @ObservedObject var viewModel: ManualEntryDoseViewModel
 
-    @State private var enteredBolusAmount = ""
+    @State private var enteredBolusString = ""
     @State private var shouldBolusEntryBecomeFirstResponder = false
 
     @State private var isInteractingWithChart = false
@@ -54,12 +54,7 @@ struct ManualEntryDoseView: View {
             .keyboardAware()
             .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
             .navigationBarTitle(self.title)
-                .supportedInterfaceOrientations(.portrait)
-                .onReceive(self.viewModel.$enteredBolus) { updatedBolusEntry in
-                    // The view model can update the user's entered bolus when the recommendation changes; ensure the text entry updates in tandem.
-                    let amount = updatedBolusEntry.doubleValue(for: .internationalUnit())
-                    self.enteredBolusAmount = amount == 0 ? "" : Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-            }
+            .supportedInterfaceOrientations(.portrait)
         }
     }
     
@@ -166,27 +161,6 @@ struct ManualEntryDoseView: View {
         quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
         return quantityFormatter.numberFormatter
     }()
-
-    private var recommendedBolusRow: some View {
-        HStack {
-            Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
-            Spacer()
-            HStack(alignment: .firstTextBaseline) {
-                Text(recommendedBolusString)
-                    .font(.title)
-                    .foregroundColor(Color(.label))
-                bolusUnitsLabel
-            }
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private var recommendedBolusString: String {
-        guard let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) else {
-            return "–"
-        }
-        return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-    }
     
     private var insulinTypePicker: some View {
         ExpandablePicker(
@@ -239,17 +213,25 @@ struct ManualEntryDoseView: View {
 
     private var typedBolusEntry: Binding<String> {
         Binding(
-            get: { self.enteredBolusAmount },
+            get: { self.enteredBolusString },
             set: { newValue in
                 self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: Self.doseAmountFormatter.number(from: newValue)?.doubleValue ?? 0)
-                self.enteredBolusAmount = newValue
+                self.enteredBolusString = newValue
             }
         )
     }
 
+    private var enteredBolusAmount: Double {
+        Self.doseAmountFormatter.number(from: enteredBolusString)?.doubleValue ?? 0
+    }
+
+    private var actionButtonDisabled: Bool {
+        enteredBolusAmount <= 0
+    }
+
     private var actionArea: some View {
         VStack(spacing: 0) {
-            actionButton
+            actionButton.disabled(actionButtonDisabled)
         }
         .padding(.bottom) // FIXME: unnecessary on iPhone 8 size devices
         .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
