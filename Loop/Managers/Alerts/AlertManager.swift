@@ -186,7 +186,7 @@ extension AlertManager {
     }
 
     private func playbackAlertsFromAlertStore() {
-        alertStore.lookupAllUnacknowledged {
+        alertStore.lookupAllUnacknowledgedUnretracted {
             switch $0 {
             case .failure(let error):
                 self.log.error("Could not fetch unacknowledged alerts: %@", error.localizedDescription)
@@ -246,6 +246,55 @@ extension AlertManager {
                     """
                 }.joined(separator: "\n")
                 completion(report)
+            }
+        }
+    }
+}
+
+// MARK: PersistedAlertStore
+extension AlertManager: PersistedAlertStore {
+    public func lookupAllUnretracted(managerIdentifier: String, completion: @escaping (Result<[PersistedAlert], Error>) -> Void) {
+        alertStore.lookupAllUnretracted(managerIdentifier: managerIdentifier) {
+            switch $0 {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let alerts):
+                do {
+                    let result = try alerts.map {
+                        PersistedAlert(
+                            alert: try Alert(from: $0, adjustedForStorageTime: false),
+                            issuedDate: $0.issuedDate,
+                            retractedDate: $0.retractedDate,
+                            acknowledgedDate: $0.acknowledgedDate
+                        )
+                    }
+                    completion(.success(result))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
+    public func lookupAllUnacknowledgedUnretracted(managerIdentifier: String, completion: @escaping (Result<[PersistedAlert], Error>) -> Void) {
+        alertStore.lookupAllUnacknowledgedUnretracted(managerIdentifier: managerIdentifier) {
+            switch $0 {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let alerts):
+                do {
+                    let result = try alerts.map {
+                        PersistedAlert(
+                            alert: try Alert(from: $0, adjustedForStorageTime: false),
+                            issuedDate: $0.issuedDate,
+                            retractedDate: $0.retractedDate,
+                            acknowledgedDate: $0.acknowledgedDate
+                        )
+                    }
+                    completion(.success(result))
+                } catch {
+                    completion(.failure(error))
+                }
             }
         }
     }
