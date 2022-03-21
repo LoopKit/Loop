@@ -839,6 +839,12 @@ extension LoopDataManager {
         dosingDecision.scheduleOverride = latestSettings?.scheduleOverride
         dosingDecision.controllerStatus = UIDevice.current.controllerStatus
         dosingDecision.pumpManagerStatus = delegate?.pumpManagerStatus
+        if let pumpStatusHighlight = delegate?.pumpStatusHighlight {
+            dosingDecision.pumpStatusHighlight = StoredDosingDecision.StoredDeviceHighlight(
+                localizedMessage: pumpStatusHighlight.localizedMessage,
+                imageName: pumpStatusHighlight.imageName,
+                state: pumpStatusHighlight.state)
+        }
         dosingDecision.cgmManagerStatus = delegate?.cgmManagerStatus
         dosingDecision.lastReservoirValue = StoredDosingDecision.LastReservoirValue(doseStore.lastReservoirValue)
 
@@ -2076,6 +2082,9 @@ protocol LoopDataManagerDelegate: AnyObject {
 
     /// The pump manager status, if one exists.
     var pumpManagerStatus: PumpManagerStatus? { get }
+
+    /// The pump status highlight, if one exists.
+    var pumpStatusHighlight: DeviceStatusHighlight? { get }
 
     /// The cgm manager status, if one exists.
     var cgmManagerStatus: CGMManagerStatus? { get }
