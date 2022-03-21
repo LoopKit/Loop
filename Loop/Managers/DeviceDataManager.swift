@@ -435,12 +435,14 @@ final class DeviceDataManager {
     
     private func checkPumpDataAndLoop() {
         self.log.default("Asserting current pump data")
-        self.pumpManager?.ensureCurrentPumpData(completion: { (lastSync) in
-            if let lastSync = lastSync, Date().timeIntervalSince(lastSync) < LoopCoreConstants.inputDataRecencyInterval {
-                self.log.default("Pump data from %@ is fresh. Triggering loop()", String(describing: type(of: self.pumpManager)))
-                self.loopManager.loop()
-            }
-        })
+        guard let pumpManager = pumpManager else {
+            self.loopManager.loop()
+            return
+        }
+
+        pumpManager.ensureCurrentPumpData() { (lastSync) in
+            self.loopManager.loop()
+        }
     }
 
     private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult) {
