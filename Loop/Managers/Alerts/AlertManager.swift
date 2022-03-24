@@ -106,19 +106,23 @@ extension AlertManager: AlertManagerResponder {
     }
     
     func presentAcknowledgementFailedAlert(error: Error) {
-        let message: String
-        if let localizedError = error as? LocalizedError {
-            message = [localizedError.localizedDescription, localizedError.recoverySuggestion].compactMap({$0}).joined(separator: "\n\n")
-        } else {
-            message = String(format: NSLocalizedString("%1$@ is unable to clear the alert from your device", comment: "Message for alert shown when alert acknowledgement fails for a device, and the device does not provide a LocalizedError. (1: app name)"), Bundle.main.bundleDisplayName)
+        DispatchQueue.main.async {
+            let message: String
+            if let localizedError = error as? LocalizedError {
+                message = [localizedError.localizedDescription, localizedError.recoverySuggestion].compactMap({$0}).joined(separator: "\n\n")
+            } else {
+                message = String(format: NSLocalizedString("%1$@ is unable to clear the alert from your device", comment: "Message for alert shown when alert acknowledgement fails for a device, and the device does not provide a LocalizedError. (1: app name)"), Bundle.main.bundleDisplayName)
+            }
+            self.log.info("Alert acknowledgement failed: %{public}@", message)
+
+            let alert = UIAlertController(
+                title: NSLocalizedString("Unable To Clear Alert", comment: "Title for alert shown when alert acknowledgement fails"),
+                message: message,
+                preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action for alert when alert acknowledgment fails"), style: .default))
+            
+            self.alertPresenter.present(alert, animated: true)
         }
-        let alert = UIAlertController(
-            title: NSLocalizedString("Unable To Clear Alert", comment: "Title for alert shown when alert acknowledgement fails"),
-            message: message,
-            preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action for alert when alert acknowledgment fails"), style: .default))
-        
-        self.alertPresenter.present(alert, animated: true)
     }
 }
 
