@@ -1509,7 +1509,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
-    private func addPumpManagerViewToHUD(_ view: LevelHUDView) {
+    private func addPumpManagerViewToHUD(_ view: BaseHUDView) {
         if let hudView = hudView {
             view.stateColors = .pumpStatus
             hudView.addPumpManagerProvidedHUDView(view)

@@ -15,7 +15,7 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
     
     @IBOutlet public weak var basalRateHUD: BasalRateHUDView!
     
-    @IBOutlet public weak var pumpManagerProvidedHUD: LevelHUDView!
+    @IBOutlet public weak var pumpManagerProvidedHUD: BaseHUDView!
         
     override public var orderPriority: HUDViewOrderPriority {
         return 3
@@ -84,7 +84,7 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
         pumpManagerProvidedHUD.removeFromSuperview()
     }
     
-    public func addPumpManagerProvidedHUDView(_ pumpManagerProvidedHUD: LevelHUDView) {
+    public func addPumpManagerProvidedHUDView(_ pumpManagerProvidedHUD: BaseHUDView) {
         self.pumpManagerProvidedHUD = pumpManagerProvidedHUD
         statusStackView.addArrangedSubview(self.pumpManagerProvidedHUD)
     }
