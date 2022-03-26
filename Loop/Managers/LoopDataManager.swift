@@ -583,13 +583,14 @@ extension LoopDataManager {
         var dosingDecision = StoredDosingDecision(reason: reason.rawValue)
         dosingDecision.settings = StoredDosingDecision.Settings(latestStoredSettingsProvider.latestSettings)
         dosingDecision.controllerStatus = UIDevice.current.controllerStatus
-        dosingDecision.pumpManagerStatus = delegate?.pumpManagerStatus
-        dosingDecision.cgmManagerStatus = delegate?.cgmManagerStatus
-        dosingDecision.lastReservoirValue = StoredDosingDecision.LastReservoirValue(doseStore.lastReservoirValue)
         dosingDecision.automaticDoseRecommendation = recommendation
 
         let error = enactRecommendedAutomaticDose()
-        
+
+        dosingDecision.pumpManagerStatus = delegate?.pumpManagerStatus
+        dosingDecision.cgmManagerStatus = delegate?.cgmManagerStatus
+        dosingDecision.lastReservoirValue = StoredDosingDecision.LastReservoirValue(doseStore.lastReservoirValue)
+
         if let error = error {
             dosingDecision.appendError(error)
         }
