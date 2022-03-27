@@ -132,7 +132,7 @@ extension DoseStore {
 
 fileprivate extension PersistedPumpEvent {
     static func simulatedAlarm(date: Date) -> PersistedPumpEvent {
-        return simulated(date: date, type: .alarm)
+        return simulated(date: date, type: .alarm, alarmType: .other("Simulated Other Alarm"))
     }
 
     static func simulatedAlarmClear(date: Date) -> PersistedPumpEvent {
@@ -141,19 +141,19 @@ fileprivate extension PersistedPumpEvent {
 
     static func simulatedBasal(date: Date, duration: TimeInterval, rate: Double) -> PersistedPumpEvent {
         return simulated(dose: DoseEntry(type: .basal,
-                                  startDate: date,
-                                  endDate: date.addingTimeInterval(duration),
-                                  value: rate,
-                                  unit: .unitsPerHour,
-                                  deliveredUnits: rate * duration / .hours(1)))
+                                         startDate: date,
+                                         endDate: date.addingTimeInterval(duration),
+                                         value: rate,
+                                         unit: .unitsPerHour,
+                                         deliveredUnits: rate * duration / .hours(1)))
     }
 
     static func simulatedBolus(date: Date, amount: Double) -> PersistedPumpEvent {
         return simulated(dose: DoseEntry(type: .bolus,
-                                  startDate: date,
-                                  endDate: date.addingTimeInterval(.minutes(1)),
-                                  value: amount,
-                                  unit: .units))
+                                         startDate: date,
+                                         endDate: date.addingTimeInterval(.minutes(1)),
+                                         value: amount,
+                                         unit: .units))
     }
 
     static func simulatedPrime(date: Date) -> PersistedPumpEvent {
@@ -174,15 +174,15 @@ fileprivate extension PersistedPumpEvent {
 
     static func simulatedTempBasal(date: Date, duration: TimeInterval, rate: Double, scheduledRate: Double) -> PersistedPumpEvent {
         return simulated(dose: DoseEntry(type: .tempBasal,
-                                  startDate: date,
-                                  endDate: date.addingTimeInterval(duration),
-                                  value: rate,
-                                  unit: .unitsPerHour,
-                                  deliveredUnits: rate * duration / .hours(1),
-                                  scheduledBasalRate: HKQuantity(unit: .internationalUnitsPerHour, doubleValue: scheduledRate)))
+                                         startDate: date,
+                                         endDate: date.addingTimeInterval(duration),
+                                         value: rate,
+                                         unit: .unitsPerHour,
+                                         deliveredUnits: rate * duration / .hours(1),
+                                         scheduledBasalRate: HKQuantity(unit: .internationalUnitsPerHour, doubleValue: scheduledRate)))
     }
 
-    private static func simulated(date: Date, type: PumpEventType) -> PersistedPumpEvent {
+    private static func simulated(date: Date, type: PumpEventType, alarmType: PumpAlarmType? = nil) -> PersistedPumpEvent {
         return PersistedPumpEvent(date: date,
                                   persistedDate: date,
                                   dose: nil,
@@ -191,8 +191,8 @@ fileprivate extension PersistedPumpEvent {
                                   raw: Data(UUID().uuidString.utf8),
                                   title: UUID().uuidString,
                                   type: type,
-                                  isMutable: false,
-                                  automatic: nil)
+                                  automatic: nil,
+                                  alarmType: alarmType)
     }
 
     private static func simulated(dose: DoseEntry) -> PersistedPumpEvent {
@@ -203,8 +203,7 @@ fileprivate extension PersistedPumpEvent {
                                   objectIDURL: URL(string: "x-coredata:///PumpEvent/\(UUID().uuidString)")!,
                                   raw: Data(UUID().uuidString.utf8),
                                   title: String(describing: dose),
-                                  type: dose.type.pumpEventType!,
-                                  isMutable: false,
+                                  type: dose.type.pumpEventType,
                                   automatic: nil)
     }
 }

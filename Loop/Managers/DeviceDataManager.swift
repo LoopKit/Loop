@@ -319,7 +319,8 @@ final class DeviceDataManager {
             dosingDecisionStore: dosingDecisionStore,
             glucoseStore: glucoseStore,
             settingsStore: settingsManager.settingsStore,
-            overrideHistory: overrideHistory
+            overrideHistory: overrideHistory,
+            insulinDeliveryStore: doseStore.insulinDeliveryStore
         )
         
 
@@ -348,6 +349,7 @@ final class DeviceDataManager {
         doseStore.delegate = self
         dosingDecisionStore.delegate = self
         glucoseStore.delegate = self
+        doseStore.insulinDeliveryStore.delegate = self
 
         setupPump()
         setupCGM()
@@ -436,12 +438,14 @@ final class DeviceDataManager {
     
     private func checkPumpDataAndLoop() {
         self.log.default("Asserting current pump data")
-        self.pumpManager?.ensureCurrentPumpData(completion: { (lastSync) in
-            if let lastSync = lastSync, Date().timeIntervalSince(lastSync) < LoopCoreConstants.inputDataRecencyInterval {
-                self.log.default("Pump data from %@ is fresh. Triggering loop()", String(describing: type(of: self.pumpManager)))
-                self.loopManager.loop()
-            }
-        })
+        guard let pumpManager = pumpManager else {
+            self.loopManager.loop()
+            return
+        }
+
+        pumpManager.ensureCurrentPumpData() { (lastSync) in
+            self.loopManager.loop()
+        }
     }
 
     private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult) {
@@ -697,7 +701,7 @@ extension DeviceDataManager {
             return
         }
 
-        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
+        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true), completion: nil)
         pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
@@ -1080,10 +1084,6 @@ extension DeviceDataManager: CarbStoreDelegate {
 // MARK: - DoseStoreDelegate
 extension DeviceDataManager: DoseStoreDelegate {
 
-    func doseStoreHasUpdatedDoseData(_ doseStore: DoseStore) {
-        remoteDataServicesManager.doseStoreHasUpdatedDoseData(doseStore)
-    }
-
     func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
         remoteDataServicesManager.doseStoreHasUpdatedPumpEventData(doseStore)
     }
@@ -1104,6 +1104,15 @@ extension DeviceDataManager: GlucoseStoreDelegate {
 
     func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
         remoteDataServicesManager.glucoseStoreHasUpdatedGlucoseData(glucoseStore)
+    }
+
+}
+
+// MARK: - InsulinDeliveryStoreDelegate
+extension DeviceDataManager: InsulinDeliveryStoreDelegate {
+
+    func insulinDeliveryStoreHasUpdatedDoseData(_ insulinDeliveryStore: InsulinDeliveryStore) {
+        remoteDataServicesManager.insulinDeliveryStoreHasUpdatedDoseData(insulinDeliveryStore)
     }
 
 }
@@ -1129,7 +1138,7 @@ extension DeviceDataManager {
 
             healthStore.deleteObjects(of: self.doseStore.sampleType, predicate: devicePredicate) { success, deletedObjectCount, error in
                 if success {
-                    insulinDeliveryStore.test_lastBasalEndDate = nil
+                    insulinDeliveryStore.test_lastImmutableBasalEndDate = nil
                 }
                 completion?(error)
             }
@@ -1205,6 +1214,21 @@ extension DeviceDataManager {
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
 
         if FeatureFlags.remoteOverridesEnabled {
+
+            if let expirationStr = notification["expiration"] as? String {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
+                if let expiration = formatter.date(from: expirationStr) {
+                    guard expiration > Date() else {
+                        log.error("Expired notification: %{public}@", String(describing: notification))
+                        return
+                    }
+                } else {
+                    log.error("Invalid expiration: %{public}@", expirationStr)
+                    return
+                }
+            }
+
             if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
                 switch command {
                 case .temporaryScheduleOverride(let override):
@@ -1275,10 +1299,10 @@ extension DeviceDataManager {
                         }
                     }
                 }
-                // Wait up to 25 seconds for uploads to finish
+                // Wait up to 25 seconds for uploads triggered by these commands to finish
                 let _ = remoteDataServicesManager.waitForUploadsToFinish(timeout: .now() + TimeInterval(25))
             } else {
-                log.info("Unhandled remote notification: %{public}@", String(describing: notification))
+                log.error("Unhandled remote notification: %{public}@", String(describing: notification))
             }
         }
         log.info("Finished handling remote notification")

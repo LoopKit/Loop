@@ -155,11 +155,11 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                         self.contextDate = context.creationDate
 
                         // Don't publish a new value if the recommendation has not changed.
-                        guard self.recommendedBolusAmount != context.recommendedBolusDoseConsideringPotentialCarbEntry else {
+                        guard self.recommendedBolusAmount != context.recommendedBolusDose else {
                             return
                         }
 
-                        self.recommendedBolusAmount = context.recommendedBolusDoseConsideringPotentialCarbEntry
+                        self.recommendedBolusAmount = context.recommendedBolusDose
                     }
                 },
                 errorHandler: { error in
