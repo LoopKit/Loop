@@ -826,9 +826,34 @@ extension LoopDataManager {
         notify(forChange: .tempBasal)
     }
 
+    // This is primarily for external clients displaying a bolus recommendation and forecast
+    // Should be called after any significant change to forecast input data.
+    private func updateRecommendedManualBolus() {
+        dataAccessQueue.async {
+            var (dosingDecision, updateError) = self.update(for: .updateRecommendedManualBolus)
+
+            if let error = updateError {
+                self.logger.error("Error updating manual bolus recommendation: ", String(describing: error))
+            } else {
+                do {
+                    if let predictedGlucoseIncludingPendingInsulin = self.predictedGlucoseIncludingPendingInsulin,
+                       let manualBolusRecommendation = try self.recommendManualBolus(forPrediction: predictedGlucoseIncludingPendingInsulin, consideringPotentialCarbEntry: nil)
+                    {
+                        dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualBolusRecommendation, date: Date())
+                        self.logger.debug("Manual bolus rec = %{public}@", String(describing: dosingDecision.manualBolusRecommendation))
+                        self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
+                    }
+                } catch {
+                    self.logger.error("Error updating manual bolus recommendation: ", String(describing: error))
+                }
+            }
+        }
+    }
+
     fileprivate enum UpdateReason: String {
         case loop
         case getLoopState
+        case updateRecommendedManualBolus
     }
 
     fileprivate func update(for reason: UpdateReason) -> (StoredDosingDecision, LoopError?) {
@@ -1052,6 +1077,8 @@ extension LoopDataManager {
                 type(of: self).LoopUpdateContextKey: context.rawValue
             ]
         )
+
+        updateRecommendedManualBolus()
     }
 
     /// Computes amount of insulin from boluses that have been issued and not confirmed, and
@@ -1632,7 +1659,6 @@ extension LoopDataManager {
             } else {
                 recommendedAutomaticDose = nil
             }
-
             dosingDecision.automaticDoseRecommendation = recommendedAutomaticDose?.recommendation
         } catch let error {
             loopError = error as? LoopError ?? .unknownError(error)
