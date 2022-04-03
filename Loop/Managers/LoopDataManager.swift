@@ -833,7 +833,7 @@ extension LoopDataManager {
             var (dosingDecision, updateError) = self.update(for: .updateRecommendedManualBolus)
 
             if let error = updateError {
-                self.logger.error("Error updating manual bolus recommendation: ", String(describing: error))
+                self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
             } else {
                 do {
                     if let predictedGlucoseIncludingPendingInsulin = self.predictedGlucoseIncludingPendingInsulin,
@@ -844,7 +844,7 @@ extension LoopDataManager {
                         self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
                     }
                 } catch {
-                    self.logger.error("Error updating manual bolus recommendation: ", String(describing: error))
+                    self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
                 }
             }
         }
