@@ -1180,6 +1180,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
     func loopDataManager(
         _ manager: LoopDataManager,
         didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date),
+        automatic: Bool,
         completion: @escaping (LoopError?) -> Void
     ) {
         guard let pumpManager = pumpManager else {

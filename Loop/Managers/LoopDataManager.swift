@@ -1691,7 +1691,7 @@ extension LoopDataManager {
         updateGroup.enter()
         var delegateError: LoopError?
 
-        delegate?.loopDataManager(self, didRecommend: recommendedDose) { (error) in
+        delegate?.loopDataManager(self, didRecommend: recommendedDose, automatic: true) { (error) in
             delegateError = error
             updateGroup.leave()
         }
@@ -2089,9 +2089,10 @@ protocol LoopDataManagerDelegate: AnyObject {
     /// - Parameters:
     ///   - manager: The manager
     ///   - basal: The new recommended basal
+    ///   - automatic: Will be true for a Loop enacted or suggested temp basal, false for a manual temp basal
     ///   - completion: A closure called once on completion. Will be passed a non-null error if acting on the recommendation fails.
     ///   - result: The enacted basal
-    func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), completion: @escaping (LoopError?) -> Void) -> Void
+    func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), automatic: Bool, completion: @escaping (LoopError?) -> Void) -> Void
 
     /// Asks the delegate to round a recommended basal rate to a supported rate
     ///

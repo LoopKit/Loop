@@ -25,7 +25,7 @@ class MockPumpManager: PumpManager {
     
     var enactBolusCalled: ((Double, Bool) -> Void)?
 
-    var enactTempBasalCalled: ((Double, TimeInterval) -> Void)?
+    var enactTempBasalCalled: ((Double, TimeInterval, Bool) -> Void)?
     
     var enactTempBasalError: PumpManagerError?
     
@@ -95,8 +95,8 @@ class MockPumpManager: PumpManager {
         completion(.success(nil))
     }
     
-    func enactTempBasal(unitsPerHour: Double, for duration: TimeInterval, completion: @escaping (PumpManagerError?) -> Void) {
-        enactTempBasalCalled?(unitsPerHour, duration)
+    func enactTempBasal(unitsPerHour: Double, for duration: TimeInterval, automatic: Bool, completion: @escaping (PumpManagerError?) -> Void) {
+        enactTempBasalCalled?(unitsPerHour, duration, automatic)
         completion(enactTempBasalError)
     }
     
@@ -151,7 +151,7 @@ class DoseEnactorTests: XCTestCase {
         let pumpManager = MockPumpManager()
         
         let tempBasalExpectation = expectation(description: "enactTempBasal called")
-        pumpManager.enactTempBasalCalled = { (rate, duration) in
+        pumpManager.enactTempBasalCalled = { (rate, duration, automatic) in
             tempBasalExpectation.fulfill()
         }
 
@@ -174,7 +174,7 @@ class DoseEnactorTests: XCTestCase {
         let pumpManager = MockPumpManager()
         
         let tempBasalExpectation = expectation(description: "enactTempBasal called")
-        pumpManager.enactTempBasalCalled = { (rate, duration) in
+        pumpManager.enactTempBasalCalled = { (rate, duration, automatic) in
             tempBasalExpectation.fulfill()
         }
 
@@ -198,7 +198,7 @@ class DoseEnactorTests: XCTestCase {
         let pumpManager = MockPumpManager()
         
         let tempBasalExpectation = expectation(description: "enactTempBasal called")
-        pumpManager.enactTempBasalCalled = { (rate, duration) in
+        pumpManager.enactTempBasalCalled = { (rate, duration, automatic) in
             XCTAssertEqual(1.2, rate)
             XCTAssertEqual(.minutes(30), duration)
             tempBasalExpectation.fulfill()

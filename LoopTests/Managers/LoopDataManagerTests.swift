@@ -296,7 +296,7 @@ class LoopDataManagerDosingTests: XCTestCase {
     class MockDelegate: LoopDataManagerDelegate {
         var recommendation: AutomaticDoseRecommendation?
         var error: LoopError?
-        func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), completion: @escaping (LoopError?) -> Void) {
+        func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), automatic: Bool, completion: @escaping (LoopError?) -> Void) {
             self.recommendation = automaticDose.recommendation
             completion(error)
         }
