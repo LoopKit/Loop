@@ -337,7 +337,23 @@ class AlertStoreTests: XCTestCase {
         })
         wait(for: [expect], timeout: Self.defaultTimeout)
     }
-    
+
+    func testRecordRetractedAlert() {
+        let expect = self.expectation(description: #function)
+        let alertDate = Self.historicDate
+        alertStore.recordRetractedAlert(alert1, at: alertDate, completion: self.expectSuccess {
+            self.alertStore.fetch(identifier: Self.identifier1, completion: self.expectSuccess { storedAlerts in
+                XCTAssertEqual(1, storedAlerts.count)
+                XCTAssertEqual(Self.identifier1, storedAlerts.first?.identifier)
+                XCTAssertEqual(alertDate, storedAlerts.first?.issuedDate)
+                XCTAssertNil(storedAlerts.first?.acknowledgedDate)
+                XCTAssertEqual(alertDate, storedAlerts.first?.retractedDate)
+                expect.fulfill()
+            })
+        })
+        wait(for: [expect], timeout: Self.defaultTimeout)
+    }
+
     func testEmptyQuery() {
         let expect = self.expectation(description: #function)
         alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
@@ -715,7 +731,21 @@ class AlertStoreTests: XCTestCase {
         }
         wait(for: [expect], timeout: Self.defaultTimeout)
     }
-    
+
+    func testLookUpAllMatching() {
+        let expect = self.expectation(description: #function)
+        fillWith(startDate: Self.historicDate, data: [
+            (alert1, true, false),
+            (repeatingAlert, true, false)
+        ]) {
+            self.alertStore.lookupAllMatching(identifier: AlertStoreTests.repeatingAlertIdentifier, completion: self.expectSuccess { alerts in
+                XCTAssertEqual(alerts.count, 1)
+                self.assertEqual([self.repeatingAlert], alerts)
+                expect.fulfill()
+            })
+        }
+        wait(for: [expect], timeout: Self.defaultTimeout)
+    }
 
     private func fillWith(startDate: Date, data: [(alert: Alert, acknowledged: Bool, retracted: Bool)], _ completion: @escaping () -> Void) {
         let increment = 1.0

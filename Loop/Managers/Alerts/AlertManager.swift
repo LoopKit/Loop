@@ -257,11 +257,20 @@ extension AlertManager {
 
 // MARK: PersistedAlertStore
 extension AlertManager: PersistedAlertStore {
+    public func doesIssuedAlertExist(identifier: Alert.Identifier, completion: @escaping (Result<Bool, Error>) -> Void) {
+        alertStore.lookupAllMatching(identifier: identifier) { result in
+            switch result {
+            case .success(let storedAlerts):
+                completion(.success(!storedAlerts.isEmpty))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
     public func lookupAllUnretracted(managerIdentifier: String, completion: @escaping (Result<[PersistedAlert], Error>) -> Void) {
         alertStore.lookupAllUnretracted(managerIdentifier: managerIdentifier) {
             switch $0 {
-            case .failure(let error):
-                completion(.failure(error))
             case .success(let alerts):
                 do {
                     let result = try alerts.map {
@@ -276,6 +285,8 @@ extension AlertManager: PersistedAlertStore {
                 } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }
@@ -283,8 +294,6 @@ extension AlertManager: PersistedAlertStore {
     public func lookupAllUnacknowledgedUnretracted(managerIdentifier: String, completion: @escaping (Result<[PersistedAlert], Error>) -> Void) {
         alertStore.lookupAllUnacknowledgedUnretracted(managerIdentifier: managerIdentifier) {
             switch $0 {
-            case .failure(let error):
-                completion(.failure(error))
             case .success(let alerts):
                 do {
                     let result = try alerts.map {
@@ -299,8 +308,14 @@ extension AlertManager: PersistedAlertStore {
                 } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
+    }
+
+    public func recordRetractedAlert(_ alert: Alert, at date: Date) {
+        alertStore.recordRetractedAlert(alert, at: date)
     }
 }
 
