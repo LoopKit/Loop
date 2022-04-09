@@ -209,6 +209,8 @@ final class BolusEntryViewModel: ObservableObject {
         self.dosingDecision.originalCarbEntry = originalCarbEntry
 
         self.cachedDisplayGlucoseUnit = delegate.displayGlucoseUnitObservable.displayGlucoseUnit
+
+        self.updateSettings()
     }
 
     public func generateRecommendationAndStartObserving(_ completion: (() -> Void)? = nil) {
@@ -226,7 +228,13 @@ final class BolusEntryViewModel: ObservableObject {
         NotificationCenter.default
             .publisher(for: .LoopDataUpdated)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] note in
+                if let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
+                   let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
+                   context == .preferences
+                {
+                    self?.updateSettings()
+                }
                 self?.update()
             }
             .store(in: &cancellables)
@@ -621,9 +629,6 @@ final class BolusEntryViewModel: ObservableObject {
         }
         delegate.withLoopState { [weak self] state in
             self?.updateCarbsOnBoard(from: state)
-            DispatchQueue.main.async {
-                self?.updateSettings()
-            }
             self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
             self?.updatePredictedGlucoseValues(from: state)
             DispatchQueue.main.async {
