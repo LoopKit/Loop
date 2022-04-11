@@ -180,7 +180,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         self.automaticDosingStatus.$isClosedLoop
             .dropFirst()
             .removeDuplicates()
-            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { if !$0 {
                 self.mutateSettings { settings in
