@@ -949,7 +949,14 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         glucoseTargetRangeSchedule: BolusEntryViewModelTests.exampleGlucoseRangeSchedule,
         maximumBasalRatePerHour: 3.0,
         maximumBolus: 10.0,
-        suspendThreshold: GlucoseThreshold(unit: .internationalUnit(), value: 75))
+        suspendThreshold: GlucoseThreshold(unit: .internationalUnit(), value: 75)) {
+            didSet {
+                NotificationCenter.default.post(name: .LoopDataUpdated, object: nil, userInfo: [
+                    LoopDataManager.LoopUpdateContextKey: LoopDataManager.LoopUpdateContext.preferences.rawValue
+                ])
+            }
+        }
+
 }
 
 fileprivate struct MockInsulinModel: InsulinModel {
