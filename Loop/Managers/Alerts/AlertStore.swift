@@ -83,7 +83,7 @@ public class AlertStore {
     }
 
     public func recordIssued(alert: Alert, at date: Date = Date(), completion: ((Result<Void, Error>) -> Void)? = nil) {
-        self.managedObjectContext.perform {
+        self.managedObjectContext.performAndWait {
             _ = StoredAlert(from: alert, context: self.managedObjectContext, issuedDate: date)
             do {
                 try self.managedObjectContext.save()
@@ -93,6 +93,23 @@ public class AlertStore {
                 completion?(.success)
             } catch {
                 self.log.error("Could not store alert: %{public}@, %{public}@", alert.identifier.value, String(describing: error))
+                completion?(.failure(error))
+            }
+        }
+    }
+
+    public func recordRetractedAlert(_ alert: Alert, at date: Date, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        self.managedObjectContext.performAndWait {
+            let storedAlert = StoredAlert(from: alert, context: self.managedObjectContext, issuedDate: date)
+            storedAlert.retractedDate = date
+            do {
+                try self.managedObjectContext.save()
+                self.log.default("Recorded retracted alert: %{public}@", alert.identifier.value)
+                self.purgeExpired()
+                self.delegate?.alertStoreHasUpdatedAlertData(self)
+                completion?(.success)
+            } catch {
+                self.log.error("Could not store retracted alert: %{public}@, %{public}@", alert.identifier.value, String(describing: error))
                 completion?(.failure(error))
             }
         }
@@ -125,15 +142,57 @@ public class AlertStore {
                              },
                              completion: completion)
     }
-    
-    public func lookupAllUnacknowledged(completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
+
+    public func lookupAllMatching(identifier: Alert.Identifier, completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
         managedObjectContext.perform {
             do {
                 let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
-                fetchRequest.predicate =  NSCompoundPredicate(andPredicateWithSubpredicates: [
+                let predicates = [
+                    NSPredicate(format: "managerIdentifier = %@", identifier.managerIdentifier),
+                    NSPredicate(format: "alertIdentifier = %@", identifier.alertIdentifier),
+                ]
+                fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+                fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "modificationCounter", ascending: true) ]
+                let result = try self.managedObjectContext.fetch(fetchRequest)
+                completion(.success(result))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
+    public func lookupAllUnretracted(managerIdentifier: String? = nil, completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
+        managedObjectContext.perform {
+            do {
+                let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+                var predicates = [
+                    NSPredicate(format: "retractedDate == nil"),
+                ]
+                if let managerIdentifier = managerIdentifier {
+                    predicates.insert(NSPredicate(format: "managerIdentifier = %@", managerIdentifier), at: 0)
+                }
+                fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+                fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "modificationCounter", ascending: true) ]
+                let result = try self.managedObjectContext.fetch(fetchRequest)
+                completion(.success(result))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
+    public func lookupAllUnacknowledgedUnretracted(managerIdentifier: String? = nil, completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
+        managedObjectContext.perform {
+            do {
+                let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+                var predicates = [
                     NSPredicate(format: "acknowledgedDate == nil"),
                     NSPredicate(format: "retractedDate == nil"),
-                ])
+                ]
+                if let managerIdentifier = managerIdentifier {
+                    predicates.insert(NSPredicate(format: "managerIdentifier = %@", managerIdentifier), at: 0)
+                }
+                fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
                 fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "modificationCounter", ascending: true) ]
                 let result = try self.managedObjectContext.fetch(fetchRequest)
                 completion(.success(result))
@@ -172,7 +231,7 @@ extension AlertStore {
                                    addingPredicate predicate: NSPredicate,
                                    with updateBlock: @escaping ManagedObjectUpdateBlock,
                                    completion: ((Result<Void, Error>) -> Void)?) {
-        managedObjectContext.perform {
+        managedObjectContext.performAndWait {
             self.lookupAll(identifier: identifier, predicate: predicate) {
                 switch $0 {
                 case .success(let objects):
@@ -194,7 +253,7 @@ extension AlertStore {
                                       addingPredicate predicate: NSPredicate,
                                       with updateBlock: @escaping ManagedObjectUpdateBlock,
                                       completion: ((Result<Void, Error>) -> Void)?) {
-        managedObjectContext.perform {
+        managedObjectContext.performAndWait {
             self.lookupLatest(identifier: identifier, predicate: predicate) {
                 switch $0 {
                 case .success(let object):

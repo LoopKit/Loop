@@ -807,6 +807,28 @@ extension DeviceDataManager: AlertIssuer {
     }
 }
 
+// MARK: - PersistedAlertStore
+extension DeviceDataManager: PersistedAlertStore {
+    func doesIssuedAlertExist(identifier: Alert.Identifier, completion: @escaping (Swift.Result<Bool, Error>) -> Void) {
+        precondition(alertManager != nil)
+        alertManager.doesIssuedAlertExist(identifier: identifier, completion: completion)
+    }
+    func lookupAllUnretracted(managerIdentifier: String, completion: @escaping (Swift.Result<[PersistedAlert], Error>) -> Void) {
+        precondition(alertManager != nil)
+        alertManager.lookupAllUnretracted(managerIdentifier: managerIdentifier, completion: completion)
+    }
+    
+    func lookupAllUnacknowledgedUnretracted(managerIdentifier: String, completion: @escaping (Swift.Result<[PersistedAlert], Error>) -> Void) {
+        precondition(alertManager != nil)
+        alertManager.lookupAllUnacknowledgedUnretracted(managerIdentifier: managerIdentifier, completion: completion)
+    }
+
+    func recordRetractedAlert(_ alert: Alert, at date: Date) {
+        precondition(alertManager != nil)
+        alertManager.recordRetractedAlert(alert, at: date)
+    }
+}
+
 // MARK: - CGMManagerDelegate
 extension DeviceDataManager: CGMManagerDelegate {
     func cgmManagerWantsDeletion(_ manager: CGMManager) {
