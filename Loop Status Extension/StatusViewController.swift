@@ -223,7 +223,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
 
             // Pump Status
-            let pumpManagerHUDView: LevelHUDView
+            let pumpManagerHUDView: BaseHUDView
             if let hudViewContext = context.pumpManagerHUDViewContext,
                 let contextHUDView = PumpManagerHUDViewFromRawValue(hudViewContext.pumpManagerHUDViewRawValue, pluginManager: self.pluginManager)
             {

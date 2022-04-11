@@ -498,6 +498,61 @@ class LoopDataManagerDosingTests: XCTestCase {
         XCTAssertEqual(recommendedBolus!.amount, 1.52, accuracy: 0.01)
     }
 
+    func testIsClosedLoopAvoidsTriggeringTempBasalCancelOnCreation() {
+        let settings = LoopSettings(
+            dosingEnabled: false,
+            glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+            maximumBasalRatePerHour: maxBasalRate,
+            maximumBolus: maxBolus,
+            suspendThreshold: suspendThreshold
+        )
+
+        let doseStore = MockDoseStore()
+        let glucoseStore = MockGlucoseStore()
+        let carbStore = MockCarbStore()
+
+        let currentDate = Date()
+
+        dosingDecisionStore = MockDosingDecisionStore()
+        automaticDosingStatus = AutomaticDosingStatus(isClosedLoop: false, isClosedLoopAllowed: true)
+        let existingTempBasal = DoseEntry(
+            type: .tempBasal,
+            startDate: currentDate.addingTimeInterval(-.minutes(2)),
+            endDate: currentDate.addingTimeInterval(.minutes(28)),
+            value: 1.0,
+            unit: .unitsPerHour,
+            deliveredUnits: nil,
+            description: "Mock Temp Basal",
+            syncIdentifier: "asdf",
+            scheduledBasalRate: nil,
+            insulinType: .novolog,
+            automatic: true,
+            manuallyEntered: false,
+            isMutable: true)
+        loopDataManager = LoopDataManager(
+            lastLoopCompleted: currentDate.addingTimeInterval(-.minutes(5)),
+            basalDeliveryState: .tempBasal(existingTempBasal),
+            settings: settings,
+            overrideHistory: TemporaryScheduleOverrideHistory(),
+            analyticsServicesManager: AnalyticsServicesManager(),
+            localCacheDuration: .days(1),
+            doseStore: doseStore,
+            glucoseStore: glucoseStore,
+            carbStore: carbStore,
+            dosingDecisionStore: dosingDecisionStore,
+            latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
+            now: { currentDate },
+            pumpInsulinType: .novolog,
+            automaticDosingStatus: automaticDosingStatus
+        )
+        let mockDelegate = MockDelegate()
+        loopDataManager.delegate = mockDelegate
+
+        // Dose enacting happens asynchronously, as does receiving isClosedLoop signals
+        waitOnMain(timeout: 5)
+        XCTAssertNil(mockDelegate.recommendation)
+    }
+
 }
 
 extension LoopDataManagerDosingTests {
