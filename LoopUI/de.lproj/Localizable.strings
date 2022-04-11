@@ -34,3 +34,38 @@
 /* Acessibility label describing completion HUD waiting for first run */
 "Waiting for first run" = "Warten auf erste Ausführung";
 
+/* Title of red loop message / Title of yellow loop message */
+"Loop Failure" = "Loop Fehler";
+
+/* Red loop message (1: app name) */
+"\n%1$@ has not completed a loop successfully in over 15 minutes.\n\nTap your CGM and insulin pump status icons for more information. %1$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@ hat seit mehr als 15 Minuten keinen Loop erfolgreich abgeschlossen.\n\nTippe auf Deine CGM- und Insulinpumpen-Statussymbole, um weitere Informationen zu erhalten. %1$@ wird weiterhin versuchen, einen Loop abzuschließen.\nAchte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und/oder Deinem CGM.";
+
+/* Yellow loop message (1: app name) */
+"\n%1$@ has not completed a loop successfully in the past 5-15 minutes.\n\nTap your CGM and insulin pump status icons for more information. %1$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@ hat in den letzten 5–15 Minuten keinen Loop erfolgreich abgeschlossen.\n\nTippe auf deine CGM- und Insulinpumpen-Statussymbole, um weitere Informationen zu erhalten. %1$@ wird weiterhin versuchen, einen Loop abzuschließen.\nAchte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und/oder Deinem CGM.";
+
+/* Title of green open loop OFF message */
+"Closed Loop OFF" = "Closed Loop AUS";
+
+/* Green closed loop OFF message (1: app name) */
+"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\nTap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "\n%1$@ arbeitet mit geschlossenem Regelkreis in der AUS-Position. Deine Pumpe und CGM arbeiten weiter, aber die App passt die Dosierung nicht automatisch an.\n\nTippe auf Einstellungen, um den geschlossenen Regelkreis einzuschalten, wenn Du möchtest, dass die App Dein Insulin automatisch dosiert.";
+
+/* Title of green closed loop ON message */
+"Closed Loop ON" = "Closed Loop AN";
+
+/* Green closed loop ON message (1: app name) */
+"\n%1$@ is operating with Closed Loop in the ON position. Your last loop was successful within the last 5 minutes." = "\n%1$@ arbeitet mit geschlossenem Regelkreis in der EIN-Position. Deine letzter Loop war innerhalb der letzten 5 Minuten erfolgreich.";
+
+/* Title of yellow/red loop message */
+"Loop Failure" = "Loop Fehler";
+
+/* Yellow loop message (1: app name) */
+"\n%1$@ has not completed a loop successfully in the past 5-15 minutes.\n\nTap your CGM and insulin pump status icons for more information. %1$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@ hat in den letzten 5–15 Minuten keinen Loop erfolgreich abgeschlossen.\n\nTippe auf deine CGM- und Insulinpumpen-Statussymbole, um weitere Informationen zu erhalten. %1$@ wird weiterhin versuchen, einen Loop abzuschließen, aber achte auf mögliche Kommunikationsprobleme mit Deiner Pumpe oder Deinem CGM.";
+
+/* Red loop message (1: app name) */
+"\n%1$@ has not completed a loop successfully in over 15 minutes.\n\nTap your CGM and insulin pump status icons for more information. %1$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@ hat seit mehr als 15 Minuten keinen Loop erfolgreich abgeschlossen.\n\nTippe auf Deine CGM- und Insulinpumpen-Statussymbole, um weitere Informationen zu erhalten. %1$@ wird weiterhin versuchen, einen Loop abzuschließen, aber prüfe auf mögliche Kommunikationsprobleme mit Deiner Pumpe oder Deinem CGM.";
+
+/* The text for the override history duration */
+"Active Duration" = "Dauer aktiv";
+
+/* The text for the override start time */
+"End Time" = "Endzeit";

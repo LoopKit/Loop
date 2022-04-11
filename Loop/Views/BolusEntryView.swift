@@ -349,7 +349,7 @@ struct BolusEntryView: View {
             let suspendThresholdString = QuantityFormatter().string(from: suspendThreshold, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: suspendThreshold)
             return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text("Your glucose is below or predicted to go below your glucose safety limit, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit")
+                caption: Text(String(format: NSLocalizedString("Your glucose is below or predicted to go below your glucose safety limit, (%1$@).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit"), suspendThresholdString))
             )
         case .staleGlucoseData:
             return WarningView(
@@ -422,7 +422,7 @@ struct BolusEntryView: View {
             }
             return SwiftUI.Alert(
                 title: Text("Exceeds Maximum Bolus", comment: "Alert title for a maximum bolus validation error"),
-                message: Text("The maximum bolus amount is \(maximumBolusAmountString) U.", comment: "Alert message for a maximum bolus validation error (1: max bolus value)")
+                message: Text(String(format: NSLocalizedString("The maximum bolus amount is %1$@ U.", comment: "Alert message for a maximum bolus validation error (1: max bolus value)"), maximumBolusAmountString))
             )
         case .noPumpManagerConfigured:
             return SwiftUI.Alert(

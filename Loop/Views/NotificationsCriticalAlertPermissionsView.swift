@@ -45,11 +45,7 @@ public struct NotificationsCriticalAlertPermissionsView: View {
     
     private func content() -> some View {
         List {
-            Section(footer: DescriptiveText(label: String(format: NSLocalizedString("""
-                Notifications give you important %1$@ app information without requiring you to open the app.
-                
-                Keep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications.
-                """, comment: "Alert Permissions descriptive text (1: app name)"), appName)))
+            Section(footer: DescriptiveText(label: String(format: NSLocalizedString("Notifications give you important %1$@ app information without requiring you to open the app.\n\nKeep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications.", comment: "Alert Permissions descriptive text (1: app name)"), appName)))
             {
                 manageNotifications
                 notificationsEnabledStatus

@@ -110,7 +110,7 @@
 "Rse-x8-amW.text" = "voraussichtlich 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g KaB";
+"SQx-au-ZcM.text" = "g COB";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Blutzucker";
@@ -142,3 +142,16 @@
 /* Class = "UILabel"; text = "0"; ObjectID = "zvZ-uf-zMX"; */
 "zvZ-uf-zMX.text" = "0";
 
+/* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
+"Wx8-Tf-FnG.text" = "Menge gegessen";
+
+/* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
+"ap1-M6-naG.text" = "Art von Essen";
+
+/* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
+"qPH-vU-xlu.text" = "Art von Essen";
+
+/* Class = "UILabel"; text = "Tap to Stop"; ObjectID = "Xiw-DG-3Hi"; */
+"Xiw-DG-3Hi.text" = "Tippe zum Stoppen";
+
+"Xiw-DG-3Hi" = "Tippe zum Stoppen";
