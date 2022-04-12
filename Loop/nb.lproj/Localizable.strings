@@ -222,7 +222,7 @@
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Karbohydrater absorbert (g) ÷ Karbohydratforhold (g/E) × Insulinfølsomhet (%1$@/E)";
 
 /* The notification alert describing a low pump battery */
-"Change the pump battery immediately" = "Bytt Batteri på pumpe snarest";
+"Change the pump battery immediately" = "Bytt batteri på pumpe snarest";
 
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "Bytt reservoar på pumpe nå";
@@ -358,7 +358,7 @@
 
 /* The title of the insulin sensitivities schedule screen
    The title text for the insulin sensitivity schedule */
-"Insulin Sensitivities" = "Insulinsenfølsomhet";
+"Insulin Sensitivities" = "Insulinfølsomhet";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
 "Invalid data: %1$@" = "Ugyldige data: %1$@";
@@ -382,7 +382,7 @@
 "Loop Failure" = "Loop feilet";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
-"Loop has not completed successfully in %@" = "Loop har ikke fullført vellykket på %@";
+"Loop has not completed successfully in %@" = "Loop har ikke kjørt vellykket på %@";
 
 /* Description string for automatic bolus dosing strategy */
 "Loop will automatically bolus when bg is predicted to be higher than target range, and will use temp basals when bg is predicted to be lower than target range. Please use caution when selecting this option for the first time. You may need re-evaluate your settings, even if you have been having success with those settings when using Loop's original temp basal strategy." = "Loop vil automatisk bolus når bg er spådd å være høyere enn målområdet, og vil bruke temp basals når bg er spådd å være lavere enn målområdet. Vær forsiktig når du velger dette alternativet for første gang. Det kan hende du må evaluere innstillingene på nytt, selv om du har hatt suksess med disse innstillingene når du bruker Loops opprinnelige temp basal-strategi.";
@@ -423,7 +423,7 @@
 "Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
-"No connected devices, or failure during device connection" = "Ingen tilkoblede enheter eller feil under enhetstilkobling";
+"No connected devices, or failure during device connection" = "Ingen tilkoblede enheter, eller feil under tilkobling til enhet";
 
 /* Button text to acknowledge an updated bolus recommendation alert
    Button text to dismiss unconfigured pump alert.
@@ -440,47 +440,47 @@
 "Pre-Meal" = "Før måltid";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Før måltid mål";
+"Pre-Meal Targets" = "Pre-måltids mål";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Forventet glykose ved 1$@ er %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Forventet blodsukker ved 1$@ er %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet glukose på %1$@ er under terkesinnstillingen for hvilemodus";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet blodsukker %1$@ er under innstilling for insulinstopp";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "prediction-description-retrospective-correction" = "prediction-description-retrospective-correction";
 
 /* The title for notification of upcoming profile expiration */
-"Profile Expires Soon" = "Profil utløpet snart";
+"Profile Expires Soon" = "Profil utløper snart";
 
 /* The title of the pump section in settings */
 "Pump" = "Pumpe";
 
 /* The notification title for a low pump battery */
-"Pump Battery Low" = "Lavt pumpebatteri";
+"Pump Battery Low" = "Pumpebatteri lavt";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Pumpedata er %1$@ gammelt";
 
 /* Details for configuration error when pump manager is missing */
-"Pump Manager" = "Pumpeinnstillinger";
+"Pump Manager" = "Pumpeinnstilling";
 
 /* The notification title for an empty pump reservoir */
-"Pump Reservoir Empty" = "Pumpereservoaret er tomt";
+"Pump Reservoir Empty" = "Pumpereservoar tomt";
 
 /* The notification title for a low pump reservoir */
 "Pump Reservoir Low" = "Pumpereservoar lavt";
 
 /* The error message when loop failed because the pump was encountered.
    The title of the cell indicating the pump is suspended */
-"Pump Suspended" = "Pumpe suspendert";
+"Pump Suspended" = "Pumpe satt på pause";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "QUANTITY_VALUE_AND_UNIT";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Hurtigvirkende – voksne";
+"Rapid-Acting – Adults" = "Hurtigvirkende – voksen";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Children" = "Hurtigvirkende - barn";
@@ -489,7 +489,7 @@
 "Rec: %@ U" = "Anb: %@ E";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
-"Recommendation expired: %1$@ old" = "Anbefaling utløpt: %1$@ gammel";
+"Recommendation expired: %1$@ old" = "Anbefaling utløpt: %1$@ gammelt";
 
 /* The title of the cell displaying a recommended automatic bolus value */
 "Recommended Auto-Bolus" = "Anbefalt auto bolus";
@@ -530,25 +530,25 @@
 "Settings" = "Innstillinger";
 
 /* Loop Completion HUD accessibility hint */
-"Shows last loop error" = "Viser siste Loop-error";
+"Shows last loop error" = "Viser siste Loop-feil";
 
 /* Format fragment for a start time */
-"since %@" = "side %@";
+"since %@" = "siden %@";
 
 /* The title of the nightscout site URL credential */
 "Site URL" = "Site URL";
 
 /* The format for the description of a temporary override start date */
-"starting at %@" = "starter %@";
+"starting at %@" = "startet %@";
 
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "Starter bolus";
 
 /* The title text in settings */
-"Suspend Threshold" = "Suspendere terskelverdi";
+"Suspend Threshold" = "Grense for insulinstopp";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Trykk for å fortsette";
+"Tap to Resume" = "Trykk for å gjenoppta";
 
 /* Title string for temp basal only dosing strategy */
 "Temp Basal Only" = "Bare midlertidig basal";
@@ -560,7 +560,7 @@
 "The legacy model used by Loop, allowing customization of action duration." = "Den eldre modellen brukt av Loop, som tillater tilpassing av varighet for handling.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
-"The maximum bolus amount is %@ Units" = "Maksimal bolus er %@ enheter";
+"The maximum bolus amount is %@ Units" = "Maks bolus er satt til %@ enheter";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";
@@ -572,16 +572,16 @@
 "Unconfigured Pump" = "Ukonfigurert pumpe";
 
 /* The format for the description of a temporary override end date */
-"until %@" = "til %@";
+"until %@" = "frem til %@";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Bruk mål for treningsglukose";
+"Use Workout Glucose Targets" = "Bruk treningsmodus for glukosemålområde";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når nåværende eller varslet glukose er under terskelen for hvilemodus, vil Loop ikke anbefale en bolus, og vil alltid anbefale en midlertidig basalhastighet på 0 enheter per time.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når nåværende eller forventet blodsukker er under grensen for insulinstopp, vil ikke Loop anbefale en bolus, og vil alltid anbefale en midlertidig basalrate på 0 enheter per time.";
 
 /* Name of legacy workout override
    The text for the Watch button for enabling workout mode */
