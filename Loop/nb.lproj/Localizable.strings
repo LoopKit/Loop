@@ -1,3 +1,12 @@
+/* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
+" (pending: %@)" = " (Gjenstår: %@)";
+
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ E totalt";
+
 /* Lesson subtitle */
 "Computes the percentage of glucose measurements within a specified range" = "Beregner prosentandelen av glukosemålinger innenfor et bestemt område";
 
@@ -18,6 +27,9 @@
 
 /* Lesson result text for no data */
 "No data available" = "Ingen data tilgjengelig";
+
+/* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
+"%1$@ U/hour @ %2$@" = "%1$@ E/timen @ %2$@";
 
 /* Section title for glucose range */
 "Range" = "Målområde";
@@ -56,7 +68,7 @@
 "%1$@ U left: %2$@" = "%1$@ E gjenstår: %2$@";
 
 /* The format for recommended temp basal rate and time. (1: localized rate number) */
-"%1$@ U/hour" = "%1$@ E/hour";
+"%1$@ U/hour" = "%1$@ E/timen";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
@@ -274,8 +286,14 @@
 /* The short unit display string for decibles */
 "dB" = "dB";
 
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "Trenger tilsyn";
+
 /* Button title to delete CGM */
 "Delete CGM" = "Slett CGM";
+
+/* The title text for the override presets */
+"Override Presets" = "Forhåndslagrede overstyringer";
 
 /* The button text to initiate a bolus */
 "Deliver" = "Lever";
@@ -557,7 +575,7 @@
 "The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolus-anbefalingen er oppdatert. Bekreft bolusverdien på nytt.";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Den eldre modellen brukt av Loop, som tillater tilpassing av varighet for handling.";
+"The legacy model used by Loop, allowing customization of action duration." = "Den gamle modellen brukt av Loop, tillater endring av varighet for handling.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Maks bolus er satt til %@ enheter";
