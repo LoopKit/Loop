@@ -687,7 +687,7 @@
 "Glucose Safety Limit" = "Glukose sikkerhetsgrense";
 "%1$@ will deliver basal and recommend bolus insulin only if your glucose is predicted to be above this limit for the next three hours." = "%1$@ leverer basal og anbefaler bolusinsulin bare hvis glukose forventes å være over denne grensen for de neste tre timene";
 "Correction Range" = "Korreksjonsområde";
-"%@ Range" = "%@ område"
+"%@ Range" = "%@ område";
 "Pre-Meal" = "Pre-måltid";
 "Temporarily lower your glucose target before a meal to impact post-meal glucose spikes." = "Senk glokusemålet midlertidig før et måltid for å påvirke blodsukkertopper etter måltidet.";
 "Carb Ratios" = "Karbohydratsforhold";
@@ -703,4 +703,4 @@
 "Rapid-Acting – Children" = "Hurtigvirkende – Barn";
 "This model assumes peak insulin activity at 65 minutes." = "Denne modellen antar topp insulinaktivitet på 65 minutter.";
 "Insulin Sensitivities" = "Insulinfølsomhet";
-"Maximum Bolus is the highest bolus amount you can deliver at one time to cover carbs or bring down high glucose." = "Maksimal bolus er den høyeste bolusmengden du kan levere på en gang for å dekke karbohydrater eller få ned høy glukose."
+"Maximum Bolus is the highest bolus amount you can deliver at one time to cover carbs or bring down high glucose." = "Maksimal bolus er den høyeste bolusmengden du kan levere på en gang for å dekke karbohydrater eller få ned høy glukose.";
