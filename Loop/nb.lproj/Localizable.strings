@@ -37,9 +37,6 @@
 /* Lesson result text for no data */
 "No data available" = "Ingen data tilgjengelig";
 
-/* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
-"%1$@ U/hour @ %2$@" = "%1$@ E/timen @ %2$@";
-
 /* Section title for glucose range */
 "Range" = "Målområde";
 
