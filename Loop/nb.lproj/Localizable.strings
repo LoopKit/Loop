@@ -623,8 +623,8 @@
 "Alert Permissions" = "Varslingsinnstillinger";
 "Alert Permissions Need Attention" = "Varslingsinnstillinger trenger tilsyn";
 "mmol/L" = "mmol/L";
-"No Recent Glucose" = "Ingen nylige glucoseverdier";
-"No Recent Glucose Data" = "Ingen nylige glucosedata";
+"No Recent Glucose" = "Ingen ny glukose";
+"No Recent Glucose Data" = "Ingen ny glukosedata";
 "Tap to Add" = "Trykk for å legge til";
 "Closed Loop requires an active CGM Sensor Session" = "Lukket Loop krever en aktiv glukosemåler";
 "Dosing Strategy" = "Doseringsstrategi";
