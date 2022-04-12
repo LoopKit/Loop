@@ -280,7 +280,7 @@
 "Correction Range" = "Korreksjonsområde";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Nåværende blodsukker på %1$@ er under korreksjonssområde";
+"Current glucose of %1$@ is below correction range." = "Nåværende blodsukker på %1$@ er under korreksjonssområde.";
 
 /* Name of custom override
    The title of the cell indicating a generic temporary override is enabled */
