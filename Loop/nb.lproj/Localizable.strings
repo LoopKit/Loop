@@ -706,3 +706,4 @@
 "Maximum Bolus is the highest bolus amount you can deliver at one time to cover carbs or bring down high glucose." = "Maksimal bolus er den høyeste bolusmengden du kan levere på en gang for å dekke karbohydrater eller få ned høy glukose.";
 "Notification delivery is set to Scheduled Summary in your phone’s settings." = "Varslingslevering er satt til planlagt oppsummering i telefonens innstillinger.";
 "Delete Testing CGM Data" = "Slett data for testglukosemåler";
+"Notifications Delayed" = "Varsler forsinket";
