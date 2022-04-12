@@ -388,7 +388,7 @@
 "Insulin Sensitivities" = "Insulinfølsomhet";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
-"Invalid data: %1$@" = "Ugyldige data: %1$@";
+"Invalid data: %1$@" = "Ugyldig data: %1$@";
 
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
 "IOB %1$@ U" = "IOB %1$@ E";
