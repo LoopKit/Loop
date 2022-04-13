@@ -908,7 +908,8 @@ extension LoopDataManager {
         let retrospectiveStart = lastGlucoseDate.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
 
         let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
-        let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+        let nextCounteractionEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+        let insulinEffectStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-5))
 
         if glucoseMomentumEffect == nil {
             updateGroup.enter()
@@ -928,7 +929,7 @@ extension LoopDataManager {
         if insulinEffect == nil {
             self.logger.debug("Recomputing insulin effects")
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: nextEffectDate, end: nil, basalDosingEnd: now()) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: now()) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("%{public}@", String(describing: error))
@@ -944,7 +945,7 @@ extension LoopDataManager {
 
         if insulinEffectIncludingPendingInsulin == nil {
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: nextEffectDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects: %{public}@", String(describing: error))
@@ -960,10 +961,10 @@ extension LoopDataManager {
 
         _ = updateGroup.wait(timeout: .distantFuture)
 
-        if nextEffectDate < lastGlucoseDate, let insulinEffect = insulinEffect {
+        if nextCounteractionEffectDate < lastGlucoseDate, let insulinEffect = insulinEffect {
             updateGroup.enter()
-            self.logger.debug("Fetching counteraction effects after %{public}@", String(describing: nextEffectDate))
-            glucoseStore.getCounteractionEffects(start: nextEffectDate, end: nil, to: insulinEffect) { (result) in
+            self.logger.debug("Fetching counteraction effects after %{public}@", String(describing: nextCounteractionEffectDate))
+            glucoseStore.getCounteractionEffects(start: nextCounteractionEffectDate, end: nil, to: insulinEffect) { (result) in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Failure getting counteraction effects: %{public}@", String(describing: error))
