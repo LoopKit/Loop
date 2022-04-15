@@ -36,8 +36,6 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     
     func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ result: CarbStoreResult<CarbValue>) -> Void)
     
-    func ensureCurrentPumpData(completion: @escaping (Date?) -> Void)
-    
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
 
     var mostRecentGlucoseDataDate: Date? { get }
@@ -63,6 +61,7 @@ final class BolusEntryViewModel: ObservableObject {
         case manualGlucoseEntryOutOfAcceptableRange
         case manualGlucoseEntryPersistenceFailure
         case glucoseNoLongerStale
+        case forecastInfo
     }
 
     enum Notice: Equatable {
@@ -101,6 +100,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     @Published var recommendedBolus: HKQuantity?
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+    private var userChangedBolusAmount = false
     private var isInitiatingSaveOrBolus = false
 
     private var dosingDecision = BolusDosingDecision(for: .normalBolus)
@@ -111,8 +111,6 @@ final class BolusEntryViewModel: ObservableObject {
     private let log = OSLog(category: "BolusEntryViewModel")
     private var cancellables: Set<AnyCancellable> = []
 
-    @Published var isRefreshingPump: Bool = false
-    
     let chartManager: ChartsManager = {
         let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
                                                           yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
@@ -212,19 +210,32 @@ final class BolusEntryViewModel: ObservableObject {
         self.dosingDecision.originalCarbEntry = originalCarbEntry
 
         self.cachedDisplayGlucoseUnit = delegate.displayGlucoseUnitObservable.displayGlucoseUnit
-        observeLoopUpdates()
-        observeEnteredBolusChanges()
-        observeEnteredManualGlucoseChanges()
-        observeElapsedTime()
-        observeRecommendedBolusChanges()
-        update()
+
+        self.updateSettings()
     }
-        
+
+    public func generateRecommendationAndStartObserving(_ completion: (() -> Void)? = nil) {
+        update() {
+            // Only start observing after first update is complete
+            self.observeLoopUpdates()
+            self.observeEnteredManualGlucoseChanges()
+            self.observeElapsedTime()
+            self.observeEnteredBolusChanges()
+            completion?()
+        }
+    }
+
     private func observeLoopUpdates() {
         NotificationCenter.default
             .publisher(for: .LoopDataUpdated)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] note in
+                if let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
+                   let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
+                   context == .preferences
+                {
+                    self?.updateSettings()
+                }
                 self?.update()
             }
             .store(in: &cancellables)
@@ -232,6 +243,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func observeEnteredBolusChanges() {
         $enteredBolus
+            .dropFirst()
             .removeDuplicates()
             .debounce(for: .milliseconds(debounceIntervalMilliseconds), scheduler: RunLoop.main)
             .sink { [weak self] _ in
@@ -242,25 +254,16 @@ final class BolusEntryViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private func observeRecommendedBolusChanges() {
-        $recommendedBolus
-            .removeDuplicates()
-            .debounce(for: .milliseconds(debounceIntervalMilliseconds), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.setRecommendedBolus()
-            }
-            .store(in: &cancellables)
-    }
-
     private func observeEnteredManualGlucoseChanges() {
         $manualGlucoseQuantity
+            .dropFirst()
             .debounce(for: .milliseconds(debounceIntervalMilliseconds), scheduler: RunLoop.main)
             .sink { [weak self] enteredManualGlucose in
                 guard let self = self else { return }
 
                 self.updateManualGlucoseSample(enteredAt: self.now())
 
-                // Clear out any entered bolus whenever the manual entry changes
+                // Clear out any entered bolus whenever the glucose entry changes
                 self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
 
                 self.delegate?.withLoopState { [weak self] state in
@@ -269,9 +272,7 @@ final class BolusEntryViewModel: ObservableObject {
                         self?.updateGlucoseChartValues()
                     })
 
-                    self?.ensurePumpDataIsFresh { [weak self] in
-                        self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
-                    }
+                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
                 }
             }
             .store(in: &cancellables)
@@ -303,15 +304,6 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         return recommendedBolus.doubleValue(for: .internationalUnit()) > 0
-    }
-
-    func setRecommendedBolus() {
-        guard isBolusRecommended else { return }
-        enteredBolus = recommendedBolus!
-        isRefreshingPump = false
-        delegate?.withLoopState { [weak self] state in
-            self?.updatePredictedGlucoseValues(from: state)
-        }
     }
 
     func saveAndDeliver(onSuccess completion: @escaping () -> Void) {
@@ -513,17 +505,22 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func update() {
+    private func update(_ completion: (() -> Void)? = nil) {
         dispatchPrecondition(condition: .onQueue(.main))
 
         // Prevent any UI updates after a bolus has been initiated.
-        guard !isInitiatingSaveOrBolus else { return }
+        guard !isInitiatingSaveOrBolus else {
+            completion?()
+            return
+        }
 
         disableManualGlucoseEntryIfNecessary()
         updateChartDateInterval()
         updateStoredGlucoseValues()
-        updateFromLoopState()
-        updateActiveInsulin()
+        updatePredictionAndRecommendation() {
+            self.updateActiveInsulin()
+            completion?()
+        }
     }
 
     private func disableManualGlucoseEntryIfNecessary() {
@@ -626,15 +623,17 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func updateFromLoopState() {
-        delegate?.withLoopState { [weak self] state in
-            self?.updatePredictedGlucoseValues(from: state)
+    private func updatePredictionAndRecommendation(_ completion: @escaping () -> Void) {
+        guard let delegate = delegate else {
+            completion()
+            return
+        }
+        delegate.withLoopState { [weak self] state in
             self?.updateCarbsOnBoard(from: state)
-            self?.ensurePumpDataIsFresh { [weak self] in
-                self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
-                DispatchQueue.main.async {
-                    self?.updateSettings()
-                }
+            self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
+            self?.updatePredictedGlucoseValues(from: state)
+            DispatchQueue.main.async {
+                completion()
             }
         }
     }
@@ -654,32 +653,6 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func ensurePumpDataIsFresh(then completion: @escaping () -> Void) {
-        if !isPumpDataStale {
-            completion()
-            return
-        }
-        
-        DispatchQueue.main.async {
-            // v-- This needs to happen on the main queue
-            self.isRefreshingPump = true
-            let wrappedCompletion: (Date?) -> Void = { [weak self] (lastSync) in
-                self?.delegate?.withLoopState { [weak self] _ in
-                    // v-- This needs to happen in LoopDataManager's dataQueue
-                    completion()
-                    // ^v-- Unfortunately, these two things might happen concurrently, so in theory the
-                    // completion above may not "complete" by the time we clear isRefreshingPump.  To fix that
-                    // would require some very confusing wiring, but I think it is a minor issue.
-                    DispatchQueue.main.async {
-                        // v-- This needs to happen on the main queue
-                        self?.isRefreshingPump = false
-                    }
-                }
-            }
-            self.delegate?.ensureCurrentPumpData(completion: wrappedCompletion)
-        }
-    }
-    
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
@@ -729,15 +702,12 @@ final class BolusEntryViewModel: ObservableObject {
             self.dosingDecision.manualBolusRecommendation = recommendation.map { ManualBolusRecommendationWithDate(recommendation: $0, date: now) }
             self.activeNotice = notice
 
-            if priorRecommendedBolus != recommendedBolus,
-                self.enteredBolus.doubleValue(for: .internationalUnit()) > 0,
-                !self.isInitiatingSaveOrBolus
+            if priorRecommendedBolus != nil,
+               priorRecommendedBolus != recommendedBolus,
+               !self.isInitiatingSaveOrBolus,
+               !isUpdatingFromUserInput
             {
-                self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
-
-                if !isUpdatingFromUserInput {
-                    self.presentAlert(.recommendationChanged)
-                }
+                self.presentAlert(.recommendationChanged)
             }
         }
     }
