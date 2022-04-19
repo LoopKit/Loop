@@ -451,8 +451,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 let entry = values[indexPath.row]
                 let time = timeFormatter.string(from: entry.date)
 
-                if let attributedText = entry.dose?.localizedAttributedDescription {
-                                    cell.textLabel?.attributedText = attributedText
+                if let attributedText = entry.localizedAttributedDescription {
+                    cell.textLabel?.attributedText = attributedText
                 } else {
                     cell.textLabel?.text = NSLocalizedString("Unknown", comment: "The default description to use when an entry has no dose description")
                 }
@@ -463,12 +463,12 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             case .manualEntryDoses(let values):
                 let entry = values[indexPath.row]
                 let time = timeFormatter.string(from: entry.startDate)
+                let font = UIFont.preferredFont(forTextStyle: .body)
 
-                if let attributedText = entry.localizedAttributedDescription {
-                                    cell.textLabel?.attributedText = attributedText
-                } else {
-                    cell.textLabel?.text = NSLocalizedString("Unknown", comment: "The default description to use when an entry has no dose description")
-                }
+                let description = String(format: NSLocalizedString("Manual Dose: <b>%1$@</b> %2$@", comment: "Description of a bolus dose entry (1: value (? if no value) in bold, 2: unit)"), numberFormatter.string(from: entry.programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString(avoidLineBreaking: false))
+
+                let attributedDescription = createAttributedDescription(from: description, with: font)
+                cell.textLabel?.attributedText = attributedDescription
                 cell.detailTextLabel?.text = time
                 cell.selectionStyle = .default
             }
@@ -600,60 +600,66 @@ fileprivate extension UIAlertController {
     }
 }
 
-extension DoseEntry {
+fileprivate var numberFormatter: NumberFormatter {
+    let numberFormatter = NumberFormatter()
+    numberFormatter.maximumFractionDigits = DoseEntry.unitsPerHour.maxFractionDigits
+    return numberFormatter
+}
 
-    fileprivate var numberFormatter: NumberFormatter {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.maximumFractionDigits = DoseEntry.unitsPerHour.maxFractionDigits
-        return numberFormatter
+fileprivate func createAttributedDescription(from description: String, with font: UIFont) -> NSAttributedString? {
+    let descriptionWithFont = String(format:"<style>body{font-family: '-apple-system', '\(font.fontName)'; font-size: \(font.pointSize);}</style>%@", description)
+
+    guard let attributedDescription = try? NSMutableAttributedString(data: Data(descriptionWithFont.utf8), options: [.documentType: NSAttributedString.DocumentType.html], documentAttributes: nil) else {
+        return nil
     }
+
+    attributedDescription.enumerateAttribute(.font, in: NSRange(location: 0, length: attributedDescription.length)) { value, range, stop in
+        // bold font items have a dominate colour
+        if let font = value as? UIFont,
+           font.fontDescriptor.symbolicTraits.contains(.traitBold)
+        {
+            attributedDescription.addAttributes([.foregroundColor: UIColor.label], range: range)
+        } else {
+            attributedDescription.addAttributes([.foregroundColor: UIColor.secondaryLabel], range: range)
+        }
+    }
+
+    return attributedDescription
+}
+
+extension PersistedPumpEvent {
 
     fileprivate var localizedAttributedDescription: NSAttributedString? {
         let font = UIFont.preferredFont(forTextStyle: .body)
 
-        switch type {
-        case .bolus:
-            let description: String
-            if let deliveredUnits = deliveredUnits,
-               deliveredUnits != programmedUnits
-            {
-                description = String(format: NSLocalizedString("Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@", comment: "Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit)"), type.localizedDescription, numberFormatter.string(from: deliveredUnits) ?? "?", numberFormatter.string(from: programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString())
-            } else {
-                description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString(avoidLineBreaking: false))
+        let eventTitle = title ?? NSLocalizedString("Unknown", comment: "Event title displayed when StoredPumpEvent.title is not set")
+
+        if let dose = dose {
+            switch dose.type {
+            case .bolus:
+                let description: String
+                if let deliveredUnits = dose.deliveredUnits,
+                   deliveredUnits != dose.programmedUnits
+                {
+                    description = String(format: NSLocalizedString("Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@", comment: "Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit)"), eventTitle, numberFormatter.string(from: deliveredUnits) ?? "?", numberFormatter.string(from: dose.programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString())
+                } else {
+                    description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), eventTitle, numberFormatter.string(from: dose.programmedUnits) ?? "?", DoseEntry.units.shortLocalizedUnitString(avoidLineBreaking: false))
+                }
+
+                return createAttributedDescription(from: description, with: font)
+            case .basal, .tempBasal:
+                let description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), eventTitle, numberFormatter.string(from: dose.unitsPerHour) ?? "?", DoseEntry.unitsPerHour.shortLocalizedUnitString(avoidLineBreaking: false))
+                return createAttributedDescription(from: description, with: font)
+            case .suspend, .resume:
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: font,
+                    .foregroundColor: UIColor.secondaryLabel
+                ]
+                return NSAttributedString(string: eventTitle, attributes: attributes)
             }
-
-            return createAttributedDescription(from: description, with: font)
-        case .basal, .tempBasal:
-            let description = String(format: NSLocalizedString("%1$@: <b>%2$@</b> %3$@", comment: "Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)"), type.localizedDescription, numberFormatter.string(from: unitsPerHour) ?? "?", DoseEntry.unitsPerHour.shortLocalizedUnitString(avoidLineBreaking: false))
-            return createAttributedDescription(from: description, with: font)
-        case .suspend, .resume:
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: UIColor.secondaryLabel
-            ]
-            return NSAttributedString(string: type.localizedDescription, attributes: attributes)
+        } else {
+            return createAttributedDescription(from: eventTitle, with: font)
         }
-    }
-
-    fileprivate func createAttributedDescription(from description: String, with font: UIFont) -> NSAttributedString? {
-        let descriptionWithFont = String(format:"<style>body{font-family: '-apple-system', '\(font.fontName)'; font-size: \(font.pointSize);}</style>%@", description)
-
-        guard let attributedDescription = try? NSMutableAttributedString(data: Data(descriptionWithFont.utf8), options: [.documentType: NSAttributedString.DocumentType.html], documentAttributes: nil) else {
-            return nil
-        }
-
-        attributedDescription.enumerateAttribute(.font, in: NSRange(location: 0, length: attributedDescription.length)) { value, range, stop in
-            // bold font items have a dominate colour
-            if let font = value as? UIFont,
-               font.fontDescriptor.symbolicTraits.contains(.traitBold)
-            {
-                attributedDescription.addAttributes([.foregroundColor: UIColor.label], range: range)
-            } else {
-                attributedDescription.addAttributes([.foregroundColor: UIColor.secondaryLabel], range: range)
-            }
-        }
-
-        return attributedDescription
     }
 }
 
