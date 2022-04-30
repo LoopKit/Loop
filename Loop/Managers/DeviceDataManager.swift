@@ -14,12 +14,13 @@ import LoopCore
 import LoopTestingKit
 import UserNotifications
 import Combine
+import os.log
 
 final class DeviceDataManager {
 
     private let queue = DispatchQueue(label: "com.loopkit.DeviceManagerQueue", qos: .utility)
     
-    private let log = DiagnosticLog(category: "DeviceDataManager")
+    private let log = OSLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
     weak var alertManager: AlertManager!

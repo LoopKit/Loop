@@ -13,6 +13,7 @@ import LoopKit
 import LoopKitUI
 import MockKit
 import HealthKit
+import os.log
 
 public protocol AlertPresenter: AnyObject {
     /// Present the alert view controller, with or without animation.
@@ -77,7 +78,7 @@ class LoopAppManager: NSObject {
 
     private var state: State = .initialize
 
-    private let log = DiagnosticLog(category: "LoopAppManager")
+    private let log = OSLog(category: "LoopAppManager")
 
     private let closedLoopStatus = ClosedLoopStatus(isClosedLoop: false, isClosedLoopAllowed: false)
 

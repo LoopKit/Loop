@@ -8,12 +8,13 @@
 
 import UIKit
 import LoopKit
+import os.log
 
 final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     var window: UIWindow?
 
     private let loopAppManager = LoopAppManager()
-    private let log = DiagnosticLog(category: "AppDelegate")
+    private let log = OSLog(category: "AppDelegate")
 
     // MARK: - UIApplicationDelegate - Initialization
 

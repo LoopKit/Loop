@@ -7,13 +7,14 @@
 //
 
 import LoopKit
+import os.log
 
 /// Class responsible for monitoring "system level" operations and alerting the user to any anomalous situations (e.g. bluetooth off)
 public class LoopAlertsManager {
     
     static let managerIdentifier = "Loop"
     
-    private lazy var log = DiagnosticLog(category: String(describing: LoopAlertsManager.self))
+    private lazy var log = OSLog(category: String(describing: LoopAlertsManager.self))
     
     private weak var alertManager: AlertManager?
     
