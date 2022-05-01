@@ -348,6 +348,24 @@ final class BolusEntryViewModel: ObservableObject {
             completion()
         }
     }
+
+    func saveWithoutBolusing(onSuccess completion: @escaping () -> Void) {
+        if let manualGlucoseSample = manualGlucoseSample {
+            guard LoopConstants.validManualGlucoseEntryRange.contains(manualGlucoseSample.quantity) else {
+                presentAlert(.manualGlucoseEntryOutOfAcceptableRange)
+                return
+            }
+        }
+
+        // There is no bolus, save carbs if needed
+        if potentialCarbEntry != nil  { // Allow user to save carbs without bolusing
+            continueSaving(onSuccess: completion)
+        } else if manualGlucoseSample != nil { // Allow user to save the manual glucose sample without bolusing
+            continueSaving(onSuccess: completion)
+        } else {
+            completion()
+        }
+    }
     
     private func continueSaving(onSuccess completion: @escaping () -> Void) {
         if let manualGlucoseSample = manualGlucoseSample {

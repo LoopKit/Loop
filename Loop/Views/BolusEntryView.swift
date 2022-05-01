@@ -389,6 +389,8 @@ struct BolusEntryView: View {
             action: {
                 if self.viewModel.actionButtonAction == .enterBolus {
                     self.shouldBolusEntryBecomeFirstResponder = true
+                } else if self.viewModel.actionButtonAction == .saveWithoutBolusing {
+                    self.viewModel.saveWithoutBolusing(onSuccess: self.dismiss)
                 } else {
                     self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
                 }
