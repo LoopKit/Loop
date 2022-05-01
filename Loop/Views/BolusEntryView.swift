@@ -289,22 +289,32 @@ struct BolusEntryView: View {
 
     private var bolusEntryRow: some View {
         HStack {
-            Text("Bolus", comment: "Label for bolus entry row on bolus screen")
-            Spacer()
-            HStack(alignment: .firstTextBaseline) {
-                DismissibleKeyboardTextField(
-                    text: enteredBolusStringBinding,
-                    placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
-                    font: .preferredFont(forTextStyle: .title1),
-                    textColor: .loopAccent,
-                    textAlignment: .right,
-                    keyboardType: .decimalPad,
-                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
-                    maxLength: 5,
-                    doneButtonColor: .loopAccent,
-                    textFieldDidBeginEditing: didBeginEditing
-                )
-                bolusUnitsLabel
+            if !shouldBolusEntryBecomeFirstResponder {
+                Text("Accept with Save", comment: "Label for bolus entry row on bolus screen when shouldBolusEntryBecomeFirstResponder is false")
+                Spacer()
+                HStack(alignment: .firstTextBaseline) {
+                    // Instead of Text, insert a button with action of
+                    //  shouldBolusEntryBecomeFirstResponder = true
+                    Text("Edit Bolus")
+                }
+            } else {
+                Text("Bolus", comment: "Label for bolus entry row on bolus screen")
+                Spacer()
+                HStack(alignment: .firstTextBaseline) {
+                    DismissibleKeyboardTextField(
+                        text: enteredBolusStringBinding,
+                        placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
+                        font: .preferredFont(forTextStyle: .title1),
+                        textColor: .loopAccent,
+                        textAlignment: .right,
+                        keyboardType: .decimalPad,
+                        shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
+                        maxLength: 5,
+                        doneButtonColor: .loopAccent,
+                        textFieldDidBeginEditing: didBeginEditing
+                    )
+                    bolusUnitsLabel
+                }
             }
         }
         .accessibilityElement(children: .combine)
