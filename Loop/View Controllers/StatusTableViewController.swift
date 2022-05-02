@@ -783,7 +783,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func updatePreMealModeAvailability(isClosedLoop: Bool) {
-        let allowed = onboardingManager.isComplete && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+        let allowed = onboardingManager.isComplete &&
+                (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+                && deviceManager.loopManager.settings.preMealTargetRange != nil
         toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
 
