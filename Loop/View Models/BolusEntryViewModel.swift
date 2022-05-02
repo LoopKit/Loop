@@ -818,7 +818,7 @@ extension BolusEntryViewModel {
         }
     }
     
-    private var hasBolusEntryReadyToDeliver: Bool {
+    public var hasBolusEntryReadyToDeliver: Bool {
         enteredBolus.doubleValue(for: .internationalUnit()) != 0
     }
 

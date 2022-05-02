@@ -182,6 +182,10 @@ struct BolusEntryView: View {
             if viewModel.isManualGlucoseEntryEnabled || viewModel.potentialCarbEntry != nil {
                 recommendedBolusRow
             }
+            
+            if viewModel.hasBolusEntryReadyToDeliver && viewModel.potentialCarbEntry != nil {
+                saveCarbsWithoutBolusButton
+            }
 
             bolusEntryRow
         }
@@ -289,32 +293,22 @@ struct BolusEntryView: View {
 
     private var bolusEntryRow: some View {
         HStack {
-            if !shouldBolusEntryBecomeFirstResponder {
-                Text("Accept with Save", comment: "Label for bolus entry row on bolus screen when shouldBolusEntryBecomeFirstResponder is false")
-                Spacer()
-                HStack(alignment: .firstTextBaseline) {
-                    // Instead of Text, insert a button with action of
-                    //  shouldBolusEntryBecomeFirstResponder = true
-                    Text("Edit Bolus")
-                }
-            } else {
-                Text("Bolus", comment: "Label for bolus entry row on bolus screen")
-                Spacer()
-                HStack(alignment: .firstTextBaseline) {
-                    DismissibleKeyboardTextField(
-                        text: enteredBolusStringBinding,
-                        placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
-                        font: .preferredFont(forTextStyle: .title1),
-                        textColor: .loopAccent,
-                        textAlignment: .right,
-                        keyboardType: .decimalPad,
-                        shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
-                        maxLength: 5,
-                        doneButtonColor: .loopAccent,
-                        textFieldDidBeginEditing: didBeginEditing
-                    )
-                    bolusUnitsLabel
-                }
+            Text("Bolus", comment: "Label for bolus entry row on bolus screen")
+            Spacer()
+            HStack(alignment: .firstTextBaseline) {
+                DismissibleKeyboardTextField(
+                    text: enteredBolusStringBinding,
+                    placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
+                    font: .preferredFont(forTextStyle: .title1),
+                    textColor: .loopAccent,
+                    textAlignment: .right,
+                    keyboardType: .decimalPad,
+                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
+                    maxLength: 5,
+                    doneButtonColor: .loopAccent,
+                    textFieldDidBeginEditing: didBeginEditing
+                )
+                bolusUnitsLabel
             }
         }
         .accessibilityElement(children: .combine)
@@ -392,6 +386,17 @@ struct BolusEntryView: View {
         )
         .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .manualGlucoseEntry ? .primary : .secondary))
         .padding([.top, .horizontal])
+    }
+
+    private var saveCarbsWithoutBolusButton: some View {
+        Button(
+            action: {
+                enteredBolusStringBinding.wrappedValue = String("0.0")
+                self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
+            },
+            label: { Text("Save Carbs without Bolusing", comment: "Button text to save carbs without bolusing") }
+        )
+        .buttonStyle(ActionButtonStyle(.primary))
     }
 
     private var actionButton: some View {
