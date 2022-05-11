@@ -22,7 +22,9 @@ struct FeatureFlagConfiguration: Decodable {
     let insulinDeliveryReservoirViewEnabled: Bool
     let mockTherapySettingsEnabled: Bool
     let nonlinearCarbModelEnabled: Bool
-    let observeHealthKitSamplesFromOtherApps: Bool
+    let observeHealthKitCarbSamplesFromOtherApps: Bool
+    let observeHealthKitDoseSamplesFromOtherApps: Bool
+    let observeHealthKitGlucoseSamplesFromOtherApps: Bool
     let remoteOverridesEnabled: Bool
     let predictedGlucoseChartClampEnabled: Bool
     let scenariosEnabled: Bool
@@ -101,7 +103,6 @@ struct FeatureFlagConfiguration: Decodable {
         self.insulinDeliveryReservoirViewEnabled = true
         #endif
 
-        // Swift compiler config is inverse, since the default state is enabled.
         #if MOCK_THERAPY_SETTINGS_ENABLED
         self.mockTherapySettingsEnabled = true
         #else
@@ -115,13 +116,32 @@ struct FeatureFlagConfiguration: Decodable {
         self.nonlinearCarbModelEnabled = true
         #endif
         
+        #if OBSERVE_HEALTH_KIT_CARB_SAMPLES_FROM_OTHER_APPS_ENABLED
+        self.observeHealthKitCarbSamplesFromOtherApps = true
+        #else
+        self.observeHealthKitCarbSamplesFromOtherApps = false
+        #endif
+        
         // Swift compiler config is inverse, since the default state is enabled.
         #if OBSERVE_HEALTH_KIT_SAMPLES_FROM_OTHER_APPS_DISABLED
-        self.observeHealthKitSamplesFromOtherApps = false
+        self.observeHealthKitCarbSamplesFromOtherApps = false
+        self.observeHealthKitDoseSamplesFromOtherApps = false
+        self.observeHealthKitGlucoseSamplesFromOtherApps = false
         #else
-        self.observeHealthKitSamplesFromOtherApps = true
+        self.observeHealthKitDoseSamplesFromOtherApps = true
+        self.observeHealthKitGlucoseSamplesFromOtherApps = true
         #endif
 
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if OBSERVE_HEALTH_KIT_DOSE_SAMPLES_FROM_OTHER_APPS_DISABLED
+        self.observeHealthKitDoseSamplesFromOtherApps = false
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if OBSERVE_HEALTH_KIT_GLUCOSE_SAMPLES_FROM_OTHER_APPS_DISABLED
+        self.observeHealthKitGlucoseSamplesFromOtherApps = false
+        #endif
+        
         #if PREDICTED_GLUCOSE_CHART_CLAMP_ENABLED
         self.predictedGlucoseChartClampEnabled = true
         #else
@@ -181,7 +201,9 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* includeServicesInSettingsEnabled: \(includeServicesInSettingsEnabled)",
             "* mockTherapySettingsEnabled: \(mockTherapySettingsEnabled)",
             "* nonlinearCarbModelEnabled: \(nonlinearCarbModelEnabled)",
-            "* observeHealthKitSamplesFromOtherApps: \(observeHealthKitSamplesFromOtherApps)",
+            "* observeHealthKitCarbSamplesFromOtherApps: \(observeHealthKitCarbSamplesFromOtherApps)",
+            "* observeHealthKitDoseSamplesFromOtherApps: \(observeHealthKitDoseSamplesFromOtherApps)",
+            "* observeHealthKitGlucoseSamplesFromOtherApps: \(observeHealthKitGlucoseSamplesFromOtherApps)",
             "* predictedGlucoseChartClampEnabled: \(predictedGlucoseChartClampEnabled)",
             "* remoteOverridesEnabled: \(remoteOverridesEnabled)",
             "* scenariosEnabled: \(scenariosEnabled)",
