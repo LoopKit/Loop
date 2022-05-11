@@ -129,6 +129,13 @@ public final class LoopCompletionHUDView: BaseHUDView {
         return formatter
     }()
 
+    private lazy var timeFormatter: DateFormatter = {
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateStyle = .short
+        timeFormatter.timeStyle = .short
+        return timeFormatter
+    }()
+
     @objc private func updateDisplay(_: Timer?) {
         lastLoopMessage = ""
         if let date = lastLoopCompleted {
@@ -148,10 +155,10 @@ public final class LoopCompletionHUDView: BaseHUDView {
                     caption?.text = timeString
                 }
 
-                accessibilityLabel = String(format: LocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
+                accessibilityLabel = String(format: LocalizedString("%1$@ ran %2$@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: app name) (2: The localized date components)"), Bundle.main.bundleDisplayName, timeString)
 
                 if let fullTimeStr = formatterFull.string(from: ago) {
-                    lastLoopMessage = String(format: LocalizedString("%1$@ last successfully completed a loop %2$@ ago.", comment: "Last loop time completed message (1: app name) (2: last loop time string)"), Bundle.main.bundleDisplayName, fullTimeStr)
+                    lastLoopMessage = String(format: LocalizedString("Communication completed\n%2$@ ago,\n%3$@.", comment: "Last loop time completed message (1: last loop ago string) (1: last loop date string)"), fullTimeStr, timeFormatter.string(from: date))
                 }
             } else {
                 caption?.text = "–"
@@ -178,20 +185,28 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
 extension LoopCompletionHUDView {
     public var loopCompletionMessage: (title: String, message: String) {
+        var loopStateString = ""
+        if loopStateView.open {
+            loopStateString = LocalizedString("Open Loop", comment: "Title indicating Open Loop")
+        } else {
+            loopStateString = LocalizedString("Closed Loop", comment: "Title indicating Closed Loop")
+        }
+        let warningString = LocalizedString("Warning", comment: "Title indicating warning, last communication 6 to 14 minutes ago")
+        let failureString = LocalizedString("Failure", comment: "Title indicating failure, more than 15 minutes since communication completed")
         switch freshness {
         case .fresh:
             if loopStateView.open {
-                return (title: LocalizedString("Closed Loop OFF", comment: "Title of green open loop OFF message"),
-                        message: String(format: NSLocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\nTap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Green closed loop OFF message (1: app name)"), Bundle.main.bundleDisplayName))
+                return (title: loopStateString,
+                        message: String(format: NSLocalizedString("%1$@\nYour pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\nTap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Green closed loop OFF message (1: last loop string)"), lastLoopMessage))
             } else {
-                return (title: LocalizedString("Closed Loop ON", comment: "Title of green closed loop ON message"),
-                        message: String(format: LocalizedString("\n%1$@ is operating with Closed Loop in the ON position. %2$@", comment: "Green closed loop ON message (1: app name) (2: last loop string)"), Bundle.main.bundleDisplayName, lastLoopMessage))
+                return (title: loopStateString,
+                        message: String(format: LocalizedString("%1$@", comment: "Green closed loop ON message (1: last loop string)"), lastLoopMessage))
             }
         case .aging:
-            return (title: LocalizedString("Loop Warning", comment: "Title of yellow loop message"),
+            return (title: loopStateString + " " + warningString,
                     message: String(format: LocalizedString("\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM.", comment: "Yellow loop message (1: last loop string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
         case .stale:
-            return (title: LocalizedString("Loop Failure", comment: "Title of red loop message"),
+            return (title: loopStateString + " " + failureString,
                     message: String(format: LocalizedString("\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM.", comment: "Red loop message (1: last loop  string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
         }
     }
