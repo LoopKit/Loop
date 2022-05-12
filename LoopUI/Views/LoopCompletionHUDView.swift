@@ -130,10 +130,17 @@ public final class LoopCompletionHUDView: BaseHUDView {
     }()
 
     private lazy var timeFormatter: DateFormatter = {
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateStyle = .short
-        timeFormatter.timeStyle = .short
-        return timeFormatter
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
+    private lazy var timeDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter
     }()
 
     @objc private func updateDisplay(_: Timer?) {
@@ -157,8 +164,14 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
                 accessibilityLabel = String(format: LocalizedString("%1$@ ran %2$@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: app name) (2: The localized date components)"), Bundle.main.bundleDisplayName, timeString)
 
+                var timeDateString = ""
+                if ago < .hours(4) {
+                    timeDateString = timeFormatter.string(from: date)
+                } else {
+                    timeDateString = timeDateFormatter.string(from: date)
+                }
                 if let fullTimeStr = formatterFull.string(from: ago) {
-                    lastLoopMessage = String(format: LocalizedString("Communication completed\n%2$@ ago,\n%3$@.", comment: "Last loop time completed message (1: last loop ago string) (1: last loop date string)"), fullTimeStr, timeFormatter.string(from: date))
+                    lastLoopMessage = String(format: LocalizedString("Communication completed\n%2$@ ago at\n%3$@.", comment: "Last loop time completed message (1: last loop ago string) (1: last loop date string)"), fullTimeStr, timeDateString)
                 }
             } else {
                 caption?.text = "–"
