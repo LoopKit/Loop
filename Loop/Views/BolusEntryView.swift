@@ -182,12 +182,12 @@ struct BolusEntryView: View {
             if viewModel.isManualGlucoseEntryEnabled || viewModel.potentialCarbEntry != nil {
                 recommendedBolusRow
             }
-            
+
+            bolusEntryRow
+
             if viewModel.hasBolusEntryReadyToDeliver && viewModel.potentialCarbEntry != nil {
                 saveCarbsWithoutBolusButton
             }
-
-            bolusEntryRow
         }
     }
     
