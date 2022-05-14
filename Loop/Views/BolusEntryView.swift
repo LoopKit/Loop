@@ -396,7 +396,7 @@ struct BolusEntryView: View {
             },
             label: { Text("Save Carbs without Bolusing", comment: "Button text to save carbs without bolusing") }
         )
-        .buttonStyle(ActionButtonStyle(.primary))
+        .buttonStyle(ActionButtonStyle(.secondary))
     }
 
     private var actionButton: some View {
