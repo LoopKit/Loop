@@ -200,4 +200,13 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
 
         presentController(withName: CarbEntryListController.className, context: nil)
     }
+
+    @IBAction func didTapOnChart(_ sender: Any) {
+        scene.decreaseVisibleDuration()
+    }
+
+    @IBAction func didDoubleTapOnChart(_ sender: Any) {
+        scene.increaseVisibleDuration()
+    }
+
 }
