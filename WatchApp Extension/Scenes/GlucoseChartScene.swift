@@ -81,7 +81,7 @@ private extension SKSpriteNode {
 }
 
 class GlucoseChartScene: SKScene {
-    let log = OSLog(category: "GlucoseChartScene")
+    let logger = Logger(category: "GlucoseChartScene")
 
     var textInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5) {
         didSet {
@@ -99,8 +99,9 @@ class GlucoseChartScene: SKScene {
         }
     }
 
-    var visibleDuration = UserDefaults.standard.visibleDuration {
+    private(set) var visibleDuration = UserDefaults.standard.visibleDuration {
         didSet {
+            logger.log("New visible duration: \(self.visibleDuration.hours)h")
             setNeedsUpdate()
             UserDefaults.standard.visibleDuration = visibleDuration
         }
@@ -170,7 +171,7 @@ class GlucoseChartScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        log.default("update(_:)")
+        logger.debug("update(_:)")
 
         if needsUpdate {
             needsUpdate = false
@@ -185,12 +186,12 @@ class GlucoseChartScene: SKScene {
     override func didFinishUpdate() {
         let isPaused = self.isPaused
         let childNodesHaveActions = self.childNodesHaveActions
-        log.default("didFinishUpdate() needsUpdate: %d isPaused: %d childNodesHaveActions: %d", needsUpdate, isPaused, childNodesHaveActions)
+        logger.debug("didFinishUpdate() needsUpdate: \(self.needsUpdate) isPaused: \(isPaused) childNodesHaveActions: \(childNodesHaveActions)")
 
         super.didFinishUpdate()
 
         if !needsUpdate && !isPaused && !childNodesHaveActions {
-            log.default("didFinishUpdate() pausing")
+            logger.log("didFinishUpdate() pausing")
             self.isPaused = true
         }
     }
@@ -212,7 +213,7 @@ class GlucoseChartScene: SKScene {
         needsUpdate = true
 
         if isPaused {
-            log.default("setNeedsUpdate() unpausing")
+            logger.log("setNeedsUpdate() unpausing")
             isPaused = false
         }
     }
@@ -334,5 +335,13 @@ class GlucoseChartScene: SKScene {
             node.removeFromParent()
             nodes.removeValue(forKey: hash)
         }
+    }
+
+    func decreaseVisibleDuration(by decrement: TimeInterval = .hours(1)) {
+        visibleDuration = max(.hours(2), visibleDuration - decrement)
+    }
+
+    func increaseVisibleDuration(by increment: TimeInterval = .hours(1)) {
+        visibleDuration = min(.hours(12), visibleDuration + increment)
     }
 }

@@ -116,10 +116,16 @@ final class DeviceDataManager {
     private var readTypes: Set<HKSampleType> {
         var readTypes: Set<HKSampleType> = []
 
-        if FeatureFlags.observeHealthKitSamplesFromOtherApps {
-            readTypes.insert(glucoseStore.sampleType)
+        if FeatureFlags.observeHealthKitCarbSamplesFromOtherApps {
+            readTypes.insert(carbStore.sampleType)
+        }
+        if FeatureFlags.observeHealthKitDoseSamplesFromOtherApps {
             readTypes.insert(doseStore.sampleType)
         }
+        if FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps {
+            readTypes.insert(glucoseStore.sampleType)
+        }
+
         readTypes.insert(HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!)
 
         return readTypes
@@ -226,7 +232,7 @@ final class DeviceDataManager {
         
         self.carbStore = CarbStore(
             healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: false, // At some point we should let the user decide which apps they would like to import from.
+            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitCarbSamplesFromOtherApps, // At some point we should let the user decide which apps they would like to import from.
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             defaultAbsorptionTimes: absorptionTimes,
@@ -240,7 +246,7 @@ final class DeviceDataManager {
         
         self.doseStore = DoseStore(
             healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: UserDefaults.appGroup?.defaultRapidActingModel),
@@ -254,7 +260,7 @@ final class DeviceDataManager {
         
         self.glucoseStore = GlucoseStore(
             healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             observationInterval: .hours(24),
@@ -569,9 +575,9 @@ final class DeviceDataManager {
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
                 // Call the individual authorization methods to trigger query creation
-                self.carbStore.authorize(toShare: true, read: false, { _ in })
-                self.doseStore.insulinDeliveryStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
-                self.glucoseStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitSamplesFromOtherApps, { _ in })
+                self.carbStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitCarbSamplesFromOtherApps, { _ in })
+                self.doseStore.insulinDeliveryStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps, { _ in })
+                self.glucoseStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps, { _ in })
             }
 
             self.getHealthStoreAuthorization(completion)
@@ -1026,7 +1032,7 @@ extension DeviceDataManager: PumpManagerDelegate {
 
     func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastSync: Date?, completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(queue))
-        log.default("PumpManager:%{public}@ did read pump events", String(describing: type(of: pumpManager)))
+        log.default("PumpManager:%{public}@ hasNewPumpEvents (lastSync = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastSync))
 
         loopManager.addPumpEvents(events, lastReconciliation: lastSync) { (error) in
             if let error = error {
