@@ -66,7 +66,7 @@ public class StatusBarHUDView: UIView, NibLoadable {
         pumpStatusHUD.removePumpManagerProvidedHUD()
     }
     
-    public func addPumpManagerProvidedHUDView(_ pumpManagerProvidedHUD: LevelHUDView) {
+    public func addPumpManagerProvidedHUDView(_ pumpManagerProvidedHUD: BaseHUDView) {
         pumpStatusHUD.addPumpManagerProvidedHUDView(pumpManagerProvidedHUD)
     }
 }

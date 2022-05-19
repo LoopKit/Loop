@@ -56,7 +56,7 @@ class ManualEntryDoseViewModelTests: XCTestCase {
     }
 
     func testDoseLogging() throws {
-        XCTAssertEqual(0, manualEntryDoseViewModel.selectedInsulinTypeIndex)
+        XCTAssertEqual(.novolog, manualEntryDoseViewModel.selectedInsulinType)
         manualEntryDoseViewModel.enteredBolus = Self.exampleBolusQuantity
         
         try saveAndDeliver(ManualEntryDoseViewModelTests.exampleBolusQuantity)

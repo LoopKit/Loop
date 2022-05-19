@@ -11,6 +11,7 @@ import Combine
 import HealthKit
 import LoopKit
 import LoopCore
+import os.log
 
 final class LoopDataManager: LoopSettingsAlerterDelegate {
     enum LoopUpdateContext: Int {
@@ -35,7 +36,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
     weak var delegate: LoopDataManagerDelegate?
 
-    private let logger = DiagnosticLog(category: "LoopDataManager")
+    private let logger = OSLog(category: "LoopDataManager")
 
     private let analyticsServicesManager: AnalyticsServicesManager
 
@@ -178,8 +179,8 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         // Cancel any active temp basal when going into closed loop off mode
         // The dispatch is necessary in case this is coming from a didSet already on the settings struct.
         self.automaticDosingStatus.$isClosedLoop
-            .removeDuplicates()
             .dropFirst()
+            .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { if !$0 {
                 self.mutateSettings { settings in
@@ -826,9 +827,34 @@ extension LoopDataManager {
         notify(forChange: .tempBasal)
     }
 
+    // This is primarily for external clients displaying a bolus recommendation and forecast
+    // Should be called after any significant change to forecast input data.
+    private func updateRecommendedManualBolus() {
+        dataAccessQueue.async {
+            var (dosingDecision, updateError) = self.update(for: .updateRecommendedManualBolus)
+
+            if let error = updateError {
+                self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
+            } else {
+                do {
+                    if let predictedGlucoseIncludingPendingInsulin = self.predictedGlucoseIncludingPendingInsulin,
+                       let manualBolusRecommendation = try self.recommendManualBolus(forPrediction: predictedGlucoseIncludingPendingInsulin, consideringPotentialCarbEntry: nil)
+                    {
+                        dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualBolusRecommendation, date: Date())
+                        self.logger.debug("Manual bolus rec = %{public}@", String(describing: dosingDecision.manualBolusRecommendation))
+                        self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
+                    }
+                } catch {
+                    self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
+                }
+            }
+        }
+    }
+
     fileprivate enum UpdateReason: String {
         case loop
         case getLoopState
+        case updateRecommendedManualBolus
     }
 
     fileprivate func update(for reason: UpdateReason) -> (StoredDosingDecision, LoopError?) {
@@ -883,7 +909,8 @@ extension LoopDataManager {
         let retrospectiveStart = lastGlucoseDate.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
 
         let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
-        let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+        let nextCounteractionEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+        let insulinEffectStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-5))
 
         if glucoseMomentumEffect == nil {
             updateGroup.enter()
@@ -903,7 +930,7 @@ extension LoopDataManager {
         if insulinEffect == nil {
             self.logger.debug("Recomputing insulin effects")
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: nextEffectDate, end: nil, basalDosingEnd: now()) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: now()) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("%{public}@", String(describing: error))
@@ -919,7 +946,7 @@ extension LoopDataManager {
 
         if insulinEffectIncludingPendingInsulin == nil {
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: nextEffectDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects: %{public}@", String(describing: error))
@@ -935,10 +962,10 @@ extension LoopDataManager {
 
         _ = updateGroup.wait(timeout: .distantFuture)
 
-        if nextEffectDate < lastGlucoseDate, let insulinEffect = insulinEffect {
+        if nextCounteractionEffectDate < lastGlucoseDate, let insulinEffect = insulinEffect {
             updateGroup.enter()
-            self.logger.debug("Fetching counteraction effects after %{public}@", String(describing: nextEffectDate))
-            glucoseStore.getCounteractionEffects(start: nextEffectDate, end: nil, to: insulinEffect) { (result) in
+            self.logger.debug("Fetching counteraction effects after %{public}@", String(describing: nextCounteractionEffectDate))
+            glucoseStore.getCounteractionEffects(start: nextCounteractionEffectDate, end: nil, to: insulinEffect) { (result) in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Failure getting counteraction effects: %{public}@", String(describing: error))
@@ -1052,6 +1079,8 @@ extension LoopDataManager {
                 type(of: self).LoopUpdateContextKey: context.rawValue
             ]
         )
+
+        updateRecommendedManualBolus()
     }
 
     /// Computes amount of insulin from boluses that have been issued and not confirmed, and
@@ -1632,7 +1661,6 @@ extension LoopDataManager {
             } else {
                 recommendedAutomaticDose = nil
             }
-
             dosingDecision.automaticDoseRecommendation = recommendedAutomaticDose?.recommendation
         } catch let error {
             loopError = error as? LoopError ?? .unknownError(error)

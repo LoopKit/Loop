@@ -12,10 +12,11 @@ import LoopKit
 import LoopKitUI
 import SwiftUI
 import MockKitUI
+import os.log
 
 public final class SupportManager {
     
-    private lazy var log = DiagnosticLog(category: "SupportManager")
+    private lazy var log = OSLog(category: "SupportManager")
 
     private var supports = Locked<[String: SupportUI]>([:])
     

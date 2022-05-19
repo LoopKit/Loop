@@ -8,12 +8,13 @@
 
 import Foundation
 import LoopKit
+import os.log
 
 class DoseEnactor {
     
     fileprivate let dosingQueue: DispatchQueue = DispatchQueue(label: "com.loopkit.DeviceManagerDosingQueue", qos: .utility)
     
-    private let log = DiagnosticLog(category: "DoseEnactor")
+    private let log = OSLog(category: "DoseEnactor")
 
     func enact(recommendation: AutomaticDoseRecommendation, with pumpManager: PumpManager, completion: @escaping (PumpManagerError?) -> Void) {
         

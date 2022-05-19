@@ -8,6 +8,7 @@
 
 import LoopKit
 import LoopTestingKit
+import os.log
 
 
 protocol TestingScenariosManagerDelegate: AnyObject {
@@ -30,7 +31,7 @@ protocol TestingScenariosManagerRequirements: TestingScenariosManager {
     var deviceManager: DeviceDataManager { get }
     var activeScenarioURL: URL? { get set }
     var activeScenario: TestingScenario? { get set }
-    var log: DiagnosticLog { get }
+    var log: OSLog { get }
     func fetchScenario(from url: URL, completion: @escaping (Result<TestingScenario, Error>) -> Void)
 }
 

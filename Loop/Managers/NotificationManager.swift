@@ -163,8 +163,13 @@ extension NotificationManager {
     
     static func sendRemoteBolusNotification(amount: Double) {
         let notification = UNMutableNotificationContent()
-
-        notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %.1f U", comment: "The notification title for a remote bolus. (1: Bolus amount)"), amount)
+        let quantityFormatter = QuantityFormatter()
+        quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
+        guard let amountDescription = quantityFormatter.numberFormatter.string(from: amount) else {
+            print("Unexpected, cannot convert remote bolus amount to string: \(amount)")
+            return
+        }
+        notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %@ U", comment: "The notification title for a remote bolus. (1: Bolus amount)"), amountDescription)
         
         let body = "Success!"
 
@@ -182,8 +187,14 @@ extension NotificationManager {
     
     static func sendRemoteBolusFailureNotification(for error: Error, amount: Double) {
         let notification = UNMutableNotificationContent()
+        let quantityFormatter = QuantityFormatter()
+        quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
+        guard let amountDescription = quantityFormatter.numberFormatter.string(from: amount) else {
+            print("Unexpected, cannot convert remote bolus amount to string: \(amount)")
+            return
+        }
 
-        notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %.1f U", comment: "The notification title for a remote failure. (1: Bolus amount)"), amount)
+        notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %@ U", comment: "The notification title for a remote failure. (1: Bolus amount)"), amountDescription)
         notification.body = error.localizedDescription
         notification.sound = .default
 

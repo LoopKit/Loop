@@ -78,11 +78,8 @@ final class ManualEntryDoseViewModel: ObservableObject {
     }()
     
     // MARK: - External Insulin
-    @Published var selectedInsulinTypeIndex: Int = 0
+    @Published var selectedInsulinType: InsulinType
     
-    var selectedInsulinType: InsulinType? {
-        return insulinTypePickerOptions[selectedInsulinTypeIndex]
-    }
     @Published var selectedDoseDate: Date = Date()
     
     var insulinTypePickerOptions: [InsulinType]
@@ -113,25 +110,19 @@ final class ManualEntryDoseViewModel: ObservableObject {
         self.insulinTypePickerOptions = [.novolog, .humalog, .apidra, .fiasp, .lyumjev, .afrezza]
         
         self.chartDateInterval = DateInterval(start: Date(timeInterval: .hours(-1), since: now()), duration: .hours(7))
-        
-        selectedInsulinTypeIndex = startingPickerIndex
-        
+
+        if let pumpInsulinType = delegate.pumpInsulinType {
+            selectedInsulinType = pumpInsulinType
+        } else {
+            selectedInsulinType = .novolog
+        }
+
         observeLoopUpdates()
         observeEnteredBolusChanges()
         observeInsulinModelChanges()
         observeDoseDateChanges()
 
         update()
-    }
-        
-    var startingPickerIndex: Int {
-        if let pumpInsulinType = delegate?.pumpInsulinType {
-            if let indexToStartOn = insulinTypePickerOptions.firstIndex(of: pumpInsulinType) {
-                return indexToStartOn
-            }
-        }
-        
-        return 0
     }
 
     private func observeLoopUpdates() {
@@ -155,7 +146,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
     }
 
     private func observeInsulinModelChanges() {
-        $selectedInsulinTypeIndex
+        $selectedInsulinType
             .removeDuplicates()
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in
@@ -356,7 +347,6 @@ final class ManualEntryDoseViewModel: ObservableObject {
         let availableWidth = screenWidth - chartManager.fixedHorizontalMargin - 2 * viewMarginInset
 
         let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
-        let selectedInsulinType = insulinTypePickerOptions[selectedInsulinTypeIndex]
         let futureHours = ceil((delegate?.insulinActivityDuration(for: selectedInsulinType) ?? .hours(4)).hours)
         let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 

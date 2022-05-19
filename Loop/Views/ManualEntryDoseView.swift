@@ -164,8 +164,8 @@ struct ManualEntryDoseView: View {
     
     private var insulinTypePicker: some View {
         ExpandablePicker(
-            with: viewModel.insulinTypePickerOptions.map { $0.title },
-            pickerIndex: $viewModel.selectedInsulinTypeIndex,
+            with: viewModel.insulinTypePickerOptions,
+            selectedValue: $viewModel.selectedInsulinType,
             label: NSLocalizedString("Insulin Type", comment: "Insulin type label")
         )
     }
@@ -248,5 +248,11 @@ struct ManualEntryDoseView: View {
         )
         .buttonStyle(ActionButtonStyle(.primary))
         .padding()
+    }
+}
+
+extension InsulinType: Labeled {
+    public var label: String {
+        return title
     }
 }

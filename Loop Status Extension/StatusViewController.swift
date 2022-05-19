@@ -79,7 +79,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     lazy var glucoseStore = GlucoseStore(
         healthStore: healthStore,
-        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
         storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
         observationEnabled: false,
@@ -88,7 +88,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     lazy var doseStore = DoseStore(
         healthStore: healthStore,
-        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
+        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
         storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
         observationEnabled: false,
@@ -223,7 +223,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
 
             // Pump Status
-            let pumpManagerHUDView: LevelHUDView
+            let pumpManagerHUDView: BaseHUDView
             if let hudViewContext = context.pumpManagerHUDViewContext,
                 let contextHUDView = PumpManagerHUDViewFromRawValue(hudViewContext.pumpManagerHUDViewRawValue, pluginManager: self.pluginManager)
             {

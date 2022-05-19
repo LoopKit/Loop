@@ -783,7 +783,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func updatePreMealModeAvailability(isClosedLoop: Bool) {
-        let allowed = onboardingManager.isComplete && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+        let allowed = onboardingManager.isComplete &&
+                (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+                && deviceManager.loopManager.settings.preMealTargetRange != nil
         toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
 
@@ -1511,7 +1513,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
-    private func addPumpManagerViewToHUD(_ view: LevelHUDView) {
+    private func addPumpManagerViewToHUD(_ view: BaseHUDView) {
         if let hudView = hudView {
             view.stateColors = .pumpStatus
             hudView.addPumpManagerProvidedHUDView(view)

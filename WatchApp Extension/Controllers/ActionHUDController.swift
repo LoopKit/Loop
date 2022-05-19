@@ -36,18 +36,17 @@ final class ActionHUDController: HUDInterfaceController {
 
     private lazy var bolusButtonGroup = ButtonGroup(button: bolusButton, image: bolusButtonImage, background: bolusButtonBackground, onBackgroundColor: .insulin, offBackgroundColor: .darkInsulin, onIconColor: .darkInsulin, offIconColor: .insulin)
 
-    @IBOutlet var overrideButtonLabel: WKInterfaceLabel! {
-        didSet {
-            if FeatureFlags.sensitivityOverridesEnabled {
-                overrideButtonLabel.setText(NSLocalizedString("Preset", comment: "The text for the Watch button for enabling a custom preset"))
-            } else {
-                overrideButtonLabel.setText(NSLocalizedString("Workout", comment: "The text for the Watch button for enabling workout mode"))
-            }
-        }
-    }
+    @IBOutlet var overrideButtonLabel: WKInterfaceLabel?
 
     override func willActivate() {
         super.willActivate()
+
+        // Update the override button description based on the feature flag; this cannot be done earlier than `-willActivate` (e.g. didSet on the IBOutlet is too soon)
+        if FeatureFlags.sensitivityOverridesEnabled {
+            overrideButtonLabel?.setText(NSLocalizedString("Preset", comment: "The text for the Watch button for enabling a custom preset"))
+        } else {
+            overrideButtonLabel?.setText(NSLocalizedString("Workout", comment: "The text for the Watch button for enabling workout mode"))
+        }
 
         let userActivity = NSUserActivity.forViewLoopStatus()
         if #available(watchOSApplicationExtension 5.0, *) {
