@@ -9,7 +9,6 @@
 import LoopKit
 import TrueTime
 import UIKit
-import os.log
 
 fileprivate extension UserDefaults {
     private enum Key: String {
@@ -33,7 +32,7 @@ class TrustedTimeChecker {
     // For NTP time checking
     private var ntpClient: TrueTimeClient
     private weak var alertManager: AlertManager?
-    private lazy var log = OSLog(category: "TrustedTimeChecker")
+    private lazy var log = DiagnosticLog(category: "TrustedTimeChecker")
 
     init(alertManager: AlertManager) {
         ntpClient = TrueTimeClient.sharedInstance

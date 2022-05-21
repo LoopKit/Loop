@@ -8,7 +8,6 @@
 
 import CoreData
 import LoopKit
-import os.log
 
 public protocol AlertStoreDelegate: AnyObject {
     /**
@@ -40,7 +39,7 @@ public class AlertStore {
 
     private let expireAfter: TimeInterval
 
-    private let log = OSLog(category: "AlertStore")
+    private let log = DiagnosticLog(category: "AlertStore")
 
     // This is terribly inconvenient, but it turns out that executing the following expression in CoreData _differs_
     // depending on whether it is in-memory or SQLite

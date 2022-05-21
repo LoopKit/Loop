@@ -8,7 +8,6 @@
 
 import LoopKit
 import UIKit
-import os.log
 
 protocol AlertManagerResponder: AnyObject {
     /// Method for our Handlers to call to kick off alert response.  Differs from AlertResponder because here we need the whole `Identifier`.
@@ -36,7 +35,7 @@ public enum AlertUserNotificationUserInfoKey: String {
 public final class AlertManager {
     private static let soundsDirectoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).last!.appendingPathComponent("Sounds")
 
-    private let log = OSLog(category: "AlertManager")
+    private let log = DiagnosticLog(category: "AlertManager")
 
     private var handlers: [AlertIssuer] = []
     private var responders: [String: Weak<AlertResponder>] = [:]
