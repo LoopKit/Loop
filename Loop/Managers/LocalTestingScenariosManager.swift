@@ -9,13 +9,13 @@
 import Foundation
 import LoopKit
 import LoopTestingKit
-import os.log
-
+import OSLog
 
 final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, DirectoryObserver {
+    
     unowned let deviceManager: DeviceDataManager
 
-    let log = OSLog(category: "LocalTestingScenariosManager")
+    let log = DiagnosticLog(category: "LocalTestingScenariosManager")
 
     private let fileManager = FileManager.default
     private let scenariosSource: URL

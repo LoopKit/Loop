@@ -11,7 +11,6 @@ import UIKit
 import WatchConnectivity
 import LoopKit
 import LoopCore
-import os.log
 
 final class WatchDataManager: NSObject {
 
@@ -32,7 +31,7 @@ final class WatchDataManager: NSObject {
         watchSession?.activate()
     }
 
-    private let log = OSLog(category: "WatchDataManager")
+    private let log = DiagnosticLog(category: "WatchDataManager")
 
     private var watchSession: WCSession? = {
         if WCSession.isSupported() {

@@ -8,12 +8,11 @@
 
 import LoopKit
 import UIKit
-import os.log
 
 class UserNotificationAlertIssuer: AlertIssuer {
     
     let userNotificationCenter: UserNotificationCenter
-    let log = OSLog(category: "UserNotificationAlertIssuer")
+    let log = DiagnosticLog(category: "UserNotificationAlertIssuer")
     
     init(userNotificationCenter: UserNotificationCenter) {
         self.userNotificationCenter = userNotificationCenter

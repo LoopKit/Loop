@@ -11,7 +11,6 @@ import Combine
 import HealthKit
 import LoopKit
 import LoopCore
-import os.log
 
 final class LoopDataManager: LoopSettingsAlerterDelegate {
     enum LoopUpdateContext: Int {
@@ -36,7 +35,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
     weak var delegate: LoopDataManagerDelegate?
 
-    private let logger = OSLog(category: "LoopDataManager")
+    private let logger = DiagnosticLog(category: "LoopDataManager")
 
     private let analyticsServicesManager: AnalyticsServicesManager
 
