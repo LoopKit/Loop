@@ -566,9 +566,9 @@ extension LoopDataManager {
         case maximumBasalRateChanged
     }
     
-    /// Cancel the active temp basal
+    /// Cancel the active temp basal if it was automatically issued
     private func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) {
-        guard case .tempBasal(_) = basalDeliveryState else { return }
+        guard case .tempBasal(let dose) = basalDeliveryState, (dose.automatic ?? true) else { return }
 
         dataAccessQueue.async {
             self.cancelActiveTempBasal(for: reason, completion: nil)

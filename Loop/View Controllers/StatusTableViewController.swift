@@ -1453,6 +1453,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private func closedLoopStatusChanged(_ isClosedLoop: Bool) {
         updatePreMealModeAvailability(isClosedLoop: isClosedLoop)
         hudView?.loopCompletionHUD.loopIconClosed = isClosedLoop
+        hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
     }
 
     // MARK: - HUDs
@@ -2001,6 +2002,10 @@ extension StatusTableViewController: BluetoothObserver {
 
 // MARK: - SettingsViewModel delegation
 extension StatusTableViewController: SettingsViewModelDelegate {
+    var closedLoopDescriptiveText: String? {
+        return deviceManager.closedLoopDisallowedLocalizedDescription
+    }
+
     func dosingEnabledChanged(_ value: Bool) {
         deviceManager.loopManager.mutateSettings { settings in
             settings.dosingEnabled = value
