@@ -1965,9 +1965,17 @@ extension StatusTableViewController {
 
 extension StatusTableViewController {
     fileprivate func addPumpManager(withIdentifier identifier: String) {
-        let settings = PumpManagerSetupSettings(maxBasalRateUnitsPerHour: deviceManager.loopManager.settings.maximumBasalRatePerHour,
-                                                maxBolusUnits: deviceManager.loopManager.settings.maximumBolus,
-                                                basalSchedule: deviceManager.loopManager.basalRateSchedule)
+        guard let maximumBasalRate = deviceManager.loopManager.settings.maximumBasalRatePerHour,
+              let maxBolus = deviceManager.loopManager.settings.maximumBolus,
+              let basalSchedule = deviceManager.loopManager.basalRateSchedule else
+        {
+            log.default("Failure to setup pump manager: incomplete settings")
+            return
+        }
+        
+        let settings = PumpManagerSetupSettings(maxBasalRateUnitsPerHour: maximumBasalRate,
+                                                maxBolusUnits: maxBolus,
+                                                basalSchedule: basalSchedule)
         switch deviceManager.setupPumpManagerUI(withIdentifier: identifier, initialSettings: settings) {
         case .failure(let error):
             log.default("Failure to setup pump manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
