@@ -93,6 +93,7 @@ extension SettingsView {
                         DescriptiveText(label: closedLoopDescriptiveText)
                     }
                 }
+                .fixedSize(horizontal: false, vertical: true)
             }
             .disabled(!viewModel.isOnboardingComplete || !viewModel.isClosedLoopAllowed)
         }
