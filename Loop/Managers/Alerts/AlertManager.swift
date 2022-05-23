@@ -317,6 +317,10 @@ extension AlertManager: PersistedAlertStore {
     public func recordRetractedAlert(_ alert: Alert, at date: Date) {
         alertStore.recordRetractedAlert(alert, at: date)
     }
+
+    public func recordIssued(alert: Alert, at date: Date = Date(), completion: ((Result<Void, Error>) -> Void)? = nil) {
+        alertStore.recordIssued(alert: alert, at: date, completion: completion)
+    }
 }
 
 // MARK: Extensions
