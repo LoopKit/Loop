@@ -378,7 +378,9 @@ final class DeviceDataManager {
             .combineLatest($cgmHasValidSensorSession)
             .map { $0 == false || $1 }
             .combineLatest($pumpIsAllowingAutomation)
-            .map { $0 == false || $1 }
+            .map { $0 && $1 }
+            .receive(on: RunLoop.main)
+            .removeDuplicates()
             .assign(to: \.closedLoopStatus.isClosedLoopAllowed, on: self)
             .store(in: &cancellables)
 
