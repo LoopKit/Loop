@@ -1535,7 +1535,10 @@ struct CancelTempBasalFailedError: LocalizedError {
 
 extension DeviceDataManager : RemoteDataServicesManagerDelegate {
     var shouldSyncToRemoteService: Bool {
-        return cgmManager?.shouldSyncToRemoteService ?? false
+        guard let cgmManager = cgmManager else {
+            return true
+        }
+        return cgmManager.shouldSyncToRemoteService
     }
 }
 
