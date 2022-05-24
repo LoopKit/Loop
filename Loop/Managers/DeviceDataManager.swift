@@ -369,7 +369,8 @@ final class DeviceDataManager {
         dosingDecisionStore.delegate = self
         glucoseStore.delegate = self
         doseStore.insulinDeliveryStore.delegate = self
-
+        remoteDataServicesManager.delegate = self
+        
         setupPump()
         setupCGM()
                 
@@ -1557,6 +1558,17 @@ struct CancelTempBasalFailedError: LocalizedError {
             }
         }
         return reason.map { $0.localizedDescription + paragraphEnd } ?? ""
+    }
+}
+
+//MARK: - RemoteDataServicesManagerDelegate protocol conformance
+
+extension DeviceDataManager : RemoteDataServicesManagerDelegate {
+    var shouldSyncToRemoteService: Bool {
+        guard let cgmManager = cgmManager else {
+            return true
+        }
+        return cgmManager.shouldSyncToRemoteService
     }
 }
 
