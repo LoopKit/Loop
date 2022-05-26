@@ -68,29 +68,29 @@ class LoopAlertManagerTests: XCTestCase {
         XCTAssertEqual(4, UserDefaults.appGroup?.loopNotRunningNotifications.count)
     }
 
-    func testLoopDidCompleteAfter10MinutesDoesNotRecordAlert() {
+    func testLoopFailureFor10MinutesDoesNotRecordAlert() {
         loopAlertsManager.loopDidComplete()
         XCTAssertNil(mockAlertStore.issuedAlert)
         loopAlertsManager.getCurrentDate = { return Date().addingTimeInterval(.minutes(10))}
-        loopAlertsManager.loopDidComplete()
+        loopAlertsManager.inferDeliveredLoopNotRunningNotifications()
         XCTAssertNil(mockAlertStore.issuedAlert)
     }
 
-    func testLoopDidCompleteAfter30MinutesRecordsTimeSensitiveAlert() {
+    func testLoopFailureFor30MinutesRecordsTimeSensitiveAlert() {
         loopAlertsManager.loopDidComplete()
         XCTAssertNil(mockAlertStore.issuedAlert)
         loopAlertsManager.getCurrentDate = { return Date().addingTimeInterval(.minutes(30))}
-        loopAlertsManager.loopDidComplete()
-        XCTAssertEqual(4, UserDefaults.appGroup?.loopNotRunningNotifications.count)
+        loopAlertsManager.inferDeliveredLoopNotRunningNotifications()
+        XCTAssertEqual(3, UserDefaults.appGroup?.loopNotRunningNotifications.count)
         XCTAssertNotNil(mockAlertStore.issuedAlert)
         XCTAssertEqual(.timeSensitive, mockAlertStore.issuedAlert!.interruptionLevel)
     }
 
-    func testLoopDidCompleteAfter30MinutesRecordsCriticalAlert() {
+    func testLoopFailureFor65MinutesRecordsCriticalAlert() {
         loopAlertsManager.loopDidComplete()
         loopAlertsManager.getCurrentDate = { return Date().addingTimeInterval(.minutes(65))}
-        loopAlertsManager.loopDidComplete()
-        XCTAssertEqual(4, UserDefaults.appGroup?.loopNotRunningNotifications.count)
+        loopAlertsManager.inferDeliveredLoopNotRunningNotifications()
+        XCTAssertEqual(1, UserDefaults.appGroup?.loopNotRunningNotifications.count)
         XCTAssertNotNil(mockAlertStore.issuedAlert)
         XCTAssertEqual(.critical, mockAlertStore.issuedAlert!.interruptionLevel)
     }

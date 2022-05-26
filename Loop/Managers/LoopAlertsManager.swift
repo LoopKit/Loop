@@ -134,10 +134,10 @@ public class LoopAlertsManager {
         UserDefaults.appGroup?.loopNotRunningNotifications = scheduledNotifications
     }
 
-    func clearLoopNotRunningNotifications() {
-
-        // Any past alerts have been delivered at this point
+    func inferDeliveredLoopNotRunningNotifications() {
+        // Infer that any past alerts have been delivered at this point
         let now = getCurrentDate()
+        var stillPendingNotifications = [StoredLoopNotRunningNotification]()
         for notification in UserDefaults.appGroup?.loopNotRunningNotifications ?? [] {
             print("Comparing alert \(notification.alertAt) to \(now) (real date = \(Date())")
             if notification.alertAt < now {
@@ -146,10 +146,15 @@ public class LoopAlertsManager {
                 let interruptionLevel: Alert.InterruptionLevel = notification.isCritical ? .critical : .timeSensitive
                 let alert = Alert(identifier: alertIdentifier, foregroundContent: nil, backgroundContent: content, trigger: .immediate, interruptionLevel: interruptionLevel)
                 alertManager.recordIssued(alert: alert, at: notification.alertAt)
+            } else {
+                stillPendingNotifications.append(notification)
             }
         }
+        UserDefaults.appGroup?.loopNotRunningNotifications = stillPendingNotifications
+    }
 
-        UserDefaults.appGroup?.loopNotRunningNotifications = []
+    func clearLoopNotRunningNotifications() {
+        inferDeliveredLoopNotRunningNotifications()
 
         // Clear out any existing not-running notifications
         UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in

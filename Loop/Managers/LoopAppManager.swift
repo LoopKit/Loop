@@ -243,6 +243,7 @@ class LoopAppManager: NSObject {
             ProfileExpirationAlerter.alertIfNeeded(viewControllerToPresentFrom: rootViewController)
         }
         deviceDataManager?.didBecomeActive()
+        loopAlertsManager.inferDeliveredLoopNotRunningNotifications()
     }
 
     // MARK: - Remote Notification
