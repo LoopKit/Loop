@@ -212,7 +212,6 @@ struct BolusEntryView: View {
                         maxLength: 4,
                         doneButtonColor: .loopAccent
                     )
-
                     Text(QuantityFormatter().string(from: displayGlucoseUnitObservable.displayGlucoseUnit))
                         .foregroundColor(Color(.secondaryLabel))
                 }

@@ -14,13 +14,12 @@ import LoopCore
 import LoopTestingKit
 import UserNotifications
 import Combine
-import os.log
 
 final class DeviceDataManager {
 
     private let queue = DispatchQueue(label: "com.loopkit.DeviceManagerQueue", qos: .utility)
     
-    private let log = OSLog(category: "DeviceDataManager")
+    private let log = DiagnosticLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
     weak var alertManager: AlertManager!
@@ -46,7 +45,19 @@ final class DeviceDataManager {
     
     @Published var cgmHasValidSensorSession: Bool
 
+    @Published var pumpIsAllowingAutomation: Bool
+
     private let closedLoopStatus: ClosedLoopStatus
+
+    var closedLoopDisallowedLocalizedDescription: String? {
+        if !cgmHasValidSensorSession {
+            return NSLocalizedString("Closed Loop requires an active CGM Sensor Session", comment: "The description text for the looping enabled switch cell when closed loop is not allowed because the sensor is inactive")
+        } else if !pumpIsAllowingAutomation {
+            return NSLocalizedString("Your pump is delivering a manual temporary basal rate.", comment: "The description text for the looping enabled switch cell when closed loop is not allowed because the pump is delivering a manual temp basal.")
+        } else {
+            return nil
+        }
+    }
 
     lazy private var cancellables = Set<AnyCancellable>()
     
@@ -276,6 +287,7 @@ final class DeviceDataManager {
         self.dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
         
         self.cgmHasValidSensorSession = false
+        self.pumpIsAllowingAutomation = true
         self.closedLoopStatus = closedLoopStatus
 
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
@@ -286,6 +298,9 @@ final class DeviceDataManager {
             // Update lastPumpEventsReconciliation on DoseStore
             if let lastSync = pumpManager?.lastSync {
                 doseStore.addPumpEvents([], lastReconciliation: lastSync) { _ in }
+            }
+            if let status = pumpManager?.status {
+                updatePumpIsAllowingAutomation(status: status)
             }
         } else {
             pumpManager = nil
@@ -357,13 +372,18 @@ final class DeviceDataManager {
         dosingDecisionStore.delegate = self
         glucoseStore.delegate = self
         doseStore.insulinDeliveryStore.delegate = self
-
+        remoteDataServicesManager.delegate = self
+        
         setupPump()
         setupCGM()
                 
         cgmStalenessMonitor.$cgmDataIsStale
             .combineLatest($cgmHasValidSensorSession)
             .map { $0 == false || $1 }
+            .combineLatest($pumpIsAllowingAutomation)
+            .map { $0 && $1 }
+            .receive(on: RunLoop.main)
+            .removeDuplicates()
             .assign(to: \.closedLoopStatus.isClosedLoopAllowed, on: self)
             .store(in: &cancellables)
 
@@ -984,6 +1004,8 @@ extension DeviceDataManager: PumpManagerDelegate {
             loopManager.basalDeliveryState = status.basalDeliveryState
         }
 
+        updatePumpIsAllowingAutomation(status: status)
+
         // Update the pump-schedule based settings
         loopManager.setScheduleTimeZone(status.timeZone)
         
@@ -999,6 +1021,14 @@ extension DeviceDataManager: PumpManagerDelegate {
                     self.deliveryUncertaintyAlertManager?.clearAlert()
                 }
             }
+        }
+    }
+
+    func updatePumpIsAllowingAutomation(status: PumpManagerStatus) {
+        if case .tempBasal(let dose) = status.basalDeliveryState, !(dose.automatic ?? true), dose.endDate > Date() {
+            pumpIsAllowingAutomation = false
+        } else {
+            pumpIsAllowingAutomation = true
         }
     }
 
@@ -1531,6 +1561,17 @@ struct CancelTempBasalFailedError: LocalizedError {
             }
         }
         return reason.map { $0.localizedDescription + paragraphEnd } ?? ""
+    }
+}
+
+//MARK: - RemoteDataServicesManagerDelegate protocol conformance
+
+extension DeviceDataManager : RemoteDataServicesManagerDelegate {
+    var shouldSyncToRemoteService: Bool {
+        guard let cgmManager = cgmManager else {
+            return true
+        }
+        return cgmManager.shouldSyncToRemoteService
     }
 }
 

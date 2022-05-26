@@ -9,11 +9,10 @@
 import Foundation
 import LoopKit
 import LoopCore
-import os.log
 
 final class AnalyticsServicesManager {
 
-    private lazy var log = OSLog(category: "AnalyticsServicesManager")
+    private lazy var log = DiagnosticLog(category: "AnalyticsServicesManager")
 
     private var analyticsServices = [AnalyticsService]()
 
