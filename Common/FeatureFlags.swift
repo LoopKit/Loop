@@ -84,7 +84,7 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         // Swift compiler config is inverse, since the default state is enabled.
-        #if LYUMJEV_INSULIN_MODEL_DISABLED
+        #if AFREZZA_INSULIN_MODEL_DISABLED
         self.afrezzaInsulinModelEnabled = false
         #else
         self.afrezzaInsulinModelEnabled = true
