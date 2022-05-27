@@ -207,11 +207,7 @@ extension LoopCompletionHUDView {
             if loopStateView.open {
                 let reason = closedLoopDisallowedLocalizedDescription ?? NSLocalizedString("Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Instructions for user to close loop if it is allowed.")
                 return (title: LocalizedString("Closed Loop OFF", comment: "Title of green open loop OFF message"),
-<<<<<<< HEAD
-                        message: String(format: NSLocalizedString("\n%1$@\n\n%2$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\nTap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Green closed loop OFF message (1: last loop string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
-=======
                         message: String(format: NSLocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@", comment: "Green closed loop OFF message (1: app name)(2: reason for open loop)"), Bundle.main.bundleDisplayName, reason))
->>>>>>> dev
             } else {
                 return (title: LocalizedString("Closed Loop ON", comment: "Title of green closed loop ON message"),
                         message: String(format: LocalizedString("\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position.", comment: "Green closed loop ON message (1: last loop string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
