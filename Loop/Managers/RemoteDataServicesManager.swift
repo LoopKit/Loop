@@ -24,6 +24,8 @@ enum RemoteDataType: String {
 final class RemoteDataServicesManager {
 
     public typealias RawState = [String: Any]
+    
+    public weak var delegate: RemoteDataServicesManagerDelegate?
 
     private var lock = UnfairLock()
 
@@ -333,6 +335,11 @@ extension RemoteDataServicesManager {
     }
 
     private func uploadGlucoseData(to remoteDataService: RemoteDataService) {
+        
+        if delegate?.shouldSyncToRemoteService == false {
+            return
+        }
+        
         uploadGroup.enter()
         dispatchQueue(for: remoteDataService, withRemoteDataType: .glucose).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -520,6 +527,11 @@ extension RemoteDataServicesManager {
         }
     }
 
+}
+
+
+protocol RemoteDataServicesManagerDelegate: AnyObject {
+    var shouldSyncToRemoteService: Bool {get}
 }
 
 
