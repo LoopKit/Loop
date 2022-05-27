@@ -125,8 +125,8 @@ public final class LoopCompletionHUDView: BaseHUDView {
         let formatter = DateComponentsFormatter()
 
         formatter.allowedUnits = [.day, .hour, .minute]
-        formatter.maximumUnitCount = 1
-        formatter.unitsStyle = .full
+        formatter.maximumUnitCount = 2
+        formatter.unitsStyle = .short
         return formatter
     }()
 
@@ -176,7 +176,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
                 accessibilityLabel = String(format: LocalizedString("Loop ran %@", comment: "Accessbility format label describing the time interval since and time of the last completion date. (1: last loop time string)"), timeString)
 
-                lastLoopMessage = String(format: LocalizedString("%1$@ last successfully completed %2$@", comment: "Last loop time completed message (1: app name) (2: last loop time string)"), Bundle.main.bundleDisplayName, timeString)
+                lastLoopMessage = String(format: LocalizedString("%1$@ last successful loop was\n%2$@", comment: "Last time loop completed message (1: app name) (2: last loop time string)"), Bundle.main.bundleDisplayName, timeString)
             } else {
                 caption?.text = "–"
                 accessibilityLabel = nil
