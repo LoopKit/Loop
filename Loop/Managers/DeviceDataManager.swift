@@ -72,6 +72,13 @@ final class DeviceDataManager {
         if !FeatureFlags.afrezzaInsulinModelEnabled {
             allowed.remove(.afrezza)
         }
+
+        for insulinType in InsulinType.allCases {
+            if !insulinType.pumpAdministerable {
+                allowed.remove(insulinType)
+            }
+        }
+
         return allowed
     }()
 
