@@ -85,9 +85,12 @@ final class DeviceDataManager {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
             NotificationCenter.default.post(name: .CGMManagerChanged, object: self, userInfo: nil)
-            UserDefaults.appGroup?.cgmManagerRawValue = cgmManager?.rawValue
+            rawCGMManager = cgmManager?.rawValue
         }
     }
+
+    @PersistedProperty(key: "CGMManagerState")
+    var rawCGMManager: CGMManager.RawValue?
 
     // MARK: - Pump
 
@@ -104,9 +107,13 @@ final class DeviceDataManager {
 
             NotificationCenter.default.post(name: .PumpManagerChanged, object: self, userInfo: nil)
 
-            UserDefaults.appGroup?.pumpManagerRawValue = pumpManager?.rawValue
+            rawPumpManager = pumpManager?.rawValue
         }
     }
+
+    @PersistedProperty(key: "PumpManagerState")
+    var rawPumpManager: PumpManager.RawValue?
+
     
     var doseEnactor = DoseEnactor()
     
@@ -290,7 +297,7 @@ final class DeviceDataManager {
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
         displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
 
-        if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
+        if let pumpManagerRawValue = rawPumpManager ?? UserDefaults.appGroup?.legacyPumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
             // Update lastPumpEventsReconciliation on DoseStore
             if let lastSync = pumpManager?.lastSync {
@@ -303,10 +310,10 @@ final class DeviceDataManager {
             pumpManager = nil
         }
 
-        if let cgmManagerRawValue = UserDefaults.appGroup?.cgmManagerRawValue {
+        if let cgmManagerRawValue = rawCGMManager ?? UserDefaults.appGroup?.legacyCGMManagerRawValue {
             cgmManager = cgmManagerFromRawValue(cgmManagerRawValue)
         } else if isCGMManagerValidPumpManager {
-            self.cgmManager = pumpManager as? CGMManager
+            cgmManager = pumpManager as? CGMManager
         }
 
         //TODO The instantiation of these non-device related managers should be moved to LoopAppManager, and then LoopAppManager can wire up the connections between them.
@@ -397,7 +404,7 @@ final class DeviceDataManager {
     }
     
     var isCGMManagerValidPumpManager: Bool {
-        guard let rawValue = UserDefaults.appGroup?.cgmManagerState else {
+        guard let rawValue = rawCGMManager else {
             return false
         }
 
@@ -885,7 +892,7 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManagerDidUpdateState(_ manager: CGMManager) {
         dispatchPrecondition(condition: .onQueue(queue))
-        UserDefaults.appGroup?.cgmManagerRawValue = manager.rawValue
+        rawCGMManager = manager.rawValue
     }
 
     func credentialStoragePrefix(for manager: CGMManager) -> String {
@@ -934,7 +941,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ did update state", String(describing: type(of: pumpManager)))
 
-        UserDefaults.appGroup?.pumpManagerRawValue = pumpManager.rawValue
+        rawPumpManager = pumpManager.rawValue
     }
 
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {

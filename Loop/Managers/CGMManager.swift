@@ -35,6 +35,9 @@ func CGMManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManager? {
 }
 
 extension CGMManager {
+
+    typealias RawValue = [String: Any]
+    
     var rawValue: [String: Any] {
         return [
             "managerIdentifier": managerIdentifier,

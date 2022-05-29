@@ -11,38 +11,36 @@ import LoopKit
 
 extension UserDefaults {
     private enum Key: String {
-        case pumpManagerState = "com.loopkit.Loop.PumpManagerState"
-        case cgmManagerState = "com.loopkit.Loop.CGMManagerState"
+        case legacyPumpManagerState = "com.loopkit.Loop.PumpManagerState"
+        case legacyCGMManagerState = "com.loopkit.Loop.CGMManagerState"
+        case servicesState = "com.loopkit.Loop.ServicesState"
     }
 
-    var pumpManagerRawValue: [String: Any]? {
+    var legacyPumpManagerRawValue: PumpManager.RawValue? {
         get {
-            return dictionary(forKey: Key.pumpManagerState.rawValue)
+            return dictionary(forKey: Key.legacyPumpManagerState.rawValue)
         }
         set {
-            set(newValue, forKey: Key.pumpManagerState.rawValue)
+            set(newValue, forKey: Key.legacyPumpManagerState.rawValue)
         }
     }
 
-    var cgmManagerRawValue: [String: Any]? {
+    var legacyCGMManagerRawValue: CGMManager.RawValue? {
         get {
-            return dictionary(forKey: Key.cgmManagerState.rawValue)
+            return dictionary(forKey: Key.legacyCGMManagerState.rawValue)
         }
         set {
-            set(newValue, forKey: Key.cgmManagerState.rawValue)
+            set(newValue, forKey: Key.legacyCGMManagerState.rawValue)
         }
     }
-    
-    var cgmManager: CGMManager? {
-        get {
-            guard let rawValue = cgmManagerState else {
-                return nil
-            }
 
-            return CGMManagerFromRawValue(rawValue)
+    var servicesState: [Service.RawStateValue] {
+        get {
+            return array(forKey: Key.servicesState.rawValue) as? [[String: Any]] ?? []
         }
         set {
-            cgmManagerState = newValue?.rawValue
+            set(newValue, forKey: Key.servicesState.rawValue)
         }
     }
+
 }
