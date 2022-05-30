@@ -13,34 +13,38 @@ extension UserDefaults {
     private enum Key: String {
         case legacyPumpManagerState = "com.loopkit.Loop.PumpManagerState"
         case legacyCGMManagerState = "com.loopkit.Loop.CGMManagerState"
-        case servicesState = "com.loopkit.Loop.ServicesState"
+        case legacyServicesState = "com.loopkit.Loop.ServicesState"
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {
         get {
             return dictionary(forKey: Key.legacyPumpManagerState.rawValue)
         }
-        set {
-            set(newValue, forKey: Key.legacyPumpManagerState.rawValue)
-        }
     }
+    func clearLegacyPumpManagerRawValue() {
+        set(nil, forKey: Key.legacyPumpManagerState.rawValue)
+    }
+
 
     var legacyCGMManagerRawValue: CGMManager.RawValue? {
         get {
             return dictionary(forKey: Key.legacyCGMManagerState.rawValue)
         }
-        set {
-            set(newValue, forKey: Key.legacyCGMManagerState.rawValue)
+    }
+
+    func clearLegacyCGMManagerRawValue() {
+        set(nil, forKey: Key.legacyCGMManagerState.rawValue)
+    }
+
+    var legacyServicesState: [Service.RawStateValue] {
+        get {
+            return array(forKey: Key.legacyServicesState.rawValue) as? [[String: Any]] ?? []
         }
     }
 
-    var servicesState: [Service.RawStateValue] {
-        get {
-            return array(forKey: Key.servicesState.rawValue) as? [[String: Any]] ?? []
-        }
-        set {
-            set(newValue, forKey: Key.servicesState.rawValue)
-        }
+    func clearLegacyServicesState() {
+        set(nil, forKey: Key.legacyServicesState.rawValue)
     }
+
 
 }

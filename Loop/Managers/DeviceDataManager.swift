@@ -86,6 +86,7 @@ final class DeviceDataManager {
             setupCGM()
             NotificationCenter.default.post(name: .CGMManagerChanged, object: self, userInfo: nil)
             rawCGMManager = cgmManager?.rawValue
+            UserDefaults.appGroup?.clearLegacyCGMManagerRawValue()
         }
     }
 
@@ -108,6 +109,8 @@ final class DeviceDataManager {
             NotificationCenter.default.post(name: .PumpManagerChanged, object: self, userInfo: nil)
 
             rawPumpManager = pumpManager?.rawValue
+            UserDefaults.appGroup?.clearLegacyPumpManagerRawValue()
+
         }
     }
 
