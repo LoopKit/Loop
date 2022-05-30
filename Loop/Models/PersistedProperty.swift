@@ -14,10 +14,6 @@ import Foundation
 
     private let log = DiagnosticLog(category: "PersistedProperty")
 
-    private var keyResourceName: String {
-        return "LoopConfig." + key
-    }
-
     init(key: String, shared: Bool = false) {
         self.key = key
 
