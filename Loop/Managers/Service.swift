@@ -33,7 +33,9 @@ func ServiceFromRawValue(_ rawValue: [String: Any]) -> Service? {
 
 extension Service {
 
-    var rawValue: RawStateValue {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
         return [
             "serviceIdentifier": serviceIdentifier,
             "state": rawState
