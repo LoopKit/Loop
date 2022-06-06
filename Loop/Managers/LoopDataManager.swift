@@ -364,6 +364,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     }
 
     private func loopDidComplete(date: Date, dosingDecision: StoredDosingDecision, duration: TimeInterval) {
+        logger.default("Loop completed successfully.")
         lastLoopCompleted = date
         NotificationManager.clearLoopNotRunningNotifications()
         NotificationManager.scheduleLoopNotRunningNotifications()
@@ -374,7 +375,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     }
 
     private func loopDidError(date: Date, error: LoopError, dosingDecision: StoredDosingDecision, duration: TimeInterval) {
-        logger.error("%{public}@", String(describing: error))
+        logger.error("Loop did error: %{public}@", String(describing: error))
         lastLoopError = error
         analyticsServicesManager.loopDidError(error: error)
         dosingDecisionStore.storeDosingDecision(dosingDecision) {}
@@ -801,13 +802,12 @@ extension LoopDataManager {
 
             var (dosingDecision, error) = self.update(for: .loop)
 
-            guard error == nil, self.automaticDosingStatus.isClosedLoop == true else {
-                self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
-                return
+            if error == nil, self.automaticDosingStatus.isClosedLoop == true {
+                error = self.enactRecommendedAutomaticDose()
+            } else {
+                self.logger.default("Not adjusting dosing during open loop.")
             }
 
-            error = self.enactRecommendedAutomaticDose()
-            
             self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
         }
     }
@@ -1654,17 +1654,17 @@ extension LoopDataManager {
             }
 
             if let dosingRecommendation = dosingRecommendation {
-                self.logger.default("Current basal state: %{public}@", String(describing: basalDeliveryState))
                 self.logger.default("Recommending dose: %{public}@ at %{public}@", String(describing: dosingRecommendation), String(describing: startDate))
                 recommendedAutomaticDose = (recommendation: dosingRecommendation, date: startDate)
             } else {
+                self.logger.default("No dose recommended.")
                 recommendedAutomaticDose = nil
             }
             dosingDecision.automaticDoseRecommendation = recommendedAutomaticDose?.recommendation
         } catch let error {
             loopError = error as? LoopError ?? .unknownError(error)
             if let loopError = loopError {
-                logger.error("%{public}@", String(describing: loopError))
+                logger.error("Error attempting to predict glucose: %{public}@", String(describing: loopError))
                 dosingDecision.appendError(loopError)
             }
         }

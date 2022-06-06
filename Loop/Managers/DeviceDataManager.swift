@@ -1271,7 +1271,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             return
         }
 
-        log.default("LoopManager did recommend dose")
+        log.default("LoopManager did recommend dose: %{public}@", String(describing: automaticDose.recommendation))
         
         doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager) { pumpManagerError in
             completion(pumpManagerError.map { .pumpManagerError($0) })

@@ -228,7 +228,7 @@ extension Collection where Element: GlucoseValue {
     ///   - suspendThreshold: The glucose value below which only suspension is returned
     ///   - sensitivity: The insulin sensitivity at the time of delivery
     ///   - model: The insulin effect model
-    /// - Returns: A correction value in units, if one could be calculated
+    /// - Returns: A correction value in units, or nil if no correction needed
     private func insulinCorrection(
         to correctionRange: GlucoseRangeSchedule,
         at date: Date,
@@ -424,7 +424,7 @@ extension Collection where Element: GlucoseValue {
     ///   - isBasalRateScheduleOverrideActive: A flag describing whether a basal rate schedule override is in progress
     ///   - duration: The duration of the temporary basal
     ///   - continuationInterval: The duration of time before an ongoing temp basal should be continued with a new command
-    /// - Returns: The recommended dosing, if one could be computed
+    /// - Returns: The recommended dosing, or nil if no dose adjustment recommended
     func recommendedAutomaticDose(
         to correctionRange: GlucoseRangeSchedule,
         at date: Date = Date(),
