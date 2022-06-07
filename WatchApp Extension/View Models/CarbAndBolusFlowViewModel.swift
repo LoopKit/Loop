@@ -206,6 +206,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         guard !hasSentConfirmationMessage else {
             return
         }
+        self.hasSentConfirmationMessage = true
 
         let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry)
         do {
@@ -213,9 +214,8 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     if let error = error {
                         ExtensionDelegate.shared().present(error)
+                        self?.hasSentConfirmationMessage = false
                     } else {
-                        self?.hasSentConfirmationMessage = true
-
                         if bolus.carbEntry != nil {
                             if bolus.value == 0 {
                                 // Notify for a successful carb entry (sans bolus)
