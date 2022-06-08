@@ -406,6 +406,7 @@ struct BolusEntryView: View {
             }
         )
         .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
+        .disabled(viewModel.isInitiatingSaveOrBolus)
         .padding()
     }
 
