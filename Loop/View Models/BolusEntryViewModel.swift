@@ -100,7 +100,7 @@ final class BolusEntryViewModel: ObservableObject {
     @Published var recommendedBolus: HKQuantity?
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
     private var userChangedBolusAmount = false
-    private var isInitiatingSaveOrBolus = false
+    @Published var isInitiatingSaveOrBolus = false
 
     private var dosingDecision = BolusDosingDecision(for: .normalBolus)
 
@@ -337,6 +337,7 @@ final class BolusEntryViewModel: ObservableObject {
                 case .success:
                     self?.continueSaving(onSuccess: completion)
                 case .failure:
+                    self?.isInitiatingSaveOrBolus = false
                     break
                 }
             }
