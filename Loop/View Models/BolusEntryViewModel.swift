@@ -16,6 +16,7 @@ import LoopKit
 import LoopKitUI
 import LoopUI
 import SwiftUI
+import SwiftCharts
 
 protocol BolusEntryViewModelDelegate: AnyObject {
     
@@ -114,7 +115,11 @@ final class BolusEntryViewModel: ObservableObject {
         let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
                                                           yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
         predictedGlucoseChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayRangeWide
-        return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
+        return ChartsManager(
+            colors: ChartColorPalette.primary,
+            settings: ChartSettings.default,
+            charts: [predictedGlucoseChart],
+            traitCollection: UITraitCollection.current)
     }()
 
     // needed to detect change in display glucose unit when returning to the app
@@ -373,9 +378,11 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func saveCarbsAndDeliverBolus(onSuccess completion: @escaping () -> Void) {
+        let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
+
         guard let carbEntry = potentialCarbEntry else {
             dosingDecision.carbEntry = nil
-            deliverBolus(onSuccess: completion)
+            deliverBolus(bolusVolume, onSuccess: completion)
             return
         }
 
@@ -394,7 +401,7 @@ final class BolusEntryViewModel: ObservableObject {
                 switch result {
                 case .success(let storedCarbEntry):
                     self.dosingDecision.carbEntry = storedCarbEntry
-                    self.deliverBolus(onSuccess: completion)
+                    self.deliverBolus(bolusVolume, onSuccess: completion)
                 case .failure(let error):
                     self.isInitiatingSaveOrBolus = false
                     self.presentAlert(.carbEntryPersistenceFailure)
@@ -404,14 +411,13 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func deliverBolus(onSuccess completion: @escaping () -> Void) {
+    private func deliverBolus(_ amount: Double, onSuccess completion: @escaping () -> Void) {
         let now = self.now()
-        let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
 
-        dosingDecision.manualBolusRequested = bolusVolume
+        dosingDecision.manualBolusRequested = amount
         delegate?.storeManualBolusDosingDecision(dosingDecision, withDate: now)
 
-        guard bolusVolume > 0 else {
+        guard amount > 0 else {
             completion()
             return
         }
@@ -419,7 +425,7 @@ final class BolusEntryViewModel: ObservableObject {
         isInitiatingSaveOrBolus = true
         savedPreMealOverride = nil
         // TODO: should we pass along completion or not???
-        delegate?.enactBolus(units: bolusVolume, automatic: false, completion: { _ in })
+        delegate?.enactBolus(units: amount, automatic: false, completion: { _ in })
         completion()
     }
 
