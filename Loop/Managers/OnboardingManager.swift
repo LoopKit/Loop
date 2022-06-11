@@ -80,7 +80,7 @@ class OnboardingManager {
         dispatchPrecondition(condition: .onQueue(.main))
 
         guard !isComplete else {
-            complete()
+            authorizeAndComplete()
             return
         }
         guard let onboarding = nextActiveOnboarding else {
