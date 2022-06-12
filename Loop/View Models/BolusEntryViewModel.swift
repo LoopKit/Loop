@@ -28,7 +28,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
 
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
-    func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void)
+    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (_ error: Error?) -> Void)
     
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -419,7 +419,7 @@ final class BolusEntryViewModel: ObservableObject {
         isInitiatingSaveOrBolus = true
         savedPreMealOverride = nil
         // TODO: should we pass along completion or not???
-        delegate?.enactBolus(units: bolusVolume, automatic: false, completion: { _ in })
+        delegate?.enactBolus(units: bolusVolume, activationType: .activationTypeFor(recommendedAmount: recommendedBolus?.doubleValue(for: .internationalUnit()), bolusAmount: bolusVolume), completion: { _ in })
         completion()
     }
 

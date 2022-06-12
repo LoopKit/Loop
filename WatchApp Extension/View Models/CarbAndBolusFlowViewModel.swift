@@ -207,7 +207,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             return
         }
 
-        let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry)
+        let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry, activationType: .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus))
         do {
             try WCSession.default.sendBolusMessage(bolus) { [weak self] (error) in
                 DispatchQueue.main.async {

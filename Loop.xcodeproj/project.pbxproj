@@ -1991,6 +1991,7 @@
 				892A5D58222F0A27008961AB /* Debug.swift */,
 				1D9650C72523FBA100A1370B /* DeviceDataManager+BolusEntryViewModelDelegate.swift */,
 				B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */,
+				C18913B42524F24C007B0683 /* DeviceDataManager+SimpleBolusViewModelDelegate.swift */,
 				A9C62D832331700D00535612 /* DiagnosticLog+Subsystem.swift */,
 				89D1503D24B506EB00EDE253 /* Dictionary.swift */,
 				89CA2B2F226C0161004D9350 /* DirectoryObserver.swift */,
@@ -2016,7 +2017,6 @@
 				C13DA2AF24F6C7690098BB29 /* UIViewController.swift */,
 				430B29922041F5B200BA9F93 /* UserDefaults+Loop.swift */,
 				A9B607AF247F000F00792BE4 /* UserNotifications+Loop.swift */,
-				C18913B42524F24C007B0683 /* DeviceDataManager+SimpleBolusViewModelDelegate.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";

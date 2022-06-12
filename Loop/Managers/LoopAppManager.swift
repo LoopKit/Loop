@@ -425,11 +425,13 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
         case NotificationManager.Action.retryBolus.rawValue:
             if  let units = response.notification.request.content.userInfo[LoopNotificationUserInfoKey.bolusAmount.rawValue] as? Double,
                 let startDate = response.notification.request.content.userInfo[LoopNotificationUserInfoKey.bolusStartDate.rawValue] as? Date,
+                let activationTypeRawValue = response.notification.request.content.userInfo[LoopNotificationUserInfoKey.bolusActivationType.rawValue] as? BolusActivationType.RawValue,
+                let activationType = BolusActivationType(rawValue: activationTypeRawValue),
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
                 deviceDataManager?.analyticsServicesManager.didRetryBolus()
                 
-                deviceDataManager?.enactBolus(units: units, automatic: false) { (_) in
+                deviceDataManager?.enactBolus(units: units, activationType: activationType) { (_) in
                     DispatchQueue.main.async {
                         completionHandler()
                     }

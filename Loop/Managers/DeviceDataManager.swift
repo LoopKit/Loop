@@ -674,14 +674,14 @@ private extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
+    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
             return
         }
 
         self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true), completion: nil)
-        pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
+        pumpManager.enactBolus(units: units, activationType: activationType) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
                 switch error {
@@ -690,8 +690,8 @@ extension DeviceDataManager {
                     break
                 default:
                     // Do not generate notifications for automatic boluses that fail.
-                    if !automatic {
-                        NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
+                    if !activationType.isAutomatic {
+                        NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), activationType: activationType)
                     }
                 }
                 
