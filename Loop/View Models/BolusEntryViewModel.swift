@@ -29,7 +29,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
 
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
-    func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void)
+    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (_ error: Error?) -> Void)
     
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -62,6 +62,7 @@ final class BolusEntryViewModel: ObservableObject {
         case manualGlucoseEntryOutOfAcceptableRange
         case manualGlucoseEntryPersistenceFailure
         case glucoseNoLongerStale
+        case forecastInfo
     }
 
     enum Notice: Equatable {
@@ -379,10 +380,11 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func saveCarbsAndDeliverBolus(onSuccess completion: @escaping () -> Void) {
         let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
+        let activationType = BolusActivationType.activationTypeFor(recommendedAmount: recommendedBolus?.doubleValue(for: .internationalUnit()), bolusAmount: bolusVolume)
 
         guard let carbEntry = potentialCarbEntry else {
             dosingDecision.carbEntry = nil
-            deliverBolus(bolusVolume, onSuccess: completion)
+            deliverBolus(bolusVolume, activationType: activationType, onSuccess: completion)
             return
         }
 
@@ -401,7 +403,7 @@ final class BolusEntryViewModel: ObservableObject {
                 switch result {
                 case .success(let storedCarbEntry):
                     self.dosingDecision.carbEntry = storedCarbEntry
-                    self.deliverBolus(bolusVolume, onSuccess: completion)
+                    self.deliverBolus(bolusVolume, activationType: activationType, onSuccess: completion)
                 case .failure(let error):
                     self.isInitiatingSaveOrBolus = false
                     self.presentAlert(.carbEntryPersistenceFailure)
@@ -411,7 +413,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func deliverBolus(_ amount: Double, onSuccess completion: @escaping () -> Void) {
+    private func deliverBolus(_ amount: Double, activationType: BolusActivationType, onSuccess completion: @escaping () -> Void) {
         let now = self.now()
 
         dosingDecision.manualBolusRequested = amount
@@ -424,8 +426,8 @@ final class BolusEntryViewModel: ObservableObject {
 
         isInitiatingSaveOrBolus = true
         savedPreMealOverride = nil
-        // TODO: should we pass along completion or not???
-        delegate?.enactBolus(units: amount, automatic: false, completion: { _ in })
+        
+        delegate?.enactBolus(units: amount, activationType: activationType, completion: { _ in })
         completion()
     }
 

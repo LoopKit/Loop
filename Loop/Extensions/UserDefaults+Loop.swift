@@ -14,6 +14,7 @@ extension UserDefaults {
         case legacyPumpManagerState = "com.loopkit.Loop.PumpManagerState"
         case legacyCGMManagerState = "com.loopkit.Loop.CGMManagerState"
         case legacyServicesState = "com.loopkit.Loop.ServicesState"
+        case loopNotRunningNotifications = "com.loopkit.Loop.loopNotRunningNotifications"
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {
@@ -47,4 +48,22 @@ extension UserDefaults {
     }
 
 
+    var loopNotRunningNotifications: [StoredLoopNotRunningNotification] {
+        get {
+            let decoder = JSONDecoder()
+            guard let data = object(forKey: Key.loopNotRunningNotifications.rawValue) as? Data else {
+                return []
+            }
+            return (try? decoder.decode([StoredLoopNotRunningNotification].self, from: data)) ?? []
+        }
+        set {
+            do {
+                let encoder = JSONEncoder()
+                let data = try encoder.encode(newValue)
+                set(data, forKey: Key.loopNotRunningNotifications.rawValue)
+            } catch {
+                assertionFailure("Unable to encode Loop not running notification")
+            }
+        }
+    }
 }

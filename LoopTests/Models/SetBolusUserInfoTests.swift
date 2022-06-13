@@ -20,6 +20,8 @@ class SetBolusUserInfoTests: XCTestCase {
                                          startDate: dateFormatter.date(from: "2020-05-14T22:00:00Z")!,
                                          foodType: "Pizza",
                                          absorptionTime: .hours(5))
+    private var activationType = BolusActivationType.manualRecommendationAccepted
+
     private lazy var rawValue: SetBolusUserInfo.RawValue = {
         return [
             "v": 1,
@@ -28,15 +30,17 @@ class SetBolusUserInfoTests: XCTestCase {
             "sd": startDate,
             "cd": contextDate,
             "ce": carbEntry.rawValue,
+            "at": activationType.rawValue,
         ]
     }()
 
     func testDefaultInitializer() {
-        let info = SetBolusUserInfo(value: value, startDate: startDate, contextDate: contextDate, carbEntry: carbEntry)
+        let info = SetBolusUserInfo(value: value, startDate: startDate, contextDate: contextDate, carbEntry: carbEntry, activationType: activationType)
         XCTAssertEqual(info.value, value)
         XCTAssertEqual(info.startDate, startDate)
         XCTAssertEqual(info.contextDate, contextDate)
         XCTAssertEqual(info.carbEntry, carbEntry)
+        XCTAssertEqual(info.activationType, activationType)
     }
 
     func testRawValueInitializer() {
@@ -84,14 +88,15 @@ class SetBolusUserInfoTests: XCTestCase {
     }
 
     func testRawValue() {
-        let info = SetBolusUserInfo(value: value, startDate: startDate, contextDate: contextDate, carbEntry: carbEntry)
+        let info = SetBolusUserInfo(value: value, startDate: startDate, contextDate: contextDate, carbEntry: carbEntry, activationType: activationType)
         let rawValue = info.rawValue
-        XCTAssertEqual(rawValue.count, 6)
+        XCTAssertEqual(rawValue.count, 7)
         XCTAssertEqual(rawValue["v"] as? Int, 1)
         XCTAssertEqual(rawValue["name"] as? String, "SetBolusUserInfo")
         XCTAssertEqual(rawValue["bv"] as? Double, value)
         XCTAssertEqual(rawValue["sd"] as? Date, startDate)
         XCTAssertEqual(rawValue["cd"] as? Date, contextDate)
+        XCTAssertEqual(rawValue["at"] as? BolusActivationType.RawValue, activationType.rawValue)
         let carbEntryRawValue = rawValue["ce"] as? NewCarbEntry.RawValue
         XCTAssertEqual(carbEntryRawValue?["date"] as? Date, carbEntry.date)
         XCTAssertEqual(carbEntryRawValue?["grams"] as? Double, carbEntry.quantity.doubleValue(for: .gram()))
