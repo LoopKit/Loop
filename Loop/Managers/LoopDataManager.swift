@@ -366,8 +366,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     private func loopDidComplete(date: Date, dosingDecision: StoredDosingDecision, duration: TimeInterval) {
         logger.default("Loop completed successfully.")
         lastLoopCompleted = date
-        NotificationManager.clearLoopNotRunningNotifications()
-        NotificationManager.scheduleLoopNotRunningNotifications()
         analyticsServicesManager.loopDidSucceed(duration)
         dosingDecisionStore.storeDosingDecision(dosingDecision) {}
 

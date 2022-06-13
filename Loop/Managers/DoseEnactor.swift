@@ -45,7 +45,7 @@ class DoseEnactor {
             if let bolusUnits = recommendation.bolusUnits, bolusUnits > 0 {
                 self.log.default("Enacting recommended bolus dose")
                 doseDispatchGroup.enter()
-                pumpManager.enactBolus(units: bolusUnits, automatic: true) { (error) in
+                pumpManager.enactBolus(units: bolusUnits, activationType: .automatic) { (error) in
                     if let error = error {
                         bolusError = error
                     } else {

@@ -23,7 +23,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     var addedGlucose: [NewGlucoseSample] = []
     var addedCarbEntry: NewCarbEntry?
     var storedBolusDecision: BolusDosingDecision?
-    var enactedBolus: (units: Double, automatic: Bool)?
+    var enactedBolus: (units: Double, activationType: BolusActivationType)?
     var currentIOB: InsulinValue = SimpleBolusViewModelTests.noIOB
     var currentRecommendation: Double = 0
     var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
@@ -308,8 +308,8 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         completion(.success(storedCarbEntry))
     }
 
-    func enactBolus(units: Double, automatic: Bool) {
-        enactedBolus = (units: units, automatic: automatic)
+    func enactBolus(units: Double, activationType: BolusActivationType) {
+        enactedBolus = (units: units, activationType: activationType)
     }
     
     func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {

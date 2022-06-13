@@ -385,7 +385,7 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             completion(.success(storedCarbEntry))
         }
         
-        func enactBolus(units: Double, automatic: Bool) {
+        func enactBolus(units: Double, activationType: BolusActivationType) {
         }
         
         func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {

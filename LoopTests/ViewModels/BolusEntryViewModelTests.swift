@@ -398,7 +398,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
     // MARK: save data and bolus delivery
 
-    func testDeliverBolusOnly() throws {
+    func testDeliverBolusOnlyRecommendationChanged() throws {
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         var success = false
         bolusEntryViewModel.saveAndDeliver {
@@ -409,7 +409,7 @@ class BolusEntryViewModelTests: XCTestCase {
         authenticateOverrideCompletion(.success(()))
         
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
+        XCTAssertEqual(.manualRecommendationChanged, delegate.enactedBolusActivationType)
         XCTAssertTrue(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
@@ -418,7 +418,51 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.manualBolusRequested, 1.0)
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
     }
-    
+
+    func testDeliverBolusOnlyRecommendationAccepted() throws {
+        bolusEntryViewModel.recommendedBolus = Self.exampleBolusQuantity
+        bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
+        var success = false
+        bolusEntryViewModel.saveAndDeliver {
+            success = true
+        }
+        // Pretend authentication succeeded
+        let authenticateOverrideCompletion = try XCTUnwrap(self.authenticateOverrideCompletion)
+        authenticateOverrideCompletion(.success(()))
+
+        XCTAssertEqual(1.0, delegate.enactedBolusUnits)
+        XCTAssertEqual(.manualRecommendationAccepted, delegate.enactedBolusActivationType)
+        XCTAssertTrue(success)
+        XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
+        XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
+        XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.reason, .normalBolus)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.manualBolusRequested, 1.0)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
+    }
+
+    func testDeliverBolusOnlyNoRecommendation() throws {
+        bolusEntryViewModel.recommendedBolus = nil
+        bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
+        var success = false
+        bolusEntryViewModel.saveAndDeliver {
+            success = true
+        }
+        // Pretend authentication succeeded
+        let authenticateOverrideCompletion = try XCTUnwrap(self.authenticateOverrideCompletion)
+        authenticateOverrideCompletion(.success(()))
+
+        XCTAssertEqual(1.0, delegate.enactedBolusUnits)
+        XCTAssertEqual(.manualNoRecommendation, delegate.enactedBolusActivationType)
+        XCTAssertTrue(success)
+        XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
+        XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
+        XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.reason, .normalBolus)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.manualBolusRequested, 1.0)
+        XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
+    }
+
     struct MockError: Error {}
     func testDeliverBolusAuthFail() throws {
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
@@ -431,7 +475,7 @@ class BolusEntryViewModelTests: XCTestCase {
         authenticateOverrideCompletion(.failure(MockError()))
         
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusAutomatic)
+        XCTAssertNil(delegate.enactedBolusActivationType)
         XCTAssertFalse(success)
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
@@ -473,7 +517,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.manualBolusRequested, 0.0)
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusAutomatic)
+        XCTAssertNil(delegate.enactedBolusActivationType)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -498,7 +542,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertNil(delegate.enactedBolusUnits)
-        XCTAssertNil(delegate.enactedBolusAutomatic)
+        XCTAssertNil(delegate.enactedBolusActivationType)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -528,7 +572,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.manualBolusRequested, 1.0)
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
+        XCTAssertEqual(.manualRecommendationChanged, delegate.enactedBolusActivationType)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -560,7 +604,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.manualBolusRequested, 1.0)
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
+        XCTAssertEqual(.manualRecommendationChanged, delegate.enactedBolusActivationType)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -631,7 +675,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.manualBolusRequested, 1.0)
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
-        XCTAssertEqual(false, delegate.enactedBolusAutomatic)
+        XCTAssertEqual(.manualRecommendationChanged, delegate.enactedBolusActivationType)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
     
@@ -904,10 +948,10 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     }
 
     var enactedBolusUnits: Double?
-    var enactedBolusAutomatic: Bool?
-    func enactBolus(units: Double, automatic: Bool, completion: @escaping (Error?) -> Void) {
+    var enactedBolusActivationType: BolusActivationType?
+    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (Error?) -> Void) {
         enactedBolusUnits = units
-        enactedBolusAutomatic = automatic
+        enactedBolusActivationType = activationType
     }
     
     var getGlucoseSamplesResponse: [StoredGlucoseSample] = []
