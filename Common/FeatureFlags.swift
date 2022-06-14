@@ -132,7 +132,6 @@ struct FeatureFlagConfiguration: Decodable {
         
         // Swift compiler config is inverse, since the default state is enabled.
         #if OBSERVE_HEALTH_KIT_SAMPLES_FROM_OTHER_APPS_DISABLED
-        self.observeHealthKitCarbSamplesFromOtherApps = false
         self.observeHealthKitDoseSamplesFromOtherApps = false
         self.observeHealthKitGlucoseSamplesFromOtherApps = false
         #else
