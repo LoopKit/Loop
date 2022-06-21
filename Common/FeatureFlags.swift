@@ -232,9 +232,7 @@ extension FeatureFlagConfiguration {
         #if ALLOW_DEBUG_FEATURES_ENABLED
         return true
         #else
-        if debugEnabled {
-            return true
-        } else if UserDefaults.appGroup?.allowDebugFeatures ?? false {
+        if UserDefaults.appGroup?.allowDebugFeatures ?? false {
             return true
         } else {
             return false
@@ -246,9 +244,7 @@ extension FeatureFlagConfiguration {
         #if ALLOW_SIMULATORS_ENABLED
         return true
         #else
-        if debugEnabled {
-            return true
-        } else if UserDefaults.appGroup?.allowSimulators ?? false {
+        if UserDefaults.appGroup?.allowSimulators ?? false {
             return true
         } else {
             return false
