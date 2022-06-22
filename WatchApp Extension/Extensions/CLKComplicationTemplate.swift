@@ -99,7 +99,7 @@ extension CLKComplicationTemplate {
         if let loopLastRunDate = loopLastRunDate {
             timeText = CLKRelativeDateTextProvider(date: loopLastRunDate, style: .natural, units: [.minute, .hour, .day])
         } else {
-            timeText = CLKTextProvider()
+            timeText = CLKTextProvider(format: "")
         }
         timeText.tintColor = tintColor
 
@@ -109,29 +109,17 @@ extension CLKComplicationTemplate {
 
         switch family {
         case .modularSmall:
-            let template = CLKComplicationTemplateModularSmallStackText()
-            template.line1TextProvider = glucoseAndTrendText
-            template.line2TextProvider = timeText
+            let template = CLKComplicationTemplateModularSmallStackText(line1TextProvider: glucoseAndTrendText, line2TextProvider: timeText)
             template.highlightLine2 = true
             return template
         case .modularLarge:
-            let template = CLKComplicationTemplateModularLargeTallBody()
-            template.bodyTextProvider = glucoseAndTrendText
-            template.headerTextProvider = timeText
-            return template
+            return CLKComplicationTemplateModularLargeTallBody(headerTextProvider: timeText, bodyTextProvider: glucoseAndTrendText)
         case .circularSmall:
-            let template = CLKComplicationTemplateCircularSmallSimpleText()
-            template.textProvider = CLKSimpleTextProvider(text: glucoseString)
-            return template
+            return CLKComplicationTemplateCircularSmallSimpleText(textProvider: CLKSimpleTextProvider(text: glucoseString))
         case .extraLarge:
-            let template = CLKComplicationTemplateExtraLargeStackText()
-            template.line1TextProvider = glucoseAndTrendText
-            template.line2TextProvider = timeText
-            return template
+            return CLKComplicationTemplateExtraLargeStackText(line1TextProvider: glucoseAndTrendText, line2TextProvider: timeText)
         case .utilitarianSmall, .utilitarianSmallFlat:
-            let template = CLKComplicationTemplateUtilitarianSmallFlat()
-            template.textProvider = CLKSimpleTextProvider(text: glucoseString)
-            return template
+            return CLKComplicationTemplateUtilitarianSmallFlat(textProvider: CLKSimpleTextProvider(text: glucoseString))
         case .utilitarianLarge:
             var eventualGlucoseText = ""
             if  let eventualGlucose = eventualGlucose,
@@ -140,38 +128,33 @@ extension CLKComplicationTemplate {
                 eventualGlucoseText = eventualGlucoseString
             }
 
-            let template = CLKComplicationTemplateUtilitarianLargeFlat()
             let format = NSLocalizedString("UtilitarianLargeFlat", tableName: "ckcomplication", comment: "Utilitarian large flat format string (1: Glucose & Trend symbol) (2: Eventual Glucose) (3: Time)")
 
-            template.textProvider = CLKSimpleTextProvider(text: String(format: format, arguments: [
+            return CLKComplicationTemplateUtilitarianLargeFlat(
+                textProvider: CLKSimpleTextProvider(text: String(format: format, arguments: [
                     glucoseAndTrend,
                     eventualGlucoseText,
                     timeFormatter.string(from: glucoseDate)
                 ]
-            ))
-            return template
+            )))
         case .graphicCorner:
             if #available(watchOSApplicationExtension 5.0, *) {
-                let template = CLKComplicationTemplateGraphicCornerStackText()
-                template.innerTextProvider = timeText
-                template.outerTextProvider = glucoseAndTrendText
-                return template
+                return CLKComplicationTemplateGraphicCornerStackText(innerTextProvider: timeText, outerTextProvider: glucoseAndTrendText)
             } else {
                 return nil
             }
         case .graphicCircular:
             if #available(watchOSApplicationExtension 5.0, *) {
-                let template = CLKComplicationTemplateGraphicCircularOpenGaugeSimpleText()
-                template.centerTextProvider = CLKSimpleTextProvider(text: glucoseString)
-                template.bottomTextProvider = CLKSimpleTextProvider(text: trendString)
-                template.gaugeProvider = CLKSimpleGaugeProvider(style: .fill, gaugeColor: tintColor, fillFraction: 1)
-                return template
+                return CLKComplicationTemplateGraphicCircularOpenGaugeSimpleText(
+                    gaugeProvider: CLKSimpleGaugeProvider(style: .fill, gaugeColor: tintColor, fillFraction: 1),
+                    bottomTextProvider: CLKSimpleTextProvider(text: trendString),
+                    centerTextProvider: CLKSimpleTextProvider(text: glucoseString)
+                )
             } else {
                 return nil
             }
         case .graphicBezel:
             if #available(watchOSApplicationExtension 5.0, *) {
-                let template = CLKComplicationTemplateGraphicBezelCircularText()
                 guard
                     let circularTemplate = templateForFamily(.graphicCircular,
                                                              glucose: glucose,
@@ -187,21 +170,21 @@ extension CLKComplicationTemplate {
                 else {
                     fatalError("\(#function) invoked with .graphicCircular must return a subclass of CLKComplicationTemplateGraphicCircular")
                 }
-                template.circularTemplate = circularTemplate
-                template.textProvider = timeText
-                return template
+                return CLKComplicationTemplateGraphicBezelCircularText(circularTemplate: circularTemplate, textProvider: timeText)
             } else {
                 return nil
             }
         case .graphicRectangular:
             if #available(watchOSApplicationExtension 5.0, *) {
-                let template = CLKComplicationTemplateGraphicRectangularLargeImage()
-                template.imageProvider = CLKFullColorImageProvider(fullColorImage: makeChart() ?? UIImage())
-                template.textProvider = CLKTextProvider(byJoining: [glucoseAndTrendText, timeText], separator: " ")
-                return template
+                return CLKComplicationTemplateGraphicRectangularLargeImage(
+                    textProvider: CLKTextProvider(byJoining: [glucoseAndTrendText, timeText], separator: " "),
+                    imageProvider: CLKFullColorImageProvider(fullColorImage: makeChart() ?? UIImage())
+                )
             } else {
                 return nil
             }
+        case .graphicExtraLarge:
+            return nil
         @unknown default:
             return nil
         }

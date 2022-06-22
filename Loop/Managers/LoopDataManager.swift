@@ -31,7 +31,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
     private let glucoseStore: GlucoseStoreProtocol
 
-    let settingsStore: SettingsStoreProtocol
+    let latestStoredSettingsProvider: LatestStoredSettingsProvider
 
     weak var delegate: LoopDataManagerDelegate?
 
@@ -66,14 +66,13 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup?.insulinSensitivitySchedule,
         settings: LoopSettings = UserDefaults.appGroup?.loopSettings ?? LoopSettings(),
         overrideHistory: TemporaryScheduleOverrideHistory,
-        lastPumpEventsReconciliation: Date?,
         analyticsServicesManager: AnalyticsServicesManager,
         localCacheDuration: TimeInterval = .days(1),
         doseStore: DoseStoreProtocol,
         glucoseStore: GlucoseStoreProtocol,
         carbStore: CarbStoreProtocol,
         dosingDecisionStore: DosingDecisionStoreProtocol,
-        settingsStore: SettingsStoreProtocol,
+        latestStoredSettingsProvider: LatestStoredSettingsProvider,
         now: @escaping () -> Date = { Date() },
         alertIssuer: AlertIssuer? = nil,
         pumpInsulinType: InsulinType?,
@@ -99,7 +98,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
         self.now = now
 
-        self.settingsStore = settingsStore
+        self.latestStoredSettingsProvider = latestStoredSettingsProvider
         
         self.lockedPumpInsulinType = Locked(pumpInsulinType)
 
@@ -127,8 +126,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
             // Remove the override from UserDefaults so we don't set it multiple times
             appGroup.intentExtensionOverrideToSet = nil
         })
-
-        overrideHistory.delegate = self
 
         // Required for device settings in stored dosing decisions
         UIDevice.current.isBatteryMonitoringEnabled = true
@@ -367,6 +364,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     }
 
     private func loopDidComplete(date: Date, dosingDecision: StoredDosingDecision, duration: TimeInterval) {
+        logger.default("Loop completed successfully.")
         lastLoopCompleted = date
         analyticsServicesManager.loopDidSucceed(duration)
         dosingDecisionStore.storeDosingDecision(dosingDecision) {}
@@ -375,9 +373,9 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     }
 
     private func loopDidError(date: Date, error: LoopError, dosingDecision: StoredDosingDecision, duration: TimeInterval) {
-        logger.error("%{public}@", String(describing: error))
+        logger.error("Loop did error: %{public}@", String(describing: error))
         lastLoopError = error
-        analyticsServicesManager.loopDidError()
+        analyticsServicesManager.loopDidError(error: error)
         dosingDecisionStore.storeDosingDecision(dosingDecision) {}
     }
 }
@@ -390,14 +388,6 @@ extension LoopDataManager: PersistenceControllerDelegate {
 
     func persistenceControllerDidSave(_ controller: PersistenceController, error: PersistenceController.PersistenceControllerError?) {
         endBackgroundTask()
-    }
-}
-
-
-// MARK: Override history tracking
-extension LoopDataManager: TemporaryScheduleOverrideHistoryDelegate {
-    func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
-        UserDefaults.appGroup?.overrideHistory = history
     }
 }
 
@@ -574,9 +564,9 @@ extension LoopDataManager {
         case maximumBasalRateChanged
     }
     
-    /// Cancel the active temp basal
+    /// Cancel the active temp basal if it was automatically issued
     private func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) {
-        guard case .tempBasal(_) = basalDeliveryState else { return }
+        guard case .tempBasal(let dose) = basalDeliveryState, (dose.automatic ?? true) else { return }
 
         dataAccessQueue.async {
             self.cancelActiveTempBasal(for: reason, completion: nil)
@@ -590,22 +580,23 @@ extension LoopDataManager {
         recommendedAutomaticDose = (recommendation: recommendation, date: now())
 
         var dosingDecision = StoredDosingDecision(reason: reason.rawValue)
-        dosingDecision.settings = StoredDosingDecision.Settings(settingsStore.latestSettings)
+        dosingDecision.settings = StoredDosingDecision.Settings(latestStoredSettingsProvider.latestSettings)
         dosingDecision.controllerStatus = UIDevice.current.controllerStatus
+        dosingDecision.automaticDoseRecommendation = recommendation
+
+        let error = enactRecommendedAutomaticDose()
+
         dosingDecision.pumpManagerStatus = delegate?.pumpManagerStatus
         dosingDecision.cgmManagerStatus = delegate?.cgmManagerStatus
         dosingDecision.lastReservoirValue = StoredDosingDecision.LastReservoirValue(doseStore.lastReservoirValue)
-        dosingDecision.automaticDoseRecommendation = recommendation
 
-        enactRecommendedAutomaticDose { error in
-            if let error = error {
-                dosingDecision.appendError(error)
-            }
-            self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
-
-            self.notify(forChange: .tempBasal)
-            completion?(error)
+        if let error = error {
+            dosingDecision.appendError(error)
         }
+        self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
+
+        self.notify(forChange: .tempBasal)
+        completion?(error)
     }
 
 
@@ -698,11 +689,12 @@ extension LoopDataManager {
     ///   - error: An error explaining why the events could not be saved.
     func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
+            completion(error)
+            
             self.dataAccessQueue.async {
                 if error == nil {
                     self.insulinEffect = nil
                 }
-                completion(error)
             }
         }
     }
@@ -764,7 +756,7 @@ extension LoopDataManager {
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
         let dosingDecision = StoredDosingDecision(date: date,
                                                   reason: bolusDosingDecision.reason.rawValue,
-                                                  settings: StoredDosingDecision.Settings(settingsStore.latestSettings),
+                                                  settings: StoredDosingDecision.Settings(latestStoredSettingsProvider.latestSettings),
                                                   scheduleOverride: bolusDosingDecision.scheduleOverride,
                                                   controllerStatus: UIDevice.current.controllerStatus,
                                                   pumpManagerStatus: delegate?.pumpManagerStatus,
@@ -783,40 +775,6 @@ extension LoopDataManager {
         dosingDecisionStore.storeDosingDecision(dosingDecision) {}
     }
 
-    func storeSettings(notificationSettings: NotificationSettings? = nil,
-                       controllerDevice: StoredSettings.ControllerDevice? = nil,
-                       cgmDevice: HKDevice? = nil,
-                       pumpDevice: HKDevice? = nil)
-    {
-        guard let appGroup = UserDefaults.appGroup, let loopSettings = appGroup.loopSettings else {
-            return
-        }
-
-        let settings = StoredSettings(date: now(),
-                                      dosingEnabled: loopSettings.dosingEnabled,
-                                      glucoseTargetRangeSchedule: loopSettings.glucoseTargetRangeSchedule,
-                                      preMealTargetRange: loopSettings.preMealTargetRange,
-                                      workoutTargetRange: loopSettings.legacyWorkoutTargetRange,
-                                      overridePresets: loopSettings.overridePresets,
-                                      scheduleOverride: loopSettings.scheduleOverride,
-                                      preMealOverride: loopSettings.preMealOverride,
-                                      maximumBasalRatePerHour: loopSettings.maximumBasalRatePerHour,
-                                      maximumBolus: loopSettings.maximumBolus,
-                                      suspendThreshold: loopSettings.suspendThreshold,
-                                      deviceToken: loopSettings.deviceToken?.hexadecimalString,
-                                      insulinType: delegate?.pumpManagerStatus?.insulinType,
-                                      defaultRapidActingModel: appGroup.defaultRapidActingModel.map(StoredInsulinModel.init),
-                                      basalRateSchedule: appGroup.basalRateSchedule,
-                                      insulinSensitivitySchedule: appGroup.insulinSensitivitySchedule,
-                                      carbRatioSchedule: appGroup.carbRatioSchedule,
-                                      notificationSettings: notificationSettings ?? settingsStore.latestSettings?.notificationSettings,
-                                      controllerDevice: controllerDevice ?? UIDevice.current.controllerDevice,
-                                      cgmDevice: cgmDevice ?? delegate?.cgmManagerStatus?.device,
-                                      pumpDevice: pumpDevice ?? delegate?.pumpManagerStatus?.device,
-                                      bloodGlucoseUnit: loopSettings.glucoseUnit)
-        settingsStore.storeSettings(settings) {}
-    }
-
     // Actions
 
     /// Runs the "loop"
@@ -826,24 +784,29 @@ extension LoopDataManager {
     func loop() {
         
         dataAccessQueue.async {
+            
+            // Ensure Loop does not happen more than once every 4.5 minutes; this is important for correct usage of automatic bolus
+            // partial application factor
+            if let lastLoopCompleted = self.lastLoopCompleted, Date().timeIntervalSince(lastLoopCompleted) < TimeInterval(minutes: 4.5) {
+                self.logger.default("Skipping loop() attempt as last loop completed at %{public}@", String(describing: lastLoopCompleted))
+                return
+            }
+
             self.logger.default("Loop running")
             NotificationCenter.default.post(name: .LoopRunning, object: self)
-
-            self.storeUpdatedSettings()
 
             self.lastLoopError = nil
             let startDate = self.now()
 
-            let (dosingDecision, error) = self.update(for: .loop)
+            var (dosingDecision, error) = self.update(for: .loop)
 
-            guard error == nil, self.automaticDosingStatus.isClosedLoop == true else {
-                self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
-                return
+            if error == nil, self.automaticDosingStatus.isClosedLoop == true {
+                error = self.enactRecommendedAutomaticDose()
+            } else {
+                self.logger.default("Not adjusting dosing during open loop.")
             }
 
-            self.enactRecommendedAutomaticDose { error in
-                self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
-            }
+            self.finishLoop(startDate: startDate, dosingDecision: dosingDecision, error: error)
         }
     }
 
@@ -861,19 +824,51 @@ extension LoopDataManager {
         notify(forChange: .tempBasal)
     }
 
+    // This is primarily for external clients displaying a bolus recommendation and forecast
+    // Should be called after any significant change to forecast input data.
+    private func updateRecommendedManualBolus() {
+        dataAccessQueue.async {
+            var (dosingDecision, updateError) = self.update(for: .updateRecommendedManualBolus)
+
+            if let error = updateError {
+                self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
+            } else {
+                do {
+                    if let predictedGlucoseIncludingPendingInsulin = self.predictedGlucoseIncludingPendingInsulin,
+                       let manualBolusRecommendation = try self.recommendManualBolus(forPrediction: predictedGlucoseIncludingPendingInsulin, consideringPotentialCarbEntry: nil)
+                    {
+                        dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualBolusRecommendation, date: Date())
+                        self.logger.debug("Manual bolus rec = %{public}@", String(describing: dosingDecision.manualBolusRecommendation))
+                        self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
+                    }
+                } catch {
+                    self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
+                }
+            }
+        }
+    }
+
     fileprivate enum UpdateReason: String {
         case loop
         case getLoopState
+        case updateRecommendedManualBolus
     }
 
     fileprivate func update(for reason: UpdateReason) -> (StoredDosingDecision, LoopError?) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         var dosingDecision = StoredDosingDecision(reason: reason.rawValue)
-        dosingDecision.settings = StoredDosingDecision.Settings(settingsStore.latestSettings)
-        dosingDecision.scheduleOverride = settingsStore.latestSettings?.scheduleOverride
+        let latestSettings = latestStoredSettingsProvider.latestSettings
+        dosingDecision.settings = StoredDosingDecision.Settings(latestSettings)
+        dosingDecision.scheduleOverride = latestSettings?.scheduleOverride
         dosingDecision.controllerStatus = UIDevice.current.controllerStatus
         dosingDecision.pumpManagerStatus = delegate?.pumpManagerStatus
+        if let pumpStatusHighlight = delegate?.pumpStatusHighlight {
+            dosingDecision.pumpStatusHighlight = StoredDosingDecision.StoredDeviceHighlight(
+                localizedMessage: pumpStatusHighlight.localizedMessage,
+                imageName: pumpStatusHighlight.imageName,
+                state: pumpStatusHighlight.state)
+        }
         dosingDecision.cgmManagerStatus = delegate?.cgmManagerStatus
         dosingDecision.lastReservoirValue = StoredDosingDecision.LastReservoirValue(doseStore.lastReservoirValue)
 
@@ -911,7 +906,8 @@ extension LoopDataManager {
         let retrospectiveStart = lastGlucoseDate.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
 
         let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
-        let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+        let nextCounteractionEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+        let insulinEffectStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-5))
 
         if glucoseMomentumEffect == nil {
             updateGroup.enter()
@@ -931,7 +927,7 @@ extension LoopDataManager {
         if insulinEffect == nil {
             self.logger.debug("Recomputing insulin effects")
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: nextEffectDate, end: nil, basalDosingEnd: now()) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: now()) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("%{public}@", String(describing: error))
@@ -947,7 +943,7 @@ extension LoopDataManager {
 
         if insulinEffectIncludingPendingInsulin == nil {
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: nextEffectDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects: %{public}@", String(describing: error))
@@ -963,10 +959,10 @@ extension LoopDataManager {
 
         _ = updateGroup.wait(timeout: .distantFuture)
 
-        if nextEffectDate < lastGlucoseDate, let insulinEffect = insulinEffect {
+        if nextCounteractionEffectDate < lastGlucoseDate, let insulinEffect = insulinEffect {
             updateGroup.enter()
-            self.logger.debug("Fetching counteraction effects after %{public}@", String(describing: nextEffectDate))
-            glucoseStore.getCounteractionEffects(start: nextEffectDate, end: nil, to: insulinEffect) { (result) in
+            self.logger.debug("Fetching counteraction effects after %{public}@", String(describing: nextCounteractionEffectDate))
+            glucoseStore.getCounteractionEffects(start: nextCounteractionEffectDate, end: nil, to: insulinEffect) { (result) in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Failure getting counteraction effects: %{public}@", String(describing: error))
@@ -1074,16 +1070,14 @@ extension LoopDataManager {
     }
 
     private func notify(forChange context: LoopUpdateContext) {
-        if case .preferences = context {
-            storeSettings()
-        }
-
         NotificationCenter.default.post(name: .LoopDataUpdated,
             object: self,
             userInfo: [
                 type(of: self).LoopUpdateContextKey: context.rawValue
             ]
         )
+
+        updateRecommendedManualBolus()
     }
 
     /// Computes amount of insulin from boluses that have been issued and not confirmed, and
@@ -1658,18 +1652,17 @@ extension LoopDataManager {
             }
 
             if let dosingRecommendation = dosingRecommendation {
-                self.logger.default("Current basal state: %{public}@", String(describing: basalDeliveryState))
                 self.logger.default("Recommending dose: %{public}@ at %{public}@", String(describing: dosingRecommendation), String(describing: startDate))
                 recommendedAutomaticDose = (recommendation: dosingRecommendation, date: startDate)
             } else {
+                self.logger.default("No dose recommended.")
                 recommendedAutomaticDose = nil
             }
-
             dosingDecision.automaticDoseRecommendation = recommendedAutomaticDose?.recommendation
         } catch let error {
             loopError = error as? LoopError ?? .unknownError(error)
             if let loopError = loopError {
-                logger.error("%{public}@", String(describing: loopError))
+                logger.error("Error attempting to predict glucose: %{public}@", String(describing: loopError))
                 dosingDecision.appendError(loopError)
             }
         }
@@ -1678,32 +1671,36 @@ extension LoopDataManager {
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
-    private func enactRecommendedAutomaticDose(_ completion: @escaping (_ error: LoopError?) -> Void) {
+    private func enactRecommendedAutomaticDose() -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let recommendedDose = self.recommendedAutomaticDose else {
-            completion(nil)
-            return
+            return nil
         }
 
         guard abs(recommendedDose.date.timeIntervalSince(now())) < TimeInterval(minutes: 5) else {
-            completion(LoopError.recommendationExpired(date: recommendedDose.date))
-            return
+            return LoopError.recommendationExpired(date: recommendedDose.date)
         }
         
         if case .suspended = basalDeliveryState {
-            completion(LoopError.pumpSuspended)
-            return
+            return LoopError.pumpSuspended
         }
 
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var delegateError: LoopError?
+
         delegate?.loopDataManager(self, didRecommend: recommendedDose) { (error) in
-            self.dataAccessQueue.async {
-                if error == nil {
-                    self.recommendedAutomaticDose = nil
-                }
-                completion(error)
-            }
+            delegateError = error
+            updateGroup.leave()
         }
+
+        updateGroup.wait()
+        if delegateError == nil {
+            self.recommendedAutomaticDose = nil
+        }
+        
+        return delegateError
     }
     
     /// Ensures that the current temp basal is at or below the proposed max temp basal, and if not, cancel it before proceeding.
@@ -1912,8 +1909,6 @@ extension LoopDataManager {
     /// - Parameter state: The current state of the manager. This is invalid to access outside of the closure.
     func getLoopState(_ handler: @escaping (_ manager: LoopDataManager, _ state: LoopState) -> Void) {
         dataAccessQueue.async {
-            self.logger.debug("getLoopState: update()")
-
             let (_, updateError) = self.update(for: .getLoopState)
 
             handler(self, LoopStateView(loopDataManager: self, updateError: updateError))
@@ -1977,38 +1972,6 @@ extension LoopDataManager {
                                                                                      date: Date())
         
         return dosingDecision
-    }
-}
-
-extension LoopDataManager {
-    func didBecomeActive () {
-        storeUpdatedSettings()
-    }
-
-    func storeUpdatedSettings() {
-        UNUserNotificationCenter.current().getNotificationSettings() { notificationSettings in
-            self.dataAccessQueue.async {
-                guard let latestSettings = self.settingsStore.latestSettings else {
-                    return
-                }
-                
-                let notificationSettings = NotificationSettings(notificationSettings)
-                let controllerDevice = UIDevice.current.controllerDevice
-                let cgmDevice = self.delegate?.cgmManagerStatus?.device
-                let pumpDevice = self.delegate?.pumpManagerStatus?.device
-
-                if notificationSettings != latestSettings.notificationSettings ||
-                    controllerDevice != latestSettings.controllerDevice ||
-                    cgmDevice != latestSettings.cgmDevice ||
-                    pumpDevice != latestSettings.pumpDevice
-                {
-                    self.storeSettings(notificationSettings: notificationSettings,
-                                       controllerDevice: controllerDevice,
-                                       cgmDevice: cgmDevice,
-                                       pumpDevice: pumpDevice)
-                }
-            }
-        }
     }
 }
 
@@ -2146,6 +2109,9 @@ protocol LoopDataManagerDelegate: AnyObject {
     /// The pump manager status, if one exists.
     var pumpManagerStatus: PumpManagerStatus? { get }
 
+    /// The pump status highlight, if one exists.
+    var pumpStatusHighlight: DeviceStatusHighlight? { get }
+
     /// The cgm manager status, if one exists.
     var cgmManagerStatus: CGMManagerStatus? { get }
 }
@@ -2186,23 +2152,6 @@ private extension StoredDosingDecision.Settings {
     }
 }
 
-private extension NotificationSettings {
-    init(_ notificationSettings: UNNotificationSettings) {
-        self.init(authorizationStatus: NotificationSettings.AuthorizationStatus(notificationSettings.authorizationStatus),
-                  soundSetting: NotificationSettings.NotificationSetting(notificationSettings.soundSetting),
-                  badgeSetting: NotificationSettings.NotificationSetting(notificationSettings.badgeSetting),
-                  alertSetting: NotificationSettings.NotificationSetting(notificationSettings.alertSetting),
-                  notificationCenterSetting: NotificationSettings.NotificationSetting(notificationSettings.notificationCenterSetting),
-                  lockScreenSetting: NotificationSettings.NotificationSetting(notificationSettings.lockScreenSetting),
-                  carPlaySetting: NotificationSettings.NotificationSetting(notificationSettings.carPlaySetting),
-                  alertStyle: NotificationSettings.AlertStyle(notificationSettings.alertStyle),
-                  showPreviewsSetting: NotificationSettings.ShowPreviewsSetting(notificationSettings.showPreviewsSetting),
-                  criticalAlertSetting: NotificationSettings.NotificationSetting(notificationSettings.criticalAlertSetting),
-                  providesAppNotificationSettings: notificationSettings.providesAppNotificationSettings,
-                  announcementSetting: NotificationSettings.NotificationSetting(notificationSettings.announcementSetting))
-    }
-}
-
 // MARK: - Simulated Core Data
 
 extension LoopDataManager {
@@ -2211,32 +2160,26 @@ extension LoopDataManager {
             fatalError("\(#function) should be invoked only when simulated core data is enabled")
         }
 
-        guard let glucoseStore = glucoseStore as? GlucoseStore, let carbStore = carbStore as? CarbStore, let doseStore = doseStore as? DoseStore, let settingsStore = settingsStore as? SettingsStore, let dosingDecisionStore = dosingDecisionStore as? DosingDecisionStore else {
+        guard let glucoseStore = glucoseStore as? GlucoseStore, let carbStore = carbStore as? CarbStore, let doseStore = doseStore as? DoseStore, let dosingDecisionStore = dosingDecisionStore as? DosingDecisionStore else {
             fatalError("Mock stores should not be used to generate simulated core data")
         }
 
-        settingsStore.generateSimulatedHistoricalSettingsObjects() { error in
+        glucoseStore.generateSimulatedHistoricalGlucoseObjects() { error in
             guard error == nil else {
                 completion(error)
                 return
             }
-            glucoseStore.generateSimulatedHistoricalGlucoseObjects() { error in
+            carbStore.generateSimulatedHistoricalCarbObjects() { error in
                 guard error == nil else {
                     completion(error)
                     return
                 }
-                carbStore.generateSimulatedHistoricalCarbObjects() { error in
+                dosingDecisionStore.generateSimulatedHistoricalDosingDecisionObjects() { error in
                     guard error == nil else {
                         completion(error)
                         return
                     }
-                    dosingDecisionStore.generateSimulatedHistoricalDosingDecisionObjects() { error in
-                        guard error == nil else {
-                            completion(error)
-                            return
-                        }
-                        doseStore.generateSimulatedHistoricalPumpEvents(completion: completion)
-                    }
+                    doseStore.generateSimulatedHistoricalPumpEvents(completion: completion)
                 }
             }
         }
@@ -2247,7 +2190,7 @@ extension LoopDataManager {
             fatalError("\(#function) should be invoked only when simulated core data is enabled")
         }
 
-        guard let glucoseStore = glucoseStore as? GlucoseStore, let carbStore = carbStore as? CarbStore, let doseStore = doseStore as? DoseStore, let settingsStore = settingsStore as? SettingsStore, let dosingDecisionStore = dosingDecisionStore as? DosingDecisionStore else {
+        guard let glucoseStore = glucoseStore as? GlucoseStore, let carbStore = carbStore as? CarbStore, let doseStore = doseStore as? DoseStore, let dosingDecisionStore = dosingDecisionStore as? DosingDecisionStore else {
             fatalError("Mock stores should not be used to generate simulated core data")
         }
 
@@ -2266,14 +2209,7 @@ extension LoopDataManager {
                         completion(error)
                         return
                     }
-
-                    glucoseStore.purgeHistoricalGlucoseObjects() { error in
-                        guard error == nil else {
-                            completion(error)
-                            return
-                        }
-                        settingsStore.purgeHistoricalSettingsObjects(completion: completion)
-                    }
+                    glucoseStore.purgeHistoricalGlucoseObjects(completion: completion)
                 }
             }
         }
@@ -2303,6 +2239,7 @@ extension LoopDataManager {
                 settings.suspendThreshold = newValue.suspendThreshold
                 settings.maximumBolus = newValue.maximumBolus
                 settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
+                settings.overridePresets = newValue.overridePresets ?? []
             }
             insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
             carbRatioSchedule = newValue.carbRatioSchedule

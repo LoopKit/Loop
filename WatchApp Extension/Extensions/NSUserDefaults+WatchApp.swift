@@ -30,7 +30,7 @@ extension UserDefaults {
             if let value = object(forKey: Key.VisibleDuration.rawValue) as? TimeInterval {
                 return value
             }
-            return TimeInterval (hours: 6)
+            return TimeInterval(hours: 2)
         }
         set {
             set(newValue.rawValue, forKey: Key.VisibleDuration.rawValue)

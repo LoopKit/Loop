@@ -26,7 +26,10 @@ var availableStaticPumpManagers: [PumpManagerDescriptor] {
 }
 
 extension PumpManager {
-    var rawValue: [String: Any] {
+
+    typealias RawValue = [String: Any]
+    
+    var rawValue: RawValue {
         return [
             "managerIdentifier": self.managerIdentifier,
             "state": self.rawState

@@ -101,14 +101,13 @@ class LoopDataManagerDosingTests: XCTestCase {
             basalDeliveryState: basalDeliveryState ?? .active(currentDate),
             settings: settings,
             overrideHistory: TemporaryScheduleOverrideHistory(),
-            lastPumpEventsReconciliation: nil, // this date is only used to init the doseStore if a DoseStoreProtocol isn't passed in, so this date can be nil
             analyticsServicesManager: AnalyticsServicesManager(),
             localCacheDuration: .days(1),
             doseStore: doseStore,
             glucoseStore: glucoseStore,
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
-            settingsStore: MockSettingsStore(),
+            latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
             now: { currentDate },
             pumpInsulinType: .novolog,
             automaticDosingStatus: automaticDosingStatus
@@ -305,6 +304,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double { units }
         var pumpManagerStatus: PumpManagerStatus?
         var cgmManagerStatus: CGMManagerStatus?
+        var pumpStatusHighlight: DeviceStatusHighlight?
     }
 
     func waitOnDataQueue(timeout: TimeInterval = 1.0) {
@@ -534,14 +534,13 @@ class LoopDataManagerDosingTests: XCTestCase {
             basalDeliveryState: .tempBasal(existingTempBasal),
             settings: settings,
             overrideHistory: TemporaryScheduleOverrideHistory(),
-            lastPumpEventsReconciliation: nil, // this date is only used to init the doseStore if a DoseStoreProtocol isn't passed in, so this date can be nil
             analyticsServicesManager: AnalyticsServicesManager(),
             localCacheDuration: .days(1),
             doseStore: doseStore,
             glucoseStore: glucoseStore,
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
-            settingsStore: MockSettingsStore(),
+            latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
             now: { currentDate },
             pumpInsulinType: .novolog,
             automaticDosingStatus: automaticDosingStatus

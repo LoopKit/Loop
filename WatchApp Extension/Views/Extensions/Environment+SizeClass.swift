@@ -75,6 +75,11 @@ extension WKInterfaceDevice.SizeClass {
     }
 
     var hasRoundedCorners: Bool {
-        self == .size40mm || self == .size44mm
+        switch self {
+        case .size40mm, .size41mm, .size44mm, .size45mm:
+            return true
+        case .size38mm, .size42mm:
+            return false
+        }
     }
 }

@@ -8,6 +8,12 @@
 import os.log
 
 
+extension Logger {
+    init(category: String) {
+        self.init(subsystem: "com.loopkit.Loop", category: category)
+    }
+}
+
 extension OSLog {
     convenience init(category: String) {
         self.init(subsystem: "com.loopkit.Loop", category: category)

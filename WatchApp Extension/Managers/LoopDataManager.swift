@@ -140,7 +140,9 @@ extension LoopDataManager {
             return false
         }
 
-        let latestDate = glucoseStore.latestGlucose?.startDate ?? .earliestGlucoseCutoff
+        // Loop doesn't read data from HealthKit anymore, and its local watch data is truly ephemeral
+        // to power the chart. Fetch enough data to populate the display of the chart.
+        let latestDate = max(lastGlucoseBackfill, .earliestGlucoseCutoff)
         guard latestDate < .staleGlucoseCutoff else {
             self.log.default("Skipping glucose backfill request because our latest sample date is %{public}@", String(describing: latestDate))
             return false
@@ -160,7 +162,7 @@ extension LoopDataManager {
                 // Already logged
                 // Reset our last date to immediately retry
                 DispatchQueue.main.async {
-                    self.lastGlucoseBackfill = .staleGlucoseCutoff
+                    self.lastGlucoseBackfill = .earliestGlucoseCutoff
                 }
             }
         }

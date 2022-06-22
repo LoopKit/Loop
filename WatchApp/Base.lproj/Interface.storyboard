@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="17156" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="20037" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch38"/>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="17035"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="20006"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
     </dependencies>
     <scenes>
@@ -39,7 +39,9 @@
                                         </group>
                                     </items>
                                     <variation key="device=watch40mm" widthAdjustment="-8.5"/>
+                                    <variation key="device=watch41mm" widthAdjustment="-8.5"/>
                                     <variation key="device=watch44mm" widthAdjustment="-9.5"/>
+                                    <variation key="device=watch45mm" widthAdjustment="-9.5"/>
                                 </group>
                             </items>
                         </group>
@@ -196,16 +198,35 @@
                                         </group>
                                     </items>
                                     <variation key="device=watch40mm" widthAdjustment="-8.5"/>
+                                    <variation key="device=watch41mm" widthAdjustment="-8.5"/>
                                     <variation key="device=watch44mm" widthAdjustment="-9.5"/>
+                                    <variation key="device=watch45mm" widthAdjustment="-9.5"/>
                                 </group>
                             </items>
                         </group>
                         <group width="1" height="90" alignment="left" layout="overlap" radius="6" id="GqJ-yv-NKQ" userLabel="Graph">
                             <items>
-                                <spriteKitScene width="1" height="1" alignment="center" verticalAlignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
+                                <spriteKitScene width="1" height="1" alignment="center" verticalAlignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c">
+                                    <gestureRecognizers>
+                                        <tapGestureRecognizer id="Vug-mJ-KXh" userLabel="Single Tap">
+                                            <precedingGestureRecognizers>
+                                                <tapGestureRecognizer reference="v7U-fV-ZKW"/>
+                                            </precedingGestureRecognizers>
+                                            <connections>
+                                                <action selector="didTapOnChart:" destination="v5b-sO-bb8" id="Jf9-8u-uEe"/>
+                                            </connections>
+                                        </tapGestureRecognizer>
+                                        <tapGestureRecognizer numberOfTapsRequired="2" id="v7U-fV-ZKW" userLabel="Double Tap">
+                                            <connections>
+                                                <action selector="didDoubleTapOnChart:" destination="v5b-sO-bb8" id="baS-sJ-I1o"/>
+                                            </connections>
+                                        </tapGestureRecognizer>
+                                    </gestureRecognizers>
+                                </spriteKitScene>
                             </items>
                             <variation key="device=watch38mm" height="73"/>
                             <variation key="device=watch44mm" height="111"/>
+                            <variation key="device=watch45mm" height="115"/>
                         </group>
                         <table alignment="left" spacing="8" id="Atz-83-hgn">
                             <items>
@@ -241,25 +262,6 @@
                             </items>
                         </table>
                     </items>
-                    <menu key="menu" id="Da1-jh-2yL">
-                        <items>
-                            <menuItem title="1 hour" image="1-hour-graph" id="vL1-NA-WZ1">
-                                <connections>
-                                    <action selector="setChartWindow1Hour" destination="v5b-sO-bb8" id="yp1-H2-0e5"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="2 hours" image="2-hour-graph" id="dPh-7b-Tfv">
-                                <connections>
-                                    <action selector="setChartWindow2Hours" destination="v5b-sO-bb8" id="IQe-Uh-AOb"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="3 hours" image="3-hour-graph" id="fR1-7h-SNe">
-                                <connections>
-                                    <action selector="setChartWindow3Hours" destination="v5b-sO-bb8" id="HhZ-89-5Yp"/>
-                                </connections>
-                            </menuItem>
-                        </items>
-                    </menu>
                     <variation key="device=watch38mm" spacing="5"/>
                     <connections>
                         <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
@@ -402,37 +404,34 @@
     </scenes>
     <color key="tintColor" red="0.29803921570000003" green="0.85098039219999999" blue="0.3921568627" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
     <resources>
-        <image name="1-hour-graph" width="70" height="70"/>
-        <image name="2-hour-graph" width="70" height="70"/>
-        <image name="3-hour-graph" width="70" height="70"/>
         <image name="bolus" width="32" height="32"/>
         <image name="carbs" width="32" height="32"/>
-        <image name="loop_unknown" width="26" height="26"/>
+        <image name="loop_unknown" width="29" height="29"/>
         <image name="pre-meal" width="32" height="32"/>
         <image name="workout" width="32" height="32"/>
         <namedColor name="carbs">
-            <color red="0.0" green="0.66699999570846558" blue="0.22400000691413879" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.3880000114440918" green="0.85500001907348633" blue="0.2199999988079071" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="carbs-dark">
-            <color red="0.0080000003799796104" green="0.14100000262260437" blue="0.050999999046325684" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.070000000298023224" green="0.11999999731779099" blue="0.039999999105930328" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="insulin">
-            <color red="0.33300000429153442" green="0.41200000047683716" blue="0.94900000095367432" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.58399999141693115" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="insulin-dark">
-            <color red="0.33300000429153442" green="0.41200000047683716" blue="0.94900000095367432" alpha="0.15000000596046448" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.58399999141693115" blue="0.0" alpha="0.15000000596046448" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="insulin-notification-background">
-            <color red="0.33300000429153442" green="0.41200000047683716" blue="0.94900000095367432" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.58399999141693115" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="separator">
             <color red="0.72200000286102295" green="0.72200000286102295" blue="0.72200000286102295" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="workout">
-            <color red="0.46700000762939453" green="0.36500000953674316" blue="0.79600000381469727" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.31000000238418579" green="0.67799997329711914" blue="0.97299998998641968" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="workout-dark">
-            <color red="0.125" green="0.10999999940395355" blue="0.17299999296665192" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.019999999552965164" green="0.10000000149011612" blue="0.14000000059604645" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

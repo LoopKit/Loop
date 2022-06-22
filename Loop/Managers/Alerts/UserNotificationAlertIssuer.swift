@@ -83,7 +83,7 @@ fileprivate extension Alert {
     }
     
     private var userNotificationSound: UNNotificationSound? {
-        guard let content = backgroundContent else {
+        guard backgroundContent != nil else {
             return nil
         }
         if let sound = sound {

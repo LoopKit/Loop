@@ -11,41 +11,42 @@ import LoopKit
 
 extension UserDefaults {
     private enum Key: String {
-        case pumpManagerState = "com.loopkit.Loop.PumpManagerState"
-        case cgmManagerState = "com.loopkit.Loop.CGMManagerState"
+        case legacyPumpManagerState = "com.loopkit.Loop.PumpManagerState"
+        case legacyCGMManagerState = "com.loopkit.Loop.CGMManagerState"
+        case legacyServicesState = "com.loopkit.Loop.ServicesState"
         case loopNotRunningNotifications = "com.loopkit.Loop.loopNotRunningNotifications"
     }
 
-    var pumpManagerRawValue: [String: Any]? {
+    var legacyPumpManagerRawValue: PumpManager.RawValue? {
         get {
-            return dictionary(forKey: Key.pumpManagerState.rawValue)
+            return dictionary(forKey: Key.legacyPumpManagerState.rawValue)
         }
-        set {
-            set(newValue, forKey: Key.pumpManagerState.rawValue)
+    }
+    func clearLegacyPumpManagerRawValue() {
+        set(nil, forKey: Key.legacyPumpManagerState.rawValue)
+    }
+
+
+    var legacyCGMManagerRawValue: CGMManager.RawValue? {
+        get {
+            return dictionary(forKey: Key.legacyCGMManagerState.rawValue)
         }
     }
 
-    var cgmManagerRawValue: [String: Any]? {
-        get {
-            return dictionary(forKey: Key.cgmManagerState.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.cgmManagerState.rawValue)
-        }
+    func clearLegacyCGMManagerRawValue() {
+        set(nil, forKey: Key.legacyCGMManagerState.rawValue)
     }
-    
-    var cgmManager: CGMManager? {
-        get {
-            guard let rawValue = cgmManagerState else {
-                return nil
-            }
 
-            return CGMManagerFromRawValue(rawValue)
-        }
-        set {
-            cgmManagerState = newValue?.rawValue
+    var legacyServicesState: [Service.RawStateValue] {
+        get {
+            return array(forKey: Key.legacyServicesState.rawValue) as? [[String: Any]] ?? []
         }
     }
+
+    func clearLegacyServicesState() {
+        set(nil, forKey: Key.legacyServicesState.rawValue)
+    }
+
 
     var loopNotRunningNotifications: [StoredLoopNotRunningNotification] {
         get {

@@ -231,7 +231,6 @@ struct BolusEntryView: View {
                         maxLength: 4,
                         doneButtonColor: .loopAccent
                     )
-
                     Text(QuantityFormatter().string(from: displayGlucoseUnitObservable.displayGlucoseUnit))
                         .foregroundColor(Color(.secondaryLabel))
                 }
@@ -426,6 +425,7 @@ struct BolusEntryView: View {
             }
         )
         .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
+        .disabled(viewModel.isInitiatingSaveOrBolus)
         .padding()
     }
 

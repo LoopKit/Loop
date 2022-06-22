@@ -37,7 +37,7 @@ extension PumpManagerStatus.BasalDeliveryState {
                 return nil
             }
         case .active(let date):
-            if let scheduledBasal = scheduledBasal(for: date) {
+            if scheduledBasal(for: date) != nil {
                 return NetBasal(scheduledRateStartedAt: date)
             } else {
                 return nil

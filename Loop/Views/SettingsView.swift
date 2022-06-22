@@ -89,10 +89,11 @@ extension SettingsView {
                         .padding(.vertical, 3)
                     if !viewModel.isOnboardingComplete {
                         DescriptiveText(label: NSLocalizedString("Closed Loop requires Setup to be Complete", comment: "The description text for the looping enabled switch cell when onboarding is not complete"))
-                    } else if !viewModel.isClosedLoopAllowed {
-                        DescriptiveText(label: NSLocalizedString("Closed Loop requires an active CGM Sensor Session", comment: "The description text for the looping enabled switch cell when closed loop is not allowed"))
+                    } else if let closedLoopDescriptiveText = viewModel.closedLoopDescriptiveText {
+                        DescriptiveText(label: closedLoopDescriptiveText)
                     }
                 }
+                .fixedSize(horizontal: false, vertical: true)
             }
             .disabled(!viewModel.isOnboardingComplete || !viewModel.isClosedLoopAllowed)
         }
@@ -222,9 +223,11 @@ extension SettingsView {
     }
     
     private var cgmChoices: [ActionSheet.Button] {
-        var result = viewModel.cgmManagerSettingsViewModel.availableDevices.map { availableDevice in
-            ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
-                self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
+        var result = viewModel.cgmManagerSettingsViewModel.availableDevices
+            .sorted(by: {$0.localizedTitle < $1.localizedTitle})
+            .map { availableDevice in
+                ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+                    self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
             }
         }
         result.append(.cancel())

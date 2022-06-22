@@ -26,6 +26,9 @@ class ServicesManager {
 
     private let log = OSLog(category: "ServicesManager")
 
+    @PersistedProperty(key: "Services")
+    var rawServices: [Service.RawValue]?
+
     init(
         pluginManager: PluginManager,
         analyticsServicesManager: AnalyticsServicesManager,
@@ -140,11 +143,13 @@ class ServicesManager {
     }
 
     private func saveState() {
-        UserDefaults.appGroup?.servicesState = services.compactMap { $0.rawValue }
+        rawServices = services.compactMap { $0.rawValue }
+        UserDefaults.appGroup?.clearLegacyServicesState()
     }
 
     private func restoreState() {
-        UserDefaults.appGroup?.servicesState.forEach { rawValue in
+        let rawServices = rawServices ?? UserDefaults.appGroup?.legacyServicesState ?? []
+        rawServices.forEach { rawValue in
             if let service = serviceFromRawValue(rawValue) {
                 service.serviceDelegate = self
 

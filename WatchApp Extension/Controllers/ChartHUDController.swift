@@ -42,15 +42,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     @IBOutlet private weak var table: WKInterfaceTable!
 
     @IBOutlet private weak var glucoseScene: WKInterfaceSKScene!
-    @IBAction private func setChartWindow1Hour() {
-        scene.visibleDuration = .hours(2)
-    }
-    @IBAction private func setChartWindow2Hours() {
-        scene.visibleDuration = .hours(4)
-    }
-    @IBAction private func setChartWindow3Hours() {
-        scene.visibleDuration = .hours(6)
-    }
     private let scene = GlucoseChartScene()
     private var timer: Timer? {
         didSet {
@@ -100,9 +91,14 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             self?.scene.setNeedsUpdate()
         }
 
-        if #available(watchOSApplicationExtension 5.0, *) {
-            scene.textInsets.left = max(scene.textInsets.left, systemMinimumLayoutMargins.leading)
-            scene.textInsets.right = max(scene.textInsets.right, systemMinimumLayoutMargins.trailing)
+        // These margins are only available after we appear (sadly)
+
+        scene.textInsets.left = max(scene.textInsets.left, systemMinimumLayoutMargins.leading)
+        scene.textInsets.right = max(scene.textInsets.right, systemMinimumLayoutMargins.trailing)
+
+        for row in TableRow.allCases {
+            let cell = table.rowController(at: row.rawValue) as! HUDRowController
+            cell.setContentInset(systemMinimumLayoutMargins)
         }
     }
 
@@ -164,9 +160,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             let cell = table.rowController(at: row.rawValue) as! HUDRowController
             cell.setTitle(row.title)
             cell.setIsLastRow(row.isLast)
-            if #available(watchOSApplicationExtension 5.0, *) {
-                cell.setContentInset(systemMinimumLayoutMargins)
-            }
+            cell.setContentInset(systemMinimumLayoutMargins)
 
             let isActiveContextStale = Date().timeIntervalSince(activeContext.creationDate) > LoopCoreConstants.inputDataRecencyInterval
 
@@ -206,4 +200,13 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
 
         presentController(withName: CarbEntryListController.className, context: nil)
     }
+
+    @IBAction func didTapOnChart(_ sender: Any) {
+        scene.decreaseVisibleDuration()
+    }
+
+    @IBAction func didDoubleTapOnChart(_ sender: Any) {
+        scene.increaseVisibleDuration()
+    }
+
 }

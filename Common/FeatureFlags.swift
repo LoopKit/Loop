@@ -16,12 +16,16 @@ struct FeatureFlagConfiguration: Decodable {
     let criticalAlertsEnabled: Bool
     let entryDeletionEnabled: Bool
     let fiaspInsulinModelEnabled: Bool
+    let lyumjevInsulinModelEnabled: Bool
+    let afrezzaInsulinModelEnabled: Bool
     let includeServicesInSettingsEnabled: Bool
     let manualDoseEntryEnabled: Bool
     let insulinDeliveryReservoirViewEnabled: Bool
     let mockTherapySettingsEnabled: Bool
     let nonlinearCarbModelEnabled: Bool
-    let observeHealthKitSamplesFromOtherApps: Bool
+    let observeHealthKitCarbSamplesFromOtherApps: Bool
+    let observeHealthKitDoseSamplesFromOtherApps: Bool
+    let observeHealthKitGlucoseSamplesFromOtherApps: Bool
     let remoteOverridesEnabled: Bool
     let predictedGlucoseChartClampEnabled: Bool
     let scenariosEnabled: Bool
@@ -71,6 +75,20 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.fiaspInsulinModelEnabled = true
         #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if LYUMJEV_INSULIN_MODEL_DISABLED
+        self.lyumjevInsulinModelEnabled = false
+        #else
+        self.lyumjevInsulinModelEnabled = true
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if AFREZZA_INSULIN_MODEL_DISABLED
+        self.afrezzaInsulinModelEnabled = false
+        #else
+        self.afrezzaInsulinModelEnabled = true
+        #endif
         
         // Swift compiler config is inverse, since the default state is enabled.
         #if INCLUDE_SERVICES_IN_SETTINGS_DISABLED
@@ -93,7 +111,6 @@ struct FeatureFlagConfiguration: Decodable {
         self.insulinDeliveryReservoirViewEnabled = true
         #endif
 
-        // Swift compiler config is inverse, since the default state is enabled.
         #if MOCK_THERAPY_SETTINGS_ENABLED
         self.mockTherapySettingsEnabled = true
         #else
@@ -107,13 +124,31 @@ struct FeatureFlagConfiguration: Decodable {
         self.nonlinearCarbModelEnabled = true
         #endif
         
+        #if OBSERVE_HEALTH_KIT_CARB_SAMPLES_FROM_OTHER_APPS_ENABLED
+        self.observeHealthKitCarbSamplesFromOtherApps = true
+        #else
+        self.observeHealthKitCarbSamplesFromOtherApps = false
+        #endif
+        
         // Swift compiler config is inverse, since the default state is enabled.
         #if OBSERVE_HEALTH_KIT_SAMPLES_FROM_OTHER_APPS_DISABLED
-        self.observeHealthKitSamplesFromOtherApps = false
+        self.observeHealthKitDoseSamplesFromOtherApps = false
+        self.observeHealthKitGlucoseSamplesFromOtherApps = false
         #else
-        self.observeHealthKitSamplesFromOtherApps = true
+        self.observeHealthKitDoseSamplesFromOtherApps = true
+        self.observeHealthKitGlucoseSamplesFromOtherApps = true
         #endif
 
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if OBSERVE_HEALTH_KIT_DOSE_SAMPLES_FROM_OTHER_APPS_DISABLED
+        self.observeHealthKitDoseSamplesFromOtherApps = false
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if OBSERVE_HEALTH_KIT_GLUCOSE_SAMPLES_FROM_OTHER_APPS_DISABLED
+        self.observeHealthKitGlucoseSamplesFromOtherApps = false
+        #endif
+        
         #if PREDICTED_GLUCOSE_CHART_CLAMP_ENABLED
         self.predictedGlucoseChartClampEnabled = true
         #else
@@ -169,10 +204,14 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* criticalAlertsEnabled: \(criticalAlertsEnabled)",
             "* entryDeletionEnabled: \(entryDeletionEnabled)",
             "* fiaspInsulinModelEnabled: \(fiaspInsulinModelEnabled)",
+            "* lyumjevInsulinModelEnabled: \(lyumjevInsulinModelEnabled)",
+            "* afrezzaInsulinModelEnabled: \(afrezzaInsulinModelEnabled)",
             "* includeServicesInSettingsEnabled: \(includeServicesInSettingsEnabled)",
             "* mockTherapySettingsEnabled: \(mockTherapySettingsEnabled)",
             "* nonlinearCarbModelEnabled: \(nonlinearCarbModelEnabled)",
-            "* observeHealthKitSamplesFromOtherApps: \(observeHealthKitSamplesFromOtherApps)",
+            "* observeHealthKitCarbSamplesFromOtherApps: \(observeHealthKitCarbSamplesFromOtherApps)",
+            "* observeHealthKitDoseSamplesFromOtherApps: \(observeHealthKitDoseSamplesFromOtherApps)",
+            "* observeHealthKitGlucoseSamplesFromOtherApps: \(observeHealthKitGlucoseSamplesFromOtherApps)",
             "* predictedGlucoseChartClampEnabled: \(predictedGlucoseChartClampEnabled)",
             "* remoteOverridesEnabled: \(remoteOverridesEnabled)",
             "* scenariosEnabled: \(scenariosEnabled)",
@@ -190,30 +229,26 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
 
 extension FeatureFlagConfiguration {
     var allowDebugFeatures: Bool {
-        if debugEnabled {
-            return true
-        }
-        if UserDefaults.appGroup?.allowDebugFeatures ?? false {
-            return true
-        }
         #if ALLOW_DEBUG_FEATURES_ENABLED
         return true
         #else
-        return false
+        if UserDefaults.appGroup?.allowDebugFeatures ?? false {
+            return true
+        } else {
+            return false
+        }
         #endif
     }
     
     var allowSimulators: Bool {
-        if debugEnabled {
-            return true
-        }
-        if UserDefaults.appGroup?.allowSimulators ?? false {
-            return true
-        }
         #if ALLOW_SIMULATORS_ENABLED
         return true
         #else
-        return false
+        if UserDefaults.appGroup?.allowSimulators ?? false {
+            return true
+        } else {
+            return false
+        }
         #endif
     }
 }

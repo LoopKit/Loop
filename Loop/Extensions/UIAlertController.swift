@@ -223,7 +223,10 @@ extension UIAlertController {
         // Every `UIAlertAction` handler must eventually call this
         func finish(result: TextInputResult) {
             // Capture the observer to keep it alive while the alert is on screen
-            textFieldObserver = nil
+            // Check for non-nil first to suppress an unused variable warning
+            if textFieldObserver != nil {
+                textFieldObserver = nil
+            }
             onCompletion(result)
         }
 
