@@ -229,26 +229,38 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
 
 extension FeatureFlagConfiguration {
     var allowDebugFeatures: Bool {
-        #if ALLOW_DEBUG_FEATURES_ENABLED
+        #if DEBUG_FEATURES_ENABLED
         return true
-        #else
-        if UserDefaults.appGroup?.allowDebugFeatures ?? false {
+        #elseif DEBUG_FEATURES_ENABLED_CONDITIONALLY
+        if debugEnabled {
             return true
         } else {
-            return false
+            if UserDefaults.appGroup?.allowDebugFeatures ?? false {
+                return true
+            } else {
+                return false
+            }
         }
+        #else
+        return false
         #endif
     }
     
     var allowSimulators: Bool {
-        #if ALLOW_SIMULATORS_ENABLED
+        #if SIMULATORS_ENABLED
         return true
-        #else
-        if UserDefaults.appGroup?.allowSimulators ?? false {
+        #elseif SIMULATORS_ENABLED_CONDITIONALLY
+        if debugEnabled {
             return true
         } else {
-            return false
+            if UserDefaults.appGroup?.allowSimulators ?? false {
+                return true
+            } else {
+                return false
+            }
         }
+        #else
+        return false
         #endif
     }
 }
