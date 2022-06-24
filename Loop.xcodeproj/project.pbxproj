@@ -6,20 +6,6 @@
 	objectVersion = 48;
 	objects = {
 
-/* Begin PBXAggregateTarget section */
-		432CF87720D8B8380066B889 /* Cartfile */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 432CF87820D8B8380066B889 /* Build configuration list for PBXAggregateTarget "Cartfile" */;
-			buildPhases = (
-				432CF87B20D8B8490066B889 /* Build Carthage Dependencies */,
-			);
-			dependencies = (
-			);
-			name = Cartfile;
-			productName = Cartfile;
-		};
-/* End PBXAggregateTarget section */
-
 /* Begin PBXBuildFile section */
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
@@ -2985,10 +2971,6 @@
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "LoopKit Authors";
 				TargetAttributes = {
-					432CF87720D8B8380066B889 = {
-						CreatedOnToolsVersion = 9.4;
-						ProvisioningStyle = Automatic;
-					};
 					43776F8B1B8022E90074EA36 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 1020;
@@ -3141,7 +3123,6 @@
 				4F75288A1DFE1DC600C322D6 /* LoopUI */,
 				43E2D8D01D20BF42004DA55F /* DoseMathTests */,
 				43E2D90A1D20C581004DA55F /* LoopTests */,
-				432CF87720D8B8380066B889 /* Cartfile */,
 			);
 		};
 /* End PBXProject section */
@@ -3313,21 +3294,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		432CF87B20D8B8490066B889 /* Build Carthage Dependencies */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Build Carthage Dependencies";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ -f $PROJECT_DIR/.gitmodules ]; then\n    echo \"Skipping checkout due to presence of .gitmodules file\"\n    if [ $ACTION = \"install\" ]; then\n        echo \"You're installing: Make sure to keep all submodules up-to-date and run carthage build after changes.\"\n    fi\nelse\n    echo \"Bootstrapping Carthage dependencies...\"\n    unset LLVM_TARGET_TRIPLE_SUFFIX\n\n    if ! cmp -s Cartfile.Resolved Carthage/Cartfile.resolved; then\n        time ./Scripts/carthage.sh bootstrap --project-directory \"$SRCROOT\" --platform ios,watchos --cache-builds --verbose || exit 1\n        cp Cartfile.resolved Carthage\n    else\n        echo \"Carthage: not bootstrapping\"\n    fi\nfi\n";
-			showEnvVarsInLog = 0;
-		};
 		C16DA84322E8E5FF008624C2 /* Install Plugins */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -4375,20 +4341,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		432CF87920D8B8380066B889 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		432CF87A20D8B8380066B889 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 		43776FB41B8022E90074EA36 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 437D9BA11D7B5203007245E8 /* Loop.xcconfig */;
@@ -4997,15 +4949,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		432CF87820D8B8380066B889 /* Build configuration list for PBXAggregateTarget "Cartfile" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				432CF87920D8B8380066B889 /* Debug */,
-				432CF87A20D8B8380066B889 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Loop" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
