@@ -1950,7 +1950,7 @@ extension StatusTableViewController {
     fileprivate func addCGMManager(withIdentifier identifier: String) {
         switch deviceManager.setupCGMManager(withIdentifier: identifier) {
         case .failure(let error):
-            log.default("Failure to setup CGM manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
+            log.error("Failure to setup CGM manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
         case .success(let success):
             switch success {
             case .userInteractionRequired(var setupViewController):
@@ -1970,7 +1970,7 @@ extension StatusTableViewController {
               let maxBolus = deviceManager.loopManager.settings.maximumBolus,
               let basalSchedule = deviceManager.loopManager.basalRateSchedule else
         {
-            log.default("Failure to setup pump manager: incomplete settings")
+            log.error("Failure to setup pump manager: incomplete settings")
             return
         }
         
@@ -1979,7 +1979,7 @@ extension StatusTableViewController {
                                                 basalSchedule: basalSchedule)
         switch deviceManager.setupPumpManagerUI(withIdentifier: identifier, initialSettings: settings) {
         case .failure(let error):
-            log.default("Failure to setup pump manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
+            log.error("Failure to setup pump manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
         case .success(let success):
             switch success {
             case .userInteractionRequired(var setupViewController):

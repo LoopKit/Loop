@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 48;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -99,8 +99,6 @@
 		43785E932120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */; };
 		43785E972120E4500057DED1 /* INRelevantShortcutStore+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */; };
 		43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
-		437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */; };
-		437AFEE8203689FE008C4892 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
 		437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */; };
 		4389916B1E91B689000EEF90 /* ChartSettings+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4389916A1E91B689000EEF90 /* ChartSettings+Loop.swift */; };
@@ -142,7 +140,6 @@
 		43C05CB621EBE321006FB252 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		43C05CB821EBEA54006FB252 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C05CB721EBEA54006FB252 /* HKUnit.swift */; };
 		43C05CB921EBEA54006FB252 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C05CB721EBEA54006FB252 /* HKUnit.swift */; };
-		43C05CBA21EBEAD8006FB252 /* LoopCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */; };
 		43C05CBD21EBF77D006FB252 /* LessonsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C05CBC21EBF77D006FB252 /* LessonsViewController.swift */; };
 		43C05CC021EBFFA4006FB252 /* Lesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C05CBF21EBFFA4006FB252 /* Lesson.swift */; };
 		43C05CC221EC06E4006FB252 /* LessonConfigurationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C05CC121EC06E4006FB252 /* LessonConfigurationViewController.swift */; };
@@ -163,7 +160,6 @@
 		43CB2B2B1D924D450079823D /* WCSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CB2B2A1D924D450079823D /* WCSession.swift */; };
 		43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE7CDD1CA8B63E003CC1B0 /* Data.swift */; };
 		43D381621EBD9759007F8C8F /* HeaderValuesTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */; };
-		43D9000B21EB0BE000AF44BF /* LoopCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */; };
 		43D9001E21EB209400AF44BF /* LoopCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 43D9FFD121EAE05D00AF44BF /* LoopCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		43D9002021EB209400AF44BF /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		43D9002D21EB225D00AF44BF /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9002C21EB225D00AF44BF /* HealthKit.framework */; };
@@ -182,7 +178,6 @@
 		43D9FFB621EA9B2F00AF44BF /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
 		43D9FFBB21EA9CC900AF44BF /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		43D9FFBC21EA9CCD00AF44BF /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
-		43D9FFBD21EA9CD700AF44BF /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		43D9FFC021EAB22E00AF44BF /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9FFBF21EAB22E00AF44BF /* DataManager.swift */; };
 		43D9FFD321EAE05D00AF44BF /* LoopCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 43D9FFD121EAE05D00AF44BF /* LoopCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */; };
@@ -190,8 +185,6 @@
 		43D9FFDE21EAE3AE00AF44BF /* LoopCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */; };
 		43D9FFE021EAE3E500AF44BF /* LoopUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		43D9FFE121EAE3E500AF44BF /* LoopCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		43D9FFF821EAF2EF00AF44BF /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
-		43D9FFFA21EAF35900AF44BF /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
 		43D9FFFB21EAF3D300AF44BF /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */; };
 		43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */; };
@@ -231,9 +224,6 @@
 		43FCEEB5221BCA020013DD30 /* COBChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEB4221BCA020013DD30 /* COBChart.swift */; };
 		43FCEEBB22211C860013DD30 /* CarbEffectChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEBA22211C860013DD30 /* CarbEffectChart.swift */; };
 		43FCEEBD22212DD50013DD30 /* PredictedGlucoseChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEBC22212DD50013DD30 /* PredictedGlucoseChart.swift */; };
-		43FCEEBE22220CE70013DD30 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
-		43FCEEBF22220CF30013DD30 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
-		43FCEEC022220D1F0013DD30 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */; };
 		4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */; };
 		4F11D3C220DD80B3006E072C /* WatchHistoricalGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */; };
@@ -257,7 +247,6 @@
 		4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; };
-		4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; };
 		4F75289A1DFE1F6000C322D6 /* BasalRateHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEBF1CD6FCD8003C8C80 /* BasalRateHUDView.swift */; };
 		4F75289C1DFE1F6000C322D6 /* GlucoseHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4337615E1D52F487004A3647 /* GlucoseHUDView.swift */; };
 		4F75289E1DFE1F6000C322D6 /* LoopCompletionHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */; };
@@ -271,7 +260,6 @@
 		4F7E8ACB20E2ACB500AEA65E /* WatchPredictedGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */; };
 		4F82655020E69F9A0031A8F5 /* HUDInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F82654F20E69F9A0031A8F5 /* HUDInterfaceController.swift */; };
 		4FAC02541E22F6B20087A773 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
-		4FB76FB01E8C3E8000B39636 /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4FB76FB31E8C3EE400B39636 /* ChartAxisValueDoubleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */; };
 		4FB76FB51E8C41E200B39636 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */; };
 		4FB76FB61E8C426900B39636 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */; };
@@ -440,7 +428,6 @@
 		B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */; };
 		B4FACBB12541FAB700199981 /* LoopSettingsAlerterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FACBB02541FAB700199981 /* LoopSettingsAlerterTests.swift */; };
 		B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */; };
-		C101947227DD473C004E7EB8 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11BD0552523CFED00236B08 /* SimpleBolusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
@@ -499,15 +486,33 @@
 		C19E96E023D275FA003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
 		C19F48742560ABFB003632D7 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
 		C1AD4200256D61E500164DDD /* Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1AD41FF256D61E500164DDD /* Comparable.swift */; };
-		C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C660D1252E4DD5009B5C32 /* LoopConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C660D0252E4DD5009B5C32 /* LoopConstants.swift */; };
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
+		C1CCF1122858FA900035389C /* LoopCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */; };
+		C1CCF1172858FBAD0035389C /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1CCF1162858FBAD0035389C /* SwiftCharts */; };
 		C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */; };
 		C1DA986C2843B6F9001D04CC /* PersistedProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DA986B2843B6F9001D04CC /* PersistedProperty.swift */; };
 		C1DE5D23251BFC4D00439E49 /* SimpleBolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */; };
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		C1E3862628247C6100F561A4 /* StoredLoopNotRunningNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */; };
+		C1E3DC4728595FAA00CA19FF /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; };
+		C1E3DC4928595FAA00CA19FF /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		C1F00C5D285A7FFB006302C5 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5C285A7FFB006302C5 /* SwiftCharts */; };
+		C1F00C60285A802A006302C5 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; };
+		C1F00C66285A811A006302C5 /* TrueTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1F00C65285A811A006302C5 /* TrueTime.framework */; };
+		C1F00C67285A811A006302C5 /* TrueTime.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C1F00C65285A811A006302C5 /* TrueTime.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C1F00C68285A8150006302C5 /* Minizip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19F496225630504003632D7 /* Minizip.framework */; };
+		C1F00C69285A8150006302C5 /* Minizip.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C19F496225630504003632D7 /* Minizip.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C1F00C6B285A8182006302C5 /* LoopTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1F00C6A285A8182006302C5 /* LoopTestingKit.framework */; };
+		C1F00C6C285A8182006302C5 /* LoopTestingKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C1F00C6A285A8182006302C5 /* LoopTestingKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C1F00C6D285A81AF006302C5 /* MKRingProgressView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; };
+		C1F00C6E285A81AF006302C5 /* MKRingProgressView.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C1F00C74285A822A006302C5 /* MockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1F00C73285A822A006302C5 /* MockKit.framework */; };
+		C1F00C75285A822A006302C5 /* MockKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C1F00C73285A822A006302C5 /* MockKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C1F00C76285A822A006302C5 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
+		C1F00C77285A822A006302C5 /* MockKitUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C1F00C78285A8256006302C5 /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C1F2075C26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */; };
 		C1F7822627CC056900C0919A /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F7822527CC056900C0919A /* SettingsManager.swift */; };
 		C1F8B243223E73FD00DD66CF /* BolusProgressTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */; };
@@ -599,20 +604,6 @@
 			remoteGlobalIDString = 43A943711B926B7B0051FA24;
 			remoteInfo = WatchApp;
 		};
-		43D9000C21EB0BEA00AF44BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
-			remoteInfo = LoopCore;
-		};
-		43D9001221EB137A00AF44BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
-			remoteInfo = LoopCore;
-		};
 		43D9FFB921EA9CA400AF44BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -648,13 +639,6 @@
 			remoteGlobalIDString = 4F75288A1DFE1DC600C322D6;
 			remoteInfo = LoopUI;
 		};
-		4F7528981DFE1ED800C322D6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4F75288A1DFE1DC600C322D6;
-			remoteInfo = LoopUI;
-		};
 		A942E444225FD97F00DD4980 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -675,6 +659,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 43D9001A21EB209400AF44BF;
 			remoteInfo = "LoopCore-watchOS";
+		};
+		C1CCF1142858FA900035389C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
+			remoteInfo = LoopCore;
 		};
 		E9B07F92253BBA6500BAD8F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -720,7 +711,7 @@
 				C19C8BCF28651F520056D5E4 /* LoopKitUI.framework in Embed Frameworks */,
 				C19C8BBD28651E1C0056D5E4 /* Minizip.framework in Embed Frameworks */,
 				C19C8BBB28651DFB0056D5E4 /* TrueTime.framework in Embed Frameworks */,
-				C19C8BCD28651F240056D5E4 /* SwiftCharts.framework in Embed Frameworks */,
+				C1F00C78285A8256006302C5 /* SwiftCharts.framework in Embed Frameworks */,
 				C19C8BBF28651E3D0056D5E4 /* LoopKit.framework in Embed Frameworks */,
 				43D9FFD721EAE05D00AF44BF /* LoopCore.framework in Embed Frameworks */,
 				C19C8BC628651EE50056D5E4 /* MKRingProgressView.framework in Embed Frameworks */,
@@ -773,6 +764,37 @@
 				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1CCF1112858F5180035389C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1CCF1192858FBAD0035389C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1E3DC4828595FAA00CA19FF /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C1E3DC4928595FAA00CA19FF /* SwiftCharts in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -837,7 +859,6 @@
 		4345E3FD21F04A50009E00E5 /* DateIntervalFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateIntervalFormatter.swift; sourceTree = "<group>"; };
 		4345E40321F68AD9009E00E5 /* TextRowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRowController.swift; sourceTree = "<group>"; };
 		4345E40521F68E18009E00E5 /* CarbEntryListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryListController.swift; sourceTree = "<group>"; };
-		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SwiftCharts.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		434F54561D287FDB002A9274 /* NibLoadable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NibLoadable.swift; sourceTree = "<group>"; };
 		434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
 		434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
@@ -1434,6 +1455,9 @@
 		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
 		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MKRingProgressView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredLoopNotRunningNotification.swift; sourceTree = "<group>"; };
+		C1F00C65285A811A006302C5 /* TrueTime.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TrueTime.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1F00C6A285A8182006302C5 /* LoopTestingKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopTestingKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1F00C73285A822A006302C5 /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileExpirationAlerter.swift; sourceTree = "<group>"; };
 		C1F7822527CC056900C0919A /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusProgressTableViewCell.swift; sourceTree = "<group>"; };
@@ -1560,7 +1584,7 @@
 				C19C8BBE28651E3D0056D5E4 /* LoopKit.framework in Frameworks */,
 				C19C8BCA28651F0A0056D5E4 /* MockKitUI.framework in Frameworks */,
 				C19C8BBA28651DFB0056D5E4 /* TrueTime.framework in Frameworks */,
-				C19C8BCC28651F240056D5E4 /* SwiftCharts.framework in Frameworks */,
+				C1F00C60285A802A006302C5 /* SwiftCharts.framework in Frameworks */,
 				C19C8BC528651EE50056D5E4 /* MKRingProgressView.framework in Frameworks */,
 				C19C8BC328651EAE0056D5E4 /* LoopTestingKit.framework in Frameworks */,
 				C19C8BCE28651F520056D5E4 /* LoopKitUI.framework in Frameworks */,
@@ -1593,7 +1617,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				43D9FFDE21EAE3AE00AF44BF /* LoopCore.framework in Frameworks */,
-				43D9FFBD21EA9CD700AF44BF /* SwiftCharts.framework in Frameworks */,
 				43D9FFB421EA9AD800AF44BF /* LoopUI.framework in Frameworks */,
 				43D9FFBB21EA9CC900AF44BF /* LoopKit.framework in Frameworks */,
 				43D9FFB621EA9B2F00AF44BF /* HealthKit.framework in Frameworks */,
@@ -1605,8 +1628,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				43D9FFFA21EAF35900AF44BF /* HealthKit.framework in Frameworks */,
-				43D9FFF821EAF2EF00AF44BF /* LoopKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1623,6 +1644,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1E3DC4728595FAA00CA19FF /* SwiftCharts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1630,13 +1652,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C101947227DD473C004E7EB8 /* MockKitUI.framework in Frameworks */,
-				43D9000B21EB0BE000AF44BF /* LoopCore.framework in Frameworks */,
-				43FCEEC022220D1F0013DD30 /* LoopKit.framework in Frameworks */,
-				43FCEEBF22220CF30013DD30 /* LoopKitUI.framework in Frameworks */,
-				4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */,
-				437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */,
-				C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */,
+				C1CCF1172858FBAD0035389C /* SwiftCharts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1644,10 +1660,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				437AFEE8203689FE008C4892 /* LoopKit.framework in Frameworks */,
-				4FB76FB01E8C3E8000B39636 /* SwiftCharts.framework in Frameworks */,
-				43C05CBA21EBEAD8006FB252 /* LoopCore.framework in Frameworks */,
-				43FCEEBE22220CE70013DD30 /* LoopKitUI.framework in Frameworks */,
+				C1CCF1122858FA900035389C /* LoopCore.framework in Frameworks */,
+				C1F00C5D285A7FFB006302C5 /* SwiftCharts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2499,7 +2513,6 @@
 				4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */,
 				43B371871CE597D10013C5A6 /* ShareClient.framework */,
 				4379CFEF21112CF700AADC79 /* ShareClientUI.framework */,
-				4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */,
 				438A95A71D8B9B24009D12E1 /* CGMBLEKit.framework */,
 				43F78D4B1C914197002152D1 /* LoopKit.framework */,
 				E9B07F86253BBA6500BAD8F8 /* IntentsUI.framework */,
@@ -2773,6 +2786,9 @@
 				E9B07F93253BBA6500BAD8F8 /* PBXTargetDependency */,
 			);
 			name = Loop;
+			packageProductDependencies = (
+				C1F00C5F285A802A006302C5 /* SwiftCharts */,
+			);
 			productName = Loop;
 			productReference = 43776F8C1B8022E90074EA36 /* Loop.app */;
 			productType = "com.apple.product-type.application";
@@ -2897,6 +2913,7 @@
 				43E2D9071D20C581004DA55F /* Sources */,
 				43E2D9081D20C581004DA55F /* Frameworks */,
 				43E2D9091D20C581004DA55F /* Resources */,
+				C1E3DC4828595FAA00CA19FF /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2904,6 +2921,9 @@
 				43E2D9111D20C581004DA55F /* PBXTargetDependency */,
 			);
 			name = LoopTests;
+			packageProductDependencies = (
+				C1E3DC4628595FAA00CA19FF /* SwiftCharts */,
+			);
 			productName = LoopTests;
 			productReference = 43E2D90B1D20C581004DA55F /* LoopTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -2915,14 +2935,16 @@
 				4F70C1D81DE8DCA7006380B7 /* Sources */,
 				4F70C1D91DE8DCA7006380B7 /* Frameworks */,
 				4F70C1DA1DE8DCA7006380B7 /* Resources */,
+				C1CCF1192858FBAD0035389C /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				43D9000D21EB0BEA00AF44BF /* PBXTargetDependency */,
-				4F7528991DFE1ED800C322D6 /* PBXTargetDependency */,
 			);
 			name = "Loop Status Extension";
+			packageProductDependencies = (
+				C1CCF1162858FBAD0035389C /* SwiftCharts */,
+			);
 			productName = "Loop Status Extension";
 			productReference = 4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -2935,13 +2957,17 @@
 				4F7528861DFE1DC600C322D6 /* Sources */,
 				4F7528871DFE1DC600C322D6 /* Frameworks */,
 				4F7528891DFE1DC600C322D6 /* Resources */,
+				C1CCF1112858F5180035389C /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				43D9001321EB137A00AF44BF /* PBXTargetDependency */,
+				C1CCF1152858FA900035389C /* PBXTargetDependency */,
 			);
 			name = LoopUI;
+			packageProductDependencies = (
+				C1F00C5C285A7FFB006302C5 /* SwiftCharts */,
+			);
 			productName = LoopUI;
 			productReference = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */;
 			productType = "com.apple.product-type.framework";
@@ -3110,6 +3136,9 @@
 				he,
 			);
 			mainGroup = 43776F831B8022E90074EA36;
+			packageReferences = (
+				C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */,
+			);
 			productRefGroup = 43776F8D1B8022E90074EA36 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -3881,16 +3910,6 @@
 			target = 43A943711B926B7B0051FA24 /* WatchApp */;
 			targetProxy = 43A943921B926B7B0051FA24 /* PBXContainerItemProxy */;
 		};
-		43D9000D21EB0BEA00AF44BF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
-			targetProxy = 43D9000C21EB0BEA00AF44BF /* PBXContainerItemProxy */;
-		};
-		43D9001321EB137A00AF44BF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
-			targetProxy = 43D9001221EB137A00AF44BF /* PBXContainerItemProxy */;
-		};
 		43D9FFBA21EA9CA400AF44BF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4F75288A1DFE1DC600C322D6 /* LoopUI */;
@@ -3916,11 +3935,6 @@
 			target = 4F75288A1DFE1DC600C322D6 /* LoopUI */;
 			targetProxy = 4F7528961DFE1ED400C322D6 /* PBXContainerItemProxy */;
 		};
-		4F7528991DFE1ED800C322D6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4F75288A1DFE1DC600C322D6 /* LoopUI */;
-			targetProxy = 4F7528981DFE1ED800C322D6 /* PBXContainerItemProxy */;
-		};
 		A942E445225FD97F00DD4980 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
@@ -3935,6 +3949,11 @@
 			isa = PBXTargetDependency;
 			target = 43D9001A21EB209400AF44BF /* LoopCore-watchOS */;
 			targetProxy = C117ED70232EDB3200DA57CD /* PBXContainerItemProxy */;
+		};
+		C1CCF1152858FA900035389C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
+			targetProxy = C1CCF1142858FA900035389C /* PBXContainerItemProxy */;
 		};
 		E9B07F93253BBA6500BAD8F8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4556,7 +4575,8 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -4578,7 +4598,10 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				OTHER_LDFLAGS = "";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
 				"OTHER_SWIFT_FLAGS[sdk=iphonesimulator*]" = "-D IOS_SIMULATOR -D DEBUG";
@@ -4600,7 +4623,10 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4619,7 +4645,11 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.watchkitextension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION_DEBUG)";
@@ -4640,7 +4670,11 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.watchkitextension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION_RELEASE)";
@@ -4662,7 +4696,10 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_DEBUG)";
@@ -4683,7 +4720,10 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_RELEASE)";
@@ -4709,6 +4749,7 @@
 				PRODUCT_NAME = LoopCore;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Debug;
@@ -4729,6 +4770,7 @@
 				PRODUCT_NAME = LoopCore;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Release;
@@ -4742,7 +4784,10 @@
 				CODE_SIGN_ENTITLEMENTS = Learn/Learn.entitlements;
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Learn/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)Learn";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -4758,7 +4803,10 @@
 				CODE_SIGN_ENTITLEMENTS = Learn/Learn.entitlements;
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Learn/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)Learn";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -4774,10 +4822,15 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Debug;
 		};
@@ -4790,10 +4843,15 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Release;
 		};
@@ -4802,9 +4860,13 @@
 			buildSettings = {
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = DoseMathTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.DoseMathTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Debug;
 		};
@@ -4813,9 +4875,13 @@
 			buildSettings = {
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = DoseMathTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.DoseMathTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Release;
 		};
@@ -4825,9 +4891,14 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop.app/Loop";
 			};
 			name = Debug;
@@ -4838,10 +4909,15 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop.app/Loop";
 			};
 			name = Release;
@@ -4855,7 +4931,11 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION_DEBUG)";
@@ -4873,7 +4953,11 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION_RELEASE)";
@@ -4890,10 +4974,15 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Debug;
 		};
@@ -4905,10 +4994,15 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Release;
 		};
@@ -4922,7 +5016,11 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).Loop-Intent-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_INTENT_EXTENSION_DEBUG)";
@@ -4941,7 +5039,11 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).Loop-Intent-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_INTENT_EXTENSION_RELEASE)";
@@ -5062,6 +5164,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ivanschuetz/SwiftCharts";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C1CCF1162858FBAD0035389C /* SwiftCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
+			productName = SwiftCharts;
+		};
+		C1E3DC4628595FAA00CA19FF /* SwiftCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
+			productName = SwiftCharts;
+		};
+		C1F00C5C285A7FFB006302C5 /* SwiftCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
+			productName = SwiftCharts;
+		};
+		C1F00C5F285A802A006302C5 /* SwiftCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
+			productName = SwiftCharts;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */ = {
