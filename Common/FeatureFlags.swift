@@ -132,7 +132,6 @@ struct FeatureFlagConfiguration: Decodable {
         
         // Swift compiler config is inverse, since the default state is enabled.
         #if OBSERVE_HEALTH_KIT_SAMPLES_FROM_OTHER_APPS_DISABLED
-        self.observeHealthKitCarbSamplesFromOtherApps = false
         self.observeHealthKitDoseSamplesFromOtherApps = false
         self.observeHealthKitGlucoseSamplesFromOtherApps = false
         #else
@@ -230,13 +229,17 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
 
 extension FeatureFlagConfiguration {
     var allowDebugFeatures: Bool {
-        #if ALLOW_DEBUG_FEATURES_ENABLED
+        #if DEBUG_FEATURES_ENABLED
+        return true
+        #elseif DEBUG_FEATURES_ENABLED_CONDITIONALLY
         if debugEnabled {
             return true
-        } else if UserDefaults.appGroup?.allowDebugFeatures ?? false {
-            return true
         } else {
-            return false
+            if UserDefaults.appGroup?.allowDebugFeatures ?? false {
+                return true
+            } else {
+                return false
+            }
         }
         #else
         return false
@@ -244,13 +247,17 @@ extension FeatureFlagConfiguration {
     }
     
     var allowSimulators: Bool {
-        #if ALLOW_SIMULATORS_ENABLED
+        #if SIMULATORS_ENABLED
+        return true
+        #elseif SIMULATORS_ENABLED_CONDITIONALLY
         if debugEnabled {
             return true
-        } else if UserDefaults.appGroup?.allowSimulators ?? false {
-            return true
         } else {
-            return false
+            if UserDefaults.appGroup?.allowSimulators ?? false {
+                return true
+            } else {
+                return false
+            }
         }
         #else
         return false
