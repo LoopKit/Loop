@@ -7,7 +7,6 @@
 
 import SwiftCharts
 
-
 extension ChartSettings {
     static var `default`: ChartSettings {
         var settings = ChartSettings()

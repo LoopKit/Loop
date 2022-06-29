@@ -53,6 +53,7 @@ public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: DosingStrategy)
     func didTapIssueReport(title: String)
+    var closedLoopDescriptiveText: String? { get }
 }
 
 public class SettingsViewModel: ObservableObject {
@@ -79,6 +80,12 @@ public class SettingsViewModel: ObservableObject {
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
 
     @Published var isClosedLoopAllowed: Bool
+
+    var closedLoopDescriptiveText: String? {
+        return delegate?.closedLoopDescriptiveText
+    }
+
+
     @Published var dosingStrategy: DosingStrategy {
         didSet {
             delegate?.dosingStrategyChanged(dosingStrategy)

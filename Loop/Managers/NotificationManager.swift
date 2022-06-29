@@ -78,7 +78,7 @@ extension NotificationManager {
 
     // MARK: - Notifications
 
-    static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date) {
+    static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date, activationType: BolusActivationType) {
         let notification = UNMutableNotificationContent()
 
         notification.title = NSLocalizedString("Bolus Issue", comment: "The notification title for a bolus issue")
@@ -103,7 +103,8 @@ extension NotificationManager {
 
         notification.userInfo = [
             LoopNotificationUserInfoKey.bolusAmount.rawValue: units,
-            LoopNotificationUserInfoKey.bolusStartDate.rawValue: startDate
+            LoopNotificationUserInfoKey.bolusStartDate.rawValue: startDate,
+            LoopNotificationUserInfoKey.bolusActivationType.rawValue: activationType.rawValue
         ]
 
         let request = UNNotificationRequest(
@@ -114,51 +115,6 @@ extension NotificationManager {
         )
 
         UNUserNotificationCenter.current().add(request)
-    }
-
-    static func scheduleLoopNotRunningNotifications() {
-        // Give a little extra time for a loop-in-progress to complete
-        let gracePeriod = TimeInterval(minutes: 0.5)
-
-        for (minutes, isCritical) in [(20.0, false), (40.0, false), (60.0, true), (120.0, true)] {
-            let notification = UNMutableNotificationContent()
-            let failureInterval = TimeInterval(minutes: minutes)
-
-            let formatter = DateComponentsFormatter()
-            formatter.maximumUnitCount = 1
-            formatter.allowedUnits = [.hour, .minute]
-            formatter.unitsStyle = .full
-
-            if let failureIntervalString = formatter.string(from: failureInterval)?.localizedLowercase {
-                notification.body = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failureIntervalString)
-            }
-
-            notification.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            if isCritical, FeatureFlags.criticalAlertsEnabled {
-                if #available(iOS 15.0, *) {
-                    notification.interruptionLevel = .critical
-                }
-                notification.sound = .defaultCritical
-            } else {
-                if #available(iOS 15.0, *) {
-                    notification.interruptionLevel = .timeSensitive
-                }
-                notification.sound = .default
-            }
-            notification.categoryIdentifier = LoopNotificationCategory.loopNotRunning.rawValue
-            notification.threadIdentifier = LoopNotificationCategory.loopNotRunning.rawValue
-
-            let request = UNNotificationRequest(
-                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(failureInterval)",
-                content: notification,
-                trigger: UNTimeIntervalNotificationTrigger(
-                    timeInterval: failureInterval + gracePeriod,
-                    repeats: false
-                )
-            )
-
-            UNUserNotificationCenter.current().add(request)
-        }
     }
     
     static func sendRemoteBolusNotification(amount: Double) {
@@ -249,18 +205,5 @@ extension NotificationManager {
     
     private static func remoteCarbEntryNotificationBody(amountInGrams: Double) -> String {
         return String(format: NSLocalizedString("Remote Carbs Entry: %d grams", comment: "The carb amount message for a remote carbs entry notification. (1: Carb amount in grams)"), Int(amountInGrams))
-    }
-
-    static func clearLoopNotRunningNotifications() {
-        // Clear out any existing not-running notifications
-        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
-            let loopNotRunningIdentifiers = notifications.filter({
-                $0.request.content.categoryIdentifier == LoopNotificationCategory.loopNotRunning.rawValue
-            }).map({
-                $0.request.identifier
-            })
-
-            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: loopNotRunningIdentifiers)
-        }
     }
 }

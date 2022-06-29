@@ -783,7 +783,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func updatePreMealModeAvailability(isClosedLoop: Bool) {
-        let allowed = onboardingManager.isComplete && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+        let allowed = onboardingManager.isComplete &&
+                (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+                && deviceManager.loopManager.settings.preMealTargetRange != nil
         toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
 
@@ -1451,6 +1453,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private func closedLoopStatusChanged(_ isClosedLoop: Bool) {
         updatePreMealModeAvailability(isClosedLoop: isClosedLoop)
         hudView?.loopCompletionHUD.loopIconClosed = isClosedLoop
+        hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
     }
 
     // MARK: - HUDs
@@ -1947,7 +1950,7 @@ extension StatusTableViewController {
     fileprivate func addCGMManager(withIdentifier identifier: String) {
         switch deviceManager.setupCGMManager(withIdentifier: identifier) {
         case .failure(let error):
-            log.default("Failure to setup CGM manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
+            log.error("Failure to setup CGM manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
         case .success(let success):
             switch success {
             case .userInteractionRequired(var setupViewController):
@@ -1963,12 +1966,20 @@ extension StatusTableViewController {
 
 extension StatusTableViewController {
     fileprivate func addPumpManager(withIdentifier identifier: String) {
-        let settings = PumpManagerSetupSettings(maxBasalRateUnitsPerHour: deviceManager.loopManager.settings.maximumBasalRatePerHour,
-                                                maxBolusUnits: deviceManager.loopManager.settings.maximumBolus,
-                                                basalSchedule: deviceManager.loopManager.basalRateSchedule)
+        guard let maximumBasalRate = deviceManager.loopManager.settings.maximumBasalRatePerHour,
+              let maxBolus = deviceManager.loopManager.settings.maximumBolus,
+              let basalSchedule = deviceManager.loopManager.basalRateSchedule else
+        {
+            log.error("Failure to setup pump manager: incomplete settings")
+            return
+        }
+        
+        let settings = PumpManagerSetupSettings(maxBasalRateUnitsPerHour: maximumBasalRate,
+                                                maxBolusUnits: maxBolus,
+                                                basalSchedule: basalSchedule)
         switch deviceManager.setupPumpManagerUI(withIdentifier: identifier, initialSettings: settings) {
         case .failure(let error):
-            log.default("Failure to setup pump manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
+            log.error("Failure to setup pump manager with identifier '%{public}@': %{public}@", identifier, String(describing: error))
         case .success(let success):
             switch success {
             case .userInteractionRequired(var setupViewController):
@@ -1991,6 +2002,10 @@ extension StatusTableViewController: BluetoothObserver {
 
 // MARK: - SettingsViewModel delegation
 extension StatusTableViewController: SettingsViewModelDelegate {
+    var closedLoopDescriptiveText: String? {
+        return deviceManager.closedLoopDisallowedLocalizedDescription
+    }
+
     func dosingEnabledChanged(_ value: Bool) {
         deviceManager.loopManager.mutateSettings { settings in
             settings.dosingEnabled = value

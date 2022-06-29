@@ -11,7 +11,7 @@ import Foundation
 
 extension Date {
     static var earliestGlucoseCutoff: Date {
-        return Date(timeIntervalSinceNow: .hours(-3))
+        return Date(timeIntervalSinceNow: .hours(-6))
     }
 
     static var staleGlucoseCutoff: Date {

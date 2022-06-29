@@ -16,6 +16,7 @@ import LoopKit
 import LoopKitUI
 import LoopUI
 import SwiftUI
+import SwiftCharts
 
 protocol BolusEntryViewModelDelegate: AnyObject {
     
@@ -28,7 +29,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
 
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
-    func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void)
+    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (_ error: Error?) -> Void)
     
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -61,6 +62,7 @@ final class BolusEntryViewModel: ObservableObject {
         case manualGlucoseEntryOutOfAcceptableRange
         case manualGlucoseEntryPersistenceFailure
         case glucoseNoLongerStale
+        case forecastInfo
     }
 
     enum Notice: Equatable {
@@ -100,7 +102,7 @@ final class BolusEntryViewModel: ObservableObject {
     @Published var recommendedBolus: HKQuantity?
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
     private var userChangedBolusAmount = false
-    private var isInitiatingSaveOrBolus = false
+    @Published var isInitiatingSaveOrBolus = false
 
     private var dosingDecision = BolusDosingDecision(for: .normalBolus)
 
@@ -114,7 +116,11 @@ final class BolusEntryViewModel: ObservableObject {
         let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
                                                           yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
         predictedGlucoseChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayRangeWide
-        return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
+        return ChartsManager(
+            colors: ChartColorPalette.primary,
+            settings: ChartSettings.default,
+            charts: [predictedGlucoseChart],
+            traitCollection: UITraitCollection.current)
     }()
 
     // needed to detect change in display glucose unit when returning to the app
@@ -311,12 +317,19 @@ final class BolusEntryViewModel: ObservableObject {
             return
         }
 
+        // Capture state as is during initial action, to prevent race conditions
+        // caused by later updates to member variables while async operations are
+        // in progress
+        let amountToDeliver = enteredBolus
+        let manualGlucoseSample = manualGlucoseSample
+        let potentialCarbEntry = potentialCarbEntry
+
         guard let maximumBolus = maximumBolus else {
             presentAlert(.noMaxBolusConfigured)
             return
         }
 
-        guard enteredBolus <= maximumBolus else {
+        guard amountToDeliver <= maximumBolus else {
             presentAlert(.maxBolusExceeded)
             return
         }
@@ -329,21 +342,22 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         // Authenticate the bolus before saving anything
-        if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
+        if amountToDeliver.doubleValue(for: .internationalUnit()) > 0 {
             isInitiatingSaveOrBolus = true
             let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString)
             authenticate(message) { [weak self] in
                 switch $0 {
                 case .success:
-                    self?.continueSaving(onSuccess: completion)
+                    self?.continueSaving(amountToDeliver: amountToDeliver, manualGlucoseSample: manualGlucoseSample, potentialCarbEntry: potentialCarbEntry, onSuccess: completion)
                 case .failure:
+                    self?.isInitiatingSaveOrBolus = false
                     break
                 }
             }
         } else if potentialCarbEntry != nil  { // Allow user to save carbs without bolusing
-            continueSaving(onSuccess: completion)
+            continueSaving(amountToDeliver: amountToDeliver, manualGlucoseSample: manualGlucoseSample, potentialCarbEntry: potentialCarbEntry, onSuccess: completion)
         } else if manualGlucoseSample != nil { // Allow user to save the manual glucose sample without bolusing
-            continueSaving(onSuccess: completion)
+            continueSaving(amountToDeliver: amountToDeliver, manualGlucoseSample: manualGlucoseSample, potentialCarbEntry: potentialCarbEntry, onSuccess: completion)
         } else {
             completion()
         }
@@ -367,7 +381,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
     
-    private func continueSaving(onSuccess completion: @escaping () -> Void) {
+    private func continueSaving(amountToDeliver: HKQuantity, manualGlucoseSample: NewGlucoseSample?, potentialCarbEntry: NewCarbEntry?, onSuccess completion: @escaping () -> Void) {
         if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
             delegate?.addGlucoseSamples([manualGlucoseSample]) { result in
@@ -375,7 +389,7 @@ final class BolusEntryViewModel: ObservableObject {
                     switch result {
                     case .success(let glucoseValues):
                         self.dosingDecision.manualGlucoseSample = glucoseValues.first
-                        self.saveCarbsAndDeliverBolus(onSuccess: completion)
+                        self.saveCarbsAndDeliverBolus(amountToDeliver: amountToDeliver, potentialCarbEntry: potentialCarbEntry, onSuccess: completion)
                     case .failure(let error):
                         self.isInitiatingSaveOrBolus = false
                         self.presentAlert(.manualGlucoseEntryPersistenceFailure)
@@ -385,14 +399,17 @@ final class BolusEntryViewModel: ObservableObject {
             }
         } else {
             self.dosingDecision.manualGlucoseSample = nil
-            saveCarbsAndDeliverBolus(onSuccess: completion)
+            saveCarbsAndDeliverBolus(amountToDeliver: amountToDeliver, potentialCarbEntry: potentialCarbEntry, onSuccess: completion)
         }
     }
 
-    private func saveCarbsAndDeliverBolus(onSuccess completion: @escaping () -> Void) {
+    private func saveCarbsAndDeliverBolus(amountToDeliver: HKQuantity, potentialCarbEntry: NewCarbEntry?, onSuccess completion: @escaping () -> Void) {
+        let bolusVolume = amountToDeliver.doubleValue(for: .internationalUnit())
+        let activationType = BolusActivationType.activationTypeFor(recommendedAmount: recommendedBolus?.doubleValue(for: .internationalUnit()), bolusAmount: bolusVolume)
+
         guard let carbEntry = potentialCarbEntry else {
             dosingDecision.carbEntry = nil
-            deliverBolus(onSuccess: completion)
+            deliverBolus(bolusVolume, activationType: activationType, onSuccess: completion)
             return
         }
 
@@ -411,7 +428,7 @@ final class BolusEntryViewModel: ObservableObject {
                 switch result {
                 case .success(let storedCarbEntry):
                     self.dosingDecision.carbEntry = storedCarbEntry
-                    self.deliverBolus(onSuccess: completion)
+                    self.deliverBolus(bolusVolume, activationType: activationType, onSuccess: completion)
                 case .failure(let error):
                     self.isInitiatingSaveOrBolus = false
                     self.presentAlert(.carbEntryPersistenceFailure)
@@ -421,22 +438,21 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func deliverBolus(onSuccess completion: @escaping () -> Void) {
+    private func deliverBolus(_ amount: Double, activationType: BolusActivationType, onSuccess completion: @escaping () -> Void) {
         let now = self.now()
-        let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
 
-        dosingDecision.manualBolusRequested = bolusVolume
+        dosingDecision.manualBolusRequested = amount
         delegate?.storeManualBolusDosingDecision(dosingDecision, withDate: now)
 
-        guard bolusVolume > 0 else {
+        guard amount > 0 else {
             completion()
             return
         }
 
         isInitiatingSaveOrBolus = true
         savedPreMealOverride = nil
-        // TODO: should we pass along completion or not???
-        delegate?.enactBolus(units: bolusVolume, automatic: false, completion: { _ in })
+        
+        delegate?.enactBolus(units: amount, activationType: activationType, completion: { _ in })
         completion()
     }
 

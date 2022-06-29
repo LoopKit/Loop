@@ -9,9 +9,10 @@
 import Foundation
 import LoopKit
 import LoopTestingKit
-
+import OSLog
 
 final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, DirectoryObserver {
+    
     unowned let deviceManager: DeviceDataManager
 
     let log = DiagnosticLog(category: "LocalTestingScenariosManager")
