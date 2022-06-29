@@ -141,7 +141,10 @@ extension AlertManager: AlertIssuer {
     }
 
     private func replayAlert(_ alert: Alert) {
-        handlers.forEach { $0.issueAlert(alert) }
+        // Only alerts with foreground content are replayed
+        if alert.foregroundContent != nil {
+            handlers.forEach { $0.issueAlert(alert) }
+        }
     }
 }
 
