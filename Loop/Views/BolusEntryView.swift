@@ -119,6 +119,25 @@ struct BolusEntryView: View {
                         .clipped()
                 }
                 .frame(height: ceil(UIScreen.main.bounds.height / 4))
+
+                if !FeatureFlags.usePositiveMomentumAndRCForManualBoluses {
+                    Divider()
+                    Button(action: {
+                        viewModel.activeAlert = .forecastInfo
+                    }) {
+                        HStack {
+                            Text("Forecasted blood glucose may still be higher than target range.")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 25))
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+
             }
             .padding(.top, 12)
             .padding(.bottom, 8)
@@ -406,6 +425,7 @@ struct BolusEntryView: View {
             }
         )
         .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
+        .disabled(viewModel.isInitiatingSaveOrBolus)
         .padding()
     }
 
@@ -456,6 +476,11 @@ struct BolusEntryView: View {
             return SwiftUI.Alert(
                 title: Text("Glucose Data Now Available", comment: "Alert title when glucose data returns while on bolus screen"),
                 message: Text("An updated bolus recommendation is available.", comment: "Alert message when glucose data returns while on bolus screen")
+            )
+        case .forecastInfo:
+            return SwiftUI.Alert(
+                title: Text("Forecasted Glucose", comment: "Title for forecast explanation modal on bolus view"),
+                message: Text("The bolus dosing algorithm uses a more conservative estimate of forecasted blood glucose than what is used to adjust your basal rate.\n\nAs a result, your forecasted blood glucose after a bolus may still be higher than your target range.", comment: "Forecast explanation modal on bolus view")
             )
         }
     }

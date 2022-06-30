@@ -206,16 +206,16 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         guard !hasSentConfirmationMessage else {
             return
         }
+        self.hasSentConfirmationMessage = true
 
-        let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry)
+        let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry, activationType: .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus))
         do {
             try WCSession.default.sendBolusMessage(bolus) { [weak self] (error) in
                 DispatchQueue.main.async {
                     if let error = error {
                         ExtensionDelegate.shared().present(error)
+                        self?.hasSentConfirmationMessage = false
                     } else {
-                        self?.hasSentConfirmationMessage = true
-
                         if bolus.carbEntry != nil {
                             if bolus.value == 0 {
                                 // Notify for a successful carb entry (sans bolus)

@@ -69,6 +69,16 @@ final class DeviceDataManager {
         if !FeatureFlags.lyumjevInsulinModelEnabled {
             allowed.remove(.lyumjev)
         }
+        if !FeatureFlags.afrezzaInsulinModelEnabled {
+            allowed.remove(.afrezza)
+        }
+
+        for insulinType in InsulinType.allCases {
+            if !insulinType.pumpAdministerable {
+                allowed.remove(insulinType)
+            }
+        }
+
         return allowed
     }()
 
@@ -85,9 +95,13 @@ final class DeviceDataManager {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
             NotificationCenter.default.post(name: .CGMManagerChanged, object: self, userInfo: nil)
-            UserDefaults.appGroup?.cgmManagerRawValue = cgmManager?.rawValue
+            rawCGMManager = cgmManager?.rawValue
+            UserDefaults.appGroup?.clearLegacyCGMManagerRawValue()
         }
     }
+
+    @PersistedProperty(key: "CGMManagerState")
+    var rawCGMManager: CGMManager.RawValue?
 
     // MARK: - Pump
 
@@ -104,9 +118,15 @@ final class DeviceDataManager {
 
             NotificationCenter.default.post(name: .PumpManagerChanged, object: self, userInfo: nil)
 
-            UserDefaults.appGroup?.pumpManagerRawValue = pumpManager?.rawValue
+            rawPumpManager = pumpManager?.rawValue
+            UserDefaults.appGroup?.clearLegacyPumpManagerRawValue()
+
         }
     }
+
+    @PersistedProperty(key: "PumpManagerState")
+    var rawPumpManager: PumpManager.RawValue?
+
     
     var doseEnactor = DoseEnactor()
     
@@ -290,7 +310,7 @@ final class DeviceDataManager {
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
         displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
 
-        if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
+        if let pumpManagerRawValue = rawPumpManager ?? UserDefaults.appGroup?.legacyPumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
             // Update lastPumpEventsReconciliation on DoseStore
             if let lastSync = pumpManager?.lastSync {
@@ -303,10 +323,10 @@ final class DeviceDataManager {
             pumpManager = nil
         }
 
-        if let cgmManagerRawValue = UserDefaults.appGroup?.cgmManagerRawValue {
+        if let cgmManagerRawValue = rawCGMManager ?? UserDefaults.appGroup?.legacyCGMManagerRawValue {
             cgmManager = cgmManagerFromRawValue(cgmManagerRawValue)
         } else if isCGMManagerValidPumpManager {
-            self.cgmManager = pumpManager as? CGMManager
+            cgmManager = pumpManager as? CGMManager
         }
 
         //TODO The instantiation of these non-device related managers should be moved to LoopAppManager, and then LoopAppManager can wire up the connections between them.
@@ -397,7 +417,7 @@ final class DeviceDataManager {
     }
     
     var isCGMManagerValidPumpManager: Bool {
-        guard let rawValue = UserDefaults.appGroup?.cgmManagerState else {
+        guard let rawValue = rawCGMManager else {
             return false
         }
 
@@ -719,14 +739,14 @@ private extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, automatic: Bool, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
+    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
             return
         }
 
         self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true), completion: nil)
-        pumpManager.enactBolus(units: units, automatic: automatic) { (error) in
+        pumpManager.enactBolus(units: units, activationType: activationType) { (error) in
             if let error = error {
                 self.log.error("%{public}@", String(describing: error))
                 switch error {
@@ -735,8 +755,8 @@ extension DeviceDataManager {
                     break
                 default:
                     // Do not generate notifications for automatic boluses that fail.
-                    if !automatic {
-                        NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date())
+                    if !activationType.isAutomatic {
+                        NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), activationType: activationType)
                     }
                 }
                 
@@ -885,7 +905,7 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManagerDidUpdateState(_ manager: CGMManager) {
         dispatchPrecondition(condition: .onQueue(queue))
-        UserDefaults.appGroup?.cgmManagerRawValue = manager.rawValue
+        rawCGMManager = manager.rawValue
     }
 
     func credentialStoragePrefix(for manager: CGMManager) -> String {
@@ -934,7 +954,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ did update state", String(describing: type(of: pumpManager)))
 
-        UserDefaults.appGroup?.pumpManagerRawValue = pumpManager.rawValue
+        rawPumpManager = pumpManager.rawValue
     }
 
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
@@ -1251,7 +1271,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             return
         }
 
-        log.default("LoopManager did recommend dose")
+        log.default("LoopManager did recommend dose: %{public}@", String(describing: automaticDose.recommendation))
         
         doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager) { pumpManagerError in
             completion(pumpManagerError.map { .pumpManagerError($0) })
@@ -1314,8 +1334,9 @@ extension DeviceDataManager {
                         log.default("Remote bolus higher than maximum. Aborting...")
                         return
                     }
-                    
-                    self.enactBolus(units: bolusAmount, automatic: true) { error in
+
+                    // For remote boluses, assume manual no recommendation.
+                    self.enactBolus(units: bolusAmount, activationType: .manualNoRecommendation) { error in
                         if let error = error {
                             NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAmount)
                         } else {

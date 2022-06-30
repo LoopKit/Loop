@@ -39,15 +39,3 @@ function copy_plugins {
 }
 
 copy_plugins "$BUILT_PRODUCTS_DIR"
-
-CARTHAGE_BUILD_DIR="${SRCROOT}/Carthage/Build"
-if [ -n "${IPHONEOS_DEPLOYMENT_TARGET}" ]; then
-CARTHAGE_BUILD_DIR="${CARTHAGE_BUILD_DIR}/iOS"
-elif [ -n "${WATCHOS_DEPLOYMENT_TARGET}" ]; then
-CARTHAGE_BUILD_DIR="${CARTHAGE_BUILD_DIR}/watchOS"
-else
-echo "ERROR: Unexpected deployment target type"
-exit 1
-fi
-
-copy_plugins "$CARTHAGE_BUILD_DIR"

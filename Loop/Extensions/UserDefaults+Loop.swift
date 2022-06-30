@@ -11,38 +11,59 @@ import LoopKit
 
 extension UserDefaults {
     private enum Key: String {
-        case pumpManagerState = "com.loopkit.Loop.PumpManagerState"
-        case cgmManagerState = "com.loopkit.Loop.CGMManagerState"
+        case legacyPumpManagerState = "com.loopkit.Loop.PumpManagerState"
+        case legacyCGMManagerState = "com.loopkit.Loop.CGMManagerState"
+        case legacyServicesState = "com.loopkit.Loop.ServicesState"
+        case loopNotRunningNotifications = "com.loopkit.Loop.loopNotRunningNotifications"
     }
 
-    var pumpManagerRawValue: [String: Any]? {
+    var legacyPumpManagerRawValue: PumpManager.RawValue? {
         get {
-            return dictionary(forKey: Key.pumpManagerState.rawValue)
+            return dictionary(forKey: Key.legacyPumpManagerState.rawValue)
         }
-        set {
-            set(newValue, forKey: Key.pumpManagerState.rawValue)
+    }
+    func clearLegacyPumpManagerRawValue() {
+        set(nil, forKey: Key.legacyPumpManagerState.rawValue)
+    }
+
+
+    var legacyCGMManagerRawValue: CGMManager.RawValue? {
+        get {
+            return dictionary(forKey: Key.legacyCGMManagerState.rawValue)
         }
     }
 
-    var cgmManagerRawValue: [String: Any]? {
+    func clearLegacyCGMManagerRawValue() {
+        set(nil, forKey: Key.legacyCGMManagerState.rawValue)
+    }
+
+    var legacyServicesState: [Service.RawStateValue] {
         get {
-            return dictionary(forKey: Key.cgmManagerState.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.cgmManagerState.rawValue)
+            return array(forKey: Key.legacyServicesState.rawValue) as? [[String: Any]] ?? []
         }
     }
-    
-    var cgmManager: CGMManager? {
+
+    func clearLegacyServicesState() {
+        set(nil, forKey: Key.legacyServicesState.rawValue)
+    }
+
+
+    var loopNotRunningNotifications: [StoredLoopNotRunningNotification] {
         get {
-            guard let rawValue = cgmManagerState else {
-                return nil
+            let decoder = JSONDecoder()
+            guard let data = object(forKey: Key.loopNotRunningNotifications.rawValue) as? Data else {
+                return []
             }
-
-            return CGMManagerFromRawValue(rawValue)
+            return (try? decoder.decode([StoredLoopNotRunningNotification].self, from: data)) ?? []
         }
         set {
-            cgmManagerState = newValue?.rawValue
+            do {
+                let encoder = JSONEncoder()
+                let data = try encoder.encode(newValue)
+                set(data, forKey: Key.loopNotRunningNotifications.rawValue)
+            } catch {
+                assertionFailure("Unable to encode Loop not running notification")
+            }
         }
     }
 }

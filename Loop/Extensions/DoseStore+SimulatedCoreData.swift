@@ -21,38 +21,53 @@ extension DoseStore {
     private var simulatedLimit: Int { 10000 }
 
     func generateSimulatedHistoricalPumpEvents(completion: @escaping (Error?) -> Void) {
-        generatedSimulatedHistoricalBasalPumpEvents() { error in
-            guard error == nil else {
-                completion(error)
-                return
-            }
-            self.generatedSimulatedHistoricalBolusPumpEvents() { error in
-                guard error == nil else {
-                    completion(error)
-                    return
-                }
-                self.generatedSimulatedHistoricalOtherPumpEvents(completion: completion)
-            }
-        }
-    }
-
-    private func generatedSimulatedHistoricalBasalPumpEvents(completion: @escaping (Error?) -> Void) {
         var startDate = Calendar.current.startOfDay(for: cacheStartDate)
         let endDate = Calendar.current.startOfDay(for: historicalEndDate)
         var index = 0
         var simulated = [PersistedPumpEvent]()
+        var suspendedAt: Date?
 
         while startDate < endDate {
-            switch index % 3 {
-            case 0:
-                simulated.append(PersistedPumpEvent.simulatedTempBasal(date: startDate, duration: .minutes(5), rate: 0, scheduledRate: 1))
-            case 1:
-                simulated.append(PersistedPumpEvent.simulatedTempBasal(date: startDate, duration: .minutes(5), rate: 2, scheduledRate: 1))
-            default:
-                simulated.append(PersistedPumpEvent.simulatedBasal(date: startDate, duration: .minutes(5), rate: 1))
+
+            let basalEvent: PersistedPumpEvent?
+
+            // Suspends last for 30m
+            if let suspendedTime = suspendedAt, startDate.timeIntervalSince(suspendedTime) >= .minutes(30) {
+                basalEvent = PersistedPumpEvent.simulatedResume(date: startDate)
+                suspendedAt = nil
+            } else if Double.random(in: 0...1) > 0.98 { // 2% chance of this being a suspend
+                basalEvent = PersistedPumpEvent.simulatedSuspend(date: startDate)
+                suspendedAt = startDate
+            } else if Double.random(in: 0...1) < 0.98 { // 98% chance of a successful basal
+                let rate = [0, 0.5, 1, 1.5, 2, 6].randomElement()!
+                basalEvent = PersistedPumpEvent.simulatedTempBasal(date: startDate, duration: .minutes(5), rate: rate, scheduledRate: 1)
+            } else {
+                basalEvent = nil
             }
 
-            if simulated.count >= simulatedLimit {
+            if let basalEvent = basalEvent {
+                simulated.append(basalEvent)
+            }
+
+            if Double.random(in: 0...1) > 0.98 { // 2% chance of some other event
+                let eventDate = startDate.addingTimeInterval(.minutes(1))
+                simulated.append([
+                    PersistedPumpEvent.simulatedAlarm(date: eventDate),
+                    PersistedPumpEvent.simulatedAlarmClear(date: eventDate),
+                    PersistedPumpEvent.simulatedRewind(date: eventDate),
+                    PersistedPumpEvent.simulatedPrime(date: eventDate)
+                ].randomElement()!)
+            }
+
+            if Double.random(in: 0...1) < 0.27 { // Aim for roughly 8 per day (chance = 8/288)
+                let eventDate = startDate.addingTimeInterval(.minutes(2))
+                let amount = [0, 1.5, 2, 3.5, 5, 6].randomElement()!
+                simulated.append(PersistedPumpEvent.simulatedBolus(date: eventDate, amount: amount))
+            }
+
+
+            // Process about a day's worth at a time
+            if simulated.count >= 300 {
                 if let error = addPumpEvents(events: simulated) {
                     completion(error)
                     return
@@ -62,64 +77,6 @@ extension DoseStore {
 
             index += 1
             startDate = startDate.addingTimeInterval(simulatedBasalStartDateInterval)
-        }
-
-        completion(addPumpEvents(events: simulated))
-    }
-
-    private func generatedSimulatedHistoricalBolusPumpEvents(completion: @escaping (Error?) -> Void) {
-        var startDate = Calendar.current.startOfDay(for: cacheStartDate)
-        let endDate = Calendar.current.startOfDay(for: historicalEndDate)
-        var simulated = [PersistedPumpEvent]()
-
-        while startDate < endDate {
-            for index in 0..<simulatedBolusPerDay {
-                simulated.append(PersistedPumpEvent.simulatedBolus(date: startDate.addingTimeInterval(.hours(24) * Double(index) / Double(simulatedBolusPerDay)),
-                                                                amount: Double(2 + index % 3)))
-            }
-
-            if simulated.count >= simulatedLimit {
-                if let error = addPumpEvents(events: simulated) {
-                    completion(error)
-                    return
-                }
-                simulated = []
-            }
-
-            startDate = Calendar.current.date(byAdding: .day, value: 1, to: startDate)!
-        }
-
-        completion(addPumpEvents(events: simulated))
-    }
-
-    private func generatedSimulatedHistoricalOtherPumpEvents(completion: @escaping (Error?) -> Void) {
-        var startDate = Calendar.current.startOfDay(for: cacheStartDate)
-        let endDate = Calendar.current.startOfDay(for: historicalEndDate)
-        var simulated = [PersistedPumpEvent]()
-
-        while startDate < endDate {
-            for index in 0..<simulatedOtherPerDay {
-                var date = startDate.addingTimeInterval(.hours(24) * Double(index) / Double(simulatedOtherPerDay) + .minutes(5))
-                simulated.append(PersistedPumpEvent.simulatedAlarm(date: date))
-                simulated.append(PersistedPumpEvent.simulatedSuspend(date: date))
-                date = date.addingTimeInterval(.minutes(1))
-                simulated.append(PersistedPumpEvent.simulatedAlarmClear(date: date))
-                simulated.append(PersistedPumpEvent.simulatedRewind(date: date))
-                date = date.addingTimeInterval(.minutes(2))
-                simulated.append(PersistedPumpEvent.simulatedPrime(date: date))
-                date = date.addingTimeInterval(.minutes(1))
-                simulated.append(PersistedPumpEvent.simulatedResume(date: date))
-            }
-
-            if simulated.count >= simulatedLimit {
-                if let error = addPumpEvents(events: simulated) {
-                    completion(error)
-                    return
-                }
-                simulated = []
-            }
-
-            startDate = Calendar.current.date(byAdding: .day, value: 1, to: startDate)!
         }
 
         completion(addPumpEvents(events: simulated))
