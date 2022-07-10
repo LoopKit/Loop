@@ -430,7 +430,6 @@
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11B9D5B286778A800500CF8 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C11B9D5A286778A800500CF8 /* SwiftCharts */; };
 		C11B9D5E286778D000500CF8 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D5D286778D000500CF8 /* LoopKitUI.framework */; };
-		C11B9D5F286778D000500CF8 /* LoopKitUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D5D286778D000500CF8 /* LoopKitUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C11B9D62286779C000500CF8 /* MockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D60286779C000500CF8 /* MockKit.framework */; };
 		C11B9D63286779C000500CF8 /* MockKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D60286779C000500CF8 /* MockKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C11B9D64286779C000500CF8 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D61286779C000500CF8 /* MockKitUI.framework */; };
@@ -764,17 +763,6 @@
 				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C1CCF1112858F5180035389C /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				C11B9D5F286778D000500CF8 /* LoopKitUI.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C1E3DC4828595FAA00CA19FF /* Embed Frameworks */ = {
@@ -2965,7 +2953,6 @@
 				4F7528861DFE1DC600C322D6 /* Sources */,
 				4F7528871DFE1DC600C322D6 /* Frameworks */,
 				4F7528891DFE1DC600C322D6 /* Resources */,
-				C1CCF1112858F5180035389C /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
