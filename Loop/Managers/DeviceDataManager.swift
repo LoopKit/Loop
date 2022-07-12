@@ -259,7 +259,7 @@ final class DeviceDataManager {
         self.settingsManager = settingsManager
 
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
-        let sensitivitySchedule = UserDefaults.appGroup?.insulinSensitivitySchedule
+        let sensitivitySchedule = settingsManager.latestSettings?.insulinSensitivitySchedule
         
         self.carbStore = CarbStore(
             healthStore: healthStore,
@@ -268,7 +268,7 @@ final class DeviceDataManager {
             cacheLength: localCacheDuration,
             defaultAbsorptionTimes: absorptionTimes,
             observationInterval: absorptionTimes.slow * 2,
-            carbRatioSchedule: UserDefaults.appGroup?.carbRatioSchedule,
+            carbRatioSchedule: settingsManager.latestSettings?.carbRatioSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
             carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear,
@@ -280,9 +280,9 @@ final class DeviceDataManager {
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: UserDefaults.appGroup?.defaultRapidActingModel),
+            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings?.defaultRapidActingModel?.presetForRapidActingInsulin),
             longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
-            basalProfile: UserDefaults.appGroup?.basalRateSchedule,
+            basalProfile: settingsManager.latestSettings?.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
             lastPumpEventsReconciliation: nil, // PumpManager is nil at this point. Will update this via addPumpEvents below
@@ -335,6 +335,7 @@ final class DeviceDataManager {
         loopManager = LoopDataManager(
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
             basalDeliveryState: pumpManager?.status.basalDeliveryState,
+            settings: settingsManager.loopSettings,
             overrideHistory: overrideHistory,
             analyticsServicesManager: analyticsServicesManager,
             localCacheDuration: localCacheDuration,
@@ -343,11 +344,11 @@ final class DeviceDataManager {
             carbStore: carbStore,
             dosingDecisionStore: dosingDecisionStore,
             latestStoredSettingsProvider: settingsManager,
-            alertIssuer: alertManager,
             pumpInsulinType: pumpManager?.status.insulinType,
             automaticDosingStatus: closedLoopStatus
         )
         cacheStore.delegate = loopManager
+        loopManager.presetActivationObserver = alertManager
         
         watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 

@@ -422,7 +422,6 @@ extension WatchDataManager: WCSessionDelegate {
                 var loopSettings = deviceManager.loopManager.settings
                 loopSettings.preMealOverride = watchSettings.preMealOverride
                 loopSettings.scheduleOverride = watchSettings.scheduleOverride
-                loopSettings.indefiniteWorkoutOverrideEnabledDate = watchSettings.indefiniteWorkoutOverrideEnabledDate
 
                 // Prevent re-sending these updated settings back to the watch
                 lastSentSettings = loopSettings
