@@ -66,7 +66,6 @@ class LoopAppManager: NSObject {
     private var pluginManager: PluginManager!
     private var bluetoothStateManager: BluetoothStateManager!
     private var alertManager: AlertManager!
-    private var loopAlertsManager: LoopAlertsManager!
     private var trustedTimeChecker: TrustedTimeChecker!
     private var deviceDataManager: DeviceDataManager!
     private var onboardingManager: OnboardingManager!
@@ -161,10 +160,9 @@ class LoopAppManager: NSObject {
         self.pluginManager = PluginManager()
         self.bluetoothStateManager = BluetoothStateManager()
         self.alertManager = AlertManager(alertPresenter: self,
-                                         expireAfter: Bundle.main.localCacheDuration)
+                                         expireAfter: Bundle.main.localCacheDuration,
+                                         bluetoothProvider: bluetoothStateManager)
         self.alertPermissionsChecker = AlertPermissionsChecker(alertManager: alertManager)
-        self.loopAlertsManager = LoopAlertsManager(alertManager: alertManager,
-                                                   bluetoothProvider: bluetoothStateManager)
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
 
         self.settingsManager = SettingsManager(cacheStore: cacheStore, expireAfter: localCacheDuration)
@@ -269,7 +267,7 @@ class LoopAppManager: NSObject {
         }
         settingsManager?.didBecomeActive()
         deviceDataManager?.didBecomeActive()
-        loopAlertsManager.inferDeliveredLoopNotRunningNotifications()
+        alertManager.inferDeliveredLoopNotRunningNotifications()
     }
 
     // MARK: - Remote Notification

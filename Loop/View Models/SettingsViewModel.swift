@@ -51,7 +51,7 @@ public typealias PumpManagerViewModel = DeviceViewModel<PumpManagerDescriptor>
 
 public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
-    func dosingStrategyChanged(_: DosingStrategy)
+    func dosingStrategyChanged(_: AutomaticDosingStrategy)
     func didTapIssueReport(title: String)
     var closedLoopDescriptiveText: String? { get }
 }
@@ -86,9 +86,9 @@ public class SettingsViewModel: ObservableObject {
     }
 
 
-    @Published var dosingStrategy: DosingStrategy {
+    @Published var automaticDosingStrategy: AutomaticDosingStrategy {
         didSet {
-            delegate?.dosingStrategyChanged(dosingStrategy)
+            delegate?.dosingStrategyChanged(automaticDosingStrategy)
         }
     }
 
@@ -111,7 +111,7 @@ public class SettingsViewModel: ObservableObject {
                 initialDosingEnabled: Bool,
                 isClosedLoopAllowed: Published<Bool>.Publisher,
                 supportInfoProvider: SupportInfoProvider,
-                dosingStrategy: DosingStrategy,
+                automaticDosingStrategy: AutomaticDosingStrategy,
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
@@ -127,7 +127,7 @@ public class SettingsViewModel: ObservableObject {
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.closedLoopPreference = initialDosingEnabled
         self.isClosedLoopAllowed = false
-        self.dosingStrategy = dosingStrategy
+        self.automaticDosingStrategy = automaticDosingStrategy
         self.supportInfoProvider = supportInfoProvider
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
@@ -188,7 +188,7 @@ extension SettingsViewModel {
                                  initialDosingEnabled: true,
                                  isClosedLoopAllowed: FakeClosedLoopAllowedPublisher().$mockIsClosedLoopAllowed,
                                  supportInfoProvider: MockSupportInfoProvider(),
-                                 dosingStrategy: .automaticBolus,
+                                 automaticDosingStrategy: .automaticBolus,
                                  availableSupports: [],
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,

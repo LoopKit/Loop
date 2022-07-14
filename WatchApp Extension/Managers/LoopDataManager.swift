@@ -13,6 +13,7 @@ import LoopCore
 import WatchConnectivity
 import os.log
 
+
 class LoopDataManager {
     let carbStore: CarbStore
 
@@ -25,7 +26,6 @@ class LoopDataManager {
     // Main queue only
     var settings = LoopSettings() {
         didSet {
-            UserDefaults.standard.loopSettings = settings
             needsDidUpdateContextNotification = true
             sendDidUpdateContextNotificationIfNecessary()
         }
@@ -57,9 +57,7 @@ class LoopDataManager {
     /// Main queue only
     private var lastGlucoseBackfill = Date.distantPast
 
-    init(settings: LoopSettings = UserDefaults.standard.loopSettings ?? LoopSettings()) {
-        self.settings = settings
-
+    init() {
         let healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInLocalDirectory()
 

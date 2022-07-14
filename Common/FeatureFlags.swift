@@ -34,6 +34,8 @@ struct FeatureFlagConfiguration: Decodable {
     let siriEnabled: Bool
     let simpleBolusCalculatorEnabled: Bool
     let usePositiveMomentumAndRCForManualBoluses: Bool
+    let dynamicCarbAbsorptionEnabled: Bool
+
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -193,6 +195,8 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.usePositiveMomentumAndRCForManualBoluses = true
         #endif
+
+        self.dynamicCarbAbsorptionEnabled = true
     }
 }
 
@@ -223,6 +227,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* allowDebugFeatures: \(allowDebugFeatures)",
             "* simpleBolusCalculatorEnabled: \(simpleBolusCalculatorEnabled)",
             "* usePositiveMomentumAndRCForManualBoluses: \(usePositiveMomentumAndRCForManualBoluses)",
+            "* dynamicCarbAbsorptionEnabled: \(dynamicCarbAbsorptionEnabled)"
         ].joined(separator: "\n")
     }
 }
