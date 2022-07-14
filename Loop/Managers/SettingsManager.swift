@@ -13,6 +13,7 @@ import UIKit
 import HealthKit
 import Combine
 import LoopCore
+import LoopKitUI
 
 protocol DeviceStatusProvider {
     var pumpManagerStatus: PumpManagerStatus? { get }
@@ -27,6 +28,8 @@ class SettingsManager {
 
     var deviceStatusProvider: DeviceStatusProvider?
 
+    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable?
+
     public var latestSettings: StoredSettings? {
         return settingsStore.latestSettings
     }
@@ -36,7 +39,9 @@ class SettingsManager {
 
     private var cancellables: Set<AnyCancellable> = []
 
-    init(cacheStore: PersistenceController, expireAfter: TimeInterval) {
+
+    init(cacheStore: PersistenceController, expireAfter: TimeInterval)
+    {
         settingsStore = SettingsStore(store: cacheStore, expireAfter: expireAfter)
         settingsStore.delegate = self
 
@@ -92,12 +97,13 @@ class SettingsManager {
     func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil)
     {
 
-        // Don't save without deviceToken if running with remote overrides
-        if FeatureFlags.remoteOverridesEnabled {
-            guard deviceToken != nil else {
-                return
-            }
+#if targetEnvironment(simulator)
+        let deviceToken = "mockDeviceTokenFromSimulator"
+#else
+        guard let deviceToken = deviceToken?.hexadecimalString else {
+            return
         }
+#endif
 
         let newLoopSettings = newLoopSettings ?? loopSettings
         let newNotificationSettings = notificationSettings ?? settingsStore.latestSettings?.notificationSettings
@@ -113,7 +119,7 @@ class SettingsManager {
                                       maximumBasalRatePerHour: newLoopSettings.maximumBasalRatePerHour,
                                       maximumBolus: newLoopSettings.maximumBolus,
                                       suspendThreshold: newLoopSettings.suspendThreshold,
-                                      deviceToken: deviceToken?.hexadecimalString,
+                                      deviceToken: deviceToken,
                                       insulinType: deviceStatusProvider?.pumpManagerStatus?.insulinType,
                                       defaultRapidActingModel: newLoopSettings.defaultRapidActingModel.map(StoredInsulinModel.init),
                                       basalRateSchedule: newLoopSettings.basalRateSchedule,
@@ -123,7 +129,7 @@ class SettingsManager {
                                       controllerDevice: UIDevice.current.controllerDevice,
                                       cgmDevice: deviceStatusProvider?.cgmManagerStatus?.device,
                                       pumpDevice: deviceStatusProvider?.pumpManagerStatus?.device,
-                                      bloodGlucoseUnit: newLoopSettings.glucoseUnit)
+                                      bloodGlucoseUnit: displayGlucoseUnitObservable?.displayGlucoseUnit)
 
         if let latestSettings = latestSettings, latestSettings == settings {
             // Skipping unchanged settings store

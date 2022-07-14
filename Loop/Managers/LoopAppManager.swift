@@ -165,7 +165,8 @@ class LoopAppManager: NSObject {
         self.alertPermissionsChecker = AlertPermissionsChecker(alertManager: alertManager)
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
 
-        self.settingsManager = SettingsManager(cacheStore: cacheStore, expireAfter: localCacheDuration)
+        self.settingsManager = SettingsManager(cacheStore: cacheStore,
+                                               expireAfter: localCacheDuration)
 
         self.deviceDataManager = DeviceDataManager(pluginManager: pluginManager,
                                                    alertManager: alertManager,
@@ -178,6 +179,8 @@ class LoopAppManager: NSObject {
                                                    overrideHistory: overrideHistory
         )
         settingsManager.deviceStatusProvider = deviceDataManager
+        settingsManager.displayGlucoseUnitObservable = deviceDataManager.displayGlucoseUnitObservable
+
 
         overrideHistory.delegate = self
 
