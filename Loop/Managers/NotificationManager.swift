@@ -122,7 +122,6 @@ extension NotificationManager {
         let quantityFormatter = QuantityFormatter()
         quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
         guard let amountDescription = quantityFormatter.numberFormatter.string(from: amount) else {
-            print("Unexpected, cannot convert remote bolus amount to string: \(amount)")
             return
         }
         notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %@ U", comment: "The notification title for a remote bolus. (1: Bolus amount)"), amountDescription)
@@ -146,7 +145,6 @@ extension NotificationManager {
         let quantityFormatter = QuantityFormatter()
         quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
         guard let amountDescription = quantityFormatter.numberFormatter.string(from: amount) else {
-            print("Unexpected, cannot convert remote bolus amount to string: \(amount)")
             return
         }
 
