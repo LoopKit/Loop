@@ -129,7 +129,8 @@ class SettingsManager {
                                       controllerDevice: UIDevice.current.controllerDevice,
                                       cgmDevice: deviceStatusProvider?.cgmManagerStatus?.device,
                                       pumpDevice: deviceStatusProvider?.pumpManagerStatus?.device,
-                                      bloodGlucoseUnit: displayGlucoseUnitObservable?.displayGlucoseUnit)
+                                      bloodGlucoseUnit: displayGlucoseUnitObservable?.displayGlucoseUnit,
+                                      automaticDosingStrategy: newLoopSettings.automaticDosingStrategy)
 
         if let latestSettings = latestSettings, latestSettings == settings {
             // Skipping unchanged settings store
