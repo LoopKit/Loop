@@ -1624,7 +1624,7 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
         case .suspendThreshold:
             loopManager.mutateSettings { settings in settings.suspendThreshold = therapySettings.suspendThreshold }
         case .basalRate:
-            loopManager.basalRateSchedule = therapySettings.basalRateSchedule
+            loopManager.mutateSettings { settings in settings.basalRateSchedule = therapySettings.basalRateSchedule }
         case .deliveryLimits:
             loopManager.mutateSettings { settings in
                 settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
@@ -1632,14 +1632,12 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
             }
         case .insulinModel:
             if let defaultRapidActingModel = therapySettings.defaultRapidActingModel {
-                loopManager.defaultRapidActingModel = defaultRapidActingModel
+                loopManager.mutateSettings { settings in settings.defaultRapidActingModel = defaultRapidActingModel }
             }
         case .carbRatio:
-            loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule
-            analyticsServicesManager.didChangeCarbRatioSchedule()
+            loopManager.mutateSettings { settings in settings.carbRatioSchedule = therapySettings.carbRatioSchedule }
         case .insulinSensitivity:
-            loopManager.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
-            analyticsServicesManager.didChangeInsulinSensitivitySchedule()
+            loopManager.mutateSettings { settings in settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule }
         case .none:
             break // NO-OP
         }

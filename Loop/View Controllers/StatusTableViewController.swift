@@ -1697,11 +1697,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     settings.suspendThreshold = therapySettings.suspendThreshold
                     settings.maximumBolus = therapySettings.maximumBolus
                     settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
+                    settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
+                    settings.carbRatioSchedule = therapySettings.carbRatioSchedule
+                    settings.basalRateSchedule = therapySettings.basalRateSchedule
+                    settings.defaultRapidActingModel = therapySettings.defaultRapidActingModel
                 }
-                self.deviceManager.loopManager.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
-                self.deviceManager.loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule
-                self.deviceManager.loopManager.basalRateSchedule = therapySettings.basalRateSchedule
-                self.deviceManager.loopManager.defaultRapidActingModel = therapySettings.defaultRapidActingModel
             })
         }
         actionSheet.addAction(UIAlertAction(title: "Crash the App", style: .destructive) { _ in
@@ -1968,7 +1968,7 @@ extension StatusTableViewController {
     fileprivate func addPumpManager(withIdentifier identifier: String) {
         guard let maximumBasalRate = deviceManager.loopManager.settings.maximumBasalRatePerHour,
               let maxBolus = deviceManager.loopManager.settings.maximumBolus,
-              let basalSchedule = deviceManager.loopManager.basalRateSchedule else
+              let basalSchedule = deviceManager.loopManager.settings.basalRateSchedule else
         {
             log.error("Failure to setup pump manager: incomplete settings")
             return
