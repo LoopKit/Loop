@@ -30,9 +30,7 @@ class SettingsManager {
 
     var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable?
 
-    public var latestSettings: StoredSettings? {
-        return settingsStore.latestSettings
-    }
+    public var latestSettings: StoredSettings
 
     // Push Notifications (do not persist)
     private var deviceToken: Data?
@@ -43,18 +41,14 @@ class SettingsManager {
     init(cacheStore: PersistenceController, expireAfter: TimeInterval)
     {
         settingsStore = SettingsStore(store: cacheStore, expireAfter: expireAfter)
-        settingsStore.delegate = self
 
-        NotificationCenter.default
-            .publisher(for: .LoopDataUpdated)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] note in
-                let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
-                if case .preferences = LoopDataManager.LoopUpdateContext(rawValue: context), let loopDataManager = note.object as? LoopDataManager {
-                    self?.storeSettings(newLoopSettings: loopDataManager.settings)
-                }
-            }
-            .store(in: &cancellables)
+        if let storedSettings = settingsStore.latestSettings {
+            latestSettings = storedSettings
+        } else {
+            latestSettings = StoredSettings()
+        }
+
+        settingsStore.delegate = self
 
         // Migrate old settings from UserDefaults
         if var legacyLoopSettings = UserDefaults.appGroup?.legacyLoopSettings {
@@ -67,48 +61,53 @@ class SettingsManager {
 
             UserDefaults.appGroup?.removeLegacyLoopSettings()
         }
+
+        NotificationCenter.default
+            .publisher(for: .LoopDataUpdated)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] note in
+                let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
+                if case .preferences = LoopDataManager.LoopUpdateContext(rawValue: context), let loopDataManager = note.object as? LoopDataManager {
+                    self?.storeSettings(newLoopSettings: loopDataManager.settings)
+                }
+            }
+            .store(in: &cancellables)
     }
 
     var loopSettings: LoopSettings {
         get {
-            guard let storedSettings = latestSettings else {
-                return LoopSettings()
-            }
-
             return LoopSettings(
-                dosingEnabled: storedSettings.dosingEnabled,
-                glucoseTargetRangeSchedule: storedSettings.glucoseTargetRangeSchedule,
-                insulinSensitivitySchedule: storedSettings.insulinSensitivitySchedule,
-                basalRateSchedule: storedSettings.basalRateSchedule,
-                carbRatioSchedule: storedSettings.carbRatioSchedule,
-                preMealTargetRange: storedSettings.preMealTargetRange,
-                legacyWorkoutTargetRange: storedSettings.workoutTargetRange,
-                overridePresets: storedSettings.overridePresets,
-                scheduleOverride: storedSettings.scheduleOverride,
-                preMealOverride: storedSettings.preMealOverride,
-                maximumBasalRatePerHour: storedSettings.maximumBasalRatePerHour,
-                maximumBolus: storedSettings.maximumBolus,
-                suspendThreshold: storedSettings.suspendThreshold,
-                automaticDosingStrategy: storedSettings.automaticDosingStrategy,
-                defaultRapidActingModel: storedSettings.defaultRapidActingModel?.presetForRapidActingInsulin)
+                dosingEnabled: latestSettings.dosingEnabled,
+                glucoseTargetRangeSchedule: latestSettings.glucoseTargetRangeSchedule,
+                insulinSensitivitySchedule: latestSettings.insulinSensitivitySchedule,
+                basalRateSchedule: latestSettings.basalRateSchedule,
+                carbRatioSchedule: latestSettings.carbRatioSchedule,
+                preMealTargetRange: latestSettings.preMealTargetRange,
+                legacyWorkoutTargetRange: latestSettings.workoutTargetRange,
+                overridePresets: latestSettings.overridePresets,
+                scheduleOverride: latestSettings.scheduleOverride,
+                preMealOverride: latestSettings.preMealOverride,
+                maximumBasalRatePerHour: latestSettings.maximumBasalRatePerHour,
+                maximumBolus: latestSettings.maximumBolus,
+                suspendThreshold: latestSettings.suspendThreshold,
+                automaticDosingStrategy: latestSettings.automaticDosingStrategy,
+                defaultRapidActingModel: latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin)
         }
     }
 
-    func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil)
+    func mergeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) -> StoredSettings
     {
 
 #if targetEnvironment(simulator)
         let deviceToken = "mockDeviceTokenFromSimulator"
 #else
-        guard let deviceToken = deviceToken?.hexadecimalString else {
-            return
-        }
+        let deviceToken = deviceToken?.hexadecimalString
 #endif
 
         let newLoopSettings = newLoopSettings ?? loopSettings
         let newNotificationSettings = notificationSettings ?? settingsStore.latestSettings?.notificationSettings
 
-        let settings = StoredSettings(date: Date(),
+        return StoredSettings(date: Date(),
                                       dosingEnabled: newLoopSettings.dosingEnabled,
                                       glucoseTargetRangeSchedule: newLoopSettings.glucoseTargetRangeSchedule,
                                       preMealTargetRange: newLoopSettings.preMealTargetRange,
@@ -131,13 +130,25 @@ class SettingsManager {
                                       pumpDevice: deviceStatusProvider?.pumpManagerStatus?.device,
                                       bloodGlucoseUnit: displayGlucoseUnitObservable?.displayGlucoseUnit,
                                       automaticDosingStrategy: newLoopSettings.automaticDosingStrategy)
+    }
 
-        if let latestSettings = latestSettings, latestSettings == settings {
+    func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) {
+        let mergedSettings = mergeSettings(newLoopSettings: newLoopSettings, notificationSettings: notificationSettings)
+
+        if latestSettings == mergedSettings {
             // Skipping unchanged settings store
             return
         }
 
-        settingsStore.storeSettings(settings) {}
+        latestSettings = mergedSettings
+
+#if !targetEnvironment(simulator)
+        // Only store settings once we have a device token
+        guard deviceToken != nil else {
+            return
+        }
+#endif
+        settingsStore.storeSettings(latestSettings) {}
     }
 
     func storeSettingsCheckingNotificationPermissions() {
