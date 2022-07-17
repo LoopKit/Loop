@@ -817,7 +817,7 @@ extension LoopDataManager {
         var dosingDecision = StoredDosingDecision(reason: reason.rawValue)
         let latestSettings = latestStoredSettingsProvider.latestSettings
         dosingDecision.settings = StoredDosingDecision.Settings(latestSettings)
-        dosingDecision.scheduleOverride = latestSettings?.scheduleOverride
+        dosingDecision.scheduleOverride = latestSettings.scheduleOverride
         dosingDecision.controllerStatus = UIDevice.current.controllerStatus
         dosingDecision.pumpManagerStatus = delegate?.pumpManagerStatus
         if let pumpStatusHighlight = delegate?.pumpStatusHighlight {
