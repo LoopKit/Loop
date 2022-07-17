@@ -12,7 +12,7 @@ import LoopKit
 import LoopUI
 
 
-protocol InsulinModelSettingsViewControllerDelegate: class {
+protocol InsulinModelSettingsViewControllerDelegate: AnyObject {
     func insulinModelSettingsViewControllerDidChangeValue(_ controller: InsulinModelSettingsViewController)
 }
 

@@ -22,6 +22,7 @@ extension UserDefaults {
         case overrideHistory = "com.tidepool.loopkit.overrideHistory"
         case lastBedtimeQuery = "com.loopkit.Loop.lastBedtimeQuery"
         case bedtime = "com.loopkit.Loop.bedtime"
+        case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -179,4 +180,18 @@ extension UserDefaults {
             set(newValue, forKey: Key.bedtime.rawValue)
         }
     }
+    
+    public var lastProfileExpirationAlertDate: Date? {
+        get {
+            if let rawValue = object(forKey: Key.lastProfileExpirationAlertDate.rawValue) as? Date {
+                return rawValue
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue, forKey: Key.lastProfileExpirationAlertDate.rawValue)
+        }
+    }
+
 }
