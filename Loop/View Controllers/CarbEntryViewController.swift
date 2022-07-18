@@ -652,3 +652,8 @@ extension CarbEntryViewController: EmojiInputControllerDelegate {
 extension DateAndDurationTableViewCell: NibLoadable {}
 
 extension DateAndDurationSteppableTableViewCell: NibLoadable {}
+
+
+class GGG {
+    
+}
