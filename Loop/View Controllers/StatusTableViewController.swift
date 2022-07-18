@@ -62,7 +62,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext)
                 DispatchQueue.main.async {
                     switch context {
-                    case .none, .bolus?:
+                    case .none, .insulin?:
                         self?.refreshContext.formUnion([.status, .insulin])
                     case .preferences?:
                         self?.refreshContext.formUnion([.status, .targets])
@@ -70,7 +70,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         self?.refreshContext.update(with: .carbs)
                     case .glucose?:
                         self?.refreshContext.formUnion([.glucose, .carbs])
-                    case .tempBasal?:
+                    case .loopFinished?:
                         self?.refreshContext.update(with: .insulin)
                     }
 

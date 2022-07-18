@@ -19,11 +19,11 @@ protocol PresetActivationObserver: AnyObject {
 
 final class LoopDataManager {
     enum LoopUpdateContext: Int {
-        case bolus
+        case insulin
         case carbs
         case glucose
         case preferences
-        case tempBasal
+        case loopFinished
     }
 
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
@@ -171,7 +171,7 @@ final class LoopDataManager {
 
                     self.insulinEffect = nil
 
-                    self.notify(forChange: .bolus)
+                    self.notify(forChange: .insulin)
                 }
             }
         ]
@@ -552,7 +552,7 @@ extension LoopDataManager {
         }
         self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
 
-        self.notify(forChange: .tempBasal)
+        self.notify(forChange: .loopFinished)
         completion?(error)
     }
 
@@ -589,6 +589,14 @@ extension LoopDataManager {
         }
     }
 
+    func deleteCarbEntry(_ oldEntry: StoredCarbEntry, completion: @escaping (_ result: CarbStoreResult<Bool>) -> Void) {
+        carbStore.deleteCarbEntry(oldEntry) { result in
+            completion(result)
+            self.updateRecommendedManualBolus()
+        }
+    }
+
+
     /// Adds a bolus requested of the pump, but not confirmed.
     ///
     /// - Parameters:
@@ -598,7 +606,7 @@ extension LoopDataManager {
         dataAccessQueue.async {
             self.logger.debug("addRequestedBolus")
             self.lastRequestedBolus = dose
-            self.notify(forChange: .bolus)
+            self.notify(forChange: .insulin)
 
             completion?()
         }
@@ -614,7 +622,7 @@ extension LoopDataManager {
             self.lastRequestedBolus = nil
             self.recommendedAutomaticDose = nil
             self.insulinEffect = nil
-            self.notify(forChange: .bolus)
+            self.notify(forChange: .insulin)
 
             completion?()
         }
@@ -630,7 +638,7 @@ extension LoopDataManager {
             self.logger.debug("bolusRequestFailed")
             self.lastRequestedBolus = nil
             self.insulinEffect = nil
-            self.notify(forChange: .bolus)
+            self.notify(forChange: .insulin)
 
             completion?()
         }
@@ -670,7 +678,7 @@ extension LoopDataManager {
             if error == nil {
                 self.recommendedAutomaticDose = nil
                 self.insulinEffect = nil
-                self.notify(forChange: .bolus)
+                self.notify(forChange: .insulin)
             }
         }
     }
@@ -778,7 +786,9 @@ extension LoopDataManager {
         }
 
         logger.default("Loop ended")
-        notify(forChange: .tempBasal)
+        notify(forChange: .loopFinished)
+
+        updateRecommendedManualBolus()
     }
 
     // This is primarily for external clients displaying a bolus recommendation and forecast
@@ -1033,8 +1043,6 @@ extension LoopDataManager {
                 type(of: self).LoopUpdateContextKey: context.rawValue
             ]
         )
-
-        updateRecommendedManualBolus()
     }
 
     /// Computes amount of insulin from boluses that have been issued and not confirmed, and
