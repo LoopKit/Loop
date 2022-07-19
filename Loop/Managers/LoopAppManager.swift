@@ -175,7 +175,8 @@ class LoopAppManager: NSObject {
                                                    closedLoopStatus: closedLoopStatus,
                                                    cacheStore: cacheStore,
                                                    localCacheDuration: localCacheDuration,
-                                                   overrideHistory: overrideHistory
+                                                   overrideHistory: overrideHistory,
+                                                   trustedTimeChecker: trustedTimeChecker
         )
         settingsManager.deviceStatusProvider = deviceDataManager
 
