@@ -10,7 +10,7 @@ import LoopKit
 @testable import Loop
 
 class MockLatestStoredSettingsProvider: LatestStoredSettingsProvider {
-    var latestSettings: StoredSettings? { nil }
+    var latestSettings: StoredSettings { StoredSettings() }
     func storeSettings(_ settings: StoredSettings, completion: @escaping () -> Void) {
         completion()
     }

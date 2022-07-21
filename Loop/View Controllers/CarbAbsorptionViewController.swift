@@ -450,7 +450,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let status = carbStatuses[indexPath.row]
-            deviceManager.carbStore.deleteCarbEntry(status.entry) { (result) -> Void in
+            deviceManager.loopManager.deleteCarbEntry(status.entry) { (result) -> Void in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
