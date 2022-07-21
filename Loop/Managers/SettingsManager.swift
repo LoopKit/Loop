@@ -182,6 +182,9 @@ private extension NotificationSettings {
                   showPreviewsSetting: NotificationSettings.ShowPreviewsSetting(notificationSettings.showPreviewsSetting),
                   criticalAlertSetting: NotificationSettings.NotificationSetting(notificationSettings.criticalAlertSetting),
                   providesAppNotificationSettings: notificationSettings.providesAppNotificationSettings,
-                  announcementSetting: NotificationSettings.NotificationSetting(notificationSettings.announcementSetting))
+                  announcementSetting: NotificationSettings.NotificationSetting(notificationSettings.announcementSetting),
+                  timeSensitiveSetting: NotificationSettings.NotificationSetting(notificationSettings.timeSensitiveSetting),
+                  scheduledDeliverySetting: NotificationSettings.NotificationSetting(notificationSettings.scheduledDeliverySetting)
+        )
     }
 }
