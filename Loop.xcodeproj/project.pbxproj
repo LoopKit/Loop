@@ -246,6 +246,9 @@
 		43FCEEB5221BCA020013DD30 /* COBChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEB4221BCA020013DD30 /* COBChart.swift */; };
 		43FCEEBB22211C860013DD30 /* CarbEffectChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEBA22211C860013DD30 /* CarbEffectChart.swift */; };
 		43FCEEBD22212DD50013DD30 /* PredictedGlucoseChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEBC22212DD50013DD30 /* PredictedGlucoseChart.swift */; };
+		4B60626C287E286000BF8BBB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4B60626A287E286000BF8BBB /* Localizable.strings */; };
+		4B60626D287E286000BF8BBB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4B60626A287E286000BF8BBB /* Localizable.strings */; };
+		4B67E2C8289B4EDB002D92AF /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4B67E2C6289B4EDB002D92AF /* InfoPlist.strings */; };
 		4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */; };
 		4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */; };
 		4F11D3C220DD80B3006E072C /* WatchHistoricalGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */; };
@@ -1031,6 +1034,8 @@
 		43FCEEB4221BCA020013DD30 /* COBChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = COBChart.swift; sourceTree = "<group>"; };
 		43FCEEBA22211C860013DD30 /* CarbEffectChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEffectChart.swift; sourceTree = "<group>"; };
 		43FCEEBC22212DD50013DD30 /* PredictedGlucoseChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictedGlucoseChart.swift; sourceTree = "<group>"; };
+		4B60626B287E286000BF8BBB /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		4B67E2C7289B4EDB002D92AF /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = G4ShareSpy.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
 		4F08DE801E7BB6F1006741EA /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
@@ -1949,6 +1954,7 @@
 				7D7076601FE06EE3004AC8EA /* Localizable.strings */,
 				43D533BB1CFD1DD7009E3085 /* WatchApp Extension.entitlements */,
 				43A943911B926B7B0051FA24 /* Info.plist */,
+				4B67E2C6289B4EDB002D92AF /* InfoPlist.strings */,
 				43A9438D1B926B7B0051FA24 /* ComplicationController.swift */,
 				43A943871B926B7B0051FA24 /* ExtensionDelegate.swift */,
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
@@ -2069,6 +2075,7 @@
 				43D848AF1E7DCBE100DADCBC /* Result.swift */,
 				43D9FFD121EAE05D00AF44BF /* LoopCore.h */,
 				43D9FFD221EAE05D00AF44BF /* Info.plist */,
+				4B60626A287E286000BF8BBB /* Localizable.strings */,
 				E9C00EEF24C620EF00628F35 /* LoopSettings.swift */,
 				C16575742539FD60004AE16E /* LoopCoreConstants.swift */,
 			);
@@ -3293,6 +3300,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D70765E1FE06EE3004AC8EA /* Localizable.strings in Resources */,
+				4B67E2C8289B4EDB002D92AF /* InfoPlist.strings in Resources */,
 				43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */,
 				B405E35924D2A75B00DD058D /* DerivedAssets.xcassets in Resources */,
 			);
@@ -3302,6 +3310,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B60626C287E286000BF8BBB /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3321,6 +3330,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B60626D287E286000BF8BBB /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4229,6 +4239,22 @@
 				F5E0BDD927E1D71F0033557E /* he */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		4B60626A287E286000BF8BBB /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4B60626B287E286000BF8BBB /* de */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		4B67E2C6289B4EDB002D92AF /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4B67E2C7289B4EDB002D92AF /* de */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 		4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */ = {
