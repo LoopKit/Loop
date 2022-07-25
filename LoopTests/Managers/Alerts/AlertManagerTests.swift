@@ -148,7 +148,6 @@ class AlertManagerTests: XCTestCase {
     var mockFileManager: MockFileManager!
     var mockPresenter: MockPresenter!
     var mockIssuer: MockIssuer!
-    var mockUserNotificationCenter: MockUserNotificationCenter!
     var mockAlertStore: MockAlertStore!
     var alertManager: AlertManager!
     var isInBackground = true
@@ -162,11 +161,9 @@ class AlertManagerTests: XCTestCase {
         mockFileManager = MockFileManager()
         mockPresenter = MockPresenter()
         mockIssuer = MockIssuer()
-        mockUserNotificationCenter = MockUserNotificationCenter()
         mockAlertStore = MockAlertStore()
         alertManager = AlertManager(alertPresenter: mockPresenter,
-                                    handlers: [mockIssuer],
-                                    userNotificationCenter: mockUserNotificationCenter,
+                                    modalAlertIssuer: mockIssuer,
                                     fileManager: mockFileManager,
                                     alertStore: mockAlertStore,
                                     bluetoothProvider: MockBluetoothProvider())
@@ -238,8 +235,7 @@ class AlertManagerTests: XCTestCase {
             mockAlertStore.storedAlerts = [StoredAlert(from: alert, context: mockAlertStore.managedObjectContext)]
 
             alertManager = AlertManager(alertPresenter: mockPresenter,
-                                        handlers: [mockIssuer],
-                                        userNotificationCenter: mockUserNotificationCenter,
+                                        modalAlertIssuer: mockIssuer,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider())
@@ -258,8 +254,7 @@ class AlertManagerTests: XCTestCase {
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
             alertManager = AlertManager(alertPresenter: mockPresenter,
-                                        handlers: [mockIssuer],
-                                        userNotificationCenter: mockUserNotificationCenter,
+                                        modalAlertIssuer: mockIssuer,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider())
@@ -279,8 +274,7 @@ class AlertManagerTests: XCTestCase {
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
             alertManager = AlertManager(alertPresenter: mockPresenter,
-                                        handlers: [mockIssuer],
-                                        userNotificationCenter: mockUserNotificationCenter,
+                                        modalAlertIssuer: mockIssuer,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider())
@@ -309,8 +303,7 @@ class AlertManagerTests: XCTestCase {
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
             alertManager = AlertManager(alertPresenter: mockPresenter,
-                                        handlers: [mockIssuer],
-                                        userNotificationCenter: mockUserNotificationCenter,
+                                        modalAlertIssuer: mockIssuer,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider())
@@ -330,8 +323,7 @@ class AlertManagerTests: XCTestCase {
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
             alertManager = AlertManager(alertPresenter: mockPresenter,
-                                        handlers: [mockIssuer],
-                                        userNotificationCenter: mockUserNotificationCenter,
+                                        modalAlertIssuer: mockIssuer,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider())
@@ -352,8 +344,7 @@ class AlertManagerTests: XCTestCase {
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
             alertManager = AlertManager(alertPresenter: mockPresenter,
-                                        handlers: [mockIssuer],
-                                        userNotificationCenter: mockUserNotificationCenter,
+                                        modalAlertIssuer: mockIssuer,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider())
@@ -374,8 +365,7 @@ class AlertManagerTests: XCTestCase {
             storedAlert.issuedDate = date
             mockAlertStore.storedAlerts = [storedAlert]
             alertManager = AlertManager(alertPresenter: mockPresenter,
-                                        handlers: [mockIssuer],
-                                        userNotificationCenter: mockUserNotificationCenter,
+                                        modalAlertIssuer: mockIssuer,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider())
@@ -397,8 +387,7 @@ class AlertManagerTests: XCTestCase {
                               foregroundContent: content, backgroundContent: content, trigger: .repeating(repeatInterval: 60.0))
             mockAlertStore.storedAlerts = []
             alertManager = AlertManager(alertPresenter: mockPresenter,
-                                        handlers: [mockIssuer],
-                                        userNotificationCenter: mockUserNotificationCenter,
+                                        modalAlertIssuer: mockIssuer,
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider())

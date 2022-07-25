@@ -112,7 +112,6 @@ class LoopAppManager: NSObject {
         precondition(isLaunchPending)
 
         resumeLaunch()
-        finishLaunch()
     }
 
     var isLaunchPending: Bool { state == .checkProtectedDataAvailable }
@@ -160,8 +159,10 @@ class LoopAppManager: NSObject {
         self.pluginManager = PluginManager()
         self.bluetoothStateManager = BluetoothStateManager()
         self.alertManager = AlertManager(alertPresenter: self,
+                                         userNotificationAlertIssuer: UserNotificationAlertIssuer(userNotificationCenter: UNUserNotificationCenter.current()),
                                          expireAfter: Bundle.main.localCacheDuration,
                                          bluetoothProvider: bluetoothStateManager)
+
         self.alertPermissionsChecker = AlertPermissionsChecker(alertManager: alertManager)
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
 
@@ -253,12 +254,6 @@ class LoopAppManager: NSObject {
         self.launchOptions = nil
 
         self.state = state.next
-    }
-
-    private func finishLaunch() {
-        guard !isLaunchPending else {
-            return
-        }
 
         alertManager.playbackAlertsFromPersistence()
     }
