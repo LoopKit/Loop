@@ -74,15 +74,20 @@ class TrustedTimeChecker {
                 let deviceNow = Date()
                 let ntpNow = referenceTime.now()
                 let timeDelta = ntpNow.timeIntervalSince(deviceNow)
-                let timeSinceLastAlert = abs(ntpNow.timeIntervalSince(UserDefaults.standard.lastSignificantTimeChangeAlert ?? Date.distantPast))
 
-                if abs(timeDelta) > self.acceptableTimeDelta, timeSinceLastAlert > self.minimumAlertFrequency {
-                    self.log.info("applicationSignificantTimeChange: ntpNow = %@, deviceNow = %@", ntpNow.debugDescription, deviceNow.debugDescription)
-                    self.issueTimeChangedAlert()
+                if abs(timeDelta) > self.acceptableTimeDelta {
+                    self.log.default("applicationSignificantTimeChange: ntpNow = %@, deviceNow = %@", ntpNow.debugDescription, deviceNow.debugDescription)
                     self.detectedSystemTimeOffset = timeDelta
-                    UserDefaults.standard.lastSignificantTimeChangeAlert = ntpNow
+                    let timeSinceLastAlert = abs(ntpNow.timeIntervalSince(UserDefaults.standard.lastSignificantTimeChangeAlert ?? Date.distantPast))
+
+                    if timeSinceLastAlert > self.minimumAlertFrequency {
+                        self.issueTimeChangedAlert()
+                        UserDefaults.standard.lastSignificantTimeChangeAlert = ntpNow
+                    }
                 } else {
                     self.detectedSystemTimeOffset = 0
+                    // reset the last time the alert was issued, since the device time is now considered aligned.
+                    UserDefaults.standard.lastSignificantTimeChangeAlert = nil
                 }
             case let .failure(error):
                 self.log.error("applicationSignificantTimeChange: Error getting NTP time: %@", error.localizedDescription)

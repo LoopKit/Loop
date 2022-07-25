@@ -42,8 +42,8 @@ struct BolusInput: View {
             DoseVolumeInput(
                 volume: amount,
                 isEditable: isEditable,
-                increment: { self.amount = self.pickerValues.incrementing(self.amount, by: 10) },
-                decrement: { self.amount = self.pickerValues.decrementing(self.amount, by: 10) },
+                increment: { self.amount = self.pickerValues[self.pickerValues.index(of: self.amount+0.5)] },
+                decrement: { self.amount = self.pickerValues[self.pickerValues.index(of: self.amount-0.5)] },
                 formatVolume: formatVolume
             )
             .focusable(isEditable)

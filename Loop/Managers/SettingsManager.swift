@@ -188,7 +188,19 @@ extension SettingsManager: SettingsStoreDelegate {
 }
 
 private extension NotificationSettings {
+
     init(_ notificationSettings: UNNotificationSettings) {
+        let timeSensitiveSetting: NotificationSettings.NotificationSetting
+        let scheduledDeliverySetting: NotificationSettings.NotificationSetting
+
+        if #available(iOS 15.0, *) {
+            timeSensitiveSetting = NotificationSettings.NotificationSetting(notificationSettings.timeSensitiveSetting)
+            scheduledDeliverySetting = NotificationSettings.NotificationSetting(notificationSettings.scheduledDeliverySetting)
+        } else {
+            timeSensitiveSetting = .unknown
+            scheduledDeliverySetting = .unknown
+        }
+
         self.init(authorizationStatus: NotificationSettings.AuthorizationStatus(notificationSettings.authorizationStatus),
                   soundSetting: NotificationSettings.NotificationSetting(notificationSettings.soundSetting),
                   badgeSetting: NotificationSettings.NotificationSetting(notificationSettings.badgeSetting),
@@ -201,8 +213,8 @@ private extension NotificationSettings {
                   criticalAlertSetting: NotificationSettings.NotificationSetting(notificationSettings.criticalAlertSetting),
                   providesAppNotificationSettings: notificationSettings.providesAppNotificationSettings,
                   announcementSetting: NotificationSettings.NotificationSetting(notificationSettings.announcementSetting),
-                  timeSensitiveSetting: NotificationSettings.NotificationSetting(notificationSettings.timeSensitiveSetting),
-                  scheduledDeliverySetting: NotificationSettings.NotificationSetting(notificationSettings.scheduledDeliverySetting)
+                  timeSensitiveSetting: timeSensitiveSetting,
+                  scheduledDeliverySetting: scheduledDeliverySetting
         )
     }
 }
