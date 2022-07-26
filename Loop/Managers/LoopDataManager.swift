@@ -255,10 +255,6 @@ final class LoopDataManager {
             analyticsServicesManager.didChangeCarbRatioSchedule()
         }
 
-        if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {
-            analyticsServicesManager.pumpTimeZoneDidChange()
-        }
-
         if newValue.defaultRapidActingModel != oldValue.defaultRapidActingModel {
             doseStore.insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: newValue.defaultRapidActingModel)
             invalidateCachedEffects = true
