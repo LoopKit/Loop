@@ -52,7 +52,7 @@ public final class AlertManager {
     
     public init(alertPresenter: AlertPresenter,
                 modalAlertIssuer: AlertIssuer? = nil,
-                userNotificationAlertIssuer: AlertIssuer? = nil,
+                userNotificationAlertIssuer: AlertIssuer,
                 fileManager: FileManager = FileManager.default,
                 alertStore: AlertStore? = nil,
                 expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
@@ -73,7 +73,7 @@ public final class AlertManager {
         self.alertPresenter = alertPresenter
         self.modalAlertIssuer = modalAlertIssuer ?? InAppModalAlertIssuer(alertPresenter: alertPresenter, alertManagerResponder: self)
         self.userNotificationAlertIssuer = userNotificationAlertIssuer
-        handlers = [self.modalAlertIssuer, userNotificationAlertIssuer].compactMap { $0 }
+        handlers = [self.modalAlertIssuer, userNotificationAlertIssuer]
 
         bluetoothProvider.addBluetoothObserver(self, queue: .main)
 
