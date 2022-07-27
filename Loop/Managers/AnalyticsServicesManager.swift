@@ -65,10 +65,6 @@ final class AnalyticsServicesManager {
         logEvent("Pump time change", withProperties: ["value": drift], outOfSession: true)
     }
 
-    func pumpTimeZoneDidChange() {
-        logEvent("Pump time zone change", outOfSession: true)
-    }
-
     func pumpBatteryWasReplaced() {
         logEvent("Pump battery replacement", outOfSession: true)
     }
@@ -110,14 +106,16 @@ final class AnalyticsServicesManager {
             logEvent("Closed loop enabled change")
         }
 
+        if newValue.basalRateSchedule?.timeZone != oldValue.basalRateSchedule?.timeZone {
+            logEvent("Therapy schedule time zone change")
+        }
+
+        if newValue.scheduleOverride != oldValue.scheduleOverride {
+            logEvent("Temporary schedule override change")
+        }
+
         if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
-            if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {
-                self.pumpTimeZoneDidChange()
-            } else if newValue.scheduleOverride != oldValue.scheduleOverride {
-                logEvent("Temporary schedule override change", outOfSession: true)
-            } else {
-                logEvent("Glucose target range change")
-            }
+            logEvent("Glucose target range change")
         }
     }
 

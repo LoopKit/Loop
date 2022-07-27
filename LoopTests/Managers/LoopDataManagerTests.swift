@@ -78,16 +78,19 @@ class LoopDataManagerDosingTests: XCTestCase {
     var loopDataManager: LoopDataManager!
     
     func setUp(for test: DataManagerTestType, basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil) {
+        let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
+
         let settings = LoopSettings(
             dosingEnabled: false,
             glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+            basalRateSchedule: basalRateSchedule,
             maximumBasalRatePerHour: maxBasalRate,
             maximumBolus: maxBolus,
             suspendThreshold: suspendThreshold
         )
         
         let doseStore = MockDoseStore(for: test)
-        doseStore.basalProfile = loadBasalRateScheduleFixture("basal_profile")
+        doseStore.basalProfile = basalRateSchedule
         doseStore.basalProfileApplyingOverrideHistory = doseStore.basalProfile
         let glucoseStore = MockGlucoseStore(for: test)
         let carbStore = MockCarbStore(for: test)

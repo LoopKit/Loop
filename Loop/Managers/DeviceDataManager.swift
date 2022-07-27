@@ -262,7 +262,7 @@ final class DeviceDataManager {
         self.settingsManager = settingsManager
 
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
-        let sensitivitySchedule = settingsManager.latestSettings?.insulinSensitivitySchedule
+        let sensitivitySchedule = settingsManager.latestSettings.insulinSensitivitySchedule
         
         self.carbStore = CarbStore(
             healthStore: healthStore,
@@ -271,7 +271,7 @@ final class DeviceDataManager {
             cacheLength: localCacheDuration,
             defaultAbsorptionTimes: absorptionTimes,
             observationInterval: absorptionTimes.slow * 2,
-            carbRatioSchedule: settingsManager.latestSettings?.carbRatioSchedule,
+            carbRatioSchedule: settingsManager.latestSettings.carbRatioSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
             carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear,
@@ -283,9 +283,9 @@ final class DeviceDataManager {
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings?.defaultRapidActingModel?.presetForRapidActingInsulin),
+            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin),
             longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
-            basalProfile: settingsManager.latestSettings?.basalRateSchedule,
+            basalProfile: settingsManager.latestSettings.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
             lastPumpEventsReconciliation: nil, // PumpManager is nil at this point. Will update this via addPumpEvents below
@@ -1629,7 +1629,7 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
         case .suspendThreshold:
             loopManager.mutateSettings { settings in settings.suspendThreshold = therapySettings.suspendThreshold }
         case .basalRate:
-            loopManager.basalRateSchedule = therapySettings.basalRateSchedule
+            loopManager.mutateSettings { settings in settings.basalRateSchedule = therapySettings.basalRateSchedule }
         case .deliveryLimits:
             loopManager.mutateSettings { settings in
                 settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
@@ -1637,14 +1637,12 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
             }
         case .insulinModel:
             if let defaultRapidActingModel = therapySettings.defaultRapidActingModel {
-                loopManager.defaultRapidActingModel = defaultRapidActingModel
+                loopManager.mutateSettings { settings in settings.defaultRapidActingModel = defaultRapidActingModel }
             }
         case .carbRatio:
-            loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule
-            analyticsServicesManager.didChangeCarbRatioSchedule()
+            loopManager.mutateSettings { settings in settings.carbRatioSchedule = therapySettings.carbRatioSchedule }
         case .insulinSensitivity:
-            loopManager.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
-            analyticsServicesManager.didChangeInsulinSensitivitySchedule()
+            loopManager.mutateSettings { settings in settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule }
         case .none:
             break // NO-OP
         }
