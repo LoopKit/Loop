@@ -107,7 +107,7 @@ extension PredictedGlucoseChart {
 
                 if displayedScheduleOverride != nil {
                     if displayedScheduleOverride!.scheduledEndDate > preMealOverride.scheduledEndDate {
-                        displayedScheduleOverride!.scheduledInterval = DateInterval(start: preMealOverride.scheduledEndDate, end: displayedScheduleOverride!.scheduledEndDate)
+                        displayedScheduleOverride!.scheduledInterval = DateInterval(start: displayedScheduleOverride!.startDate, end: displayedScheduleOverride!.scheduledEndDate)
                     } else {
                         displayedScheduleOverride = nil
                     }
