@@ -14,6 +14,8 @@ import HealthKit
 import Combine
 import LoopCore
 import LoopKitUI
+import os.log
+
 
 protocol DeviceStatusProvider {
     var pumpManagerStatus: PumpManagerStatus? { get }
@@ -37,6 +39,7 @@ class SettingsManager {
 
     private var cancellables: Set<AnyCancellable> = []
 
+    private let log = OSLog(category: "SettingsManager")
 
     init(cacheStore: PersistenceController, expireAfter: TimeInterval)
     {
@@ -45,6 +48,7 @@ class SettingsManager {
         if let storedSettings = settingsStore.latestSettings {
             latestSettings = storedSettings
         } else {
+            log.default("SettingsStore has no latestSettings: initializing empty StoredSettings.")
             latestSettings = StoredSettings()
         }
 
@@ -52,6 +56,7 @@ class SettingsManager {
 
         // Migrate old settings from UserDefaults
         if var legacyLoopSettings = UserDefaults.appGroup?.legacyLoopSettings {
+            log.default("Migrating settings from UserDefaults")
             legacyLoopSettings.insulinSensitivitySchedule = UserDefaults.appGroup?.legacyInsulinSensitivitySchedule
             legacyLoopSettings.basalRateSchedule = UserDefaults.appGroup?.legacyBasalRateSchedule
             legacyLoopSettings.carbRatioSchedule = UserDefaults.appGroup?.legacyCarbRatioSchedule
@@ -95,7 +100,7 @@ class SettingsManager {
         }
     }
 
-    func mergeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) -> StoredSettings
+    private func mergeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) -> StoredSettings
     {
 
 #if targetEnvironment(simulator)
@@ -142,6 +147,10 @@ class SettingsManager {
 
         latestSettings = mergedSettings
 
+        if latestSettings.insulinSensitivitySchedule == nil {
+            log.default("Saving settings with no ISF schedule.")
+        }
+
 #if !targetEnvironment(simulator)
         // Only store settings once we have a device token
         guard deviceToken != nil else {
@@ -153,15 +162,17 @@ class SettingsManager {
 
     func storeSettingsCheckingNotificationPermissions() {
         UNUserNotificationCenter.current().getNotificationSettings() { notificationSettings in
-            guard let latestSettings = self.settingsStore.latestSettings else {
-                return
-            }
+            DispatchQueue.main.async {
+                guard let latestSettings = self.settingsStore.latestSettings else {
+                    return
+                }
 
-            let notificationSettings = NotificationSettings(notificationSettings)
+                let notificationSettings = NotificationSettings(notificationSettings)
 
-            if notificationSettings != latestSettings.notificationSettings
-            {
-                self.storeSettings(notificationSettings: notificationSettings)
+                if notificationSettings != latestSettings.notificationSettings
+                {
+                    self.storeSettings(notificationSettings: notificationSettings)
+                }
             }
         }
     }
