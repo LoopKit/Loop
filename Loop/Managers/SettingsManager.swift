@@ -154,10 +154,15 @@ class SettingsManager {
 #if !targetEnvironment(simulator)
         // Only store settings once we have a device token
         guard deviceToken != nil else {
+            log.default("Skipping setttings store without device token.")
             return
         }
 #endif
-        settingsStore.storeSettings(latestSettings) {}
+        settingsStore.storeSettings(latestSettings) { error in
+            if let error = error {
+                self.log.error("Error storing settings: %{public}@", error.localizedDescription)
+            }
+        }
     }
 
     func storeSettingsCheckingNotificationPermissions() {
