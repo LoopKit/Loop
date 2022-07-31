@@ -34,8 +34,7 @@ class SettingsManager {
 
     public var latestSettings: StoredSettings
 
-    // Push Notifications (do not persist)
-    private var deviceToken: Data?
+    private var remoteNotificationRegistrationResult: Swift.Result<Data,Error>?
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -100,15 +99,8 @@ class SettingsManager {
         }
     }
 
-    private func mergeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) -> StoredSettings
+    private func mergeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil, deviceToken: String? = nil) -> StoredSettings
     {
-
-#if targetEnvironment(simulator)
-        let deviceToken = "mockDeviceTokenFromSimulator"
-#else
-        let deviceToken = deviceToken?.hexadecimalString
-#endif
-
         let newLoopSettings = newLoopSettings ?? loopSettings
         let newNotificationSettings = notificationSettings ?? settingsStore.latestSettings?.notificationSettings
 
@@ -138,7 +130,19 @@ class SettingsManager {
     }
 
     func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) {
-        let mergedSettings = mergeSettings(newLoopSettings: newLoopSettings, notificationSettings: notificationSettings)
+
+        if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteOverridesEnabled {
+            // remote notification registration not finished
+            return
+        }
+
+        var deviceTokenStr: String?
+
+        if case .success(let deviceToken) = remoteNotificationRegistrationResult {
+            deviceTokenStr = deviceToken.hexadecimalString
+        }
+
+        let mergedSettings = mergeSettings(newLoopSettings: newLoopSettings, notificationSettings: notificationSettings, deviceToken: deviceTokenStr)
 
         if latestSettings == mergedSettings {
             // Skipping unchanged settings store
@@ -151,13 +155,6 @@ class SettingsManager {
             log.default("Saving settings with no ISF schedule.")
         }
 
-#if !targetEnvironment(simulator)
-        // Only store settings once we have a device token
-        guard deviceToken != nil else {
-            log.default("Skipping setttings store without device token.")
-            return
-        }
-#endif
         settingsStore.storeSettings(latestSettings) { error in
             if let error = error {
                 self.log.error("Error storing settings: %{public}@", error.localizedDescription)
@@ -186,8 +183,8 @@ class SettingsManager {
         storeSettingsCheckingNotificationPermissions()
     }
 
-    func hasNewDeviceToken(token: Data) {
-        self.deviceToken = token
+    func remoteNotificationRegistrationDidFinish(_ result: Swift.Result<Data,Error>) {
+        self.remoteNotificationRegistrationResult = result
         storeSettings()
     }
 
