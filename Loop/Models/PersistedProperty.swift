@@ -39,6 +39,7 @@ import Foundation
         get {
             do {
                 let data = try Data(contentsOf: storageURL)
+                log.info("Reading %{public}@ from %{public}@", key, storageURL.absoluteString)
                 guard let value = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? Value else {
                     log.error("Unexpected type for %{public}@", key)
                     return nil
@@ -61,7 +62,7 @@ import Foundation
             do {
                 let data = try PropertyListSerialization.data(fromPropertyList: newValue, format: .binary, options: 0)
                 try data.write(to: storageURL, options: .atomic)
-                log.default("Wrote %{public}@ to %{public}@", key, storageURL.absoluteString)
+                log.info("Wrote %{public}@ to %{public}@", key, storageURL.absoluteString)
             } catch {
                 log.error("Error saving %{public}@: %{public}@", key, error.localizedDescription)
             }
