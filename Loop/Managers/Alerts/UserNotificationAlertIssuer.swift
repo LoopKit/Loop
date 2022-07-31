@@ -9,6 +9,15 @@
 import LoopKit
 import UIKit
 
+public protocol UserNotificationCenter {
+    func add(_ request: UNNotificationRequest, withCompletionHandler: ((Error?) -> Void)?)
+    func removePendingNotificationRequests(withIdentifiers: [String])
+    func removeDeliveredNotifications(withIdentifiers: [String])
+    func getDeliveredNotifications(completionHandler: @escaping ([UNNotification]) -> Void)
+    func getPendingNotificationRequests(completionHandler: @escaping ([UNNotificationRequest]) -> Void)
+}
+extension UNUserNotificationCenter: UserNotificationCenter {}
+
 class UserNotificationAlertIssuer: AlertIssuer {
     
     let userNotificationCenter: UserNotificationCenter

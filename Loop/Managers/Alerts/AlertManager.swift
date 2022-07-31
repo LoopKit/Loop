@@ -15,15 +15,6 @@ protocol AlertManagerResponder: AnyObject {
     func acknowledgeAlert(identifier: Alert.Identifier)
 }
 
-public protocol UserNotificationCenter {
-    func add(_ request: UNNotificationRequest, withCompletionHandler: ((Error?) -> Void)?)
-    func removePendingNotificationRequests(withIdentifiers: [String])
-    func removeDeliveredNotifications(withIdentifiers: [String])
-    func getDeliveredNotifications(completionHandler: @escaping ([UNNotification]) -> Void)
-    func getPendingNotificationRequests(completionHandler: @escaping ([UNNotificationRequest]) -> Void)
-}
-extension UNUserNotificationCenter: UserNotificationCenter {}
-
 public enum AlertUserNotificationUserInfoKey: String {
     case alert, alertTimestamp
 }
@@ -44,9 +35,11 @@ public final class AlertManager {
     private var responders: [String: Weak<AlertResponder>] = [:]
     private var soundVendors: [String: Weak<AlertSoundVendor>] = [:]
 
-    private let userNotificationCenter: UserNotificationCenter
     private let fileManager: FileManager
     private let alertPresenter: AlertPresenter
+
+    private var modalAlertIssuer: AlertIssuer!
+    private var userNotificationAlertIssuer: AlertIssuer?
 
     let alertStore: AlertStore
 
@@ -58,14 +51,13 @@ public final class AlertManager {
     var getCurrentDate = { return Date() }
     
     public init(alertPresenter: AlertPresenter,
-                handlers: [AlertIssuer]? = nil,
-                userNotificationCenter: UserNotificationCenter = UNUserNotificationCenter.current(),
+                modalAlertIssuer: AlertIssuer? = nil,
+                userNotificationAlertIssuer: AlertIssuer,
                 fileManager: FileManager = FileManager.default,
                 alertStore: AlertStore? = nil,
                 expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
                 bluetoothProvider: BluetoothProvider
     ) {
-        self.userNotificationCenter = userNotificationCenter
         self.fileManager = fileManager
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
         let alertStoreDirectory = documentsDirectory?.appendingPathComponent("AlertStore")
@@ -79,9 +71,9 @@ public final class AlertManager {
         }
         self.alertStore = alertStore ?? AlertStore(storageDirectoryURL: alertStoreDirectory, expireAfter: expireAfter)
         self.alertPresenter = alertPresenter
-        self.handlers = handlers ??
-            [UserNotificationAlertIssuer(userNotificationCenter: userNotificationCenter),
-            InAppModalAlertIssuer(alertPresenter: alertPresenter, alertManagerResponder: self)]
+        self.modalAlertIssuer = modalAlertIssuer ?? InAppModalAlertIssuer(alertPresenter: alertPresenter, alertManagerResponder: self)
+        self.userNotificationAlertIssuer = userNotificationAlertIssuer
+        handlers = [self.modalAlertIssuer, userNotificationAlertIssuer]
 
         bluetoothProvider.addBluetoothObserver(self, queue: .main)
 
@@ -324,7 +316,7 @@ extension AlertManager: AlertIssuer {
     private func replayAlert(_ alert: Alert) {
         // Only alerts with foreground content are replayed
         if alert.foregroundContent != nil {
-            handlers.forEach { $0.issueAlert(alert) }
+            modalAlertIssuer?.issueAlert(alert)
         }
     }
 }

@@ -255,10 +255,6 @@ final class LoopDataManager {
             analyticsServicesManager.didChangeCarbRatioSchedule()
         }
 
-        if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {
-            analyticsServicesManager.pumpTimeZoneDidChange()
-        }
-
         if newValue.defaultRapidActingModel != oldValue.defaultRapidActingModel {
             doseStore.insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: newValue.defaultRapidActingModel)
             invalidateCachedEffects = true
@@ -552,6 +548,8 @@ extension LoopDataManager {
         }
         self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
 
+        // Didn't actually run a loop, but this is similar to a loop() in that the automatic dosing
+        // was updated.
         self.notify(forChange: .loopFinished)
         completion?(error)
     }
