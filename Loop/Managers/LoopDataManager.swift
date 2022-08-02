@@ -2185,6 +2185,7 @@ extension LoopDataManager {
             let settings = settings
             return TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
                             correctionRangeOverrides: CorrectionRangeOverrides(preMeal: settings.preMealTargetRange, workout: settings.legacyWorkoutTargetRange),
+                            overridePresets: settings.overridePresets,
                             maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
                             maximumBolus: settings.maximumBolus,
                             suspendThreshold: settings.suspendThreshold,

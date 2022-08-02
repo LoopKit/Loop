@@ -64,11 +64,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         log.default(#function)
 
-        loopAppManager.setRemoteNotificationsDeviceToken(deviceToken)
+        loopAppManager.remoteNotificationRegistrationDidFinish(.success(deviceToken))
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         log.error("%{public}@ with error: %{public}@", #function, String(describing: error))
+        loopAppManager.remoteNotificationRegistrationDidFinish(.failure(error))
     }
 
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
