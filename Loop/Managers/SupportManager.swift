@@ -11,7 +11,6 @@ import Foundation
 import LoopKit
 import LoopKitUI
 import SwiftUI
-import MockKitUI
 
 public final class SupportManager {
     
@@ -43,8 +42,7 @@ public final class SupportManager {
         
         self.alertIssuer = alertIssuer
         self.pluginManager = pluginManager
-        self.staticSupportTypes = staticSupportTypes ??
-            (FeatureFlags.allowSimulators ? [MockSupport.self] : [])
+        self.staticSupportTypes = []
         staticSupportTypesByIdentifier = self.staticSupportTypes.reduce(into: [:]) { (map, type) in
             map[type.supportIdentifier] = type
         }

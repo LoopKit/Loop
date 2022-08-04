@@ -352,6 +352,12 @@ final class WatchDataManager: NSObject {
             return
         }
 
+        // Prevent any delayed messages from enacting.
+        guard bolus.startDate.timeIntervalSinceNow > -30 else {
+            log.error("Could not enact expired bolus from watch: %{public}@", String(describing: message))
+            return
+        }
+
         var dosingDecision: BolusDosingDecision
         if let contextDate = bolus.contextDate, let contextDosingDecision = contextDosingDecisions[contextDate] {
             dosingDecision = contextDosingDecision

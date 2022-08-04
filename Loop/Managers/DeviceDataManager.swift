@@ -211,6 +211,8 @@ final class DeviceDataManager {
 
     private(set) var pumpManagerHUDProvider: HUDProvider?
 
+    private var trustedTimeChecker: TrustedTimeChecker
+
     // MARK: - WatchKit
 
     private var watchManager: WatchDataManager!
@@ -231,7 +233,8 @@ final class DeviceDataManager {
          closedLoopStatus: ClosedLoopStatus,
          cacheStore: PersistenceController,
          localCacheDuration: TimeInterval,
-         overrideHistory: TemporaryScheduleOverrideHistory)
+         overrideHistory: TemporaryScheduleOverrideHistory,
+         trustedTimeChecker: TrustedTimeChecker)
     {
 
         let fileManager = FileManager.default
@@ -310,6 +313,8 @@ final class DeviceDataManager {
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
         displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
 
+        self.trustedTimeChecker = trustedTimeChecker
+
         if let pumpManagerRawValue = rawPumpManager ?? UserDefaults.appGroup?.legacyPumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
             // Update lastPumpEventsReconciliation on DoseStore
@@ -325,8 +330,11 @@ final class DeviceDataManager {
 
         if let cgmManagerRawValue = rawCGMManager ?? UserDefaults.appGroup?.legacyCGMManagerRawValue {
             cgmManager = cgmManagerFromRawValue(cgmManagerRawValue)
-        } else if isCGMManagerValidPumpManager {
-            cgmManager = pumpManager as? CGMManager
+
+            // Handle case of PumpManager providing CGM
+            if cgmManager == nil && pumpManagerTypeFromRawValue(cgmManagerRawValue) != nil {
+                cgmManager = pumpManager as? CGMManager
+            }
         }
 
         //TODO The instantiation of these non-device related managers should be moved to LoopAppManager, and then LoopAppManager can wire up the connections between them.
@@ -417,13 +425,6 @@ final class DeviceDataManager {
         }
     }
     
-    var isCGMManagerValidPumpManager: Bool {
-        guard let rawValue = rawCGMManager else {
-            return false
-        }
-
-        return pumpManagerTypeFromRawValue(rawValue) != nil
-    }
 
     var availablePumpManagers: [PumpManagerDescriptor] {
         return pluginManager.availablePumpManagers + availableStaticPumpManagers
@@ -1680,3 +1681,7 @@ extension DeviceDataManager {
 }
 
 extension DeviceDataManager: DeviceStatusProvider {}
+
+extension DeviceDataManager {
+    var detectedSystemTimeOffset: TimeInterval { trustedTimeChecker.detectedSystemTimeOffset }
+}

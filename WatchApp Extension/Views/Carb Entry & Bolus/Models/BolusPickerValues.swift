@@ -34,6 +34,7 @@ struct BolusPickerValues: RandomAccessCollection {
 extension BolusPickerValues {
     func index(of bolusValue: Double) -> Int {
         let indexAfter = supportedVolumes.firstIndex(where: { $0 > bolusValue }) ?? supportedVolumes.endIndex
+        guard indexAfter > 0 else { return 0 }
         return supportedVolumes.index(before: indexAfter)
     }
 

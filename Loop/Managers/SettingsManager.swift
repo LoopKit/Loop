@@ -14,6 +14,8 @@ import HealthKit
 import Combine
 import LoopCore
 import LoopKitUI
+import os.log
+
 
 protocol DeviceStatusProvider {
     var pumpManagerStatus: PumpManagerStatus? { get }
@@ -32,11 +34,11 @@ class SettingsManager {
 
     public var latestSettings: StoredSettings
 
-    // Push Notifications (do not persist)
-    private var deviceToken: Data?
+    private var remoteNotificationRegistrationResult: Swift.Result<Data,Error>?
 
     private var cancellables: Set<AnyCancellable> = []
 
+    private let log = OSLog(category: "SettingsManager")
 
     init(cacheStore: PersistenceController, expireAfter: TimeInterval)
     {
@@ -45,6 +47,7 @@ class SettingsManager {
         if let storedSettings = settingsStore.latestSettings {
             latestSettings = storedSettings
         } else {
+            log.default("SettingsStore has no latestSettings: initializing empty StoredSettings.")
             latestSettings = StoredSettings()
         }
 
@@ -52,6 +55,7 @@ class SettingsManager {
 
         // Migrate old settings from UserDefaults
         if var legacyLoopSettings = UserDefaults.appGroup?.legacyLoopSettings {
+            log.default("Migrating settings from UserDefaults")
             legacyLoopSettings.insulinSensitivitySchedule = UserDefaults.appGroup?.legacyInsulinSensitivitySchedule
             legacyLoopSettings.basalRateSchedule = UserDefaults.appGroup?.legacyBasalRateSchedule
             legacyLoopSettings.carbRatioSchedule = UserDefaults.appGroup?.legacyCarbRatioSchedule
@@ -95,15 +99,8 @@ class SettingsManager {
         }
     }
 
-    func mergeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) -> StoredSettings
+    private func mergeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil, deviceToken: String? = nil) -> StoredSettings
     {
-
-#if targetEnvironment(simulator)
-        let deviceToken = "mockDeviceTokenFromSimulator"
-#else
-        let deviceToken = deviceToken?.hexadecimalString
-#endif
-
         let newLoopSettings = newLoopSettings ?? loopSettings
         let newNotificationSettings = notificationSettings ?? settingsStore.latestSettings?.notificationSettings
 
@@ -133,7 +130,19 @@ class SettingsManager {
     }
 
     func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) {
-        let mergedSettings = mergeSettings(newLoopSettings: newLoopSettings, notificationSettings: notificationSettings)
+
+        if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteOverridesEnabled {
+            // remote notification registration not finished
+            return
+        }
+
+        var deviceTokenStr: String?
+
+        if case .success(let deviceToken) = remoteNotificationRegistrationResult {
+            deviceTokenStr = deviceToken.hexadecimalString
+        }
+
+        let mergedSettings = mergeSettings(newLoopSettings: newLoopSettings, notificationSettings: notificationSettings, deviceToken: deviceTokenStr)
 
         if latestSettings == mergedSettings {
             // Skipping unchanged settings store
@@ -142,26 +151,30 @@ class SettingsManager {
 
         latestSettings = mergedSettings
 
-#if !targetEnvironment(simulator)
-        // Only store settings once we have a device token
-        guard deviceToken != nil else {
-            return
+        if latestSettings.insulinSensitivitySchedule == nil {
+            log.default("Saving settings with no ISF schedule.")
         }
-#endif
-        settingsStore.storeSettings(latestSettings) {}
+
+        settingsStore.storeSettings(latestSettings) { error in
+            if let error = error {
+                self.log.error("Error storing settings: %{public}@", error.localizedDescription)
+            }
+        }
     }
 
     func storeSettingsCheckingNotificationPermissions() {
         UNUserNotificationCenter.current().getNotificationSettings() { notificationSettings in
-            guard let latestSettings = self.settingsStore.latestSettings else {
-                return
-            }
+            DispatchQueue.main.async {
+                guard let latestSettings = self.settingsStore.latestSettings else {
+                    return
+                }
 
-            let notificationSettings = NotificationSettings(notificationSettings)
+                let notificationSettings = NotificationSettings(notificationSettings)
 
-            if notificationSettings != latestSettings.notificationSettings
-            {
-                self.storeSettings(notificationSettings: notificationSettings)
+                if notificationSettings != latestSettings.notificationSettings
+                {
+                    self.storeSettings(notificationSettings: notificationSettings)
+                }
             }
         }
     }
@@ -170,8 +183,8 @@ class SettingsManager {
         storeSettingsCheckingNotificationPermissions()
     }
 
-    func hasNewDeviceToken(token: Data) {
-        self.deviceToken = token
+    func remoteNotificationRegistrationDidFinish(_ result: Swift.Result<Data,Error>) {
+        self.remoteNotificationRegistrationResult = result
         storeSettings()
     }
 
@@ -188,7 +201,19 @@ extension SettingsManager: SettingsStoreDelegate {
 }
 
 private extension NotificationSettings {
+
     init(_ notificationSettings: UNNotificationSettings) {
+        let timeSensitiveSetting: NotificationSettings.NotificationSetting
+        let scheduledDeliverySetting: NotificationSettings.NotificationSetting
+
+        if #available(iOS 15.0, *) {
+            timeSensitiveSetting = NotificationSettings.NotificationSetting(notificationSettings.timeSensitiveSetting)
+            scheduledDeliverySetting = NotificationSettings.NotificationSetting(notificationSettings.scheduledDeliverySetting)
+        } else {
+            timeSensitiveSetting = .unknown
+            scheduledDeliverySetting = .unknown
+        }
+
         self.init(authorizationStatus: NotificationSettings.AuthorizationStatus(notificationSettings.authorizationStatus),
                   soundSetting: NotificationSettings.NotificationSetting(notificationSettings.soundSetting),
                   badgeSetting: NotificationSettings.NotificationSetting(notificationSettings.badgeSetting),
@@ -200,6 +225,9 @@ private extension NotificationSettings {
                   showPreviewsSetting: NotificationSettings.ShowPreviewsSetting(notificationSettings.showPreviewsSetting),
                   criticalAlertSetting: NotificationSettings.NotificationSetting(notificationSettings.criticalAlertSetting),
                   providesAppNotificationSettings: notificationSettings.providesAppNotificationSettings,
-                  announcementSetting: NotificationSettings.NotificationSetting(notificationSettings.announcementSetting))
+                  announcementSetting: NotificationSettings.NotificationSetting(notificationSettings.announcementSetting),
+                  timeSensitiveSetting: timeSensitiveSetting,
+                  scheduledDeliverySetting: scheduledDeliverySetting
+        )
     }
 }
