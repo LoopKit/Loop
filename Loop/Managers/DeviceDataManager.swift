@@ -1614,33 +1614,19 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
         }
     }
     
-    func saveCompletion(for therapySetting: TherapySetting, therapySettings: TherapySettings) {
-        switch therapySetting {
-        case .glucoseTargetRange:
-            loopManager.mutateSettings { settings in settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule }
-        case .preMealCorrectionRangeOverride:
-            loopManager.mutateSettings { settings in settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal }
-        case .workoutCorrectionRangeOverride:
-            loopManager.mutateSettings { settings in settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout }
-        case .suspendThreshold:
-            loopManager.mutateSettings { settings in settings.suspendThreshold = therapySettings.suspendThreshold }
-        case .basalRate:
-            loopManager.mutateSettings { settings in settings.basalRateSchedule = therapySettings.basalRateSchedule }
-        case .deliveryLimits:
-            loopManager.mutateSettings { settings in
-                settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
-                settings.maximumBolus = therapySettings.maximumBolus
-            }
-        case .insulinModel:
-            if let defaultRapidActingModel = therapySettings.defaultRapidActingModel {
-                loopManager.mutateSettings { settings in settings.defaultRapidActingModel = defaultRapidActingModel }
-            }
-        case .carbRatio:
-            loopManager.mutateSettings { settings in settings.carbRatioSchedule = therapySettings.carbRatioSchedule }
-        case .insulinSensitivity:
-            loopManager.mutateSettings { settings in settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule }
-        case .none:
-            break // NO-OP
+    func saveCompletion(therapySettings: TherapySettings) {
+
+        loopManager.mutateSettings { settings in
+            settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule
+            settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal
+            settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout
+            settings.suspendThreshold = therapySettings.suspendThreshold
+            settings.basalRateSchedule = therapySettings.basalRateSchedule
+            settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
+            settings.maximumBolus = therapySettings.maximumBolus
+            settings.defaultRapidActingModel = therapySettings.defaultRapidActingModel
+            settings.carbRatioSchedule = therapySettings.carbRatioSchedule
+            settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
         }
     }
     
