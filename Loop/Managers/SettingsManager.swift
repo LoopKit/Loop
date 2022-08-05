@@ -131,11 +131,6 @@ class SettingsManager {
 
     func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) {
 
-        if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteOverridesEnabled {
-            // remote notification registration not finished
-            return
-        }
-
         var deviceTokenStr: String?
 
         if case .success(let deviceToken) = remoteNotificationRegistrationResult {
@@ -150,6 +145,11 @@ class SettingsManager {
         }
 
         latestSettings = mergedSettings
+
+        if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteOverridesEnabled {
+            // remote notification registration not finished
+            return
+        }
 
         if latestSettings.insulinSensitivitySchedule == nil {
             log.default("Saving settings with no ISF schedule.")
