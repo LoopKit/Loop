@@ -49,7 +49,7 @@ enum RemoteCommand {
 
 // Push Notifications
 extension RemoteCommand {
-    init?(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset]) {
+    init(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], nowDate: Date = Date()) throws {
         if let overrideName = notification["override-name"] as? String,
             let preset = allowedPresets.first(where: { $0.name == overrideName }),
             let remoteAddress = notification["remote-address"] as? String
@@ -70,10 +70,27 @@ extension RemoteCommand {
                 absorptionTime = TimeInterval(hours: absorptionOverride)
             }
             let quantity = HKQuantity(unit: .gram(), doubleValue: carbsValue)
-            let newEntry = NewCarbEntry(quantity: quantity, startDate: Date(), foodType: "", absorptionTime: absorptionTime)
+            
+            var startDate = nowDate
+            if let createdAtStr = notification["created-at"] as? String {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
+                if let createdAtDate = formatter.date(from: createdAtStr) {
+                    startDate = createdAtDate
+                } else {
+                    throw RemoteCommandError.invalidCreatedDate(createdAtStr)
+                }
+            }
+
+            let newEntry = NewCarbEntry(quantity: quantity, startDate: startDate, foodType: "", absorptionTime: absorptionTime)
             self = .carbsEntry(newEntry)
         } else {
-            return nil
+            throw RemoteCommandError.unhandledNotication("\(notification)")
         }
+    }
+    
+    enum RemoteCommandError: LocalizedError {
+        case invalidCreatedDate(String)
+        case unhandledNotication(String)
     }
 }
