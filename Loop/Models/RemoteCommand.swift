@@ -49,7 +49,7 @@ enum RemoteCommand {
 
 // Push Notifications
 extension RemoteCommand {
-    init(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], nowDate: Date = Date()) throws {
+    static func createRemoteCommand(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], nowDate: Date = Date()) -> Result<RemoteCommand, RemoteCommandCreationError> {
         if let overrideName = notification["override-name"] as? String,
             let preset = allowedPresets.first(where: { $0.name == overrideName }),
             let remoteAddress = notification["remote-address"] as? String
@@ -58,11 +58,11 @@ extension RemoteCommand {
             if let overrideDurationMinutes = notification["override-duration-minutes"] as? Double {
                 override.duration = .finite(TimeInterval(minutes: overrideDurationMinutes))
             }
-            self = .temporaryScheduleOverride(override)
+            return .success(.temporaryScheduleOverride(override))
         } else if let _ = notification["cancel-temporary-override"] as? String {
-            self = .cancelTemporaryOverride
+            return .success(.cancelTemporaryOverride)
         }  else if let bolusValue = notification["bolus-entry"] as? Double {
-            self = .bolusEntry(bolusValue)
+            return .success(.bolusEntry(bolusValue))
         } else if let carbsValue = notification["carbs-entry"] as? Double {
             // TODO: get default absorption value
             var absorptionTime = TimeInterval(hours: 3.0)
@@ -78,18 +78,18 @@ extension RemoteCommand {
                 if let createdAtDate = formatter.date(from: createdAtStr) {
                     startDate = createdAtDate
                 } else {
-                    throw RemoteCommandError.invalidCreatedDate(createdAtStr)
+                    return .failure(RemoteCommandCreationError.invalidCreatedDate(createdAtStr))
                 }
             }
 
             let newEntry = NewCarbEntry(quantity: quantity, startDate: startDate, foodType: "", absorptionTime: absorptionTime)
-            self = .carbsEntry(newEntry)
+            return .success(.carbsEntry(newEntry))
         } else {
-            throw RemoteCommandError.unhandledNotication("\(notification)")
+            return .failure(RemoteCommandCreationError.unhandledNotication("\(notification)"))
         }
     }
     
-    enum RemoteCommandError: LocalizedError {
+    enum RemoteCommandCreationError: LocalizedError {
         case invalidCreatedDate(String)
         case unhandledNotication(String)
     }

@@ -37,7 +37,7 @@ class RemoteCommandTests: XCTestCase {
         ]
         
         //Act
-        let command = try RemoteCommand(notification: notification, allowedPresets: [])
+        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: []).get()
         
         //Assert
         guard case .carbsEntry(let carbEntry) = command else {
@@ -63,7 +63,7 @@ class RemoteCommandTests: XCTestCase {
         ]
         
         //Act
-        let command = try RemoteCommand(notification: notification, allowedPresets: [], nowDate: expectedStartDate)
+        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], nowDate: expectedStartDate).get()
         
         //Assert
         guard case .carbsEntry(let carbEntry) = command else {
@@ -90,7 +90,7 @@ class RemoteCommandTests: XCTestCase {
         ]
         
         //Act + Assert
-        XCTAssertThrowsError(try RemoteCommand(notification: notification, allowedPresets: []))
+        XCTAssertThrowsError(try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: []).get())
     }
     
     

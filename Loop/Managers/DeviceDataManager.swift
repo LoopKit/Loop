@@ -1316,7 +1316,7 @@ extension DeviceDataManager {
         let command: RemoteCommand
         
         do {
-            command = try RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets)
+            command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets).get()
         } catch {
             log.error("Remote Notification Error: %{public}@", String(describing: error))
             return
