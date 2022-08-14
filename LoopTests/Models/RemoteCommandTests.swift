@@ -33,7 +33,7 @@ class RemoteCommandTests: XCTestCase {
             "carbs-entry":expectedCarbsInGrams,
             "absorption-time": expectedAbsorptionTimeInHours,
             "otp": otp,
-            "created-at": expectedStartDateString
+            "start-time": expectedStartDateString
         ]
         
         //Act
@@ -86,7 +86,7 @@ class RemoteCommandTests: XCTestCase {
             "carbs-entry": expectedCarbsInGrams,
             "absorption-time":expectedAbsorptionTimeInHours,
             "otp": otp,
-            "created-at": "invalid-date-string"
+            "start-time": "invalid-date-string"
         ]
         
         //Act + Assert

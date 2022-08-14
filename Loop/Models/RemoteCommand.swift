@@ -49,7 +49,7 @@ enum RemoteCommand {
 
 // Push Notifications
 extension RemoteCommand {
-    static func createRemoteCommand(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], nowDate: Date = Date()) -> Result<RemoteCommand, RemoteCommandCreationError> {
+    static func createRemoteCommand(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], nowDate: Date = Date()) -> Result<RemoteCommand, RemoteCommandParseError> {
         if let overrideName = notification["override-name"] as? String,
             let preset = allowedPresets.first(where: { $0.name == overrideName }),
             let remoteAddress = notification["remote-address"] as? String
@@ -72,25 +72,25 @@ extension RemoteCommand {
             let quantity = HKQuantity(unit: .gram(), doubleValue: carbsValue)
             
             var startDate = nowDate
-            if let createdAtStr = notification["created-at"] as? String {
+            if let notificationStartTimeString = notification["start-time"] as? String {
                 let formatter = ISO8601DateFormatter()
                 formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
-                if let createdAtDate = formatter.date(from: createdAtStr) {
-                    startDate = createdAtDate
+                if let notificationStartDate = formatter.date(from: notificationStartTimeString) {
+                    startDate = notificationStartDate
                 } else {
-                    return .failure(RemoteCommandCreationError.invalidCreatedDate(createdAtStr))
+                    return .failure(RemoteCommandParseError.invalidStartTime(notificationStartTimeString))
                 }
             }
 
             let newEntry = NewCarbEntry(quantity: quantity, startDate: startDate, foodType: "", absorptionTime: absorptionTime)
             return .success(.carbsEntry(newEntry))
         } else {
-            return .failure(RemoteCommandCreationError.unhandledNotication("\(notification)"))
+            return .failure(RemoteCommandParseError.unhandledNotication("\(notification)"))
         }
     }
     
-    enum RemoteCommandCreationError: LocalizedError {
-        case invalidCreatedDate(String)
+    enum RemoteCommandParseError: LocalizedError {
+        case invalidStartTime(String)
         case unhandledNotication(String)
     }
 }
