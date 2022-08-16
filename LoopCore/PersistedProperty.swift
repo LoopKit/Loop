@@ -7,14 +7,15 @@
 //
 
 import Foundation
+import os.log
 
-@propertyWrapper struct PersistedProperty<Value> {
+@propertyWrapper public struct PersistedProperty<Value> {
     let key: String
     let storageURL: URL
 
-    private let log = DiagnosticLog(category: "PersistedProperty")
+    private let log = OSLog(subsystem: "com.loopkit.Loop", category: "PersistedProperty")
 
-    init(key: String, shared: Bool = false) {
+    public init(key: String, shared: Bool = false) {
         self.key = key
 
         let documents: URL
@@ -35,18 +36,18 @@ import Foundation
         storageURL = documents.appendingPathComponent(key + ".plist")
     }
 
-    var wrappedValue: Value? {
+    public var wrappedValue: Value? {
         get {
             do {
                 let data = try Data(contentsOf: storageURL)
-                log.info("Reading %{public}@ from %{public}@", key, storageURL.absoluteString)
+                os_log(.info, "Reading %{public}@ from %{public}@", key, storageURL.absoluteString)
                 guard let value = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? Value else {
-                    log.error("Unexpected type for %{public}@", key)
+                    os_log(.error, "Unexpected type for %{public}@", key)
                     return nil
                 }
                 return value
             } catch {
-                log.error("Error reading %{public}@: %{public}@", key, error.localizedDescription)
+                os_log(.error, "Error reading %{public}@: %{public}@", key, error.localizedDescription)
             }
             return nil
         }
@@ -55,16 +56,16 @@ import Foundation
                 do {
                     try FileManager.default.removeItem(at: storageURL)
                 } catch {
-                    log.error("Error deleting %{public}@: %{public}@", key, error.localizedDescription)
+                    os_log(.error, "Error deleting %{public}@: %{public}@", key, error.localizedDescription)
                 }
                 return
             }
             do {
                 let data = try PropertyListSerialization.data(fromPropertyList: newValue, format: .binary, options: 0)
                 try data.write(to: storageURL, options: .atomic)
-                log.info("Wrote %{public}@ to %{public}@", key, storageURL.absoluteString)
+                os_log(.info, "Wrote %{public}@ to %{public}@", key, storageURL.absoluteString)
             } catch {
-                log.error("Error saving %{public}@: %{public}@", key, error.localizedDescription)
+                os_log(.error, "Error saving %{public}@: %{public}@", key, error.localizedDescription)
             }
         }
     }
