@@ -49,6 +49,7 @@ struct GlucoseView: View {
                 Text(deltaString + " " + unitString)
                     .font(.caption2)
                     .foregroundColor(entry.minsAgo >= 5 ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .dynamicTypeSize(.xxLarge)
             }
             else {
                 Text(unitString)

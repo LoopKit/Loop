@@ -210,7 +210,10 @@ struct SmallStatusWidgetEntryView : View {
         VStack(alignment: .center, spacing: 5) {
             HStack(alignment: .center) {
                 LoopCircleView(entry: entry)
-                    .frame(maxWidth: .infinity, alignment: .center)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                // There is a SwiftUI bug which causes view not to be padded correctly when using .border
+                // Added padding to counteract the width of the border
+                    .padding(.leading, 8)
                 
                 GlucoseView(entry: entry)
             }
@@ -243,15 +246,15 @@ struct SmallStatusWidgetEntryView : View {
                             .font(.caption)
                     }
                     else {
-                        Text("Ev ---")
+                        Text("Ev --")
                             .font(.caption)
                     }
                     if let activeInsulin = entry.activeInsulin {
-                        Text("IOB \(activeInsulin) U")
+                        Text("IOB \(activeInsulin)")
                             .font(.caption)
                     }
                     else {
-                        Text("IOB ---")
+                        Text("IOB --")
                             .font(.caption)
                     }
                 }
