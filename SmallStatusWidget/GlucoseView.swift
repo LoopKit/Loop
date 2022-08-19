@@ -11,6 +11,7 @@ import LoopKit
 import HealthKit
 
 struct GlucoseView: View {
+    @Environment(\.sizeCategory) var sizeCategory
     var entry: SmallStatusEntry
     
     var body: some View {
@@ -47,9 +48,9 @@ struct GlucoseView: View {
                 let deltaString = (previousGlucose.quantity > currentGlucose.quantity ? "-" : "+") + (numberFormatter.string(from: abs(previousGlucose.quantity.doubleValue(for: unit) - currentGlucose.quantity.doubleValue(for: unit))) ?? "")
                 
                 Text(deltaString + " " + unitString)
-                    .font(.caption2)
+                // Dynamic text causes string to be cut off
+                    .font(.system(size: 11))
                     .foregroundColor(entry.minsAgo >= 5 ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
-                    .dynamicTypeSize(.xxLarge)
             }
             else {
                 Text(unitString)
