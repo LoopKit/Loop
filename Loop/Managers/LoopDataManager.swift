@@ -12,13 +12,18 @@ import HealthKit
 import LoopKit
 import LoopCore
 
-final class LoopDataManager: LoopSettingsAlerterDelegate {
+protocol PresetActivationObserver: AnyObject {
+    func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration)
+    func presetDeactivated(context: TemporaryScheduleOverride.Context)
+}
+
+final class LoopDataManager {
     enum LoopUpdateContext: Int {
-        case bolus
+        case insulin
         case carbs
         case glucose
         case preferences
-        case tempBasal
+        case loopFinished
     }
 
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
@@ -39,8 +44,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
     private let analyticsServicesManager: AnalyticsServicesManager
 
-    let loopSettingsAlerter: LoopSettingsAlerter
-    
     private let now: () -> Date
 
     private let automaticDosingStatus: AutomaticDosingStatus
@@ -50,7 +53,9 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
     
-    private var overrideObserver: NSKeyValueObservation? = nil
+    private var overrideIntentObserver: NSKeyValueObservation? = nil
+
+    weak var presetActivationObserver: PresetActivationObserver?
 
     deinit {
         for observer in notificationObservers {
@@ -61,10 +66,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
     init(
         lastLoopCompleted: Date?,
         basalDeliveryState: PumpManagerStatus.BasalDeliveryState?,
-        basalRateSchedule: BasalRateSchedule? = UserDefaults.appGroup?.basalRateSchedule,
-        carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup?.carbRatioSchedule,
-        insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup?.insulinSensitivitySchedule,
-        settings: LoopSettings = UserDefaults.appGroup?.loopSettings ?? LoopSettings(),
+        settings: LoopSettings,
         overrideHistory: TemporaryScheduleOverrideHistory,
         analyticsServicesManager: AnalyticsServicesManager,
         localCacheDuration: TimeInterval = .days(1),
@@ -74,7 +76,6 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         dosingDecisionStore: DosingDecisionStoreProtocol,
         latestStoredSettingsProvider: LatestStoredSettingsProvider,
         now: @escaping () -> Date = { Date() },
-        alertIssuer: AlertIssuer? = nil,
         pumpInsulinType: InsulinType?,
         automaticDosingStatus: AutomaticDosingStatus
     ) {
@@ -106,10 +107,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
-        loopSettingsAlerter = LoopSettingsAlerter(alertIssuer: alertIssuer)
-        loopSettingsAlerter.delegate = self
-
-        overrideObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
+        overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
                 return
             }
@@ -121,7 +119,11 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
             
             self?.logger.default("Override Intent: setting override named '%s'", String(describing: name))
             self?.mutateSettings { settings in
+                if let oldPreset = settings.scheduleOverride {
+                    self?.presetActivationObserver?.presetDeactivated(context: oldPreset.context)
+                }
                 settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
+                self?.presetActivationObserver?.presetActivated(context: .preset(preset), duration: preset.duration)
             }
             // Remove the override from UserDefaults so we don't set it multiple times
             appGroup.intentExtensionOverrideToSet = nil
@@ -169,7 +171,7 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
 
                     self.insulinEffect = nil
 
-                    self.notify(forChange: .bolus)
+                    self.notify(forChange: .insulin)
                 }
             }
         ]
@@ -209,6 +211,8 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
             return
         }
 
+        var invalidateCachedEffects = false
+
         dosingEnabled = newValue.dosingEnabled
 
         if newValue.preMealOverride != oldValue.preMealOverride {
@@ -219,13 +223,53 @@ final class LoopDataManager: LoopSettingsAlerterDelegate {
         if newValue.scheduleOverride != oldValue.scheduleOverride {
             overrideHistory.recordOverride(settings.scheduleOverride)
 
+            if let oldPreset = oldValue.scheduleOverride {
+                self.presetActivationObserver?.presetDeactivated(context: oldPreset.context)
+            }
+            if let newPreset = newValue.scheduleOverride {
+                self.presetActivationObserver?.presetActivated(context: newPreset.context, duration: newPreset.duration)
+            }
+
             // Invalidate cached effects affected by the override
-            self.carbEffect = nil
-            self.carbsOnBoard = nil
-            self.insulinEffect = nil
+            invalidateCachedEffects = true
         }
 
-        UserDefaults.appGroup?.loopSettings = newValue
+        if newValue.insulinSensitivitySchedule != oldValue.insulinSensitivitySchedule {
+            carbStore.insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
+            doseStore.insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
+            invalidateCachedEffects = true
+            analyticsServicesManager.didChangeInsulinSensitivitySchedule()
+        }
+
+        if newValue.basalRateSchedule != oldValue.basalRateSchedule {
+            doseStore.basalProfile = newValue.basalRateSchedule
+
+            if let newValue = newValue.basalRateSchedule, let oldValue = oldValue.basalRateSchedule, newValue.items != oldValue.items {
+                analyticsServicesManager.didChangeBasalRateSchedule()
+            }
+        }
+
+        if newValue.carbRatioSchedule != oldValue.carbRatioSchedule {
+            carbStore.carbRatioSchedule = newValue.carbRatioSchedule
+            invalidateCachedEffects = true
+            analyticsServicesManager.didChangeCarbRatioSchedule()
+        }
+
+        if newValue.defaultRapidActingModel != oldValue.defaultRapidActingModel {
+            doseStore.insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: newValue.defaultRapidActingModel)
+            invalidateCachedEffects = true
+            analyticsServicesManager.didChangeInsulinModel()
+        }
+
+        if invalidateCachedEffects {
+            dataAccessQueue.async {
+                // Invalidate cached effects based on this schedule
+                self.carbEffect = nil
+                self.carbsOnBoard = nil
+                self.insulinEffect = nil
+            }
+        }
+
         notify(forChange: .preferences)
         analyticsServicesManager.didChangeLoopSettings(from: oldValue, to: newValue)
     }
@@ -394,91 +438,14 @@ extension LoopDataManager: PersistenceControllerDelegate {
 // MARK: - Preferences
 extension LoopDataManager {
 
-    /// The daily schedule of basal insulin rates
-    var basalRateSchedule: BasalRateSchedule? {
-        get {
-            return doseStore.basalProfile
-        }
-        set {
-            doseStore.basalProfile = newValue
-            UserDefaults.appGroup?.basalRateSchedule = newValue
-            notify(forChange: .preferences)
-
-            if let newValue = newValue, let oldValue = doseStore.basalProfile, newValue.items != oldValue.items {
-                analyticsServicesManager.didChangeBasalRateSchedule()
-            }
-        }
-    }
-
     /// The basal rate schedule, applying recent overrides relative to the current moment in time.
     var basalRateScheduleApplyingOverrideHistory: BasalRateSchedule? {
         return doseStore.basalProfileApplyingOverrideHistory
     }
 
-    /// The daily schedule of carbs-to-insulin ratios
-    /// This is measured in grams/Unit
-    var carbRatioSchedule: CarbRatioSchedule? {
-        get {
-            return carbStore.carbRatioSchedule
-        }
-        set {
-            carbStore.carbRatioSchedule = newValue
-            UserDefaults.appGroup?.carbRatioSchedule = newValue
-
-            // Invalidate cached effects based on this schedule
-            carbEffect = nil
-            carbsOnBoard = nil
-
-            notify(forChange: .preferences)
-        }
-    }
-
     /// The carb ratio schedule, applying recent overrides relative to the current moment in time.
     var carbRatioScheduleApplyingOverrideHistory: CarbRatioSchedule? {
         return carbStore.carbRatioScheduleApplyingOverrideHistory
-    }
-
-    /// The length of time insulin has an effect on blood glucose
-    var defaultRapidActingModel: ExponentialInsulinModelPreset? {
-        get {
-            return UserDefaults.appGroup?.defaultRapidActingModel
-        }
-        set {
-            doseStore.insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: newValue)
-            UserDefaults.appGroup?.defaultRapidActingModel = newValue
-
-            self.dataAccessQueue.async {
-                // Invalidate cached effects based on this schedule
-                self.insulinEffect = nil
-
-                self.notify(forChange: .preferences)
-            }
-
-            analyticsServicesManager.didChangeInsulinModel()
-        }
-    }
-    
-    /// The daily schedule of insulin sensitivity (also known as ISF)
-    /// This is measured in <blood glucose>/Unit
-    var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
-        get {
-            return carbStore.insulinSensitivitySchedule
-        }
-        set {
-            carbStore.insulinSensitivitySchedule = newValue
-            doseStore.insulinSensitivitySchedule = newValue
-
-            UserDefaults.appGroup?.insulinSensitivitySchedule = newValue
-
-            dataAccessQueue.async {
-                // Invalidate cached effects based on this schedule
-                self.carbEffect = nil
-                self.carbsOnBoard = nil
-                self.insulinEffect = nil
-
-                self.notify(forChange: .preferences)
-            }
-        }
     }
 
     /// The insulin sensitivity schedule, applying recent overrides relative to the current moment in time.
@@ -490,25 +457,11 @@ extension LoopDataManager {
     ///
     /// - Parameter timeZone: The time zone
     func setScheduleTimeZone(_ timeZone: TimeZone) {
-        if timeZone != basalRateSchedule?.timeZone {
-            analyticsServicesManager.pumpTimeZoneDidChange()
-            basalRateSchedule?.timeZone = timeZone
-        }
-
-        if timeZone != carbRatioSchedule?.timeZone {
-            analyticsServicesManager.pumpTimeZoneDidChange()
-            carbRatioSchedule?.timeZone = timeZone
-        }
-
-        if timeZone != insulinSensitivitySchedule?.timeZone {
-            analyticsServicesManager.pumpTimeZoneDidChange()
-            insulinSensitivitySchedule?.timeZone = timeZone
-        }
-
-        if timeZone != settings.glucoseTargetRangeSchedule?.timeZone {
-            mutateSettings { settings in
-                settings.glucoseTargetRangeSchedule?.timeZone = timeZone
-            }
+        self.mutateSettings { settings in
+            settings.basalRateSchedule?.timeZone = timeZone
+            settings.carbRatioSchedule?.timeZone = timeZone
+            settings.insulinSensitivitySchedule?.timeZone = timeZone
+            settings.glucoseTargetRangeSchedule?.timeZone = timeZone
         }
     }
 }
@@ -548,7 +501,7 @@ extension LoopDataManager {
     /// An active high temp basal (greater than the basal schedule) is cancelled when the CGM data is unreliable.
     func receivedUnreliableCGMReading() {
         guard case .tempBasal(let tempBasal) = basalDeliveryState,
-              let scheduledBasalRate = basalRateSchedule?.value(at: now()),
+              let scheduledBasalRate = settings.basalRateSchedule?.value(at: now()),
               tempBasal.unitsPerHour > scheduledBasalRate else
         {
             return
@@ -595,7 +548,9 @@ extension LoopDataManager {
         }
         self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
 
-        self.notify(forChange: .tempBasal)
+        // Didn't actually run a loop, but this is similar to a loop() in that the automatic dosing
+        // was updated.
+        self.notify(forChange: .loopFinished)
         completion?(error)
     }
 
@@ -632,6 +587,14 @@ extension LoopDataManager {
         }
     }
 
+    func deleteCarbEntry(_ oldEntry: StoredCarbEntry, completion: @escaping (_ result: CarbStoreResult<Bool>) -> Void) {
+        carbStore.deleteCarbEntry(oldEntry) { result in
+            completion(result)
+            self.updateRecommendedManualBolus()
+        }
+    }
+
+
     /// Adds a bolus requested of the pump, but not confirmed.
     ///
     /// - Parameters:
@@ -641,7 +604,7 @@ extension LoopDataManager {
         dataAccessQueue.async {
             self.logger.debug("addRequestedBolus")
             self.lastRequestedBolus = dose
-            self.notify(forChange: .bolus)
+            self.notify(forChange: .insulin)
 
             completion?()
         }
@@ -657,7 +620,7 @@ extension LoopDataManager {
             self.lastRequestedBolus = nil
             self.recommendedAutomaticDose = nil
             self.insulinEffect = nil
-            self.notify(forChange: .bolus)
+            self.notify(forChange: .insulin)
 
             completion?()
         }
@@ -673,7 +636,7 @@ extension LoopDataManager {
             self.logger.debug("bolusRequestFailed")
             self.lastRequestedBolus = nil
             self.insulinEffect = nil
-            self.notify(forChange: .bolus)
+            self.notify(forChange: .insulin)
 
             completion?()
         }
@@ -713,7 +676,7 @@ extension LoopDataManager {
             if error == nil {
                 self.recommendedAutomaticDose = nil
                 self.insulinEffect = nil
-                self.notify(forChange: .bolus)
+                self.notify(forChange: .insulin)
             }
         }
     }
@@ -821,7 +784,9 @@ extension LoopDataManager {
         }
 
         logger.default("Loop ended")
-        notify(forChange: .tempBasal)
+        notify(forChange: .loopFinished)
+
+        updateRecommendedManualBolus()
     }
 
     // This is primarily for external clients displaying a bolus recommendation and forecast
@@ -860,7 +825,7 @@ extension LoopDataManager {
         var dosingDecision = StoredDosingDecision(reason: reason.rawValue)
         let latestSettings = latestStoredSettingsProvider.latestSettings
         dosingDecision.settings = StoredDosingDecision.Settings(latestSettings)
-        dosingDecision.scheduleOverride = latestSettings?.scheduleOverride
+        dosingDecision.scheduleOverride = latestSettings.scheduleOverride
         dosingDecision.controllerStatus = UIDevice.current.controllerStatus
         dosingDecision.pumpManagerStatus = delegate?.pumpManagerStatus
         if let pumpStatusHighlight = delegate?.pumpStatusHighlight {
@@ -982,7 +947,7 @@ extension LoopDataManager {
             updateGroup.enter()
             carbStore.getGlucoseEffects(
                 start: retrospectiveStart, end: nil,
-                effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
+                effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
             ) { (result) -> Void in
                 switch result {
                 case .failure(let error):
@@ -1001,7 +966,7 @@ extension LoopDataManager {
 
         if carbsOnBoard == nil {
             updateGroup.enter()
-            carbStore.carbsOnBoard(at: now(), effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
+            carbStore.carbsOnBoard(at: now(), effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
                 switch result {
                 case .failure(let error):
                     switch error {
@@ -1076,8 +1041,6 @@ extension LoopDataManager {
                 type(of: self).LoopUpdateContextKey: context.rawValue
             ]
         )
-
-        updateRecommendedManualBolus()
     }
 
     /// Computes amount of insulin from boluses that have been issued and not confirmed, and
@@ -1165,7 +1128,7 @@ extension LoopDataManager {
                         of: [potentialCarbEntry],
                         startingAt: retrospectiveStart,
                         endingAt: nil,
-                        effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
+                        effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
                     )
 
                     effects.append(potentialCarbEffect)
@@ -1184,7 +1147,7 @@ extension LoopDataManager {
                         of: entries,
                         startingAt: retrospectiveStart,
                         endingAt: nil,
-                        effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
+                        effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
                     )
 
                     effects.append(potentialCarbEffect)
@@ -1312,7 +1275,7 @@ extension LoopDataManager {
         updateGroup.enter()
         carbStore.getGlucoseEffects(
             start: retrospectiveStart, end: nil,
-            effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
+            effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
         ) { result in
             switch result {
             case .failure(let error):
@@ -1476,8 +1439,8 @@ extension LoopDataManager {
             startingAt: glucose,
             retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,
             recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
-            insulinSensitivitySchedule: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule,
+            insulinSensitivitySchedule: settings.insulinSensitivitySchedule,
+            basalRateSchedule: settings.basalRateSchedule,
             glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
             retrospectiveCorrectionGroupingInterval: LoopConstants.retrospectiveCorrectionGroupingInterval
         )
@@ -1490,8 +1453,8 @@ extension LoopDataManager {
             startingAt: glucose,
             retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,
             recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
-            insulinSensitivitySchedule: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule,
+            insulinSensitivitySchedule: settings.insulinSensitivitySchedule,
+            basalRateSchedule: settings.basalRateSchedule,
             glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
             retrospectiveCorrectionGroupingInterval: LoopConstants.retrospectiveCorrectionGroupingInterval
         )
@@ -1615,7 +1578,7 @@ extension LoopDataManager {
 
             let dosingRecommendation: AutomaticDoseRecommendation?
 
-            switch settings.dosingStrategy {
+            switch settings.automaticDosingStrategy {
             case .automaticBolus:
                 let volumeRounder = { (_ units: Double) in
                     return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
@@ -2222,17 +2185,22 @@ extension LoopDataManager {
             let settings = settings
             return TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
                             correctionRangeOverrides: CorrectionRangeOverrides(preMeal: settings.preMealTargetRange, workout: settings.legacyWorkoutTargetRange),
+                            overridePresets: settings.overridePresets,
                             maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
                             maximumBolus: settings.maximumBolus,
                             suspendThreshold: settings.suspendThreshold,
-                            insulinSensitivitySchedule: insulinSensitivitySchedule,
-                            carbRatioSchedule: carbRatioSchedule,
-                            basalRateSchedule: basalRateSchedule,
-                            defaultRapidActingModel: defaultRapidActingModel)
+                            insulinSensitivitySchedule: settings.insulinSensitivitySchedule,
+                            carbRatioSchedule: settings.carbRatioSchedule,
+                            basalRateSchedule: settings.basalRateSchedule,
+                            defaultRapidActingModel: settings.defaultRapidActingModel)
         }
         
         set {
             mutateSettings { settings in
+                settings.defaultRapidActingModel = newValue.defaultRapidActingModel
+                settings.insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
+                settings.carbRatioSchedule = newValue.carbRatioSchedule
+                settings.basalRateSchedule = newValue.basalRateSchedule
                 settings.glucoseTargetRangeSchedule = newValue.glucoseTargetRangeSchedule
                 settings.preMealTargetRange = newValue.correctionRangeOverrides?.preMeal
                 settings.legacyWorkoutTargetRange = newValue.correctionRangeOverrides?.workout
@@ -2241,10 +2209,6 @@ extension LoopDataManager {
                 settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
                 settings.overridePresets = newValue.overridePresets ?? []
             }
-            insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
-            carbRatioSchedule = newValue.carbRatioSchedule
-            basalRateSchedule = newValue.basalRateSchedule
-            defaultRapidActingModel = newValue.defaultRapidActingModel
         }
     }
 }

@@ -8,17 +8,18 @@
 
 import SwiftUI
 import LoopCore
+import LoopKit
 import LoopKitUI
 
 public struct DosingStrategySelectionView: View {
     
-    @Binding private var dosingStrategy: DosingStrategy
+    @Binding private var automaticDosingStrategy: AutomaticDosingStrategy
     
-    @State private var internalDosingStrategy: DosingStrategy
+    @State private var internalDosingStrategy: AutomaticDosingStrategy
     
-    public init(dosingStrategy: Binding<DosingStrategy>) {
-        self._dosingStrategy = dosingStrategy
-        self._internalDosingStrategy = State(initialValue: dosingStrategy.wrappedValue)
+    public init(automaticDosingStrategy: Binding<AutomaticDosingStrategy>) {
+        self._automaticDosingStrategy = automaticDosingStrategy
+        self._internalDosingStrategy = State(initialValue: automaticDosingStrategy.wrappedValue)
     }
     
     public var body: some View {
@@ -32,15 +33,15 @@ public struct DosingStrategySelectionView: View {
     }
 
     public var options: some View {
-        ForEach(DosingStrategy.allCases, id: \.self) { strategy in
+        ForEach(AutomaticDosingStrategy.allCases, id: \.self) { strategy in
             CheckmarkListItem(
                 title: Text(strategy.title),
                 description: Text(strategy.informationalText),
                 isSelected: Binding(
-                    get: { self.dosingStrategy == strategy },
+                    get: { self.automaticDosingStrategy == strategy },
                     set: { isSelected in
                         if isSelected {
-                            self.dosingStrategy = strategy
+                            self.automaticDosingStrategy = strategy
                             self.internalDosingStrategy = strategy // Hack to force update. :(
                         }
                     }
@@ -51,7 +52,7 @@ public struct DosingStrategySelectionView: View {
     }
 }
 
-extension DosingStrategy {
+extension AutomaticDosingStrategy {
     var informationalText: String {
         switch self {
         case .tempBasalOnly:
@@ -65,6 +66,6 @@ extension DosingStrategy {
 
 struct DosingStrategySelectionView_Previews: PreviewProvider {
     static var previews: some View {
-        DosingStrategySelectionView(dosingStrategy: .constant(.automaticBolus))
+        DosingStrategySelectionView(automaticDosingStrategy: .constant(.automaticBolus))
     }
 }

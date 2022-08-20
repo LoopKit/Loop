@@ -138,8 +138,17 @@ final class WatchDataManager: NSObject {
 
         lastSentSettings = settings
 
-        log.default("Transferring LoopSettingsUserInfo")
-        session.transferUserInfo(LoopSettingsUserInfo(settings: settings).rawValue)
+        // clear any old pending settings transfers
+        for transfer in session.outstandingUserInfoTransfers {
+            if (transfer.userInfo["name"] as? String) == LoopSettingsUserInfo.name {
+                log.default("Cancelling old setings transfer")
+                transfer.cancel()
+            }
+        }
+
+        let userInfo = LoopSettingsUserInfo(settings: settings).rawValue
+        log.default("Transferring LoopSettingsUserInfo: %{public}@", userInfo)
+        session.transferUserInfo(userInfo)
     }
 
     @objc private func sendSupportedBolusVolumesIfNeeded() {
@@ -352,6 +361,12 @@ final class WatchDataManager: NSObject {
             return
         }
 
+        // Prevent any delayed messages from enacting.
+        guard bolus.startDate.timeIntervalSinceNow > -30 else {
+            log.error("Could not enact expired bolus from watch: %{public}@", String(describing: message))
+            return
+        }
+
         var dosingDecision: BolusDosingDecision
         if let contextDate = bolus.contextDate, let contextDosingDecision = contextDosingDecisions[contextDate] {
             dosingDecision = contextDosingDecision
@@ -422,7 +437,6 @@ extension WatchDataManager: WCSessionDelegate {
                 var loopSettings = deviceManager.loopManager.settings
                 loopSettings.preMealOverride = watchSettings.preMealOverride
                 loopSettings.scheduleOverride = watchSettings.scheduleOverride
-                loopSettings.indefiniteWorkoutOverrideEnabledDate = watchSettings.indefiniteWorkoutOverrideEnabledDate
 
                 // Prevent re-sending these updated settings back to the watch
                 lastSentSettings = loopSettings

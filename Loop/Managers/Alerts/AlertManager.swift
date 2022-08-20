@@ -8,20 +8,12 @@
 
 import LoopKit
 import UIKit
+import Combine
 
 protocol AlertManagerResponder: AnyObject {
     /// Method for our Handlers to call to kick off alert response.  Differs from AlertResponder because here we need the whole `Identifier`.
     func acknowledgeAlert(identifier: Alert.Identifier)
 }
-
-public protocol UserNotificationCenter {
-    func add(_ request: UNNotificationRequest, withCompletionHandler: ((Error?) -> Void)?)
-    func removePendingNotificationRequests(withIdentifiers: [String])
-    func removeDeliveredNotifications(withIdentifiers: [String])
-    func getDeliveredNotifications(completionHandler: @escaping ([UNNotification]) -> Void)
-    func getPendingNotificationRequests(completionHandler: @escaping ([UNNotificationRequest]) -> Void)
-}
-extension UNUserNotificationCenter: UserNotificationCenter {}
 
 public enum AlertUserNotificationUserInfoKey: String {
     case alert, alertTimestamp
@@ -37,23 +29,35 @@ public final class AlertManager {
 
     private let log = DiagnosticLog(category: "AlertManager")
 
+    static let managerIdentifier = "Loop"
+
     private var handlers: [AlertIssuer] = []
     private var responders: [String: Weak<AlertResponder>] = [:]
     private var soundVendors: [String: Weak<AlertSoundVendor>] = [:]
 
-    private let userNotificationCenter: UserNotificationCenter
     private let fileManager: FileManager
     private let alertPresenter: AlertPresenter
 
+    private var modalAlertIssuer: AlertIssuer!
+    private var userNotificationAlertIssuer: AlertIssuer?
+
     let alertStore: AlertStore
+
+    private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
+
+    lazy private var cancellables = Set<AnyCancellable>()
+
+    // For testing
+    var getCurrentDate = { return Date() }
     
     public init(alertPresenter: AlertPresenter,
-                handlers: [AlertIssuer]? = nil,
-                userNotificationCenter: UserNotificationCenter = UNUserNotificationCenter.current(),
+                modalAlertIssuer: AlertIssuer? = nil,
+                userNotificationAlertIssuer: AlertIssuer,
                 fileManager: FileManager = FileManager.default,
                 alertStore: AlertStore? = nil,
-                expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */) {
-        self.userNotificationCenter = userNotificationCenter
+                expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
+                bluetoothProvider: BluetoothProvider
+    ) {
         self.fileManager = fileManager
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
         let alertStoreDirectory = documentsDirectory?.appendingPathComponent("AlertStore")
@@ -67,9 +71,18 @@ public final class AlertManager {
         }
         self.alertStore = alertStore ?? AlertStore(storageDirectoryURL: alertStoreDirectory, expireAfter: expireAfter)
         self.alertPresenter = alertPresenter
-        self.handlers = handlers ??
-            [UserNotificationAlertIssuer(userNotificationCenter: userNotificationCenter),
-            InAppModalAlertIssuer(alertPresenter: alertPresenter, alertManagerResponder: self)]
+        self.modalAlertIssuer = modalAlertIssuer ?? InAppModalAlertIssuer(alertPresenter: alertPresenter, alertManagerResponder: self)
+        self.userNotificationAlertIssuer = userNotificationAlertIssuer
+        handlers = [self.modalAlertIssuer, userNotificationAlertIssuer]
+
+        bluetoothProvider.addBluetoothObserver(self, queue: .main)
+
+        NotificationCenter.default.publisher(for: .LoopCompleted)
+            .sink { [weak self] _ in
+                self?.loopDidComplete()
+            }
+            .store(in: &cancellables)
+
     }
 
     public func addAlertResponder(managerIdentifier: String, alertResponder: AlertResponder) {
@@ -88,6 +101,166 @@ public final class AlertManager {
     public func removeAlertSoundVendor(managerIdentifier: String) {
         soundVendors.removeValue(forKey: managerIdentifier)
     }
+
+    // MARK: - Bluetooth alerts
+
+    private func onBluetoothPermissionDenied() {
+        log.default("Bluetooth permission denied")
+        let title = NSLocalizedString("Bluetooth Unavailable Alert", comment: "Bluetooth unavailable alert title")
+        let body = NSLocalizedString("Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus.", comment: "Bluetooth unavailable alert body.")
+        let content = Alert.Content(title: title,
+                                      body: body,
+                                      acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
+        issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate))
+    }
+
+    private func onBluetoothPoweredOn() {
+        log.default("Bluetooth powered on")
+        retractAlert(identifier: bluetoothPoweredOffIdentifier)
+    }
+
+    private func onBluetoothPoweredOff() {
+        log.default("Bluetooth powered off")
+        let title = NSLocalizedString("Bluetooth Off Alert", comment: "Bluetooth off alert title")
+        let bgBody = NSLocalizedString("Loop will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus.", comment: "Bluetooth off background alert body.")
+        let bgcontent = Alert.Content(title: title,
+                                      body: bgBody,
+                                      acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
+        let fgBody = NSLocalizedString("Turn on Bluetooth to receive alerts, alarms or sensor glucose readings.", comment: "Bluetooth off foreground alert body")
+        let fgcontent = Alert.Content(title: title,
+                                      body: fgBody,
+                                      acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
+        issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier,
+                                       foregroundContent: fgcontent,
+                                       backgroundContent: bgcontent,
+                                       trigger: .immediate,
+                                       interruptionLevel: .critical))
+    }
+
+    // MARK: - Loop Not Running alerts
+
+    func loopDidComplete() {
+        clearLoopNotRunningNotifications()
+        scheduleLoopNotRunningNotifications()
+    }
+
+    func scheduleLoopNotRunningNotifications() {
+        // Give a little extra time for a loop-in-progress to complete
+        let gracePeriod = TimeInterval(minutes: 0.5)
+
+        var scheduledNotifications: [StoredLoopNotRunningNotification] = []
+
+        for (minutes, isCritical) in [(20.0, false), (40.0, false), (60.0, true), (120.0, true)] {
+            let notification = UNMutableNotificationContent()
+            let failureInterval = TimeInterval(minutes: minutes)
+
+            let formatter = DateComponentsFormatter()
+            formatter.maximumUnitCount = 1
+            formatter.allowedUnits = [.hour, .minute]
+            formatter.unitsStyle = .full
+
+            if let failureIntervalString = formatter.string(from: failureInterval)?.localizedLowercase {
+                notification.body = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failureIntervalString)
+            }
+
+            notification.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
+            if isCritical, FeatureFlags.criticalAlertsEnabled {
+                if #available(iOS 15.0, *) {
+                    notification.interruptionLevel = .critical
+                }
+                notification.sound = .defaultCritical
+            } else {
+                if #available(iOS 15.0, *) {
+                    notification.interruptionLevel = .timeSensitive
+                }
+                notification.sound = .default
+            }
+            notification.categoryIdentifier = LoopNotificationCategory.loopNotRunning.rawValue
+            notification.threadIdentifier = LoopNotificationCategory.loopNotRunning.rawValue
+
+            let trigger = UNTimeIntervalNotificationTrigger(
+                timeInterval: failureInterval + gracePeriod,
+                repeats: false
+            )
+
+            let request = UNNotificationRequest(
+                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(failureInterval)",
+                content: notification,
+                trigger: trigger
+            )
+
+            if let nextTriggerDate = trigger.nextTriggerDate() {
+                let scheduledNotification = StoredLoopNotRunningNotification(
+                    alertAt: nextTriggerDate,
+                    title: notification.title,
+                    body: notification.body,
+                    timeInterval: failureInterval,
+                    isCritical: isCritical)
+                scheduledNotifications.append(scheduledNotification)
+            }
+            UNUserNotificationCenter.current().add(request)
+        }
+        UserDefaults.appGroup?.loopNotRunningNotifications = scheduledNotifications
+    }
+
+    func inferDeliveredLoopNotRunningNotifications() {
+        // Infer that any past alerts have been delivered at this point
+        let now = getCurrentDate()
+        var stillPendingNotifications = [StoredLoopNotRunningNotification]()
+        for notification in UserDefaults.appGroup?.loopNotRunningNotifications ?? [] {
+            if notification.alertAt < now {
+                let alertIdentifier = Alert.Identifier(managerIdentifier: "Loop", alertIdentifier: "loopNotLooping")
+                let content = Alert.Content(title: notification.title, body: notification.body, acknowledgeActionButtonLabel: "ios-notification-default")
+                let interruptionLevel: Alert.InterruptionLevel = notification.isCritical ? .critical : .timeSensitive
+                let alert = Alert(identifier: alertIdentifier, foregroundContent: nil, backgroundContent: content, trigger: .immediate, interruptionLevel: interruptionLevel)
+                recordIssued(alert: alert, at: notification.alertAt)
+            } else {
+                stillPendingNotifications.append(notification)
+            }
+        }
+        UserDefaults.appGroup?.loopNotRunningNotifications = stillPendingNotifications
+    }
+
+    func clearLoopNotRunningNotifications() {
+        inferDeliveredLoopNotRunningNotifications()
+
+        // Clear out any existing not-running notifications
+        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
+            let loopNotRunningIdentifiers = notifications.filter({
+                $0.request.content.categoryIdentifier == LoopNotificationCategory.loopNotRunning.rawValue
+            }).map({
+                $0.request.identifier
+            })
+
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: loopNotRunningIdentifiers)
+        }
+    }
+
+    // MARK: - Workout reminder
+    private func scheduleWorkoutOverrideReminder() {
+        issueAlert(workoutOverrideReminderAlert)
+    }
+
+    private func retractWorkoutOverrideReminder() {
+        retractAlert(identifier: AlertManager.workoutOverrideReminderAlertIdentifier)
+    }
+
+    public static var workoutOverrideReminderAlertIdentifier: Alert.Identifier {
+        return Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "WorkoutOverrideReminder")
+    }
+
+    public var workoutOverrideReminderAlert: Alert {
+        let title = NSLocalizedString("Workout Temp Adjust Still On", comment: "Workout override still on reminder alert title")
+        let body = NSLocalizedString("Workout Temp Adjust has been turned on for more than 24 hours. Make sure you still want it enabled, or turn it off in the app.", comment: "Workout override still on reminder alert body.")
+        let content = Alert.Content(title: title,
+                                    body: body,
+                                    acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
+        return Alert(identifier: AlertManager.workoutOverrideReminderAlertIdentifier,
+                     foregroundContent: content,
+                     backgroundContent: content,
+                     trigger: .delayed(interval: .hours(24)))
+    }
+
 }
 
 // MARK: AlertManagerResponder implementation
@@ -143,7 +316,7 @@ extension AlertManager: AlertIssuer {
     private func replayAlert(_ alert: Alert) {
         // Only alerts with foreground content are replayed
         if alert.foregroundContent != nil {
-            handlers.forEach { $0.issueAlert(alert) }
+            modalAlertIssuer?.issueAlert(alert)
         }
     }
 }
@@ -321,7 +494,7 @@ extension AlertManager: PersistedAlertStore {
         alertStore.recordRetractedAlert(alert, at: date)
     }
 
-    public func recordIssued(alert: Alert, at date: Date = Date(), completion: ((Result<Void, Error>) -> Void)? = nil) {
+    private func recordIssued(alert: Alert, at date: Date = Date(), completion: ((Result<Void, Error>) -> Void)? = nil) {
         alertStore.recordIssued(alert: alert, at: date, completion: completion)
     }
 }
@@ -371,3 +544,43 @@ fileprivate extension URL {
     }
 }
 
+
+// MARK: - BluetoothObserver
+extension AlertManager: BluetoothObserver {
+    public func bluetoothDidUpdateState(_ state: BluetoothState) {
+        switch state {
+        case .poweredOn:
+            onBluetoothPoweredOn()
+        case .poweredOff:
+            onBluetoothPoweredOff()
+        case .unauthorized:
+            onBluetoothPermissionDenied()
+        default:
+            return
+        }
+    }
+}
+
+
+// MARK: - PresetActivationObserver
+extension AlertManager: PresetActivationObserver {
+    func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration) {
+        switch context {
+        case .legacyWorkout:
+            if duration == .indefinite {
+                scheduleWorkoutOverrideReminder()
+            }
+        default:
+            break
+        }
+    }
+
+    func presetDeactivated(context: TemporaryScheduleOverride.Context) {
+        switch context {
+        case .legacyWorkout:
+            retractWorkoutOverrideReminder()
+        default:
+            break
+        }
+    }
+}

@@ -159,7 +159,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 insulinCounteractionEffects = allInsulinCounteractionEffects.filterDateRange(chartStartDate, nil)
 
                 reloadGroup.enter()
-                self.deviceManager.carbStore.getCarbStatus(start: listStart, end: nil, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? allInsulinCounteractionEffects : nil) { (result) in
+                self.deviceManager.carbStore.getCarbStatus(start: listStart, end: nil, effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? allInsulinCounteractionEffects : nil) { (result) in
                     switch result {
                     case .success(let status):
                         carbStatuses = status
@@ -173,7 +173,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 }
 
                 reloadGroup.enter()
-                self.deviceManager.carbStore.getGlucoseEffects(start: chartStartDate, end: nil, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
+                self.deviceManager.carbStore.getGlucoseEffects(start: chartStartDate, end: nil, effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
                     switch result {
                     case .success((_, let effects)):
                         carbEffects = effects
@@ -450,7 +450,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let status = carbStatuses[indexPath.row]
-            deviceManager.carbStore.deleteCarbEntry(status.entry) { (result) -> Void in
+            deviceManager.loopManager.deleteCarbEntry(status.entry) { (result) -> Void in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:

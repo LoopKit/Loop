@@ -62,7 +62,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext)
                 DispatchQueue.main.async {
                     switch context {
-                    case .none, .bolus?:
+                    case .none, .insulin?:
                         self?.refreshContext.formUnion([.status, .insulin])
                     case .preferences?:
                         self?.refreshContext.formUnion([.status, .targets])
@@ -70,7 +70,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         self?.refreshContext.update(with: .carbs)
                     case .glucose?:
                         self?.refreshContext.formUnion([.glucose, .carbs])
-                    case .tempBasal?:
+                    case .loopFinished?:
                         self?.refreshContext.update(with: .insulin)
                     }
 
@@ -401,7 +401,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             if currentContext.contains(.carbs) {
                 reloadGroup.enter()
-                self.deviceManager.carbStore.getCarbsOnBoardValues(start: startDate, end: nil, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? state.insulinCounteractionEffects : nil) { (result) in
+                self.deviceManager.carbStore.getCarbsOnBoardValues(start: startDate, end: nil, effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? state.insulinCounteractionEffects : nil) { (result) in
                     switch result {
                     case .failure(let error):
                         self.log.error("CarbStore failed to get carbs on board values: %{public}@", String(describing: error))
@@ -1415,7 +1415,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           isClosedLoopAllowed: closedLoopStatus.$isClosedLoopAllowed,
                                           supportInfoProvider: deviceManager,
-                                          dosingStrategy: deviceManager.loopManager.settings.dosingStrategy,
+                                          automaticDosingStrategy: deviceManager.loopManager.settings.automaticDosingStrategy,
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
@@ -1697,11 +1697,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     settings.suspendThreshold = therapySettings.suspendThreshold
                     settings.maximumBolus = therapySettings.maximumBolus
                     settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
+                    settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
+                    settings.carbRatioSchedule = therapySettings.carbRatioSchedule
+                    settings.basalRateSchedule = therapySettings.basalRateSchedule
+                    settings.defaultRapidActingModel = therapySettings.defaultRapidActingModel
                 }
-                self.deviceManager.loopManager.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
-                self.deviceManager.loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule
-                self.deviceManager.loopManager.basalRateSchedule = therapySettings.basalRateSchedule
-                self.deviceManager.loopManager.defaultRapidActingModel = therapySettings.defaultRapidActingModel
             })
         }
         actionSheet.addAction(UIAlertAction(title: "Crash the App", style: .destructive) { _ in
@@ -1968,7 +1968,7 @@ extension StatusTableViewController {
     fileprivate func addPumpManager(withIdentifier identifier: String) {
         guard let maximumBasalRate = deviceManager.loopManager.settings.maximumBasalRatePerHour,
               let maxBolus = deviceManager.loopManager.settings.maximumBolus,
-              let basalSchedule = deviceManager.loopManager.basalRateSchedule else
+              let basalSchedule = deviceManager.loopManager.settings.basalRateSchedule else
         {
             log.error("Failure to setup pump manager: incomplete settings")
             return
@@ -2012,9 +2012,9 @@ extension StatusTableViewController: SettingsViewModelDelegate {
         }
     }
     
-    func dosingStrategyChanged(_ strategy: DosingStrategy) {
+    func dosingStrategyChanged(_ strategy: AutomaticDosingStrategy) {
         self.deviceManager.loopManager.mutateSettings { settings in
-            settings.dosingStrategy = strategy
+            settings.automaticDosingStrategy = strategy
         }
     }
 

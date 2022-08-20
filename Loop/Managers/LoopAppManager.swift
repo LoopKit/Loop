@@ -66,7 +66,6 @@ class LoopAppManager: NSObject {
     private var pluginManager: PluginManager!
     private var bluetoothStateManager: BluetoothStateManager!
     private var alertManager: AlertManager!
-    private var loopAlertsManager: LoopAlertsManager!
     private var trustedTimeChecker: TrustedTimeChecker!
     private var deviceDataManager: DeviceDataManager!
     private var onboardingManager: OnboardingManager!
@@ -96,14 +95,11 @@ class LoopAppManager: NSObject {
 
         registerBackgroundTasks()
 
-
         if FeatureFlags.remoteOverridesEnabled {
             DispatchQueue.main.async {
                 UIApplication.shared.registerForRemoteNotifications()
             }
         }
-
-
 
         self.state = state.next
     }
@@ -113,7 +109,6 @@ class LoopAppManager: NSObject {
         precondition(isLaunchPending)
 
         resumeLaunch()
-        finishLaunch()
     }
 
     var isLaunchPending: Bool { state == .checkProtectedDataAvailable }
@@ -161,13 +156,15 @@ class LoopAppManager: NSObject {
         self.pluginManager = PluginManager()
         self.bluetoothStateManager = BluetoothStateManager()
         self.alertManager = AlertManager(alertPresenter: self,
-                                         expireAfter: Bundle.main.localCacheDuration)
+                                         userNotificationAlertIssuer: UserNotificationAlertIssuer(userNotificationCenter: UNUserNotificationCenter.current()),
+                                         expireAfter: Bundle.main.localCacheDuration,
+                                         bluetoothProvider: bluetoothStateManager)
+
         self.alertPermissionsChecker = AlertPermissionsChecker(alertManager: alertManager)
-        self.loopAlertsManager = LoopAlertsManager(alertManager: alertManager,
-                                                   bluetoothProvider: bluetoothStateManager)
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
 
-        self.settingsManager = SettingsManager(cacheStore: cacheStore, expireAfter: localCacheDuration)
+        self.settingsManager = SettingsManager(cacheStore: cacheStore,
+                                               expireAfter: localCacheDuration)
 
         self.deviceDataManager = DeviceDataManager(pluginManager: pluginManager,
                                                    alertManager: alertManager,
@@ -177,9 +174,12 @@ class LoopAppManager: NSObject {
                                                    closedLoopStatus: closedLoopStatus,
                                                    cacheStore: cacheStore,
                                                    localCacheDuration: localCacheDuration,
-                                                   overrideHistory: overrideHistory
+                                                   overrideHistory: overrideHistory,
+                                                   trustedTimeChecker: trustedTimeChecker
         )
         settingsManager.deviceStatusProvider = deviceDataManager
+        settingsManager.displayGlucoseUnitObservable = deviceDataManager.displayGlucoseUnitObservable
+
 
         overrideHistory.delegate = self
 
@@ -251,12 +251,6 @@ class LoopAppManager: NSObject {
         self.launchOptions = nil
 
         self.state = state.next
-    }
-
-    private func finishLaunch() {
-        guard !isLaunchPending else {
-            return
-        }
 
         alertManager.playbackAlertsFromPersistence()
     }
@@ -269,20 +263,16 @@ class LoopAppManager: NSObject {
         }
         settingsManager?.didBecomeActive()
         deviceDataManager?.didBecomeActive()
-        loopAlertsManager.inferDeliveredLoopNotRunningNotifications()
+        alertManager.inferDeliveredLoopNotRunningNotifications()
     }
 
     // MARK: - Remote Notification
     
-    func registerForRemoteNotifications() {
-        if FeatureFlags.remoteOverridesEnabled {
-            UIApplication.shared.registerForRemoteNotifications()
+    func remoteNotificationRegistrationDidFinish(_ result: Result<Data,Error>) {
+        if case .success(let token) = result {
+            log.default("DeviceToken: %{public}@", token.hexadecimalString)
         }
-    }
-
-    func setRemoteNotificationsDeviceToken(_ remoteNotificationsDeviceToken: Data) {
-        log.default("DeviceToken: %{public}@", remoteNotificationsDeviceToken.hexadecimalString)
-        settingsManager.hasNewDeviceToken(token: remoteNotificationsDeviceToken)
+        settingsManager.remoteNotificationRegistrationDidFinish(result)
     }
 
     private func handleRemoteNotificationFromLaunchOptions() {

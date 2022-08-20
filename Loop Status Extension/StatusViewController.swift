@@ -77,6 +77,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     lazy var cacheStore = PersistenceController.controllerInAppGroupDirectory()
 
+    lazy var localCacheDuration = Bundle.main.localCacheDuration
+
+    lazy var settingsStore: SettingsStore =  SettingsStore(
+        store: cacheStore,
+        expireAfter: localCacheDuration)
+
     lazy var glucoseStore = GlucoseStore(
         healthStore: healthStore,
         observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
@@ -92,10 +98,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
         observationEnabled: false,
-        insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: defaults?.defaultRapidActingModel),
+        insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsStore.latestSettings?.defaultRapidActingModel?.presetForRapidActingInsulin),
         longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
-        basalProfile: defaults?.basalRateSchedule,
-        insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule,
+        basalProfile: settingsStore.latestSettings?.basalRateSchedule,
+        insulinSensitivitySchedule: settingsStore.latestSettings?.insulinSensitivitySchedule,
         provenanceIdentifier: HKSource.default().bundleIdentifier
     )
     
@@ -313,7 +319,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 self.charts.predictedGlucose.setPredictedGlucoseValues([])
             }
 
-            self.charts.predictedGlucose.targetGlucoseSchedule = defaults.loopSettings?.glucoseTargetRangeSchedule
+            self.charts.predictedGlucose.targetGlucoseSchedule = self.settingsStore.latestSettings?.glucoseTargetRangeSchedule
             self.charts.invalidateChart(atIndex: 0)
             self.charts.prerender()
             self.glucoseChartContentView.reloadChart()
