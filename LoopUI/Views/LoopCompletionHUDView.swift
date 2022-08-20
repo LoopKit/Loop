@@ -165,18 +165,18 @@ public final class LoopCompletionHUDView: BaseHUDView {
                     caption?.text = timeString
                 }
 
-                var timeDateString: String = ""
+                var timeString: String = ""
                 if ago < timeAgoToIncludeDate {
-                    timeDateString = timeFormatter.string(from: date)
+                    timeString = String(format: LocalizedString("%1$@ ago at \n%2$@", comment: "Format string describing the time interval since and time of the last completion date. (1: The localized date components, (2: the date"), formatter.string(from: ago)!, timeFormatter.string(from: date))
+
                 } else {
-                    timeDateString = timeDateFormatter.string(from: date)
+                    timeString = String(format: LocalizedString("%1$@", comment: "Format string describing the time interval since and time of the last completion date. (1: The localized date components, (1: the date"), timeDateFormatter.string(from: date))
+
                 }
 
-                let timeString = String(format: LocalizedString("%1$@ ago at \n%2$@", comment: "Format string describing the time interval since and time of the last completion date. (1: The localized date components, (2: the date"), formatter.string(from: ago)!, timeDateString)
+                accessibilityLabel = String(format: LocalizedString("%@", comment: "Accessbility format label describing the last completion. (1: last loop time string)"), timeString)
 
-                accessibilityLabel = String(format: LocalizedString("Loop ran %@", comment: "Accessbility format label describing the time interval since and time of the last completion date. (1: last loop time string)"), timeString)
-
-                lastLoopMessage = String(format: LocalizedString("%1$@ last successful loop was\n%2$@", comment: "Last time loop completed message (1: app name) (2: last loop time string)"), Bundle.main.bundleDisplayName, timeString)
+                lastLoopMessage = String(format: LocalizedString("Last completed loop was\n%2$@", comment: "Last time loop completed message (1: last loop time string)"), timeString)
             } else {
                 caption?.text = "–"
                 accessibilityLabel = nil
