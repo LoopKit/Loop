@@ -35,21 +35,8 @@ class Provider: TimelineProvider {
         provenanceIdentifier: HKSource.default().bundleIdentifier
     )
 
-    lazy var doseStore = DoseStore(
-        healthStore: healthStore,
-        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
-        storeSamplesToHealthKit: false,
-        cacheStore: cacheStore,
-        observationEnabled: false,
-        insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsStore.latestSettings?.defaultRapidActingModel?.presetForRapidActingInsulin),
-        longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
-        basalProfile: settingsStore.latestSettings?.basalRateSchedule,
-        insulinSensitivitySchedule: settingsStore.latestSettings?.insulinSensitivitySchedule,
-        provenanceIdentifier: HKSource.default().bundleIdentifier
-    )
-
     func placeholder(in context: Context) -> SmallStatusEntry {
-        return SmallStatusEntry(date: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, previousGlucose: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil, activeInsulin: nil, minsAgo: 5)
+        return SmallStatusEntry(date: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, previousGlucose: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil, minsAgo: 5)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SmallStatusEntry) -> ()) {
@@ -84,29 +71,7 @@ class Provider: TimelineProvider {
     func update(completion: @escaping (SmallStatusEntry) -> Void) {
         let group = DispatchGroup()
 
-        var activeInsulin: Double?
         var glucose: [StoredGlucoseSample] = []
-        
-        let insulinFormatter: NumberFormatter = {
-            let numberFormatter = NumberFormatter()
-
-            numberFormatter.numberStyle = .decimal
-            numberFormatter.minimumFractionDigits = 1
-            numberFormatter.maximumFractionDigits = 1
-
-            return numberFormatter
-        }()
-
-        group.enter()
-        doseStore.insulinOnBoard(at: Date()) { (result) in
-            switch result {
-            case .success(let iobValue):
-                activeInsulin = iobValue.value
-            case .failure:
-                activeInsulin = nil
-            }
-            group.leave()
-        }
 
         let startDate: Date = Calendar.current.nextDate(after: Date(timeIntervalSinceNow: .minutes(-5)), matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? Date()
 
@@ -160,11 +125,6 @@ class Provider: TimelineProvider {
                 eventualGlucoseString = glucoseFormatter.string(from: eventualGlucose.quantity.doubleValue(for: unit, withRounding: true))
             }
             
-            var activeInsulinString: String?
-            if let activeInsulin = activeInsulin {
-                 activeInsulinString = insulinFormatter.string(from: activeInsulin)
-            }
-            
             completion(SmallStatusEntry(
                 date: Date(),
                 lastLoopCompleted: lastCompleted,
@@ -175,7 +135,6 @@ class Provider: TimelineProvider {
                 sensor: context.glucoseDisplay,
                 netBasal: netBasal,
                 eventualGlucose: eventualGlucoseString,
-                activeInsulin: activeInsulinString,
                 minsAgo: 0
             ))
         }
@@ -197,7 +156,6 @@ struct SmallStatusEntry: TimelineEntry {
     let netBasal: NetBasalContext?
     
     let eventualGlucose: String?
-    var activeInsulin: String?
     
     // For marking old entries as stale
     var minsAgo: Int
@@ -247,14 +205,6 @@ struct SmallStatusWidgetEntryView : View {
                     }
                     else {
                         Text("Ev --")
-                            .font(.caption)
-                    }
-                    if let activeInsulin = entry.activeInsulin {
-                        Text("IOB \(activeInsulin)")
-                            .font(.caption)
-                    }
-                    else {
-                        Text("IOB --")
                             .font(.caption)
                     }
                 }

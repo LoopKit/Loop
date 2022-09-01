@@ -18,6 +18,7 @@ import LoopUI
 import SwiftCharts
 import os.log
 import Combine
+import WidgetKit
 
 
 private extension RefreshContext {
@@ -78,6 +79,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     self?.log.debug("[reloadData] from notification with context %{public}@", String(describing: context))
                     self?.reloadData(animated: true)
                 }
+                
+                WidgetCenter.shared.reloadAllTimelines()
             },
             notificationCenter.addObserver(forName: .LoopRunning, object: deviceManager.loopManager, queue: nil) { [weak self] _ in
                 DispatchQueue.main.async {
