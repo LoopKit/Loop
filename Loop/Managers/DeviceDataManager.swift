@@ -277,13 +277,20 @@ final class DeviceDataManager {
             carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear,
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
+
+        let insulinModelProvider: InsulinModelProvider
+        if FeatureFlags.adultChildInsulinModelSelectionEnabled {
+            insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin)
+        } else {
+            insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
+        }
         
         self.doseStore = DoseStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin),
+            insulinModelProvider: insulinModelProvider,
             longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
             basalProfile: settingsManager.latestSettings.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,

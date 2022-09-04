@@ -35,6 +35,7 @@ struct FeatureFlagConfiguration: Decodable {
     let simpleBolusCalculatorEnabled: Bool
     let usePositiveMomentumAndRCForManualBoluses: Bool
     let dynamicCarbAbsorptionEnabled: Bool
+    let adultChildInsulinModelSelectionEnabled: Bool
 
 
     fileprivate init() {
@@ -196,6 +197,12 @@ struct FeatureFlagConfiguration: Decodable {
         self.usePositiveMomentumAndRCForManualBoluses = true
         #endif
 
+        #if ADULT_CHILD_INSULIN_MODEL_SELECTION_ENABLED
+        self.adultChildInsulinModelSelectionEnabled = true
+        #else
+        self.adultChildInsulinModelSelectionEnabled = false
+        #endif
+
         self.dynamicCarbAbsorptionEnabled = true
     }
 }
@@ -227,7 +234,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* allowDebugFeatures: \(allowDebugFeatures)",
             "* simpleBolusCalculatorEnabled: \(simpleBolusCalculatorEnabled)",
             "* usePositiveMomentumAndRCForManualBoluses: \(usePositiveMomentumAndRCForManualBoluses)",
-            "* dynamicCarbAbsorptionEnabled: \(dynamicCarbAbsorptionEnabled)"
+            "* dynamicCarbAbsorptionEnabled: \(dynamicCarbAbsorptionEnabled)",
+            "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)"
         ].joined(separator: "\n")
     }
 }
