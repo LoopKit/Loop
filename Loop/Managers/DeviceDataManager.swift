@@ -1052,7 +1052,8 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
-        doseStore.resetPumpData(completion: nil)
+        // PumpManagers should report a continuous dosing history, across pump changes
+        //doseStore.resetPumpData(completion: nil)
     }
     
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
@@ -1060,7 +1061,6 @@ extension DeviceDataManager: PumpManagerDelegate {
 
         log.default("Pump manager with identifier '%{public}@' will deactivate", pumpManager.managerIdentifier)
 
-        doseStore.resetPumpData(completion: nil)
         DispatchQueue.main.async {
             self.pumpManager = nil
             self.deliveryUncertaintyAlertManager = nil
