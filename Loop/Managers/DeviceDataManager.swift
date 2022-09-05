@@ -277,13 +277,20 @@ final class DeviceDataManager {
             carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear,
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
+
+        let insulinModelProvider: InsulinModelProvider
+        if FeatureFlags.adultChildInsulinModelSelectionEnabled {
+            insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin)
+        } else {
+            insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
+        }
         
         self.doseStore = DoseStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin),
+            insulinModelProvider: insulinModelProvider,
             longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
             basalProfile: settingsManager.latestSettings.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
@@ -1052,7 +1059,8 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
-        doseStore.resetPumpData(completion: nil)
+        // PumpManagers should report a continuous dosing history, across pump changes
+        //doseStore.resetPumpData(completion: nil)
     }
     
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
@@ -1060,7 +1068,6 @@ extension DeviceDataManager: PumpManagerDelegate {
 
         log.default("Pump manager with identifier '%{public}@' will deactivate", pumpManager.managerIdentifier)
 
-        doseStore.resetPumpData(completion: nil)
         DispatchQueue.main.async {
             self.pumpManager = nil
             self.deliveryUncertaintyAlertManager = nil
