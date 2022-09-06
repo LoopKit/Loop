@@ -176,7 +176,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
                 accessibilityLabel = String(format: LocalizedString("%@", comment: "Accessbility format label describing the last completion. (1: last loop time string)"), timeString)
 
-                lastLoopMessage = String(format: LocalizedString("Last completed loop was\n%2$@", comment: "Last time loop completed message (1: last loop time string)"), timeString)
+                lastLoopMessage = String(format: LocalizedString("Last completed loop was\n%1$@", comment: "Last time loop completed message (1: last loop time string)"), timeString)
             } else {
                 caption?.text = "–"
                 accessibilityLabel = nil
