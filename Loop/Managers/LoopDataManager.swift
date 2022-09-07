@@ -257,7 +257,11 @@ final class LoopDataManager {
         }
 
         if newValue.defaultRapidActingModel != oldValue.defaultRapidActingModel {
-            doseStore.insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: newValue.defaultRapidActingModel)
+            if FeatureFlags.adultChildInsulinModelSelectionEnabled {
+                doseStore.insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: newValue.defaultRapidActingModel)
+            } else {
+                doseStore.insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
+            }
             invalidateCachedEffects = true
             analyticsServicesManager.didChangeInsulinModel()
         }

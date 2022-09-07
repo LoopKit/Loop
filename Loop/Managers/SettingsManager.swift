@@ -59,7 +59,7 @@ class SettingsManager {
             legacyLoopSettings.insulinSensitivitySchedule = UserDefaults.appGroup?.legacyInsulinSensitivitySchedule
             legacyLoopSettings.basalRateSchedule = UserDefaults.appGroup?.legacyBasalRateSchedule
             legacyLoopSettings.carbRatioSchedule = UserDefaults.appGroup?.legacyCarbRatioSchedule
-            legacyLoopSettings.defaultRapidActingModel = UserDefaults.appGroup?.legacyDefaultRapidActingModel
+            legacyLoopSettings.defaultRapidActingModel = .rapidActingAdult
 
             storeSettings(newLoopSettings: legacyLoopSettings)
 

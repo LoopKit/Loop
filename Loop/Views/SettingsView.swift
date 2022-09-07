@@ -150,6 +150,7 @@ extension SettingsView {
                     TherapySettingsView(mode: .settings,
                                         viewModel: TherapySettingsViewModel(therapySettings: self.viewModel.therapySettings(),
                                                                             sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
+                                                                            adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
                                                                             delegate: self.viewModel.therapySettingsViewModelDelegate))
                         .environmentObject(displayGlucoseUnitObservable)
                         .environment(\.dismissAction, self.dismiss)

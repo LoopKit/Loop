@@ -277,13 +277,20 @@ final class DeviceDataManager {
             carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear,
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
+
+        let insulinModelProvider: InsulinModelProvider
+        if FeatureFlags.adultChildInsulinModelSelectionEnabled {
+            insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin)
+        } else {
+            insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
+        }
         
         self.doseStore = DoseStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin),
+            insulinModelProvider: insulinModelProvider,
             longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
             basalProfile: settingsManager.latestSettings.basalRateSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
@@ -1082,11 +1089,11 @@ extension DeviceDataManager: PumpManagerDelegate {
         setLastError(error: error)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastSync: Date?, completion: @escaping (_ error: Error?) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(queue))
-        log.default("PumpManager:%{public}@ hasNewPumpEvents (lastSync = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastSync))
+        log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
 
-        loopManager.addPumpEvents(events, lastReconciliation: lastSync) { (error) in
+        loopManager.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
             }
