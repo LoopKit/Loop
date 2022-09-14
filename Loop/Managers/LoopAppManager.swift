@@ -160,7 +160,9 @@ class LoopAppManager: NSObject {
                                          expireAfter: Bundle.main.localCacheDuration,
                                          bluetoothProvider: bluetoothStateManager)
 
-        self.alertPermissionsChecker = AlertPermissionsChecker(alertManager: alertManager)
+        self.alertPermissionsChecker = AlertPermissionsChecker()
+        self.alertPermissionsChecker.delegate = alertManager
+        
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
 
         self.settingsManager = SettingsManager(cacheStore: cacheStore,

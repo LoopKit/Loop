@@ -82,7 +82,6 @@ public final class AlertManager {
                 self?.loopDidComplete()
             }
             .store(in: &cancellables)
-
     }
 
     public func addAlertResponder(managerIdentifier: String, alertResponder: AlertResponder) {
@@ -131,10 +130,10 @@ public final class AlertManager {
                                       body: fgBody,
                                       acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
         issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier,
-                                       foregroundContent: fgcontent,
-                                       backgroundContent: bgcontent,
-                                       trigger: .immediate,
-                                       interruptionLevel: .critical))
+                         foregroundContent: fgcontent,
+                         backgroundContent: bgcontent,
+                         trigger: .immediate,
+                         interruptionLevel: .critical))
     }
 
     // MARK: - Loop Not Running alerts
@@ -581,6 +580,80 @@ extension AlertManager: PresetActivationObserver {
             retractWorkoutOverrideReminder()
         default:
             break
+        }
+    }
+}
+
+// MARK: - Issue/Retract Alert Permissions Warning
+extension AlertManager: AlertPermissionsCheckerDelegate {
+    func notificationsPermissions(requiresRiskMitigation: Bool, scheduledDeliveryEnabled: Bool) {
+        if !issueOrRetract(alert: AlertPermissionsChecker.unsafeNotificationPermissionsAlert,
+                           condition: requiresRiskMitigation,
+                           alreadyIssued: UserDefaults.standard.hasIssuedNotificationPermissionsAlert,
+                           setAlreadyIssued: { UserDefaults.standard.hasIssuedNotificationPermissionsAlert = $0 },
+                           issueHandler: { alert in
+            // the risk mitigation in-app alert is presented with a button to navigate to settings
+            self.recordIssued(alert: alert)
+            let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert() { [weak self] in
+                self?.acknowledgeAlert(identifier: AlertPermissionsChecker.unsafeNotificationPermissionsAlertIdentifier)
+            }
+            self.alertPresenter.present(alertController, animated: true)
+        }) {
+            _ = issueOrRetract(alert: AlertPermissionsChecker.scheduledDeliveryEnabledAlert,
+                               condition: scheduledDeliveryEnabled,
+                               alreadyIssued: UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert,
+                               setAlreadyIssued: { UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert = $0 }, issueHandler: { alert in self.issueAlert(alert) })
+        }
+    }
+
+    private func issueOrRetract(alert: LoopKit.Alert,
+                                condition: Bool,
+                                alreadyIssued: Bool,
+                                setAlreadyIssued: (Bool) -> Void,
+                                issueHandler: @escaping (LoopKit.Alert) -> Void) -> Bool {
+        if condition {
+            if !alreadyIssued {
+                issueHandler(alert)
+                setAlreadyIssued(true)
+            }
+            return true
+        } else {
+            if alreadyIssued {
+                setAlreadyIssued(false)
+                retractAlert(identifier: alert.identifier)
+            }
+            return false
+        }
+    }
+}
+
+fileprivate extension AlertManager {
+    private var isAppInBackground: Bool {
+        return UIApplication.shared.applicationState == UIApplication.State.background
+    }
+}
+
+fileprivate extension UserDefaults {
+    private enum Key: String {
+        case hasIssuedNotificationPermissionsAlert = "com.loopkit.Loop.HasIssuedNotificationPermissionsAlert"
+        case hasIssuedScheduledDeliveryEnabledAlert = "com.loopkit.Loop.HasIssuedScheduledDeliveryEnabledAlert"
+    }
+
+    var hasIssuedNotificationPermissionsAlert: Bool {
+        get {
+            return object(forKey: Key.hasIssuedNotificationPermissionsAlert.rawValue) as? Bool ?? false
+        }
+        set {
+            set(newValue, forKey: Key.hasIssuedNotificationPermissionsAlert.rawValue)
+        }
+    }
+
+    var hasIssuedScheduledDeliveryEnabledAlert: Bool {
+        get {
+            return object(forKey: Key.hasIssuedScheduledDeliveryEnabledAlert.rawValue) as? Bool ?? false
+        }
+        set {
+            set(newValue, forKey: Key.hasIssuedScheduledDeliveryEnabledAlert.rawValue)
         }
     }
 }
