@@ -44,7 +44,7 @@ final class LoopDataManager {
 
     private let analyticsServicesManager: AnalyticsServicesManager
 
-    private let trustedTimeChecker: TrustedTimeChecker
+    private let trustedTimeOffset: () -> TimeInterval
 
     private let now: () -> Date
 
@@ -80,7 +80,7 @@ final class LoopDataManager {
         now: @escaping () -> Date = { Date() },
         pumpInsulinType: InsulinType?,
         automaticDosingStatus: AutomaticDosingStatus,
-        trustedTimeChecker: TrustedTimeChecker
+        trustedTimeOffset: @escaping () -> TimeInterval
     ) {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -108,7 +108,7 @@ final class LoopDataManager {
 
         self.automaticDosingStatus = automaticDosingStatus
 
-        self.trustedTimeChecker = trustedTimeChecker
+        self.trustedTimeOffset = trustedTimeOffset
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
@@ -759,7 +759,7 @@ extension LoopDataManager {
 
             // If time was changed to future time, and a loop completed, then time was fixed, lastLoopCompleted will prevent looping
             // until the future loop time passes. Fix that here.
-            if let lastLoopCompleted = self.lastLoopCompleted, Date() < lastLoopCompleted, self.trustedTimeChecker.detectedSystemTimeOffset == 0 {
+            if let lastLoopCompleted = self.lastLoopCompleted, Date() < lastLoopCompleted, self.trustedTimeOffset() == 0 {
                 self.logger.error("Detected future lastLoopCompleted. Restoring.")
                 self.lastLoopCompleted = Date()
             }

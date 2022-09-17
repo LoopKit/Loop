@@ -361,7 +361,7 @@ final class DeviceDataManager {
             latestStoredSettingsProvider: settingsManager,
             pumpInsulinType: pumpManager?.status.insulinType,
             automaticDosingStatus: closedLoopStatus,
-            trustedTimeChecker: trustedTimeChecker
+            trustedTimeOffset: { trustedTimeChecker.detectedSystemTimeOffset }
         )
         cacheStore.delegate = loopManager
         loopManager.presetActivationObserver = alertManager

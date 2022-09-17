@@ -50,7 +50,7 @@ class TrustedTimeChecker {
         }
     }
 
-    init(alertManager: AlertManager) {
+    init(alertManager: AlertManager? = nil) {
         ntpClient = TrueTimeClient.sharedInstance
         #if DEBUG
         if ntpClient.responds(to: #selector(setter: TrueTimeClient.logCallback)) {
