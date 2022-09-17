@@ -360,7 +360,8 @@ final class DeviceDataManager {
             dosingDecisionStore: dosingDecisionStore,
             latestStoredSettingsProvider: settingsManager,
             pumpInsulinType: pumpManager?.status.insulinType,
-            automaticDosingStatus: closedLoopStatus
+            automaticDosingStatus: closedLoopStatus,
+            trustedTimeChecker: trustedTimeChecker
         )
         cacheStore.delegate = loopManager
         loopManager.presetActivationObserver = alertManager
