@@ -1673,8 +1673,8 @@ extension LoopDataManager {
             delegateError = error
             updateGroup.leave()
         }
-
         updateGroup.wait()
+
         if delegateError == nil {
             self.recommendedAutomaticDose = nil
         }

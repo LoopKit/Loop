@@ -15,6 +15,7 @@ extension UserDefaults {
         case legacyCGMManagerState = "com.loopkit.Loop.CGMManagerState"
         case legacyServicesState = "com.loopkit.Loop.ServicesState"
         case loopNotRunningNotifications = "com.loopkit.Loop.loopNotRunningNotifications"
+        case inFlightAutomaticDose = "com.loopkit.Loop.inFlightAutomaticDose"
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {
@@ -47,6 +48,28 @@ extension UserDefaults {
         set(nil, forKey: Key.legacyServicesState.rawValue)
     }
 
+    var inFlightAutomaticDose: AutomaticDoseRecommendation? {
+        get {
+            let decoder = JSONDecoder()
+            guard let data = object(forKey: Key.inFlightAutomaticDose.rawValue) as? Data else {
+                return nil
+            }
+            return try? decoder.decode(AutomaticDoseRecommendation.self, from: data)
+        }
+        set {
+            do {
+                if let newValue = newValue {
+                    let encoder = JSONEncoder()
+                    let data = try encoder.encode(newValue)
+                    set(data, forKey: Key.inFlightAutomaticDose.rawValue)
+                } else {
+                    set(nil, forKey: Key.inFlightAutomaticDose.rawValue)
+                }
+            } catch {
+                assertionFailure("Unable to encode AutomaticDoseRecommendation")
+            }
+        }
+    }
 
     var loopNotRunningNotifications: [StoredLoopNotRunningNotification] {
         get {
