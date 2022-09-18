@@ -41,6 +41,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     lazy private var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
+
         super.viewDidLoad()
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
@@ -166,6 +167,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
+
         super.viewDidAppear(animated)
 
         if !appearedOnce {
