@@ -29,7 +29,6 @@ class CrashRecoveryManager {
         self.alertIssuer = alertIssuer
 
         doseRecoveredFromCrash = UserDefaults.appGroup?.inFlightAutomaticDose
-        UserDefaults.appGroup?.inFlightAutomaticDose = nil
 
         if doseRecoveredFromCrash != nil {
             issueCrashAlert()
@@ -69,6 +68,7 @@ class CrashRecoveryManager {
 
 extension CrashRecoveryManager: AlertResponder {
     func acknowledgeAlert(alertIdentifier: LoopKit.Alert.AlertIdentifier, completion: @escaping (Error?) -> Void) {
+        UserDefaults.appGroup?.inFlightAutomaticDose = nil
         doseRecoveredFromCrash = nil
     }
 }
