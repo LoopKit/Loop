@@ -106,6 +106,10 @@ class MockCarbStore: CarbStoreProtocol {
             return GlucoseEffect(startDate: dateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
         })))
     }
+    
+    func containsUnannouncedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], completion: (UnannouncedMealStatus) -> Void) {
+        completion(.noMeal)
+    }
 }
 
 extension MockCarbStore {
