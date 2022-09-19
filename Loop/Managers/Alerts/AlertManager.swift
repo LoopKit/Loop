@@ -35,6 +35,10 @@ public final class AlertManager {
     private var responders: [String: Weak<AlertResponder>] = [:]
     private var soundVendors: [String: Weak<AlertSoundVendor>] = [:]
 
+    // Defer issuance of new alerts until playback is done
+    private var deferredAlerts: [Alert] = []
+    private var playbackFinished: Bool = false
+
     private let fileManager: FileManager
     private let alertPresenter: AlertPresenter
 
@@ -304,6 +308,10 @@ extension AlertManager: AlertManagerResponder {
 extension AlertManager: AlertIssuer {
 
     public func issueAlert(_ alert: Alert) {
+        guard playbackFinished else {
+            deferredAlerts.append(alert)
+            return
+        }
         handlers.forEach { $0.issueAlert(alert) }
         alertStore.recordIssued(alert: alert)
     }
@@ -366,6 +374,8 @@ extension AlertManager {
     }
 
     private func playbackAlertsFromAlertStore() {
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
         alertStore.lookupAllUnacknowledgedUnretracted {
             switch $0 {
             case .failure(let error):
@@ -379,7 +389,9 @@ extension AlertManager {
                     }
                 }
             }
+            updateGroup.leave()
         }
+        updateGroup.enter()
         alertStore.lookupAllAcknowledgedUnretractedRepeatingAlerts {
             switch $0 {
             case .failure(let error):
@@ -392,6 +404,13 @@ extension AlertManager {
                         self.log.error("Error decoding alert from persistent storage: %@", error.localizedDescription)
                     }
                 }
+            }
+            updateGroup.leave()
+        }
+        updateGroup.notify(queue: .main) {
+            self.playbackFinished = true
+            for alert in self.deferredAlerts {
+                self.issueAlert(alert)
             }
         }
     }

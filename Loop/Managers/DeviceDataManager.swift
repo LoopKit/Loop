@@ -182,17 +182,17 @@ final class DeviceDataManager {
     /// True if any stores require HealthKit authorization
     var authorizationRequired: Bool {
         return glucoseStore.authorizationRequired ||
-               carbStore.authorizationRequired ||
-               doseStore.authorizationRequired ||
-               sleepDataAuthorizationRequired
+        carbStore.authorizationRequired ||
+        doseStore.authorizationRequired ||
+        sleepDataAuthorizationRequired
     }
 
     /// True if the user has explicitly denied access to any stores' HealthKit types
     private var sharingDenied: Bool {
         return glucoseStore.sharingDenied ||
-               carbStore.sharingDenied ||
-               doseStore.sharingDenied ||
-               sleepDataSharingDenied
+        carbStore.sharingDenied ||
+        doseStore.sharingDenied ||
+        sleepDataSharingDenied
     }
 
     // MARK: Services
@@ -208,6 +208,8 @@ final class DeviceDataManager {
     var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
 
     var criticalEventLogExportManager: CriticalEventLogExportManager!
+
+    var crashRecoveryManager: CrashRecoveryManager
 
     private(set) var pumpManagerHUDProvider: HUDProvider?
 
@@ -322,6 +324,9 @@ final class DeviceDataManager {
 
         self.trustedTimeChecker = trustedTimeChecker
 
+        crashRecoveryManager = CrashRecoveryManager(alertIssuer: alertManager)
+        alertManager.addAlertResponder(managerIdentifier: crashRecoveryManager.managerIdentifier, alertResponder: crashRecoveryManager)
+
         if let pumpManagerRawValue = rawPumpManager ?? UserDefaults.appGroup?.legacyPumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
             // Update lastPumpEventsReconciliation on DoseStore
@@ -360,11 +365,12 @@ final class DeviceDataManager {
             dosingDecisionStore: dosingDecisionStore,
             latestStoredSettingsProvider: settingsManager,
             pumpInsulinType: pumpManager?.status.insulinType,
-            automaticDosingStatus: closedLoopStatus
+            automaticDosingStatus: closedLoopStatus,
+            trustedTimeOffset: { trustedTimeChecker.detectedSystemTimeOffset }
         )
         cacheStore.delegate = loopManager
         loopManager.presetActivationObserver = alertManager
-        
+
         watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 
         let remoteDataServicesManager = RemoteDataServicesManager(
@@ -490,8 +496,14 @@ final class DeviceDataManager {
     }
     
     private func checkPumpDataAndLoop() {
+        guard !crashRecoveryManager.pendingCrashRecovery else {
+            self.log.default("Loop paused pending crash recovery acknowledgement.")
+            return
+        }
+
         self.log.default("Asserting current pump data")
         guard let pumpManager = pumpManager else {
+            // Run loop, even if pump is missing, to ensure stored dosing decision
             self.loopManager.loop()
             return
         }
@@ -1089,11 +1101,11 @@ extension DeviceDataManager: PumpManagerDelegate {
         setLastError(error: error)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastSync: Date?, completion: @escaping (_ error: Error?) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(queue))
-        log.default("PumpManager:%{public}@ hasNewPumpEvents (lastSync = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastSync))
+        log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
 
-        loopManager.addPumpEvents(events, lastReconciliation: lastSync) { (error) in
+        loopManager.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
             }
@@ -1281,9 +1293,11 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         }
 
         log.default("LoopManager did recommend dose: %{public}@", String(describing: automaticDose.recommendation))
-        
+
+        crashRecoveryManager.dosingStarted(dose: automaticDose.recommendation)
         doseEnactor.enact(recommendation: automaticDose.recommendation, with: pumpManager) { pumpManagerError in
             completion(pumpManagerError.map { .pumpManagerError($0) })
+            self.crashRecoveryManager.dosingFinished()
         }
     }
 }
