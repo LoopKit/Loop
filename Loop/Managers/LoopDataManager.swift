@@ -429,7 +429,9 @@ final class LoopDataManager {
         logger.error("Loop did error: %{public}@", String(describing: error))
         lastLoopError = error
         analyticsServicesManager.loopDidError(error: error)
-        dosingDecisionStore.storeDosingDecision(dosingDecision) {}
+        var dosingDecisionWithError = dosingDecision
+        dosingDecisionWithError.appendError(error)
+        dosingDecisionStore.storeDosingDecision(dosingDecisionWithError) {}
     }
 }
 
