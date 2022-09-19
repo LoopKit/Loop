@@ -243,6 +243,7 @@ class LoopAppManager: NSObject {
             rootNavigationController = RootNavigationController()
             rootViewController = rootNavigationController
         }
+
         rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
 
         deviceDataManager.refreshDeviceData()

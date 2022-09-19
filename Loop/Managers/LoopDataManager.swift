@@ -45,6 +45,8 @@ final class LoopDataManager {
 
     private let analyticsServicesManager: AnalyticsServicesManager
 
+    private let trustedTimeOffset: () -> TimeInterval
+
     private let now: () -> Date
 
     private let automaticDosingStatus: AutomaticDosingStatus
@@ -78,7 +80,8 @@ final class LoopDataManager {
         latestStoredSettingsProvider: LatestStoredSettingsProvider,
         now: @escaping () -> Date = { Date() },
         pumpInsulinType: InsulinType?,
-        automaticDosingStatus: AutomaticDosingStatus
+        automaticDosingStatus: AutomaticDosingStatus,
+        trustedTimeOffset: @escaping () -> TimeInterval
     ) {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -105,6 +108,8 @@ final class LoopDataManager {
         self.lockedPumpInsulinType = Locked(pumpInsulinType)
 
         self.automaticDosingStatus = automaticDosingStatus
+
+        self.trustedTimeOffset = trustedTimeOffset
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
@@ -757,6 +762,13 @@ extension LoopDataManager {
     func loop() {
         
         dataAccessQueue.async {
+
+            // If time was changed to future time, and a loop completed, then time was fixed, lastLoopCompleted will prevent looping
+            // until the future loop time passes. Fix that here.
+            if let lastLoopCompleted = self.lastLoopCompleted, Date() < lastLoopCompleted, self.trustedTimeOffset() == 0 {
+                self.logger.error("Detected future lastLoopCompleted. Restoring.")
+                self.lastLoopCompleted = Date()
+            }
             
             // Ensure Loop does not happen more than once every 4.5 minutes; this is important for correct usage of automatic bolus
             // partial application factor
@@ -1667,8 +1679,8 @@ extension LoopDataManager {
             delegateError = error
             updateGroup.leave()
         }
-
         updateGroup.wait()
+
         if delegateError == nil {
             self.recommendedAutomaticDose = nil
         }

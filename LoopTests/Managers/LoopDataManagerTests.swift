@@ -113,7 +113,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
             now: { currentDate },
             pumpInsulinType: .novolog,
-            automaticDosingStatus: automaticDosingStatus
+            automaticDosingStatus: automaticDosingStatus,
+            trustedTimeOffset: { 0 }
         )
     }
     
@@ -546,7 +547,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
             now: { currentDate },
             pumpInsulinType: .novolog,
-            automaticDosingStatus: automaticDosingStatus
+            automaticDosingStatus: automaticDosingStatus,
+            trustedTimeOffset: { 0 }
         )
         let mockDelegate = MockDelegate()
         loopDataManager.delegate = mockDelegate
