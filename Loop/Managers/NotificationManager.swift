@@ -207,6 +207,10 @@ extension NotificationManager {
         notification.title =  String(format: NSLocalizedString("Possible Unannounced Meal", comment: "The notification title for a meal that was possibly not logged in Loop."))
         notification.body = String(format: NSLocalizedString("It looks like you may not have logged a meal you ate. Logging your carbohydrate entry now will improve the performance of Loop's algorithm.", comment: "The notification description for a meal that was possibly not logged in Loop."))
         notification.sound = .default
+        
+        notification.userInfo = [
+            LoopNotificationUserInfoKey.unannouncedMealTime.rawValue: mealStart
+        ]
 
         let request = UNNotificationRequest(
             identifier: LoopNotificationCategory.unannouncedMeal.rawValue,
