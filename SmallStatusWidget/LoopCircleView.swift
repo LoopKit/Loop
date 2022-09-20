@@ -15,14 +15,14 @@ struct LoopCircleView: View {
     var body: some View {
         let closeLoop = entry.closeLoop
         let lastLoopCompleted = entry.lastLoopCompleted ?? Date()
-        let ago = abs(min(0, lastLoopCompleted.timeIntervalSinceNow))
-        let freshness = LoopCompletionFreshness(age: ago)
+        let age = abs(min(0, lastLoopCompleted.timeIntervalSinceNow))
+        let freshness = LoopCompletionFreshness(age: age)
         
         let loopColor = getLoopColor(freshness: freshness)
         
         Circle()
             .trim(from: closeLoop ? 0 : 0.2, to: 1)
-            .stroke(entry.minsAgo >= 5 ? Color(UIColor.systemGray3) : loopColor, lineWidth: 8)
+            .stroke(entry.isOld ? Color(UIColor.systemGray3) : loopColor, lineWidth: 8)
             .rotationEffect(Angle(degrees: -126))
             .frame(width: 36, height: 36)
     }

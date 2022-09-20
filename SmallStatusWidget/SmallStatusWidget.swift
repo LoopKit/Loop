@@ -159,6 +159,10 @@ struct SmallStatusEntry: TimelineEntry {
     
     // For marking old entries as stale
     var minsAgo: Int
+    
+    var isOld: Bool {
+        return minsAgo >= 5
+    }
 }
 
 struct SmallStatusWidgetEntryView : View {
@@ -183,7 +187,7 @@ struct SmallStatusWidgetEntryView : View {
             )
             
             HStack(spacing: 2) {
-                if entry.minsAgo >= 5 {
+                if entry.isOld {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 10))
                 }
@@ -214,7 +218,7 @@ struct SmallStatusWidgetEntryView : View {
             .padding(5)
             .background(ContainerRelativeShape().fill(Color("WidgetSecondaryBackground")))
         }
-        .foregroundColor(entry.minsAgo >= 5 ? Color(UIColor.systemGray3) : nil)
+        .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : nil)
         .padding(5)
         .background(Color("WidgetBackground"))
     }

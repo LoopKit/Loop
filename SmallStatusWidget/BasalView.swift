@@ -20,9 +20,9 @@ struct BasalView: View {
                 BasalRateView(percent: percent!)
                     .overlay(
                         BasalRateView(percent: percent!)
-                            .stroke(entry.minsAgo >= 5 ? Color(UIColor.systemGray3) : Color("insulin"), lineWidth: 2)
+                            .stroke(entry.isOld ? Color(UIColor.systemGray3) : Color("insulin"), lineWidth: 2)
                     )
-                    .foregroundColor((entry.minsAgo >= 5 ? Color(UIColor.systemGray3) : Color("insulin")).opacity(0.5))
+                    .foregroundColor((entry.isOld ? Color(UIColor.systemGray3) : Color("insulin")).opacity(0.5))
                     .frame(width: 44, height: 22)
             }
             
@@ -30,12 +30,12 @@ struct BasalView: View {
                 let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
                 Text("\(rateString) U")
                     .font(.caption2)
-                    .foregroundColor(Color(entry.minsAgo >= 5 ? UIColor.systemGray3 : UIColor.secondaryLabel))
+                    .foregroundColor(Color(entry.isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
             }
             else {
                 Text("-U")
                     .font(.caption2)
-                    .foregroundColor(Color(entry.minsAgo >= 5 ? UIColor.systemGray3 : UIColor.secondaryLabel))
+                    .foregroundColor(Color(entry.isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
             }
         }
     }

@@ -25,7 +25,7 @@ struct GlucoseView: View {
                             .font(.system(size: 24, weight: .heavy, design: .default))
                     }
                     else {
-                        Text("--")
+                        Text("-")
                             .font(.system(size: 24, weight: .heavy, design: .default))
                     }
                 }
@@ -38,6 +38,7 @@ struct GlucoseView: View {
                     Image(systemName: trendImageName)
                 }
             }
+            // Prevent truncation of text
             .fixedSize(horizontal: true, vertical: false)
             
             let unitString = entry.unit == nil ? "-" : entry.unit!.localizedShortUnitString
@@ -50,12 +51,12 @@ struct GlucoseView: View {
                 Text(deltaString + " " + unitString)
                 // Dynamic text causes string to be cut off
                     .font(.system(size: 11))
-                    .foregroundColor(entry.minsAgo >= 5 ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
             }
             else {
                 Text(unitString)
                     .font(.caption2)
-                    .foregroundColor(entry.minsAgo >= 5 ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
             }
         }
     }

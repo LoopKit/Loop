@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
+		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
+		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		14B1735E28AED9EC006CCD7C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735D28AED9EC006CCD7C /* WidgetKit.framework */; };
 		14B1736028AED9EC006CCD7C /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735F28AED9EC006CCD7C /* SwiftUI.framework */; };
 		14B1736528AED9EE006CCD7C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14B1736428AED9EE006CCD7C /* Assets.xcassets */; };
@@ -1340,7 +1343,6 @@
 		A900531A28D60862000BC15B /* Loop.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop.shortcut; sourceTree = "<group>"; };
 		A900531B28D608CA000BC15B /* Cancel Override.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Cancel Override.shortcut"; sourceTree = "<group>"; };
 		A900531C28D6090D000BC15B /* Loop Remote Overrides.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop Remote Overrides.shortcut"; sourceTree = "<group>"; };
-		A9122E8526D1506E00CDF0F5 /* Base32.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Base32.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A91D2A3E26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconTitleSubtitleTableViewCell.swift; sourceTree = "<group>"; };
 		A91E4C2024F867A700BE9213 /* StoredAlertTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlertTests.swift; sourceTree = "<group>"; };
 		A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalEventLogExportManagerTests.swift; sourceTree = "<group>"; };
@@ -1591,6 +1593,9 @@
 			files = (
 				14B1736028AED9EC006CCD7C /* SwiftUI.framework in Frameworks */,
 				14B1735E28AED9EC006CCD7C /* WidgetKit.framework in Frameworks */,
+				1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */,
+				1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */,
+				1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

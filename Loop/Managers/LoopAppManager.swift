@@ -267,6 +267,7 @@ class LoopAppManager: NSObject {
         deviceDataManager?.didBecomeActive()
         alertManager.inferDeliveredLoopNotRunningNotifications()
         
+        log.default("Refreshing widget. Reason: App didBecomeActive")
         WidgetCenter.shared.reloadAllTimelines()
     }
 
