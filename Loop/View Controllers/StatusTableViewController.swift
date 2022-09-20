@@ -853,6 +853,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let imageView = UIImageView(image: disclosureIndicator)
             imageView.tintColor = .white
             accessoryView = imageView
+
+            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
         }
     }
     
