@@ -437,7 +437,8 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.remoteBolus.rawValue,
              LoopNotificationCategory.remoteBolusFailure.rawValue,
              LoopNotificationCategory.remoteCarbs.rawValue,
-             LoopNotificationCategory.remoteCarbsFailure.rawValue:
+             LoopNotificationCategory.remoteCarbsFailure.rawValue,
+             LoopNotificationCategory.unannouncedMeal.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:
             // All other userNotifications are not to be displayed while in the foreground
@@ -469,6 +470,25 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                let managerIdentifier = userInfo[LoopNotificationUserInfoKey.managerIDForAlert.rawValue] as? String {
                 alertManager?.acknowledgeAlert(identifier: Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier))
             }
+        case UNNotificationDefaultActionIdentifier:
+            guard response.notification.request.identifier == LoopNotificationCategory.unannouncedMeal.rawValue else {
+                break
+            }
+
+            var carbActivity = NSUserActivity.forNewCarbEntry()
+            
+            let userInfo = response.notification.request.content.userInfo
+            if let mealTime = userInfo[LoopNotificationUserInfoKey.unannouncedMealTime.rawValue] as? Date {
+                let unannouncedEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(),
+                                                                         doubleValue: CarbStore.unannouncedCarbThreshold),
+                                                    startDate: mealTime,
+                                                    foodType: nil,
+                                                    absorptionTime: nil)
+                carbActivity.update(from: unannouncedEntry)
+            }
+            
+            rootViewController?.restoreUserActivityState(carbActivity)
+            
         default:
             break
         }
