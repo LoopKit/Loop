@@ -201,6 +201,22 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
+    static func sendUnannouncedMealNotification(mealStart: Date) {
+        let notification = UNMutableNotificationContent()
+
+        notification.title =  String(format: NSLocalizedString("Possible Unannounced Meal", comment: "The notification title for a meal that was possibly not logged in Loop."))
+        notification.body = String(format: NSLocalizedString("It looks like you may not have logged a meal you ate. Logging your carbohydrate entry now will improve the performance of Loop's algorithm.", comment: "The notification description for a meal that was possibly not logged in Loop."))
+        notification.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: LoopNotificationCategory.unannouncedMeal.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
+    }
+    
     private static func remoteCarbEntryNotificationBody(amountInGrams: Double) -> String {
         return String(format: NSLocalizedString("Remote Carbs Entry: %d grams", comment: "The carb amount message for a remote carbs entry notification. (1: Carb amount in grams)"), Int(amountInGrams))
     }

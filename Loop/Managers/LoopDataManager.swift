@@ -1046,6 +1046,8 @@ extension LoopDataManager {
 
             return (dosingDecision, nil)
         }
+        
+        generateUnannouncedMealNotificationIfNeeded(using: insulinCounteractionEffects)
 
         return updatePredictedGlucoseAndRecommendedDose(with: dosingDecision)
     }
@@ -1427,6 +1429,17 @@ extension LoopDataManager {
             volumeRounder: volumeRounder
         )
     }
+    
+    public func generateUnannouncedMealNotificationIfNeeded(using insulinCounteractionEffects: [GlucoseEffectVelocity]) {
+        carbStore.containsUnannouncedMeal(insulinCounteractionEffects: self.insulinCounteractionEffects) { status in
+            guard case .hasMeal(let startTime) = status else {
+                // No unannounced meal!
+                return
+            }
+
+            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime)
+        }
+    }
 
     /// Generates a correction effect based on how large the discrepancy is between the current glucose and its model predicted value.
     ///
@@ -1703,7 +1716,6 @@ extension LoopDataManager {
             }
         }
     }
-
 }
 
 /// Describes a view into the loop state
