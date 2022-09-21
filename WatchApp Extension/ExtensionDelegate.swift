@@ -249,11 +249,24 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         switch response.actionIdentifier {
         case UNNotificationDefaultActionIdentifier:
-            guard response.notification.request.identifier == LoopNotificationCategory.unannouncedMeal.rawValue else {
+            guard
+                response.notification.request.identifier == LoopNotificationCategory.unannouncedMeal.rawValue,
+                let statusController = WKExtension.shared().visibleInterfaceController as? HUDInterfaceController
+            else {
                 break
             }
 
-            if let statusController = WKExtension.shared().visibleInterfaceController as? HUDInterfaceController {
+            let userInfo = response.notification.request.content.userInfo
+            // If we have info about a meal, the carb entry UI should reflect it
+            if let mealTime = userInfo[LoopNotificationUserInfoKey.unannouncedMealTime.rawValue] as? Date {
+                let unannouncedEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(),
+                                                                         doubleValue: CarbStore.unannouncedCarbThreshold),
+                                                    startDate: mealTime,
+                                                    foodType: nil,
+                                                    absorptionTime: nil)
+                statusController.addCarbs(initialEntry: unannouncedEntry)
+            // Otherwise, just provide the ability to add carbs
+            } else {
                 statusController.addCarbs()
             }
         default:
