@@ -10,6 +10,7 @@
 		1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
+		1481F9BB28DA26F4004C5AEB /* LoopUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; };
 		14B1735E28AED9EC006CCD7C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735D28AED9EC006CCD7C /* WidgetKit.framework */; };
 		14B1736028AED9EC006CCD7C /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735F28AED9EC006CCD7C /* SwiftUI.framework */; };
 		14B1736528AED9EE006CCD7C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14B1736428AED9EE006CCD7C /* Assets.xcassets */; };
@@ -604,6 +605,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1481F9BD28DA26F4004C5AEB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F75288A1DFE1DC600C322D6;
+			remoteInfo = LoopUI;
+		};
 		14B1736728AED9EE006CCD7C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -1595,6 +1603,7 @@
 				14B1735E28AED9EC006CCD7C /* WidgetKit.framework in Frameworks */,
 				1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */,
 				1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */,
+				1481F9BB28DA26F4004C5AEB /* LoopUI.framework in Frameworks */,
 				1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2837,6 +2846,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				1481F9BE28DA26F4004C5AEB /* PBXTargetDependency */,
 			);
 			name = SmallStatusWidgetExtension;
 			productName = SmallStatusWidgetExtension;
@@ -4015,6 +4025,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1481F9BE28DA26F4004C5AEB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F75288A1DFE1DC600C322D6 /* LoopUI */;
+			targetProxy = 1481F9BD28DA26F4004C5AEB /* PBXContainerItemProxy */;
+		};
 		14B1736828AED9EE006CCD7C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 14B1735B28AED9EC006CCD7C /* SmallStatusWidgetExtension */;
