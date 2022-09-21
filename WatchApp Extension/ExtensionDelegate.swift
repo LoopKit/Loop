@@ -13,6 +13,7 @@ import Intents
 import os
 import os.log
 import UserNotifications
+import LoopKit
 
 
 final class ExtensionDelegate: NSObject, WKExtensionDelegate {
@@ -245,6 +246,23 @@ extension ExtensionDelegate: WCSessionDelegate {
 
 
 extension ExtensionDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        switch response.actionIdentifier {
+        case UNNotificationDefaultActionIdentifier:
+            guard response.notification.request.identifier == LoopNotificationCategory.unannouncedMeal.rawValue else {
+                break
+            }
+
+            if let statusController = WKExtension.shared().visibleInterfaceController as? HUDInterfaceController {
+                statusController.addCarbs()
+            }
+        default:
+            break
+        }
+
+        completionHandler()
+    }
+    
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.badge, .sound, .list, .banner])
     }
