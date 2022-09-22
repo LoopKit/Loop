@@ -105,7 +105,7 @@ extension AlertPermissionsChecker {
         }
     }
 
-    // MARK: Risk Mitigating Alert
+    // MARK: Unsafe Notification Permissions Alert
     static let unsafeNotificationPermissionsAlertIdentifier = Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeNotificationPermissionsAlert")
 
     private static let unsafeNotificationPermissionsAlertContent = Alert.Content(
@@ -150,7 +150,7 @@ extension AlertPermissionsChecker {
             AlertPermissionsChecker.gotoSettings()
             acknowledgementCompletion()
         }))
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: "The button label of the action used to dismiss the risk mitigation alert"),
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: "The button label of the action used to dismiss the unsafe notification permission alert"),
                                                 style: .cancel,
                                                 handler: { _ in acknowledgementCompletion()
         }))
