@@ -107,7 +107,7 @@ public extension DoseChart {
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
 
         let currentTimeValue = ChartAxisValueDate(date: Date(), formatter: { _ in "" })
-        let currentTimeSettings = ChartGuideLinesLayerSettings(linesColor: UIColor.systemGray2, linesWidth: 0.5)
+        let currentTimeSettings = ChartGuideLinesLayerSettings(linesColor: colors.insulinTint, linesWidth: 1.0)
         let currentTimeLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: currentTimeSettings, axisValuesX: [currentTimeValue], axisValuesY: [])
 
         // 0-line
