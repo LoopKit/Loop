@@ -9,6 +9,7 @@
 import UIKit
 import UserNotifications
 import LoopKit
+import LoopCore
 
 enum NotificationManager {
 
@@ -203,13 +204,16 @@ extension NotificationManager {
     
     static func sendUnannouncedMealNotification(mealStart: Date) {
         let notification = UNMutableNotificationContent()
+        // Notifications should expire after the missed meal is no longer relevant
+        let expirationDate = Date().addingTimeInterval(LoopCoreConstants.defaultCarbAbsorptionTimes.slow)
 
         notification.title =  String(format: NSLocalizedString("Possible Unannounced Meal", comment: "The notification title for a meal that was possibly not logged in Loop."))
         notification.body = String(format: NSLocalizedString("It looks like you may not have logged a meal you ate. Tap to log it now.", comment: "The notification description for a meal that was possibly not logged in Loop."))
         notification.sound = .default
         
         notification.userInfo = [
-            LoopNotificationUserInfoKey.unannouncedMealTime.rawValue: mealStart
+            LoopNotificationUserInfoKey.unannouncedMealTime.rawValue: mealStart,
+            LoopNotificationUserInfoKey.expirationDate.rawValue: expirationDate
         ]
 
         let request = UNNotificationRequest(
@@ -219,6 +223,36 @@ extension NotificationManager {
         )
 
         UNUserNotificationCenter.current().add(request)
+    }
+    
+    static func removeExpiredMealNotifications(completion: @escaping () -> Void) {
+        let notificationCenter = UNUserNotificationCenter.current()
+        var identifiersToRemove: [String] = []
+        
+        notificationCenter.getPendingNotificationRequests { requests in
+            defer {
+                completion()
+            }
+            
+            for request in requests {
+                guard
+                    request.identifier == LoopNotificationCategory.unannouncedMeal.rawValue,
+                    let expirationDate = request.content.userInfo[LoopNotificationUserInfoKey.expirationDate.rawValue] as? Date,
+                    expirationDate < Date()
+                else {
+                    continue
+                }
+                
+                // The notification is expired: mark it for removal
+                identifiersToRemove.append(request.identifier)
+            }
+            
+            guard identifiersToRemove.count > 0 else {
+                return
+            }
+            
+            notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiersToRemove)
+        }
     }
     
     private static func remoteCarbEntryNotificationBody(amountInGrams: Double) -> String {
