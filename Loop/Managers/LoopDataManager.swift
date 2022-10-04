@@ -1431,7 +1431,7 @@ extension LoopDataManager {
     }
     
     public func generateUnannouncedMealNotificationIfNeeded(using insulinCounteractionEffects: [GlucoseEffectVelocity]) {
-        carbStore.containsUnannouncedMeal(insulinCounteractionEffects: self.insulinCounteractionEffects) {[weak self] status in
+        carbStore.hasUnannouncedMeal(insulinCounteractionEffects: self.insulinCounteractionEffects) {[weak self] status in
             self?.manageMealNotifications(for: status)
         }
     }
