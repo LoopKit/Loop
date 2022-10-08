@@ -248,7 +248,7 @@ extension Collection where Element: GlucoseValue {
         let sensitivityValue = sensitivity.doubleValue(for: unit)
         let suspendThresholdValue = suspendThreshold.doubleValue(for: unit)
 
-        // For each prediction above target, determine the amount of insulin necessary to correct glucose based on the modeled effectiveness of the insulin at that time
+        // For each prediction above suspend threshold, determine the amount of insulin necessary to correct glucose based on the modeled effectiveness of the insulin at that time
         for prediction in self {
             guard validDateRange.contains(prediction.startDate) else {
                 continue

@@ -65,7 +65,7 @@ import os.log
                 try data.write(to: storageURL, options: .atomic)
                 os_log(.info, "Wrote %{public}@ to %{public}@", key, storageURL.absoluteString)
             } catch {
-                os_log(.error, "Error saving %{public}@: %{public}@", key, error.localizedDescription)
+                os_log(.error, "Error saving %{public}@: %{public}@", key, String(describing: error))
             }
         }
     }

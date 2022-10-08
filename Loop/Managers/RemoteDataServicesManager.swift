@@ -136,13 +136,28 @@ final class RemoteDataServicesManager {
     public func waitForUploadsToFinish(timeout: DispatchTime = .now() + TimeInterval(10)) -> DispatchTimeoutResult {
         return uploadGroup.wait(timeout: timeout)
     }
+
+    public func uploadAnyPendingData() {
+        uploadDoseDataToAllServices()
+        uploadCarbDataToAllServices()
+        uploadSettingsDataToAllServices()
+        uploadGlucoseDataToAllServices()
+        uploadPumpEventDataToAllServices()
+        uploadDosingDecisionDataToAllServices()
+        uploadTemporaryOverrideDataToAllServices()
+    }
 }
 
 extension RemoteDataServicesManager {
 
     public func alertStoreHasUpdatedAlertData(_ alertStore: AlertStore) {
+        uploadAlertDataToAllServices()
+    }
+
+    public func uploadAlertDataToAllServices() {
         remoteDataServices.forEach { self.uploadAlertData(to: $0) }
     }
+
 
     private func uploadAlertData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
@@ -178,12 +193,15 @@ extension RemoteDataServicesManager {
             UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .alert)
         }
     }
-
 }
 
 extension RemoteDataServicesManager {
 
     public func carbStoreHasUpdatedCarbData(_ carbStore: CarbStore) {
+        uploadCarbDataToAllServices()
+    }
+
+    private func uploadCarbDataToAllServices() {
         remoteDataServices.forEach { self.uploadCarbData(to: $0) }
     }
 
@@ -193,6 +211,8 @@ extension RemoteDataServicesManager {
             let semaphore = DispatchSemaphore(value: 0)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .carb) ?? CarbStore.QueryAnchor()
             var continueUpload = false
+
+            self.log.debug("Uploading carbs with query anchor %{public}@", String(describing: previousQueryAnchor))
 
             self.carbStore.executeCarbQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.carbDataLimit ?? Int.max) { result in
                 switch result {
@@ -205,6 +225,7 @@ extension RemoteDataServicesManager {
                         case .failure(let error):
                             self.log.error("Error synchronizing carb data: %{public}@", String(describing: error))
                         case .success:
+                            self.log.debug("Setting new query anchor for carbs: %{public}@", String(describing: queryAnchor))
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .carb, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
                         }
@@ -233,6 +254,10 @@ extension RemoteDataServicesManager {
 extension RemoteDataServicesManager {
 
     public func insulinDeliveryStoreHasUpdatedDoseData(_ insulinDeliveryStore: InsulinDeliveryStore) {
+        uploadDoseDataToAllServices()
+    }
+
+    private func uploadDoseDataToAllServices() {
         remoteDataServices.forEach { self.uploadDoseData(to: $0) }
     }
 
@@ -282,6 +307,10 @@ extension RemoteDataServicesManager {
 extension RemoteDataServicesManager {
 
     public func dosingDecisionStoreHasUpdatedDosingDecisionData(_ dosingDecisionStore: DosingDecisionStore) {
+        uploadDosingDecisionDataToAllServices()
+    }
+
+    private func uploadDosingDecisionDataToAllServices() {
         remoteDataServices.forEach { self.uploadDosingDecisionData(to: $0) }
     }
 
@@ -331,6 +360,10 @@ extension RemoteDataServicesManager {
 extension RemoteDataServicesManager {
 
     public func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
+        uploadGlucoseDataToAllServices()
+    }
+
+    private func uploadGlucoseDataToAllServices() {
         remoteDataServices.forEach { self.uploadGlucoseData(to: $0) }
     }
 
@@ -385,6 +418,10 @@ extension RemoteDataServicesManager {
 extension RemoteDataServicesManager {
 
     public func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
+        uploadPumpEventDataToAllServices()
+    }
+
+    private func uploadPumpEventDataToAllServices() {
         remoteDataServices.forEach { self.uploadPumpEventData(to: $0) }
     }
 
@@ -434,6 +471,10 @@ extension RemoteDataServicesManager {
 extension RemoteDataServicesManager {
 
     public func settingsStoreHasUpdatedSettingsData(_ settingsStore: SettingsStore) {
+        uploadSettingsDataToAllServices()
+    }
+
+    private func uploadSettingsDataToAllServices() {
         remoteDataServices.forEach { self.uploadSettingsData(to: $0) }
     }
 
@@ -494,6 +535,10 @@ extension RemoteDataServicesManager {
     }
     
     public func temporaryScheduleOverrideHistoryDidUpdate() {
+        uploadTemporaryOverrideDataToAllServices()
+    }
+
+    private func uploadTemporaryOverrideDataToAllServices() {
         remoteDataServices.forEach { self.uploadTemporaryOverrideData(to: $0) }
     }
 

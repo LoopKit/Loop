@@ -209,6 +209,16 @@ class LoopAppManager: NSObject {
             .assign(to: \.closedLoopStatus.isClosedLoop, on: self)
             .store(in: &cancellables)
 
+        NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: deviceDataManager.loopManager, queue: nil) { [weak self] note in
+            let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
+            let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext)
+            DispatchQueue.main.async {
+                if context == .loopFinished {
+                    self?.deviceDataManager.remoteDataServicesManager.uploadAnyPendingData()
+                }
+            }
+        }
+
         self.state = state.next
     }
 

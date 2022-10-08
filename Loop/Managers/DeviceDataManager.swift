@@ -1171,7 +1171,7 @@ extension DeviceDataManager: AlertStoreDelegate {
 extension DeviceDataManager: CarbStoreDelegate {
 
     func carbStoreHasUpdatedCarbData(_ carbStore: CarbStore) {
-        remoteDataServicesManager.carbStoreHasUpdatedCarbData(carbStore)
+        remoteDataServicesManager.uploadPendingCarbData(carbStore)
     }
 
     func carbStore(_ carbStore: CarbStore, didError error: CarbStore.CarbStoreError) {}

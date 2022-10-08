@@ -159,12 +159,13 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         // Swift compiler config is inverse, since the default state is enabled.
-        #if REMOTE_OVERRIDES_DISABLED
+        #if REMOTE_OVERRIDES_DISABLED || targetEnvironment(simulator)
         self.remoteOverridesEnabled = false
         #else
         self.remoteOverridesEnabled = true
         #endif
-        
+
+
         #if SCENARIOS_ENABLED
         self.scenariosEnabled = true
         #else
