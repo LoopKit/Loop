@@ -397,6 +397,13 @@ final class LoopDataManager {
 
     // Confined to dataAccessQueue
     private var retrospectiveCorrection: RetrospectiveCorrection
+    
+    /// The last time an unannounced meal notification was sent
+    private var lastUAMNotificationDeliveryTime: Date? = UserDefaults.standard.lastUAMNotificationDeliveryTime {
+        didSet {
+            UserDefaults.standard.lastUAMNotificationDeliveryTime = lastUAMNotificationDeliveryTime
+        }
+    }
 
     // MARK: - Background task management
 
@@ -1439,12 +1446,21 @@ extension LoopDataManager {
     private func manageMealNotifications(for status: UnannouncedMealStatus) {
         // We should remove expired notifications regardless of whether or not there was a meal
         NotificationManager.removeExpiredMealNotifications { [weak self] in
-            guard case .hasMeal(let startTime) = status else {
-                // No unannounced meal!
+            guard let self = self else { return }
+            
+            let now = Date()
+            let notificationTimeTooRecent = now.timeIntervalSince(self.lastUAMNotificationDeliveryTime ?? .distantPast) < (CarbStore.unannouncedMealMaxRecency - CarbStore.unannouncedMealMinRecency)
+            
+            guard
+                case .hasMeal(let startTime) = status,
+                !notificationTimeTooRecent
+            else {
+                // No notification needed!
                 return
             }
             
-            self?.logger.debug("Delivering a missed meal notification")
+            self.logger.debug("Delivering a missed meal notification")
+            self.lastUAMNotificationDeliveryTime = now
             NotificationManager.sendUnannouncedMealNotification(mealStart: startTime)
         }
     }
@@ -2034,6 +2050,7 @@ extension LoopDataManager {
                 "recommendedAutomaticDose: \(String(describing: state.recommendedAutomaticDose))",
                 "lastBolus: \(String(describing: manager.lastRequestedBolus))",
                 "lastLoopCompleted: \(String(describing: manager.lastLoopCompleted))",
+                "lastUnannouncedMealNotificationTime: \(String(describing: self.lastUAMNotificationDeliveryTime))",
                 "basalDeliveryState: \(String(describing: manager.basalDeliveryState))",
                 "carbsOnBoard: \(String(describing: state.carbsOnBoard))",
                 "error: \(String(describing: state.error))",

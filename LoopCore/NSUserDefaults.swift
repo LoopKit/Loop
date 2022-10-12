@@ -20,6 +20,7 @@ extension UserDefaults {
         case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
+        case LastUAMNotificationDeliveryTime = "com.loopkit.Loop.lastUAMNotificationDeliveryTime"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -111,6 +112,19 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.lastProfileExpirationAlertDate.rawValue)
+        }
+    }
+    
+    public var lastUAMNotificationDeliveryTime: Date? {
+        get {
+            if let rawValue = value(forKey: Key.LastUAMNotificationDeliveryTime.rawValue) as? Date {
+                return rawValue
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue, forKey: Key.LastUAMNotificationDeliveryTime.rawValue)
         }
     }
     
