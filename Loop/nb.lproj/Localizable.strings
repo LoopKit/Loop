@@ -503,9 +503,6 @@
    The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Pumpe satt på pause";
 
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "QUANTITY_VALUE_AND_UNIT";
-
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Hurtigvirkende – voksen";
 
