@@ -107,8 +107,8 @@ class MockCarbStore: CarbStoreProtocol {
         })))
     }
     
-        completion(.noMeal)
     func hasUnannouncedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], completion: @escaping (UnannouncedMealStatus) -> Void) {
+        completion(.noUnannouncedMeal)
     }
 }
 
