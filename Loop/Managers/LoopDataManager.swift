@@ -399,7 +399,8 @@ final class LoopDataManager {
     private var retrospectiveCorrection: RetrospectiveCorrection
     
     /// The last time an unannounced meal notification was sent
-    private var lastUAMNotificationDeliveryTime: Date? = UserDefaults.standard.lastUAMNotificationDeliveryTime {
+    /// Internal for unit testing
+    internal var lastUAMNotificationDeliveryTime: Date? = UserDefaults.standard.lastUAMNotificationDeliveryTime {
         didSet {
             UserDefaults.standard.lastUAMNotificationDeliveryTime = lastUAMNotificationDeliveryTime
         }
@@ -1446,11 +1447,13 @@ extension LoopDataManager {
     }
     
     private func manageMealNotifications(for status: UnannouncedMealStatus) {
+    // Internal for unit testing
+    internal func manageMealNotifications(for status: UnannouncedMealStatus) {
         // We should remove expired notifications regardless of whether or not there was a meal
         NotificationManager.removeExpiredMealNotifications { [weak self] in
             guard let self = self else { return }
             
-            let now = Date()
+            let now = self.now()
             let notificationTimeTooRecent = now.timeIntervalSince(self.lastUAMNotificationDeliveryTime ?? .distantPast) < (CarbStore.unannouncedMealMaxRecency - CarbStore.unannouncedMealMinRecency)
             
             guard

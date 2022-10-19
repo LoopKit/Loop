@@ -73,6 +73,7 @@ class LoopDataManagerDosingTests: XCTestCase {
     }
     
     // MARK: Mock stores
+    var now: Date!
     var dosingDecisionStore: MockDosingDecisionStore!
     var automaticDosingStatus: AutomaticDosingStatus!
     var loopDataManager: LoopDataManager!
@@ -96,6 +97,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         let carbStore = MockCarbStore(for: test)
         
         let currentDate = glucoseStore.latestGlucose!.startDate
+        now = currentDate
         
         dosingDecisionStore = MockDosingDecisionStore()
         automaticDosingStatus = AutomaticDosingStatus(isClosedLoop: true, isClosedLoopAllowed: true)
