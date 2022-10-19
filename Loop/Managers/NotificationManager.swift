@@ -226,12 +226,13 @@ extension NotificationManager {
     }
     
     static func removeExpiredMealNotifications(completion: @escaping () -> Void) {
+    static func removeExpiredMealNotifications(completion: (() -> Void)? = nil) {
         let notificationCenter = UNUserNotificationCenter.current()
         var identifiersToRemove: [String] = []
         
         notificationCenter.getPendingNotificationRequests { requests in
             defer {
-                completion()
+                completion?()
             }
             
             for request in requests {

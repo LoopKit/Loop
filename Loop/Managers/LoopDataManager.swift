@@ -1445,29 +1445,27 @@ extension LoopDataManager {
             self?.manageMealNotifications(for: status)
         }
     }
-    
-    private func manageMealNotifications(for status: UnannouncedMealStatus) {
+
     // Internal for unit testing
     internal func manageMealNotifications(for status: UnannouncedMealStatus) {
         // We should remove expired notifications regardless of whether or not there was a meal
-        NotificationManager.removeExpiredMealNotifications { [weak self] in
-            guard let self = self else { return }
-            
-            let now = self.now()
-            let notificationTimeTooRecent = now.timeIntervalSince(self.lastUAMNotificationDeliveryTime ?? .distantPast) < (CarbStore.unannouncedMealMaxRecency - CarbStore.unannouncedMealMinRecency)
-            
-            guard
-                case .hasUnannouncedMeal(let startTime) = status,
-                !notificationTimeTooRecent
-            else {
-                // No notification needed!
-                return
-            }
-            
-            self.logger.debug("Delivering a missed meal notification")
-            self.lastUAMNotificationDeliveryTime = now
-            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime)
+        NotificationManager.removeExpiredMealNotifications()
+        
+        // Figure out if we should deliver a notification
+        let now = now()
+        let notificationTimeTooRecent = now.timeIntervalSince(lastUAMNotificationDeliveryTime ?? .distantPast) < (CarbStore.unannouncedMealMaxRecency - CarbStore.unannouncedMealMinRecency)
+        
+        guard
+            case .hasUnannouncedMeal(let startTime) = status,
+            !notificationTimeTooRecent
+        else {
+            // No notification needed!
+            return
         }
+        
+        logger.debug("Delivering a missed meal notification")
+        lastUAMNotificationDeliveryTime = now
+        NotificationManager.sendUnannouncedMealNotification(mealStart: startTime)
     }
 
     /// Generates a correction effect based on how large the discrepancy is between the current glucose and its model predicted value.
