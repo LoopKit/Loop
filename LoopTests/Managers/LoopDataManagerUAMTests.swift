@@ -20,7 +20,6 @@ class LoopDataManagerUAMTests: LoopDataManagerTests {
     
     func testNoUnannouncedMealLastNotificationTime() {
         setUp(for: .highAndRisingWithCOB)
-        XCTAssertNil(loopDataManager.lastUAMNotificationDeliveryTime)
         
         let status = UnannouncedMealStatus.noUnannouncedMeal
         loopDataManager.manageMealNotifications(for: status)

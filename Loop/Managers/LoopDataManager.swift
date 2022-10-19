@@ -1453,7 +1453,7 @@ extension LoopDataManager {
         
         // Figure out if we should deliver a notification
         let now = now()
-        let notificationTimeTooRecent = now.timeIntervalSince(lastUAMNotificationDeliveryTime ?? .distantPast) < (CarbStore.unannouncedMealMaxRecency - CarbStore.unannouncedMealMinRecency)
+        let notificationTimeTooRecent = now.timeIntervalSince(lastUAMNotificationDeliveryTime ?? .distantPast) < (UAMSettings.maxRecency - UAMSettings.minRecency)
         
         guard
             case .hasUnannouncedMeal(let startTime) = status,

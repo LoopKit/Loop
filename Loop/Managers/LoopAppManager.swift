@@ -481,7 +481,7 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
             
             if let mealTime = userInfo[LoopNotificationUserInfoKey.unannouncedMealTime.rawValue] as? Date {
                 let unannouncedEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(),
-                                                                         doubleValue: CarbStore.unannouncedMealCarbThreshold),
+                                                                         doubleValue: UAMSettings.carbThreshold),
                                                     startDate: mealTime,
                                                     foodType: nil,
                                                     absorptionTime: nil)
