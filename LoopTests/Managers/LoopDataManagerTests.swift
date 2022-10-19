@@ -45,7 +45,7 @@ extension ISO8601DateFormatter {
     }
 }
 
-class LoopDataManagerDosingTests: XCTestCase {
+class LoopDataManagerTests: XCTestCase {
     // MARK: Constants for testing
     let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
     let retrospectiveCorrectionGroupingInterval = 1.01
@@ -123,7 +123,10 @@ class LoopDataManagerDosingTests: XCTestCase {
     override func tearDownWithError() throws {
         loopDataManager = nil
     }
-    
+}
+
+
+class LoopDataManagerDosingTests: LoopDataManagerTests {
     // MARK: Functions to load fixtures
     func loadGlucoseEffect(_ name: String) -> [GlucoseEffect] {
         let fixture: [JSONDictionary] = loadFixture(name)
@@ -562,7 +565,7 @@ class LoopDataManagerDosingTests: XCTestCase {
 
 }
 
-extension LoopDataManagerDosingTests {
+extension LoopDataManagerTests {
     public var bundle: Bundle {
         return Bundle(for: type(of: self))
     }
