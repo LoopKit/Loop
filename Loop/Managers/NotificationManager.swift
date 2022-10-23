@@ -204,7 +204,7 @@ extension NotificationManager {
     
     static func sendUnannouncedMealNotification(mealStart: Date) {
         let notification = UNMutableNotificationContent()
-        // Notifications should expire after the missed meal is no longer relevant
+        /// Notifications should expire after the missed meal is no longer relevant
         let expirationDate = Date().addingTimeInterval(LoopCoreConstants.defaultCarbAbsorptionTimes.slow)
 
         notification.title =  String(format: NSLocalizedString("Possible Unannounced Meal", comment: "The notification title for a meal that was possibly not logged in Loop."))
@@ -217,6 +217,7 @@ extension NotificationManager {
         ]
 
         let request = UNNotificationRequest(
+            /// We use the same `identifier` for all requests so a newer missed meal notification will replace a current one (if it exists)
             identifier: LoopNotificationCategory.unannouncedMeal.rawValue,
             content: notification,
             trigger: nil
@@ -224,35 +225,39 @@ extension NotificationManager {
 
         UNUserNotificationCenter.current().add(request)
     }
-    
-    static func removeExpiredMealNotifications(completion: @escaping () -> Void) {
-    static func removeExpiredMealNotifications(completion: (() -> Void)? = nil) {
+
+    static func removeExpiredMealNotifications(now: Date = Date(), completion: (() -> Void)? = nil) {
         let notificationCenter = UNUserNotificationCenter.current()
         var identifiersToRemove: [String] = []
         
-        notificationCenter.getPendingNotificationRequests { requests in
+        notificationCenter.getDeliveredNotifications { notifications in
             defer {
                 completion?()
             }
             
-            for request in requests {
+            for notification in notifications {
+                let request = notification.request
+                
                 guard
                     request.identifier == LoopNotificationCategory.unannouncedMeal.rawValue,
                     let expirationDate = request.content.userInfo[LoopNotificationUserInfoKey.expirationDate.rawValue] as? Date,
-                    expirationDate < Date()
+                    expirationDate < now
                 else {
                     continue
                 }
                 
-                // The notification is expired: mark it for removal
+                /// The notification is expired: mark it for removal
                 identifiersToRemove.append(request.identifier)
+                /// We can break early because all missed meal notifications have the same `identifier`,
+                /// so there will only ever be 1 outstanding missed meal notification
+                break
             }
             
             guard identifiersToRemove.count > 0 else {
                 return
             }
             
-            notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiersToRemove)
+            notificationCenter.removeDeliveredNotifications(withIdentifiers: identifiersToRemove)
         }
     }
     
