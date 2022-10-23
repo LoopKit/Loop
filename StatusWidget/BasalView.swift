@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct BasalView: View {
-    var entry: SmallStatusEntry
+    var entry: StatusWidgetEntry
     
     var body: some View {
         let percent = entry.netBasal?.percentage
@@ -29,12 +29,12 @@ struct BasalView: View {
             if let rate = rate,
                 let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
                 Text("\(rateString) U")
-                    .font(.caption2)
+                    .font(.footnote)
                     .foregroundColor(Color(entry.isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
             }
             else {
                 Text("-U")
-                    .font(.caption2)
+                    .font(.footnote)
                     .foregroundColor(Color(entry.isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
             }
         }

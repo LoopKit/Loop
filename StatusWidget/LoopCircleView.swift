@@ -10,11 +10,11 @@ import SwiftUI
 import LoopCore
 
 struct LoopCircleView: View {
-    var entry: SmallStatusEntry
+    var entry: StatusWidgetEntry
 
     var body: some View {
         let closeLoop = entry.closeLoop
-        let lastLoopCompleted = entry.lastLoopCompleted ?? Date()
+        let lastLoopCompleted = entry.lastLoopCompleted ?? Date().addingTimeInterval(.minutes(16))
         let age = abs(min(0, lastLoopCompleted.timeIntervalSinceNow))
         let freshness = LoopCompletionFreshness(age: age)
         

@@ -11,21 +11,20 @@ import LoopKit
 import HealthKit
 
 struct GlucoseView: View {
-    @Environment(\.sizeCategory) var sizeCategory
-    var entry: SmallStatusEntry
+    var entry: StatusWidgetEntry
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             HStack(spacing: 2) {
                 if let quantity = entry.currentGlucose?.quantity,
                    let unit = entry.unit {
-                    let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
-                    if let glucoseString = numberFormatter.string(from: quantity.doubleValue(for: unit)) {
+                    let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
+                    if let glucoseString = glucoseFormatter.string(from: quantity.doubleValue(for: unit)) {
                         Text(glucoseString)
                             .font(.system(size: 24, weight: .heavy, design: .default))
                     }
                     else {
-                        Text("-")
+                        Text("--")
                             .font(.system(size: 24, weight: .heavy, design: .default))
                     }
                 }
@@ -40,6 +39,7 @@ struct GlucoseView: View {
             }
             // Prevent truncation of text
             .fixedSize(horizontal: true, vertical: false)
+            .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : .primary)
             
             let unitString = entry.unit == nil ? "-" : entry.unit!.localizedShortUnitString
             if let previousGlucose = entry.previousGlucose,
@@ -50,13 +50,13 @@ struct GlucoseView: View {
                 
                 Text(deltaString + " " + unitString)
                 // Dynamic text causes string to be cut off
-                    .font(.system(size: 11))
-                    .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .font(.system(size: 13))
+                    .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
             }
             else {
                 Text(unitString)
-                    .font(.caption2)
-                    .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .font(.footnote)
+                    .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
             }
         }
     }

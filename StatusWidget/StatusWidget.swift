@@ -13,7 +13,7 @@ import LoopCore
 import HealthKit
 import CoreData
 
-class Provider: TimelineProvider {
+class StatusWidgetProvider: TimelineProvider {
     lazy var defaults = UserDefaults.appGroup
     
     lazy var healthStore = HKHealthStore()
@@ -35,40 +35,43 @@ class Provider: TimelineProvider {
         provenanceIdentifier: HKSource.default().bundleIdentifier
     )
 
-    func placeholder(in context: Context) -> SmallStatusEntry {
-        return SmallStatusEntry(date: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, previousGlucose: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil, minsAgo: 5)
+    func placeholder(in context: Context) -> StatusWidgetEntry {
+        return StatusWidgetEntry(date: Date(), originalDate: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, previousGlucose: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (SmallStatusEntry) -> ()) {
+    func getSnapshot(in context: Context, completion: @escaping (StatusWidgetEntry) -> ()) {
         update { newEntry in
             completion(newEntry)
         }
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
+    func getTimeline(in context: Context, completion: @escaping (Timeline<StatusWidgetEntry>) -> ()) {
         update { newEntry in
             var entries = [newEntry]
-            
-            let midnight = Calendar.current.startOfDay(for: Date())
-            let nextHour = midnight.addingTimeInterval(.hours(1))
-            
-            for minute in 1..<60 {
-                let entryDate = Date().addingTimeInterval(.minutes(Double(minute)))
-                
-                // Copy the previous entry but mark it as old and keep the old date so the user knows that the data is stale
-                var oldEntry = newEntry
-                oldEntry.date = entryDate
-                oldEntry.minsAgo = minute
-                entries.append(oldEntry)
+            var datesToRefreshWidget: [Date] = []
+            let nextLoopRefresh = newEntry.lastLoopCompleted?.addingTimeInterval(.minutes(5)) ?? Date().addingTimeInterval(.minutes(5))
+
+            if let lastBGTime = newEntry.currentGlucose?.startDate {
+                let staleBgRefreshTime = lastBGTime.addingTimeInterval(.minutes(5))
+                datesToRefreshWidget.append(staleBgRefreshTime)
             }
-            
-            
+
+            datesToRefreshWidget.append(nextLoopRefresh)
+
+            for date in datesToRefreshWidget {
+                // Copy the previous entry but mark it as old but mark it as stale
+                var copiedEntry = newEntry
+                copiedEntry.date = date
+                entries.append(copiedEntry)
+            }
+                                
+            let nextHour = Date().addingTimeInterval(.hours(1))
             let timeline = Timeline(entries: entries, policy: .after(nextHour))
             completion(timeline)
         }
     }
     
-    func update(completion: @escaping (SmallStatusEntry) -> Void) {
+    func update(completion: @escaping (StatusWidgetEntry) -> Void) {
         let group = DispatchGroup()
 
         var glucose: [StoredGlucoseSample] = []
@@ -119,31 +122,30 @@ class Provider: TimelineProvider {
             let unit = context.predictedGlucose?.unit
             
             let eventualGlucose = predictedGlucose?.last
-            var eventualGlucoseString: String?
-            if let unit = unit, let eventualGlucose = eventualGlucose {
-                let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
-                eventualGlucoseString = glucoseFormatter.string(from: eventualGlucose.quantity.doubleValue(for: unit, withRounding: true))
-            }
             
-            completion(SmallStatusEntry(
-                date: Date(),
-                lastLoopCompleted: lastCompleted,
-                closeLoop: closeLoop,
-                currentGlucose: currentGlucose,
-                previousGlucose: previousGlucose,
-                unit: unit,
-                sensor: context.glucoseDisplay,
-                netBasal: netBasal,
-                eventualGlucose: eventualGlucoseString,
-                minsAgo: 0
-            ))
+            completion(
+                StatusWidgetEntry(
+                    date: Date(),
+                    originalDate: Date(),
+                    lastLoopCompleted: lastCompleted,
+                    closeLoop: closeLoop,
+                    currentGlucose: currentGlucose,
+                    previousGlucose: previousGlucose,
+                    unit: unit,
+                    sensor: context.glucoseDisplay,
+                    netBasal: netBasal,
+                    eventualGlucose: eventualGlucose
+                )
+            )
         }
     }
 }
 
 
-struct SmallStatusEntry: TimelineEntry {
+struct StatusWidgetEntry: TimelineEntry {
     var date: Date
+    
+    let originalDate: Date
     
     let lastLoopCompleted: Date?
     let closeLoop: Bool
@@ -155,18 +157,40 @@ struct SmallStatusEntry: TimelineEntry {
     
     let netBasal: NetBasalContext?
     
-    let eventualGlucose: String?
+    let eventualGlucose: GlucoseContext?
     
     // For marking old entries as stale
-    var minsAgo: Int
+    var minsOld: Double {
+        guard let lastLoopCompleted else {
+            return 5
+        }
+        return (date - lastLoopCompleted).minutes
+    }
     
     var isOld: Bool {
-        return minsAgo >= 5
+        return minsOld >= 5
+    }
+    
+    var glucoseMinsOld: Double {
+        guard let glucoseDate = currentGlucose?.startDate else {
+            return 5
+        }
+        return (date - glucoseDate).minutes
+    }
+    
+    var glucoseIsStale: Bool {
+        return glucoseMinsOld >= 5
+    }
+}
+
+extension Date {
+    static func - (lhs: Date, rhs: Date) -> TimeInterval {
+        return lhs.timeIntervalSinceReferenceDate - rhs.timeIntervalSinceReferenceDate
     }
 }
 
 struct SmallStatusWidgetEntryView : View {
-    var entry: Provider.Entry
+    var entry: StatusWidgetProvider.Entry
 
     var body: some View {
         VStack(alignment: .center, spacing: 5) {
@@ -185,38 +209,37 @@ struct SmallStatusWidgetEntryView : View {
                 ContainerRelativeShape()
                     .fill(Color("WidgetSecondaryBackground"))
             )
-            
-            HStack(spacing: 2) {
-                if entry.isOld {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 10))
-                }
-                
-                Text("\(entry.minsAgo) min\(entry.minsAgo != 1 ? "s" : "") ago")
-                    .font(.caption)
-            }
-            .foregroundColor(.primary)
-            
-            
+                        
             HStack(alignment: .center) {
                 BasalView(entry: entry)
                     .frame(maxWidth: .infinity, alignment: .center)
                 
-                VStack {
-                    if let eventualGlucose = entry.eventualGlucose {
-                        Text("Ev \(eventualGlucose)")
-                            .font(.caption)
-                    }
-                    else {
-                        Text("Ev --")
-                            .font(.caption)
+                if let eventualGlucose = entry.eventualGlucose {
+                    let glucoseFormatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
+                    if let glucoseString = glucoseFormatter.string(from: eventualGlucose.quantity.doubleValue(for: eventualGlucose.unit)) {
+                        VStack {
+                            Text("FUTURE")
+                            .font(.footnote)
+                            .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                            
+                            Text("\(glucoseString)")
+                                .font(.subheadline)
+                                .fontWeight(.heavy)
+                            
+                            Text(eventualGlucose.unit.shortLocalizedUnitString())
+                                .font(.footnote)
+                                .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
             }
             .frame(maxHeight: .infinity, alignment: .center)
             .padding(5)
-            .background(ContainerRelativeShape().fill(Color("WidgetSecondaryBackground")))
+            .background(
+                ContainerRelativeShape()
+                    .fill(Color("WidgetSecondaryBackground"))
+            )
         }
         .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : nil)
         .padding(5)
@@ -229,7 +252,7 @@ struct SmallStatusWidget: Widget {
     let kind: String = "SmallStatusWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+        StaticConfiguration(kind: kind, provider: StatusWidgetProvider()) { entry in
             SmallStatusWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Loop Status Widget")

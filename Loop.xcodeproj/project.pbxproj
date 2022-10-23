@@ -16,7 +16,7 @@
 		14B1736528AED9EE006CCD7C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14B1736428AED9EE006CCD7C /* Assets.xcassets */; };
 		14B1736928AED9EE006CCD7C /* SmallStatusWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736E28AEDBF6006CCD7C /* BasalView.swift */; };
-		14B1737328AEDBF6006CCD7C /* SmallStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736F28AEDBF6006CCD7C /* SmallStatusWidget.swift */; };
+		14B1737328AEDBF6006CCD7C /* StatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736F28AEDBF6006CCD7C /* StatusWidget.swift */; };
 		14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1737028AEDBF6006CCD7C /* GlucoseView.swift */; };
 		14B1737528AEDBF6006CCD7C /* LoopCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */; };
 		14B1737628AEDC6C006CCD7C /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
@@ -822,9 +822,9 @@
 		14B1735F28AED9EC006CCD7C /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		14B1736428AED9EE006CCD7C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		14B1736628AED9EE006CCD7C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		14B1736D28AEDA63006CCD7C /* SmallStatusWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SmallStatusWidgetExtension.entitlements; sourceTree = "<group>"; };
+		14B1736D28AEDA63006CCD7C /* StatusWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StatusWidgetExtension.entitlements; sourceTree = "<group>"; };
 		14B1736E28AEDBF6006CCD7C /* BasalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalView.swift; sourceTree = "<group>"; };
-		14B1736F28AEDBF6006CCD7C /* SmallStatusWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmallStatusWidget.swift; sourceTree = "<group>"; };
+		14B1736F28AEDBF6006CCD7C /* StatusWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusWidget.swift; sourceTree = "<group>"; };
 		14B1737028AEDBF6006CCD7C /* GlucoseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseView.swift; sourceTree = "<group>"; };
 		14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopCircleView.swift; sourceTree = "<group>"; };
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
@@ -1724,18 +1724,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		14B1736128AED9EC006CCD7C /* SmallStatusWidget */ = {
+		14B1736128AED9EC006CCD7C /* StatusWidget */ = {
 			isa = PBXGroup;
 			children = (
-				14B1736D28AEDA63006CCD7C /* SmallStatusWidgetExtension.entitlements */,
+				14B1736D28AEDA63006CCD7C /* StatusWidgetExtension.entitlements */,
 				14B1736E28AEDBF6006CCD7C /* BasalView.swift */,
 				14B1737028AEDBF6006CCD7C /* GlucoseView.swift */,
 				14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */,
-				14B1736F28AEDBF6006CCD7C /* SmallStatusWidget.swift */,
+				14B1736F28AEDBF6006CCD7C /* StatusWidget.swift */,
 				14B1736428AED9EE006CCD7C /* Assets.xcassets */,
 				14B1736628AED9EE006CCD7C /* Info.plist */,
 			);
-			path = SmallStatusWidget;
+			path = StatusWidget;
 			sourceTree = "<group>";
 		};
 		1DA6499D2441266400F61E75 /* Alerts */ = {
@@ -1878,7 +1878,7 @@
 				43E2D8D21D20BF42004DA55F /* DoseMathTests */,
 				43D9FFA321EA9A0C00AF44BF /* Learn */,
 				E9B07F7D253BBA6500BAD8F8 /* Loop Intent Extension */,
-				14B1736128AED9EC006CCD7C /* SmallStatusWidget */,
+				14B1736128AED9EC006CCD7C /* StatusWidget */,
 				A900531928D60852000BC15B /* Shortcuts */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
@@ -3522,7 +3522,7 @@
 				14B1738028AEDC6C006CCD7C /* Debug.swift in Sources */,
 				14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */,
 				14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */,
-				14B1737328AEDBF6006CCD7C /* SmallStatusWidget.swift in Sources */,
+				14B1737328AEDBF6006CCD7C /* StatusWidget.swift in Sources */,
 				14B1737528AEDBF6006CCD7C /* LoopCircleView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4519,7 +4519,7 @@
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_ENTITLEMENTS = SmallStatusWidget/SmallStatusWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = StatusWidget/StatusWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				CURRENT_PROJECT_VERSION = 1;
@@ -4527,7 +4527,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = SmallStatusWidget/Info.plist;
+				INFOPLIST_FILE = StatusWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SmallStatusWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
@@ -4564,7 +4564,7 @@
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_ENTITLEMENTS = SmallStatusWidget/SmallStatusWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = StatusWidget/StatusWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				CURRENT_PROJECT_VERSION = 1;
@@ -4572,7 +4572,7 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = SmallStatusWidget/Info.plist;
+				INFOPLIST_FILE = StatusWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SmallStatusWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
