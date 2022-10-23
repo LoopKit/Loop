@@ -205,7 +205,7 @@ extension NotificationManager {
     static func sendUnannouncedMealNotification(mealStart: Date) {
         let notification = UNMutableNotificationContent()
         /// Notifications should expire after the missed meal is no longer relevant
-        let expirationDate = Date().addingTimeInterval(LoopCoreConstants.defaultCarbAbsorptionTimes.slow)
+        let expirationDate = mealStart.addingTimeInterval(LoopCoreConstants.defaultCarbAbsorptionTimes.slow)
 
         notification.title =  String(format: NSLocalizedString("Possible Unannounced Meal", comment: "The notification title for a meal that was possibly not logged in Loop."))
         notification.body = String(format: NSLocalizedString("It looks like you may not have logged a meal you ate. Tap to log it now.", comment: "The notification description for a meal that was possibly not logged in Loop."))
