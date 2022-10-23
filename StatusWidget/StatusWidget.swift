@@ -163,7 +163,7 @@ struct StatusWidgetEntry: TimelineEntry {
     
     // For marking old entries as stale
     var minsOld: Double {
-        guard let lastLoopCompleted else {
+        guard let lastLoopCompleted = lastLoopCompleted else {
             return 5
         }
         return (date - lastLoopCompleted).minutes
