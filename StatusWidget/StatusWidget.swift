@@ -112,8 +112,10 @@ class StatusWidgetProvider: TimelineProvider {
                 previousGlucose = nil
             }
             
-            // Making sure that previous glucose is within 15 mins of last glucose to avoid large deltas on sensor changes, missed readings, etc.
-            if let prevGlucose = previousGlucose, prevGlucose.startDate.addingTimeInterval(.minutes(30)) < Date() {
+            // Making sure that previous glucose is within 5 mins of last glucose to avoid large deltas on sensor changes, missed readings, etc.
+            if let prevGlucose = previousGlucose,
+               let currGlucose = currentGlucose,
+               abs((prevGlucose.startDate.addingTimeInterval(.minutes(5)) - currGlucose.startDate).minutes) > 1 {
                 previousGlucose = nil
             }
 
