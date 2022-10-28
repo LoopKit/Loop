@@ -156,7 +156,7 @@ class LoopAppManager: NSObject {
         self.pluginManager = PluginManager()
         self.bluetoothStateManager = BluetoothStateManager()
         self.alertManager = AlertManager(alertPresenter: self,
-                                         userNotificationAlertIssuer: UserNotificationAlertIssuer(userNotificationCenter: UNUserNotificationCenter.current()),
+                                         userNotificationAlertScheduler: UserNotificationAlertScheduler(userNotificationCenter: UNUserNotificationCenter.current()),
                                          expireAfter: Bundle.main.localCacheDuration,
                                          bluetoothProvider: bluetoothStateManager)
 
@@ -166,7 +166,8 @@ class LoopAppManager: NSObject {
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
 
         self.settingsManager = SettingsManager(cacheStore: cacheStore,
-                                               expireAfter: localCacheDuration)
+                                               expireAfter: localCacheDuration,
+                                               alertMuter: alertManager.alertMuter)
 
         self.deviceDataManager = DeviceDataManager(pluginManager: pluginManager,
                                                    alertManager: alertManager,
@@ -233,6 +234,7 @@ class LoopAppManager: NSObject {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle(for: Self.self))
         let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         statusTableViewController.alertPermissionsChecker = alertPermissionsChecker
+        statusTableViewController.alertMuter = alertManager.alertMuter
         statusTableViewController.closedLoopStatus = closedLoopStatus
         statusTableViewController.deviceManager = deviceDataManager
         statusTableViewController.onboardingManager = onboardingManager
@@ -442,8 +444,8 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.remoteCarbsFailure.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:
-            // All other userNotifications are not to be displayed while in the foreground
-            completionHandler([])
+            // For all others, banners are not to be displayed while in the foreground
+            completionHandler([.badge, .sound, .list])
         }
     }
 

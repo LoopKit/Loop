@@ -341,7 +341,7 @@ final class DeviceDataManager {
         statusExtensionManager = ExtensionDataManager(deviceDataManager: self, closedLoopStatus: closedLoopStatus)
 
         loopManager = LoopDataManager(
-            lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
+            lastLoopCompleted: ExtensionDataManager.lastLoopCompleted,
             basalDeliveryState: pumpManager?.status.basalDeliveryState,
             settings: settingsManager.loopSettings,
             overrideHistory: overrideHistory,

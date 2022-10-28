@@ -39,14 +39,16 @@ class StoredAlertEncodableTests: XCTestCase {
     }
 
     func testInterruptionLevel() throws {
+        let backgroundContent = Alert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "OK")
         managedObjectContext.performAndWait {
-            let alert = Alert(identifier: Alert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate, interruptionLevel: .active)
+            let alert = Alert(identifier: Alert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar"), foregroundContent: nil, backgroundContent: backgroundContent, trigger: .immediate, interruptionLevel: .active)
             let storedAlert = StoredAlert(from: alert, context: managedObjectContext, syncIdentifier: UUID(uuidString: "A7073F28-0322-4506-A733-CF6E0687BAF7")!)
             XCTAssertEqual(.active, storedAlert.interruptionLevel)
             storedAlert.issuedDate = dateFormatter.date(from: "2020-05-14T21:00:12Z")!
             try! assertStoredAlertEncodable(storedAlert, encodesJSON: """
             {
               "alertIdentifier" : "bar",
+              "backgroundContent" : "{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}",
               "interruptionLevel" : "active",
               "issuedDate" : "2020-05-14T21:00:12Z",
               "managerIdentifier" : "foo",
@@ -62,6 +64,7 @@ class StoredAlertEncodableTests: XCTestCase {
             try! assertStoredAlertEncodable(storedAlert, encodesJSON: """
             {
               "alertIdentifier" : "bar",
+              "backgroundContent" : "{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}",
               "interruptionLevel" : "critical",
               "issuedDate" : "2020-05-14T21:00:12Z",
               "managerIdentifier" : "foo",

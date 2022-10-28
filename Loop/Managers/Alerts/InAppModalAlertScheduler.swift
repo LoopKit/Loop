@@ -1,5 +1,5 @@
 //
-//  InAppModalAlertIssuer.swift
+//  InAppModalAlertScheduler.swift
 //  LoopKit
 //
 //  Created by Rick Pasetto on 4/9/20.
@@ -9,7 +9,7 @@
 import UIKit
 import LoopKit
 
-public class InAppModalAlertIssuer: AlertIssuer {
+public class InAppModalAlertScheduler {
 
     private weak var alertPresenter: AlertPresenter?
     private weak var alertManagerResponder: AlertManagerResponder?
@@ -23,24 +23,20 @@ public class InAppModalAlertIssuer: AlertIssuer {
     typealias TimerFactoryFunction = (TimeInterval, Bool, (() -> Void)?) -> Timer
     private let newTimerFunc: TimerFactoryFunction
 
-    private let soundPlayer: AlertSoundPlayer
-
     init(alertPresenter: AlertPresenter?,
          alertManagerResponder: AlertManagerResponder,
-         soundPlayer: AlertSoundPlayer = DeviceAVSoundPlayer(),
          newActionFunc: @escaping ActionFactoryFunction = UIAlertAction.init,
          newTimerFunc: TimerFactoryFunction? = nil)
     {
         self.alertPresenter = alertPresenter
         self.alertManagerResponder = alertManagerResponder
-        self.soundPlayer = soundPlayer
         self.newActionFunc = newActionFunc
         self.newTimerFunc = newTimerFunc ?? { timeInterval, repeats, block in
             return Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: repeats) { _ in block?() }
         }
     }
 
-    public func issueAlert(_ alert: Alert) {
+    public func scheduleAlert(_ alert: Alert) {
         switch alert.trigger {
         case .immediate:
             show(alert: alert)
@@ -51,7 +47,7 @@ public class InAppModalAlertIssuer: AlertIssuer {
         }
     }
     
-    public func retractAlert(identifier: Alert.Identifier) {
+    public func unscheduleAlert(identifier: Alert.Identifier) {
         DispatchQueue.main.async {
             self.removePendingAlert(identifier: identifier)
             self.removePresentedAlert(identifier: identifier)
@@ -75,7 +71,7 @@ public class InAppModalAlertIssuer: AlertIssuer {
 }
 
 /// Private functions
-extension InAppModalAlertIssuer {
+extension InAppModalAlertScheduler {
 
     private func schedule(alert: Alert, interval: TimeInterval, repeats: Bool) {
         guard alert.foregroundContent != nil else {
@@ -113,7 +109,6 @@ extension InAppModalAlertIssuer {
             }
             self.alertPresenter?.present(alertController, animated: true) { [weak self] in
                 // the completion is called after the alert is presented
-                self?.playSound(for: alert)
                 self?.addPresentedAlert(alert: alert, controller: alertController)
             }
         }
@@ -155,21 +150,5 @@ extension InAppModalAlertIssuer {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertController.addAction(newActionFunc(action, .default, { _ in acknowledgeCompletion() }))
         return alertController
-    }
-
-    private func playSound(for alert: Alert) {
-        guard let sound = alert.sound else { return }
-        switch sound {
-        case .vibrate:
-            soundPlayer.vibrate()
-        case .silence:
-            break
-        default:
-            // Assuming in-app alerts should also vibrate.  That way, if the user has "silent mode" on, they still get
-            // some kind of haptic feedback
-            soundPlayer.vibrate()
-            guard let url = AlertManager.soundURL(for: alert) else { return }
-            soundPlayer.play(url: url)
-        }
     }
 }
