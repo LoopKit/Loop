@@ -203,7 +203,7 @@ public final class AlertManager {
             )
 
             let request = UNNotificationRequest(
-                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(failureInterval)",
+                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(minutes)",
                 content: notificationContent,
                 trigger: trigger
             )
