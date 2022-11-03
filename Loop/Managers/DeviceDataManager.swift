@@ -1137,6 +1137,10 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
             self.settingsManager.storeSettings()
         }
     }
+
+    func pumpManagerOnboarding(didPauseOnboarding pumpManager: PumpManagerUI) {
+        
+    }
 }
 
 // MARK: - AlertStoreDelegate
