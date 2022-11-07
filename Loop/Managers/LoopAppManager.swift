@@ -318,7 +318,15 @@ class LoopAppManager: NSObject {
 
     private static let defaultSupportedInterfaceOrientations = UIInterfaceOrientationMask.allButUpsideDown
 
-    var supportedInterfaceOrientations = defaultSupportedInterfaceOrientations
+    var supportedInterfaceOrientations = defaultSupportedInterfaceOrientations {
+        didSet {
+            if #available(iOS 16.0, *) {
+                rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+            } else {
+                // Fallback on earlier versions
+            }
+        }
+    }
 
     // MARK: - Background Tasks
 
