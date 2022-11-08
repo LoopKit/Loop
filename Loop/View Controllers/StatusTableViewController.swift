@@ -1406,7 +1406,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                                   activeServices: { [weak self] in self?.deviceManager.servicesManager.activeServices ?? [] },
                                                   delegate: self)
         let versionUpdateViewModel = VersionUpdateViewModel(supportManager: supportManager, guidanceColors: .default)
-        let viewModel = SettingsViewModel(alertPermissionsChecker: alertPermissionsChecker,
+        let viewModel = SettingsViewModel(alertPermissionsViewModel: AlertPermissionsViewModel(checker: alertPermissionsChecker),
                                           versionUpdateViewModel: versionUpdateViewModel,
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,

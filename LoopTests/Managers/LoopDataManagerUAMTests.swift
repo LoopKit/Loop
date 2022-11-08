@@ -15,33 +15,50 @@ import LoopKit
 class LoopDataManagerUAMTests: LoopDataManagerTests {    
     override func tearDownWithError() throws {
         loopDataManager.lastUAMNotificationDeliveryTime = nil
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = false
         try super.tearDownWithError()
     }
     
     func testNoUnannouncedMealLastNotificationTime() {
         setUp(for: .highAndRisingWithCOB)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
         
         let status = UnannouncedMealStatus.noUnannouncedMeal
         loopDataManager.manageMealNotifications(for: status)
+        
         XCTAssertNil(loopDataManager.lastUAMNotificationDeliveryTime)
     }
 
     func testUnannouncedMealUpdatesLastNotificationTime() {
         setUp(for: .highAndRisingWithCOB)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
         
         let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now)
         loopDataManager.manageMealNotifications(for: status)
+        
         XCTAssertEqual(loopDataManager.lastUAMNotificationDeliveryTime, now)
+    }
+    
+    func testUnannouncedMealWithoutNotificationsEnabled() {
+        setUp(for: .highAndRisingWithCOB)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = false
+        
+        let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now)
+        loopDataManager.manageMealNotifications(for: status)
+        
+        XCTAssertNil(loopDataManager.lastUAMNotificationDeliveryTime)
     }
 
     func testUnannouncedMealWithTooRecentNotificationTime() {
         setUp(for: .highAndRisingWithCOB)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
         
         let oldTime = now.addingTimeInterval(.hours(1))
         loopDataManager.lastUAMNotificationDeliveryTime = oldTime
         
         let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now)
         loopDataManager.manageMealNotifications(for: status)
+        
         XCTAssertEqual(loopDataManager.lastUAMNotificationDeliveryTime, oldTime)
     }
 }

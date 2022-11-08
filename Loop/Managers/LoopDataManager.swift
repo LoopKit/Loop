@@ -1457,7 +1457,8 @@ extension LoopDataManager {
         
         guard
             case .hasUnannouncedMeal(let startTime) = status,
-            !notificationTimeTooRecent
+            !notificationTimeTooRecent,
+            UserDefaults.standard.unannouncedMealNotificationsEnabled
         else {
             // No notification needed!
             return
