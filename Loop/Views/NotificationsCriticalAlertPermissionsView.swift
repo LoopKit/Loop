@@ -139,7 +139,7 @@ extension NotificationsCriticalAlertPermissionsView {
     }
     
     private var unannouncedMealAlertSection: some View {
-        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects that you may have forgotten to log a meal.", comment: "Description of unannounced meal notifications."))) {
+        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of unannounced meal notifications."))) {
             Toggle("Missed Meal Notifications", isOn: $viewModel.unannouncedMealNotificationsEnabled)
         }
     }

@@ -226,15 +226,11 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
 
-    static func removeExpiredMealNotifications(now: Date = Date(), completion: (() -> Void)? = nil) {
+    static func removeExpiredMealNotifications(now: Date = Date()) {
         let notificationCenter = UNUserNotificationCenter.current()
         var identifiersToRemove: [String] = []
         
-        notificationCenter.getDeliveredNotifications { notifications in
-            defer {
-                completion?()
-            }
-            
+        notificationCenter.getDeliveredNotifications { notifications in            
             for notification in notifications {
                 let request = notification.request
                 
