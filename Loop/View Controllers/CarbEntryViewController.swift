@@ -33,7 +33,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         return deviceManager.displayGlucoseUnitObservable.displayGlucoseUnit
     }
 
-    var maxQuantity = HKQuantity(unit: .gram(), doubleValue: 250)
+    var maxQuantity = HKQuantity(unit: .gram(), doubleValue: 99)
 
     /// Entry configuration values. Must be set before presenting.
     var absorptionTimePickerInterval = TimeInterval(minutes: 30)
