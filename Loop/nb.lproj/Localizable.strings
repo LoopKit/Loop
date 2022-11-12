@@ -144,7 +144,7 @@
 
 /* HUD row title for IOB
    The title of the Insulin On-Board graph */
-"Active Insulin" = "Aktivt insuling";
+"Active Insulin" = "Aktivt insulin";
 
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Legg til karbohydrater";
