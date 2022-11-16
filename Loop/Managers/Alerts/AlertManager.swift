@@ -37,7 +37,7 @@ public final class AlertManager {
 
     // Defer issuance of new alerts until playback is done
     private var deferredAlerts: [Alert] = []
-    private var playbackFinished: Bool = false
+    private var playbackFinished: Bool
 
     private let fileManager: FileManager
     private let alertPresenter: AlertPresenter
@@ -60,9 +60,11 @@ public final class AlertManager {
                 fileManager: FileManager = FileManager.default,
                 alertStore: AlertStore? = nil,
                 expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
-                bluetoothProvider: BluetoothProvider
+                bluetoothProvider: BluetoothProvider,
+                preventIssuanceBeforePlayback: Bool = true
     ) {
         self.fileManager = fileManager
+        playbackFinished = !preventIssuanceBeforePlayback
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
         let alertStoreDirectory = documentsDirectory?.appendingPathComponent("AlertStore")
         if let alertStoreDirectory = alertStoreDirectory {
