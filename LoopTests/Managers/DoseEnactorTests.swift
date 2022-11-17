@@ -42,6 +42,8 @@ class MockPumpManager: PumpManager {
 
     static var onboardingSupportedMaximumBolusVolumes: [Double] = [1,2,3]
     
+    let deliveryUnitsPerMinute = 1.5
+    
     var supportedBasalRates: [Double] = [1,2,3]
     
     var supportedBolusVolumes: [Double] = [1,2,3]
@@ -113,6 +115,10 @@ class MockPumpManager: PumpManager {
 
     func syncDeliveryLimits(limits deliveryLimits: DeliveryLimits, completion: @escaping (Result<DeliveryLimits, Error>) -> Void) {
 
+    }
+    
+    func estimatedDuration(toDeliver bolusUnits: Double) -> TimeInterval {
+        .minutes(bolusUnits / deliveryUnitsPerMinute)
     }
 
     var managerIdentifier: String = "MockPumpManager"

@@ -1056,8 +1056,6 @@ extension LoopDataManager {
 
             return (dosingDecision, nil)
         }
-        
-        generateUnannouncedMealNotificationIfNeeded(using: insulinCounteractionEffects)
 
         return updatePredictedGlucoseAndRecommendedDose(with: dosingDecision)
     }
@@ -1440,14 +1438,14 @@ extension LoopDataManager {
         )
     }
     
-    public func generateUnannouncedMealNotificationIfNeeded(using insulinCounteractionEffects: [GlucoseEffectVelocity]) {
+    public func generateUnannouncedMealNotificationIfNeeded(using insulinCounteractionEffects: [GlucoseEffectVelocity], pendingAutobolusUnits: Double? = nil) {
         carbStore.hasUnannouncedMeal(insulinCounteractionEffects: insulinCounteractionEffects) {[weak self] status in
-            self?.manageMealNotifications(for: status)
+            self?.manageMealNotifications(for: status, pendingAutobolusUnits: pendingAutobolusUnits)
         }
     }
 
     // Internal for unit testing
-    internal func manageMealNotifications(for status: UnannouncedMealStatus) {
+    internal func manageMealNotifications(for status: UnannouncedMealStatus, pendingAutobolusUnits: Double? = nil) {
         // We should remove expired notifications regardless of whether or not there was a meal
         NotificationManager.removeExpiredMealNotifications()
         
@@ -1465,8 +1463,21 @@ extension LoopDataManager {
         }
         
         logger.debug("Delivering a missed meal notification")
-        lastUAMNotificationDeliveryTime = now
-        NotificationManager.sendUnannouncedMealNotification(mealStart: startTime)
+
+        /// Coordinate the unannounced meal notification time with any pending autoboluses that `update` may have started
+        /// so that the user doesn't have to cancel the current autobolus to bolus in response to the missed meal notification
+        if
+            let pendingAutobolusUnits,
+            pendingAutobolusUnits > 0,
+            let estimatedBolusDuration = delegate?.loopDataManager(self, estimateBolusDuration: pendingAutobolusUnits),
+            estimatedBolusDuration < UAMSettings.maxNotificationDelay
+        {
+            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, delay: estimatedBolusDuration)
+            lastUAMNotificationDeliveryTime = now.advanced(by: estimatedBolusDuration)
+        } else {
+            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime)
+            lastUAMNotificationDeliveryTime = now
+        }
     }
 
     /// Generates a correction effect based on how large the discrepancy is between the current glucose and its model predicted value.
@@ -1693,6 +1704,9 @@ extension LoopDataManager {
     /// *This method should only be called from the `dataAccessQueue`*
     private func enactRecommendedAutomaticDose() -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+        
+        generateUnannouncedMealNotificationIfNeeded(using: insulinCounteractionEffects,
+                                                    pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits)
 
         guard let recommendedDose = self.recommendedAutomaticDose else {
             return nil
@@ -2118,7 +2132,14 @@ protocol LoopDataManagerDelegate: AnyObject {
     ///   - rate: The recommended rate in U/hr
     /// - Returns: a supported rate of delivery in Units/hr. The rate returned should not be larger than the passed in rate.
     func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double
-
+    
+    /// Asks the delegate to estimate the duration to deliver the bolus.
+    ///
+    /// - Parameters:
+    ///   - bolusUnits: size of the bolus in U
+    /// - Returns: the estimated time it will take to deliver bolus
+    func loopDataManager(_ manager: LoopDataManager, estimateBolusDuration bolusUnits: Double) -> TimeInterval?
+    
     /// Asks the delegate to round a recommended bolus volume to a supported volume
     ///
     /// - Parameters:

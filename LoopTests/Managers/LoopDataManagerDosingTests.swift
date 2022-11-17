@@ -12,6 +12,28 @@ import LoopKit
 @testable import LoopCore
 @testable import Loop
 
+class MockDelegate: LoopDataManagerDelegate {
+    let pumpManager = MockPumpManager()
+    
+    var bolusUnits: Double?
+    func loopDataManager(_ manager: Loop.LoopDataManager, estimateBolusDuration bolusUnits: Double) -> TimeInterval? {
+        self.bolusUnits = bolusUnits
+        return pumpManager.estimatedDuration(toDeliver: bolusUnits)
+    }
+    
+    var recommendation: AutomaticDoseRecommendation?
+    var error: LoopError?
+    func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), completion: @escaping (LoopError?) -> Void) {
+        self.recommendation = automaticDose.recommendation
+        completion(error)
+    }
+    func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double { unitsPerHour }
+    func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double { units }
+    var pumpManagerStatus: PumpManagerStatus?
+    var cgmManagerStatus: CGMManagerStatus?
+    var pumpStatusHighlight: DeviceStatusHighlight?
+}
+
 class LoopDataManagerDosingTests: LoopDataManagerTests {
     // MARK: Functions to load fixtures
     func loadGlucoseEffect(_ name: String) -> [GlucoseEffect] {
@@ -186,20 +208,6 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
 
         XCTAssertEqual(0, recommendedTempBasal!.unitsPerHour, accuracy: defaultAccuracy)
-    }
-    
-    class MockDelegate: LoopDataManagerDelegate {
-        var recommendation: AutomaticDoseRecommendation?
-        var error: LoopError?
-        func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), completion: @escaping (LoopError?) -> Void) {
-            self.recommendation = automaticDose.recommendation
-            completion(error)
-        }
-        func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double { unitsPerHour }
-        func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double { units }
-        var pumpManagerStatus: PumpManagerStatus?
-        var cgmManagerStatus: CGMManagerStatus?
-        var pumpStatusHighlight: DeviceStatusHighlight?
     }
 
     func waitOnDataQueue(timeout: TimeInterval = 1.0) {
