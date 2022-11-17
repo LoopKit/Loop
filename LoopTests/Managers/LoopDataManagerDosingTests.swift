@@ -16,9 +16,9 @@ class MockDelegate: LoopDataManagerDelegate {
     let pumpManager = MockPumpManager()
     
     var bolusUnits: Double?
-    func loopDataManager(_ manager: Loop.LoopDataManager, estimateBolusDuration bolusUnits: Double) -> TimeInterval? {
-        self.bolusUnits = bolusUnits
-        return pumpManager.estimatedDuration(toDeliver: bolusUnits)
+    func loopDataManager(_ manager: Loop.LoopDataManager, estimateBolusDuration units: Double) -> TimeInterval? {
+        self.bolusUnits = units
+        return pumpManager.estimatedDuration(toBolus: units)
     }
     
     var recommendation: AutomaticDoseRecommendation?
