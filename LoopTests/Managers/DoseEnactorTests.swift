@@ -117,8 +117,8 @@ class MockPumpManager: PumpManager {
 
     }
     
-    func estimatedDuration(toDeliver bolusUnits: Double) -> TimeInterval {
-        .minutes(bolusUnits / deliveryUnitsPerMinute)
+    func estimatedDuration(toBolus units: Double) -> TimeInterval {
+        .minutes(units / deliveryUnitsPerMinute)
     }
 
     var managerIdentifier: String = "MockPumpManager"
