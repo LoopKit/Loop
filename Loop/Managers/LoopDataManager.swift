@@ -2080,6 +2080,13 @@ protocol LoopDataManagerDelegate: AnyObject {
     /// - Returns: a supported rate of delivery in Units/hr. The rate returned should not be larger than the passed in rate.
     func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double
 
+    /// Asks the delegate to estimate the duration to deliver the bolus.
+    ///
+    /// - Parameters:
+    ///   - bolusUnits: size of the bolus in U
+    /// - Returns: the estimated time it will take to deliver bolus
+    func loopDataManager(_ manager: LoopDataManager, estimateBolusDuration bolusUnits: Double) -> TimeInterval?
+
     /// Asks the delegate to round a recommended bolus volume to a supported volume
     ///
     /// - Parameters:
