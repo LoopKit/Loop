@@ -11,6 +11,7 @@ import Combine
 import HealthKit
 import LoopKit
 import LoopCore
+import WidgetKit
 
 protocol PresetActivationObserver: AnyObject {
     func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration)
@@ -423,6 +424,11 @@ final class LoopDataManager {
         dosingDecisionStore.storeDosingDecision(dosingDecision) {}
 
         NotificationCenter.default.post(name: .LoopCompleted, object: self)
+        
+        // 5 second delay to allow stores to cache data before it is read by widget
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 
     private func loopDidError(date: Date, error: LoopError, dosingDecision: StoredDosingDecision, duration: TimeInterval) {
