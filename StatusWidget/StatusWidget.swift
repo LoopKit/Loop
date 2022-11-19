@@ -21,6 +21,8 @@ class StatusWidgetProvider: TimelineProvider {
 
     private let log = OSLog(category: "LoopWidgets")
 
+    static let stalenessAge = TimeInterval(minutes: 5)
+
     lazy var cacheStore = PersistenceController.controllerInAppGroupDirectory()
 
     lazy var localCacheDuration = Bundle.main.localCacheDuration
@@ -56,14 +58,21 @@ class StatusWidgetProvider: TimelineProvider {
         update { newEntry in
             var entries = [newEntry]
             var datesToRefreshWidget: [Date] = []
-            let nextLoopRefresh = newEntry.lastLoopCompleted?.addingTimeInterval(.minutes(5)) ?? Date().addingTimeInterval(.minutes(5))
 
+            // Dates Loop completion staleness changes
+            if let lastLoopCompleted = newEntry.lastLoopCompleted {
+                datesToRefreshWidget.append(lastLoopCompleted.addingTimeInterval(LoopCompletionFreshness.fresh.maxAge!+1)) // Turns yellow
+                datesToRefreshWidget.append(lastLoopCompleted.addingTimeInterval(LoopCompletionFreshness.aging.maxAge!+1)) // Turns red
+            }
+
+            // Date glucose staleness changes
             if let lastBGTime = newEntry.currentGlucose?.startDate {
-                let staleBgRefreshTime = lastBGTime.addingTimeInterval(.minutes(5))
+                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval+1)
                 datesToRefreshWidget.append(staleBgRefreshTime)
             }
 
-            datesToRefreshWidget.append(nextLoopRefresh)
+            // Date we mark entire widget stale
+            datesToRefreshWidget.append(newEntry.statusUpdatedAt.addingTimeInterval(StatusWidgetProvider.stalenessAge+1))
 
             for date in datesToRefreshWidget {
                 // Copy the previous entry but mark it as stale
@@ -175,7 +184,7 @@ struct StatusWidgetEntry: TimelineEntry {
     
     // Whether context data is old
     var isOld: Bool {
-        return (date - statusUpdatedAt).minutes >= 6
+        return (date - statusUpdatedAt) >= StatusWidgetProvider.stalenessAge
     }
 
     var glucoseIsStale: Bool {
