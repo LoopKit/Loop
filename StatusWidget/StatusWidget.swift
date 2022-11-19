@@ -43,7 +43,7 @@ class StatusWidgetProvider: TimelineProvider {
     func placeholder(in context: Context) -> StatusWidgetEntry {
         log.default("%{public}@: context=%{public}@", #function, String(describing: context))
 
-        return StatusWidgetEntry(date: Date(), statusUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, previousGlucose: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil)
+        return StatusWidgetEntry(date: Date(), statusUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, delta: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StatusWidgetEntry) -> ()) {
@@ -107,9 +107,12 @@ class StatusWidgetProvider: TimelineProvider {
             }
             group.leave()
         }
-
         group.notify(queue: .main) {
-            guard let defaults = self.defaults, let context = defaults.statusExtensionContext, let contextUpdatedAt = context.createdAt else {
+            guard let defaults = self.defaults,
+                  let context = defaults.statusExtensionContext,
+                  let contextUpdatedAt = context.createdAt,
+                  let unit = self.glucoseStore.preferredUnit
+            else {
                 return
             }
             
@@ -119,28 +122,25 @@ class StatusWidgetProvider: TimelineProvider {
             
             let netBasal = context.netBasal
             
-            var currentGlucose = glucose.last
+            let currentGlucose = glucose.last
             var previousGlucose: GlucoseValue?
+
             if glucose.count > 1 {
                 previousGlucose = glucose[glucose.count - 2]
             }
-            
-            // Making sure that last glucose is not old
-            if let currGlucose = currentGlucose, currGlucose.startDate.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval) < Date() {
-                currentGlucose = nil
-                previousGlucose = nil
-            }
-            
+
+            var delta: HKQuantity?
+
             // Making sure that previous glucose is within 5 mins of last glucose to avoid large deltas on sensor changes, missed readings, etc.
             if let prevGlucose = previousGlucose,
                let currGlucose = currentGlucose,
-               abs((prevGlucose.startDate.addingTimeInterval(.minutes(5)) - currGlucose.startDate).minutes) > 1 {
-                previousGlucose = nil
+               abs((prevGlucose.startDate.addingTimeInterval(.minutes(5)) - currGlucose.startDate).minutes) > 1
+            {
+                let deltaMGDL = currGlucose.quantity.doubleValue(for: .milligramsPerDeciliter) - prevGlucose.quantity.doubleValue(for: .milligramsPerDeciliter)
+                delta = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: deltaMGDL)
             }
 
             let predictedGlucose = context.predictedGlucose?.samples
-            
-            let unit = context.predictedGlucose?.unit
             
             let eventualGlucose = predictedGlucose?.last
 
@@ -150,7 +150,7 @@ class StatusWidgetProvider: TimelineProvider {
                 lastLoopCompleted: lastCompleted,
                 closeLoop: closeLoop,
                 currentGlucose: currentGlucose,
-                previousGlucose: previousGlucose,
+                delta: delta,
                 unit: unit,
                 sensor: context.glucoseDisplay,
                 netBasal: netBasal,
@@ -174,7 +174,7 @@ struct StatusWidgetEntry: TimelineEntry {
     let closeLoop: Bool
     
     let currentGlucose: GlucoseValue?
-    let previousGlucose: GlucoseValue?
+    let delta: HKQuantity?
     let unit: HKUnit?
     var sensor: GlucoseDisplayableContext?
     
