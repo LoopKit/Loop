@@ -78,6 +78,7 @@ class LoopAppManager: NSObject {
     private var state: State = .initialize
 
     private let log = DiagnosticLog(category: "LoopAppManager")
+    private let widgetLog = DiagnosticLog(category: "LoopWidgets")
 
     private let closedLoopStatus = ClosedLoopStatus(isClosedLoop: false, isClosedLoopAllowed: false)
 
@@ -267,7 +268,7 @@ class LoopAppManager: NSObject {
         deviceDataManager?.didBecomeActive()
         alertManager.inferDeliveredLoopNotRunningNotifications()
         
-        log.default("Refreshing widget. Reason: App didBecomeActive")
+        widgetLog.default("Refreshing widget. Reason: App didBecomeActive")
         WidgetCenter.shared.reloadAllTimelines()
     }
 

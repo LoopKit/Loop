@@ -42,6 +42,7 @@ final class LoopDataManager {
     weak var delegate: LoopDataManagerDelegate?
 
     private let logger = DiagnosticLog(category: "LoopDataManager")
+    private let widgetLog = DiagnosticLog(category: "LoopWidgets")
 
     private let analyticsServicesManager: AnalyticsServicesManager
 
@@ -424,11 +425,6 @@ final class LoopDataManager {
         dosingDecisionStore.storeDosingDecision(dosingDecision) {}
 
         NotificationCenter.default.post(name: .LoopCompleted, object: self)
-        
-        // 5 second delay to allow stores to cache data before it is read by widget
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            WidgetCenter.shared.reloadAllTimelines()
-        }
     }
 
     private func loopDidError(date: Date, error: LoopError, dosingDecision: StoredDosingDecision, duration: TimeInterval) {
@@ -809,6 +805,12 @@ extension LoopDataManager {
 
         logger.default("Loop ended")
         notify(forChange: .loopFinished)
+
+        // 5 second delay to allow stores to cache data before it is read by widget
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            self.widgetLog.default("Refreshing widget. Reason: Loop completed")
+            WidgetCenter.shared.reloadAllTimelines()
+        }
 
         updateRecommendedManualBolus()
     }

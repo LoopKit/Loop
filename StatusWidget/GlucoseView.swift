@@ -24,12 +24,12 @@ struct GlucoseView: View {
                             .font(.system(size: 24, weight: .heavy, design: .default))
                     }
                     else {
-                        Text("--")
+                        Text("??")
                             .font(.system(size: 24, weight: .heavy, design: .default))
                     }
                 }
                 else {
-                    Text("--")
+                    Text("---")
                         .font(.system(size: 24, weight: .heavy, design: .default))
                 }
                 
@@ -52,6 +52,7 @@ struct GlucoseView: View {
                 // Dynamic text causes string to be cut off
                     .font(.system(size: 13))
                     .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .fixedSize(horizontal: true, vertical: true)
             }
             else {
                 Text(unitString)
