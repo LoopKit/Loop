@@ -9,6 +9,7 @@
 import SwiftUI
 import LoopKit
 import HealthKit
+import LoopCore
 
 struct GlucoseView: View {
     var entry: StatusWidgetEntry
@@ -16,20 +17,23 @@ struct GlucoseView: View {
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             HStack(spacing: 2) {
-                if let quantity = entry.currentGlucose?.quantity,
-                   let unit = entry.unit {
+                if let glucose = entry.currentGlucose,
+                   entry.date.timeIntervalSince(glucose.startDate) < LoopCoreConstants.inputDataRecencyInterval,
+                   let unit = entry.unit
+                {
+                    let quantity = glucose.quantity
                     let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
                     if let glucoseString = glucoseFormatter.string(from: quantity.doubleValue(for: unit)) {
                         Text(glucoseString)
                             .font(.system(size: 24, weight: .heavy, design: .default))
                     }
                     else {
-                        Text("--")
+                        Text("??")
                             .font(.system(size: 24, weight: .heavy, design: .default))
                     }
                 }
                 else {
-                    Text("--")
+                    Text("---")
                         .font(.system(size: 24, weight: .heavy, design: .default))
                 }
                 
@@ -42,16 +46,16 @@ struct GlucoseView: View {
             .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : .primary)
             
             let unitString = entry.unit == nil ? "-" : entry.unit!.localizedShortUnitString
-            if let previousGlucose = entry.previousGlucose,
-               let currentGlucose = entry.currentGlucose,
-               let unit = entry.unit {
+            if let delta = entry.delta, let unit = entry.unit {
+                let deltaValue = delta.doubleValue(for: unit)
                 let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
-                let deltaString = (previousGlucose.quantity > currentGlucose.quantity ? "-" : "+") + (numberFormatter.string(from: abs(previousGlucose.quantity.doubleValue(for: unit) - currentGlucose.quantity.doubleValue(for: unit))) ?? "")
+                let deltaString = (deltaValue < 0 ? "-" : "+") + numberFormatter.string(from: abs(deltaValue))!
                 
                 Text(deltaString + " " + unitString)
                 // Dynamic text causes string to be cut off
                     .font(.system(size: 13))
                     .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .fixedSize(horizontal: true, vertical: true)
             }
             else {
                 Text(unitString)

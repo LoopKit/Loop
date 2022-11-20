@@ -6,6 +6,7 @@
 //  Copyright © 2022 LoopKit Authors. All rights reserved.
 //
 
+import os.log
 import WidgetKit
 import SwiftUI
 import LoopKit
@@ -17,6 +18,10 @@ class StatusWidgetProvider: TimelineProvider {
     lazy var defaults = UserDefaults.appGroup
     
     lazy var healthStore = HKHealthStore()
+
+    private let log = OSLog(category: "LoopWidgets")
+
+    static let stalenessAge = TimeInterval(minutes: 5)
 
     lazy var cacheStore = PersistenceController.controllerInAppGroupDirectory()
 
@@ -36,30 +41,41 @@ class StatusWidgetProvider: TimelineProvider {
     )
 
     func placeholder(in context: Context) -> StatusWidgetEntry {
-        return StatusWidgetEntry(date: Date(), originalDate: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, previousGlucose: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil)
+        log.default("%{public}@: context=%{public}@", #function, String(describing: context))
+
+        return StatusWidgetEntry(date: Date(), statusUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, delta: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StatusWidgetEntry) -> ()) {
+        log.default("%{public}@: context=%{public}@", #function, String(describing: context))
         update { newEntry in
             completion(newEntry)
         }
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<StatusWidgetEntry>) -> ()) {
+        log.default("%{public}@: context=%{public}@", #function, String(describing: context))
         update { newEntry in
             var entries = [newEntry]
             var datesToRefreshWidget: [Date] = []
-            let nextLoopRefresh = newEntry.lastLoopCompleted?.addingTimeInterval(.minutes(5)) ?? Date().addingTimeInterval(.minutes(5))
 
+            // Dates Loop completion staleness changes
+            if let lastLoopCompleted = newEntry.lastLoopCompleted {
+                datesToRefreshWidget.append(lastLoopCompleted.addingTimeInterval(LoopCompletionFreshness.fresh.maxAge!+1)) // Turns yellow
+                datesToRefreshWidget.append(lastLoopCompleted.addingTimeInterval(LoopCompletionFreshness.aging.maxAge!+1)) // Turns red
+            }
+
+            // Date glucose staleness changes
             if let lastBGTime = newEntry.currentGlucose?.startDate {
-                let staleBgRefreshTime = lastBGTime.addingTimeInterval(.minutes(5))
+                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval+1)
                 datesToRefreshWidget.append(staleBgRefreshTime)
             }
 
-            datesToRefreshWidget.append(nextLoopRefresh)
+            // Date we mark entire widget stale
+            datesToRefreshWidget.append(newEntry.statusUpdatedAt.addingTimeInterval(StatusWidgetProvider.stalenessAge+1))
 
             for date in datesToRefreshWidget {
-                // Copy the previous entry but mark it as old but mark it as stale
+                // Copy the previous entry but mark it as stale
                 var copiedEntry = newEntry
                 copiedEntry.date = date
                 entries.append(copiedEntry)
@@ -67,6 +83,7 @@ class StatusWidgetProvider: TimelineProvider {
                                 
             let nextHour = Date().addingTimeInterval(.hours(1))
             let timeline = Timeline(entries: entries, policy: .after(nextHour))
+            self.log.default("Returning timeline: %{public}@", String(describing: datesToRefreshWidget))
             completion(timeline)
         }
     }
@@ -82,15 +99,20 @@ class StatusWidgetProvider: TimelineProvider {
         glucoseStore.getGlucoseSamples(start: startDate) { (result) in
             switch result {
             case .failure:
+                self.log.error("Failed to fetch glucose after %{public}@", String(describing: startDate))
                 glucose = []
             case .success(let samples):
+                self.log.default("Fetched glucose: last = %{public}@, %{public}@", String(describing: samples.last?.startDate), String(describing: samples.last?.quantity))
                 glucose = samples
             }
             group.leave()
         }
-
         group.notify(queue: .main) {
-            guard let defaults = self.defaults, let context = defaults.statusExtensionContext else {
+            guard let defaults = self.defaults,
+                  let context = defaults.statusExtensionContext,
+                  let contextUpdatedAt = context.createdAt,
+                  let unit = self.glucoseStore.preferredUnit
+            else {
                 return
             }
             
@@ -100,45 +122,44 @@ class StatusWidgetProvider: TimelineProvider {
             
             let netBasal = context.netBasal
             
-            var currentGlucose = glucose.last
+            let currentGlucose = glucose.last
             var previousGlucose: GlucoseValue?
+
             if glucose.count > 1 {
                 previousGlucose = glucose[glucose.count - 2]
             }
-            
-            // Making sure that last glucose is not old
-            if let currGlucose = currentGlucose, currGlucose.startDate.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval) < Date() {
-                currentGlucose = nil
-                previousGlucose = nil
-            }
-            
+
+            var delta: HKQuantity?
+
             // Making sure that previous glucose is within 5 mins of last glucose to avoid large deltas on sensor changes, missed readings, etc.
             if let prevGlucose = previousGlucose,
                let currGlucose = currentGlucose,
-               abs((prevGlucose.startDate.addingTimeInterval(.minutes(5)) - currGlucose.startDate).minutes) > 1 {
-                previousGlucose = nil
+               abs((prevGlucose.startDate.addingTimeInterval(.minutes(5)) - currGlucose.startDate).minutes) > 1
+            {
+                let deltaMGDL = currGlucose.quantity.doubleValue(for: .milligramsPerDeciliter) - prevGlucose.quantity.doubleValue(for: .milligramsPerDeciliter)
+                delta = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: deltaMGDL)
             }
 
             let predictedGlucose = context.predictedGlucose?.samples
             
-            let unit = context.predictedGlucose?.unit
-            
             let eventualGlucose = predictedGlucose?.last
-            
-            completion(
-                StatusWidgetEntry(
-                    date: Date(),
-                    originalDate: Date(),
-                    lastLoopCompleted: lastCompleted,
-                    closeLoop: closeLoop,
-                    currentGlucose: currentGlucose,
-                    previousGlucose: previousGlucose,
-                    unit: unit,
-                    sensor: context.glucoseDisplay,
-                    netBasal: netBasal,
-                    eventualGlucose: eventualGlucose
-                )
+
+            let entry = StatusWidgetEntry(
+                date: Date(),
+                statusUpdatedAt: contextUpdatedAt,
+                lastLoopCompleted: lastCompleted,
+                closeLoop: closeLoop,
+                currentGlucose: currentGlucose,
+                delta: delta,
+                unit: unit,
+                sensor: context.glucoseDisplay,
+                netBasal: netBasal,
+                eventualGlucose: eventualGlucose
             )
+
+            self.log.default("StatusWidgetEntry = %{public}@", String(describing: entry))
+
+            completion(entry)
         }
     }
 }
@@ -147,13 +168,13 @@ class StatusWidgetProvider: TimelineProvider {
 struct StatusWidgetEntry: TimelineEntry {
     var date: Date
     
-    let originalDate: Date
+    let statusUpdatedAt: Date
     
     let lastLoopCompleted: Date?
     let closeLoop: Bool
     
     let currentGlucose: GlucoseValue?
-    let previousGlucose: GlucoseValue?
+    let delta: HKQuantity?
     let unit: HKUnit?
     var sensor: GlucoseDisplayableContext?
     
@@ -161,27 +182,18 @@ struct StatusWidgetEntry: TimelineEntry {
     
     let eventualGlucose: GlucoseContext?
     
-    // For marking old entries as stale
-    var minsOld: Double {
-        guard let lastLoopCompleted = lastLoopCompleted else {
-            return 5
-        }
-        return (date - lastLoopCompleted).minutes
-    }
-    
+    // Whether context data is old
     var isOld: Bool {
-        return minsOld >= 5
+        return (date - statusUpdatedAt) >= StatusWidgetProvider.stalenessAge
     }
-    
-    var glucoseMinsOld: Double {
-        guard let glucoseDate = currentGlucose?.startDate else {
-            return 5
-        }
-        return (date - glucoseDate).minutes
-    }
-    
+
     var glucoseIsStale: Bool {
-        return glucoseMinsOld >= 5
+        guard let glucoseDate = currentGlucose?.startDate else {
+            return true
+        }
+        let glucoseAge = date - glucoseDate
+
+        return glucoseAge >= LoopCoreConstants.inputDataRecencyInterval
     }
 }
 
@@ -258,7 +270,7 @@ struct SmallStatusWidget: Widget {
             SmallStatusWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Loop Status Widget")
-        .description("This widget displays your status.")
+        .description("See your current blood glucose and insulin delivery.")
         .supportedFamilies([.systemSmall])
     }
 }
