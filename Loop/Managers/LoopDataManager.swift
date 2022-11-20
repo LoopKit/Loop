@@ -770,12 +770,12 @@ extension LoopDataManager {
                 self.lastLoopCompleted = Date()
             }
 
-
             // Partial application factor assumes 5 minute intervals. If our looping intervals are shorter, then this will be adjusted
             self.timeBasedDoseApplicationFactor = 1.0
             if let lastLoopCompleted = self.lastLoopCompleted {
                 let timeSinceLastLoop = max(0, Date().timeIntervalSince(lastLoopCompleted))
                 self.timeBasedDoseApplicationFactor = min(1, timeSinceLastLoop/TimeInterval.minutes(5))
+                self.logger.default("Looping with timeBasedDoseApplicationFactor = %{public}@", String(describing: self.timeBasedDoseApplicationFactor))
             }
 
             self.logger.default("Loop running")
