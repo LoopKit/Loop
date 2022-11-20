@@ -61,6 +61,8 @@ final class LoopDataManager {
 
     weak var presetActivationObserver: PresetActivationObserver?
 
+    private var timeBasedDoseApplicationFactor: Double = 1.0
+
     deinit {
         for observer in notificationObservers {
             NotificationCenter.default.removeObserver(observer)
@@ -767,12 +769,13 @@ extension LoopDataManager {
                 self.logger.error("Detected future lastLoopCompleted. Restoring.")
                 self.lastLoopCompleted = Date()
             }
-            
-            // Ensure Loop does not happen more than once every 4.5 minutes; this is important for correct usage of automatic bolus
-            // partial application factor
-            if let lastLoopCompleted = self.lastLoopCompleted, Date().timeIntervalSince(lastLoopCompleted) < TimeInterval(minutes: 4.5) {
-                self.logger.default("Skipping loop() attempt as last loop completed at %{public}@", String(describing: lastLoopCompleted))
-                return
+
+
+            // Partial application factor assumes 5 minute intervals. If our looping intervals are shorter, then this will be adjusted
+            self.timeBasedDoseApplicationFactor = 1.0
+            if let lastLoopCompleted = self.lastLoopCompleted {
+                let timeSinceLastLoop = max(0, Date().timeIntervalSince(lastLoopCompleted))
+                self.timeBasedDoseApplicationFactor = min(1, timeSinceLastLoop/TimeInterval.minutes(5))
             }
 
             self.logger.default("Loop running")
@@ -1618,7 +1621,7 @@ extension LoopDataManager {
                     model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
                     basalRates: basalRates!,
                     maxAutomaticBolus: maxBolus! * LoopConstants.bolusPartialApplicationFactor,
-                    partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor,
+                    partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor * self.timeBasedDoseApplicationFactor,
                     lastTempBasal: lastTempBasal,
                     volumeRounder: volumeRounder,
                     rateRounder: rateRounder,
