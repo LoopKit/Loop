@@ -73,6 +73,8 @@ final class ExtensionDataManager {
         deviceManager.loopManager.getLoopState { (manager, state) in
             let dataManager = self.deviceManager
             var context = StatusExtensionContext()
+
+            context.createdAt = Date()
         
             #if IOS_SIMULATOR
                 // If we're in the simulator, there's a higher likelihood that we don't have

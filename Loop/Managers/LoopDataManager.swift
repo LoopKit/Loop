@@ -11,6 +11,7 @@ import Combine
 import HealthKit
 import LoopKit
 import LoopCore
+import WidgetKit
 
 protocol PresetActivationObserver: AnyObject {
     func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration)
@@ -41,6 +42,7 @@ final class LoopDataManager {
     weak var delegate: LoopDataManagerDelegate?
 
     private let logger = DiagnosticLog(category: "LoopDataManager")
+    private let widgetLog = DiagnosticLog(category: "LoopWidgets")
 
     private let analyticsServicesManager: AnalyticsServicesManager
 
@@ -811,6 +813,12 @@ extension LoopDataManager {
 
         logger.default("Loop ended")
         notify(forChange: .loopFinished)
+
+        // 5 second delay to allow stores to cache data before it is read by widget
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            self.widgetLog.default("Refreshing widget. Reason: Loop completed")
+            WidgetCenter.shared.reloadAllTimelines()
+        }
 
         updateRecommendedManualBolus()
     }

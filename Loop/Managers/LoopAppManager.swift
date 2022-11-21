@@ -13,6 +13,7 @@ import LoopKit
 import LoopKitUI
 import MockKit
 import HealthKit
+import WidgetKit
 
 public protocol AlertPresenter: AnyObject {
     /// Present the alert view controller, with or without animation.
@@ -77,6 +78,7 @@ class LoopAppManager: NSObject {
     private var state: State = .initialize
 
     private let log = DiagnosticLog(category: "LoopAppManager")
+    private let widgetLog = DiagnosticLog(category: "LoopWidgets")
 
     private let closedLoopStatus = ClosedLoopStatus(isClosedLoop: false, isClosedLoopAllowed: false)
 
@@ -265,6 +267,9 @@ class LoopAppManager: NSObject {
         settingsManager?.didBecomeActive()
         deviceDataManager?.didBecomeActive()
         alertManager.inferDeliveredLoopNotRunningNotifications()
+        
+        widgetLog.default("Refreshing widget. Reason: App didBecomeActive")
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Remote Notification
