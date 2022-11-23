@@ -9,33 +9,33 @@
 import SwiftUI
 
 struct BasalView: View {
-    var entry: StatusWidgetEntry
+    let netBasal: NetBasalContext
+    let isOld: Bool
+
     
     var body: some View {
-        let percent = entry.netBasal?.percentage
-        let rate = entry.netBasal?.rate
+        let percent = netBasal.percentage
+        let rate = netBasal.rate
         
         VStack(spacing: 1) {
-            if percent != nil {
-                BasalRateView(percent: percent!)
-                    .overlay(
-                        BasalRateView(percent: percent!)
-                            .stroke(entry.isOld ? Color(UIColor.systemGray3) : Color("insulin"), lineWidth: 2)
-                    )
-                    .foregroundColor((entry.isOld ? Color(UIColor.systemGray3) : Color("insulin")).opacity(0.5))
-                    .frame(width: 44, height: 22)
-            }
-            
+            BasalRateView(percent: percent)
+                .overlay(
+                    BasalRateView(percent: percent)
+                        .stroke(isOld ? Color(UIColor.systemGray3) : Color("insulin"), lineWidth: 2)
+                )
+                .foregroundColor((isOld ? Color(UIColor.systemGray3) : Color("insulin")).opacity(0.5))
+                .frame(width: 44, height: 22)
+
             if let rate = rate,
                 let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
                 Text("\(rateString) U")
                     .font(.footnote)
-                    .foregroundColor(Color(entry.isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
+                    .foregroundColor(Color(isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
             }
             else {
                 Text("-U")
                     .font(.footnote)
-                    .foregroundColor(Color(entry.isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
+                    .foregroundColor(Color(isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
             }
         }
     }

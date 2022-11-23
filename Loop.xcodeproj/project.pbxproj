@@ -525,6 +525,7 @@
 		C1E3862628247C6100F561A4 /* StoredLoopNotRunningNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */; };
 		C1E3DC4728595FAA00CA19FF /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; };
 		C1E3DC4928595FAA00CA19FF /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		C1E71723292E918F00DA646F /* SmallStatusWidgetEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E71721292E90CC00DA646F /* SmallStatusWidgetEntryView.swift */; };
 		C1EF747228D6A44A00C8C083 /* CrashRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */; };
 		C1F00C60285A802A006302C5 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; };
 		C1F00C78285A8256006302C5 /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -1487,6 +1488,7 @@
 		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
 		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MKRingProgressView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredLoopNotRunningNotification.swift; sourceTree = "<group>"; };
+		C1E71721292E90CC00DA646F /* SmallStatusWidgetEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallStatusWidgetEntryView.swift; sourceTree = "<group>"; };
 		C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashRecoveryManager.swift; sourceTree = "<group>"; };
 		C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileExpirationAlerter.swift; sourceTree = "<group>"; };
 		C1F7822527CC056900C0919A /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
@@ -1727,13 +1729,14 @@
 		14B1736128AED9EC006CCD7C /* StatusWidget */ = {
 			isa = PBXGroup;
 			children = (
-				14B1736D28AEDA63006CCD7C /* StatusWidgetExtension.entitlements */,
+				14B1736428AED9EE006CCD7C /* Assets.xcassets */,
 				14B1736E28AEDBF6006CCD7C /* BasalView.swift */,
 				14B1737028AEDBF6006CCD7C /* GlucoseView.swift */,
-				14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */,
-				14B1736F28AEDBF6006CCD7C /* StatusWidget.swift */,
-				14B1736428AED9EE006CCD7C /* Assets.xcassets */,
 				14B1736628AED9EE006CCD7C /* Info.plist */,
+				14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */,
+				C1E71721292E90CC00DA646F /* SmallStatusWidgetEntryView.swift */,
+				14B1736F28AEDBF6006CCD7C /* StatusWidget.swift */,
+				14B1736D28AEDA63006CCD7C /* StatusWidgetExtension.entitlements */,
 			);
 			path = StatusWidget;
 			sourceTree = "<group>";
@@ -3511,6 +3514,7 @@
 				14B1738128AEDC70006CCD7C /* StatusExtensionContext.swift in Sources */,
 				14B1737628AEDC6C006CCD7C /* HKUnit.swift in Sources */,
 				14B1737728AEDC6C006CCD7C /* NSBundle.swift in Sources */,
+				C1E71723292E918F00DA646F /* SmallStatusWidgetEntryView.swift in Sources */,
 				14B1737828AEDC6C006CCD7C /* NSTimeInterval.swift in Sources */,
 				14B1737928AEDC6C006CCD7C /* NSUserDefaults+StatusExtension.swift in Sources */,
 				14B1737A28AEDC6C006CCD7C /* NumberFormatter.swift in Sources */,

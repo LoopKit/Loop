@@ -12,7 +12,6 @@ import SwiftUI
 import LoopKit
 import LoopCore
 import HealthKit
-import CoreData
 
 class StatusWidgetProvider: TimelineProvider {
     lazy var defaults = UserDefaults.appGroup
@@ -43,7 +42,7 @@ class StatusWidgetProvider: TimelineProvider {
     func placeholder(in context: Context) -> StatusWidgetEntry {
         log.default("%{public}@: context=%{public}@", #function, String(describing: context))
 
-        return StatusWidgetEntry(date: Date(), statusUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, delta: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil)
+        return StatusWidgetEntry(date: Date(), statusUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, delta: nil, unit: .milligramsPerDeciliter, sensor: nil, pumpHighlight: nil, netBasal: nil, eventualGlucose: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StatusWidgetEntry) -> ()) {
@@ -153,11 +152,13 @@ class StatusWidgetProvider: TimelineProvider {
                 delta: delta,
                 unit: unit,
                 sensor: context.glucoseDisplay,
+                pumpHighlight: context.pumpStatusHighlightContext,
                 netBasal: netBasal,
                 eventualGlucose: eventualGlucose
             )
 
             self.log.default("StatusWidgetEntry = %{public}@", String(describing: entry))
+            self.log.default("pumpHighlight = %{public}@", String(describing: entry.pumpHighlight))
 
             completion(entry)
         }
@@ -176,8 +177,9 @@ struct StatusWidgetEntry: TimelineEntry {
     let currentGlucose: GlucoseValue?
     let delta: HKQuantity?
     let unit: HKUnit?
-    var sensor: GlucoseDisplayableContext?
-    
+    let sensor: GlucoseDisplayableContext?
+
+    let pumpHighlight: DeviceStatusHighlightContext?
     let netBasal: NetBasalContext?
     
     let eventualGlucose: GlucoseContext?
@@ -200,64 +202,6 @@ struct StatusWidgetEntry: TimelineEntry {
 extension Date {
     static func - (lhs: Date, rhs: Date) -> TimeInterval {
         return lhs.timeIntervalSinceReferenceDate - rhs.timeIntervalSinceReferenceDate
-    }
-}
-
-struct SmallStatusWidgetEntryView : View {
-    var entry: StatusWidgetProvider.Entry
-
-    var body: some View {
-        VStack(alignment: .center, spacing: 5) {
-            HStack(alignment: .center) {
-                LoopCircleView(entry: entry)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                // There is a SwiftUI bug which causes view not to be padded correctly when using .border
-                // Added padding to counteract the width of the border
-                    .padding(.leading, 8)
-                
-                GlucoseView(entry: entry)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .padding(5)
-            .background(
-                ContainerRelativeShape()
-                    .fill(Color("WidgetSecondaryBackground"))
-            )
-                        
-            HStack(alignment: .center) {
-                BasalView(entry: entry)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                
-                if let eventualGlucose = entry.eventualGlucose {
-                    let glucoseFormatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
-                    if let glucoseString = glucoseFormatter.string(from: eventualGlucose.quantity.doubleValue(for: eventualGlucose.unit)) {
-                        VStack {
-                            Text("Eventual")
-                            .font(.footnote)
-                            .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
-                            
-                            Text("\(glucoseString)")
-                                .font(.subheadline)
-                                .fontWeight(.heavy)
-                            
-                            Text(eventualGlucose.unit.shortLocalizedUnitString())
-                                .font(.footnote)
-                                .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                }
-            }
-            .frame(maxHeight: .infinity, alignment: .center)
-            .padding(5)
-            .background(
-                ContainerRelativeShape()
-                    .fill(Color("WidgetSecondaryBackground"))
-            )
-        }
-        .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : nil)
-        .padding(5)
-        .background(Color("WidgetBackground"))
     }
 }
 
