@@ -490,7 +490,7 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                                                     startDate: mealTime,
                                                     foodType: nil,
                                                     absorptionTime: nil)
-                carbActivity.update(from: unannouncedEntry)
+                carbActivity.update(from: unannouncedEntry, isUnannouncedMeal: true)
             }
             
             rootViewController?.restoreUserActivityState(carbActivity)

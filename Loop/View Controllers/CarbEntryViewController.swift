@@ -13,6 +13,20 @@ import LoopKitUI
 import LoopCore
 import LoopUI
 
+private enum CarbEntryWarning: Equatable {
+    case rateOfChange
+    case unannouncedMeal
+    
+    var description: String {
+        switch self {
+        case .rateOfChange:
+            return NSLocalizedString("Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating.", comment: "Warning to ensure the carb entry is accurate")
+        case .unannouncedMeal:
+            return NSLocalizedString("Loop has detected an unannounced meal and estimated its size. Edit the carb amount to match the amount of any carbs you may have eaten.", comment: "Warning displayed when user is adding a meal from an unannounced meal notification")
+        }
+    }
+}
+
 final class CarbEntryViewController: LoopChartsTableViewController, IdentifiableClass {
 
     var navigationDelegate = CarbEntryNavigationDelegate()
@@ -107,10 +121,10 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     private var shouldBeginEditingQuantity = true
 
     private var shouldBeginEditingFoodType = false
-    
-    private var shouldDisplayAccurateCarbEntryWarning = false {
+
+    private var carbEntryWarning: CarbEntryWarning? = nil {
         didSet {
-            if shouldDisplayAccurateCarbEntryWarning != oldValue {
+            if carbEntryWarning != oldValue {
                 self.displayAccuracyWarning()
             }
         }
@@ -183,7 +197,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        if shouldBeginEditingQuantity, let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.value.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))) as? DecimalTextFieldTableViewCell {
+        if shouldBeginEditingQuantity, let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.value.rawValue, section: Sections.indexForDetailsSection(warningSection: carbEntryWarning))) as? DecimalTextFieldTableViewCell {
             shouldBeginEditingQuantity = false
             cell.textField.becomeFirstResponder()
         }
@@ -223,30 +237,51 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             DispatchQueue.main.async {
                 switch result {
                 case .failure:
-                    self?.shouldDisplayAccurateCarbEntryWarning = false
+                    self?.removeRateOfChangeCarbWarning()
                 case .success(let samples):
                     let filteredSamples = samples.filterDateRange(startDate, now)
                     guard let startSample = filteredSamples.first, let endSample = filteredSamples.last else {
-                        self?.shouldDisplayAccurateCarbEntryWarning = false
+                        self?.removeRateOfChangeCarbWarning()
                         return
                     }
                     let duration = endSample.startDate.timeIntervalSince(startSample.startDate)
                     guard duration >= LoopConstants.missedMealWarningVelocitySampleMinDuration else {
-                        self?.shouldDisplayAccurateCarbEntryWarning = false
+                        self?.removeRateOfChangeCarbWarning()
                         return
                     }
                     let delta = endSample.quantity.doubleValue(for: .milligramsPerDeciliter) - startSample.quantity.doubleValue(for: .milligramsPerDeciliter)
                     let velocity = delta / duration.minutes // Unit = mg/dL/m
-                    self?.shouldDisplayAccurateCarbEntryWarning = velocity > LoopConstants.missedMealWarningGlucoseRiseThreshold
+                    
+                    if velocity > LoopConstants.missedMealWarningGlucoseRiseThreshold {
+                        self?.addRateOfChangeCarbWarning()
+                    } else {
+                        self?.removeRateOfChangeCarbWarning()
+                    }
                 }
             }
+        }
+    }
+    
+    private func addRateOfChangeCarbWarning() {
+        /// UAM should have display priority over a rate of change warning
+        if let carbEntryWarning, carbEntryWarning == .unannouncedMeal {
+            return
+        }
+        
+        self.carbEntryWarning = .rateOfChange
+    }
+    
+    private func removeRateOfChangeCarbWarning() {
+        /// We don't want to remove  a `.unannouncedMeal` if it's currently set
+        if let carbEntryWarning, carbEntryWarning == .rateOfChange {
+            self.carbEntryWarning = nil
         }
     }
     
     private func displayAccuracyWarning() {
         tableView.beginUpdates()
 
-        if shouldDisplayAccurateCarbEntryWarning {
+        if carbEntryWarning != nil {
             tableView.insertSections([Sections.warning.rawValue], with: .top)
         } else {
             tableView.deleteSections([Sections.warning.rawValue], with: .top)
@@ -260,40 +295,40 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         case warning
         case details
         
-        static func indexForDetailsSection(displayWarningSection: Bool) -> Int {
-            return displayWarningSection ? Sections.details.rawValue : Sections.details.rawValue - 1
+        static func indexForDetailsSection(warningSection: CarbEntryWarning?) -> Int {
+            return warningSection != nil ? Sections.details.rawValue : Sections.details.rawValue - 1
         }
         
-        static func numberOfSections(displayWarningSection: Bool) -> Int {
-            return displayWarningSection ? Sections.allCases.count : Sections.allCases.count - 1
+        static func numberOfSections(warningSection: CarbEntryWarning?) -> Int {
+            return warningSection != nil ? Sections.allCases.count : Sections.allCases.count - 1
         }
         
-        static func section(for indexPath: IndexPath, displayWarningSection: Bool) -> Int {
-            return displayWarningSection ? indexPath.section : indexPath.section + 1
+        static func section(for indexPath: IndexPath, warningSection: CarbEntryWarning?) -> Int {
+            return warningSection != nil ? indexPath.section : indexPath.section + 1
         }
         
-        static func numberOfRows(for section: Int, displayWarningSection: Bool) -> Int {
-            if section == Sections.warning.rawValue && displayWarningSection {
+        static func numberOfRows(for section: Int, warningSection: CarbEntryWarning?) -> Int {
+            if section == Sections.warning.rawValue && warningSection != nil {
                 return 1
             }
 
             return DetailsRow.allCases.count
         }
         
-        static func footer(for section: Int, displayWarningSection: Bool) -> String? {
-            if section == Sections.warning.rawValue && displayWarningSection {
+        static func footer(for section: Int, warningSection: CarbEntryWarning?) -> String? {
+            if section == Sections.warning.rawValue && warningSection != nil {
                 return nil
             }
                     
             return NSLocalizedString("Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact.", comment: "Carb entry section footer text explaining absorption time")
         }
         
-        static func headerHeight(for section: Int, displayWarningSection: Bool) -> CGFloat {
+        static func headerHeight(for section: Int, warningSection: CarbEntryWarning?) -> CGFloat {
             return 8
         }
         
-        static func footerHeight(for section: Int, displayWarningSection: Bool) -> CGFloat {
-            if section == Sections.warning.rawValue && displayWarningSection {
+        static func footerHeight(for section: Int, warningSection: CarbEntryWarning?) -> CGFloat {
+            if section == Sections.warning.rawValue && warningSection != nil {
                 return 1
             }
             
@@ -309,15 +344,15 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return Sections.numberOfSections(displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
+        return Sections.numberOfSections(warningSection: carbEntryWarning)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Sections.numberOfRows(for: section, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
+        return Sections.numberOfRows(for: section, warningSection: carbEntryWarning)
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch Sections(rawValue: Sections.section(for: indexPath, displayWarningSection: shouldDisplayAccurateCarbEntryWarning))! {
+        switch Sections(rawValue: Sections.section(for: indexPath, warningSection: carbEntryWarning))! {
         case .warning:
             let cell: UITableViewCell
             if let existingCell = tableView.dequeueReusableCell(withIdentifier: "CarbEntryAccuracyWarningCell") {
@@ -329,7 +364,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             cell.imageView?.image = UIImage(systemName: "exclamationmark.triangle.fill")
             cell.imageView?.tintColor = .destructive
             cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.text = NSLocalizedString("Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating.", comment: "Warning to ensure the carb entry is accurate")
+            cell.textLabel?.text = carbEntryWarning?.description
             cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
             cell.textLabel?.textColor = .secondaryLabel
             cell.isUserInteractionEnabled = false
@@ -415,7 +450,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     }
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        switch Sections(rawValue: Sections.section(for: indexPath, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)) {
+        switch Sections(rawValue: Sections.section(for: indexPath, warningSection: carbEntryWarning)) {
         case .details:
             switch DetailsRow(rawValue: indexPath.row)! {
             case .value, .date:
@@ -434,15 +469,15 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     }
 
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        return Sections.footer(for: section, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
+        return Sections.footer(for: section, warningSection: carbEntryWarning)
     }
     
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return Sections.headerHeight(for: section, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
+        return Sections.headerHeight(for: section, warningSection: carbEntryWarning)
     }
     
     override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return Sections.footerHeight(for: section, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
+        return Sections.footerHeight(for: section, warningSection: carbEntryWarning)
     }
     
     // MARK: - UITableViewDelegate
@@ -459,7 +494,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         case is FoodTypeShortcutCell:
             usesCustomFoodType = true
             shouldBeginEditingFoodType = true
-            tableView.reloadRows(at: [IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))], with: .none)
+            tableView.reloadRows(at: [IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(warningSection: carbEntryWarning))], with: .none)
         default:
             break
         }
@@ -484,6 +519,10 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             if let absorptionTime = entry.absorptionTime {
                 self.absorptionTime = absorptionTime
                 absorptionTimeWasEdited = true
+            }
+            
+            if activity.entryIsUnannouncedMeal {
+                carbEntryWarning = .unannouncedMeal
             }
         }
     }
@@ -605,14 +644,14 @@ extension CarbEntryViewController: FoodTypeShortcutCellDelegate {
             tableView.beginUpdates()
             usesCustomFoodType = true
             shouldBeginEditingFoodType = true
-            tableView.reloadRows(at: [IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))], with: .fade)
+            tableView.reloadRows(at: [IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(warningSection: carbEntryWarning))], with: .fade)
             tableView.endUpdates()
         }
 
         if let absorptionTime = absorptionTime {
             self.absorptionTime = absorptionTime
 
-            if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.absorptionTime.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))) as? DateAndDurationTableViewCell {
+            if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.absorptionTime.rawValue, section: Sections.indexForDetailsSection(warningSection: carbEntryWarning))) as? DateAndDurationTableViewCell {
                 cell.duration = absorptionTime
             }
         }
@@ -624,7 +663,7 @@ extension CarbEntryViewController: FoodTypeShortcutCellDelegate {
 
 extension CarbEntryViewController: EmojiInputControllerDelegate {
     func emojiInputControllerDidAdvanceToStandardInputMode(_ controller: EmojiInputController) {
-        if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))) as? TextFieldTableViewCell, let textField = cell.textField as? CustomInputTextField, textField.customInput != nil {
+        if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(warningSection: carbEntryWarning))) as? TextFieldTableViewCell, let textField = cell.textField as? CustomInputTextField, textField.customInput != nil {
             let customInput = textField.customInput
             textField.customInput = nil
             textField.resignFirstResponder()
@@ -642,7 +681,7 @@ extension CarbEntryViewController: EmojiInputControllerDelegate {
             // only adjust the absorption time if it wasn't already set.
             absorptionTime = orderedAbsorptionTimes[section]
             
-            if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.absorptionTime.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))) as? DateAndDurationTableViewCell {
+            if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.absorptionTime.rawValue, section: Sections.indexForDetailsSection(warningSection: carbEntryWarning))) as? DateAndDurationTableViewCell {
                 cell.duration = orderedAbsorptionTimes[section]
             }
         }
