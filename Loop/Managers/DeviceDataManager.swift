@@ -1337,7 +1337,7 @@ extension DeviceDataManager {
         let command: RemoteCommand
         
         do {
-            command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets).get()
+            command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets, defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium).get()
         } catch {
             log.error("Remote Notification Error: %{public}@", String(describing: error))
             return

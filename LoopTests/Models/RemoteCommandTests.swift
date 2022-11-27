@@ -37,7 +37,7 @@ class RemoteCommandTests: XCTestCase {
         ]
         
         //Act
-        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: []).get()
+        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], defaultAbsorptionTime: TimeInterval(hours: 4.0)).get()
         
         //Assert
         guard case .carbsEntry(let carbEntry) = command else {
@@ -63,7 +63,7 @@ class RemoteCommandTests: XCTestCase {
         ]
         
         //Act
-        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], nowDate: expectedStartDate).get()
+        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], defaultAbsorptionTime: TimeInterval(hours: 4.0), nowDate: expectedStartDate).get()
         
         //Assert
         guard case .carbsEntry(let carbEntry) = command else {
@@ -90,7 +90,127 @@ class RemoteCommandTests: XCTestCase {
         ]
         
         //Act + Assert
-        XCTAssertThrowsError(try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: []).get())
+        XCTAssertThrowsError(try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], defaultAbsorptionTime: TimeInterval(hours: 4.0)).get())
+    }
+    
+    func testParseCarbEntryNotification_MissingAbsorptionHours_UsesDefaultAbsorption() throws {
+        
+        //Arrange
+        let expectedStartDateString = "2022-08-14T03:08:00.000Z"
+        let expectedCarbsInGrams = 15.0
+        let expectedDate = dateFormatter().date(from: expectedStartDateString)!
+        let expectedAbsorptionTimeInHours = 4.0
+        let otp = 12345
+        let notification: [String: Any] = [
+            "carbs-entry": expectedCarbsInGrams,
+            "otp": otp,
+            "start-time": expectedStartDateString
+        ]
+
+        //Act
+        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], defaultAbsorptionTime: TimeInterval(hours: expectedAbsorptionTimeInHours)).get()
+        
+        //Assert
+        guard case .carbsEntry(let carbEntry) = command else {
+            XCTFail("Incorrect case")
+            return
+        }
+        XCTAssertEqual(carbEntry.startDate, expectedDate)
+        XCTAssertEqual(carbEntry.absorptionTime, TimeInterval(hours: expectedAbsorptionTimeInHours))
+        XCTAssertEqual(carbEntry.quantity, HKQuantity(unit: .gram(), doubleValue: expectedCarbsInGrams))
+    }
+
+    
+    func testParseCarbEntryNotification_AtMinAbsorptionHours_Succeeds() throws {
+        
+        //Arrange
+        let expectedStartDateString = "2022-08-14T03:08:00.000Z"
+        let expectedCarbsInGrams = 15.0
+        let expectedDate = dateFormatter().date(from: expectedStartDateString)!
+        let expectedAbsorptionTimeInHours = 0.5
+        let otp = 12345
+        let notification: [String: Any] = [
+            "carbs-entry": expectedCarbsInGrams,
+            "absorption-time":expectedAbsorptionTimeInHours,
+            "otp": otp,
+            "start-time": expectedStartDateString
+        ]
+
+        //Act
+        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], defaultAbsorptionTime: TimeInterval(hours: 4.0)).get()
+        
+        //Assert
+        guard case .carbsEntry(let carbEntry) = command else {
+            XCTFail("Incorrect case")
+            return
+        }
+        XCTAssertEqual(carbEntry.startDate, expectedDate)
+        XCTAssertEqual(carbEntry.absorptionTime, TimeInterval(hours: expectedAbsorptionTimeInHours))
+        XCTAssertEqual(carbEntry.quantity, HKQuantity(unit: .gram(), doubleValue: expectedCarbsInGrams))
+    }
+    
+    func testParseCarbEntryNotification_BelowMinAbsorptionHours_Fails() throws {
+        
+        //Arrange
+        let expectedStartDateString = "2022-08-14T03:08:00.000Z"
+        let expectedCarbsInGrams = 15.0
+        let expectedAbsorptionTimeInHours = 0.4
+        let otp = 12345
+        let notification: [String: Any] = [
+            "carbs-entry": expectedCarbsInGrams,
+            "absorption-time":expectedAbsorptionTimeInHours,
+            "otp": otp,
+            "start-time": expectedStartDateString
+        ]
+        
+        //Act + Assert
+        XCTAssertThrowsError(try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], defaultAbsorptionTime: TimeInterval(hours: 4.0)).get())
+    }
+    
+    func testParseCarbEntryNotification_AtMaxAbsorptionHours_Succeeds() throws {
+        
+        //Arrange
+        let expectedStartDateString = "2022-08-14T03:08:00.000Z"
+        let expectedCarbsInGrams = 15.0
+        let expectedDate = dateFormatter().date(from: expectedStartDateString)!
+        let expectedAbsorptionTimeInHours = 8.0
+        let otp = 12345
+        let notification: [String: Any] = [
+            "carbs-entry": expectedCarbsInGrams,
+            "absorption-time":expectedAbsorptionTimeInHours,
+            "otp": otp,
+            "start-time": expectedStartDateString
+        ]
+
+        //Act
+        let command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], defaultAbsorptionTime: TimeInterval(hours: 4.0)).get()
+        
+        //Assert
+        guard case .carbsEntry(let carbEntry) = command else {
+            XCTFail("Incorrect case")
+            return
+        }
+        XCTAssertEqual(carbEntry.startDate, expectedDate)
+        XCTAssertEqual(carbEntry.absorptionTime, TimeInterval(hours: expectedAbsorptionTimeInHours))
+        XCTAssertEqual(carbEntry.quantity, HKQuantity(unit: .gram(), doubleValue: expectedCarbsInGrams))
+    }
+    
+    func testParseCarbEntryNotification_AboveMaxAbsorptionHours_Fails() throws {
+        
+        //Arrange
+        let expectedStartDateString = "2022-08-14T03:08:00.000Z"
+        let expectedCarbsInGrams = 15.0
+        let expectedAbsorptionTimeInHours = 8.1
+        let otp = 12345
+        let notification: [String: Any] = [
+            "carbs-entry": expectedCarbsInGrams,
+            "absorption-time":expectedAbsorptionTimeInHours,
+            "otp": otp,
+            "start-time": expectedStartDateString
+        ]
+        
+        //Act + Assert
+        XCTAssertThrowsError(try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: [], defaultAbsorptionTime: TimeInterval(hours: 4.0)).get())
     }
     
     
