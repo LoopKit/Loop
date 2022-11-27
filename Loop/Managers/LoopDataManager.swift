@@ -1421,7 +1421,7 @@ extension LoopDataManager {
         }
 
         let volumeRounder = { (_ units: Double) in
-            return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
+            return self.delegate?.roundBolusVolume(units: units) ?? units
         }
         
         let model = doseStore.insulinModelProvider.model(for: pumpInsulinType)
@@ -1591,7 +1591,7 @@ extension LoopDataManager {
             }
 
             let rateRounder = { (_ rate: Double) in
-                return self.delegate?.loopDataManager(self, roundBasalRate: rate) ?? rate
+                return self.delegate?.roundBasalRate(unitsPerHour: rate) ?? rate
             }
 
             let lastTempBasal: DoseEntry?
@@ -1607,7 +1607,7 @@ extension LoopDataManager {
             switch settings.automaticDosingStrategy {
             case .automaticBolus:
                 let volumeRounder = { (_ units: Double) in
-                    return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
+                    return self.delegate?.roundBolusVolume(units: units) ?? units
                 }
 
                 dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
@@ -2086,14 +2086,14 @@ protocol LoopDataManagerDelegate: AnyObject {
     /// - Parameters:
     ///   - rate: The recommended rate in U/hr
     /// - Returns: a supported rate of delivery in Units/hr. The rate returned should not be larger than the passed in rate.
-    func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double
+    func roundBasalRate(unitsPerHour: Double) -> Double
 
     /// Asks the delegate to round a recommended bolus volume to a supported volume
     ///
     /// - Parameters:
     ///   - units: The recommended bolus in U
     /// - Returns: a supported bolus volume in U. The volume returned should be the nearest deliverable volume.
-    func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double
+    func roundBolusVolume(units: Double) -> Double
 
     /// The pump manager status, if one exists.
     var pumpManagerStatus: PumpManagerStatus? { get }
