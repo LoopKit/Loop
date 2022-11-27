@@ -513,32 +513,29 @@ final class DeviceDataManager {
         }
     }
 
-    private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult) {
+    private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult, completion: @escaping () -> Void) {
         switch readingResult {
         case .newData(let values):
             log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
             loopManager.addGlucoseSamples(values) { result in
-                self.checkPumpDataAndLoop()
                 if !values.isEmpty {
                     DispatchQueue.main.async {
                         self.cgmStalenessMonitor.cgmGlucoseSamplesAvailable(values)
                     }
                 }
+                completion()
             }
         case .unreliableData:
             loopManager.receivedUnreliableCGMReading()
+            completion()
         case .noData:
             log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
-            // Attempt Loop even if this fetch didn't produce new data; a previous fetch may have produced recent-enough data
-            self.checkPumpDataAndLoop()
+            completion()
         case .error(let error):
             log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
-
             self.setLastError(error: error)
-            // Attempt Loop even if this fetch didn't produce new data; a previous fetch may have produced recent-enough data
-            self.checkPumpDataAndLoop()
+            completion()
         }
-
         updatePumpManagerBLEHeartbeatPreference()
     }
 
@@ -916,7 +913,9 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
         dispatchPrecondition(condition: .onQueue(queue))
-        processCGMReadingResult(manager, readingResult: readingResult);
+        processCGMReadingResult(manager, readingResult: readingResult) {
+            self.checkPumpDataAndLoop()
+        }
     }
 
     func startDateToFilterNewData(for manager: CGMManager) -> Date? {
@@ -996,8 +995,12 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
 
             self.queue.async {
-                self.processCGMReadingResult(cgmManager, readingResult: result)
-                completion?()
+                self.processCGMReadingResult(cgmManager, readingResult: result) {
+                    if self.loopManager.lastLoopCompleted == nil || self.loopManager.lastLoopCompleted!.timeIntervalSinceNow < -.minutes(6) {
+                        self.checkPumpDataAndLoop()
+                    }
+                    completion?()
+                }
             }
         }
     }
