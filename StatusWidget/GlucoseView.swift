@@ -12,13 +12,14 @@ import HealthKit
 import LoopCore
 
 struct GlucoseView: View {
+
     var entry: StatusWidgetEntry
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             HStack(spacing: 2) {
                 if let glucose = entry.currentGlucose,
-                   entry.date.timeIntervalSince(glucose.startDate) < LoopCoreConstants.inputDataRecencyInterval,
+                   !entry.glucoseIsStale,
                    let unit = entry.unit
                 {
                     let quantity = glucose.quantity
@@ -43,7 +44,7 @@ struct GlucoseView: View {
             }
             // Prevent truncation of text
             .fixedSize(horizontal: true, vertical: false)
-            .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : .primary)
+            .foregroundColor(entry.glucoseStatusIsStale ? Color(UIColor.systemGray3) : .primary)
             
             let unitString = entry.unit == nil ? "-" : entry.unit!.localizedShortUnitString
             if let delta = entry.delta, let unit = entry.unit {
@@ -54,13 +55,13 @@ struct GlucoseView: View {
                 Text(deltaString + " " + unitString)
                 // Dynamic text causes string to be cut off
                     .font(.system(size: 13))
-                    .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .foregroundColor(entry.glucoseStatusIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
                     .fixedSize(horizontal: true, vertical: true)
             }
             else {
                 Text(unitString)
                     .font(.footnote)
-                    .foregroundColor(entry.isOld || entry.glucoseIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .foregroundColor(entry.glucoseStatusIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
             }
         }
     }
