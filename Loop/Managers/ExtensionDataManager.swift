@@ -30,12 +30,30 @@ final class ExtensionDataManager {
         }
     }
 
-    fileprivate var defaults: UserDefaults? {
+    fileprivate static var defaults: UserDefaults? {
         return UserDefaults.appGroup
     }
 
-    var context: StatusExtensionContext? {
-        return defaults?.statusExtensionContext
+    static var context: StatusExtensionContext? {
+        get {
+            return defaults?.statusExtensionContext
+        }
+        set {
+            defaults?.statusExtensionContext = newValue
+        }
+    }
+
+    static var intentExtensionInfo: IntentExtensionInfo? {
+        get {
+            return defaults?.intentExtensionInfo
+        }
+        set {
+            defaults?.intentExtensionInfo = newValue
+        }
+    }
+
+    static var lastLoopCompleted: Date? {
+        context?.lastLoopCompleted
     }
 
     @objc private func notificationReceived(_ notification: Notification) {
@@ -43,19 +61,19 @@ final class ExtensionDataManager {
     }
     
     private func update() {
-        guard let unit = (deviceManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
+        guard let unit = (deviceManager.glucoseStore.preferredUnit ?? ExtensionDataManager.context?.predictedGlucose?.unit) else {
             return
         }
 
         createStatusContext(glucoseUnit: unit) { (context) in
             if let context = context {
-                self.defaults?.statusExtensionContext = context
+                ExtensionDataManager.context = context
             }
         }
         
         createIntentsContext { (info) in
-            if let info = info, self.defaults?.intentExtensionInfo?.overridePresetNames != info.overridePresetNames {
-                self.defaults?.intentExtensionInfo = info
+            if let info = info, ExtensionDataManager.intentExtensionInfo?.overridePresetNames != info.overridePresetNames {
+                ExtensionDataManager.intentExtensionInfo = info
             }
         }
     }
@@ -160,7 +178,7 @@ extension ExtensionDataManager: CustomDebugStringConvertible {
         return [
             "## StatusExtensionDataManager",
             "appGroupName: \(Bundle.main.appGroupSuiteName)",
-            "statusExtensionContext: \(String(reflecting: defaults?.statusExtensionContext))",
+            "statusExtensionContext: \(String(reflecting: ExtensionDataManager.context))",
             ""
         ].joined(separator: "\n")
     }

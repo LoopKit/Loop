@@ -36,7 +36,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
     var closedLoopStatus: ClosedLoopStatus!
     
     var alertPermissionsChecker: AlertPermissionsChecker!
-    
+
+    var alertMuter: AlertMuter!
+
     var supportManager: SupportManager!
 
     lazy private var cancellables = Set<AnyCancellable>()
@@ -115,6 +117,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
             .sink { self.closedLoopStatusChanged($0) }
             .store(in: &cancellables)
 
+        alertMuter.$configuration
+            .removeDuplicates()
+            .receive(on: RunLoop.main)
+            .dropFirst()
+            .sink { _ in
+                self.refreshContext.update(with: .status)
+                self.reloadData(animated: true)
+            }
+            .store(in: &cancellables)
+
         if let gestureRecognizer = charts.gestureRecognizer {
             tableView.addGestureRecognizer(gestureRecognizer)
         }
@@ -155,7 +167,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         navigationController?.setToolbarHidden(false, animated: animated)
 
         alertPermissionsChecker.checkNow()
-        
+
         updateBolusProgress()
 
         onboardingManager.$isComplete
@@ -649,6 +661,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case pumpSuspended(resuming: Bool)
         case onboardingSuspended
         case recommendManualGlucoseEntry
+        case tempMuteAlerts
 
         var hasRow: Bool {
             switch self {
@@ -687,6 +700,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             !premealOverride.hasFinished()
         {
             statusRowMode = .scheduleOverrideEnabled(premealOverride)
+        } else if alertMuter.shouldMuteAlert() {
+            statusRowMode = .tempMuteAlerts
         } else {
             statusRowMode = .hidden
         }
@@ -832,19 +847,36 @@ final class StatusTableViewController: LoopChartsTableViewController {
          
         override func updateConfiguration(using state: UICellConfigurationState) {
             super.updateConfiguration(using: state)
-            let content = NSLocalizedString("Review Alert Permissions", comment: "Warning text for when Notifications or Critical Alerts Permissions is disabled")
+
+            let adjustViewForNarrowDisplay = bounds.width < 350
+
             var contentConfig = defaultContentConfiguration().updated(for: state)
-            contentConfig.text = content
-            contentConfig.textProperties.color = .red
-            contentConfig.textProperties.font = .systemFont(ofSize: 15, weight: .semibold)
+            let titleImageAttachment = NSTextAttachment()
+            titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.white)
+            let title = NSMutableAttributedString(string: NSLocalizedString(" Safety Notifications are OFF", comment: "Warning text for when Notifications or Critical Alerts Permissions is disabled"))
+            let titleWithImage = NSMutableAttributedString(attachment: titleImageAttachment)
+            titleWithImage.append(title)
+            contentConfig.attributedText = titleWithImage
+            contentConfig.textProperties.color = .white
+            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
             contentConfig.textProperties.adjustsFontSizeToFitWidth = true
-            contentConfig.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.red)
-            contentConfig.imageProperties.tintColor = .red
+            contentConfig.secondaryText = "Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON."
+            contentConfig.secondaryTextProperties.color = .white
+            contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
             contentConfiguration = contentConfig
+
             var backgroundConfig = backgroundConfiguration?.updated(for: state)
-            backgroundConfig?.backgroundColor = .secondarySystemBackground
+            backgroundConfig?.backgroundColor = .critical
             backgroundConfiguration = backgroundConfig
-            accessoryType = .disclosureIndicator
+            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10)
+            backgroundConfiguration?.cornerRadius = 10
+
+            let disclosureIndicator = UIImage(systemName: "chevron.right")?.withTintColor(.white)
+            let imageView = UIImageView(image: disclosureIndicator)
+            imageView.tintColor = .white
+            accessoryView = imageView
+
+            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
         }
     }
     
@@ -908,6 +940,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
             switch StatusRow(rawValue: indexPath.row)! {
             case .status:
                 switch statusRowMode {
+                case .tempMuteAlerts:
+                    //TODO testing (need design to make the correct status row)
+                    let cell = getTitleSubtitleCell()
+                    cell.titleLabel.text = NSLocalizedString("Temp Mute Alerts", comment: "The title of the cell indicating alerts are temporarily muted")
+                    return cell
                 case .hidden:
                     let cell = getTitleSubtitleCell()
                     return cell
@@ -1076,7 +1113,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         switch Section(rawValue: indexPath.section)! {
         case .alertPermissionsDisabledWarning:
             tableView.deselectRow(at: indexPath, animated: true)
-            presentSettings()
+            AlertPermissionsChecker.gotoSettings()
         case .hud:
             break
         case .status:
@@ -1410,6 +1447,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                                   delegate: self)
         let versionUpdateViewModel = VersionUpdateViewModel(supportManager: supportManager, guidanceColors: .default)
         let viewModel = SettingsViewModel(alertPermissionsChecker: alertPermissionsChecker,
+                                          alertMuter: alertMuter,
                                           versionUpdateViewModel: versionUpdateViewModel,
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
