@@ -66,7 +66,7 @@ extension RemoteCommand {
         } else if let carbsValue = notification["carbs-entry"] as? Double {
 
             let minAbsorptionTime = TimeInterval(hours: 0.5)
-            let maxAbsorptionTime = TimeInterval(hours: 8)
+            let maxAbsorptionTime = LoopConstants.maxCarbAbsorptionTime
             
             var absorptionTime = defaultAbsorptionTime
             if let absorptionOverrideInHours = notification["absorption-time"] as? Double {
