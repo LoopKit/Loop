@@ -98,6 +98,8 @@ extension PredictedGlucoseChart {
     public func generate(withFrame frame: CGRect, xAxisModel: ChartAxisModel, xAxisValues: [ChartAxisValue], axisLabelSettings: ChartLabelSettings, guideLinesLayerSettings: ChartGuideLinesLayerSettings, colors: ChartColorPalette, chartSettings: ChartSettings, labelsWidthY: CGFloat, gestureRecognizer: UIGestureRecognizer?, traitCollection: UITraitCollection) -> Chart
     {
         if targetGlucosePoints.isEmpty, xAxisValues.count > 1, let schedule = targetGlucoseSchedule {
+
+            // TODO: This only considers one override: pre-meal or an active override. ChartPoint.barsForGlucoseRangeSchedule needs to accept list of overridden ranges.
             let potentialOverride = (preMealOverride?.isActive() ?? false) ? preMealOverride : (scheduleOverride?.isActive() ?? false) ? scheduleOverride : nil
             targetGlucosePoints = ChartPoint.barsForGlucoseRangeSchedule(schedule, unit: glucoseUnit, xAxisValues: xAxisValues, considering: potentialOverride)
 
@@ -107,7 +109,8 @@ extension PredictedGlucoseChart {
 
                 if displayedScheduleOverride != nil {
                     if displayedScheduleOverride!.scheduledEndDate > preMealOverride.scheduledEndDate {
-                        displayedScheduleOverride!.scheduledInterval = DateInterval(start: preMealOverride.scheduledEndDate, end: displayedScheduleOverride!.scheduledEndDate)
+                        let start = max(displayedScheduleOverride!.startDate, preMealOverride.scheduledEndDate)
+                        displayedScheduleOverride!.scheduledInterval = DateInterval(start: start, end: displayedScheduleOverride!.scheduledEndDate)
                     } else {
                         displayedScheduleOverride = nil
                     }
