@@ -80,11 +80,19 @@ class LoopDataManagerTests: XCTestCase {
     
     func setUp(for test: DataManagerTestType, basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil) {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
+        let carbRatioSchedule = CarbRatioSchedule(
+            unit: .gram(),
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0.0, value: 10.0),
+            ],
+            timeZone: .utcTimeZone
+        )!
 
         let settings = LoopSettings(
             dosingEnabled: false,
             glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
             basalRateSchedule: basalRateSchedule,
+            carbRatioSchedule: carbRatioSchedule,
             maximumBasalRatePerHour: maxBasalRate,
             maximumBolus: maxBolus,
             suspendThreshold: suspendThreshold

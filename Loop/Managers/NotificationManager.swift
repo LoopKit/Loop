@@ -202,7 +202,7 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    static func sendUnannouncedMealNotification(mealStart: Date, delay: TimeInterval? = nil) {
+    static func sendUnannouncedMealNotification(mealStart: Date, amountInGrams: Double, delay: TimeInterval? = nil) {
         let notification = UNMutableNotificationContent()
         /// Notifications should expire after the missed meal is no longer relevant
         let expirationDate = mealStart.addingTimeInterval(LoopCoreConstants.defaultCarbAbsorptionTimes.slow)
@@ -213,6 +213,7 @@ extension NotificationManager {
         
         notification.userInfo = [
             LoopNotificationUserInfoKey.unannouncedMealTime.rawValue: mealStart,
+            LoopNotificationUserInfoKey.unannouncedMealCarbAmount.rawValue: amountInGrams,
             LoopNotificationUserInfoKey.expirationDate.rawValue: expirationDate
         ]
         

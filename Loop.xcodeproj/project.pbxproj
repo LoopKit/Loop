@@ -593,6 +593,8 @@
 		E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
 		E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
 		E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
+		E9B3551D292844950076AB04 /* UAMNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* UAMNotification.swift */; };
+		E9B3551E292844B90076AB04 /* UAMNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* UAMNotification.swift */; };
 		E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB27AA23B85C3500FB4987 /* SleepStore.swift */; };
 		E9C00EF224C6221B00628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
@@ -1553,6 +1555,7 @@
 		E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideIntentHandler.swift; sourceTree = "<group>"; };
 		E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+LoopIntents.swift"; sourceTree = "<group>"; };
 		E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentExtensionInfo.swift; sourceTree = "<group>"; };
+		E9B3551B292844010076AB04 /* UAMNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UAMNotification.swift; sourceTree = "<group>"; };
 		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 		E9C00EEF24C620EF00628F35 /* LoopSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettings.swift; sourceTree = "<group>"; };
 		E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopSettings+Loop.swift"; sourceTree = "<group>"; };
@@ -2070,6 +2073,7 @@
 			children = (
 				C1DA986B2843B6F9001D04CC /* PersistedProperty.swift */,
 				43DE92581C5479E4001FFDE1 /* PotentialCarbEntryUserInfo.swift */,
+				E9B3551B292844010076AB04 /* UAMNotification.swift */,
 				43C05CB721EBEA54006FB252 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
 				C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */,
@@ -3256,9 +3260,9 @@
 			targets = (
 				43776F8B1B8022E90074EA36 /* Loop */,
 				4F70C1DB1DE8DCA7006380B7 /* Loop Status Extension */,
-				14B1735B28AED9EC006CCD7C /* SmallStatusWidgetExtension */,
 				43A943711B926B7B0051FA24 /* WatchApp */,
 				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
+				14B1735B28AED9EC006CCD7C /* SmallStatusWidgetExtension */,
 				E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */,
 				43D9FFA121EA9A0C00AF44BF /* Learn */,
 				43D9FFCE21EAE05D00AF44BF /* LoopCore */,
@@ -3833,6 +3837,7 @@
 				A9CE912224CA032E00302A40 /* NSUserDefaults.swift in Sources */,
 				43C05CAB21EB2B4A006FB252 /* NSBundle.swift in Sources */,
 				43C05CC721EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
+				E9B3551E292844B90076AB04 /* UAMNotification.swift in Sources */,
 				4345E40221F67300009E00E5 /* PotentialCarbEntryUserInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3884,6 +3889,7 @@
 				43C05CAA21EB2B49006FB252 /* NSBundle.swift in Sources */,
 				43C05CC821EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
 				43C05CAD21EB2BBF006FB252 /* NSUserDefaults.swift in Sources */,
+				E9B3551D292844950076AB04 /* UAMNotification.swift in Sources */,
 				4345E40121F67300009E00E5 /* PotentialCarbEntryUserInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

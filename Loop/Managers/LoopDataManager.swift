@@ -400,11 +400,11 @@ final class LoopDataManager {
     // Confined to dataAccessQueue
     private var retrospectiveCorrection: RetrospectiveCorrection
     
-    /// The last time an unannounced meal notification was sent
+    /// The last unannounced meal notification that was sent
     /// Internal for unit testing
-    internal var lastUAMNotificationDeliveryTime: Date? = UserDefaults.standard.lastUAMNotificationDeliveryTime {
+    internal var lastUAMNotification: UAMNotification? = UserDefaults.standard.lastUAMNotification {
         didSet {
-            UserDefaults.standard.lastUAMNotificationDeliveryTime = lastUAMNotificationDeliveryTime
+            UserDefaults.standard.lastUAMNotification = lastUAMNotification
         }
     }
 
@@ -1459,15 +1459,24 @@ extension LoopDataManager {
         
         // Figure out if we should deliver a notification
         let now = now()
-        let notificationTimeTooRecent = now.timeIntervalSince(lastUAMNotificationDeliveryTime ?? .distantPast) < (UAMSettings.maxRecency - UAMSettings.minRecency)
+        let notificationTimeTooRecent = now.timeIntervalSince(lastUAMNotification?.deliveryTime ?? .distantPast) < (UAMSettings.maxRecency - UAMSettings.minRecency)
         
         guard
-            case .hasUnannouncedMeal(let startTime) = status,
+            case .hasUnannouncedMeal(let startTime, let carbAmount) = status,
             !notificationTimeTooRecent,
             UserDefaults.standard.unannouncedMealNotificationsEnabled
         else {
             // No notification needed!
             return
+        }
+        
+        var clampedCarbAmount = carbAmount
+        if
+            let maxBolus = settings.maximumBolus,
+            let currentCarbRatio = settings.carbRatioSchedule?.quantity(at: now).doubleValue(for: .gram())
+        {
+            let maxAllowedCarbAutofill = maxBolus * currentCarbRatio
+            clampedCarbAmount = min(clampedCarbAmount, maxAllowedCarbAutofill)
         }
         
         logger.debug("Delivering a missed meal notification")
@@ -1480,11 +1489,12 @@ extension LoopDataManager {
             let estimatedBolusDuration = delegate?.loopDataManager(self, estimateBolusDuration: pendingAutobolusUnits),
             estimatedBolusDuration < UAMSettings.maxNotificationDelay
         {
-            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, delay: estimatedBolusDuration)
-            lastUAMNotificationDeliveryTime = now.advanced(by: estimatedBolusDuration)
+            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount, delay: estimatedBolusDuration)
+            lastUAMNotification = UAMNotification(deliveryTime: now.advanced(by: estimatedBolusDuration),
+                                                  carbAmount: clampedCarbAmount)
         } else {
-            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime)
-            lastUAMNotificationDeliveryTime = now
+            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount)
+            lastUAMNotification = UAMNotification(deliveryTime: now, carbAmount: clampedCarbAmount)
         }
     }
 
@@ -2076,7 +2086,8 @@ extension LoopDataManager {
                 "recommendedAutomaticDose: \(String(describing: state.recommendedAutomaticDose))",
                 "lastBolus: \(String(describing: manager.lastRequestedBolus))",
                 "lastLoopCompleted: \(String(describing: manager.lastLoopCompleted))",
-                "lastUnannouncedMealNotificationTime: \(String(describing: self.lastUAMNotificationDeliveryTime))",
+                "lastUnannouncedMealNotificationTime: \(String(describing: self.lastUAMNotification?.deliveryTime))",
+                "lastUnannouncedMealCarbEstimate: \(String(describing: self.lastUAMNotification?.carbAmount))",
                 "basalDeliveryState: \(String(describing: manager.basalDeliveryState))",
                 "carbsOnBoard: \(String(describing: state.carbsOnBoard))",
                 "error: \(String(describing: state.error))",

@@ -20,7 +20,7 @@ extension UserDefaults {
         case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
-        case LastUAMNotificationDeliveryTime = "com.loopkit.Loop.lastUAMNotificationDeliveryTime"
+        case LastUAMNotification = "com.loopkit.Loop.lastUAMNotification"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -115,16 +115,26 @@ extension UserDefaults {
         }
     }
     
-    public var lastUAMNotificationDeliveryTime: Date? {
+    public var lastUAMNotification: UAMNotification? {
         get {
-            if let rawValue = value(forKey: Key.LastUAMNotificationDeliveryTime.rawValue) as? Date {
-                return rawValue
-            } else {
+            let decoder = JSONDecoder()
+            guard let data = object(forKey: Key.LastUAMNotification.rawValue) as? Data else {
                 return nil
             }
+            return try? decoder.decode(UAMNotification.self, from: data)
         }
         set {
-            set(newValue, forKey: Key.LastUAMNotificationDeliveryTime.rawValue)
+            do {
+                if let newValue = newValue {
+                    let encoder = JSONEncoder()
+                    let data = try encoder.encode(newValue)
+                    set(data, forKey: Key.LastUAMNotification.rawValue)
+                } else {
+                    set(nil, forKey: Key.LastUAMNotification.rawValue)
+                }
+            } catch {
+                assertionFailure("Unable to encode UAMNotification")
+            }
         }
     }
     

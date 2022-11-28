@@ -258,9 +258,12 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
 
             let userInfo = response.notification.request.content.userInfo
             // If we have info about a meal, the carb entry UI should reflect it
-            if let mealTime = userInfo[LoopNotificationUserInfoKey.unannouncedMealTime.rawValue] as? Date {
+            if
+                let mealTime = userInfo[LoopNotificationUserInfoKey.unannouncedMealTime.rawValue] as? Date,
+                let carbAmount = userInfo[LoopNotificationUserInfoKey.unannouncedMealCarbAmount.rawValue] as? Double
+            {
                 let unannouncedEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(),
-                                                                         doubleValue: UAMSettings.carbThreshold),
+                                                                         doubleValue: carbAmount),
                                                     startDate: mealTime,
                                                     foodType: nil,
                                                     absorptionTime: nil)
