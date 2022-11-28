@@ -60,6 +60,8 @@ public class SettingsViewModel: ObservableObject {
     
     let alertPermissionsChecker: AlertPermissionsChecker
 
+    let alertMuter: AlertMuter
+
     let versionUpdateViewModel: VersionUpdateViewModel
     
     private weak var delegate: SettingsViewModelDelegate?
@@ -101,6 +103,7 @@ public class SettingsViewModel: ObservableObject {
     lazy private var cancellables = Set<AnyCancellable>()
 
     public init(alertPermissionsChecker: AlertPermissionsChecker,
+                alertMuter: AlertMuter,
                 versionUpdateViewModel: VersionUpdateViewModel,
                 pumpManagerSettingsViewModel: PumpManagerViewModel,
                 cgmManagerSettingsViewModel: CGMManagerViewModel,
@@ -118,6 +121,7 @@ public class SettingsViewModel: ObservableObject {
                 delegate: SettingsViewModelDelegate?
     ) {
         self.alertPermissionsChecker = alertPermissionsChecker
+        self.alertMuter = alertMuter
         self.versionUpdateViewModel = versionUpdateViewModel
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
@@ -178,6 +182,7 @@ extension SettingsViewModel {
 
     static var preview: SettingsViewModel {
         return SettingsViewModel(alertPermissionsChecker: AlertPermissionsChecker(),
+                                 alertMuter: AlertMuter(),
                                  versionUpdateViewModel: VersionUpdateViewModel(supportManager: nil, guidanceColors: GuidanceColors()),
                                  pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
                                  cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
