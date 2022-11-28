@@ -42,7 +42,7 @@ struct SmallStatusWidgetEntryView : View {
                     }
                 }
                 else if let netBasal = entry.netBasal {
-                    BasalView(netBasal: netBasal, isOld: entry.isOld)
+                    BasalView(netBasal: netBasal, isOld: entry.contextIsStale)
 
                     if let eventualGlucose = entry.eventualGlucose {
                         let glucoseFormatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
@@ -50,7 +50,7 @@ struct SmallStatusWidgetEntryView : View {
                             VStack {
                                 Text("Eventual")
                                 .font(.footnote)
-                                .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                                .foregroundColor(entry.contextIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
 
                                 Text("\(glucoseString)")
                                     .font(.subheadline)
@@ -58,7 +58,7 @@ struct SmallStatusWidgetEntryView : View {
 
                                 Text(eventualGlucose.unit.shortLocalizedUnitString())
                                     .font(.footnote)
-                                    .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                                    .foregroundColor(entry.contextIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
                             }
                         }
                     }
@@ -73,7 +73,7 @@ struct SmallStatusWidgetEntryView : View {
                     .fill(Color("WidgetSecondaryBackground"))
             )
         }
-        .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : nil)
+        .foregroundColor(entry.contextIsStale ? Color(UIColor.systemGray3) : nil)
         .padding(5)
         .background(Color("WidgetBackground"))
     }

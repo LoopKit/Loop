@@ -195,7 +195,7 @@ struct StatusWidgetEntry: TimelineEntry {
     let eventualGlucose: GlucoseContext?
     
     // Whether context data is old
-    var isOld: Bool {
+    var contextIsStale: Bool {
         return (date - contextUpdatedAt) >= StatusWidgetProvider.stalenessAge
     }
 
