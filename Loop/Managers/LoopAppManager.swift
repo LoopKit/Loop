@@ -13,6 +13,7 @@ import LoopKit
 import LoopKitUI
 import MockKit
 import HealthKit
+import WidgetKit
 
 public protocol AlertPresenter: AnyObject {
     /// Present the alert view controller, with or without animation.
@@ -77,6 +78,7 @@ class LoopAppManager: NSObject {
     private var state: State = .initialize
 
     private let log = DiagnosticLog(category: "LoopAppManager")
+    private let widgetLog = DiagnosticLog(category: "LoopWidgets")
 
     private let closedLoopStatus = ClosedLoopStatus(isClosedLoop: false, isClosedLoopAllowed: false)
 
@@ -156,15 +158,18 @@ class LoopAppManager: NSObject {
         self.pluginManager = PluginManager()
         self.bluetoothStateManager = BluetoothStateManager()
         self.alertManager = AlertManager(alertPresenter: self,
-                                         userNotificationAlertIssuer: UserNotificationAlertIssuer(userNotificationCenter: UNUserNotificationCenter.current()),
+                                         userNotificationAlertScheduler: UserNotificationAlertScheduler(userNotificationCenter: UNUserNotificationCenter.current()),
                                          expireAfter: Bundle.main.localCacheDuration,
                                          bluetoothProvider: bluetoothStateManager)
 
-        self.alertPermissionsChecker = AlertPermissionsChecker(alertManager: alertManager)
+        self.alertPermissionsChecker = AlertPermissionsChecker()
+        self.alertPermissionsChecker.delegate = alertManager
+        
         self.trustedTimeChecker = TrustedTimeChecker(alertManager: alertManager)
 
         self.settingsManager = SettingsManager(cacheStore: cacheStore,
-                                               expireAfter: localCacheDuration)
+                                               expireAfter: localCacheDuration,
+                                               alertMuter: alertManager.alertMuter)
 
         self.deviceDataManager = DeviceDataManager(pluginManager: pluginManager,
                                                    alertManager: alertManager,
@@ -231,6 +236,7 @@ class LoopAppManager: NSObject {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle(for: Self.self))
         let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         statusTableViewController.alertPermissionsChecker = alertPermissionsChecker
+        statusTableViewController.alertMuter = alertManager.alertMuter
         statusTableViewController.closedLoopStatus = closedLoopStatus
         statusTableViewController.deviceManager = deviceDataManager
         statusTableViewController.onboardingManager = onboardingManager
@@ -265,6 +271,9 @@ class LoopAppManager: NSObject {
         settingsManager?.didBecomeActive()
         deviceDataManager?.didBecomeActive()
         alertManager.inferDeliveredLoopNotRunningNotifications()
+        
+        widgetLog.default("Refreshing widget. Reason: App didBecomeActive")
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Remote Notification
@@ -315,7 +324,15 @@ class LoopAppManager: NSObject {
 
     private static let defaultSupportedInterfaceOrientations = UIInterfaceOrientationMask.allButUpsideDown
 
-    var supportedInterfaceOrientations = defaultSupportedInterfaceOrientations
+    var supportedInterfaceOrientations = defaultSupportedInterfaceOrientations {
+        didSet {
+            if #available(iOS 16.0, *) {
+                rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+            } else {
+                // Fallback on earlier versions
+            }
+        }
+    }
 
     // MARK: - Background Tasks
 
@@ -441,8 +458,8 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.remoteCarbsFailure.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:
-            // All other userNotifications are not to be displayed while in the foreground
-            completionHandler([])
+            // For all others, banners are not to be displayed while in the foreground
+            completionHandler([.badge, .sound, .list])
         }
     }
 

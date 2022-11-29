@@ -419,6 +419,19 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
     }
 
+    func testBolusTooSmall() throws {
+        bolusEntryViewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0.01)
+        var success = false
+        bolusEntryViewModel.saveAndDeliver {
+            success = true
+        }
+        XCTAssertEqual(.bolusTooSmall, bolusEntryViewModel.activeAlert)
+        XCTAssertNil(delegate.enactedBolusUnits)
+        XCTAssertFalse(success)
+        XCTAssertEqual(0, delegate.bolusDosingDecisionsAdded.count)
+    }
+
+
     func testDeliverBolusOnlyRecommendationAccepted() throws {
         bolusEntryViewModel.recommendedBolus = Self.exampleBolusQuantity
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
@@ -914,7 +927,13 @@ fileprivate class MockLoopState: LoopState {
 }
 
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
-        
+    func roundBolusVolume(units: Double) -> Double {
+        // 0.05 units for rates between 0.05-30U/hr
+        // 0 is not a supported bolus volume
+        let supportedBolusVolumes = (1...600).map { Double($0) / 20.0 }
+        return ([0.0] + supportedBolusVolumes).enumerated().min( by: { abs($0.1 - units) < abs($1.1 - units) } )!.1
+    }
+
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
         return .hours(6) + .minutes(10)
     }

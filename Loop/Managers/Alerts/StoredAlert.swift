@@ -61,9 +61,13 @@ extension StoredAlert {
 }
 
 extension Alert {
-    init(from storedAlert: StoredAlert, adjustedForStorageTime: Bool) throws {
+    init?(from storedAlert: StoredAlert, adjustedForStorageTime: Bool) throws {
+        guard let bgContent = try Alert.Content(contentString: storedAlert.backgroundContent) else {
+            // all alerts must have background content
+            return nil
+        }
+        
         let fgContent = try Alert.Content(contentString: storedAlert.foregroundContent)
-        let bgContent = try Alert.Content(contentString: storedAlert.backgroundContent)
         let sound = try Alert.Sound(soundString: storedAlert.sound)
         let metadata = try Alert.Metadata(metadataString: storedAlert.metadata)
         let trigger = try Alert.Trigger(storedType: storedAlert.triggerType,
@@ -115,12 +119,14 @@ extension Alert.Metadata {
     }
 }
 
+public typealias AlertTriggerStoredType = Int16
+
 extension Alert.Trigger {
     enum StorageError: Error {
         case invalidStoredInterval, invalidStoredType
     }
     
-    var storedType: Int16 {
+    var storedType: AlertTriggerStoredType {
         switch self {
         case .immediate: return 0
         case .delayed: return 1

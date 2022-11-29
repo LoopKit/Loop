@@ -353,7 +353,7 @@ final class DeviceDataManager {
         statusExtensionManager = ExtensionDataManager(deviceDataManager: self, closedLoopStatus: closedLoopStatus)
 
         loopManager = LoopDataManager(
-            lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
+            lastLoopCompleted: ExtensionDataManager.lastLoopCompleted,
             basalDeliveryState: pumpManager?.status.basalDeliveryState,
             settings: settingsManager.loopSettings,
             overrideHistory: overrideHistory,
@@ -513,32 +513,29 @@ final class DeviceDataManager {
         }
     }
 
-    private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult) {
+    private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult, completion: @escaping () -> Void) {
         switch readingResult {
         case .newData(let values):
             log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
             loopManager.addGlucoseSamples(values) { result in
-                self.checkPumpDataAndLoop()
                 if !values.isEmpty {
                     DispatchQueue.main.async {
                         self.cgmStalenessMonitor.cgmGlucoseSamplesAvailable(values)
                     }
                 }
+                completion()
             }
         case .unreliableData:
             loopManager.receivedUnreliableCGMReading()
+            completion()
         case .noData:
             log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
-            // Attempt Loop even if this fetch didn't produce new data; a previous fetch may have produced recent-enough data
-            self.checkPumpDataAndLoop()
+            completion()
         case .error(let error):
             log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
-
             self.setLastError(error: error)
-            // Attempt Loop even if this fetch didn't produce new data; a previous fetch may have produced recent-enough data
-            self.checkPumpDataAndLoop()
+            completion()
         }
-
         updatePumpManagerBLEHeartbeatPreference()
     }
 
@@ -916,7 +913,9 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
         dispatchPrecondition(condition: .onQueue(queue))
-        processCGMReadingResult(manager, readingResult: readingResult);
+        processCGMReadingResult(manager, readingResult: readingResult) {
+            self.checkPumpDataAndLoop()
+        }
     }
 
     func startDateToFilterNewData(for manager: CGMManager) -> Date? {
@@ -996,8 +995,12 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
 
             self.queue.async {
-                self.processCGMReadingResult(cgmManager, readingResult: result)
-                completion?()
+                self.processCGMReadingResult(cgmManager, readingResult: result) {
+                    if self.loopManager.lastLoopCompleted == nil || self.loopManager.lastLoopCompleted!.timeIntervalSinceNow < -.minutes(6) {
+                        self.checkPumpDataAndLoop()
+                    }
+                    completion?()
+                }
             }
         }
     }
@@ -1156,6 +1159,10 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
             self.settingsManager.storeSettings()
         }
     }
+
+    func pumpManagerOnboarding(didPauseOnboarding pumpManager: PumpManagerUI) {
+        
+    }
 }
 
 // MARK: - AlertStoreDelegate
@@ -1258,7 +1265,7 @@ extension DeviceDataManager {
 
 // MARK: - LoopDataManagerDelegate
 extension DeviceDataManager: LoopDataManagerDelegate {
-    func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double {
+    func roundBasalRate(unitsPerHour: Double) -> Double {
         guard let pumpManager = pumpManager else {
             return unitsPerHour
         }
@@ -1266,7 +1273,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         return pumpManager.roundToSupportedBasalRate(unitsPerHour: unitsPerHour)
     }
 
-    func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double {
+    func roundBolusVolume(units: Double) -> Double {
         guard let pumpManager = pumpManager else {
             return units
         }
@@ -1337,7 +1344,7 @@ extension DeviceDataManager {
         let command: RemoteCommand
         
         do {
-            command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets).get()
+            command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets, defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium).get()
         } catch {
             log.error("Remote Notification Error: %{public}@", String(describing: error))
             return
@@ -1645,33 +1652,19 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
         }
     }
     
-    func saveCompletion(for therapySetting: TherapySetting, therapySettings: TherapySettings) {
-        switch therapySetting {
-        case .glucoseTargetRange:
-            loopManager.mutateSettings { settings in settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule }
-        case .preMealCorrectionRangeOverride:
-            loopManager.mutateSettings { settings in settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal }
-        case .workoutCorrectionRangeOverride:
-            loopManager.mutateSettings { settings in settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout }
-        case .suspendThreshold:
-            loopManager.mutateSettings { settings in settings.suspendThreshold = therapySettings.suspendThreshold }
-        case .basalRate:
-            loopManager.mutateSettings { settings in settings.basalRateSchedule = therapySettings.basalRateSchedule }
-        case .deliveryLimits:
-            loopManager.mutateSettings { settings in
-                settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
-                settings.maximumBolus = therapySettings.maximumBolus
-            }
-        case .insulinModel:
-            if let defaultRapidActingModel = therapySettings.defaultRapidActingModel {
-                loopManager.mutateSettings { settings in settings.defaultRapidActingModel = defaultRapidActingModel }
-            }
-        case .carbRatio:
-            loopManager.mutateSettings { settings in settings.carbRatioSchedule = therapySettings.carbRatioSchedule }
-        case .insulinSensitivity:
-            loopManager.mutateSettings { settings in settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule }
-        case .none:
-            break // NO-OP
+    func saveCompletion(therapySettings: TherapySettings) {
+
+        loopManager.mutateSettings { settings in
+            settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule
+            settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal
+            settings.legacyWorkoutTargetRange = therapySettings.correctionRangeOverrides?.workout
+            settings.suspendThreshold = therapySettings.suspendThreshold
+            settings.basalRateSchedule = therapySettings.basalRateSchedule
+            settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
+            settings.maximumBolus = therapySettings.maximumBolus
+            settings.defaultRapidActingModel = therapySettings.defaultRapidActingModel
+            settings.carbRatioSchedule = therapySettings.carbRatioSchedule
+            settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
         }
     }
     

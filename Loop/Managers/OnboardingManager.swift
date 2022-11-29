@@ -6,6 +6,7 @@
 //  Copyright © 2021 LoopKit Authors. All rights reserved.
 //
 
+import os.log
 import HealthKit
 import LoopKit
 import LoopKitUI
@@ -18,6 +19,8 @@ class OnboardingManager {
     private let loopDataManager: LoopDataManager
     private weak var windowProvider: WindowProvider?
     private let userDefaults: UserDefaults
+
+    private let log = OSLog(category: "OnboardingManager")
 
     @Published public private(set) var isSuspended: Bool {
         didSet { userDefaults.onboardingManagerIsSuspended = isSuspended }
@@ -33,7 +36,7 @@ class OnboardingManager {
         didSet { userDefaults.onboardingManagerActiveOnboardingRawValue = activeOnboarding?.rawValue }
     }
 
-    private var completion: (() -> Void)?
+    private var onboardingCompletion: (() -> Void)?
 
     init(pluginManager: PluginManager, bluetoothProvider: BluetoothProvider, deviceDataManager: DeviceDataManager, servicesManager: ServicesManager, loopDataManager: LoopDataManager, windowProvider: WindowProvider?, userDefaults: UserDefaults = .standard) {
         self.pluginManager = pluginManager
@@ -60,17 +63,17 @@ class OnboardingManager {
 
     func launch(_ completion: @escaping () -> Void) {
         dispatchPrecondition(condition: .onQueue(.main))
-        precondition(self.completion == nil)
+        precondition(self.onboardingCompletion == nil)
 
-        self.completion = completion
+        self.onboardingCompletion = completion
         continueOnboarding()
     }
 
     func resume() {
         dispatchPrecondition(condition: .onQueue(.main))
-        precondition(self.completion == nil)
+        precondition(self.onboardingCompletion == nil)
 
-        self.completion = {
+        self.onboardingCompletion = {
             self.windowProvider?.window?.rootViewController?.dismiss(animated: true, completion: nil)
         }
         continueOnboarding(allowResume: true)
@@ -204,8 +207,8 @@ class OnboardingManager {
     private func complete() {
         dispatchPrecondition(condition: .onQueue(.main))
 
-        if let completion = completion {
-            self.completion = nil
+        if let completion = onboardingCompletion {
+            self.onboardingCompletion = nil
             completion()
         }
     }
@@ -256,6 +259,7 @@ extension OnboardingManager: OnboardingDelegate {
     }
 
     func onboardingDidSuspend(_ onboarding: OnboardingUI) {
+        log.debug("OnboardingUI %@ did suspend", onboarding.onboardingIdentifier)
         guard onboarding.onboardingIdentifier == activeOnboarding?.onboardingIdentifier else { return }
         self.isSuspended = true
     }
@@ -266,7 +270,20 @@ extension OnboardingManager: OnboardingDelegate {
 extension OnboardingManager: CompletionDelegate {
     func completionNotifyingDidComplete(_ object: CompletionNotifying) {
         DispatchQueue.main.async {
-            self.completeActiveOnboarding()
+            guard let activeOnboarding = self.activeOnboarding else {
+                return
+            }
+
+            self.log.debug("completionNotifyingDidComplete during activeOnboarding", activeOnboarding.onboardingIdentifier)
+
+            // The `completionNotifyingDidComplete` callback can be called by an onboarding plugin to signal that the user is done with
+            // the onboarding UI, like when pausing, so the onboarding UI can be dismissed. This doesn't necessarily mean that the
+            // onboarding is finished/complete. So we check to see if onboarding is finished here before calling `completeActiveOnboarding`
+            if activeOnboarding.isOnboarded {
+                self.completeActiveOnboarding()
+            }
+
+            self.complete()
         }
     }
 }

@@ -296,6 +296,7 @@ struct StatusExtensionContext: RawRepresentable {
 
     var predictedGlucose: PredictedGlucoseContext?
     var lastLoopCompleted: Date?
+    var createdAt: Date?
     var isClosedLoop: Bool?
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
@@ -324,6 +325,7 @@ struct StatusExtensionContext: RawRepresentable {
         }
 
         lastLoopCompleted = rawValue["lastLoopCompleted"] as? Date
+        createdAt = rawValue["createdAt"] as? Date
         isClosedLoop = rawValue["isClosedLoop"] as? Bool
         batteryPercentage = rawValue["batteryPercentage"] as? Double
         reservoirCapacity = rawValue["reservoirCapacity"] as? Double
@@ -361,6 +363,7 @@ struct StatusExtensionContext: RawRepresentable {
 
         raw["predictedGlucose"] = predictedGlucose?.rawValue
         raw["lastLoopCompleted"] = lastLoopCompleted
+        raw["createdAt"] = createdAt
         raw["isClosedLoop"] = isClosedLoop
         raw["netBasal"] = netBasal?.rawValue
         raw["batteryPercentage"] = batteryPercentage

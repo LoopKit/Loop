@@ -50,12 +50,15 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     var settings: LoopSettings { get }
 
     var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable { get }
+
+    func roundBolusVolume(units: Double) -> Double
 }
 
 final class BolusEntryViewModel: ObservableObject {
     enum Alert: Int {
         case recommendationChanged
         case maxBolusExceeded
+        case bolusTooSmall
         case noPumpManagerConfigured
         case noMaxBolusConfigured
         case carbEntryPersistenceFailure
@@ -317,10 +320,24 @@ final class BolusEntryViewModel: ObservableObject {
             return
         }
 
+        guard let delegate = delegate else {
+            assertionFailure("Missing BolusEntryViewModelDelegate")
+            return
+        }
+
+        let amountEntered = enteredBolus.doubleValue(for: .internationalUnit())
+
+        let amountToDeliver = delegate.roundBolusVolume(units: amountEntered)
+        guard amountEntered == 0 || amountToDeliver > 0 else {
+            presentAlert(.bolusTooSmall)
+            return
+        }
+
+        let amountToDeliverString = bolusVolumeFormatter.numberFormatter.string(from: amountToDeliver) ?? String(amountToDeliver)
+
         // Capture state as is during initial action, to prevent race conditions
         // caused by later updates to member variables while async operations are
         // in progress
-        let amountToDeliver = enteredBolus
         let manualGlucoseSample = manualGlucoseSample
         let potentialCarbEntry = potentialCarbEntry
 
@@ -329,7 +346,7 @@ final class BolusEntryViewModel: ObservableObject {
             return
         }
 
-        guard amountToDeliver <= maximumBolus else {
+        guard amountToDeliver <= maximumBolus.doubleValue(for: .internationalUnit()) else {
             presentAlert(.maxBolusExceeded)
             return
         }
@@ -342,9 +359,9 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         // Authenticate the bolus before saving anything
-        if amountToDeliver.doubleValue(for: .internationalUnit()) > 0 {
+        if amountToDeliver > 0 {
             isInitiatingSaveOrBolus = true
-            let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString)
+            let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), amountToDeliverString)
             authenticate(message) { [weak self] in
                 switch $0 {
                 case .success:
@@ -363,7 +380,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
     
-    private func continueSaving(amountToDeliver: HKQuantity, manualGlucoseSample: NewGlucoseSample?, potentialCarbEntry: NewCarbEntry?, onSuccess completion: @escaping () -> Void) {
+    private func continueSaving(amountToDeliver: Double, manualGlucoseSample: NewGlucoseSample?, potentialCarbEntry: NewCarbEntry?, onSuccess completion: @escaping () -> Void) {
         if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
             delegate?.addGlucoseSamples([manualGlucoseSample]) { result in
@@ -385,13 +402,12 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func saveCarbsAndDeliverBolus(amountToDeliver: HKQuantity, potentialCarbEntry: NewCarbEntry?, onSuccess completion: @escaping () -> Void) {
-        let bolusVolume = amountToDeliver.doubleValue(for: .internationalUnit())
-        let activationType = BolusActivationType.activationTypeFor(recommendedAmount: recommendedBolus?.doubleValue(for: .internationalUnit()), bolusAmount: bolusVolume)
+    private func saveCarbsAndDeliverBolus(amountToDeliver: Double, potentialCarbEntry: NewCarbEntry?, onSuccess completion: @escaping () -> Void) {
+        let activationType = BolusActivationType.activationTypeFor(recommendedAmount: recommendedBolus?.doubleValue(for: .internationalUnit()), bolusAmount: amountToDeliver)
 
         guard let carbEntry = potentialCarbEntry else {
             dosingDecision.carbEntry = nil
-            deliverBolus(bolusVolume, activationType: activationType, onSuccess: completion)
+            deliverBolus(amountToDeliver, activationType: activationType, onSuccess: completion)
             return
         }
 
@@ -410,7 +426,7 @@ final class BolusEntryViewModel: ObservableObject {
                 switch result {
                 case .success(let storedCarbEntry):
                     self.dosingDecision.carbEntry = storedCarbEntry
-                    self.deliverBolus(bolusVolume, activationType: activationType, onSuccess: completion)
+                    self.deliverBolus(amountToDeliver, activationType: activationType, onSuccess: completion)
                 case .failure(let error):
                     self.isInitiatingSaveOrBolus = false
                     self.presentAlert(.carbEntryPersistenceFailure)

@@ -20,7 +20,9 @@ class ZipArchiveTests: XCTestCase {
     }
 
     override func tearDown() {
-        outputStream?.close()
+        if outputStream?.streamStatus == .open {
+           outputStream?.close()
+        }
         archive.close()
         try? FileManager.default.removeItem(at: url)
     }
