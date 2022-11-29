@@ -208,8 +208,10 @@ public final class AlertManager {
                 repeats: false
             )
 
+            let intervalIdentifierValue = TimeInterval(minutes: minutes)
+
             let request = UNNotificationRequest(
-                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(minutes)",
+                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(intervalIdentifierValue)",
                 content: notificationContent,
                 trigger: trigger
             )
