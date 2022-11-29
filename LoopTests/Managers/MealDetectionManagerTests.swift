@@ -8,6 +8,7 @@
 
 import XCTest
 import HealthKit
+import LoopCore
 import LoopKit
 @testable import Loop
 
@@ -32,12 +33,14 @@ enum UAMTestType {
     case manyMeals
     /// Test case to test dynamic computation of missed meal carb amount
     case dynamicCarbAutofill
+    /// Test case for purely testing the notifications (not the algorithm)
+    case notificationTest
 }
 
 extension UAMTestType {
     var counteractionEffectFixture: String {
         switch self {
-        case .unannouncedMealNoCOB, .noMealWithCOB:
+        case .unannouncedMealNoCOB, .noMealWithCOB, .notificationTest:
             return "uam_counteraction_effect"
         case .noMeal, .announcedMeal:
             return "long_interval_counteraction_effect"
@@ -54,7 +57,7 @@ extension UAMTestType {
     
     var currentDate: Date {
         switch self {
-        case .unannouncedMealNoCOB, .noMealWithCOB:
+        case .unannouncedMealNoCOB, .noMealWithCOB, .notificationTest:
             return Self.dateFormatter.date(from: "2022-10-17T23:28:45")!
         case .noMeal, .noMealCounteractionEffectsNeedClamping, .announcedMeal:
             return Self.dateFormatter.date(from: "2022-10-17T02:49:16")!
@@ -160,10 +163,18 @@ extension UAMTestType {
 
 class MealDetectionManagerTests {
     let dateFormatter = ISO8601DateFormatter.localTimeDate()
+    let pumpManager = MockPumpManager()
 
     var mealDetectionManager: MealDetectionManager!
     
-    func setUp(for testType: UAMTestType) -> [GlucoseEffectVelocity] {
+    var now: Date {
+        mealDetectionManager.test_currentDate!
+    }
+    
+    var bolusUnits: Double?
+    var bolusDurationEstimator: ((Double) -> TimeInterval?)!
+    
+    @discardableResult func setUp(for testType: UAMTestType) -> [GlucoseEffectVelocity] {
         let healthStore = HKHealthStoreMock()
         
         let carbStore = CarbStore(
@@ -194,7 +205,16 @@ class MealDetectionManagerTests {
         }
         _ = updateGroup.wait(timeout: .now() + .seconds(5))
         
-        mealDetectionManager = MealDetectionManager(carbStore: carbStore, test_currentDate: testType.currentDate)
+        mealDetectionManager = MealDetectionManager(
+            carbStore: carbStore,
+            maximumBolus: 5,
+            test_currentDate: testType.currentDate
+        )
+        
+        bolusDurationEstimator = { units in
+            self.bolusUnits = units
+            return self.pumpManager.estimatedDuration(toBolus: units)
+        }
         
         // Fetch & return the counteraction effects for the test
         return counteractionEffects(for: testType)
@@ -213,9 +233,12 @@ class MealDetectionManagerTests {
     }
     
     func tearDown() {
+        mealDetectionManager.lastUAMNotification = nil
         mealDetectionManager = nil
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = false
     }
     
+    // MARK: - Algorithm Tests
     func testNoUnannouncedMeal() {
         let counteractionEffects = setUp(for: .noMeal)
 
@@ -313,6 +336,108 @@ class MealDetectionManagerTests {
             updateGroup.leave()
         }
         updateGroup.wait()
+    }
+    
+    // MARK: - Notification Tests
+    func testNoUnannouncedMealLastNotificationTime() {
+        setUp(for: .notificationTest)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
+        
+        let status = UnannouncedMealStatus.noUnannouncedMeal
+        mealDetectionManager.manageMealNotifications(for: status, bolusDurationEstimator: { _ in nil })
+        
+        XCTAssertNil(mealDetectionManager.lastUAMNotification)
+    }
+
+    func testUnannouncedMealUpdatesLastNotificationTime() {
+        setUp(for: .notificationTest)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
+        
+        let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now, carbAmount: 40)
+        mealDetectionManager.manageMealNotifications(for: status, bolusDurationEstimator: { _ in nil })
+        
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.deliveryTime, now)
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.carbAmount, 40)
+    }
+    
+    func testUnannouncedMealWithoutNotificationsEnabled() {
+        setUp(for: .notificationTest)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = false
+        
+        let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now, carbAmount: 40)
+        mealDetectionManager.manageMealNotifications(for: status, bolusDurationEstimator: { _ in nil })
+        
+        XCTAssertNil(mealDetectionManager.lastUAMNotification)
+    }
+
+    func testUnannouncedMealWithTooRecentNotificationTime() {
+        setUp(for: .notificationTest)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
+        
+        let oldTime = now.addingTimeInterval(.hours(1))
+        let oldNotification = UAMNotification(deliveryTime: oldTime, carbAmount: 40)
+        mealDetectionManager.lastUAMNotification = oldNotification
+        
+        let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now, carbAmount: UAMSettings.minCarbThreshold)
+        mealDetectionManager.manageMealNotifications(for: status, bolusDurationEstimator: { _ in nil })
+        
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification, oldNotification)
+    }
+    
+    func testUnannouncedMealCarbClamping() {
+        setUp(for: .notificationTest)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
+
+        let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now, carbAmount: 120)
+        mealDetectionManager.manageMealNotifications(for: status, bolusDurationEstimator: { _ in nil })
+        
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.deliveryTime, now)
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.carbAmount, 100)
+    }
+    
+    func testUnannouncedMealNoPendingBolus() {
+        setUp(for: .notificationTest)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
+        
+        let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now, carbAmount: 40)
+        mealDetectionManager.manageMealNotifications(for: status, pendingAutobolusUnits: 0, bolusDurationEstimator: bolusDurationEstimator)
+        
+        /// The bolus units time delegate should never be called if there are 0 pending units
+        XCTAssertNil(bolusUnits)
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.deliveryTime, now)
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.carbAmount, 40)
+    }
+    
+    func testUnannouncedMealLongPendingBolus() {
+        setUp(for: .notificationTest)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
+        
+        let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now, carbAmount: 40)
+        mealDetectionManager.manageMealNotifications(for: status, pendingAutobolusUnits: 10, bolusDurationEstimator: bolusDurationEstimator)
+        
+        XCTAssertEqual(bolusUnits, 10)
+        /// There shouldn't be a delay in delivering notification, since the autobolus will take the length of the notification window to deliver
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.deliveryTime, now)
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.carbAmount, 40)
+    }
+    
+    func testNoUnannouncedMealShortPendingBolus_DelaysNotificationTime() {
+        setUp(for: .notificationTest)
+        UserDefaults.standard.unannouncedMealNotificationsEnabled = true
+        
+        let status = UnannouncedMealStatus.hasUnannouncedMeal(startTime: now, carbAmount: 30)
+        mealDetectionManager.manageMealNotifications(for: status, pendingAutobolusUnits: 2, bolusDurationEstimator: bolusDurationEstimator)
+        
+        let expectedDeliveryTime = now.addingTimeInterval(TimeInterval(80))
+        XCTAssertEqual(bolusUnits, 2)
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.deliveryTime, expectedDeliveryTime)
+        
+        mealDetectionManager.lastUAMNotification = nil
+        mealDetectionManager.manageMealNotifications(for: status, pendingAutobolusUnits: 4.5, bolusDurationEstimator: bolusDurationEstimator)
+        
+        let expectedDeliveryTime2 = now.addingTimeInterval(TimeInterval(minutes: 3))
+        XCTAssertEqual(bolusUnits, 4.5)
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.deliveryTime, expectedDeliveryTime2)
     }
 }
 

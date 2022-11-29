@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import OSLog
+import LoopCore
 import LoopKit
 
 enum UnannouncedMealStatus: Equatable {
@@ -18,15 +19,25 @@ enum UnannouncedMealStatus: Equatable {
 
 class MealDetectionManager {
     private let log = OSLog(category: "MealDetectionManager")
-
+    
+    public var maximumBolus: Double?
+    
+    /// The last unannounced meal notification that was sent
+    /// Internal for unit testing
+    var lastUAMNotification: UAMNotification? = UserDefaults.standard.lastUAMNotification {
+        didSet {
+            UserDefaults.standard.lastUAMNotification = lastUAMNotification
+        }
+    }
+    
+    private var carbStore: CarbStoreProtocol
+    
     /// Debug info for UAM
     /// Timeline from the most recent check for unannounced meals
     private var lastEvaluatedUamTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
     
     /// Timeline from the most recent detection of an unannounced meal
     private var lastDetectedUamTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
-    
-    private var carbStore: CarbStoreProtocol
     
     /// Allows for controlling uses of the system date in unit testing
     internal var test_currentDate: Date?
@@ -42,14 +53,16 @@ class MealDetectionManager {
     
     public init(
         carbStore: CarbStoreProtocol,
+        maximumBolus: Double?,
         test_currentDate: Date? = nil
     ) {
         self.carbStore = carbStore
+        self.maximumBolus = maximumBolus
         self.test_currentDate = test_currentDate
     }
     
     // MARK: Meal Detection
-    public func hasUnannouncedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], completion: @escaping (UnannouncedMealStatus) -> Void) {
+    func hasUnannouncedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], completion: @escaping (UnannouncedMealStatus) -> Void) {
         let delta = TimeInterval(minutes: 5)
 
         let intervalStart = currentDate(timeIntervalSinceNow: -UAMSettings.maxRecency)
@@ -214,15 +227,75 @@ class MealDetectionManager {
         return nil
     }
     
+    // MARK: Notification Generation
+    func generateUnannouncedMealNotificationIfNeeded(
+        using insulinCounteractionEffects: [GlucoseEffectVelocity],
+        pendingAutobolusUnits: Double? = nil,
+        bolusDurationEstimator: @escaping (Double) -> TimeInterval?
+    ) {
+        hasUnannouncedMeal(insulinCounteractionEffects: insulinCounteractionEffects) {[weak self] status in
+            self?.manageMealNotifications(for: status, pendingAutobolusUnits: pendingAutobolusUnits, bolusDurationEstimator: bolusDurationEstimator)
+        }
+    }
+    
+    
+    // Internal for unit testing
+    func manageMealNotifications(for status: UnannouncedMealStatus, pendingAutobolusUnits: Double? = nil, bolusDurationEstimator getBolusDuration: (Double) -> TimeInterval?) {
+        // We should remove expired notifications regardless of whether or not there was a meal
+        NotificationManager.removeExpiredMealNotifications()
+        
+        // Figure out if we should deliver a notification
+        let now = self.currentDate
+        let notificationTimeTooRecent = now.timeIntervalSince(lastUAMNotification?.deliveryTime ?? .distantPast) < (UAMSettings.maxRecency - UAMSettings.minRecency)
+        
+        guard
+            case .hasUnannouncedMeal(let startTime, let carbAmount) = status,
+            !notificationTimeTooRecent,
+            UserDefaults.standard.unannouncedMealNotificationsEnabled
+        else {
+            // No notification needed!
+            return
+        }
+        
+        var clampedCarbAmount = carbAmount
+        if
+            let maxBolus = maximumBolus,
+            let currentCarbRatio = carbStore.carbRatioSchedule?.quantity(at: now).doubleValue(for: .gram())
+        {
+            let maxAllowedCarbAutofill = maxBolus * currentCarbRatio
+            clampedCarbAmount = min(clampedCarbAmount, maxAllowedCarbAutofill)
+        }
+        
+        log.debug("Delivering a missed meal notification")
+
+        /// Coordinate the unannounced meal notification time with any pending autoboluses that `update` may have started
+        /// so that the user doesn't have to cancel the current autobolus to bolus in response to the missed meal notification
+        if
+            let pendingAutobolusUnits,
+            pendingAutobolusUnits > 0,
+            let estimatedBolusDuration = getBolusDuration(pendingAutobolusUnits),
+            estimatedBolusDuration < UAMSettings.maxNotificationDelay
+        {
+            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount, delay: estimatedBolusDuration)
+            lastUAMNotification = UAMNotification(deliveryTime: now.advanced(by: estimatedBolusDuration),
+                                                  carbAmount: clampedCarbAmount)
+        } else {
+            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount)
+            lastUAMNotification = UAMNotification(deliveryTime: now, carbAmount: clampedCarbAmount)
+        }
+    }
+    
     // MARK: Logging
     
     /// Generates a diagnostic report about the current state
     ///
     /// - parameter completionHandler: A closure called once the report has been generated. The closure takes a single argument of the report string.
-    public func generateDiagnosticReport(_ completionHandler: @escaping (_ report: String) -> Void) {
+    func generateDiagnosticReport(_ completionHandler: @escaping (_ report: String) -> Void) {
         let report = [
             "## MealDetectionManager",
             "",
+            "* lastUnannouncedMealNotificationTime: \(String(describing: lastUAMNotification?.deliveryTime))",
+            "* lastUnannouncedMealCarbEstimate: \(String(describing: lastUAMNotification?.carbAmount))",
             "* lastEvaluatedUnannouncedMealTimeline:",
             lastEvaluatedUamTimeline.reduce(into: "", { (entries, entry) in
                 entries.append("  * date: \(entry.date), unexpectedDeviation: \(entry.unexpectedDeviation ?? -1), meal-based threshold: \(entry.mealThreshold ?? -1), change-based threshold: \(entry.rateOfChangeThreshold ?? -1) \n")
