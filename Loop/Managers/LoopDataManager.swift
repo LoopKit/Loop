@@ -30,6 +30,8 @@ final class LoopDataManager {
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
     private let carbStore: CarbStoreProtocol
+    
+    private let mealDetectionManager: MealDetectionManager
 
     private let doseStore: DoseStoreProtocol
 
@@ -105,6 +107,7 @@ final class LoopDataManager {
         self.now = now
 
         self.latestStoredSettingsProvider = latestStoredSettingsProvider
+        self.mealDetectionManager = MealDetectionManager(carbStore: carbStore)
         
         self.lockedPumpInsulinType = Locked(pumpInsulinType)
 
@@ -1447,7 +1450,7 @@ extension LoopDataManager {
     }
     
     public func generateUnannouncedMealNotificationIfNeeded(using insulinCounteractionEffects: [GlucoseEffectVelocity], pendingAutobolusUnits: Double? = nil) {
-        carbStore.hasUnannouncedMeal(insulinCounteractionEffects: insulinCounteractionEffects) {[weak self] status in
+        mealDetectionManager.hasUnannouncedMeal(insulinCounteractionEffects: insulinCounteractionEffects) {[weak self] status in
             self?.manageMealNotifications(for: status, pendingAutobolusUnits: pendingAutobolusUnits)
         }
     }
@@ -2108,16 +2111,21 @@ extension LoopDataManager {
                     self.doseStore.generateDiagnosticReport { (report) in
                         entries.append(report)
                         entries.append("")
-
-                        UNUserNotificationCenter.current().generateDiagnosticReport { (report) in
+                        
+                        self.mealDetectionManager.generateDiagnosticReport { report in
                             entries.append(report)
                             entries.append("")
-
-                            UIDevice.current.generateDiagnosticReport { (report) in
+                            
+                            UNUserNotificationCenter.current().generateDiagnosticReport { (report) in
                                 entries.append(report)
                                 entries.append("")
 
-                                completion(entries.joined(separator: "\n"))
+                                UIDevice.current.generateDiagnosticReport { (report) in
+                                    entries.append(report)
+                                    entries.append("")
+
+                                    completion(entries.joined(separator: "\n"))
+                                }
                             }
                         }
                     }
