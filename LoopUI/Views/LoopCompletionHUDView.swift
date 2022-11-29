@@ -125,29 +125,14 @@ public final class LoopCompletionHUDView: BaseHUDView {
         let formatter = DateComponentsFormatter()
 
         formatter.allowedUnits = [.day, .hour, .minute]
-        formatter.maximumUnitCount = 2
+        formatter.maximumUnitCount = 1
         formatter.unitsStyle = .short
-        return formatter
-    }()
 
-    private lazy var timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .medium
-        return formatter
-    }()
-
-    private lazy var timeDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        formatter.locale = Locale.current
         return formatter
     }()
 
     @objc private func updateDisplay(_: Timer?) {
         lastLoopMessage = ""
-        let timeAgoToIncludeDate: TimeInterval = .hours(4)
         if let date = lastLoopCompleted {
             let ago = abs(min(0, date.timeIntervalSinceNow))
 
@@ -165,18 +150,11 @@ public final class LoopCompletionHUDView: BaseHUDView {
                     caption?.text = timeString
                 }
 
-                var timeString: String = ""
-                if ago < timeAgoToIncludeDate {
-                    timeString = String(format: LocalizedString("%1$@ ago at \n%2$@", comment: "Format string describing the time interval since and time of the last completion date. (1: The localized date components, (2: the date"), formatter.string(from: ago)!, timeFormatter.string(from: date))
+                accessibilityLabel = String(format: LocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
 
-                } else {
-                    timeString = String(format: LocalizedString("%1$@", comment: "Format string describing the time interval since and time of the last completion date. (1: The localized date components, (1: the date"), timeDateFormatter.string(from: date))
-
+                if let fullTimeStr = formatterFull.string(from: ago) {
+                    lastLoopMessage = String(format: LocalizedString("%1$@ last successfully completed a loop %2$@ ago.", comment: "Last loop time completed message (1: app name) (2: last loop time string)"), Bundle.main.bundleDisplayName, fullTimeStr)
                 }
-
-                accessibilityLabel = String(format: LocalizedString("%@", comment: "Accessbility format label describing the last completion. (1: last loop time string)"), timeString)
-
-                lastLoopMessage = String(format: LocalizedString("Last completed loop was\n%1$@", comment: "Last time loop completed message (1: last loop time string)"), timeString)
             } else {
                 caption?.text = "–"
                 accessibilityLabel = nil
@@ -210,7 +188,7 @@ extension LoopCompletionHUDView {
                         message: String(format: NSLocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@", comment: "Green closed loop OFF message (1: app name)(2: reason for open loop)"), Bundle.main.bundleDisplayName, reason))
             } else {
                 return (title: LocalizedString("Closed Loop ON", comment: "Title of green closed loop ON message"),
-                        message: String(format: LocalizedString("\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position.", comment: "Green closed loop ON message (1: last loop string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
+                        message: String(format: LocalizedString("\n%1$@ is operating with Closed Loop in the ON position. %2$@", comment: "Green closed loop ON message (1: app name) (2: last loop string)"), Bundle.main.bundleDisplayName, lastLoopMessage))
             }
         case .aging:
             return (title: LocalizedString("Loop Warning", comment: "Title of yellow loop message"),
