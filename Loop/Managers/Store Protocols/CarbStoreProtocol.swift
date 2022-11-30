@@ -60,9 +60,6 @@ protocol CarbStoreProtocol: AnyObject {
     func getTotalCarbs(since start: Date, completion: @escaping (_ result: CarbStoreResult<CarbValue>) -> Void)
     
     func deleteCarbEntry(_ entry: StoredCarbEntry, completion: @escaping (_ result: CarbStoreResult<Bool>) -> Void)
-    
-    // MARK: Unannounced Meal Detection
-    func hasUnannouncedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], completion: @escaping (UnannouncedMealStatus) -> Void)
 }
 
 extension CarbStore: CarbStoreProtocol { }

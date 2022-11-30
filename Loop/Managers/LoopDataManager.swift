@@ -30,6 +30,8 @@ final class LoopDataManager {
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
     private let carbStore: CarbStoreProtocol
+    
+    private let mealDetectionManager: MealDetectionManager
 
     private let doseStore: DoseStoreProtocol
 
@@ -105,6 +107,7 @@ final class LoopDataManager {
         self.now = now
 
         self.latestStoredSettingsProvider = latestStoredSettingsProvider
+        self.mealDetectionManager = MealDetectionManager(carbStore: carbStore, maximumBolus: settings.maximumBolus)
         
         self.lockedPumpInsulinType = Locked(pumpInsulinType)
 
@@ -271,6 +274,11 @@ final class LoopDataManager {
             invalidateCachedEffects = true
             analyticsServicesManager.didChangeInsulinModel()
         }
+        
+        // ANNA TODO: add test for this
+        if newValue.maximumBolus != oldValue.maximumBolus {
+            mealDetectionManager.maximumBolus = newValue.maximumBolus
+        }
 
         if invalidateCachedEffects {
             dataAccessQueue.async {
@@ -399,14 +407,6 @@ final class LoopDataManager {
 
     // Confined to dataAccessQueue
     private var retrospectiveCorrection: RetrospectiveCorrection
-    
-    /// The last unannounced meal notification that was sent
-    /// Internal for unit testing
-    internal var lastUAMNotification: UAMNotification? = UserDefaults.standard.lastUAMNotification {
-        didSet {
-            UserDefaults.standard.lastUAMNotification = lastUAMNotification
-        }
-    }
 
     // MARK: - Background task management
 
@@ -1445,58 +1445,6 @@ extension LoopDataManager {
             volumeRounder: volumeRounder
         )
     }
-    
-    public func generateUnannouncedMealNotificationIfNeeded(using insulinCounteractionEffects: [GlucoseEffectVelocity], pendingAutobolusUnits: Double? = nil) {
-        carbStore.hasUnannouncedMeal(insulinCounteractionEffects: insulinCounteractionEffects) {[weak self] status in
-            self?.manageMealNotifications(for: status, pendingAutobolusUnits: pendingAutobolusUnits)
-        }
-    }
-
-    // Internal for unit testing
-    internal func manageMealNotifications(for status: UnannouncedMealStatus, pendingAutobolusUnits: Double? = nil) {
-        // We should remove expired notifications regardless of whether or not there was a meal
-        NotificationManager.removeExpiredMealNotifications()
-        
-        // Figure out if we should deliver a notification
-        let now = now()
-        let notificationTimeTooRecent = now.timeIntervalSince(lastUAMNotification?.deliveryTime ?? .distantPast) < (UAMSettings.maxRecency - UAMSettings.minRecency)
-        
-        guard
-            case .hasUnannouncedMeal(let startTime, let carbAmount) = status,
-            !notificationTimeTooRecent,
-            UserDefaults.standard.unannouncedMealNotificationsEnabled
-        else {
-            // No notification needed!
-            return
-        }
-        
-        var clampedCarbAmount = carbAmount
-        if
-            let maxBolus = settings.maximumBolus,
-            let currentCarbRatio = settings.carbRatioSchedule?.quantity(at: now).doubleValue(for: .gram())
-        {
-            let maxAllowedCarbAutofill = maxBolus * currentCarbRatio
-            clampedCarbAmount = min(clampedCarbAmount, maxAllowedCarbAutofill)
-        }
-        
-        logger.debug("Delivering a missed meal notification")
-
-        /// Coordinate the unannounced meal notification time with any pending autoboluses that `update` may have started
-        /// so that the user doesn't have to cancel the current autobolus to bolus in response to the missed meal notification
-        if
-            let pendingAutobolusUnits,
-            pendingAutobolusUnits > 0,
-            let estimatedBolusDuration = delegate?.loopDataManager(self, estimateBolusDuration: pendingAutobolusUnits),
-            estimatedBolusDuration < UAMSettings.maxNotificationDelay
-        {
-            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount, delay: estimatedBolusDuration)
-            lastUAMNotification = UAMNotification(deliveryTime: now.advanced(by: estimatedBolusDuration),
-                                                  carbAmount: clampedCarbAmount)
-        } else {
-            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount)
-            lastUAMNotification = UAMNotification(deliveryTime: now, carbAmount: clampedCarbAmount)
-        }
-    }
 
     /// Generates a correction effect based on how large the discrepancy is between the current glucose and its model predicted value.
     ///
@@ -1723,8 +1671,13 @@ extension LoopDataManager {
     private func enactRecommendedAutomaticDose() -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
         
-        generateUnannouncedMealNotificationIfNeeded(using: insulinCounteractionEffects,
-                                                    pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits)
+        mealDetectionManager.generateUnannouncedMealNotificationIfNeeded(
+            using: insulinCounteractionEffects,
+            pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
+            bolusDurationEstimator: { [unowned self] bolusAmount in
+                return self.delegate?.loopDataManager(self, estimateBolusDuration: bolusAmount)
+            }
+        )
 
         guard let recommendedDose = self.recommendedAutomaticDose else {
             return nil
@@ -2086,8 +2039,6 @@ extension LoopDataManager {
                 "recommendedAutomaticDose: \(String(describing: state.recommendedAutomaticDose))",
                 "lastBolus: \(String(describing: manager.lastRequestedBolus))",
                 "lastLoopCompleted: \(String(describing: manager.lastLoopCompleted))",
-                "lastUnannouncedMealNotificationTime: \(String(describing: self.lastUAMNotification?.deliveryTime))",
-                "lastUnannouncedMealCarbEstimate: \(String(describing: self.lastUAMNotification?.carbAmount))",
                 "basalDeliveryState: \(String(describing: manager.basalDeliveryState))",
                 "carbsOnBoard: \(String(describing: state.carbsOnBoard))",
                 "error: \(String(describing: state.error))",
@@ -2108,16 +2059,21 @@ extension LoopDataManager {
                     self.doseStore.generateDiagnosticReport { (report) in
                         entries.append(report)
                         entries.append("")
-
-                        UNUserNotificationCenter.current().generateDiagnosticReport { (report) in
+                        
+                        self.mealDetectionManager.generateDiagnosticReport { report in
                             entries.append(report)
                             entries.append("")
-
-                            UIDevice.current.generateDiagnosticReport { (report) in
+                            
+                            UNUserNotificationCenter.current().generateDiagnosticReport { (report) in
                                 entries.append(report)
                                 entries.append("")
 
-                                completion(entries.joined(separator: "\n"))
+                                UIDevice.current.generateDiagnosticReport { (report) in
+                                    entries.append(report)
+                                    entries.append("")
+
+                                    completion(entries.joined(separator: "\n"))
+                                }
                             }
                         }
                     }
