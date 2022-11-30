@@ -598,6 +598,12 @@
 		E9B3552B293591E70076AB04 /* UAMNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* UAMNotification.swift */; };
 		E9B3552D293592B40076AB04 /* MealDetectionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */; };
 		E9B3552F2935968E0076AB04 /* HKHealthStoreMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3552E2935968E0076AB04 /* HKHealthStoreMock.swift */; };
+		E9B35538293706CB0076AB04 /* needs_clamping_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35532293706CA0076AB04 /* needs_clamping_counteraction_effect.json */; };
+		E9B35539293706CB0076AB04 /* dynamic_autofill_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35533293706CA0076AB04 /* dynamic_autofill_counteraction_effect.json */; };
+		E9B3553A293706CB0076AB04 /* uam_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35534293706CB0076AB04 /* uam_counteraction_effect.json */; };
+		E9B3553B293706CB0076AB04 /* noisy_cgm_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35535293706CB0076AB04 /* noisy_cgm_counteraction_effect.json */; };
+		E9B3553C293706CB0076AB04 /* realistic_report_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35536293706CB0076AB04 /* realistic_report_counteraction_effect.json */; };
+		E9B3553D293706CB0076AB04 /* long_interval_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35537293706CB0076AB04 /* long_interval_counteraction_effect.json */; };
 		E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB27AA23B85C3500FB4987 /* SleepStore.swift */; };
 		E9C00EF224C6221B00628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
@@ -1562,6 +1568,12 @@
 		E9B35525293590980076AB04 /* UAMSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UAMSettings.swift; sourceTree = "<group>"; };
 		E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealDetectionManagerTests.swift; sourceTree = "<group>"; };
 		E9B3552E2935968E0076AB04 /* HKHealthStoreMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HKHealthStoreMock.swift; sourceTree = "<group>"; };
+		E9B35532293706CA0076AB04 /* needs_clamping_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = needs_clamping_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35533293706CA0076AB04 /* dynamic_autofill_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dynamic_autofill_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35534293706CB0076AB04 /* uam_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = uam_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35535293706CB0076AB04 /* noisy_cgm_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = noisy_cgm_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35536293706CB0076AB04 /* realistic_report_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = realistic_report_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35537293706CB0076AB04 /* long_interval_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = long_interval_counteraction_effect.json; sourceTree = "<group>"; };
 		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 		E9C00EEF24C620EF00628F35 /* LoopSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettings.swift; sourceTree = "<group>"; };
 		E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopSettings+Loop.swift"; sourceTree = "<group>"; };
@@ -2822,9 +2834,23 @@
 			path = "Missed Meal Detection";
 			sourceTree = "<group>";
 		};
+		E9B355312937068A0076AB04 /* meal_detection */ = {
+			isa = PBXGroup;
+			children = (
+				E9B35533293706CA0076AB04 /* dynamic_autofill_counteraction_effect.json */,
+				E9B35532293706CA0076AB04 /* needs_clamping_counteraction_effect.json */,
+				E9B35534293706CB0076AB04 /* uam_counteraction_effect.json */,
+				E9B35535293706CB0076AB04 /* noisy_cgm_counteraction_effect.json */,
+				E9B35537293706CB0076AB04 /* long_interval_counteraction_effect.json */,
+				E9B35536293706CB0076AB04 /* realistic_report_counteraction_effect.json */,
+			);
+			path = meal_detection;
+			sourceTree = "<group>";
+		};
 		E9C58A7624DB510500487A17 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				E9B355312937068A0076AB04 /* meal_detection */,
 				E90909EC24E35B3400F963D2 /* high_and_falling */,
 				E90909E124E352C300F963D2 /* low_with_low_treatment */,
 				E90909D624E34EC200F963D2 /* low_and_falling */,
@@ -3395,6 +3421,9 @@
 				E93E865424DB6CBA00FF40C8 /* retrospective_output.json in Resources */,
 				E9C58A7F24DB529A00487A17 /* counteraction_effect_falling_glucose.json in Resources */,
 				E93E865624DB731900FF40C8 /* predicted_glucose_without_retrospective.json in Resources */,
+				E9B3553D293706CB0076AB04 /* long_interval_counteraction_effect.json in Resources */,
+				E9B3553A293706CB0076AB04 /* uam_counteraction_effect.json in Resources */,
+				E9B35538293706CB0076AB04 /* needs_clamping_counteraction_effect.json in Resources */,
 				E90909D424E34AC500F963D2 /* high_and_rising_with_cob_carb_effect.json in Resources */,
 				E93E86CC24E2E02200FF40C8 /* high_and_stable_predicted_glucose.json in Resources */,
 				E90909DC24E34F1600F963D2 /* low_and_falling_predicted_glucose.json in Resources */,
@@ -3409,10 +3438,13 @@
 				E90909DF24E34F1600F963D2 /* low_and_falling_insulin_effect.json in Resources */,
 				E93E86BE24E1FDC400FF40C8 /* flat_and_stable_carb_effect.json in Resources */,
 				E90909E824E3530200F963D2 /* low_with_low_treatment_insulin_effect.json in Resources */,
+				E9B3553B293706CB0076AB04 /* noisy_cgm_counteraction_effect.json in Resources */,
+				E9B3553C293706CB0076AB04 /* realistic_report_counteraction_effect.json in Resources */,
 				E93E865824DB75BE00FF40C8 /* predicted_glucose_very_negative.json in Resources */,
 				E93E86BC24E1FDC400FF40C8 /* flat_and_stable_predicted_glucose.json in Resources */,
 				E90909EB24E3530200F963D2 /* low_with_low_treatment_counteraction_effect.json in Resources */,
 				E90909F424E35B4D00F963D2 /* high_and_falling_insulin_effect.json in Resources */,
+				E9B35539293706CB0076AB04 /* dynamic_autofill_counteraction_effect.json in Resources */,
 				E90909F624E35B7C00F963D2 /* high_and_falling_momentum_effect.json in Resources */,
 				E93E86BA24E1FDC400FF40C8 /* flat_and_stable_insulin_effect.json in Resources */,
 				E90909E724E3530200F963D2 /* low_with_low_treatment_carb_effect.json in Resources */,
@@ -4569,7 +4601,7 @@
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				CURRENT_PROJECT_VERSION = 101;
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -4615,7 +4647,7 @@
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				CURRENT_PROJECT_VERSION = 101;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatusWidget/Info.plist;
@@ -4870,7 +4902,7 @@
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4895,7 +4927,7 @@
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4917,7 +4949,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4944,7 +4976,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4971,7 +5003,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				FRAMEWORK_SEARCH_PATHS = "";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -4995,7 +5027,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				FRAMEWORK_SEARCH_PATHS = "";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -5215,7 +5247,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -5237,7 +5269,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -5299,7 +5331,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Intent Extension/Loop Intent Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
@@ -5322,7 +5354,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Intent Extension/Loop Intent Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = T93DJEUU9W;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
