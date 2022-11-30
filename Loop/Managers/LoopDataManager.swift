@@ -274,8 +274,7 @@ final class LoopDataManager {
             invalidateCachedEffects = true
             analyticsServicesManager.didChangeInsulinModel()
         }
-        
-        // ANNA TODO: add test for this
+
         if newValue.maximumBolus != oldValue.maximumBolus {
             mealDetectionManager.maximumBolus = newValue.maximumBolus
         }
