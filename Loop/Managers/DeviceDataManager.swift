@@ -1313,10 +1313,11 @@ extension DeviceDataManager {
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
 
         defer {
-            log.info("Finished handling remote notification")
+            log.default("Remote Notification: Finished handling")
         }
         
         guard FeatureFlags.remoteOverridesEnabled else {
+            log.error("Remote Notification: Overrides not enabled.")
             return
         }
 
@@ -1325,11 +1326,11 @@ extension DeviceDataManager {
             formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
             if let expiration = formatter.date(from: expirationStr) {
                 guard expiration > Date() else {
-                    log.error("Expired notification: %{public}@", String(describing: notification))
+                    log.error("Remote Notification: Expired: %{public}@", String(describing: notification))
                     return
                 }
             } else {
-                log.error("Invalid expiration: %{public}@", expirationStr)
+                log.error("Remote Notification: Invalid expiration: %{public}@", expirationStr)
                 return
             }
         }
@@ -1339,69 +1340,70 @@ extension DeviceDataManager {
         do {
             command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets).get()
         } catch {
-            log.error("Remote Notification Error: %{public}@", String(describing: error))
+            log.error("Remote Notification: Parse Error: %{public}@", String(describing: error))
             return
         }
 
         switch command {
             
         case .temporaryScheduleOverride(let override):
-            log.default("Enacting remote temporary override: %{public}@", String(describing: override))
+            log.default("Remote Notification: Enacting temporary override: %{public}@", String(describing: override))
             loopManager.mutateSettings { settings in settings.scheduleOverride = override }
         case .cancelTemporaryOverride:
-            log.default("Canceling temporary override from remote command")
+            log.default("Remote Notification: Canceling temporary override")
             loopManager.mutateSettings { settings in settings.scheduleOverride = nil }
         case .bolusEntry(let bolusAmount):
-            log.default("Enacting remote bolus entry: %{public}@", String(describing: bolusAmount))
+            log.default("Remote Notification: Enacting bolus entry: %{public}@", String(describing: bolusAmount))
             
             //Remote bolus requires validation from its remote source
             guard remoteDataServicesManager.validatePushNotificationSource(notification) else {
                 NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.invalidOTP, amount: bolusAmount)
-                log.info("Could not validate notification: %{public}@", String(describing: notification))
+                log.error("Remote Notification: Could not validate notification: %{public}@", String(describing: notification))
                 return
             }
             
             guard let maxBolusAmount = loopManager.settings.maximumBolus else {
                 NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.missingMaxBolus, amount: bolusAmount)
-                log.default("No max bolus detected. Aborting...")
+                log.error("Remote Notification: No max bolus detected. Aborting...")
                 return
             }
             
             guard bolusAmount.isLessThanOrEqualTo(maxBolusAmount) else {
                 NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.exceedsMaxBolus, amount: bolusAmount)
-                log.default("Remote bolus higher than maximum. Aborting...")
+                log.error("Remote Notification: Bolus exceeds maximum allowed. Aborting...")
                 return
             }
             
             // For remote boluses, assume manual no recommendation.
             self.enactBolus(units: bolusAmount, activationType: .manualNoRecommendation) { error in
                 if let error = error {
+                    self.log.error("Remote Notification: Error adding bolus: %{public}@", String(describing: error))
                     NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAmount)
                 } else {
                     NotificationManager.sendRemoteBolusNotification(amount: bolusAmount)
                 }
             }
         case .carbsEntry(let candidateCarbEntry):
-            log.default("Adding carbs entry.")
+            log.default("Remote Notification: Adding carbs entry: %{public}@", String(describing: candidateCarbEntry))
             
             let candidateCarbsInGrams = candidateCarbEntry.quantity.doubleValue(for: .gram())
             
             //Remote carb entry requires validation from its remote source
             guard remoteDataServicesManager.validatePushNotificationSource(notification) else {
                 NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidOTP, amountInGrams: candidateCarbsInGrams)
-                log.info("Could not validate notification: %{public}@", String(describing: notification))
+                log.error("Remote Notification: Could not validate notification: %{public}@", String(describing: notification))
                 return
             }
             
             guard candidateCarbsInGrams > 0.0 else {
                 NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidCarbs, amountInGrams: candidateCarbsInGrams)
-                log.default("Invalid carb entry amount. Aborting...")
+                log.error("Remote Notification: Invalid carb entry amount. Aborting...")
                 return
             }
             
             guard candidateCarbsInGrams <= LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()) else {
                 NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.exceedsMaxCarbs, amountInGrams: candidateCarbsInGrams)
-                log.default("Carbs higher than maximum. Aborting...")
+                log.error("Remote Notification: Carbs higher than maximum. Aborting...")
                 return
             }
             
@@ -1410,6 +1412,7 @@ extension DeviceDataManager {
                 case .success(let completedCarbEntry):
                     NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: completedCarbEntry.quantity.doubleValue(for: .gram()))
                 case .failure(let error):
+                    self.log.error("Remote Notification: Error adding carb entry: %{public}@", String(describing: error))
                     NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: candidateCarbsInGrams)
                 }
             }
