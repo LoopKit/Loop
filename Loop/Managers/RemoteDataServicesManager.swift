@@ -176,10 +176,6 @@ final class RemoteDataServicesManager {
         clearSettingsQueryAnchor(for: remoteDataService)
     }
 
-    public func waitForUploadsToFinish(timeout: DispatchTime = .now() + TimeInterval(10)) -> DispatchTimeoutResult {
-        return uploadGroup.wait(timeout: timeout)
-    }
-
     func triggerUpload(for triggeringType: RemoteDataType) {
         let uploadTypes = [triggeringType] + failedUploads.map { $0.remoteDataType }
 
@@ -204,6 +200,13 @@ final class RemoteDataServicesManager {
             case .overrides:
                 remoteDataServices.forEach { self.uploadTemporaryOverrideData(to: $0) }
             }
+        }
+    }
+    
+    func triggerUpload(for triggeringType: RemoteDataType, completion: @escaping () -> Void) {
+        triggerUpload(for: triggeringType)
+        self.uploadGroup.notify(queue: DispatchQueue.main) {
+            completion()
         }
     }
 }
