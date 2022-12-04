@@ -1432,30 +1432,54 @@ extension DeviceDataManager {
     }
     
     func addRemoteCarbEntry(_ carbEntry: NewCarbEntry, completion: @escaping (_ result: CarbStoreResult<StoredCarbEntry>) -> Void) {
-        let backgroundTaskID = "Add Remote Carb Entry"
-        let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: backgroundTaskID)
+
+        var backgroundTask: UIBackgroundTaskIdentifier?
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Add Remote Carb Entry") {
+            guard let backgroundTask = backgroundTask else {return}
+            UIApplication.shared.endBackgroundTask(backgroundTask)
+            self.log.error("Add Remote Carb Entry background task expired")
+        }
+
         carbStore.addCarbEntry(carbEntry) { result in
             self.triggerBackgroundUpload(for: .carb)
-            UIApplication.shared.endBackgroundTask(backgroundTask)
+            if let backgroundTask = backgroundTask {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
             completion(result)
         }
     }
     
     func enactRemoteBolus(units: Double, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
-        let backgroundTaskID = "Add Remote Bolus Entry"
-        let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: backgroundTaskID)
+        
+        var backgroundTask: UIBackgroundTaskIdentifier?
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Enact Remote Bolus") {
+            guard let backgroundTask = backgroundTask else {return}
+            UIApplication.shared.endBackgroundTask(backgroundTask)
+            self.log.error("Enact Remote Bolus background task expired")
+        }
+        
         self.enactBolus(units: units, activationType: .manualNoRecommendation) { error in
             self.triggerBackgroundUpload(for: .dose)
-            UIApplication.shared.endBackgroundTask(backgroundTask)
+            if let backgroundTask = backgroundTask {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
             completion(error)
         }
     }
     
     func triggerBackgroundUpload(for triggeringType: RemoteDataType) {
-        let backgroundTaskID = "Remote Data upload"
-        let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: backgroundTaskID)
-        self.remoteDataServicesManager.triggerUpload(for: triggeringType) {
+        
+        var backgroundTask: UIBackgroundTaskIdentifier?
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Remote Data Upload") {
+            guard let backgroundTask = backgroundTask else {return}
             UIApplication.shared.endBackgroundTask(backgroundTask)
+            self.log.error("Remote Data Upload background task expired")
+        }
+        
+        self.remoteDataServicesManager.triggerUpload(for: triggeringType) {
+            if let backgroundTask = backgroundTask {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
         }
     }
 }
