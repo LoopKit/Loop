@@ -44,6 +44,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupToolbarItems()
+        
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
 
@@ -132,14 +135,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         // Estimate an initial value
         landscapeMode = UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height
 
-        // Toolbar
-        toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
-        toolbarItems![0].tintColor = UIColor.carbTintColor
-        toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
-        toolbarItems![4].tintColor = UIColor.insulinTintColor
-        toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
-        toolbarItems![8].tintColor = UIColor.secondaryLabel
-
         addScenarioStepGestureRecognizers()
 
         tableView.backgroundColor = .secondarySystemBackground
@@ -161,6 +156,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         navigationController?.setNavigationBarHidden(true, animated: animated)
         navigationController?.setToolbarHidden(false, animated: animated)
+        
+        setupToolbarItems()
+        updateToolbarItems()
 
         alertPermissionsChecker.checkNow()
 
@@ -256,15 +254,40 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
     }
 
+    private func setupToolbarItems() {
+        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+        let carbs = UIBarButtonItem(image: UIImage(named: "carbs"), style: .plain, target: self, action: #selector(userTappedAddCarbs))
+        let preMeal = createPreMealButtonItem(selected: false, isEnabled: true)
+        let bolus = UIBarButtonItem(image: UIImage(named: "bolus"), style: .plain, target: self, action: #selector(presentBolusScreen))
+        let workout = createWorkoutButtonItem(selected: false, isEnabled: true)
+        let settings = UIBarButtonItem(image: UIImage(named: "settings"), style: .plain, target: self, action: #selector(onSettingsTapped))
+        
+        toolbarItems = [
+            carbs,
+            space,
+            preMeal,
+            space,
+            bolus,
+            space,
+            workout,
+            space,
+            settings
+        ]
+    }
+    
     private func updateToolbarItems() {
         let isPumpOnboarded = onboardingManager.isComplete || deviceManager.pumpManager?.isOnboarded == true
-        let isClosedLoop = closedLoopStatus.isClosedLoop
 
+        toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
         toolbarItems![0].isEnabled = isPumpOnboarded
-        toolbarItems![2].isEnabled = isPumpOnboarded && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+        toolbarItems![0].tintColor = UIColor.carbTintColor
+        toolbarItems![2].isEnabled = isPumpOnboarded && (closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+        toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
         toolbarItems![4].isEnabled = isPumpOnboarded
+        toolbarItems![4].tintColor = UIColor.insulinTintColor
         toolbarItems![6].isEnabled = isPumpOnboarded
-        toolbarItems![8].isEnabled = true
+        toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
+        toolbarItems![8].tintColor = UIColor.secondaryLabel
     }
 
     public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil {
