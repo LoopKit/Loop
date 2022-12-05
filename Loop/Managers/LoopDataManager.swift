@@ -154,6 +154,7 @@ final class LoopDataManager {
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
                     self.recentCarbEntries = nil
+                    self.remoteRecommendationNeedsUpdating = true
                     self.notify(forChange: .carbs)
                 }
             },
@@ -166,6 +167,7 @@ final class LoopDataManager {
                     self.logger.default("Received notification of glucose samples changing")
 
                     self.glucoseMomentumEffect = nil
+                    self.remoteRecommendationNeedsUpdating = true
 
                     self.notify(forChange: .glucose)
                 }
@@ -179,6 +181,7 @@ final class LoopDataManager {
                     self.logger.default("Received notification of dosing changing")
 
                     self.insulinEffect = nil
+                    self.remoteRecommendationNeedsUpdating = true
 
                     self.notify(forChange: .insulin)
                 }
@@ -437,6 +440,37 @@ final class LoopDataManager {
         dosingDecisionWithError.appendError(error)
         dosingDecisionStore.storeDosingDecision(dosingDecisionWithError) {}
     }
+
+    // This is primarily for remote clients displaying a bolus recommendation and forecast
+    // Should be called after any significant change to forecast input data.
+
+
+    var remoteRecommendationNeedsUpdating: Bool = false
+
+    func updateRemoteRecommendation() {
+        dataAccessQueue.async {
+            if self.remoteRecommendationNeedsUpdating {
+                var (dosingDecision, updateError) = self.update(for: .updateRemoteRecommendation)
+
+                if let error = updateError {
+                    self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
+                } else {
+                    do {
+                        if let predictedGlucoseIncludingPendingInsulin = self.predictedGlucoseIncludingPendingInsulin,
+                           let manualBolusRecommendation = try self.recommendManualBolus(forPrediction: predictedGlucoseIncludingPendingInsulin, consideringPotentialCarbEntry: nil)
+                        {
+                            dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualBolusRecommendation, date: Date())
+                            self.logger.debug("Manual bolus rec = %{public}@", String(describing: dosingDecision.manualBolusRecommendation))
+                            self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
+                        }
+                    } catch {
+                        self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
+                    }
+                }
+                self.remoteRecommendationNeedsUpdating = false
+            }
+        }
+    }
 }
 
 // MARK: Background task management
@@ -605,7 +639,6 @@ extension LoopDataManager {
     func deleteCarbEntry(_ oldEntry: StoredCarbEntry, completion: @escaping (_ result: CarbStoreResult<Bool>) -> Void) {
         carbStore.deleteCarbEntry(oldEntry) { result in
             completion(result)
-            self.updateRecommendedManualBolus()
         }
     }
 
@@ -815,37 +848,13 @@ extension LoopDataManager {
             WidgetCenter.shared.reloadAllTimelines()
         }
 
-        updateRecommendedManualBolus()
-    }
-
-    // This is primarily for external clients displaying a bolus recommendation and forecast
-    // Should be called after any significant change to forecast input data.
-    private func updateRecommendedManualBolus() {
-        dataAccessQueue.async {
-            var (dosingDecision, updateError) = self.update(for: .updateRecommendedManualBolus)
-
-            if let error = updateError {
-                self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
-            } else {
-                do {
-                    if let predictedGlucoseIncludingPendingInsulin = self.predictedGlucoseIncludingPendingInsulin,
-                       let manualBolusRecommendation = try self.recommendManualBolus(forPrediction: predictedGlucoseIncludingPendingInsulin, consideringPotentialCarbEntry: nil)
-                    {
-                        dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualBolusRecommendation, date: Date())
-                        self.logger.debug("Manual bolus rec = %{public}@", String(describing: dosingDecision.manualBolusRecommendation))
-                        self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
-                    }
-                } catch {
-                    self.logger.error("Error updating manual bolus recommendation: %{public}@", String(describing: error))
-                }
-            }
-        }
+        updateRemoteRecommendation()
     }
 
     fileprivate enum UpdateReason: String {
         case loop
         case getLoopState
-        case updateRecommendedManualBolus
+        case updateRemoteRecommendation
     }
 
     fileprivate func update(for reason: UpdateReason) -> (StoredDosingDecision, LoopError?) {
