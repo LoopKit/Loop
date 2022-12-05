@@ -786,6 +786,8 @@ extension DeviceDataManager {
                     completion(nil)
                 }
             }
+            // Trigger forecast/recommendation update for remote clients
+            self.loopManager.updateRemoteRecommendation()
         }
     }
 

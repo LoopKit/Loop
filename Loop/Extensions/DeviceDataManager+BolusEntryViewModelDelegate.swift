@@ -19,11 +19,20 @@ extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDel
     func withLoopState(do block: @escaping (LoopState) -> Void) {
         loopManager.getLoopState { block($1) }
     }
-    
-    func addGlucoseSamples(_ samples: [NewGlucoseSample], completion: ((Swift.Result<[StoredGlucoseSample], Error>) -> Void)?) {
-        loopManager.addGlucoseSamples(samples, completion: completion)
+
+    func saveGlucose(sample: NewGlucoseSample) async -> StoredGlucoseSample? {
+        return await withCheckedContinuation { continuation in
+            loopManager.addGlucoseSamples([sample]) { result in
+                switch result {
+                case .success(let samples):
+                    continuation.resume(returning: samples.first)
+                case .failure:
+                    continuation.resume(returning: nil)
+                }
+            }
+        }
     }
-    
+
     func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
         loopManager.addCarbEntry(carbEntry, replacing: replacingEntry, completion: completion)
     }
@@ -76,4 +85,7 @@ extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDel
         return loopManager.settings
     }
 
+    func updateRemoteRecommendation() {
+        loopManager.updateRemoteRecommendation()
+    }
 }
