@@ -174,8 +174,9 @@ public final class AlertManager {
         var scheduledNotifications: [StoredLoopNotRunningNotification] = []
 
         for (minutes, isCritical) in [(20.0, false), (40.0, false), (60.0, true), (120.0, true)] {
-            let failureInterval = lastLoopDate.addingTimeInterval(.minutes(minutes)).timeIntervalSinceNow
-            guard failureInterval >= 0 else { break }
+            let warningInterval = TimeInterval(minutes: minutes)
+            let timeUntilNotification = lastLoopDate.addingTimeInterval(.minutes(minutes)).timeIntervalSinceNow
+            guard timeUntilNotification >= 0 else { break }
 
             let formatter = DateComponentsFormatter()
             formatter.maximumUnitCount = 1
@@ -183,12 +184,12 @@ public final class AlertManager {
             formatter.unitsStyle = .full
 
             let notificationContent = UNMutableNotificationContent()
-            if let failureIntervalString = formatter.string(from: failureInterval)?.localizedLowercase {
+            if let failureIntervalString = formatter.string(from: warningInterval)?.localizedLowercase {
                 notificationContent.body = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failureIntervalString)
             }
 
             notificationContent.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            let shouldMuteAlert = alertMuter.shouldMuteAlert(scheduledAt: failureInterval)
+            let shouldMuteAlert = alertMuter.shouldMuteAlert(scheduledAt: timeUntilNotification)
             if isCritical, FeatureFlags.criticalAlertsEnabled {
                 if #available(iOS 15.0, *) {
                     notificationContent.interruptionLevel = .critical
@@ -204,14 +205,13 @@ public final class AlertManager {
             notificationContent.threadIdentifier = LoopNotificationCategory.loopNotRunning.rawValue
 
             let trigger = UNTimeIntervalNotificationTrigger(
-                timeInterval: failureInterval + gracePeriod,
+                timeInterval: timeUntilNotification + gracePeriod,
                 repeats: false
             )
 
-            let intervalIdentifierValue = TimeInterval(minutes: minutes)
 
             let request = UNNotificationRequest(
-                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(intervalIdentifierValue)",
+                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(warningInterval)",
                 content: notificationContent,
                 trigger: trigger
             )
@@ -221,7 +221,7 @@ public final class AlertManager {
                     alertAt: nextTriggerDate,
                     title: notificationContent.title,
                     body: notificationContent.body,
-                    timeInterval: failureInterval,
+                    timeInterval: warningInterval,
                     isCritical: isCritical)
                 scheduledNotifications.append(scheduledNotification)
             }
