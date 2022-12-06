@@ -71,10 +71,6 @@ class MockDoseStore: DoseStoreProtocol {
         completion(nil)
     }
     
-    func resetPumpData(completion: ((DoseStore.DoseStoreError?) -> Void)?) {
-        completion?(.configurationError)
-    }
-    
     func getInsulinOnBoardValues(start: Date, end: Date?, basalDosingEnd: Date?, completion: @escaping (DoseStoreResult<[InsulinValue]>) -> Void) {
         completion(.failure(.configurationError))
     }

@@ -1074,8 +1074,6 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
-        // PumpManagers should report a continuous dosing history, across pump changes
-        //doseStore.resetPumpData(completion: nil)
     }
     
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
