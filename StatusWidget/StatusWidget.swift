@@ -223,6 +223,7 @@ extension Date {
     }
 }
 
+#if NOT_USED_IN_TIDEPOOL_LOOP
 @main
 struct SmallStatusWidget: Widget {
     let kind: String = "SmallStatusWidget"
@@ -236,3 +237,4 @@ struct SmallStatusWidget: Widget {
         .supportedFamilies([.systemSmall])
     }
 }
+#endif
