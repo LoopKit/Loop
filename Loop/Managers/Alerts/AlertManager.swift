@@ -85,8 +85,10 @@ public final class AlertManager {
         bluetoothProvider.addBluetoothObserver(self, queue: .main)
 
         NotificationCenter.default.publisher(for: .LoopCompleted)
-            .sink { [weak self] _ in
-                self?.loopDidComplete(self?.getLastLoopDate())
+            .sink { [weak self] publisher in
+                if let loopDataManager = publisher.object as? LoopDataManager {
+                    self?.loopDidComplete(loopDataManager.lastLoopCompleted)
+                }
             }
             .store(in: &cancellables)
 
