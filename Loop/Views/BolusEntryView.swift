@@ -410,7 +410,11 @@ struct BolusEntryView: View {
                 if self.viewModel.actionButtonAction == .enterBolus {
                     self.shouldBolusEntryBecomeFirstResponder = true
                 } else {
-                    self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
+                    Task {
+                        if await self.viewModel.didPressActionButton() {
+                            dismiss()
+                        }
+                    }
                 }
             },
             label: {
@@ -427,7 +431,7 @@ struct BolusEntryView: View {
             }
         )
         .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
-        .disabled(viewModel.isInitiatingSaveOrBolus)
+        .disabled(viewModel.enacting)
         .padding()
     }
 

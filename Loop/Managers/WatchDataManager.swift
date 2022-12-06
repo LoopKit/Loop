@@ -391,6 +391,8 @@ final class WatchDataManager: NSObject {
 
                 // When we've successfully started the bolus, send a new context with our new prediction
                 self.sendWatchContextIfNeeded()
+
+                self.deviceManager.loopManager.updateRemoteRecommendation()
             }
         }
 
