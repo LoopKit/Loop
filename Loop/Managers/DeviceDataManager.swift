@@ -1321,7 +1321,7 @@ extension DeviceDataManager {
             log.info("Finished handling remote notification")
         }
         
-        guard FeatureFlags.remoteOverridesEnabled else {
+        guard FeatureFlags.remoteCommandsEnabled else {
             return
         }
 

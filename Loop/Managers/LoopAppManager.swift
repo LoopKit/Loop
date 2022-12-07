@@ -97,7 +97,7 @@ class LoopAppManager: NSObject {
 
         registerBackgroundTasks()
 
-        if FeatureFlags.remoteOverridesEnabled {
+        if FeatureFlags.remoteCommandsEnabled {
             DispatchQueue.main.async {
                 UIApplication.shared.registerForRemoteNotifications()
             }
