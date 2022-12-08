@@ -24,8 +24,6 @@ struct BolusEntryView: View {
     @State private var enteredBolusString = ""
     @State private var shouldBolusEntryBecomeFirstResponder = false
 
-    @State private var isManualGlucoseEntryRowVisible = false
-
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
     @State private var pickerShouldExpand = false
@@ -50,6 +48,7 @@ struct BolusEntryView: View {
                     .opacity(self.isKeyboardVisible ? 0 : 1)
             }
             .onKeyboardStateChange { state in
+                print("onKeyboardStateChange: \(state)")
                 self.isKeyboardVisible = state.height > 0
                 
                 if state.height == 0 {
@@ -75,10 +74,6 @@ struct BolusEntryView: View {
                         enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                     }
                 }
-                .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
-                    // The view model can disable manual glucose entry if CGM data returns.
-                    self.isManualGlucoseEntryRowVisible = isManualGlucoseEntryEnabled
-                }
         }
     }
     
@@ -92,7 +87,10 @@ struct BolusEntryView: View {
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
         // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
         // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
-        shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
+        print("geometry.size.height = \(geometry.size.height)")
+        print("shouldBolusEntryBecomeFirstResponder = \(shouldBolusEntryBecomeFirstResponder)")
+        print("shouldAutoScroll = \(shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640)")
+        return shouldBolusEntryBecomeFirstResponder && geometry.size.height > 640
     }
     
     private var chartSection: some View {
@@ -185,7 +183,7 @@ struct BolusEntryView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 if viewModel.isManualGlucoseEntryEnabled {
-                    manualGlucoseEntryRow
+                    ManualGlucoseEntryRow(quantity: $viewModel.manualGlucoseQuantity)
                 } else if viewModel.potentialCarbEntry != nil {
                     potentialCarbEntryRow
                 } else {
@@ -214,43 +212,6 @@ struct BolusEntryView: View {
         QuantityFormatter(for: displayGlucoseUnitObservable.displayGlucoseUnit).numberFormatter
     }
 
-    @ViewBuilder
-    private var manualGlucoseEntryRow: some View {
-        if viewModel.isManualGlucoseEntryEnabled {
-            HStack {
-                Text("Fingerstick Glucose", comment: "Label for manual glucose entry row on bolus screen")
-                Spacer()
-                HStack(alignment: .firstTextBaseline) {
-                    DismissibleKeyboardTextField(
-                        text: enteredManualGlucose,
-                        placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
-                        font: .heavy(.title1),
-                        textAlignment: .right,
-                        keyboardType: .decimalPad,
-                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
-                        maxLength: 4,
-                        doneButtonColor: .loopAccent
-                    )
-                    Text(QuantityFormatter().string(from: displayGlucoseUnitObservable.displayGlucoseUnit))
-                        .foregroundColor(Color(.secondaryLabel))
-                }
-            }
-            .onKeyboardStateChange { state in
-                if state.animationDuration > 0 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + state.animationDuration) {
-                         self.isManualGlucoseEntryRowVisible = true
-                    }
-                }
-            }
-        }
-    }
-
-    private var enteredManualGlucose: Binding<String> {
-        Binding(
-            get: { viewModel.manualGlucoseString },
-            set: { newValue in viewModel.manualGlucoseString = newValue }
-        )
-    }
 
     @ViewBuilder
     private var potentialCarbEntryRow: some View {
