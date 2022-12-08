@@ -54,12 +54,12 @@ public class AlertMuter: ObservableObject {
         }
 
         func shouldMuteAlert(scheduledAt timeFromNow: TimeInterval = 0, now: Date = Date()) -> Bool {
-            guard timeFromNow >= 0 else { return false }
-
             guard let mutingEndTime = mutingEndTime else { return false }
 
             let alertTriggerTime = now.advanced(by: timeFromNow)
-            guard alertTriggerTime < mutingEndTime
+            guard let startTime = startTime,
+                  alertTriggerTime >= startTime,
+                  alertTriggerTime < mutingEndTime
             else { return false }
 
             return true
