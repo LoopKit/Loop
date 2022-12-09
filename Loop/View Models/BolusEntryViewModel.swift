@@ -114,7 +114,6 @@ final class BolusEntryViewModel: ObservableObject {
 
     @Published var recommendedBolus: HKQuantity?
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
-    private var userChangedBolusAmount = false
     @Published var enacting = false
 
     private var dosingDecision = BolusDosingDecision(for: .normalBolus)
@@ -190,15 +189,15 @@ final class BolusEntryViewModel: ObservableObject {
         self.updateSettings()
     }
 
-    public func generateRecommendationAndStartObserving(_ completion: (() -> Void)? = nil) {
-        update() {
-            // Only start observing after first update is complete
-            self.observeLoopUpdates()
-            self.observeElapsedTime()
-            self.observeEnteredManualGlucoseChanges()
-            self.observeEnteredBolusChanges()
-            completion?()
-        }
+    public func generateRecommendationAndStartObserving() async {
+        await update()
+
+        // Only start observing after first update is complete
+        self.observeLoopUpdates()
+        self.observeElapsedTime()
+        self.observeEnteredManualGlucoseChanges()
+        self.observeEnteredBolusChanges()
+
     }
 
     private func observeLoopUpdates() {
@@ -206,13 +205,15 @@ final class BolusEntryViewModel: ObservableObject {
             .publisher(for: .LoopDataUpdated)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] note in
-                if let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
-                   let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
-                   context == .preferences
-                {
-                    self?.updateSettings()
+                Task {
+                    if let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
+                       let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
+                       context == .preferences
+                    {
+                        self?.updateSettings()
+                    }
+                    await self?.update()
                 }
-                self?.update()
             }
             .store(in: &cancellables)
     }
@@ -272,9 +273,10 @@ final class BolusEntryViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                
                 self.log.default("5 minutes elapsed on bolus screen; refreshing UI")
-                self.update()
+                Task {
+                    await self.update()
+                }
             }
             .store(in: &cancellables)
     }
@@ -290,8 +292,12 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     func saveCarbEntry(_ entry: NewCarbEntry, replacingEntry: StoredCarbEntry?) async -> StoredCarbEntry? {
+        guard let delegate = delegate else {
+            return nil
+        }
+
         return await withCheckedContinuation { continuation in
-            delegate?.addCarbEntry(entry, replacing: replacingEntry) { result in
+            delegate.addCarbEntry(entry, replacing: replacingEntry) { result in
                 switch result {
                 case .success(let storedCarbEntry):
                     continuation.resume(returning: storedCarbEntry)
@@ -476,22 +482,25 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     // MARK: - Data upkeep
-
-    private func update(_ completion: (() -> Void)? = nil) {
+    func update() async {
         dispatchPrecondition(condition: .onQueue(.main))
 
         // Prevent any UI updates after a bolus has been initiated.
         guard !enacting else {
-            completion?()
             return
         }
 
         disableManualGlucoseEntryIfNecessary()
         updateChartDateInterval()
         updateStoredGlucoseValues()
-        updatePredictionAndRecommendation() {
-            self.updateActiveInsulin()
-            completion?()
+        await updatePredictionAndRecommendation()
+
+        if let iob = await getInsulinOnBoard() {
+            self.activeInsulin = HKQuantity(unit: .internationalUnit(), doubleValue: iob.value)
+            self.dosingDecision.insulinOnBoard = iob
+        } else {
+            self.activeInsulin = nil
+            self.dosingDecision.insulinOnBoard = nil
         }
     }
 
@@ -577,34 +586,33 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func updateActiveInsulin() {
-        delegate?.insulinOnBoard(at: Date()) { [weak self] result in
-            guard let self = self else { return }
+    private func getInsulinOnBoard() async -> InsulinValue? {
+        guard let delegate = delegate else {
+            return nil
+        }
 
-            DispatchQueue.main.async {
+        return await withCheckedContinuation { continuation in
+            delegate.insulinOnBoard(at: Date()) { result in
                 switch result {
                 case .success(let iob):
-                    self.activeInsulin = HKQuantity(unit: .internationalUnit(), doubleValue: iob.value)
-                    self.dosingDecision.insulinOnBoard = iob
+                    continuation.resume(returning: iob)
                 case .failure:
-                    self.activeInsulin = nil
-                    self.dosingDecision.insulinOnBoard = nil
+                    continuation.resume(returning: nil)
                 }
             }
         }
     }
 
-    private func updatePredictionAndRecommendation(_ completion: @escaping () -> Void) {
+    private func updatePredictionAndRecommendation() async {
         guard let delegate = delegate else {
-            completion()
             return
         }
-        delegate.withLoopState { [weak self] state in
-            self?.updateCarbsOnBoard(from: state)
-            self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
-            self?.updatePredictedGlucoseValues(from: state)
-            DispatchQueue.main.async {
-                completion()
+        return await withCheckedContinuation { continuation in
+            delegate.withLoopState { [weak self] state in
+                self?.updateCarbsOnBoard(from: state)
+                self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
+                self?.updatePredictedGlucoseValues(from: state)
+                continuation.resume()
             }
         }
     }
@@ -703,7 +711,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func updateSettings() {
+    func updateSettings() {
         dispatchPrecondition(condition: .onQueue(.main))
         
         guard let delegate = delegate else {
@@ -781,7 +789,6 @@ extension BolusEntryViewModel {
     }
     
     var isNoticeVisible: Bool {
-        return false;
         if activeNotice == nil {
             return false
         } else if activeNotice != .staleGlucoseData {

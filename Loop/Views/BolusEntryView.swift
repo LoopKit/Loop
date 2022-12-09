@@ -59,21 +59,21 @@ struct BolusEntryView: View {
             .keyboardAware()
             .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
             .navigationBarTitle(self.title)
-                .supportedInterfaceOrientations(.portrait)
-                .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
-                .onReceive(self.viewModel.$recommendedBolus) { recommendation in
-                    // If the recommendation changes, and the user has not edited the bolus amount, update the bolus amount
-                    let amount = recommendation?.doubleValue(for: .internationalUnit()) ?? 0
-                    if !editedBolusAmount {
-                        var newEnteredBolusString: String
-                        if amount == 0 {
-                            newEnteredBolusString = ""
-                        } else {
-                            newEnteredBolusString = Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-                        }
-                        enteredBolusStringBinding.wrappedValue = newEnteredBolusString
+            .supportedInterfaceOrientations(.portrait)
+            .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
+            .onReceive(self.viewModel.$recommendedBolus) { recommendation in
+                // If the recommendation changes, and the user has not edited the bolus amount, update the bolus amount
+                let amount = recommendation?.doubleValue(for: .internationalUnit()) ?? 0
+                if !editedBolusAmount {
+                    var newEnteredBolusString: String
+                    if amount == 0 {
+                        newEnteredBolusString = ""
+                    } else {
+                        newEnteredBolusString = Self.doseAmountFormatter.string(from: amount) ?? String(amount)
                     }
+                    enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                 }
+            }
         }
     }
     
@@ -87,9 +87,6 @@ struct BolusEntryView: View {
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
         // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
         // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
-        print("geometry.size.height = \(geometry.size.height)")
-        print("shouldBolusEntryBecomeFirstResponder = \(shouldBolusEntryBecomeFirstResponder)")
-        print("shouldAutoScroll = \(shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640)")
         return shouldBolusEntryBecomeFirstResponder && geometry.size.height > 640
     }
     

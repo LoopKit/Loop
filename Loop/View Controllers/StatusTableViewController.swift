@@ -1292,7 +1292,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         } else {
             let viewModel = BolusEntryViewModel(delegate: deviceManager, screenWidth: UIScreen.main.bounds.width, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
-            viewModel.generateRecommendationAndStartObserving()
+            Task { @MainActor in
+                await viewModel.generateRecommendationAndStartObserving()
+            }
             let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         }

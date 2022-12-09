@@ -501,7 +501,9 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             potentialCarbEntry: updatedEntry,
             selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
         )
-        viewModel.generateRecommendationAndStartObserving()
+        Task {
+            await viewModel.generateRecommendationAndStartObserving()
+        }
 
         let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
 
