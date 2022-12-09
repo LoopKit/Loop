@@ -143,6 +143,10 @@ public class SettingsViewModel: ObservableObject {
             self?.objectWillChange.send()
         }
         .store(in: &cancellables)
+        alertMuter.objectWillChange.sink { [weak self] in
+            self?.objectWillChange.send()
+        }
+        .store(in: &cancellables)
         pumpManagerSettingsViewModel.objectWillChange.sink { [weak self] in
             self?.objectWillChange.send()
         }

@@ -49,6 +49,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
+        tableView.register(MuteAlertsWarningCell.self, forCellReuseIdentifier: MuteAlertsWarningCell.className)
 
         if FeatureFlags.predictedGlucoseChartClampEnabled {
             statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
@@ -633,7 +634,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private enum Section: Int, CaseIterable {
-        case alertPermissionsDisabledWarning
+        case alertWarning
         case hud
         case status
         case charts
@@ -679,7 +680,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case pumpSuspended(resuming: Bool)
         case onboardingSuspended
         case recommendManualGlucoseEntry
-        case tempMuteAlerts
 
         var hasRow: Bool {
             switch self {
@@ -718,22 +718,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
             !premealOverride.hasFinished()
         {
             statusRowMode = .scheduleOverrideEnabled(premealOverride)
-        } else if alertMuter.shouldMuteAlert() {
-            statusRowMode = .tempMuteAlerts
         } else {
             statusRowMode = .hidden
         }
 
         return statusRowMode
     }
-    
+
+    private var shouldShowBannerWarning: Bool {
+        alertPermissionsChecker.showWarning || alertMuter.configuration.shouldMute
+    }
+
     private func updateBannerRow(animated: Bool) {
-        let warningWasVisible = tableView.numberOfRows(inSection: Section.alertPermissionsDisabledWarning.rawValue) != 0
-        let showWarning = alertPermissionsChecker.showWarning
-        if !showWarning && warningWasVisible {
-            tableView.deleteRows(at: [IndexPath(row: 0, section: Section.alertPermissionsDisabledWarning.rawValue)], with: animated ? .top : .none)
-        } else if showWarning && !warningWasVisible {
-            tableView.insertRows(at: [IndexPath(row: 0, section: Section.alertPermissionsDisabledWarning.rawValue)], with: animated ? .top : .none)
+        let warningWasVisible = tableView.numberOfRows(inSection: Section.alertWarning.rawValue) != 0
+        if !shouldShowBannerWarning && warningWasVisible {
+            tableView.deleteRows(at: [IndexPath(row: 0, section: Section.alertWarning.rawValue)], with: animated ? .top : .none)
+        } else if shouldShowBannerWarning && !warningWasVisible {
+            tableView.insertRows(at: [IndexPath(row: 0, section: Section.alertWarning.rawValue)], with: animated ? .top : .none)
+        } else {
+            tableView.reloadRows(at: [IndexPath(row: 0, section: Section.alertWarning.rawValue)], with: .none)
         }
     }
 
@@ -850,8 +853,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
-        case .alertPermissionsDisabledWarning:
-            return alertPermissionsChecker.showWarning ? 1 : 0
+        case .alertWarning:
+            return shouldShowBannerWarning ? 1 : 0
         case .hud:
             return shouldShowHUD ? 1 : 0
         case .charts:
@@ -862,7 +865,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private class AlertPermissionsDisabledWarningCell: UITableViewCell {
-         
         override func updateConfiguration(using state: UICellConfigurationState) {
             super.updateConfiguration(using: state)
 
@@ -878,7 +880,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             contentConfig.textProperties.color = .white
             contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
             contentConfig.textProperties.adjustsFontSizeToFitWidth = true
-            contentConfig.secondaryText = "Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON."
+            contentConfig.secondaryText = NSLocalizedString("Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON.", comment: "instructions on how to fix alert permission warning")
             contentConfig.secondaryTextProperties.color = .white
             contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
             contentConfiguration = contentConfig
@@ -897,12 +899,55 @@ final class StatusTableViewController: LoopChartsTableViewController {
             contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
         }
     }
+
+    private class MuteAlertsWarningCell: UITableViewCell {
+        var formattedAlertMuteEndTime: String = NSLocalizedString("Unknown", comment: "label for when the alert mute end time is unknown")
+
+        override func updateConfiguration(using state: UICellConfigurationState) {
+            super.updateConfiguration(using: state)
+
+            let adjustViewForNarrowDisplay = bounds.width < 350
+
+            var contentConfig = defaultContentConfiguration().updated(for: state)
+            let title = NSMutableAttributedString(string: NSLocalizedString("All Alerts Muted", comment: "Warning text for when alerts are muted"))
+            contentConfig.image = UIImage(systemName: "speaker.slash.fill")
+            contentConfig.imageProperties.tintColor = .white
+            contentConfig.attributedText = title
+            contentConfig.textProperties.color = .white
+            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
+            contentConfig.textProperties.adjustsFontSizeToFitWidth = true
+            contentConfig.secondaryText = String(format: NSLocalizedString("Until %1$@", comment: "indication of when alerts will be unmuted (1: time when alerts unmute)"), formattedAlertMuteEndTime)
+            contentConfig.secondaryTextProperties.color = .white
+            contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
+            contentConfiguration = contentConfig
+
+            var backgroundConfig = backgroundConfiguration?.updated(for: state)
+            backgroundConfig?.backgroundColor = .warning.withAlphaComponent(0.8)
+            backgroundConfiguration = backgroundConfig
+            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10)
+            backgroundConfiguration?.cornerRadius = 10
+
+            let unmuteIndicator = UIImage(systemName: "stop.circle")?.withTintColor(.white)
+            let imageView = UIImageView(image: unmuteIndicator)
+            imageView.tintColor = .white
+            imageView.frame.size = CGSize(width: 30, height: 30)
+            accessoryView = imageView
+
+            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
+        }
+    }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch Section(rawValue: indexPath.section)! {
-        case .alertPermissionsDisabledWarning:
-            let cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
-            return cell
+        case .alertWarning:
+            if alertPermissionsChecker.showWarning {
+                let cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: MuteAlertsWarningCell.className, for: indexPath) as! MuteAlertsWarningCell
+                cell.formattedAlertMuteEndTime = alertMuter.formattedEndTime
+                return cell
+            }
         case .hud:
             let cell = tableView.dequeueReusableCell(withIdentifier: HUDViewTableViewCell.className, for: indexPath) as! HUDViewTableViewCell
             hudView = cell.hudView
@@ -958,11 +1003,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             switch StatusRow(rawValue: indexPath.row)! {
             case .status:
                 switch statusRowMode {
-                case .tempMuteAlerts:
-                    //TODO testing (need design to make the correct status row)
-                    let cell = getTitleSubtitleCell()
-                    cell.titleLabel.text = NSLocalizedString("Temp Mute Alerts", comment: "The title of the cell indicating alerts are temporarily muted")
-                    return cell
                 case .hidden:
                     let cell = getTitleSubtitleCell()
                     return cell
@@ -1101,7 +1141,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     cell.setSubtitleLabel(label: nil)
                 }
             }
-        case .hud, .status, .alertPermissionsDisabledWarning:
+        case .hud, .status, .alertWarning:
             break
         }
     }
@@ -1122,16 +1162,21 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case .iob, .dose, .cob:
                 return max(106, 0.21 * availableSize)
             }
-        case .hud, .status, .alertPermissionsDisabledWarning:
+        case .hud, .status, .alertWarning:
             return UITableView.automaticDimension
         }
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section)! {
-        case .alertPermissionsDisabledWarning:
-            tableView.deselectRow(at: indexPath, animated: true)
-            AlertPermissionsChecker.gotoSettings()
+        case .alertWarning:
+            if alertPermissionsChecker.showWarning {
+                tableView.deselectRow(at: indexPath, animated: true)
+                AlertPermissionsChecker.gotoSettings()
+            } else {
+                tableView.deselectRow(at: indexPath, animated: true)
+                presentUnmuteAlertConfirmation()
+            }
         case .hud:
             break
         case .status:
@@ -1206,6 +1251,20 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
             }
         }
+    }
+
+    private func presentUnmuteAlertConfirmation() {
+        let title = NSLocalizedString("Unmute Alerts?", comment: "The alert title for unmute alert confirmation")
+        let body = NSLocalizedString("Tap Unmute to resume sound for your alerts and alarms.", comment: "The alert body for unmute alert confirmation")
+        let action = UIAlertAction(
+            title: NSLocalizedString("Unmute", comment: "The title of the action used to unmute alerts"),
+            style: .default) { _ in
+                self.alertMuter.unmuteAlerts()
+            }
+        let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
+        alert.addAction(action)
+        alert.addCancelAction { _ in }
+        present(alert, animated: true, completion: nil)
     }
 
     private func presentErrorCancelingBolus(_ error: (Error)) {

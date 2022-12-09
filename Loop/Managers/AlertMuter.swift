@@ -125,4 +125,16 @@ public class AlertMuter: ObservableObject {
             return shouldMuteAlert(scheduledAt: triggerInterval)
         }
     }
+
+    func unmuteAlerts() {
+        configuration.startTime = nil
+    }
+
+    var formattedEndTime: String {
+        guard let endTime = configuration.mutingEndTime else { return NSLocalizedString("Unknown", comment: "result when time cannot be formatted") }
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: endTime)
+    }
 }
