@@ -185,7 +185,8 @@ class AlertManagerTests: XCTestCase {
                                     userNotificationAlertScheduler: mockUserNotificationScheduler,
                                     fileManager: mockFileManager,
                                     alertStore: mockAlertStore,
-                                    bluetoothProvider: MockBluetoothProvider())
+                                    bluetoothProvider: MockBluetoothProvider(),
+                                    preventIssuanceBeforePlayback: false)
     }
 
     override func tearDown() {

@@ -34,6 +34,10 @@ public final class AlertManager {
     private var responders: [String: Weak<AlertResponder>] = [:]
     private var soundVendors: [String: Weak<AlertSoundVendor>] = [:]
 
+    // Defer issuance of new alerts until playback is done
+    private var deferredAlerts: [Alert] = []
+    private var playbackFinished: Bool
+
     private let fileManager: FileManager
     private let alertPresenter: AlertPresenter
 
@@ -57,9 +61,11 @@ public final class AlertManager {
                 fileManager: FileManager = FileManager.default,
                 alertStore: AlertStore? = nil,
                 expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
-                bluetoothProvider: BluetoothProvider
+                bluetoothProvider: BluetoothProvider,
+                preventIssuanceBeforePlayback: Bool = true
     ) {
         self.fileManager = fileManager
+        playbackFinished = !preventIssuanceBeforePlayback
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
         let alertStoreDirectory = documentsDirectory?.appendingPathComponent("AlertStore")
         if let alertStoreDirectory = alertStoreDirectory {
@@ -202,8 +208,10 @@ public final class AlertManager {
                 repeats: false
             )
 
+            let intervalIdentifierValue = TimeInterval(minutes: minutes)
+
             let request = UNNotificationRequest(
-                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(minutes)",
+                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(intervalIdentifierValue)",
                 content: notificationContent,
                 trigger: trigger
             )
@@ -344,6 +352,10 @@ extension AlertManager: AlertManagerResponder {
 extension AlertManager: AlertIssuer {
 
     public func issueAlert(_ alert: Alert) {
+        guard playbackFinished else {
+            deferredAlerts.append(alert)
+            return
+        }
         scheduleAlertWithSchedulers(alert)
         alertStore.recordIssued(alert: alert)
     }
@@ -426,6 +438,8 @@ extension AlertManager {
     }
 
     private func playbackAlertsFromAlertStore() {
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
         alertStore.lookupAllUnacknowledgedUnretracted {
             switch $0 {
             case .failure(let error):
@@ -441,7 +455,9 @@ extension AlertManager {
                     }
                 }
             }
+            updateGroup.leave()
         }
+        updateGroup.enter()
         alertStore.lookupAllAcknowledgedUnretractedRepeatingAlerts {
             switch $0 {
             case .failure(let error):
@@ -456,6 +472,13 @@ extension AlertManager {
                         self.log.error("Error decoding alert from persistent storage: %@", error.localizedDescription)
                     }
                 }
+            }
+            updateGroup.leave()
+        }
+        updateGroup.notify(queue: .main) {
+            self.playbackFinished = true
+            for alert in self.deferredAlerts {
+                self.issueAlert(alert)
             }
         }
     }

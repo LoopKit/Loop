@@ -49,7 +49,7 @@ enum RemoteCommand {
 
 // Push Notifications
 extension RemoteCommand {
-    init?(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset]) {
+    static func createRemoteCommand(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], defaultAbsorptionTime: TimeInterval, nowDate: Date = Date()) -> Result<RemoteCommand, RemoteCommandParseError> {
         if let overrideName = notification["override-name"] as? String,
             let preset = allowedPresets.first(where: { $0.name == overrideName }),
             let remoteAddress = notification["remote-address"] as? String
@@ -58,22 +58,48 @@ extension RemoteCommand {
             if let overrideDurationMinutes = notification["override-duration-minutes"] as? Double {
                 override.duration = .finite(TimeInterval(minutes: overrideDurationMinutes))
             }
-            self = .temporaryScheduleOverride(override)
+            return .success(.temporaryScheduleOverride(override))
         } else if let _ = notification["cancel-temporary-override"] as? String {
-            self = .cancelTemporaryOverride
+            return .success(.cancelTemporaryOverride)
         }  else if let bolusValue = notification["bolus-entry"] as? Double {
-            self = .bolusEntry(bolusValue)
+            return .success(.bolusEntry(bolusValue))
         } else if let carbsValue = notification["carbs-entry"] as? Double {
-            // TODO: get default absorption value
-            var absorptionTime = TimeInterval(hours: 3.0)
-            if let absorptionOverride = notification["absorption-time"] as? Double {
-                absorptionTime = TimeInterval(hours: absorptionOverride)
+
+            let minAbsorptionTime = TimeInterval(hours: 0.5)
+            let maxAbsorptionTime = LoopConstants.maxCarbAbsorptionTime
+            
+            var absorptionTime = defaultAbsorptionTime
+            if let absorptionOverrideInHours = notification["absorption-time"] as? Double {
+                absorptionTime = TimeInterval(hours: absorptionOverrideInHours)
             }
+            
+            if absorptionTime < minAbsorptionTime || absorptionTime > maxAbsorptionTime {
+                return .failure(RemoteCommandParseError.invalidAbsorptionSeconds(absorptionTime))
+            }
+            
             let quantity = HKQuantity(unit: .gram(), doubleValue: carbsValue)
-            let newEntry = NewCarbEntry(quantity: quantity, startDate: Date(), foodType: "", absorptionTime: absorptionTime)
-            self = .carbsEntry(newEntry)
+            
+            var startDate = nowDate
+            if let notificationStartTimeString = notification["start-time"] as? String {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
+                if let notificationStartDate = formatter.date(from: notificationStartTimeString) {
+                    startDate = notificationStartDate
+                } else {
+                    return .failure(RemoteCommandParseError.invalidStartTime(notificationStartTimeString))
+                }
+            }
+
+            let newEntry = NewCarbEntry(quantity: quantity, startDate: startDate, foodType: "", absorptionTime: absorptionTime)
+            return .success(.carbsEntry(newEntry))
         } else {
-            return nil
+            return .failure(RemoteCommandParseError.unhandledNotication("\(notification)"))
         }
+    }
+    
+    enum RemoteCommandParseError: LocalizedError {
+        case invalidStartTime(String)
+        case invalidAbsorptionSeconds(Double)
+        case unhandledNotication(String)
     }
 }

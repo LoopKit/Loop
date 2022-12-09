@@ -9,6 +9,7 @@
 import os.log
 import LoopKit
 import LoopKitUI
+import LoopCore
 
 class ServicesManager {
 

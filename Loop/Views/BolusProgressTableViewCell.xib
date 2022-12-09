@@ -92,6 +92,7 @@
                 <outlet property="progressIndicator" destination="UrG-Ab-ud4" id="fUa-KI-CzA"/>
                 <outlet property="progressLabel" destination="xSg-dV-gfs" id="48G-HJ-93p"/>
                 <outlet property="stopSquare" destination="ACq-Bw-sij" id="y4h-8I-Pre"/>
+                <outlet property="tapToStopLabel" destination="Xiw-DG-3Hi" id="59F-Gv-raj"/>
             </connections>
             <point key="canvasLocation" x="-113.59999999999999" y="58.47076461769116"/>
         </tableViewCell>

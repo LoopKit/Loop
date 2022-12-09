@@ -113,7 +113,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
             now: { currentDate },
             pumpInsulinType: .novolog,
-            automaticDosingStatus: automaticDosingStatus
+            automaticDosingStatus: automaticDosingStatus,
+            trustedTimeOffset: { 0 }
         )
     }
     
@@ -303,8 +304,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             self.recommendation = automaticDose.recommendation
             completion(error)
         }
-        func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double { unitsPerHour }
-        func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double { units }
+        func roundBasalRate(unitsPerHour: Double) -> Double { unitsPerHour }
+        func roundBolusVolume(units: Double) -> Double { units }
         var pumpManagerStatus: PumpManagerStatus?
         var cgmManagerStatus: CGMManagerStatus?
         var pumpStatusHighlight: DeviceStatusHighlight?
@@ -546,7 +547,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
             now: { currentDate },
             pumpInsulinType: .novolog,
-            automaticDosingStatus: automaticDosingStatus
+            automaticDosingStatus: automaticDosingStatus,
+            trustedTimeOffset: { 0 }
         )
         let mockDelegate = MockDelegate()
         loopDataManager.delegate = mockDelegate

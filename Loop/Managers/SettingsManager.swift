@@ -62,7 +62,7 @@ class SettingsManager {
             legacyLoopSettings.insulinSensitivitySchedule = UserDefaults.appGroup?.legacyInsulinSensitivitySchedule
             legacyLoopSettings.basalRateSchedule = UserDefaults.appGroup?.legacyBasalRateSchedule
             legacyLoopSettings.carbRatioSchedule = UserDefaults.appGroup?.legacyCarbRatioSchedule
-            legacyLoopSettings.defaultRapidActingModel = UserDefaults.appGroup?.legacyDefaultRapidActingModel
+            legacyLoopSettings.defaultRapidActingModel = .rapidActingAdult
 
             storeSettings(newLoopSettings: legacyLoopSettings)
 
@@ -145,11 +145,6 @@ class SettingsManager {
 
     func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) {
 
-        if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteOverridesEnabled {
-            // remote notification registration not finished
-            return
-        }
-
         var deviceTokenStr: String?
 
         if case .success(let deviceToken) = remoteNotificationRegistrationResult {
@@ -164,6 +159,11 @@ class SettingsManager {
         }
 
         latestSettings = mergedSettings
+
+        if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteCommandsEnabled {
+            // remote notification registration not finished
+            return
+        }
 
         if latestSettings.insulinSensitivitySchedule == nil {
             log.default("Saving settings with no ISF schedule.")

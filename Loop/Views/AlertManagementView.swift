@@ -54,7 +54,9 @@ struct AlertManagementView: View {
     var body: some View {
         List {
             alertPermissionsSection
-            muteAlertsSection
+            if FeatureFlags.criticalAlertsEnabled {
+                muteAlertsSection
+            }
         }
         .navigationTitle(NSLocalizedString("Alert Management", comment: "Title of alert management screen"))
     }
