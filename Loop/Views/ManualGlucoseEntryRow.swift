@@ -20,58 +20,56 @@ struct ManualGlucoseEntryRow: View {
 
     @Binding var quantity: HKQuantity?
 
+    let glucoseQuantityFormatter = QuantityFormatter()
+
+    @State private var isManualGlucoseEntryRowVisible = false
+
     @FocusState private var fieldIsFocused: Bool
 
     var body: some View {
         HStack {
             Text("Fingerstick Glucose", comment: "Label for manual glucose entry row on bolus screen")
             Spacer()
+
             HStack(alignment: .firstTextBaseline) {
-                SwiftUI.TextField(
-                    NSLocalizedString("Fingerstick Glucose", comment: "Label for manual glucose entry row on bolus screen"),
+                DismissibleKeyboardTextField(
                     text: $valueText,
-                    prompt: Text("– – –", comment: "No glucose value representation (3 dashes for mg/dL)")
+                    placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
+                    font: .heavy(.title1),
+                    textAlignment: .right,
+                    keyboardType: .decimalPad,
+                    shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
+                    maxLength: 4,
+                    doneButtonColor: .loopAccent
                 )
-                .multilineTextAlignment(.trailing)
-                .onReceive(Just(valueText)) { _ in valueText = String(valueText.prefix(4)) }
-                .onReceive(Just(displayGlucoseUnitObservable)) { _ in unitsChanged() }
-                .font(Font(UIFont.heavy(.title1)))
-                .keyboardType(.decimalPad)
-//                .toolbar {
-//                    ToolbarItemGroup(placement: .keyboard) {
-//                        Spacer()
-//                        Button("Done") {
-//                            fieldIsFocused = false
-//                        }
-//                    }
-//                }
+                .onChange(of: valueText, perform: { value in
+                    if let manualGlucoseValue = glucoseQuantityFormatter.numberFormatter.number(from: valueText)?.doubleValue {
+                        quantity = HKQuantity(unit: displayGlucoseUnitObservable.displayGlucoseUnit, doubleValue: manualGlucoseValue)
+                    } else {
+                        quantity = nil
+                    }
+                })
+                .onChange(of: displayGlucoseUnitObservable.displayGlucoseUnit, perform: { value in
+                    unitsChanged()
+                })
+
                 Text(QuantityFormatter().string(from: displayGlucoseUnitObservable.displayGlucoseUnit))
                     .foregroundColor(Color(.secondaryLabel))
+            }
+        }
+        .onKeyboardStateChange { state in
+            if state.animationDuration > 0 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + state.animationDuration) {
+                     self.isManualGlucoseEntryRowVisible = true
+                }
             }
         }
     }
 
     func unitsChanged() {
-        print("Here")
+        glucoseQuantityFormatter.setPreferredNumberFormatter(for: displayGlucoseUnitObservable.displayGlucoseUnit)
+        if let quantity = quantity {
+            valueText = glucoseQuantityFormatter.string(from: quantity, for: displayGlucoseUnitObservable.displayGlucoseUnit, includeUnit: false) ?? ""
+        }
     }
-
-//    private var enteredManualGlucose: Binding<String> {
-//        Binding(
-//            get: {
-//                let displayGlucoseUnit = displayGlucoseUnitObservable.displayGlucoseUnit
-//                viewModel.glucoseQuantityFormatter.setPreferredNumberFormatter(for: displayGlucoseUnit) // TODO: set this on units change
-//                guard let manualGlucoseQuantity = viewModel.manualGlucoseQuantity,
-//                      let manualGlucoseString = viewModel.glucoseQuantityFormatter.string(from: manualGlucoseQuantity, for: displayGlucoseUnit, includeUnit: false)
-//                else {
-//                    return ""
-//                }
-//                return  manualGlucoseString
-//            },
-//            set: { newValue in
-//                viewModel.userDidChangeManualGlucose(newGlucose: newValue, unit: displayGlucoseUnitObservable.displayGlucoseUnit)
-//            }
-//        )
-//    }
-
-
 }

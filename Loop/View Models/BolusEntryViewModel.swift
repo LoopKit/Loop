@@ -143,38 +143,6 @@ final class BolusEntryViewModel: ObservableObject {
 
     var manualGlucoseSample: NewGlucoseSample?
 
-    func userDidChangeManualGlucose(newGlucose: String, unit: HKUnit) {
-        guard let manualGlucoseValue = glucoseQuantityFormatter.numberFormatter.number(from: newGlucose)?.doubleValue
-        else {
-            manualGlucoseQuantity = nil
-            return
-        }
-        manualGlucoseQuantity = HKQuantity(unit: unit, doubleValue: manualGlucoseValue)
-
-        // Clear out any entered bolus whenever the glucose entry changes
-        self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
-
-        self.delegate?.withLoopState { [weak self] state in
-            self?.updatePredictedGlucoseValues(from: state, completion: {
-                // Ensure the manual glucose entry appears on the chart at the same time as the updated prediction
-                self?.updateGlucoseChartValues()
-            })
-
-            self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
-        }
-
-        manualGlucoseSample = NewGlucoseSample(
-           date: now(),
-           quantity: manualGlucoseQuantity!,
-           condition: nil,     // All manual glucose entries are assumed to have no condition.
-           trend: nil,         // All manual glucose entries are assumed to have no trend.
-           trendRate: nil,     // All manual glucose entries are assumed to have no trend rate.
-           isDisplayOnly: false,
-           wasUserEntered: true,
-           syncIdentifier: uuidProvider()
-       )
-    }
-
     // MARK: - Seams
     private weak var delegate: BolusEntryViewModelDelegate?
     private let now: () -> Date
@@ -227,6 +195,7 @@ final class BolusEntryViewModel: ObservableObject {
             // Only start observing after first update is complete
             self.observeLoopUpdates()
             self.observeElapsedTime()
+            self.observeEnteredManualGlucoseChanges()
             self.observeEnteredBolusChanges()
             completion?()
         }
@@ -260,6 +229,40 @@ final class BolusEntryViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+
+    private func observeEnteredManualGlucoseChanges() {
+        $manualGlucoseQuantity
+            .sink { [weak self] manualGlucoseQuantity in
+                guard let self = self else { return }
+
+                // Clear out any entered bolus whenever the glucose entry changes
+                self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+
+                self.delegate?.withLoopState { [weak self] state in
+                    self?.updatePredictedGlucoseValues(from: state, completion: {
+                        // Ensure the manual glucose entry appears on the chart at the same time as the updated prediction
+                        self?.updateGlucoseChartValues()
+                    })
+
+                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                }
+
+                if let manualGlucoseQuantity = manualGlucoseQuantity {
+                    self.manualGlucoseSample = NewGlucoseSample(
+                        date: self.now(),
+                        quantity: manualGlucoseQuantity,
+                        condition: nil,     // All manual glucose entries are assumed to have no condition.
+                        trend: nil,         // All manual glucose entries are assumed to have no trend.
+                        trendRate: nil,     // All manual glucose entries are assumed to have no trend rate.
+                        isDisplayOnly: false,
+                        wasUserEntered: true,
+                        syncIdentifier: self.uuidProvider()
+                    )
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
 
     private func observeElapsedTime() {
         // If glucose data is stale, loop status updates cannot be expected to keep presented data fresh.
@@ -778,6 +781,7 @@ extension BolusEntryViewModel {
     }
     
     var isNoticeVisible: Bool {
+        return false;
         if activeNotice == nil {
             return false
         } else if activeNotice != .staleGlucoseData {
