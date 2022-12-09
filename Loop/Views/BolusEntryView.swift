@@ -48,7 +48,6 @@ struct BolusEntryView: View {
                     .opacity(self.isKeyboardVisible ? 0 : 1)
             }
             .onKeyboardStateChange { state in
-                print("onKeyboardStateChange: \(state)")
                 self.isKeyboardVisible = state.height > 0
                 
                 if state.height == 0 {
