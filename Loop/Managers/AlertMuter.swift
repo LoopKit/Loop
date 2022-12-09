@@ -54,12 +54,12 @@ public class AlertMuter: ObservableObject {
         }
 
         func shouldMuteAlert(scheduledAt timeFromNow: TimeInterval = 0, now: Date = Date()) -> Bool {
-            guard timeFromNow >= 0 else { return false }
-
             guard let mutingEndTime = mutingEndTime else { return false }
 
             let alertTriggerTime = now.advanced(by: timeFromNow)
-            guard alertTriggerTime < mutingEndTime
+            guard let startTime = startTime,
+                  alertTriggerTime >= startTime,
+                  alertTriggerTime < mutingEndTime
             else { return false }
 
             return true
@@ -124,5 +124,17 @@ public class AlertMuter: ObservableObject {
             let triggerInterval = ((issuedDate ?? now) + interval).timeIntervalSince(now)
             return shouldMuteAlert(scheduledAt: triggerInterval)
         }
+    }
+
+    func unmuteAlerts() {
+        configuration.startTime = nil
+    }
+
+    var formattedEndTime: String {
+        guard let endTime = configuration.mutingEndTime else { return NSLocalizedString("Unknown", comment: "result when time cannot be formatted") }
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: endTime)
     }
 }

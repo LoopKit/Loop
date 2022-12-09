@@ -132,6 +132,13 @@ extension SettingsView {
                         Spacer()
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.critical)
+                    } else if viewModel.alertMuter.configuration.shouldMute {
+                        Spacer()
+                        Image(systemName: "speaker.slash.fill")
+                            .foregroundColor(.white)
+                            .padding(5)
+                            .background(guidanceColors.warning)
+                            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
                     }
                 }
             }
