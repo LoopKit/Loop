@@ -85,9 +85,6 @@ extension NotificationManager {
 
         notification.body = String(format: NSLocalizedString("The remote command expired %.0f minutes ago.", comment: "The notification body for a remote command expiration. (1: Expiration in minutes)"), fabs(timeExpired / 60.0))
         notification.sound = .default
-        if #available(iOS 15.0, *) {
-            notification.interruptionLevel = .timeSensitive
-        }
          
         notification.categoryIdentifier = LoopNotificationCategory.remoteCommandExpired.rawValue
 
@@ -116,9 +113,6 @@ extension NotificationManager {
 
         notification.body = body
         notification.sound = .default
-        if #available(iOS 15.0, *) {
-            notification.interruptionLevel = .timeSensitive
-        }
 
         if startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5) {
             notification.categoryIdentifier = LoopNotificationCategory.bolusFailure.rawValue
@@ -153,9 +147,6 @@ extension NotificationManager {
 
         notification.body = body
         notification.sound = .default
-        if #available(iOS 15.0, *) {
-            notification.interruptionLevel = .timeSensitive
-        }
 
         let request = UNNotificationRequest(
             identifier: LoopNotificationCategory.remoteBolus.rawValue,
@@ -177,9 +168,6 @@ extension NotificationManager {
         notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %@ U", comment: "The notification title for a remote failure. (1: Bolus amount)"), amountDescription)
         notification.body = error.localizedDescription
         notification.sound = .default
-        if #available(iOS 15.0, *) {
-            notification.interruptionLevel = .timeSensitive
-        }
 
         let request = UNNotificationRequest(
             identifier: LoopNotificationCategory.remoteBolusFailure.rawValue,
@@ -200,9 +188,6 @@ extension NotificationManager {
 
         notification.body = body
         notification.sound = .default
-        if #available(iOS 15.0, *) {
-            notification.interruptionLevel = .timeSensitive
-        }
 
         let request = UNNotificationRequest(
             identifier: LoopNotificationCategory.remoteCarbs.rawValue,
@@ -223,9 +208,6 @@ extension NotificationManager {
         
         notification.body = body
         notification.sound = .default
-        if #available(iOS 15.0, *) {
-            notification.interruptionLevel = .timeSensitive
-        }
 
         let request = UNNotificationRequest(
             identifier: LoopNotificationCategory.remoteCarbsFailure.rawValue,
