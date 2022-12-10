@@ -1329,12 +1329,18 @@ extension DeviceDataManager {
             log.error("Remote Notification: Overrides not enabled.")
             return
         }
+        
+        let defaultServiceIdentifier = "NightscoutService"
+        let serviceIdentifer = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
 
         if let expirationStr = notification["expiration"] as? String {
             let formatter = ISO8601DateFormatter()
             formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
             if let expiration = formatter.date(from: expirationStr) {
-                guard expiration > Date() else {
+                let nowDate = Date()
+                guard nowDate < expiration else {
+                    let expiredInterval = nowDate.timeIntervalSince(expiration)
+                    NotificationManager.sendRemoteCommandExpiredNotification(timeExpired: expiredInterval)
                     log.error("Remote Notification: Expired: %{public}@", String(describing: notification))
                     return
                 }
@@ -1365,8 +1371,14 @@ extension DeviceDataManager {
             log.default("Remote Notification: Enacting bolus entry: %{public}@", String(describing: bolusAmount))
             
             //Remote bolus requires validation from its remote source
-            guard remoteDataServicesManager.validatePushNotificationSource(notification) else {
-                NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.invalidOTP, amount: bolusAmount)
+            
+            let validationResult = remoteDataServicesManager.validatePushNotificationSource(notification, serviceIdentifier: serviceIdentifer)
+
+            switch validationResult {
+            case .success():
+                log.info("Remote Notification: Validation successful")
+            case .failure(let error):
+                NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAmount)
                 log.error("Remote Notification: Could not validate notification: %{public}@", String(describing: notification))
                 return
             }
@@ -1398,8 +1410,12 @@ extension DeviceDataManager {
             let candidateCarbsInGrams = candidateCarbEntry.quantity.doubleValue(for: .gram())
             
             //Remote carb entry requires validation from its remote source
-            guard remoteDataServicesManager.validatePushNotificationSource(notification) else {
-                NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidOTP, amountInGrams: candidateCarbsInGrams)
+            let validationResult = remoteDataServicesManager.validatePushNotificationSource(notification, serviceIdentifier: serviceIdentifer)
+            switch validationResult {
+            case .success():
+                log.info("Remote Notification: Validation successful")
+            case .failure(let error):
+                NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: candidateCarbsInGrams)
                 log.error("Remote Notification: Could not validate notification: %{public}@", String(describing: notification))
                 return
             }
