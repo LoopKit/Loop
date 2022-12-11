@@ -763,27 +763,28 @@ extension DeviceDataManager {
             return
         }
 
-        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true), completion: nil)
-        pumpManager.enactBolus(units: units, activationType: activationType) { (error) in
-            if let error = error {
-                self.log.error("%{public}@", String(describing: error))
-                switch error {
-                case .uncertainDelivery:
-                    // Do not generate notification on uncertain delivery error
-                    break
-                default:
-                    // Do not generate notifications for automatic boluses that fail.
-                    if !activationType.isAutomatic {
-                        NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), activationType: activationType)
+        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true)) {
+            pumpManager.enactBolus(units: units, activationType: activationType) { (error) in
+                if let error = error {
+                    self.log.error("%{public}@", String(describing: error))
+                    switch error {
+                    case .uncertainDelivery:
+                        // Do not generate notification on uncertain delivery error
+                        break
+                    default:
+                        // Do not generate notifications for automatic boluses that fail.
+                        if !activationType.isAutomatic {
+                            NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), activationType: activationType)
+                        }
                     }
-                }
-                
-                self.loopManager.bolusRequestFailed(error) {
-                    completion(error)
-                }
-            } else {
-                self.loopManager.bolusConfirmed() {
-                    completion(nil)
+                    
+                    self.loopManager.bolusRequestFailed(error) {
+                        completion(error)
+                    }
+                } else {
+                    self.loopManager.bolusConfirmed() {
+                        completion(nil)
+                    }
                 }
             }
             // Trigger forecast/recommendation update for remote clients
@@ -1361,12 +1362,12 @@ extension DeviceDataManager {
 
         switch command {
             
-        case .temporaryScheduleOverride(let override):
-            log.default("Remote Notification: Enacting temporary override: %{public}@", String(describing: override))
-            loopManager.mutateSettings { settings in settings.scheduleOverride = override }
+        case .temporaryScheduleOverride(let remoteOverride):
+            log.default("Remote Notification: Enacting temporary override: %{public}@", String(describing: remoteOverride))
+            activateRemoteOverride(remoteOverride)
         case .cancelTemporaryOverride:
             log.default("Remote Notification: Canceling temporary override")
-            loopManager.mutateSettings { settings in settings.scheduleOverride = nil }
+            activateRemoteOverride(nil)
         case .bolusEntry(let bolusAmount):
             log.default("Remote Notification: Enacting bolus entry: %{public}@", String(describing: bolusAmount))
             
@@ -1395,8 +1396,7 @@ extension DeviceDataManager {
                 return
             }
             
-            // For remote boluses, assume manual no recommendation.
-            self.enactBolus(units: bolusAmount, activationType: .manualNoRecommendation) { error in
+            self.enactRemoteBolus(units: bolusAmount) { error in
                 if let error = error {
                     self.log.error("Remote Notification: Error adding bolus: %{public}@", String(describing: error))
                     NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAmount)
@@ -1431,8 +1431,8 @@ extension DeviceDataManager {
                 log.error("Remote Notification: Carbs higher than maximum. Aborting...")
                 return
             }
-            
-            carbStore.addCarbEntry(candidateCarbEntry) { carbEntryAddResult in
+
+            addRemoteCarbEntry(candidateCarbEntry) { carbEntryAddResult in
                 switch carbEntryAddResult {
                 case .success(let completedCarbEntry):
                     NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: completedCarbEntry.quantity.doubleValue(for: .gram()))
@@ -1442,8 +1442,63 @@ extension DeviceDataManager {
                 }
             }
         }
-        // Wait up to 25 seconds for uploads triggered by these commands to finish
-        let _ = remoteDataServicesManager.waitForUploadsToFinish(timeout: .now() + TimeInterval(25))
+    }
+    
+    func activateRemoteOverride(_ remoteOverride: TemporaryScheduleOverride?) {
+        loopManager.mutateSettings { settings in settings.scheduleOverride = remoteOverride }
+        self.triggerBackgroundUpload(for: .overrides)
+    }
+    
+    func addRemoteCarbEntry(_ carbEntry: NewCarbEntry, completion: @escaping (_ result: CarbStoreResult<StoredCarbEntry>) -> Void) {
+
+        var backgroundTask: UIBackgroundTaskIdentifier?
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Add Remote Carb Entry") {
+            guard let backgroundTask = backgroundTask else {return}
+            UIApplication.shared.endBackgroundTask(backgroundTask)
+            self.log.error("Add Remote Carb Entry background task expired")
+        }
+
+        carbStore.addCarbEntry(carbEntry) { result in
+            self.triggerBackgroundUpload(for: .carb)
+            if let backgroundTask = backgroundTask {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
+            completion(result)
+        }
+    }
+    
+    func enactRemoteBolus(units: Double, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
+        
+        var backgroundTask: UIBackgroundTaskIdentifier?
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Enact Remote Bolus") {
+            guard let backgroundTask = backgroundTask else {return}
+            UIApplication.shared.endBackgroundTask(backgroundTask)
+            self.log.error("Enact Remote Bolus background task expired")
+        }
+        
+        self.enactBolus(units: units, activationType: .manualNoRecommendation) { error in
+            self.triggerBackgroundUpload(for: .dose)
+            if let backgroundTask = backgroundTask {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
+            completion(error)
+        }
+    }
+    
+    func triggerBackgroundUpload(for triggeringType: RemoteDataType) {
+        
+        var backgroundTask: UIBackgroundTaskIdentifier?
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Remote Data Upload") {
+            guard let backgroundTask = backgroundTask else {return}
+            UIApplication.shared.endBackgroundTask(backgroundTask)
+            self.log.error("Remote Data Upload background task expired")
+        }
+        
+        self.remoteDataServicesManager.triggerUpload(for: triggeringType) {
+            if let backgroundTask = backgroundTask {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
+        }
     }
 }
 
