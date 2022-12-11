@@ -586,15 +586,13 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
 
-    func validatePushNotificationSource(_ notification: [String: AnyObject]) -> Bool {
-        for service in remoteDataServices {
-            let validated = service.validatePushNotificationSource(notification)
-            if validated {
-                return validated
-            }
+    func validatePushNotificationSource(_ notification: [String: AnyObject], serviceIdentifier: String) -> Result<Void, Error> {
+        
+        guard let matchedService = remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier}) else {
+            return .failure(PushNotificationValidationError.unsupportedService(serviceIdentifier: serviceIdentifier))
         }
         
-        return false
+        return matchedService.validatePushNotificationSource(notification)
     }
     
     public func temporaryScheduleOverrideHistoryDidUpdate() {
@@ -633,6 +631,17 @@ extension RemoteDataServicesManager {
     private func clearTemporaryOverrideQueryAnchor(for remoteDataService: RemoteDataService) {
         dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
             UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides)
+        }
+    }
+    
+    private enum PushNotificationValidationError: LocalizedError {
+        case unsupportedService(serviceIdentifier: String)
+        
+        var errorDescription: String? {
+            switch self {
+            case .unsupportedService(let serviceIdentifier):
+                return "Unsupported Loop service: \(serviceIdentifier)"
+            }
         }
     }
 
