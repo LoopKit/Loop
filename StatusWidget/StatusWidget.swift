@@ -224,7 +224,6 @@ extension Date {
 }
 
 #if NOT_USED_IN_TIDEPOOL_LOOP
-@main
 struct SmallStatusWidget: Widget {
     let kind: String = "SmallStatusWidget"
 
@@ -238,3 +237,12 @@ struct SmallStatusWidget: Widget {
     }
 }
 #endif
+
+@main
+struct SmallStatusWidgets: WidgetBundle {
+    var body: some Widget {
+#if NOT_USED_IN_TIDEPOOL_LOOP
+        SmallStatusWidget()
+#endif
+   }
+}
