@@ -526,6 +526,12 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         }
 
         guard let quantity = quantity, quantity.doubleValue(for: preferredCarbUnit) > 0 else { return false }
+
+        // DRAFT - cheat with Settings Bundle: later - add maxCarbEntry properly to Loop:
+        let maxCarbEntry = UserDefaults.standard.double(forKey: "maxCarbEntry")
+        if (maxCarbEntry > 0) {
+            maxQuantity = HKQuantity(unit: .gram(), doubleValue: maxCarbEntry)
+        }
         guard quantity.compare(maxQuantity) != .orderedDescending else {
             navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxQuantity.doubleValue(for: .gram()))
             return false

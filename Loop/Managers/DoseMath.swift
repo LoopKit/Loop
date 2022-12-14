@@ -234,7 +234,9 @@ extension Collection where Element: GlucoseValue {
         at date: Date,
         suspendThreshold: HKQuantity,
         sensitivity: HKQuantity,
-        model: InsulinModel
+        model: InsulinModel,
+        maxAutoIOB: Double?,
+        insulinOnBoard: Double?
     ) -> InsulinCorrection? {
         var minGlucose: GlucoseValue?
         var eventualGlucose: GlucoseValue?
@@ -322,14 +324,32 @@ extension Collection where Element: GlucoseValue {
                 return nil
             }
 
+            // Question: this is the entirelyBelow section of code
+            //   I did not add maxAutoIOB check here as I don't think it is needed
+
             return .entirelyBelowRange(
                 min: min,
                 minTarget: minGlucoseTargets.lowerBound,
                 units: units
             )
         } else if eventual.quantity > eventualGlucoseTargets.upperBound,
-            let minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
+            var minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
         {
+            // Limit automatic dosing to prevent insulinOnBoard > maxAutoIOB
+            if minCorrectionUnits > 0 &&
+                insulinOnBoard != nil &&
+                maxAutoIOB != nil &&
+                maxAutoIOB! > 0 {
+                let checkMaxAutoIOB = maxAutoIOB! - (insulinOnBoard! + minCorrectionUnits)
+                if checkMaxAutoIOB < 0 {
+                    print("*** maxAutoIOB Feature enacted in aboveRange")
+                    print("***  Initial minCorrectionUnits ", round(100*minCorrectionUnits)/100)
+                    print("***  maxAutoIOB, insulinOnBoard, checkMaxAutoIOB ", round(100*maxAutoIOB!)/100, round(100*insulinOnBoard!)/100, round(100*checkMaxAutoIOB)/100)
+                    minCorrectionUnits = Swift.max(minCorrectionUnits+checkMaxAutoIOB, 0)
+                    print("***  Adjusted minCorrectionUnits ", round(100*minCorrectionUnits)/100)
+                }
+            }
+
             return .aboveRange(
                 min: min,
                 correcting: correctingGlucose,
@@ -371,14 +391,18 @@ extension Collection where Element: GlucoseValue {
         rateRounder: ((Double) -> Double)? = nil,
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
-        continuationInterval: TimeInterval = .minutes(11)
+        continuationInterval: TimeInterval = .minutes(11),
+        insulinOnBoard: Double?,
+        maxAutoIOB: Double?
     ) -> TempBasalRecommendation? {
         let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model
+            model: model,
+            maxAutoIOB: maxAutoIOB,
+            insulinOnBoard: insulinOnBoard
         )
 
         let scheduledBasalRate = basalRates.value(at: date)
@@ -439,14 +463,18 @@ extension Collection where Element: GlucoseValue {
         rateRounder: ((Double) -> Double)? = nil,
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
-        continuationInterval: TimeInterval = .minutes(11)
+        continuationInterval: TimeInterval = .minutes(11),
+        insulinOnBoard: Double?,
+        maxAutoIOB: Double?
     ) -> AutomaticDoseRecommendation? {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model
+            model: model,
+            maxAutoIOB: maxAutoIOB,
+            insulinOnBoard: insulinOnBoard
         ) else {
             return nil
         }
@@ -516,7 +544,9 @@ extension Collection where Element: GlucoseValue {
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model
+            model: model,
+            maxAutoIOB: nil,
+            insulinOnBoard: nil
         ) else {
             return ManualBolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
         }
