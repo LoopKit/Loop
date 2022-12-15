@@ -45,6 +45,10 @@ enum LoopConstants {
     // Percentage of recommended dose to apply as bolus when using automatic bolus dosing strategy
     static let bolusPartialApplicationFactor = 0.4
 
+    // Simple ratio to limit automatic insulin delivery to <= ratio * maxBolus
+    // This ratio is multiplied times the user provided Delivery Limit in Therapy Settings
+    static let ratioMaxAutoInsulinOnBoardToMaxBolus = 1.2
+
     /// The interval over which to aggregate changes in glucose for retrospective correction
     static let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
 

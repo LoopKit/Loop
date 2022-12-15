@@ -1616,6 +1616,9 @@ extension LoopDataManager {
 
             let dosingRecommendation: AutomaticDoseRecommendation?
 
+            // maxAutoIOB calculated from the user entered maxBolus
+            let maxAutoIOB = maxBolus! * LoopConstants.ratioMaxAutoInsulinOnBoardToMaxBolus
+                
             switch settings.automaticDosingStrategy {
             case .automaticBolus:
                 let volumeRounder = { (_ units: Double) in
@@ -1634,7 +1637,9 @@ extension LoopDataManager {
                     lastTempBasal: lastTempBasal,
                     volumeRounder: volumeRounder,
                     rateRounder: rateRounder,
-                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
+                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true,
+                    insulinOnBoard: dosingDecision.insulinOnBoard?.value,
+                    maxAutoIOB: maxAutoIOB
                 )
             case .tempBasalOnly:
                 let temp = predictedGlucose.recommendedTempBasal(
@@ -1647,7 +1652,9 @@ extension LoopDataManager {
                     maxBasalRate: maxBasal!,
                     lastTempBasal: lastTempBasal,
                     rateRounder: rateRounder,
-                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
+                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true,
+                    insulinOnBoard: dosingDecision.insulinOnBoard?.value,
+                    maxAutoIOB: maxAutoIOB
                 )
                 dosingRecommendation = AutomaticDoseRecommendation(basalAdjustment: temp)
             }
