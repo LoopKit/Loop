@@ -42,7 +42,7 @@ extension CLKComplicationTemplate {
         _ family: CLKComplicationFamily,
         glucose: HKQuantity,
         unit: HKUnit,
-        glucoseDate: Date,
+        glucoseDate: Date?,
         trend: GlucoseTrend?,
         eventualGlucose: HKQuantity?,
         at date: Date,
