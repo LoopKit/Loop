@@ -35,6 +35,8 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
     var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
 
+    var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
+
     /// Entry configuration values. Must be set before presenting.
     var absorptionTimePickerInterval = TimeInterval(minutes: 30)
 
@@ -528,6 +530,10 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         guard let quantity = quantity, quantity.doubleValue(for: preferredCarbUnit) > 0 else { return false }
         guard quantity.compare(maxCarbEntryQuantity) != .orderedDescending else {
             navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxCarbEntryQuantity.doubleValue(for: .gram()))
+            return false
+        }
+        guard quantity.compare(warningCarbEntryQuantity) != .orderedDescending else {
+            navigationDelegate.showWarningQuantityValidationWarning(for: self, warningQuantityGrams: warningCarbEntryQuantity.doubleValue(for: .gram()))
             return false
         }
 
