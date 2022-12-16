@@ -42,7 +42,7 @@ extension CLKComplicationTemplate {
         _ family: CLKComplicationFamily,
         glucose: HKQuantity,
         unit: HKUnit,
-        glucoseDate: Date?,
+        glucoseDate: Date,
         trend: GlucoseTrend?,
         eventualGlucose: HKQuantity?,
         at date: Date,
@@ -169,7 +169,7 @@ extension CLKComplicationTemplate {
                                                              chartGenerator: makeChart
                         ) as? CLKComplicationTemplateGraphicCircular
                 else {
-                    preconditionFailure("\(#function) invoked with .graphicCircular must return a subclass of CLKComplicationTemplateGraphicCircular")
+                    return nil
                 }
                 return CLKComplicationTemplateGraphicBezelCircularText(circularTemplate: circularTemplate, textProvider: timeText)
             } else {

@@ -91,6 +91,8 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                                                                          recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
                                                                          chartGenerator: self.makeChart)
             {
+                self.log.default("template succeeded: context = %{public}@", String(describing: context))
+                self.log.default("template succeeded: template = %{public}@", String(describing: template))
                 switch complication.family {
                 case .graphicRectangular:
                     break
@@ -99,6 +101,8 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                 }
                 entry = CLKComplicationTimelineEntry(date: timelineDate, complicationTemplate: template)
             } else {
+                self.log.default("template failed: context = %{public}@", String(describing: ExtensionDelegate.shared().loopManager.activeContext))
+                self.log.default("Unable to generate current timeline entry for %{public}@", String(describing: complication))
                 entry = nil
             }
 
