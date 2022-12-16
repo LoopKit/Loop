@@ -122,7 +122,7 @@ final class ActionHUDController: HUDInterfaceController {
             preMealButtonGroup.turnOff()
             overrideButtonGroup.state = .on
         case .preMeal?:
-            assertionFailure()
+            preconditionFailure("updateForOverrideContext called with premeal")
         }
     }
 

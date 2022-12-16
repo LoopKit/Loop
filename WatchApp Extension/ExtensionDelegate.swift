@@ -75,6 +75,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     func applicationDidBecomeActive() {
+        log.default("applicationDidBecomeActive")
         if WCSession.default.activationState != .activated {
             WCSession.default.activate()
         }

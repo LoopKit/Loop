@@ -32,7 +32,7 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
         delegate = context as? OverrideSelectionControllerDelegate
 
         guard !presets.isEmpty else {
-            assertionFailure("Instantiating override selection controller without configured presets")
+            preconditionFailure("Instantiating override selection controller without configured presets")
             return
         }
 

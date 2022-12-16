@@ -82,7 +82,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             
             let timelineDate = Date()
             
-            self.log.default("Updating current complication timeline entry")
+            self.log.default("Updating current complication timeline entry: complication.family = %{public}@", String(describing: complication.family))
             
             if let context = ExtensionDelegate.shared().loopManager.activeContext,
                 let template = CLKComplicationTemplate.templateForFamily(complication.family,
@@ -197,7 +197,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         case .graphicBezel:
             if #available(watchOSApplicationExtension 5.0, *) {
                 guard let circularTemplate = getLocalizableSampleTemplate(for: .graphicCircular) as? CLKComplicationTemplateGraphicCircular else {
-                    fatalError("\(#function) invoked with .graphicCircular must return a subclass of CLKComplicationTemplateGraphicCircular")
+                    preconditionFailure("\(#function) invoked with .graphicCircular must return a subclass of CLKComplicationTemplateGraphicCircular")
                 }
                 return CLKComplicationTemplateGraphicBezelCircularText(circularTemplate: circularTemplate, textProvider: timeText)
             } else {

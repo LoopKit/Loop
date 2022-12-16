@@ -11,6 +11,7 @@ import HealthKit
 import LoopKit
 import Foundation
 import LoopCore
+import os.log
 
 extension CLKComplicationTemplate {
 
@@ -168,7 +169,7 @@ extension CLKComplicationTemplate {
                                                              chartGenerator: makeChart
                         ) as? CLKComplicationTemplateGraphicCircular
                 else {
-                    fatalError("\(#function) invoked with .graphicCircular must return a subclass of CLKComplicationTemplateGraphicCircular")
+                    preconditionFailure("\(#function) invoked with .graphicCircular must return a subclass of CLKComplicationTemplateGraphicCircular")
                 }
                 return CLKComplicationTemplateGraphicBezelCircularText(circularTemplate: circularTemplate, textProvider: timeText)
             } else {

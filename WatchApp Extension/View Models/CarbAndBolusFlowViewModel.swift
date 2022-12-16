@@ -191,7 +191,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
 
     func addCarbsWithoutBolusing() {
         guard let carbEntry = carbEntryUnderConsideration else {
-            assertionFailure("Attempting to add carbs without a carb entry")
+            preconditionFailure("Attempting to add carbs without a carb entry")
             return
         }
 

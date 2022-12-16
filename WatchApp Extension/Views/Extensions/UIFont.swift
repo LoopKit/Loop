@@ -29,7 +29,7 @@ extension UIFont.TextStyle {
         case .caption1, .caption2:
             return .caption
         default:
-            assertionFailure("Unknown text style \(self)")
+            preconditionFailure("Unknown text style \(self)")
             return .body
         }
     }

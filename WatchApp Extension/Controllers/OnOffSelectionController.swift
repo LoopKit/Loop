@@ -16,7 +16,7 @@ final class OnOffSelectionController: WKHostingController<OnOffSelectionView>, I
     
     override func awake(withContext context: Any?) {
         guard let model = context as? OnOffSelectionViewModel  else {
-            fatalError("OnOffSelectionController invoked without proper context")
+            preconditionFailure("OnOffSelectionController invoked without proper context")
         }
         
         model.dismiss = { self.dismiss() }
