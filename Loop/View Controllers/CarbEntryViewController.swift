@@ -497,14 +497,6 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         guard validateInput(), let updatedEntry = updatedCarbEntry else {
             return
         }
-        // this is a warning, allows user to continue
-        if (!warningMessagePresented &&
-            updatedCarbEntry!.quantity.doubleValue(for: .gram()) > warningCarbEntryQuantity.doubleValue(for: .gram()) )
-        {
-            navigationDelegate.showWarningQuantityValidationWarning(for: self, warningQuantityGrams: warningCarbEntryQuantity.doubleValue(for: .gram()))
-            warningMessagePresented = true
-        }
-
 
         let viewModel = BolusEntryViewModel(
             delegate: deviceManager,
@@ -542,7 +534,14 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxCarbEntryQuantity.doubleValue(for: .gram()))
             return false
         }
-        return true
+        if (!warningMessagePresented &&
+            quantity.doubleValue(for: .gram()) > warningCarbEntryQuantity.doubleValue(for: .gram()) )
+        {
+            navigationDelegate.showWarningQuantityValidationWarning(for: self, warningQuantityGrams: warningCarbEntryQuantity.doubleValue(for: .gram()))
+            warningMessagePresented = true
+            return true
+        }
+       return true
     }
 
     private func updateContinueButtonEnabled() {
