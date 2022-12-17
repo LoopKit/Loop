@@ -36,6 +36,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
 
     var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
+    var warningMessagePresented = false
 
     /// Entry configuration values. Must be set before presenting.
     var absorptionTimePickerInterval = TimeInterval(minutes: 30)
@@ -68,6 +69,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         didSet {
             if quantity != oldValue {
                 updateLastEntryDate()
+                warningMessagePresented = false
             }
             updateContinueButtonEnabled()
         }
@@ -495,6 +497,14 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         guard validateInput(), let updatedEntry = updatedCarbEntry else {
             return
         }
+        // this is a warning, allows user to continue
+        if (!warningMessagePresented &&
+            updatedCarbEntry!.quantity.doubleValue(for: .gram()) > warningCarbEntryQuantity.doubleValue(for: .gram()) )
+        {
+            navigationDelegate.showWarningQuantityValidationWarning(for: self, warningQuantityGrams: warningCarbEntryQuantity.doubleValue(for: .gram()))
+            warningMessagePresented = true
+        }
+
 
         let viewModel = BolusEntryViewModel(
             delegate: deviceManager,
@@ -532,11 +542,6 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxCarbEntryQuantity.doubleValue(for: .gram()))
             return false
         }
-        guard quantity.compare(warningCarbEntryQuantity) != .orderedDescending else {
-            navigationDelegate.showWarningQuantityValidationWarning(for: self, warningQuantityGrams: warningCarbEntryQuantity.doubleValue(for: .gram()))
-            return false
-        }
-
         return true
     }
 
