@@ -2911,7 +2911,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 43A943991B926B7B0051FA24 /* Build configuration list for PBXNativeTarget "WatchApp" */;
 			buildPhases = (
-				C1D1406222FB7ED200DA6242 /* Build Derived Assets */,
 				43A943701B926B7B0051FA24 /* Resources */,
 				43A943981B926B7B0051FA24 /* Embed App Extensions */,
 				43105EF81BADC8F9009CD81E /* Frameworks */,
@@ -2930,6 +2929,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 43A943951B926B7B0051FA24 /* Build configuration list for PBXNativeTarget "WatchApp Extension" */;
 			buildPhases = (
+				C1E9CB59294E67060022387B /* Build Derived Assets */,
 				43A9437A1B926B7B0051FA24 /* Sources */,
 				43A9437B1B926B7B0051FA24 /* Frameworks */,
 				43A9437C1B926B7B0051FA24 /* Resources */,
@@ -3489,24 +3489,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Scripts/build-derived-assets.sh\" \"${SRCROOT}/Loop\"\n";
 		};
-		C1D1406222FB7ED200DA6242 /* Build Derived Assets */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Build Derived Assets";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Scripts/build-derived-assets.sh\" \"${SRCROOT}/WatchApp\"\n";
-		};
 		C1D19800232CFA2A0096D646 /* Capture Build Details */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -3525,6 +3507,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Scripts/capture-build-details.sh\"\n";
+		};
+		C1E9CB59294E67060022387B /* Build Derived Assets */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Derived Assets";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Scripts/build-derived-assets.sh\" \"${SRCROOT}/WatchApp\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
