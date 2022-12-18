@@ -36,7 +36,6 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
 
     var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
-    var warningMessagePresented = false
 
     /// Entry configuration values. Must be set before presenting.
     var absorptionTimePickerInterval = TimeInterval(minutes: 30)
@@ -69,7 +68,6 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         didSet {
             if quantity != oldValue {
                 updateLastEntryDate()
-                warningMessagePresented = false
             }
             updateContinueButtonEnabled()
         }
@@ -494,7 +492,15 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
     @objc private func continueButtonPressed() {
         tableView.endEditing(true)
-        guard validateInput(), let updatedEntry = updatedCarbEntry else {
+        guard validateInput() else {
+            return
+        }
+        continueToBolus()
+    }
+
+    private func continueToBolus() {
+
+        guard let updatedEntry = updatedCarbEntry else {
             return
         }
 
@@ -534,12 +540,14 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxCarbEntryQuantity.doubleValue(for: .gram()))
             return false
         }
-        if (!warningMessagePresented &&
-            quantity.doubleValue(for: .gram()) > warningCarbEntryQuantity.doubleValue(for: .gram()) )
-        {
-            navigationDelegate.showWarningQuantityValidationWarning(for: self, warningQuantityGrams: warningCarbEntryQuantity.doubleValue(for: .gram()))
-            warningMessagePresented = true
-            return true
+
+        let enteredGrams = quantity.doubleValue(for: .gram())
+
+        if (enteredGrams > warningCarbEntryQuantity.doubleValue(for: .gram())) {
+            navigationDelegate.showWarningQuantityValidationWarning(for: self, enteredGrams: enteredGrams) {
+                self.continueToBolus()
+            }
+            return false
         }
        return true
     }
