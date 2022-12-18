@@ -33,7 +33,9 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         return deviceManager.displayGlucoseUnitObservable.displayGlucoseUnit
     }
 
-    var maxQuantity = HKQuantity(unit: .gram(), doubleValue: 250)
+    var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
+
+    var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
 
     /// Entry configuration values. Must be set before presenting.
     var absorptionTimePickerInterval = TimeInterval(minutes: 30)
@@ -490,7 +492,15 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
     @objc private func continueButtonPressed() {
         tableView.endEditing(true)
-        guard validateInput(), let updatedEntry = updatedCarbEntry else {
+        guard validateInput() else {
+            return
+        }
+        continueToBolus()
+    }
+
+    private func continueToBolus() {
+
+        guard let updatedEntry = updatedCarbEntry else {
             return
         }
 
@@ -526,12 +536,20 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         }
 
         guard let quantity = quantity, quantity.doubleValue(for: preferredCarbUnit) > 0 else { return false }
-        guard quantity.compare(maxQuantity) != .orderedDescending else {
-            navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxQuantity.doubleValue(for: .gram()))
+        guard quantity.compare(maxCarbEntryQuantity) != .orderedDescending else {
+            navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxCarbEntryQuantity.doubleValue(for: .gram()))
             return false
         }
 
-        return true
+        let enteredGrams = quantity.doubleValue(for: .gram())
+
+        if (enteredGrams > warningCarbEntryQuantity.doubleValue(for: .gram())) {
+            navigationDelegate.showWarningQuantityValidationWarning(for: self, enteredGrams: enteredGrams) {
+                self.continueToBolus()
+            }
+            return false
+        }
+       return true
     }
 
     private func updateContinueButtonEnabled() {
