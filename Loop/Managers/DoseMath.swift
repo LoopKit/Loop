@@ -235,7 +235,7 @@ extension Collection where Element: GlucoseValue {
         suspendThreshold: HKQuantity,
         sensitivity: HKQuantity,
         model: InsulinModel,
-        maxAutoIOB: Double?,
+        automaticDosingIOBLimit: Double?,
         insulinOnBoard: Double?
     ) -> InsulinCorrection? {
         var minGlucose: GlucoseValue?
@@ -324,9 +324,6 @@ extension Collection where Element: GlucoseValue {
                 return nil
             }
 
-            // Question: this is the entirelyBelow section of code
-            //   I did not add maxAutoIOB check here as I don't think it is needed
-
             return .entirelyBelowRange(
                 min: min,
                 minTarget: minGlucoseTargets.lowerBound,
@@ -335,15 +332,15 @@ extension Collection where Element: GlucoseValue {
         } else if eventual.quantity > eventualGlucoseTargets.upperBound,
             var minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
         {
-            // Limit automatic dosing to prevent insulinOnBoard > maxAutoIOB
+            // Limit automatic dosing to prevent insulinOnBoard > automaticDosingIOBLimit
             if minCorrectionUnits > 0 &&
                 insulinOnBoard != nil &&
-                maxAutoIOB != nil &&
-                maxAutoIOB! > 0 {
-                let checkMaxAutoIOB = maxAutoIOB! - (insulinOnBoard! + minCorrectionUnits)
-                if checkMaxAutoIOB < 0 {
+                automaticDosingIOBLimit != nil &&
+                automaticDosingIOBLimit! > 0 {
+                let checkAutomaticDosing = automaticDosingIOBLimit! - (insulinOnBoard! + minCorrectionUnits)
+                if checkAutomaticDosing < 0 {
                     // TO DO - nice to have logging but not required
-                    minCorrectionUnits = Swift.max(minCorrectionUnits+checkMaxAutoIOB, 0)
+                    minCorrectionUnits = Swift.max(minCorrectionUnits+checkAutomaticDosing, 0)
                 }
             }
 
@@ -390,7 +387,7 @@ extension Collection where Element: GlucoseValue {
         duration: TimeInterval = .minutes(30),
         continuationInterval: TimeInterval = .minutes(11),
         insulinOnBoard: Double?,
-        maxAutoIOB: Double?
+        automaticDosingIOBLimit: Double?
     ) -> TempBasalRecommendation? {
         let correction = self.insulinCorrection(
             to: correctionRange,
@@ -398,7 +395,7 @@ extension Collection where Element: GlucoseValue {
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model,
-            maxAutoIOB: maxAutoIOB,
+            automaticDosingIOBLimit: automaticDosingIOBLimit,
             insulinOnBoard: insulinOnBoard
         )
 
@@ -462,7 +459,7 @@ extension Collection where Element: GlucoseValue {
         duration: TimeInterval = .minutes(30),
         continuationInterval: TimeInterval = .minutes(11),
         insulinOnBoard: Double?,
-        maxAutoIOB: Double?
+        automaticDosingIOBLimit: Double?
     ) -> AutomaticDoseRecommendation? {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
@@ -470,7 +467,7 @@ extension Collection where Element: GlucoseValue {
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model,
-            maxAutoIOB: maxAutoIOB,
+            automaticDosingIOBLimit: automaticDosingIOBLimit,
             insulinOnBoard: insulinOnBoard
         ) else {
             return nil
@@ -542,7 +539,7 @@ extension Collection where Element: GlucoseValue {
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model,
-            maxAutoIOB: nil,
+            automaticDosingIOBLimit: nil,
             insulinOnBoard: nil
         ) else {
             return ManualBolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
