@@ -342,11 +342,8 @@ extension Collection where Element: GlucoseValue {
                 maxAutoIOB! > 0 {
                 let checkMaxAutoIOB = maxAutoIOB! - (insulinOnBoard! + minCorrectionUnits)
                 if checkMaxAutoIOB < 0 {
-                    print("*** maxAutoIOB Feature enacted in aboveRange")
-                    print("***  Initial minCorrectionUnits ", round(100*minCorrectionUnits)/100)
-                    print("***  maxAutoIOB, insulinOnBoard, checkMaxAutoIOB ", round(100*maxAutoIOB!)/100, round(100*insulinOnBoard!)/100, round(100*checkMaxAutoIOB)/100)
+                    // TO DO - nice to have logging but not required
                     minCorrectionUnits = Swift.max(minCorrectionUnits+checkMaxAutoIOB, 0)
-                    print("***  Adjusted minCorrectionUnits ", round(100*minCorrectionUnits)/100)
                 }
             }
 
