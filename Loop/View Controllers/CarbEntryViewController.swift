@@ -15,8 +15,6 @@ import LoopUI
 
 final class CarbEntryViewController: LoopChartsTableViewController, IdentifiableClass {
 
-    var navigationDelegate = CarbEntryNavigationDelegate()
-
     var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes? {
         didSet {
             if let times = defaultAbsorptionTimes {
@@ -33,7 +31,9 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         return deviceManager.displayGlucoseUnitObservable.displayGlucoseUnit
     }
 
-    var maxQuantity = HKQuantity(unit: .gram(), doubleValue: 250)
+    var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
+
+    var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
 
     /// Entry configuration values. Must be set before presenting.
     var absorptionTimePickerInterval = TimeInterval(minutes: 30)
@@ -490,7 +490,15 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
     @objc private func continueButtonPressed() {
         tableView.endEditing(true)
-        guard validateInput(), let updatedEntry = updatedCarbEntry else {
+        guard validateInput() else {
+            return
+        }
+        continueToBolus()
+    }
+
+    private func continueToBolus() {
+
+        guard let updatedEntry = updatedCarbEntry else {
             return
         }
 
@@ -521,17 +529,25 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             return false
         }
         guard absorptionTime <= maxAbsorptionTime else {
-            navigationDelegate.showAbsorptionTimeValidationWarning(for: self, maxAbsorptionTime: maxAbsorptionTime)
+            showAbsorptionTimeValidationWarning(for: self, maxAbsorptionTime: maxAbsorptionTime)
             return false
         }
 
         guard let quantity = quantity, quantity.doubleValue(for: preferredCarbUnit) > 0 else { return false }
-        guard quantity.compare(maxQuantity) != .orderedDescending else {
-            navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxQuantity.doubleValue(for: .gram()))
+        guard quantity.compare(maxCarbEntryQuantity) != .orderedDescending else {
+            showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxCarbEntryQuantity.doubleValue(for: .gram()))
             return false
         }
 
-        return true
+        let enteredGrams = quantity.doubleValue(for: .gram())
+
+        if (enteredGrams > warningCarbEntryQuantity.doubleValue(for: .gram())) {
+            showWarningQuantityValidationWarning(for: self, enteredGrams: enteredGrams) {
+                self.continueToBolus()
+            }
+            return false
+        }
+       return true
     }
 
     private func updateContinueButtonEnabled() {
@@ -542,6 +558,65 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         
         footerView.primaryButton.isEnabled = readyToContinue
         navigationItem.rightBarButtonItem?.isEnabled = readyToContinue
+    }
+
+    // Alerts
+    private lazy var dismissActionTitle = NSLocalizedString("com.loudnate.LoopKit.errorAlertActionTitle", value: "OK", comment: "The title of the action used to dismiss an error alert")
+
+    public func showAbsorptionTimeValidationWarning(for viewController: UIViewController, maxAbsorptionTime: TimeInterval) {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.minute]
+        formatter.unitsStyle = .full
+
+        let message = String(
+            format: NSLocalizedString("The maximum absorption time is %@", comment: "Alert body displayed absorption time greater than max (1: maximum absorption time)"),
+            formatter.string(from: maxAbsorptionTime) ?? String(describing: maxAbsorptionTime))
+        let validationTitle = NSLocalizedString("Maximum Duration Exceeded", comment: "Alert title when maximum duration exceeded.")
+        let alert = UIAlertController(title: validationTitle, message: message, preferredStyle: .alert)
+
+        let action = UIAlertAction(title: dismissActionTitle, style: .default)
+        alert.addAction(action)
+        alert.preferredAction = action
+
+        viewController.present(alert, animated: true)
+    }
+
+    public func showWarningQuantityValidationWarning(for viewController: UIViewController, enteredGrams: Double, didConfirm: @escaping () -> Void) {
+        let warningTitle = NSLocalizedString("Large Meal Entered", comment: "Title of the warning shown when a large meal was entered")
+
+        let message = String(
+            format: NSLocalizedString("Did you intend to enter %1$@ grams as the amount of carbohydrates for this meal?", comment: "Alert body when entered carbohydrates is greater than threshold (1: entered quantity in grams)"),
+            NumberFormatter.localizedString(from: NSNumber(value: enteredGrams), number: .none)
+                )
+        let alert = UIAlertController(title: warningTitle, message: message, preferredStyle: .alert)
+
+        let editButtonText = NSLocalizedString("No, edit amount", comment: "The title of the action used when rejecting the the amount of carbohydrates entered.")
+        let editAction = UIAlertAction(title: editButtonText, style: .default)
+        alert.addAction(editAction)
+
+        let confirmButtonText = NSLocalizedString("Yes", comment: "The title of the action used when confirming entered amount of carbohydrates.")
+        let confirm = UIAlertAction(title: confirmButtonText, style: .default) {_ in
+            didConfirm();
+        }
+        alert.addAction(confirm)
+        alert.preferredAction = confirm
+
+        viewController.present(alert, animated: true)
+    }
+
+    public func showMaxQuantityValidationWarning(for viewController: UIViewController, maxQuantityGrams: Double) {
+        let errorTitle = NSLocalizedString("Input Maximum Exceeded", comment: "Title of the alert when carb input maximum was exceeded.")
+        let message = String(
+            format: NSLocalizedString("The maximum allowed amount is %@ grams.", comment: "Alert body displayed for quantity greater than max (1: maximum quantity in grams)"),
+            NumberFormatter.localizedString(from: NSNumber(value: maxQuantityGrams), number: .none)
+        )
+        let alert = UIAlertController(title: errorTitle, message: message, preferredStyle: .alert)
+
+        let action = UIAlertAction(title: dismissActionTitle, style: .default)
+        alert.addAction(action)
+        alert.preferredAction = action
+
+        viewController.present(alert, animated: true)
     }
 }
 
