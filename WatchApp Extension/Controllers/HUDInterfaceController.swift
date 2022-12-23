@@ -14,6 +14,7 @@ class HUDInterfaceController: WKInterfaceController {
 
     @IBOutlet weak var loopHUDImage: WKInterfaceImage!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
+    @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
 
     var loopManager = ExtensionDelegate.shared().loopManager
 
@@ -71,12 +72,23 @@ class HUDInterfaceController: WKInterfaceController {
         if date != nil {
             glucoseLabel.setText(NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"))
             glucoseLabel.setHidden(false)
+            
+            let showEventualGlucose = FeatureFlags.showEventualBloodGlucoseOnWatchEnabled
+            if showEventualGlucose {
+                eventualGlucoseLabel.setHidden(true)
+            }
+                
             if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.displayGlucoseUnit, glucoseDate.timeIntervalSinceNow > -LoopCoreConstants.inputDataRecencyInterval {
                 let formatter = NumberFormatter.glucoseFormatter(for: unit)
                 
                 if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {
                     let trend = activeContext.glucoseTrend?.symbol ?? ""
                     glucoseLabel.setText(glucoseValue + trend)
+                }
+                
+                if showEventualGlucose, let eventualGlucose = activeContext.eventualGlucose, let eventualGlucoseValue = formatter.string(from: eventualGlucose.doubleValue(for: unit)) {
+                    eventualGlucoseLabel.setText(eventualGlucoseValue)
+                    eventualGlucoseLabel.setHidden(false)
                 }
             }
         }
