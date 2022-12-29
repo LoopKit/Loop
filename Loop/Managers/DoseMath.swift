@@ -333,11 +333,8 @@ extension Collection where Element: GlucoseValue {
             var minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
         {
             // Limit automatic dosing to prevent insulinOnBoard > automaticDosingIOBLimit
-            if minCorrectionUnits > 0 &&
-                insulinOnBoard != nil &&
-                automaticDosingIOBLimit != nil &&
-                automaticDosingIOBLimit! > 0 {
-                let checkAutomaticDosing = automaticDosingIOBLimit! - (insulinOnBoard! + minCorrectionUnits)
+            if let automaticDosingIOBLimit = automaticDosingIOBLimit, let insulinOnBoard = insulinOnBoard, minCorrectionUnits > 0 {
+                let checkAutomaticDosing = automaticDosingIOBLimit - (insulinOnBoard + minCorrectionUnits)
                 if checkAutomaticDosing < 0 {
                     // TO DO - nice to have logging but not required
                     minCorrectionUnits = Swift.max(minCorrectionUnits+checkAutomaticDosing, 0)
