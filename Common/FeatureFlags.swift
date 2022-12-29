@@ -172,10 +172,11 @@ struct FeatureFlagConfiguration: Decodable {
         self.scenariosEnabled = false
         #endif
 
-        #if SHOW_EVENTUAL_BLOOD_GLUCOSE_ON_WATCH_ENABLED
-        self.showEventualBloodGlucoseOnWatchEnabled = true
-        #else
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if SHOW_EVENTUAL_BLOOD_GLUCOSE_ON_WATCH_DISABLED
         self.showEventualBloodGlucoseOnWatchEnabled = false
+        #else
+        self.showEventualBloodGlucoseOnWatchEnabled = true
         #endif
         
         #if SIMULATED_CORE_DATA_ENABLED
