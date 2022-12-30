@@ -50,21 +50,25 @@ public final class AlertManager {
 
     private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
 
+    var analyticsServicesManager: AnalyticsServicesManager
+
     lazy private var cancellables = Set<AnyCancellable>()
 
     // For testing
     var getCurrentDate = { return Date() }
     
-    public init(alertPresenter: AlertPresenter,
+    init(alertPresenter: AlertPresenter,
                 modalAlertScheduler: InAppModalAlertScheduler? = nil,
                 userNotificationAlertScheduler: UserNotificationAlertScheduler,
                 fileManager: FileManager = FileManager.default,
                 alertStore: AlertStore? = nil,
                 expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
                 bluetoothProvider: BluetoothProvider,
+                analyticsServicesManager: AnalyticsServicesManager,
                 preventIssuanceBeforePlayback: Bool = true
     ) {
         self.fileManager = fileManager
+        self.analyticsServicesManager = analyticsServicesManager
         playbackFinished = !preventIssuanceBeforePlayback
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
         let alertStoreDirectory = documentsDirectory?.appendingPathComponent("AlertStore")
@@ -358,6 +362,7 @@ extension AlertManager: AlertIssuer {
             deferredAlerts.append(alert)
             return
         }
+        analyticsServicesManager.didIssueAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel)
         scheduleAlertWithSchedulers(alert)
         alertStore.recordIssued(alert: alert)
     }

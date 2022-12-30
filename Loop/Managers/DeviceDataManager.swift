@@ -368,7 +368,8 @@ final class DeviceDataManager {
             trustedTimeOffset: { trustedTimeChecker.detectedSystemTimeOffset }
         )
         cacheStore.delegate = loopManager
-        loopManager.presetActivationObserver = alertManager
+        loopManager.presetActivationObservers.append(alertManager)
+        loopManager.presetActivationObservers.append(analyticsServicesManager)
 
         watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 
@@ -717,6 +718,8 @@ private extension DeviceDataManager {
             alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
                                               soundVendor: cgmManager)            
             cgmHasValidSensorSession = cgmManager.cgmManagerStatus.hasValidSensorSession
+
+            analyticsServicesManager.identifyCGMType(cgmManager.managerIdentifier)
         }
 
         if let cgmManagerUI = cgmManager as? CGMManagerUI {
@@ -744,6 +747,8 @@ private extension DeviceDataManager {
                                                     soundVendor: pumpManager)
             
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
+
+            analyticsServicesManager.identifyPumpType(pumpManager.managerIdentifier)
         }
     }
 

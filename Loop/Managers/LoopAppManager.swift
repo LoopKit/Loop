@@ -170,7 +170,8 @@ class LoopAppManager: NSObject {
         alertManager = AlertManager(alertPresenter: self,
                                     userNotificationAlertScheduler: UserNotificationAlertScheduler(userNotificationCenter: UNUserNotificationCenter.current()),
                                     expireAfter: Bundle.main.localCacheDuration,
-                                    bluetoothProvider: bluetoothStateManager)
+                                    bluetoothProvider: bluetoothStateManager,
+                                    analyticsServicesManager: analyticsServicesManager)
 
         alertPermissionsChecker = AlertPermissionsChecker()
         alertPermissionsChecker.delegate = alertManager

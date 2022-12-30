@@ -59,7 +59,7 @@ final class LoopDataManager {
     
     private var overrideIntentObserver: NSKeyValueObservation? = nil
 
-    weak var presetActivationObserver: PresetActivationObserver?
+    var presetActivationObservers: [PresetActivationObserver] = []
 
     private var timeBasedDoseApplicationFactor: Double = 1.0
 
@@ -129,10 +129,18 @@ final class LoopDataManager {
             self?.logger.default("Override Intent: setting override named '%s'", String(describing: name))
             self?.mutateSettings { settings in
                 if let oldPreset = settings.scheduleOverride {
-                    self?.presetActivationObserver?.presetDeactivated(context: oldPreset.context)
+                    if let observers = self?.presetActivationObservers {
+                        for observer in observers {
+                            observer.presetDeactivated(context: oldPreset.context)
+                        }
+                    }
                 }
                 settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
-                self?.presetActivationObserver?.presetActivated(context: .preset(preset), duration: preset.duration)
+                if let observers = self?.presetActivationObservers {
+                    for observer in observers {
+                        observer.presetActivated(context: .preset(preset), duration: preset.duration)
+                    }
+                }
             }
             // Remove the override from UserDefaults so we don't set it multiple times
             appGroup.intentExtensionOverrideToSet = nil
@@ -236,10 +244,15 @@ final class LoopDataManager {
             overrideHistory.recordOverride(settings.scheduleOverride)
 
             if let oldPreset = oldValue.scheduleOverride {
-                self.presetActivationObserver?.presetDeactivated(context: oldPreset.context)
+                for observer in self.presetActivationObservers {
+                    observer.presetDeactivated(context: oldPreset.context)
+                }
+
             }
             if let newPreset = newValue.scheduleOverride {
-                self.presetActivationObserver?.presetActivated(context: newPreset.context, duration: newPreset.duration)
+                for observer in self.presetActivationObservers {
+                    observer.presetActivated(context: newPreset.context, duration: newPreset.duration)
+                }
             }
 
             // Invalidate cached effects affected by the override
