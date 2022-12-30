@@ -235,8 +235,8 @@ extension Collection where Element: GlucoseValue {
         suspendThreshold: HKQuantity,
         sensitivity: HKQuantity,
         model: InsulinModel,
-        automaticDosingIOBLimit: Double?,
-        insulinOnBoard: Double?
+        insulinOnBoard: Double? = nil,
+        automaticDosingIOBLimit: Double? = nil
     ) -> InsulinCorrection? {
         var minGlucose: GlucoseValue?
         var eventualGlucose: GlucoseValue?
@@ -333,7 +333,10 @@ extension Collection where Element: GlucoseValue {
             var minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
         {
             // Limit automatic dosing to prevent insulinOnBoard > automaticDosingIOBLimit
-            if let automaticDosingIOBLimit = automaticDosingIOBLimit, let insulinOnBoard = insulinOnBoard, minCorrectionUnits > 0 {
+            if let automaticDosingIOBLimit = automaticDosingIOBLimit,
+               let insulinOnBoard = insulinOnBoard,
+               minCorrectionUnits > 0
+            {
                 let checkAutomaticDosing = automaticDosingIOBLimit - (insulinOnBoard + minCorrectionUnits)
                 if checkAutomaticDosing < 0 {
                     // TO DO - nice to have logging but not required
@@ -383,8 +386,8 @@ extension Collection where Element: GlucoseValue {
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
         continuationInterval: TimeInterval = .minutes(11),
-        insulinOnBoard: Double?,
-        automaticDosingIOBLimit: Double?
+        insulinOnBoard: Double? = nil,
+        automaticDosingIOBLimit: Double? = nil
     ) -> TempBasalRecommendation? {
         let correction = self.insulinCorrection(
             to: correctionRange,
@@ -392,8 +395,8 @@ extension Collection where Element: GlucoseValue {
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model,
-            automaticDosingIOBLimit: automaticDosingIOBLimit,
-            insulinOnBoard: insulinOnBoard
+            insulinOnBoard: insulinOnBoard,
+            automaticDosingIOBLimit: automaticDosingIOBLimit
         )
 
         let scheduledBasalRate = basalRates.value(at: date)
@@ -455,8 +458,8 @@ extension Collection where Element: GlucoseValue {
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
         continuationInterval: TimeInterval = .minutes(11),
-        insulinOnBoard: Double?,
-        automaticDosingIOBLimit: Double?
+        insulinOnBoard: Double? = nil,
+        automaticDosingIOBLimit: Double? = nil
     ) -> AutomaticDoseRecommendation? {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
@@ -464,8 +467,8 @@ extension Collection where Element: GlucoseValue {
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model,
-            automaticDosingIOBLimit: automaticDosingIOBLimit,
-            insulinOnBoard: insulinOnBoard
+            insulinOnBoard: insulinOnBoard,
+            automaticDosingIOBLimit: automaticDosingIOBLimit
         ) else {
             return nil
         }
@@ -536,8 +539,8 @@ extension Collection where Element: GlucoseValue {
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model,
-            automaticDosingIOBLimit: nil,
-            insulinOnBoard: nil
+            insulinOnBoard: nil,
+            automaticDosingIOBLimit: nil
         ) else {
             return ManualBolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
         }
