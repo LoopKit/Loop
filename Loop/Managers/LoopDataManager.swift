@@ -1618,7 +1618,7 @@ extension LoopDataManager {
 
             // automaticDosingIOBLimit calculated from the user entered maxBolus
             let automaticDosingIOBLimit = maxBolus! * 2.0
-                
+
             switch settings.automaticDosingStrategy {
             case .automaticBolus:
                 let volumeRounder = { (_ units: Double) in
