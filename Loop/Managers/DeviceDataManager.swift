@@ -201,8 +201,6 @@ final class DeviceDataManager {
 
     var analyticsServicesManager: AnalyticsServicesManager
 
-    var loggingServicesManager: LoggingServicesManager
-
     var settingsManager: SettingsManager
 
     var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
@@ -230,6 +228,8 @@ final class DeviceDataManager {
     init(pluginManager: PluginManager,
          alertManager: AlertManager,
          settingsManager: SettingsManager,
+         loggingServicesManager: LoggingServicesManager,
+         analyticsServicesManager: AnalyticsServicesManager,
          bluetoothProvider: BluetoothProvider,
          alertPresenter: AlertPresenter,
          closedLoopStatus: ClosedLoopStatus,
@@ -250,9 +250,6 @@ final class DeviceDataManager {
             }
         }
         deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
-
-        loggingServicesManager = LoggingServicesManager()
-        analyticsServicesManager = AnalyticsServicesManager()
 
         self.pluginManager = pluginManager
         self.alertManager = alertManager
@@ -286,6 +283,8 @@ final class DeviceDataManager {
         } else {
             insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
         }
+
+        self.analyticsServicesManager = analyticsServicesManager
         
         self.doseStore = DoseStore(
             healthStore: healthStore,

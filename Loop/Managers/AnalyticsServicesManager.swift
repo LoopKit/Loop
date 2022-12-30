@@ -47,6 +47,10 @@ final class AnalyticsServicesManager {
         logEvent("Bolus Screen")
     }
 
+    func didDisplayCarbEntryScreen() {
+        logEvent("Carb Entry Screen")
+    }
+
     func didDisplaySettingsScreen() {
         logEvent("Settings Screen")
     }
