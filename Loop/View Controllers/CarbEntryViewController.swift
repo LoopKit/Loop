@@ -522,6 +522,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             dismissalMode: originalCarbEntry == nil ? .modalDismiss : .pop(to: predecessorViewControllerType)
         )
         show(hostingController, sender: footerView.primaryButton)
+        deviceManager.analyticsServicesManager.didDisplayBolusScreen()
     }
 
     private func validateInput() -> Bool {
