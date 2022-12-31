@@ -235,8 +235,8 @@ extension Collection where Element: GlucoseValue {
         suspendThreshold: HKQuantity,
         sensitivity: HKQuantity,
         model: InsulinModel,
-        insulinOnBoard: Double? = nil,
-        automaticDosingIOBLimit: Double? = nil
+        insulinOnBoard: Double?,
+        automaticDosingIOBLimit: Double?
     ) -> InsulinCorrection? {
         var minGlucose: GlucoseValue?
         var eventualGlucose: GlucoseValue?
@@ -386,8 +386,8 @@ extension Collection where Element: GlucoseValue {
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
         continuationInterval: TimeInterval = .minutes(11),
-        insulinOnBoard: Double? = nil,
-        automaticDosingIOBLimit: Double? = nil
+        insulinOnBoard: Double?,
+        automaticDosingIOBLimit: Double?
     ) -> TempBasalRecommendation? {
         let correction = self.insulinCorrection(
             to: correctionRange,
@@ -458,8 +458,8 @@ extension Collection where Element: GlucoseValue {
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
         continuationInterval: TimeInterval = .minutes(11),
-        insulinOnBoard: Double? = nil,
-        automaticDosingIOBLimit: Double? = nil
+        insulinOnBoard: Double?,
+        automaticDosingIOBLimit: Double?
     ) -> AutomaticDoseRecommendation? {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
