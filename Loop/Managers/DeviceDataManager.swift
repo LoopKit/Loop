@@ -201,8 +201,6 @@ final class DeviceDataManager {
 
     var analyticsServicesManager: AnalyticsServicesManager
 
-    var loggingServicesManager: LoggingServicesManager
-
     var settingsManager: SettingsManager
 
     var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
@@ -230,6 +228,8 @@ final class DeviceDataManager {
     init(pluginManager: PluginManager,
          alertManager: AlertManager,
          settingsManager: SettingsManager,
+         loggingServicesManager: LoggingServicesManager,
+         analyticsServicesManager: AnalyticsServicesManager,
          bluetoothProvider: BluetoothProvider,
          alertPresenter: AlertPresenter,
          closedLoopStatus: ClosedLoopStatus,
@@ -250,9 +250,6 @@ final class DeviceDataManager {
             }
         }
         deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
-
-        loggingServicesManager = LoggingServicesManager()
-        analyticsServicesManager = AnalyticsServicesManager()
 
         self.pluginManager = pluginManager
         self.alertManager = alertManager
@@ -286,6 +283,8 @@ final class DeviceDataManager {
         } else {
             insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
         }
+
+        self.analyticsServicesManager = analyticsServicesManager
         
         self.doseStore = DoseStore(
             healthStore: healthStore,
@@ -369,7 +368,8 @@ final class DeviceDataManager {
             trustedTimeOffset: { trustedTimeChecker.detectedSystemTimeOffset }
         )
         cacheStore.delegate = loopManager
-        loopManager.presetActivationObserver = alertManager
+        loopManager.presetActivationObservers.append(alertManager)
+        loopManager.presetActivationObservers.append(analyticsServicesManager)
 
         watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 
@@ -718,6 +718,8 @@ private extension DeviceDataManager {
             alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
                                               soundVendor: cgmManager)            
             cgmHasValidSensorSession = cgmManager.cgmManagerStatus.hasValidSensorSession
+
+            analyticsServicesManager.identifyCGMType(cgmManager.managerIdentifier)
         }
 
         if let cgmManagerUI = cgmManager as? CGMManagerUI {
@@ -745,6 +747,8 @@ private extension DeviceDataManager {
                                                     soundVendor: pumpManager)
             
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
+
+            analyticsServicesManager.identifyPumpType(pumpManager.managerIdentifier)
         }
     }
 

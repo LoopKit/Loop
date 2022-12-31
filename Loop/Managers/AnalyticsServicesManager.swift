@@ -35,16 +35,34 @@ final class AnalyticsServicesManager {
         analyticsServices.forEach { $0.recordAnalyticsEvent(name, withProperties: properties, outOfSession: outOfSession) }
     }
 
+    private func identify(_ property: String, value: String) {
+        log.debug("Identify %{public}@: %{public}@", property, value)
+        analyticsServices.forEach { $0.recordIdentify(property, value: value) }
+    }
+
     // MARK: - UIApplicationDelegate
 
     func application(didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any]?) {
         logEvent("App Launch")
     }
 
+    // MARK: - Device Type
+    func identifyPumpType(_ pumpType: String) {
+        identify("Pump Type", value: pumpType)
+    }
+
+    func identifyCGMType(_ cgmType: String) {
+        identify("CGM Type", value: cgmType)
+    }
+
     // MARK: - Screens
 
     func didDisplayBolusScreen() {
         logEvent("Bolus Screen")
+    }
+
+    func didDisplayCarbEntryScreen() {
+        logEvent("Carb Entry Screen")
     }
 
     func didDisplaySettingsScreen() {
@@ -145,4 +163,42 @@ final class AnalyticsServicesManager {
         logEvent("Loop error", withProperties: ["description": error.localizedDescription], outOfSession: true)
     }
 
+    func didIssueAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel) {
+        logEvent("Alert Issued", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue])
+    }
+
+    func didEnactOverride(name: String, symbol: String, duration: TemporaryScheduleOverride.Duration) {
+        logEvent("Override Enacted", withProperties: ["name": name, "symbol": symbol])
+    }
+
+    func didCancelOverride(name: String) {
+        logEvent("Override Enacted", withProperties: ["name": name])
+    }
 }
+
+
+// MARK: - PresetActivationObserver
+extension AnalyticsServicesManager: PresetActivationObserver {
+    func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration) {
+        switch context {
+        case .legacyWorkout:
+            didEnactOverride(name: "workout", symbol: "", duration: duration)
+        case .preMeal:
+            didEnactOverride(name: "preMeal", symbol: "", duration: duration)
+        case .custom:
+            didEnactOverride(name: "custom", symbol: "", duration: duration)
+        case .preset(let preset):
+            didEnactOverride(name: preset.name, symbol: preset.symbol, duration: duration)
+        }
+    }
+
+    func presetDeactivated(context: TemporaryScheduleOverride.Context) {
+        switch context {
+        case .legacyWorkout:
+            break
+        default:
+            break
+        }
+    }
+}
+
