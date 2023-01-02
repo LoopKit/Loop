@@ -63,6 +63,8 @@ final class LoopDataManager {
 
     private var timeBasedDoseApplicationFactor: Double = 1.0
 
+    private var insulinOnBoardValue: Double?
+
     deinit {
         for observer in notificationObservers {
             NotificationCenter.default.removeObserver(observer)
@@ -1044,6 +1046,7 @@ extension LoopDataManager {
                 warnings.append(.fetchDataWarning(.insulinOnBoard(error: error)))
             case .success(let insulinValue):
                 insulinOnBoard = insulinValue
+                self.insulinOnBoardValue = insulinValue.value
             }
             updateGroup.leave()
         }
@@ -1651,7 +1654,7 @@ extension LoopDataManager {
                     volumeRounder: volumeRounder,
                     rateRounder: rateRounder,
                     isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true,
-                    insulinOnBoard: dosingDecision.insulinOnBoard?.value,
+                    insulinOnBoard: self.insulinOnBoardValue,
                     automaticDosingIOBLimit: automaticDosingIOBLimit
                 )
             case .tempBasalOnly:
@@ -1666,7 +1669,7 @@ extension LoopDataManager {
                     lastTempBasal: lastTempBasal,
                     rateRounder: rateRounder,
                     isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true,
-                    insulinOnBoard: dosingDecision.insulinOnBoard?.value,
+                    insulinOnBoard: self.insulinOnBoardValue,
                     automaticDosingIOBLimit: automaticDosingIOBLimit
                 )
                 dosingRecommendation = AutomaticDoseRecommendation(basalAdjustment: temp)
