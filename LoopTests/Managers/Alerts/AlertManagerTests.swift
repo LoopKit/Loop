@@ -171,7 +171,7 @@ class AlertManagerTests: XCTestCase {
     var mockAlertStore: MockAlertStore!
     var alertManager: AlertManager!
     var isInBackground = true
-
+    
     override func setUp() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
