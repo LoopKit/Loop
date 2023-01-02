@@ -171,8 +171,6 @@ class AlertManagerTests: XCTestCase {
     var mockAlertStore: MockAlertStore!
     var alertManager: AlertManager!
     var isInBackground = true
-    
-    private var analyticsServicesManager = AnalyticsServicesManager()
 
     override func setUp() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
@@ -188,7 +186,7 @@ class AlertManagerTests: XCTestCase {
                                     fileManager: mockFileManager,
                                     alertStore: mockAlertStore,
                                     bluetoothProvider: MockBluetoothProvider(),
-                                    analyticsServicesManager: analyticsServicesManager,
+                                    analyticsServicesManager: AnalyticsServicesManager(),
                                     preventIssuanceBeforePlayback: false)
     }
 
@@ -267,7 +265,7 @@ class AlertManagerTests: XCTestCase {
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider(),
-                                        analyticsServicesManager: analyticsServicesManager)
+                                        analyticsServicesManager: AnalyticsServicesManager())
             alertManager.playbackAlertsFromPersistence()
             XCTAssertEqual(alert, mockModalScheduler.scheduledAlert)
             XCTAssertNil(mockUserNotificationScheduler.scheduledAlert)
@@ -289,7 +287,7 @@ class AlertManagerTests: XCTestCase {
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider(),
-                                        analyticsServicesManager: analyticsServicesManager)
+                                        analyticsServicesManager: AnalyticsServicesManager())
             alertManager.playbackAlertsFromPersistence()
             let expected = Alert(identifier: Self.mockIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate)
             XCTAssertEqual(expected, mockModalScheduler.scheduledAlert)
@@ -312,7 +310,7 @@ class AlertManagerTests: XCTestCase {
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider(),
-                                        analyticsServicesManager: analyticsServicesManager)
+                                        analyticsServicesManager: AnalyticsServicesManager())
             alertManager.playbackAlertsFromPersistence()
 
             // The trigger for this should be `.delayed` by "something less than 15 seconds",
@@ -343,7 +341,7 @@ class AlertManagerTests: XCTestCase {
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider(),
-                                        analyticsServicesManager: analyticsServicesManager)
+                                        analyticsServicesManager: AnalyticsServicesManager())
             alertManager.playbackAlertsFromPersistence()
 
             XCTAssertEqual(alert, mockModalScheduler.scheduledAlert)
@@ -366,7 +364,7 @@ class AlertManagerTests: XCTestCase {
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider(),
-                                        analyticsServicesManager: analyticsServicesManager)
+                                        analyticsServicesManager: AnalyticsServicesManager())
             alertManager.lookupAllUnretracted(managerIdentifier: Self.mockManagerIdentifier) { result in
                 try? XCTAssertEqual([PersistedAlert(alert: alert, issuedDate: date, retractedDate: nil, acknowledgedDate: nil)],
                                     XCTUnwrap(result.successValue))
@@ -389,7 +387,7 @@ class AlertManagerTests: XCTestCase {
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider(),
-                                        analyticsServicesManager: analyticsServicesManager)
+                                        analyticsServicesManager: AnalyticsServicesManager())
             alertManager.lookupAllUnacknowledgedUnretracted(managerIdentifier: Self.mockManagerIdentifier) { result in
                 try? XCTAssertEqual([PersistedAlert(alert: alert, issuedDate: date, retractedDate: nil, acknowledgedDate: nil)],
                                     XCTUnwrap(result.successValue))
@@ -412,7 +410,7 @@ class AlertManagerTests: XCTestCase {
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider(),
-                                        analyticsServicesManager: analyticsServicesManager)
+                                        analyticsServicesManager: AnalyticsServicesManager())
             let identifierExists = Self.mockIdentifier
             let identifierDoesNotExist = Alert.Identifier(managerIdentifier: "TestManagerIdentifier", alertIdentifier: "TestAlertIdentifier")
             alertManager.doesIssuedAlertExist(identifier: identifierExists) { result in
@@ -436,7 +434,7 @@ class AlertManagerTests: XCTestCase {
                                         fileManager: mockFileManager,
                                         alertStore: mockAlertStore,
                                         bluetoothProvider: MockBluetoothProvider(),
-                                        analyticsServicesManager: analyticsServicesManager)
+                                        analyticsServicesManager: AnalyticsServicesManager())
             let now = Date()
             alertManager.recordRetractedAlert(alert, at: now)
             XCTAssertEqual(mockAlertStore.retractedAlert, alert)
