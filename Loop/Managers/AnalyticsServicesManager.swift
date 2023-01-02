@@ -139,12 +139,29 @@ final class AnalyticsServicesManager {
 
     // MARK: - Loop Events
 
+    func pumpWasRemoved() {
+        logEvent("Pump Removed")
+    }
+
+    func pumpWasAdded(identifier: String) {
+        logEvent("Pump Added", withProperties: ["identifier" : identifier])
+    }
+
+    func cgmWasRemoved() {
+        logEvent("CGM Removed")
+    }
+
+    func cgmWasAdded(identifier: String) {
+        logEvent("CGM Added", withProperties: ["identifier" : identifier])
+    }
+
+
     func didAddCarbsFromWatch() {
         logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
     func didRetryBolus() {
-        logEvent("Bolus Retry", outOfSession: true)
+        logEvent("Bolus Retry")
     }
 
     func didSetBolusFromWatch(_ units: Double) {

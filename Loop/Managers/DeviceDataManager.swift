@@ -94,6 +94,15 @@ final class DeviceDataManager {
         didSet {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
+
+            if cgmManager?.managerIdentifier != oldValue?.managerIdentifier {
+                if let cgmManager = cgmManager {
+                    analyticsServicesManager.cgmWasAdded(identifier: cgmManager.managerIdentifier)
+                } else {
+                    analyticsServicesManager.cgmWasRemoved()
+                }
+            }
+
             NotificationCenter.default.post(name: .CGMManagerChanged, object: self, userInfo: nil)
             rawCGMManager = cgmManager?.rawValue
             UserDefaults.appGroup?.clearLegacyCGMManagerRawValue()
@@ -112,6 +121,14 @@ final class DeviceDataManager {
             // If the current CGMManager is a PumpManager, we clear it out.
             if cgmManager is PumpManagerUI {
                 cgmManager = nil
+            }
+
+            if pumpManager?.managerIdentifier != oldValue?.managerIdentifier {
+                if let pumpManager = pumpManager {
+                    analyticsServicesManager.pumpWasAdded(identifier: pumpManager.managerIdentifier)
+                } else {
+                    analyticsServicesManager.pumpWasRemoved()
+                }
             }
 
             setupPump()
