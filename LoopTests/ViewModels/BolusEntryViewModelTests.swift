@@ -764,6 +764,8 @@ fileprivate class MockLoopState: LoopState {
     
     var carbsOnBoard: CarbValue?
     
+    var insulinOnBoard: InsulinValue?
+    
     var error: LoopError?
     
     var insulinCounteractionEffects: [GlucoseEffectVelocity] = []
