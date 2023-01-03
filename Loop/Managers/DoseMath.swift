@@ -329,19 +329,17 @@ extension Collection where Element: GlucoseValue {
                 minTarget: minGlucoseTargets.lowerBound,
                 units: units
             )
-        } else if eventual.quantity > eventualGlucoseTargets.upperBound,
-            var minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
-        {
-            // Limit automatic dosing to prevent insulinOnBoard > automaticDosingIOBLimit
-            if let automaticDosingIOBLimit = automaticDosingIOBLimit,
-               let insulinOnBoard = insulinOnBoard,
-               minCorrectionUnits > 0
+        } else if eventual.quantity > eventualGlucoseTargets.upperBound, var minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose {
+            /// Don't allow the correction units + current `insulinOnBoard` to go over `automaticDosingIOBLimit`
+            if
+                let automaticDosingIOBLimit,
+                let insulinOnBoard,
+                minCorrectionUnits > 0,
+                insulinOnBoard + minCorrectionUnits > automaticDosingIOBLimit
             {
-                let checkAutomaticDosing = automaticDosingIOBLimit - (insulinOnBoard + minCorrectionUnits)
-                if checkAutomaticDosing < 0 {
-                    // TO DO - nice to have logging but not required
-                    minCorrectionUnits = Swift.max(minCorrectionUnits+checkAutomaticDosing, 0)
-                }
+                let unitsOverAutomaticDosingLimit = (insulinOnBoard + minCorrectionUnits) - automaticDosingIOBLimit
+                // TO DO - nice to have logging but not required
+                minCorrectionUnits = Swift.max(minCorrectionUnits - unitsOverAutomaticDosingLimit, 0)
             }
 
             return .aboveRange(
