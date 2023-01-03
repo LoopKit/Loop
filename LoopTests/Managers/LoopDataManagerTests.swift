@@ -21,6 +21,28 @@ enum DataManagerTestType {
     case lowAndFallingWithCOB
     case lowWithLowTreatment
     case highAndFalling
+    /// uses fixtures for .highAndRisingWithCOB with a low max bolus and dosing set to autobolus
+    case autoBolusIOBClamping
+}
+
+extension DataManagerTestType {
+    var dosingStrategy: AutomaticDosingStrategy {
+        switch self {
+        case .autoBolusIOBClamping:
+            return .automaticBolus
+        default:
+            return .tempBasalOnly
+        }
+    }
+    
+    var maxBolus: Double {
+        switch self {
+        case .autoBolusIOBClamping:
+            return 5
+        default:
+            return LoopDataManagerDosingTests.defaultMaxBolus
+        }
+    }
 }
 
 extension TimeZone {
@@ -56,7 +78,7 @@ class LoopDataManagerDosingTests: XCTestCase {
     
     // MARK: Settings
     let maxBasalRate = 5.0
-    let maxBolus = 10.0
+    static let defaultMaxBolus = 10.0
     
     var suspendThreshold: GlucoseThreshold {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter, value: 75)
@@ -85,8 +107,9 @@ class LoopDataManagerDosingTests: XCTestCase {
             glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
             basalRateSchedule: basalRateSchedule,
             maximumBasalRatePerHour: maxBasalRate,
-            maximumBolus: maxBolus,
-            suspendThreshold: suspendThreshold
+            maximumBolus: test.maxBolus,
+            suspendThreshold: suspendThreshold,
+            automaticDosingStrategy: test.dosingStrategy
         )
         
         let doseStore = MockDoseStore(for: test)
@@ -507,7 +530,7 @@ class LoopDataManagerDosingTests: XCTestCase {
             dosingEnabled: false,
             glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
             maximumBasalRatePerHour: maxBasalRate,
-            maximumBolus: maxBolus,
+            maximumBolus: Self.defaultMaxBolus,
             suspendThreshold: suspendThreshold
         )
 
@@ -558,6 +581,40 @@ class LoopDataManagerDosingTests: XCTestCase {
         XCTAssertNil(mockDelegate.recommendation)
     }
 
+    
+    func testAutoBolusMaxIOBClamping() {
+        /// `maximumBolus` is set to clamp the automatic dose
+        /// Autobolus without clamping: 0.65 U. Clamped recommendation: 0.2 U.
+        setUp(for: .autoBolusIOBClamping)
+        
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        
+        var insulinOnBoard: InsulinValue?
+        var recommendedBolus: Double?
+        self.loopDataManager.getLoopState { _, state in
+            insulinOnBoard = state.insulinOnBoard
+            recommendedBolus = state.recommendedAutomaticDose?.recommendation.bolusUnits
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+
+        XCTAssertEqual(recommendedBolus!, 0.2, accuracy: 0.01)
+        XCTAssertEqual(insulinOnBoard?.value, 9.5)
+        
+        /// Set the `maximumBolus` so there's no clamping
+        updateGroup.enter()
+        self.loopDataManager.mutateSettings { settings in settings.maximumBolus = Self.defaultMaxBolus }
+        self.loopDataManager.getLoopState { _, state in
+            insulinOnBoard = state.insulinOnBoard
+            recommendedBolus = state.recommendedAutomaticDose?.recommendation.bolusUnits
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+
+        XCTAssertEqual(recommendedBolus!, 0.65, accuracy: 0.01)
+        XCTAssertEqual(insulinOnBoard?.value, 9.5)
+    }
 }
 
 extension LoopDataManagerDosingTests {
