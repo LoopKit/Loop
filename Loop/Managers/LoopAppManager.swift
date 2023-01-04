@@ -15,6 +15,12 @@ import MockKit
 import HealthKit
 import WidgetKit
 
+#if targetEnvironment(simulator)
+enum SimulatorError: Error {
+    case remoteNotificationsNotAvailable
+}
+#endif
+
 public protocol AlertPresenter: AnyObject {
     /// Present the alert view controller, with or without animation.
     /// - Parameters:
@@ -102,10 +108,13 @@ class LoopAppManager: NSObject {
 
         if FeatureFlags.remoteOverridesEnabled {
             DispatchQueue.main.async {
+#if targetEnvironment(simulator)
+                self.remoteNotificationRegistrationDidFinish(.failure(SimulatorError.remoteNotificationsNotAvailable))
+#else
                 UIApplication.shared.registerForRemoteNotifications()
+#endif
             }
         }
-
         self.state = state.next
     }
 
