@@ -111,7 +111,11 @@ class RecommendTempBasalTests: XCTestCase {
         return 2.0 * maxBolus
     }
 
-    var insulinOnBoard: Double = 0.0
+    // Tests that were in place before the addition of automaticDosingIOBLimit
+    // should all still succeed so long as
+    //      insulinOnBoard < automaticDosingIOBLimit - (dose returned by test)
+    //  The test with highest dose is a bolus of 2.3 U
+    var insulinOnBoard: Double = 7.69
 
     func testNoChange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
