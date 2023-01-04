@@ -176,8 +176,16 @@ final class AnalyticsServicesManager {
         logEvent("Loop success", withProperties: ["duration": duration], outOfSession: true)
     }
 
-    func loopDidError(error: Error) {
-        logEvent("Loop error", withProperties: ["description": error.localizedDescription], outOfSession: true)
+    func loopDidError(error: LoopError) {
+        var props = [AnyHashable: Any]()
+
+        props["issueId"] = error.issueId
+
+        for (detailKey, detail) in error.issueDetails {
+            props[detailKey] = detail
+        }
+
+        logEvent("Loop error", withProperties: props, outOfSession: true)
     }
 
     func didIssueAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel) {
@@ -189,7 +197,7 @@ final class AnalyticsServicesManager {
     }
 
     func didCancelOverride(name: String) {
-        logEvent("Override Enacted", withProperties: ["name": name])
+        logEvent("Override Canceled", withProperties: ["name": name])
     }
 }
 
