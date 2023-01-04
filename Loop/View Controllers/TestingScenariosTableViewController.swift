@@ -140,8 +140,13 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
         }
 
         let url = scenarioURLs[selectedIndex]
+
+        loadButtonItem.isEnabled = false
+        loadButtonItem.title = "Loading..."
         scenariosManager.loadScenario(from: url) { error in
             DispatchQueue.main.async {
+                self.loadButtonItem.isEnabled = true
+                self.loadButtonItem.title = "Load"
                 if let error = error {
                     self.present(UIAlertController(with: error), animated: true)
                 } else {
