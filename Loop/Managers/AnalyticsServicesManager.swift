@@ -46,6 +46,14 @@ final class AnalyticsServicesManager {
         logEvent("App Launch")
     }
 
+    func identifyAppName(_ appName: String) {
+        identify("App Name", value: appName)
+    }
+
+    func identifyWorkspaceGitRevision(_ revision: String) {
+        identify("Workspace Revision", value: revision)
+    }
+
     // MARK: - Device Type
     func identifyPumpType(_ pumpType: String) {
         identify("Pump Type", value: pumpType)
@@ -193,7 +201,8 @@ final class AnalyticsServicesManager {
     }
 
     func didEnactOverride(name: String, symbol: String, duration: TemporaryScheduleOverride.Duration) {
-        logEvent("Override Enacted", withProperties: ["name": name, "symbol": symbol])
+        let combinedName = "\(symbol) - \(name)"
+        logEvent("Override Enacted", withProperties: ["name": name, "symbol": symbol, "nameWithEmoji": combinedName])
     }
 
     func didCancelOverride(name: String) {

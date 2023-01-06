@@ -223,6 +223,13 @@ class LoopAppManager: NSObject {
                                               userDefaults: UserDefaults.appGroup!)
 
         deviceDataManager.onboardingManager = onboardingManager
+
+        analyticsServicesManager.identifyAppName(Bundle.main.bundleDisplayName)
+
+        if let workspaceGitRevision = Bundle.main.workspaceGitRevision {
+            analyticsServicesManager.identifyWorkspaceGitRevision(workspaceGitRevision)
+        }
+
         analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
 
         supportManager = SupportManager(pluginManager: pluginManager,
