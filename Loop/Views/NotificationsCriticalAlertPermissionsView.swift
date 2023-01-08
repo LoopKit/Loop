@@ -89,7 +89,7 @@ extension NotificationsCriticalAlertPermissionsView {
     }
     
     private var manageNotifications: some View {
-        Button( action: { self.viewModel.checker.gotoSettings() } ) {
+        Button( action: { AlertPermissionsChecker.gotoSettings() } ) {
             HStack {
                 Text(NSLocalizedString("Manage Permissions in Settings", comment: "Manage Permissions in Settings button text"))
                 Spacer()

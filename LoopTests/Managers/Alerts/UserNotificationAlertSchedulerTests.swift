@@ -1,5 +1,5 @@
 //
-//  UserNotificationAlertIssuerTests.swift
+//  UserNotificationAlertSchedulerTests.swift
 //  LoopTests
 //
 //  Created by Rick Pasetto on 4/15/20.
@@ -10,9 +10,9 @@ import LoopKit
 import XCTest
 @testable import Loop
 
-class UserNotificationAlertIssuerTests: XCTestCase {
+class UserNotificationAlertSchedulerTests: XCTestCase {
     
-    var userNotificationAlertIssuer: UserNotificationAlertIssuer!
+    var userNotificationAlertScheduler: UserNotificationAlertScheduler!
     
     let alertIdentifier = Alert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar")
     let foregroundContent = Alert.Content(title: "FOREGROUND", body: "foreground", acknowledgeActionButtonLabel: "")
@@ -22,13 +22,13 @@ class UserNotificationAlertIssuerTests: XCTestCase {
     
     override func setUp() {
         mockUserNotificationCenter = MockUserNotificationCenter()
-        userNotificationAlertIssuer =
-            UserNotificationAlertIssuer(userNotificationCenter: mockUserNotificationCenter)
+        userNotificationAlertScheduler =
+            UserNotificationAlertScheduler(userNotificationCenter: mockUserNotificationCenter)
     }
 
     func testIssueImmediateAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationAlertIssuer.issueAlert(alert, timestamp: Date.distantPast)
+        userNotificationAlertScheduler.scheduleAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -49,7 +49,7 @@ class UserNotificationAlertIssuerTests: XCTestCase {
     func testIssueImmediateCriticalAlert() {
         let backgroundContent = Alert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "")
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate, interruptionLevel: .critical)
-        userNotificationAlertIssuer.issueAlert(alert, timestamp: Date.distantPast)
+        userNotificationAlertScheduler.scheduleAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -69,7 +69,7 @@ class UserNotificationAlertIssuerTests: XCTestCase {
     
     func testIssueDelayedAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
-        userNotificationAlertIssuer.issueAlert(alert, timestamp: Date.distantPast)
+        userNotificationAlertScheduler.scheduleAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -90,7 +90,7 @@ class UserNotificationAlertIssuerTests: XCTestCase {
     
     func testIssueRepeatingAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .repeating(repeatInterval: 100))
-        userNotificationAlertIssuer.issueAlert(alert, timestamp: Date.distantPast)
+        userNotificationAlertScheduler.scheduleAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -111,25 +111,56 @@ class UserNotificationAlertIssuerTests: XCTestCase {
     
     func testRetractAlert() {
         let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationAlertIssuer.issueAlert(alert)
+        userNotificationAlertScheduler.scheduleAlert(alert)
 
         waitOnMain()
         mockUserNotificationCenter.deliverAll()
         
-        userNotificationAlertIssuer.retractAlert(identifier: alert.identifier)
+        userNotificationAlertScheduler.unscheduleAlert(identifier: alert.identifier)
         
         waitOnMain()
         XCTAssertTrue(mockUserNotificationCenter.pendingRequests.isEmpty)
         XCTAssertTrue(mockUserNotificationCenter.deliveredRequests.isEmpty)
     }
 
-    
-    func testDoesNotShowIfNoBackgroundContent() {
-        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: nil, trigger: .immediate)
-        userNotificationAlertIssuer.issueAlert(alert)
+    func testIssueMutedAlert() {
+        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
+        userNotificationAlertScheduler.scheduleAlert(alert, timestamp: Date.distantPast, muted: true)
 
         waitOnMain()
-        
-        XCTAssertTrue(mockUserNotificationCenter.pendingRequests.isEmpty)
+
+        XCTAssertEqual(1, mockUserNotificationCenter.pendingRequests.count)
+        if let request = mockUserNotificationCenter.pendingRequests.first {
+            XCTAssertEqual(self.backgroundContent.title, request.content.title)
+            XCTAssertEqual(self.backgroundContent.body, request.content.body)
+            XCTAssertNil(request.content.sound)
+            XCTAssertEqual(alertIdentifier.value, request.content.threadIdentifier)
+            XCTAssertEqual([
+                LoopNotificationUserInfoKey.managerIDForAlert.rawValue: alertIdentifier.managerIdentifier,
+                LoopNotificationUserInfoKey.alertTypeID.rawValue: alertIdentifier.alertIdentifier,
+            ], request.content.userInfo as? [String: String])
+            XCTAssertNil(request.trigger)
+        }
+    }
+
+    func testIssueMutedCriticalAlert() {
+        let backgroundContent = Alert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "")
+        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate, interruptionLevel: .critical)
+        userNotificationAlertScheduler.scheduleAlert(alert, timestamp: Date.distantPast, muted: true)
+
+        waitOnMain()
+
+        XCTAssertEqual(1, mockUserNotificationCenter.pendingRequests.count)
+        if let request = mockUserNotificationCenter.pendingRequests.first {
+            XCTAssertEqual(self.backgroundContent.title, request.content.title)
+            XCTAssertEqual(self.backgroundContent.body, request.content.body)
+            XCTAssertEqual(UNNotificationSound.defaultCriticalSound(withAudioVolume: 0), request.content.sound)
+            XCTAssertEqual(alertIdentifier.value, request.content.threadIdentifier)
+            XCTAssertEqual([
+                LoopNotificationUserInfoKey.managerIDForAlert.rawValue: alertIdentifier.managerIdentifier,
+                LoopNotificationUserInfoKey.alertTypeID.rawValue: alertIdentifier.alertIdentifier,
+            ], request.content.userInfo as? [String: String])
+            XCTAssertNil(request.trigger)
+        }
     }
 }

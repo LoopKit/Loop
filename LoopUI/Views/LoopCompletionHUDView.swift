@@ -121,7 +121,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
     private var lastLoopMessage: String = ""
 
-    private lazy var formatter: DateComponentsFormatter = {
+    private lazy var timeAgoFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
 
         formatter.allowedUnits = [.day, .hour, .minute]
@@ -131,14 +131,31 @@ public final class LoopCompletionHUDView: BaseHUDView {
         return formatter
     }()
 
+    private lazy var timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
+    private lazy var timeDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        formatter.locale = Locale.current
+        return formatter
+    }()
+
     @objc private func updateDisplay(_: Timer?) {
         lastLoopMessage = ""
+        let timeAgoToIncludeTimeStamp: TimeInterval = .minutes(20)
+        let timeAgoToIncludeDate: TimeInterval = .hours(4)
         if let date = lastLoopCompleted {
             let ago = abs(min(0, date.timeIntervalSinceNow))
 
             freshness = LoopCompletionFreshness(age: ago)
 
-            if let timeString = formatter.string(from: ago) {
+            if let timeString = timeAgoFormatter.string(from: ago) {
                 switch traitCollection.preferredContentSizeCategory {
                 case UIContentSizeCategory.extraSmall,
                      UIContentSizeCategory.small,
@@ -152,9 +169,17 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
                 accessibilityLabel = String(format: LocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
 
-                if let fullTimeStr = formatterFull.string(from: ago) {
-                    lastLoopMessage = String(format: LocalizedString("%1$@ last successfully completed a loop %2$@ ago.", comment: "Last loop time completed message (1: app name) (2: last loop time string)"), Bundle.main.bundleDisplayName, fullTimeStr)
+                var fullTimeStr: String = ""
+                if ago >= timeAgoToIncludeDate {
+                    fullTimeStr = String(format: LocalizedString("was at %1$@", comment: "Format string describing last completion. (1: the date"), timeDateFormatter.string(from: date))
+                } else if ago >= timeAgoToIncludeTimeStamp {
+                    fullTimeStr = String(format: LocalizedString("%1$@ ago at %2$@", comment: "Format string describing last completion. (1: time ago, (2: the date"), timeAgoFormatter.string(from: ago)!, timeFormatter.string(from: date))
+                } else if ago < .minutes(1) {
+                    fullTimeStr = String(format: LocalizedString("<1 min ago", comment: "Format string describing last completion"))
+                } else {
+                    fullTimeStr = String(format: LocalizedString("%1$@ ago", comment: "Format string describing last completion. (1: time ago"), timeAgoFormatter.string(from: ago)!)
                 }
+                lastLoopMessage = String(format: LocalizedString("Last completed loop %1$@.", comment: "Last loop time completed message (1: last loop time string)"), fullTimeStr)
             } else {
                 caption?.text = "–"
                 accessibilityLabel = nil
@@ -188,7 +213,7 @@ extension LoopCompletionHUDView {
                         message: String(format: NSLocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@", comment: "Green closed loop OFF message (1: app name)(2: reason for open loop)"), Bundle.main.bundleDisplayName, reason))
             } else {
                 return (title: LocalizedString("Closed Loop ON", comment: "Title of green closed loop ON message"),
-                        message: String(format: LocalizedString("\n%1$@ is operating with Closed Loop in the ON position. %2$@", comment: "Green closed loop ON message (1: app name) (2: last loop string)"), Bundle.main.bundleDisplayName, lastLoopMessage))
+                        message: String(format: LocalizedString("\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position.", comment: "Green closed loop ON message (1: last loop string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
             }
         case .aging:
             return (title: LocalizedString("Loop Warning", comment: "Title of yellow loop message"),

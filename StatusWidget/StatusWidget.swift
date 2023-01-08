@@ -12,7 +12,6 @@ import SwiftUI
 import LoopKit
 import LoopCore
 import HealthKit
-import CoreData
 
 class StatusWidgetProvider: TimelineProvider {
     lazy var defaults = UserDefaults.appGroup
@@ -21,7 +20,7 @@ class StatusWidgetProvider: TimelineProvider {
 
     private let log = OSLog(category: "LoopWidgets")
 
-    static let stalenessAge = TimeInterval(minutes: 5)
+    static let stalenessAge = TimeInterval(minutes: 6)
 
     lazy var cacheStore = PersistenceController.controllerInAppGroupDirectory()
 
@@ -43,7 +42,7 @@ class StatusWidgetProvider: TimelineProvider {
     func placeholder(in context: Context) -> StatusWidgetEntry {
         log.default("%{public}@: context=%{public}@", #function, String(describing: context))
 
-        return StatusWidgetEntry(date: Date(), statusUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, delta: nil, unit: .milligramsPerDeciliter, sensor: nil, netBasal: nil, eventualGlucose: nil)
+        return StatusWidgetEntry(date: Date(), contextUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, glucoseFetchedAt: Date(), delta: nil, unit: .milligramsPerDeciliter, sensor: nil, pumpHighlight: nil, netBasal: nil, eventualGlucose: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StatusWidgetEntry) -> ()) {
@@ -65,14 +64,20 @@ class StatusWidgetProvider: TimelineProvider {
                 datesToRefreshWidget.append(lastLoopCompleted.addingTimeInterval(LoopCompletionFreshness.aging.maxAge!+1)) // Turns red
             }
 
+            // Date glucose status staleness changes
+            if let lastGlucoseFetch = newEntry.glucoseFetchedAt {
+                let glucoseFetchStaleAt = lastGlucoseFetch.addingTimeInterval(StatusWidgetProvider.stalenessAge+1)
+                datesToRefreshWidget.append(glucoseFetchStaleAt)
+            }
+
             // Date glucose staleness changes
             if let lastBGTime = newEntry.currentGlucose?.startDate {
                 let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval+1)
                 datesToRefreshWidget.append(staleBgRefreshTime)
             }
 
-            // Date we mark entire widget stale
-            datesToRefreshWidget.append(newEntry.statusUpdatedAt.addingTimeInterval(StatusWidgetProvider.stalenessAge+1))
+            // Date context staleness changes
+            datesToRefreshWidget.append(newEntry.contextUpdatedAt.addingTimeInterval(StatusWidgetProvider.stalenessAge+1))
 
             for date in datesToRefreshWidget {
                 // Copy the previous entry but mark it as stale
@@ -93,7 +98,7 @@ class StatusWidgetProvider: TimelineProvider {
 
         var glucose: [StoredGlucoseSample] = []
 
-        let startDate: Date = Calendar.current.nextDate(after: Date(timeIntervalSinceNow: .minutes(-5)), matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? Date()
+        let startDate = Date(timeIntervalSinceNow: -LoopCoreConstants.inputDataRecencyInterval)
 
         group.enter()
         glucoseStore.getGlucoseSamples(start: startDate) { (result) in
@@ -144,20 +149,25 @@ class StatusWidgetProvider: TimelineProvider {
             
             let eventualGlucose = predictedGlucose?.last
 
+            let updateDate = Date()
+
             let entry = StatusWidgetEntry(
-                date: Date(),
-                statusUpdatedAt: contextUpdatedAt,
+                date: updateDate,
+                contextUpdatedAt: contextUpdatedAt,
                 lastLoopCompleted: lastCompleted,
                 closeLoop: closeLoop,
                 currentGlucose: currentGlucose,
+                glucoseFetchedAt: updateDate,
                 delta: delta,
                 unit: unit,
                 sensor: context.glucoseDisplay,
+                pumpHighlight: context.pumpStatusHighlightContext,
                 netBasal: netBasal,
                 eventualGlucose: eventualGlucose
             )
 
             self.log.default("StatusWidgetEntry = %{public}@", String(describing: entry))
+            self.log.default("pumpHighlight = %{public}@", String(describing: entry.pumpHighlight))
 
             completion(entry)
         }
@@ -168,23 +178,33 @@ class StatusWidgetProvider: TimelineProvider {
 struct StatusWidgetEntry: TimelineEntry {
     var date: Date
     
-    let statusUpdatedAt: Date
+    let contextUpdatedAt: Date
     
     let lastLoopCompleted: Date?
     let closeLoop: Bool
     
     let currentGlucose: GlucoseValue?
+    let glucoseFetchedAt: Date?
     let delta: HKQuantity?
     let unit: HKUnit?
-    var sensor: GlucoseDisplayableContext?
-    
+    let sensor: GlucoseDisplayableContext?
+
+    let pumpHighlight: DeviceStatusHighlightContext?
     let netBasal: NetBasalContext?
     
     let eventualGlucose: GlucoseContext?
     
     // Whether context data is old
-    var isOld: Bool {
-        return (date - statusUpdatedAt) >= StatusWidgetProvider.stalenessAge
+    var contextIsStale: Bool {
+        return (date - contextUpdatedAt) >= StatusWidgetProvider.stalenessAge
+    }
+
+    var glucoseStatusIsStale: Bool {
+        guard let glucoseFetchedAt = glucoseFetchedAt else {
+            return true
+        }
+        let glucoseStatusAge = date - glucoseFetchedAt
+        return glucoseStatusAge >= StatusWidgetProvider.stalenessAge
     }
 
     var glucoseIsStale: Bool {
@@ -200,64 +220,6 @@ struct StatusWidgetEntry: TimelineEntry {
 extension Date {
     static func - (lhs: Date, rhs: Date) -> TimeInterval {
         return lhs.timeIntervalSinceReferenceDate - rhs.timeIntervalSinceReferenceDate
-    }
-}
-
-struct SmallStatusWidgetEntryView : View {
-    var entry: StatusWidgetProvider.Entry
-
-    var body: some View {
-        VStack(alignment: .center, spacing: 5) {
-            HStack(alignment: .center) {
-                LoopCircleView(entry: entry)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                // There is a SwiftUI bug which causes view not to be padded correctly when using .border
-                // Added padding to counteract the width of the border
-                    .padding(.leading, 8)
-                
-                GlucoseView(entry: entry)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .padding(5)
-            .background(
-                ContainerRelativeShape()
-                    .fill(Color("WidgetSecondaryBackground"))
-            )
-                        
-            HStack(alignment: .center) {
-                BasalView(entry: entry)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                
-                if let eventualGlucose = entry.eventualGlucose {
-                    let glucoseFormatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
-                    if let glucoseString = glucoseFormatter.string(from: eventualGlucose.quantity.doubleValue(for: eventualGlucose.unit)) {
-                        VStack {
-                            Text("Eventual")
-                            .font(.footnote)
-                            .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
-                            
-                            Text("\(glucoseString)")
-                                .font(.subheadline)
-                                .fontWeight(.heavy)
-                            
-                            Text(eventualGlucose.unit.shortLocalizedUnitString())
-                                .font(.footnote)
-                                .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                }
-            }
-            .frame(maxHeight: .infinity, alignment: .center)
-            .padding(5)
-            .background(
-                ContainerRelativeShape()
-                    .fill(Color("WidgetSecondaryBackground"))
-            )
-        }
-        .foregroundColor(entry.isOld ? Color(UIColor.systemGray3) : nil)
-        .padding(5)
-        .background(Color("WidgetBackground"))
     }
 }
 

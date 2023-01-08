@@ -49,7 +49,7 @@ enum RemoteCommand {
 
 // Push Notifications
 extension RemoteCommand {
-    static func createRemoteCommand(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], nowDate: Date = Date()) -> Result<RemoteCommand, RemoteCommandParseError> {
+    static func createRemoteCommand(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], defaultAbsorptionTime: TimeInterval, nowDate: Date = Date()) -> Result<RemoteCommand, RemoteCommandParseError> {
         if let overrideName = notification["override-name"] as? String,
             let preset = allowedPresets.first(where: { $0.name == overrideName }),
             let remoteAddress = notification["remote-address"] as? String
@@ -64,11 +64,19 @@ extension RemoteCommand {
         }  else if let bolusValue = notification["bolus-entry"] as? Double {
             return .success(.bolusEntry(bolusValue))
         } else if let carbsValue = notification["carbs-entry"] as? Double {
-            // TODO: get default absorption value
-            var absorptionTime = TimeInterval(hours: 3.0)
-            if let absorptionOverride = notification["absorption-time"] as? Double {
-                absorptionTime = TimeInterval(hours: absorptionOverride)
+
+            let minAbsorptionTime = TimeInterval(hours: 0.5)
+            let maxAbsorptionTime = LoopConstants.maxCarbAbsorptionTime
+            
+            var absorptionTime = defaultAbsorptionTime
+            if let absorptionOverrideInHours = notification["absorption-time"] as? Double {
+                absorptionTime = TimeInterval(hours: absorptionOverrideInHours)
             }
+            
+            if absorptionTime < minAbsorptionTime || absorptionTime > maxAbsorptionTime {
+                return .failure(RemoteCommandParseError.invalidAbsorptionSeconds(absorptionTime))
+            }
+            
             let quantity = HKQuantity(unit: .gram(), doubleValue: carbsValue)
             
             var startDate = nowDate
@@ -91,6 +99,7 @@ extension RemoteCommand {
     
     enum RemoteCommandParseError: LocalizedError {
         case invalidStartTime(String)
+        case invalidAbsorptionSeconds(Double)
         case unhandledNotication(String)
     }
 }

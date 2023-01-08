@@ -22,7 +22,7 @@ struct LoopCircleView: View {
         
         Circle()
             .trim(from: closeLoop ? 0 : 0.2, to: 1)
-            .stroke(entry.isOld ? Color(UIColor.systemGray3) : loopColor, lineWidth: 8)
+            .stroke(entry.contextIsStale ? Color(UIColor.systemGray3) : loopColor, lineWidth: 8)
             .rotationEffect(Angle(degrees: -126))
             .frame(width: 36, height: 36)
     }

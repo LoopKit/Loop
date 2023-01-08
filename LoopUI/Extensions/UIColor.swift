@@ -36,7 +36,7 @@ extension UIColor {
     
     @nonobjc public static let carbTintColor = carbs
     
-    @nonobjc static let critical = systemRed
+    @nonobjc public static let critical = systemRed
     
     @nonobjc public static let destructive = critical
     

@@ -1,0 +1,6 @@
+/* Title string for automatic bolus dosing strategy */
+"Automatic Bolus" = "Automatischer Bolus";
+
+/* Title string for temp basal only dosing strategy */
+"Temp Basal Only" = "Nur temporäre Basalrate";
+

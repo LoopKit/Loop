@@ -30,6 +30,7 @@ struct FeatureFlagConfiguration: Decodable {
     let predictedGlucoseChartClampEnabled: Bool
     let scenariosEnabled: Bool
     let sensitivityOverridesEnabled: Bool
+    let showEventualBloodGlucoseOnWatchEnabled: Bool
     let simulatedCoreDataEnabled: Bool
     let siriEnabled: Bool
     let simpleBolusCalculatorEnabled: Bool
@@ -171,6 +172,13 @@ struct FeatureFlagConfiguration: Decodable {
         self.scenariosEnabled = false
         #endif
 
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if SHOW_EVENTUAL_BLOOD_GLUCOSE_ON_WATCH_DISABLED
+        self.showEventualBloodGlucoseOnWatchEnabled = false
+        #else
+        self.showEventualBloodGlucoseOnWatchEnabled = true
+        #endif
+        
         #if SIMULATED_CORE_DATA_ENABLED
         self.simulatedCoreDataEnabled = true
         #else
@@ -227,6 +235,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* remoteOverridesEnabled: \(remoteOverridesEnabled)",
             "* scenariosEnabled: \(scenariosEnabled)",
             "* sensitivityOverridesEnabled: \(sensitivityOverridesEnabled)",
+            "* showEventualBloodGlucoseOnWatchEnabled: \(showEventualBloodGlucoseOnWatchEnabled)",
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
             "* siriEnabled: \(siriEnabled)",
             "* automaticBolusEnabled: \(automaticBolusEnabled)",

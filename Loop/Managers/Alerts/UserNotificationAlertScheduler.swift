@@ -1,5 +1,5 @@
 //
-//  UserNotificationAlertIssuer.swift
+//  UserNotificationAlertScheduler.swift
 //  LoopKit
 //
 //  Created by Rick Pasetto on 4/9/20.
@@ -18,36 +18,32 @@ public protocol UserNotificationCenter {
 }
 extension UNUserNotificationCenter: UserNotificationCenter {}
 
-class UserNotificationAlertIssuer: AlertIssuer {
+public class UserNotificationAlertScheduler {
     
     let userNotificationCenter: UserNotificationCenter
-    let log = DiagnosticLog(category: "UserNotificationAlertIssuer")
+    let log = DiagnosticLog(category: "UserNotificationAlertScheduler")
     
     init(userNotificationCenter: UserNotificationCenter) {
         self.userNotificationCenter = userNotificationCenter
     }
     
-    func issueAlert(_ alert: Alert) {
-        issueAlert(alert, timestamp: Date())
+    func scheduleAlert(_ alert: Alert, muted: Bool = false) {
+        scheduleAlert(alert, timestamp: Date(), muted: muted)
     }
 
-    func issueAlert(_ alert: Alert, timestamp: Date) {
+    func scheduleAlert(_ alert: Alert, timestamp: Date, muted: Bool = false) {
         DispatchQueue.main.async {
-            do {
-                let request = try UNNotificationRequest(from: alert, timestamp: timestamp)
-                self.userNotificationCenter.add(request) { error in
-                    if let error = error {
-                        self.log.error("Something went wrong posting the user notification: %@", error.localizedDescription)
-                    }
+            let request = UNNotificationRequest(from: alert, timestamp: timestamp, muted: muted)
+            self.userNotificationCenter.add(request) { error in
+                if let error = error {
+                    self.log.error("Something went wrong posting the user notification: %@", error.localizedDescription)
                 }
-                // For now, UserNotifications do not not acknowledge...not yet at least
-            } catch {
-                self.log.error("Error issuing alert: %@", error.localizedDescription)
             }
+            // For now, UserNotifications do not not acknowledge...not yet at least
         }
     }
     
-    func retractAlert(identifier: Alert.Identifier) {
+    func unscheduleAlert(identifier: Alert.Identifier) {
         DispatchQueue.main.async {
             self.userNotificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier.value])
             self.userNotificationCenter.removeDeliveredNotifications(withIdentifiers: [identifier.value])
@@ -55,7 +51,7 @@ class UserNotificationAlertIssuer: AlertIssuer {
     }
 }
 
-extension UserNotificationAlertIssuer: AlertManagerResponder {
+extension UserNotificationAlertScheduler: AlertManagerResponder {
     func acknowledgeAlert(identifier: Alert.Identifier) {
         DispatchQueue.main.async {
             self.log.debug("Removing notification %@ from delivered notifications", identifier.value)
@@ -65,19 +61,11 @@ extension UserNotificationAlertIssuer: AlertManagerResponder {
 }
 
 fileprivate extension Alert {
-
-    enum Error: String, Swift.Error {
-        case noBackgroundContent
-    }
-
-    func getUserNotificationContent(timestamp: Date) throws -> UNNotificationContent {
-        guard let content = backgroundContent else {
-            throw Error.noBackgroundContent
-        }
+    func getUserNotificationContent(timestamp: Date, muted: Bool) -> UNNotificationContent {
         let userNotificationContent = UNMutableNotificationContent()
-        userNotificationContent.title = content.title
-        userNotificationContent.body = content.body
-        userNotificationContent.sound = userNotificationSound
+        userNotificationContent.title = backgroundContent.title
+        userNotificationContent.body = backgroundContent.body
+        userNotificationContent.sound = userNotificationSound(muted: muted)
         if #available(iOS 15.0, *) {
             userNotificationContent.interruptionLevel = interruptionLevel.userNotificationInterruptLevel
         }
@@ -91,23 +79,17 @@ fileprivate extension Alert {
         return userNotificationContent
     }
     
-    private var userNotificationSound: UNNotificationSound? {
-        guard backgroundContent != nil else {
-            return nil
-        }
-        if let sound = sound {
-            switch sound {
-            case .vibrate:
-                // TODO: Not sure how to "force" UNNotificationSound to "vibrate only"...so for now we just do the default
-                break
-            case .silence:
-                // TODO: Not sure how to "force" UNNotificationSound to "silence"...so for now we just do the default
-                break
-            default:
-                if let actualFileName = AlertManager.soundURL(for: self)?.lastPathComponent {
-                    let unname = UNNotificationSoundName(rawValue: actualFileName)
-                    return interruptionLevel == .critical ? UNNotificationSound.criticalSoundNamed(unname) : UNNotificationSound(named: unname)
-                }
+    private func userNotificationSound(muted: Bool) -> UNNotificationSound? {
+        guard !muted else { return interruptionLevel == .critical ? .defaultCriticalSound(withAudioVolume: 0) : nil }
+        
+        switch sound {
+        case .vibrate:
+            // setting the audio volume of critical alert to 0 only vibrates
+            return interruptionLevel == .critical ? .defaultCriticalSound(withAudioVolume: 0) : nil
+        default:
+            if let actualFileName = AlertManager.soundURL(for: self)?.lastPathComponent {
+                let unname = UNNotificationSoundName(rawValue: actualFileName)
+                return interruptionLevel == .critical ? UNNotificationSound.criticalSoundNamed(unname) : UNNotificationSound(named: unname)
             }
         }
 
@@ -130,8 +112,8 @@ fileprivate extension Alert.InterruptionLevel {
 }
 
 fileprivate extension UNNotificationRequest {
-    convenience init(from alert: Alert, timestamp: Date) throws {
-        let content = try alert.getUserNotificationContent(timestamp: timestamp)
+    convenience init(from alert: Alert, timestamp: Date, muted: Bool) {
+        let content = alert.getUserNotificationContent(timestamp: timestamp, muted: muted)
         self.init(identifier: alert.identifier.value,
                   content: content,
                   trigger: UNTimeIntervalNotificationTrigger(from: alert.trigger))

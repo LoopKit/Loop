@@ -16,6 +16,12 @@
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
 "Predicted glucose at %1$@ is %2$@." = "Der vorhergesagte Blutzucker um %1$@ ist %2$@.";
 
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "Der vorhergesagte Glukosewert liegt im Bereich.";
+
+/* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Der vorhergesagte Glukosewert von %1$@ liegt unter Ihrer Glukose-Sicherheitsgrenzwerteinstellung.";
+
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unterhalb des eingestellten Schwellwertes zur Unterbrechung der Basalrate. ";
 

@@ -46,9 +46,9 @@ public struct SettingsView: View {
                 if FeatureFlags.automaticBolusEnabled {
                     dosingStrategySection
                 }
-                alertPermissionsSection
+                alertManagementSection
                 if viewModel.pumpManagerSettingsViewModel.isSetUp() {
-                    therapySettingsSection
+                    configurationSection
                 }
                 deviceSettingsSection
                 if viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice {
@@ -71,6 +71,16 @@ public struct SettingsView: View {
             set: { self.viewModel.closedLoopPreference = $0 }
         )
     }
+}
+
+struct ConfigurationMenuItem: Identifiable {
+    var id: String {
+        return pluginIdentifier + String(describing: offset)
+    }
+
+    let view: AnyView
+    let pluginIdentifier: String
+    let offset: Int
 }
 
 extension SettingsView {
@@ -121,15 +131,14 @@ extension SettingsView {
         }
     }
 
-    private var alertPermissionsSection: some View {
+    private var alertManagementSection: some View {
         Section {
-            NavigationLink(destination:
-                NotificationsCriticalAlertPermissionsView(mode: .flow, viewModel: viewModel.alertPermissionsViewModel))
+            NavigationLink(destination: AlertManagementView(checker: viewModel.alertPermissionsViewModel.checker, alertMuter: viewModel.alertMuter))
             {
                 HStack {
-                    Text(NSLocalizedString("Alert Permissions", comment: "Alert Permissions button text"))
-                    if viewModel.alertPermissionsViewModel.checker.showWarning ||
-                        viewModel.alertPermissionsViewModel.checker.notificationCenterSettings.scheduledDeliveryEnabled {
+                    Text(NSLocalizedString("Alert Management", comment: "Alert Permissions button text"))
+                    if viewModel.alertPermissionsViewModel.alertPermissionsChecker.showWarning ||
+                        viewModel.alertPermissionsViewModel.alertPermissionsChecker.notificationCenterSettings.scheduledDeliveryEnabled {
                         Spacer()
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.critical)
@@ -139,7 +148,7 @@ extension SettingsView {
         }
     }
         
-    private var therapySettingsSection: some View {
+    private var configurationSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
             LargeButton(action: { self.therapySettingsIsPresented = true },
                             includeArrow: true,
@@ -161,9 +170,21 @@ extension SettingsView {
                         .environment(\.guidanceColors, self.guidanceColors)
                         .environment(\.insulinTintColor, self.insulinTintColor)
             }
+            
+            ForEach(configurationMenuItemsForSupportPlugins) { item in
+                item.view
+            }
         }
     }
-    
+
+    private var configurationMenuItemsForSupportPlugins: [ConfigurationMenuItem] {
+        self.viewModel.availableSupports.flatMap { plugin in
+            plugin.configurationMenuItems().enumerated().map { index, view in
+                ConfigurationMenuItem(view: view, pluginIdentifier: plugin.identifier, offset: index)
+            }
+        }
+    }
+
     private var deviceSettingsSection: some View {
         Section {
             pumpSection

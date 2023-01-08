@@ -29,12 +29,14 @@ class SupportManagerTests: XCTestCase {
         weak var delegate: SupportUIDelegate?
     }
     class MockSupport: Mixin, SupportUI {
+        func configurationMenuItems() -> [AnyView] { return [] }
         static var supportIdentifier: String { "SupportManagerTestsMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
     }
     class AnotherMockSupport: Mixin, SupportUI {
+        func configurationMenuItems() -> [AnyView] { return [] }
         static var supportIdentifier: String { "SupportManagerTestsAnotherMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }

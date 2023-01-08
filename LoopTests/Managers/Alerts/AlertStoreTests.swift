@@ -20,16 +20,17 @@ class AlertStoreTests: XCTestCase {
     static let historicDate = Date(timeIntervalSinceNow: -expiryInterval + TimeInterval.hours(4))  // Within default 24 hour expiration
     
     static let identifier1 = Alert.Identifier(managerIdentifier: "managerIdentifier1", alertIdentifier: "alertIdentifier1")
-    let alert1 = Alert(identifier: identifier1, foregroundContent: nil, backgroundContent: nil, trigger: .immediate, sound: nil)
+    static let backgroundContent = Alert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "OK")
+    let alert1 = Alert(identifier: identifier1, foregroundContent: nil, backgroundContent: backgroundContent, trigger: .immediate, sound: nil)
     static let identifier2 = Alert.Identifier(managerIdentifier: "managerIdentifier2", alertIdentifier: "alertIdentifier2")
     static let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
     let alert2 = Alert(identifier: identifier2, foregroundContent: content, backgroundContent: content, trigger: .immediate, interruptionLevel: .critical, sound: .sound(name: "soundName"))
     static let delayedAlertDelay = 30.0 // seconds
     static let delayedAlertIdentifier = Alert.Identifier(managerIdentifier: "managerIdentifier3", alertIdentifier: "alertIdentifier3")
-    let delayedAlert = Alert(identifier: delayedAlertIdentifier, foregroundContent: nil, backgroundContent: nil, trigger: .delayed(interval: delayedAlertDelay), sound: nil)
+    let delayedAlert = Alert(identifier: delayedAlertIdentifier, foregroundContent: nil, backgroundContent: backgroundContent, trigger: .delayed(interval: delayedAlertDelay), sound: nil)
     static let repeatingAlertDelay = 30.0 // seconds
     static let repeatingAlertIdentifier = Alert.Identifier(managerIdentifier: "managerIdentifier4", alertIdentifier: "alertIdentifier4")
-    let repeatingAlert = Alert(identifier: repeatingAlertIdentifier, foregroundContent: nil, backgroundContent: nil, trigger: .repeating(repeatInterval: repeatingAlertDelay), sound: nil)
+    let repeatingAlert = Alert(identifier: repeatingAlertIdentifier, foregroundContent: nil, backgroundContent: backgroundContent, trigger: .repeating(repeatInterval: repeatingAlertDelay), sound: nil)
 
     override func setUp() {
         alertStore = AlertStore(expireAfter: Self.expiryInterval)
@@ -825,11 +826,11 @@ class AlertStoreLogCriticalEventLogTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let alerts = [AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:08:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m1", alertIdentifier: "a1"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate), syncIdentifier: UUID(uuidString: "52A046F7-F449-49B2-B003-7A378D0002DE")!),
-                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:10:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m2", alertIdentifier: "a2"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate), syncIdentifier: UUID(uuidString: "0929E349-972F-4B06-9808-68914A541515")!),
-                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:04:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m3", alertIdentifier: "a3"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate), syncIdentifier: UUID(uuidString: "285AEA4B-0DEE-41F4-8669-800E9582A6E7")!),
-                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:06:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m4", alertIdentifier: "a4"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate), syncIdentifier: UUID(uuidString: "4B3109BD-DE11-42BD-A777-D4783459C483")!),
-                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:02:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m5", alertIdentifier: "a5"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate), syncIdentifier: UUID(uuidString: "48C8ACC7-9DB7-411D-B5A3-CD907D464B78")!)]
+        let alerts = [AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:08:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m1", alertIdentifier: "a1"), foregroundContent: nil, backgroundContent: AlertStoreTests.backgroundContent, trigger: .immediate), syncIdentifier: UUID(uuidString: "52A046F7-F449-49B2-B003-7A378D0002DE")!),
+                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:10:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m2", alertIdentifier: "a2"), foregroundContent: nil, backgroundContent: AlertStoreTests.backgroundContent, trigger: .immediate), syncIdentifier: UUID(uuidString: "0929E349-972F-4B06-9808-68914A541515")!),
+                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:04:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m3", alertIdentifier: "a3"), foregroundContent: nil, backgroundContent: AlertStoreTests.backgroundContent, trigger: .immediate), syncIdentifier: UUID(uuidString: "285AEA4B-0DEE-41F4-8669-800E9582A6E7")!),
+                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:06:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m4", alertIdentifier: "a4"), foregroundContent: nil, backgroundContent: AlertStoreTests.backgroundContent, trigger: .immediate), syncIdentifier: UUID(uuidString: "4B3109BD-DE11-42BD-A777-D4783459C483")!),
+                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:02:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m5", alertIdentifier: "a5"), foregroundContent: nil, backgroundContent: AlertStoreTests.backgroundContent, trigger: .immediate), syncIdentifier: UUID(uuidString: "48C8ACC7-9DB7-411D-B5A3-CD907D464B78")!)]
 
         alertStore = AlertStore()
         XCTAssertNil(alertStore.addAlerts(alerts: alerts))
@@ -871,9 +872,9 @@ class AlertStoreLogCriticalEventLogTests: XCTestCase {
                                        progress: progress))
         XCTAssertEqual(outputStream.string, """
 [
-{"acknowledgedDate":"2100-01-02T03:08:00.000Z","alertIdentifier":"a1","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:08:00.000Z","managerIdentifier":"m1","modificationCounter":1,"syncIdentifier":"52A046F7-F449-49B2-B003-7A378D0002DE","triggerType":0},
-{"acknowledgedDate":"2100-01-02T03:04:00.000Z","alertIdentifier":"a3","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:04:00.000Z","managerIdentifier":"m3","modificationCounter":3,"syncIdentifier":"285AEA4B-0DEE-41F4-8669-800E9582A6E7","triggerType":0},
-{"acknowledgedDate":"2100-01-02T03:06:00.000Z","alertIdentifier":"a4","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:06:00.000Z","managerIdentifier":"m4","modificationCounter":4,"syncIdentifier":"4B3109BD-DE11-42BD-A777-D4783459C483","triggerType":0}
+{"acknowledgedDate":"2100-01-02T03:08:00.000Z","alertIdentifier":"a1","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:08:00.000Z","managerIdentifier":"m1","modificationCounter":1,"syncIdentifier":"52A046F7-F449-49B2-B003-7A378D0002DE","triggerType":0},
+{"acknowledgedDate":"2100-01-02T03:04:00.000Z","alertIdentifier":"a3","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:04:00.000Z","managerIdentifier":"m3","modificationCounter":3,"syncIdentifier":"285AEA4B-0DEE-41F4-8669-800E9582A6E7","triggerType":0},
+{"acknowledgedDate":"2100-01-02T03:06:00.000Z","alertIdentifier":"a4","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:06:00.000Z","managerIdentifier":"m4","modificationCounter":4,"syncIdentifier":"4B3109BD-DE11-42BD-A777-D4783459C483","triggerType":0}
 ]
 """
         )
