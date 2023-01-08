@@ -475,16 +475,27 @@ extension LoopAppManager: DeviceOrientationController {
 
 extension LoopAppManager: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        /*
+         TODO:
+         
+         Workout whether we should show remote notifications when a command comes in when in the foreground
+         It seems like we shouldn't. The enactment of the command seems more relevant.
+         
+         It seems we should show notifications when something is enacted for safety reasons and coordination
+         with the onsight caregiver who may be making treatment decisions.
+         
+         Note: This delegate method is for remote notifications when the app is the foreground (but not the background).
+         The identifier evaluated below is a randomly assigned UUID so it never matches these cases.
+         This switch only works for local notifications where we set the identifer.
+         */
         switch notification.request.identifier {
         // TODO: Until these notifications are converted to use the new alert system, they shall still show in the foreground
         case LoopNotificationCategory.bolusFailure.rawValue,
-             LoopNotificationCategory.pumpBatteryLow.rawValue,
-             LoopNotificationCategory.pumpExpired.rawValue,
-             LoopNotificationCategory.pumpFault.rawValue,
-             LoopNotificationCategory.remoteBolus.rawValue,
-             LoopNotificationCategory.remoteBolusFailure.rawValue,
-             LoopNotificationCategory.remoteCarbs.rawValue,
-             LoopNotificationCategory.remoteCarbsFailure.rawValue:
+            LoopNotificationCategory.pumpBatteryLow.rawValue,
+            LoopNotificationCategory.pumpExpired.rawValue,
+            LoopNotificationCategory.pumpFault.rawValue,
+            LoopNotificationCategory.remoteCommandSuccess.rawValue,
+            LoopNotificationCategory.remoteCommandFailure.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:
             // For all others, banners are not to be displayed while in the foreground

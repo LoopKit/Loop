@@ -298,11 +298,14 @@ class LoopDataManagerDosingTests: XCTestCase {
     }
     
     class MockDelegate: LoopDataManagerDelegate {
+        
         var recommendation: AutomaticDoseRecommendation?
         var error: LoopError?
         func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), completion: @escaping (LoopError?) -> Void) {
             self.recommendation = automaticDose.recommendation
             completion(error)
+        }
+        func loopDataManager(_ manager: Loop.LoopDataManager, loopDidFinishWithDosingDecision: LoopKit.StoredDosingDecision, error: Loop.LoopError?) {
         }
         func roundBasalRate(unitsPerHour: Double) -> Double { unitsPerHour }
         func roundBolusVolume(units: Double) -> Double { units }

@@ -78,26 +78,6 @@ extension NotificationManager {
 
     // MARK: - Notifications
     
-    static func sendRemoteCommandExpiredNotification(timeExpired: TimeInterval) {
-        let notification = UNMutableNotificationContent()
-
-        notification.title = NSLocalizedString("Remote Command Expired", comment: "The notification title for the remote command expiration error")
-
-        notification.body = String(format: NSLocalizedString("The remote command expired %.0f minutes ago.", comment: "The notification body for a remote command expiration. (1: Expiration in minutes)"), fabs(timeExpired / 60.0))
-        notification.sound = .default
-         
-        notification.categoryIdentifier = LoopNotificationCategory.remoteCommandExpired.rawValue
-
-        let request = UNNotificationRequest(
-            // Only support 1 expiration notification at once
-            identifier: LoopNotificationCategory.remoteCommandExpired.rawValue,
-            content: notification,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-
     static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date, activationType: BolusActivationType) {
         let notification = UNMutableNotificationContent()
 
@@ -134,91 +114,64 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    static func sendRemoteBolusNotification(amount: Double) {
+    @MainActor
+    static func sendRemoteCommandSuccessNotification(for command: RemoteCommand) async {
         let notification = UNMutableNotificationContent()
-        let quantityFormatter = QuantityFormatter()
-        quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
-        guard let amountDescription = quantityFormatter.numberFormatter.string(from: amount) else {
-            return
-        }
-        notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %@ U", comment: "The notification title for a remote bolus. (1: Bolus amount)"), amountDescription)
-        
-        let body = "Success!"
 
-        notification.body = body
+        notification.title = NSLocalizedString("Remote Command Success", comment: "The notification title for the remote command success")
+
+        //TODO: Improve the success messages -- need descriptive messages for each command
+        notification.body = formatNotificationBody(String(describing: command))
         notification.sound = .default
+        
+        notification.categoryIdentifier = LoopNotificationCategory.remoteCommandSuccess.rawValue
 
+        /*
+         TODO: It seems we want to show all success messages and not limit like this.
+         Ex: Think of a caregiver issues a 9 unit command then a 1 unit command.
+         Suppressing the 9 unit notification could lead to treatment mistakes for onsight caregiver.
+         */
         let request = UNNotificationRequest(
-            identifier: LoopNotificationCategory.remoteBolus.rawValue,
+            // Only support 1 remote notification at once
+            identifier: LoopNotificationCategory.remoteCommandSuccess.rawValue,
             content: notification,
             trigger: nil
         )
 
-        UNUserNotificationCenter.current().add(request)
+        try? await UNUserNotificationCenter.current().add(request)
     }
     
-    static func sendRemoteBolusFailureNotification(for error: Error, amount: Double) {
+    @MainActor
+    static func sendRemoteCommandFailureNotification(for error: Error) async {
         let notification = UNMutableNotificationContent()
-        let quantityFormatter = QuantityFormatter()
-        quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
-        guard let amountDescription = quantityFormatter.numberFormatter.string(from: amount) else {
-            return
-        }
 
-        notification.title =  String(format: NSLocalizedString("Remote Bolus Entry: %@ U", comment: "The notification title for a remote failure. (1: Bolus amount)"), amountDescription)
-        notification.body = error.localizedDescription
+        notification.title = NSLocalizedString("Remote Command Error", comment: "The notification title for the remote command error")
+
+        //TODO: The error messages may be truncated if we don't use the types here.
+        //We may need a layer down to show error messages and here just fail the command.
+        //Or consider unrwapping NSError when able: https://stackoverflow.com/questions/39176196/how-to-provide-a-localized-description-with-an-error-type-in-swift
+        notification.body = formatNotificationBody(error.localizedDescription)
         notification.sound = .default
+        
+        notification.categoryIdentifier = LoopNotificationCategory.remoteCommandFailure.rawValue
 
         let request = UNNotificationRequest(
-            identifier: LoopNotificationCategory.remoteBolusFailure.rawValue,
+            // Only support 1 notification at once
+            identifier: LoopNotificationCategory.remoteCommandFailure.rawValue,
             content: notification,
             trigger: nil
         )
 
-        UNUserNotificationCenter.current().add(request)
+        try? await UNUserNotificationCenter.current().add(request)
     }
     
-    static func sendRemoteCarbEntryNotification(amountInGrams: Double) {
-        let notification = UNMutableNotificationContent()
-
-        let leadingBody = remoteCarbEntryNotificationBody(amountInGrams: amountInGrams)
-        let extraBody = "Success!"
+    private static func formatNotificationBody(_ body: String) -> String {
+        let fullStopCharacter = NSLocalizedString(".", comment: "Full stop character")
+        let sentenceFormat = NSLocalizedString("%1@%2@", comment: "Adds a full-stop to a statement (1: statement, 2: full stop character)")
         
-        let body = [leadingBody, extraBody].joined(separator: "\n")
-
-        notification.body = body
-        notification.sound = .default
-
-        let request = UNNotificationRequest(
-            identifier: LoopNotificationCategory.remoteCarbs.rawValue,
-            content: notification,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-    
-    static func sendRemoteCarbEntryFailureNotification(for error: Error, amountInGrams: Double) {
-        let notification = UNMutableNotificationContent()
-        
-        let leadingBody = remoteCarbEntryNotificationBody(amountInGrams: amountInGrams)
-        let extraBody = error.localizedDescription
-
-        let body = [leadingBody, extraBody].joined(separator: "\n")
-        
-        notification.body = body
-        notification.sound = .default
-
-        let request = UNNotificationRequest(
-            identifier: LoopNotificationCategory.remoteCarbsFailure.rawValue,
-            content: notification,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-    
-    private static func remoteCarbEntryNotificationBody(amountInGrams: Double) -> String {
-        return String(format: NSLocalizedString("Remote Carbs Entry: %d grams", comment: "The carb amount message for a remote carbs entry notification. (1: Carb amount in grams)"), Int(amountInGrams))
+        return [body].compactMap({ $0 }).map({
+            // Avoids the double period at the end of a sentence.
+            $0.hasSuffix(fullStopCharacter) ? $0 : String(format: sentenceFormat, $0, fullStopCharacter)
+        }).joined(separator: " ")
     }
 }

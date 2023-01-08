@@ -203,12 +203,22 @@ final class RemoteDataServicesManager {
         }
     }
     
+    @available(*, renamed: "triggerUpload(for:)")
     func triggerUpload(for triggeringType: RemoteDataType, completion: @escaping () -> Void) {
         triggerUpload(for: triggeringType)
         self.uploadGroup.notify(queue: DispatchQueue.main) {
             completion()
         }
     }
+    
+    func triggerUpload(for triggeringType: RemoteDataType) async {
+        return await withCheckedContinuation { continuation in
+            triggerUpload(for: triggeringType) {
+                continuation.resume(returning: ())
+            }
+        }
+    }
+    
 }
 
 extension RemoteDataServicesManager {
@@ -588,14 +598,12 @@ extension RemoteDataServicesManager {
 }
 
 extension RemoteDataServicesManager {
-
-    func validatePushNotificationSource(_ notification: [String: AnyObject], serviceIdentifier: String) -> Result<Void, Error> {
+    
+    func serviceForPushNotification(_ notification: [String: AnyObject]) -> RemoteDataService? {
         
-        guard let matchedService = remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier}) else {
-            return .failure(PushNotificationValidationError.unsupportedService(serviceIdentifier: serviceIdentifier))
-        }
-        
-        return matchedService.validatePushNotificationSource(notification)
+        let defaultServiceIdentifier = "NightscoutService"
+        let serviceIdentifier = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
+        return remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier})
     }
     
     public func temporaryScheduleOverrideHistoryDidUpdate() {
@@ -650,6 +658,40 @@ extension RemoteDataServicesManager {
 
 }
 
+
+extension RemoteDataServicesManager: RemoteCommandSource {
+    
+    func commandFromPushNotification(_ notification: [String: AnyObject]) async throws -> RemoteCommand {
+        
+        enum RemoteDataServicesManagerCommandError: LocalizedError {
+            case missingNotificationService
+        }
+        
+        guard let service = serviceForPushNotification(notification) else {
+            throw RemoteDataServicesManagerCommandError.missingNotificationService
+        }
+        
+        return try await service.commandFromPushNotification(notification)
+    }
+    
+    func fetchRemoteCommands() async throws -> [LoopKit.RemoteCommand] {
+        var commands = [RemoteCommand]()
+        for service in remoteDataServices {
+            commands += try await service.fetchRemoteCommands()
+        }
+        
+        return commands
+    }
+    
+    func fetchPendingRemoteCommands() async throws -> [RemoteCommand] {
+        var commands = [RemoteCommand]()
+        for service in remoteDataServices {
+            commands += try await service.fetchPendingRemoteCommands()
+        }
+        
+        return commands
+    }
+}
 
 protocol RemoteDataServicesManagerDelegate: AnyObject {
     var shouldSyncToRemoteService: Bool {get}

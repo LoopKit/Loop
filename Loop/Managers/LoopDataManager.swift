@@ -862,6 +862,9 @@ extension LoopDataManager {
         }
 
         updateRemoteRecommendation()
+        
+        self.delegate?.loopDataManager(self, loopDidFinishWithDosingDecision: dosingDecision, error: error)
+        
     }
 
     fileprivate enum UpdateReason: String {
@@ -2134,6 +2137,8 @@ protocol LoopDataManagerDelegate: AnyObject {
     ///   - units: The recommended bolus in U
     /// - Returns: a supported bolus volume in U. The volume returned should be the nearest deliverable volume.
     func roundBolusVolume(units: Double) -> Double
+    
+    func loopDataManager(_ manager: LoopDataManager, loopDidFinishWithDosingDecision: StoredDosingDecision, error: LoopError?)
 
     /// The pump manager status, if one exists.
     var pumpManagerStatus: PumpManagerStatus? { get }
