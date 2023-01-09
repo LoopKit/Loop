@@ -513,6 +513,8 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             await viewModel.generateRecommendationAndStartObserving()
         }
 
+        viewModel.analyticsServicesManager = deviceManager.analyticsServicesManager
+
         let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
 
         // After confirming a bolus, pop back to this controller's predecessor, i.e. all the way back out of the carb flow.

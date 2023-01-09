@@ -1485,6 +1485,7 @@ extension DeviceDataManager {
                 UIApplication.shared.endBackgroundTask(backgroundTask)
             }
             completion(result)
+            self.analyticsServicesManager.didAddCarbs(source: "Remote", amount: carbEntry.quantity.doubleValue(for: .gram()))
         }
     }
     
@@ -1503,6 +1504,7 @@ extension DeviceDataManager {
                 UIApplication.shared.endBackgroundTask(backgroundTask)
             }
             completion(error)
+            self.analyticsServicesManager.didBolus(source: "Remote", units: units)
         }
     }
     
