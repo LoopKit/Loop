@@ -164,16 +164,16 @@ final class AnalyticsServicesManager {
     }
 
 
-    func didAddCarbsFromWatch() {
-        logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
+    func didAddCarbs(source: String, amount: Double, inSession: Bool = false) {
+        logEvent("Carb entry created", withProperties: ["source" : source, "amount": "\(amount)"], outOfSession: inSession)
     }
 
     func didRetryBolus() {
         logEvent("Bolus Retry")
     }
 
-    func didSetBolusFromWatch(_ units: Double) {
-        logEvent("Bolus set", withProperties: ["source" : "Watch"], outOfSession: true)
+    func didBolus(source: String, units: Double, inSession: Bool = false) {
+        logEvent("Bolus set", withProperties: ["source" : source, "units": "\(units)"], outOfSession: true)
     }
 
     func didFetchNewCGMData() {
