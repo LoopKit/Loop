@@ -348,6 +348,26 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(.stalePumpData, bolusEntryViewModel.activeNotice)
     }
 
+    func testUpdateRecommendedBolusThrowsGlucoseTooOld() async throws {
+        XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
+        delegate.loopState.bolusRecommendationError = LoopError.glucoseTooOld(date: now)
+        await bolusEntryViewModel.update()
+        XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
+        let recommendedBolus = bolusEntryViewModel.recommendedBolus
+        XCTAssertNil(recommendedBolus)
+        XCTAssertEqual(.staleGlucoseData, bolusEntryViewModel.activeNotice)
+    }
+
+    func testUpdateRecommendedBolusThrowsGlucoseInFuture() async throws {
+        XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
+        delegate.loopState.bolusRecommendationError = LoopError.glucoseInFuture(date: now)
+        await bolusEntryViewModel.update()
+        XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
+        let recommendedBolus = bolusEntryViewModel.recommendedBolus
+        XCTAssertNil(recommendedBolus)
+        XCTAssertEqual(.futureGlucoseData, bolusEntryViewModel.activeNotice)
+    }
+
     func testUpdateRecommendedBolusThrowsOtherError() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         delegate.loopState.bolusRecommendationError = LoopError.pumpSuspended
