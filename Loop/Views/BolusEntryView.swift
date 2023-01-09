@@ -334,6 +334,11 @@ struct BolusEntryView: View {
                 title: Text("No Recent Glucose Data", comment: "Title for bolus screen notice when glucose data is missing or stale"),
                 caption: Text("Enter a blood glucose from a meter for a recommended bolus amount.", comment: "Caption for bolus screen notice when glucose data is missing or stale")
             )
+        case .futureGlucoseData:
+            return WarningView(
+                title: Text("Glucose in Future", comment: "Title for bolus screen notice when glucose data is in the future"),
+                caption: Text("Check for data in the future on phone.", comment: "Caption for bolus screen notice when glucose data is in the future")
+            )
         case .stalePumpData:
             return WarningView(
                 title: Text("No Recent Pump Data", comment: "Title for bolus screen notice when pump data is missing or stale"),
