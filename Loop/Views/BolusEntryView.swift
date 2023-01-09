@@ -336,8 +336,8 @@ struct BolusEntryView: View {
             )
         case .futureGlucoseData:
             return WarningView(
-                title: Text("Glucose in Future", comment: "Title for bolus screen notice when glucose data is in the future"),
-                caption: Text("Check for data in the future on phone.", comment: "Caption for bolus screen notice when glucose data is in the future")
+                title: Text("Invalid Future Glucose", comment: "Title for bolus screen notice when glucose data is in the future"),
+                caption: Text("Check for device time and/or remove any invalid data from Apple Health.", comment: "Caption for bolus screen notice when glucose data is in the future")
             )
         case .stalePumpData:
             return WarningView(

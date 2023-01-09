@@ -192,7 +192,7 @@ extension LoopError: LocalizedError {
             return String(format: NSLocalizedString("Glucose data is %1$@ old", comment: "The error message when glucose data is too old to be used. (1: glucose data age in minutes)"), minutes)
         case .glucoseInFuture(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
-            return String(format: NSLocalizedString("Glucose data is %1$@ in the future", comment: "The error message when glucose data is in the future to be used. (1: glucose data time in future in minutes)"), minutes)
+            return String(format: NSLocalizedString("Invalid glucose reading with a timestamp that is %1$@ in the future", comment: "The error message when glucose data is in the future. (1: glucose data time in future in minutes)"), minutes)
         case .pumpDataTooOld(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
             return String(format: NSLocalizedString("Pump data is %1$@ old", comment: "The error message when pump data is too old to be used. (1: pump data age in minutes)"), minutes)

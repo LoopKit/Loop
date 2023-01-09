@@ -1157,7 +1157,7 @@ extension LoopDataManager {
             throw LoopError.glucoseTooOld(date: glucose.startDate)
         }
 
-        guard lastGlucoseDate.timeIntervalSince(now()) <= LoopCoreConstants.inputDataRecencyInterval else {
+        guard lastGlucoseDate.timeIntervalSince(now()) <= LoopCoreConstants.futureGlucoseDataInterval else {
             throw LoopError.glucoseInFuture(date: lastGlucoseDate)
         }
 
