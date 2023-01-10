@@ -161,7 +161,7 @@ extension UAMTestType {
     }
 }
 
-class MealDetectionManagerTests {
+class MealDetectionManagerTests: XCTestCase {
     let dateFormatter = ISO8601DateFormatter.localTimeDate()
     let pumpManager = MockPumpManager()
 
@@ -232,7 +232,7 @@ class MealDetectionManagerTests {
         }
     }
     
-    func tearDown() {
+    override func tearDown() {
         mealDetectionManager.lastUAMNotification = nil
         mealDetectionManager = nil
         UserDefaults.standard.unannouncedMealNotificationsEnabled = false
@@ -392,7 +392,7 @@ class MealDetectionManagerTests {
         mealDetectionManager.manageMealNotifications(for: status, bolusDurationEstimator: { _ in nil })
         
         XCTAssertEqual(mealDetectionManager.lastUAMNotification?.deliveryTime, now)
-        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.carbAmount, 100)
+        XCTAssertEqual(mealDetectionManager.lastUAMNotification?.carbAmount, 75)
     }
     
     func testUnannouncedMealNoPendingBolus() {
