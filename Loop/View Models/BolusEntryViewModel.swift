@@ -674,7 +674,7 @@ final class BolusEntryViewModel: ObservableObject {
             switch error {
             case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld:
                 notice = .staleGlucoseData
-            case LoopError.glucoseInFuture:
+            case LoopError.invalidFutureGlucose:
                 notice = .futureGlucoseData
             case LoopError.pumpDataTooOld:
                 notice = .stalePumpData

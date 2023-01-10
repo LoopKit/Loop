@@ -358,9 +358,9 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(.staleGlucoseData, bolusEntryViewModel.activeNotice)
     }
 
-    func testUpdateRecommendedBolusThrowsGlucoseInFuture() async throws {
+    func testUpdateRecommendedBolusThrowsInvalidFutureGlucose() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        delegate.loopState.bolusRecommendationError = LoopError.glucoseInFuture(date: now)
+        delegate.loopState.bolusRecommendationError = LoopError.invalidFutureGlucose(date: now)
         await bolusEntryViewModel.update()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
