@@ -76,6 +76,7 @@ final class BolusEntryViewModel: ObservableObject {
         case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
         case glucoseBelowTarget
         case staleGlucoseData
+        case futureGlucoseData
         case stalePumpData
     }
 
@@ -673,6 +674,8 @@ final class BolusEntryViewModel: ObservableObject {
             switch error {
             case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld:
                 notice = .staleGlucoseData
+            case LoopError.invalidFutureGlucose:
+                notice = .futureGlucoseData
             case LoopError.pumpDataTooOld:
                 notice = .stalePumpData
             default:

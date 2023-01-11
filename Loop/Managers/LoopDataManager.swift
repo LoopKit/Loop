@@ -1130,6 +1130,7 @@ extension LoopDataManager {
     ///     - LoopError.missingDataError
     ///     - LoopError.configurationError
     ///     - LoopError.glucoseTooOld
+    ///     - LoopError.invalidFutureGlucose
     ///     - LoopError.pumpDataTooOld
     fileprivate func predictGlucose(
         startingAt startingGlucoseOverride: GlucoseValue? = nil,
@@ -1154,6 +1155,10 @@ extension LoopDataManager {
 
         guard now().timeIntervalSince(lastGlucoseDate) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.glucoseTooOld(date: glucose.startDate)
+        }
+
+        guard lastGlucoseDate.timeIntervalSince(now()) <= LoopCoreConstants.futureGlucoseDataInterval else {
+            throw LoopError.invalidFutureGlucose(date: lastGlucoseDate)
         }
 
         guard now().timeIntervalSince(pumpStatusDate) <= LoopCoreConstants.inputDataRecencyInterval else {
@@ -1390,6 +1395,7 @@ extension LoopDataManager {
     /// - Throws:
     ///     - LoopError.missingDataError
     ///     - LoopError.glucoseTooOld
+    ///     - LoopError.invalidFutureGlucose
     ///     - LoopError.pumpDataTooOld
     ///     - LoopError.configurationError
     fileprivate func recommendBolusValidatingDataRecency<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
@@ -1403,6 +1409,10 @@ extension LoopDataManager {
 
         guard now().timeIntervalSince(lastGlucoseDate) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.glucoseTooOld(date: glucose.startDate)
+        }
+
+        guard lastGlucoseDate.timeIntervalSince(now()) <= LoopCoreConstants.inputDataRecencyInterval else {
+            throw LoopError.invalidFutureGlucose(date: lastGlucoseDate)
         }
 
         guard now().timeIntervalSince(pumpStatusDate) <= LoopCoreConstants.inputDataRecencyInterval else {
@@ -1516,6 +1526,7 @@ extension LoopDataManager {
     /// - Throws:
     ///     - LoopError.configurationError
     ///     - LoopError.glucoseTooOld
+    ///     - LoopError.invalidFutureGlucose
     ///     - LoopError.missingDataError
     ///     - LoopError.pumpDataTooOld
     private func updatePredictedGlucoseAndRecommendedDose(with dosingDecision: StoredDosingDecision) -> (StoredDosingDecision, LoopError?) {
@@ -1537,6 +1548,10 @@ extension LoopDataManager {
 
         if startDate.timeIntervalSince(glucose.startDate) > LoopCoreConstants.inputDataRecencyInterval {
             errors.append(.glucoseTooOld(date: glucose.startDate))
+        }
+
+        if glucose.startDate.timeIntervalSince(startDate) > LoopCoreConstants.inputDataRecencyInterval {
+            errors.append(.invalidFutureGlucose(date: glucose.startDate))
         }
 
         let pumpStatusDate = doseStore.lastAddedPumpData

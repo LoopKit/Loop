@@ -89,6 +89,9 @@ enum LoopError: Error {
     // Glucose data is too old to perform action
     case glucoseTooOld(date: Date)
 
+    // Glucose data is in the future
+    case invalidFutureGlucose(date: Date)
+
     // Pump data is too old to perform action
     case pumpDataTooOld(date: Date)
 
@@ -120,6 +123,8 @@ extension LoopError {
             return "missingDataError"
         case .glucoseTooOld:
             return "glucoseTooOld"
+        case .invalidFutureGlucose:
+            return "invalidFutureGlucose"
         case .pumpDataTooOld:
             return "pumpDataTooOld"
         case .recommendationExpired:
@@ -141,6 +146,8 @@ extension LoopError {
         case .missingDataError(let detail):
             details["detail"] = detail.rawValue
         case .glucoseTooOld(let date):
+            details["date"] = StoredDosingDecisionIssue.description(for: date)
+        case .invalidFutureGlucose(let date):
             details["date"] = StoredDosingDecisionIssue.description(for: date)
         case .pumpDataTooOld(let date):
             details["date"] = StoredDosingDecisionIssue.description(for: date)
@@ -183,6 +190,9 @@ extension LoopError: LocalizedError {
         case .glucoseTooOld(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
             return String(format: NSLocalizedString("Glucose data is %1$@ old", comment: "The error message when glucose data is too old to be used. (1: glucose data age in minutes)"), minutes)
+        case .invalidFutureGlucose(let date):
+            let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
+            return String(format: NSLocalizedString("Invalid glucose reading with a timestamp that is %1$@ in the future", comment: "The error message when glucose data is in the future. (1: glucose data time in future in minutes)"), minutes)
         case .pumpDataTooOld(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
             return String(format: NSLocalizedString("Pump data is %1$@ old", comment: "The error message when pump data is too old to be used. (1: pump data age in minutes)"), minutes)
