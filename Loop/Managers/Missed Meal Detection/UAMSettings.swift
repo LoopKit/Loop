@@ -10,7 +10,7 @@ import Foundation
 
 public struct UAMSettings {
     /// Minimum grams of unannounced carbs that must be detected for a notification to be delivered
-    public static let minCarbThreshold: Double = 20 // grams
+    public static let minCarbThreshold: Double = 15 // grams
     /// Maximum grams of unannounced carbs that the algorithm will search for
     public static let maxCarbThreshold: Double = 80 // grams
     /// Minimum threshold for glucose rise over the detection window
