@@ -273,6 +273,7 @@ struct BolusEntryView: View {
     private static let doseAmountFormatter: NumberFormatter = {
         let quantityFormatter = QuantityFormatter()
         quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
+        quantityFormatter.numberFormatter.roundingMode = .down
         return quantityFormatter.numberFormatter
     }()
 

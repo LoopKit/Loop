@@ -299,7 +299,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(mockState.bolusRecommendationResult?.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(delegate.roundBolusVolume(units: mockState.bolusRecommendationResult!.amount), recommendedBolus?.doubleValue(for: .internationalUnit()))
         let consideringPotentialCarbEntryPassed = try XCTUnwrap(mockState.consideringPotentialCarbEntryPassed)
         XCTAssertEqual(mockPotentialCarbEntry, consideringPotentialCarbEntryPassed)
         let replacingCarbEntryPassed = try XCTUnwrap(mockState.replacingCarbEntryPassed)
@@ -316,7 +316,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(mockState.bolusRecommendationResult?.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(delegate.roundBolusVolume(units: mockState.bolusRecommendationResult!.amount), recommendedBolus!.doubleValue(for: .internationalUnit()))
         XCTAssertEqual(BolusEntryViewModel.Notice.predictedGlucoseBelowSuspendThreshold(suspendThreshold: Self.exampleCGMGlucoseQuantity), bolusEntryViewModel.activeNotice)
     }
     
@@ -329,7 +329,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(mockState.bolusRecommendationResult?.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(delegate.roundBolusVolume(units: mockState.bolusRecommendationResult!.amount), recommendedBolus!.doubleValue(for: .internationalUnit()))
         XCTAssertNil(bolusEntryViewModel.activeNotice)
     }
 
@@ -341,7 +341,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(mockState.bolusRecommendationResult?.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(delegate.roundBolusVolume(units: mockState.bolusRecommendationResult!.amount), recommendedBolus!.doubleValue(for: .internationalUnit()))
         XCTAssertNil(bolusEntryViewModel.activeNotice)
     }
         
@@ -388,7 +388,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(mockState.bolusRecommendationResult?.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(delegate.roundBolusVolume(units: mockState.bolusRecommendationResult!.amount), recommendedBolus!.doubleValue(for: .internationalUnit()))
         let consideringPotentialCarbEntryPassed = try XCTUnwrap(mockState.consideringPotentialCarbEntryPassed)
         XCTAssertEqual(mockPotentialCarbEntry, consideringPotentialCarbEntryPassed)
         let replacingCarbEntryPassed = try XCTUnwrap(mockState.replacingCarbEntryPassed)

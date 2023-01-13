@@ -687,6 +687,11 @@ final class BolusEntryViewModel: ObservableObject {
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
+        guard let delegate = delegate else {
+            assertionFailure("Missing BolusEntryViewModelDelegate")
+            return
+        }
+
         let now = Date()
         var recommendation: ManualBolusRecommendation?
         let recommendedBolus: HKQuantity?
@@ -694,11 +699,11 @@ final class BolusEntryViewModel: ObservableObject {
         do {
             recommendation = try computeBolusRecommendation(from: state)
             if let recommendation = recommendation {
-                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
+                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: recommendation.amount))
 
                 switch recommendation.notice {
                 case .glucoseBelowSuspendThreshold:
-                    if let suspendThreshold = delegate?.settings.suspendThreshold {
+                    if let suspendThreshold = delegate.settings.suspendThreshold {
                         notice = .predictedGlucoseBelowSuspendThreshold(suspendThreshold: suspendThreshold.quantity)
                     } else {
                         notice = nil
