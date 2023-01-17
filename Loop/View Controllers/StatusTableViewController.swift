@@ -1296,6 +1296,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             Task { @MainActor in
                 await viewModel.generateRecommendationAndStartObserving()
             }
+            viewModel.analyticsServicesManager = deviceManager.analyticsServicesManager
             let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         }
