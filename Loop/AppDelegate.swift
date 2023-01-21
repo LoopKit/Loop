@@ -91,34 +91,4 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         return loopAppManager.supportedInterfaceOrientations
     }
-    
-    // MARK: - UIApplicationDelegate - handle external URLs
-
-    func application(_ application: UIApplication,
-                     open url: URL,
-                     options: [UIApplication.OpenURLOptionsKey : Any] = [:] ) -> Bool {
-
-        // Process the URL.
-        guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true), let linkTarget = components.host else {
-            // No sub-path specified
-            return true
-        }
-        
-        // Below examples would call something like the function presentCarbEntryScreen defined in StatusTableViewController; not sure if that type of code has to all be copied here, or if those various functions (e.g. carb entry, bolus view, settings) should be put elsewhere, or could be repurposed from existing files.
-
-        switch linkTarget.lowercased() {
-        case "carbs" :
-            // open carb entry view controller
-            return true
-        case "bolus" :
-            // open bolus view controller
-            return true
-        case "settings" :
-            // open settings view
-            return true
-        default :
-            return true
-        }
-    }
-  
 }
