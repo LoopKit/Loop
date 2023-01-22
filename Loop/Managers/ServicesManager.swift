@@ -173,6 +173,22 @@ class ServicesManager {
 // MARK: - ServiceDelegate
 
 extension ServicesManager: ServiceDelegate {
+    var hostIdentifier: String {
+        return "com.loopkit.Loop"
+    }
+
+    var hostVersion: String {
+        var semanticVersion = Bundle.main.shortVersionString
+
+        while semanticVersion.split(separator: ".").count < 3 {
+            semanticVersion += ".0"
+        }
+
+        semanticVersion += "+\(Bundle.main.version)"
+
+        return semanticVersion
+    }
+
     func serviceDidUpdateState(_ service: Service) {
         saveState()
     }
