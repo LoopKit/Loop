@@ -45,6 +45,9 @@ LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION_RELEASE =
 // Min iOS Version [DEFAULT]					
 IPHONEOS_DEPLOYMENT_TARGET = 15.1
 
+// Base string for opening app via URL [DEFAULT]
+URL_SCHEME_NAME = $(MAIN_APP_DISPLAY_NAME)
+
 // Version [DEFAULT]
 #include? "Version.xcconfig"
 
