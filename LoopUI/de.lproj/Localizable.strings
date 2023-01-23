@@ -7,9 +7,6 @@
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
 "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ arbeitet mit geschlossenem Regelkreis in der AUS-Position. Ihre Pumpe und CGM funktionieren weiter, aber die App passt die Dosierung nicht automatisch an.\n\n%2$@";
 
-/* Green closed loop ON message (1: app name) (2: last loop string) */
-"\n%1$@ is operating with Closed Loop in the ON position. %2$@" = "\n%1$@ arbeitet mit  geschlossenem Regelkreis in der EIN-Position. %2$@";
-
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
 "%@ ago" = "vor %@";
 
@@ -18,9 +15,6 @@
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%1$@ in %2$@";
-
-/* Last loop time completed message (1: app name) (2: last loop time string) */
-"%1$@ last successfully completed a loop %2$@ ago." = "%1$@ hat zuletzt vor %2$@ erfolgreich eine Schleife beendet.";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ Einheiten pro Stunde in %2$@";

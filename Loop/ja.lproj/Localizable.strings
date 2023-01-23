@@ -71,7 +71,7 @@
    Title text for button to set up a CGM */
 "Add CGM" = "CGMを追加";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "食事を追加";
 
 /* Action sheet title selecting Pump
@@ -251,9 +251,6 @@
 
 /* The loading message for the diagnostic report screen */
 "Loading..." = "ロード中...";
-
-/* The title of the loggly service */
-"Loggly" = "Loggly";
 
 /* The notification title for a loop failure */
 "Loop Failure" = "ループの不良";

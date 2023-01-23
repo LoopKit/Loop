@@ -71,7 +71,7 @@
    Title text for button to set up a CGM */
 "Add CGM" = "Voeg CGM toe";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Voeg maaltijd toe";
 
 /* Action sheet title selecting Pump
@@ -81,17 +81,14 @@
 /* Title text for button to set up a service */
 "Add Service" = "Add Service";
 
-/* Button title to delete a service */
-"Delete Service" = "Delete Service";
-
-/* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
-
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algoritme instellingen";
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Weet je zeker dat je de CGM wilt verwijderen";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
 
 /* Format fragment for a specific time */
 "at %@" = "bij %@";
@@ -175,11 +172,14 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Aangepast programma";
 
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Verwijder account";
+
 /* Button title to delete CGM */
 "Delete CGM" = "Verwijder CGM";
 
-/* The title of the button to remove the credentials for a service */
-"Delete Account" = "Verwijder account";
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Toediening limieten";

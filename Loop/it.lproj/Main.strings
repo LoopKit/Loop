@@ -4,41 +4,17 @@
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
 "5gz-kZ-iF1.text" = "3.5 U/ora @ 12:12 PM";
 
-/* Class = "UILabel"; text = "Bolus"; ObjectID = "5oA-6d-ZTL"; */
-"5oA-6d-ZTL.text" = "Bolo";
-
-/* Class = "UILabel"; text = "Pump ID"; ObjectID = "5TX-kX-nBo"; */
-"5TX-kX-nBo.text" = "ID Microinfusore";
-
-/* Class = "UITextField"; accessibilityLabel = "Bolus Amount"; ObjectID = "7LT-50-ZzK"; */
-"7LT-50-ZzK.accessibilityLabel" = "Quantità di bolo";
-
-/* Class = "UITextField"; placeholder = "0.0"; ObjectID = "7LT-50-ZzK"; */
-"7LT-50-ZzK.placeholder" = "0.0";
-
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
 "87H-N1-0vJ.text" = "Predittivo";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
 "aCb-Qs-bpu.text" = "Dettaglio";
 
-/* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
-"aiu-ZA-zVa.title" = "Bolo";
-
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Etichetta";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
 "bq4-98-cQU.text" = "Modifica del Glucosio";
-
-/* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.accessibilityLabel" = "Unità";
-
-/* Class = "UILabel"; text = "U"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.text" = "U";
-
-/* Class = "UILabel"; text = "Label"; ObjectID = "cpo-Po-gFM"; */
-"cpo-Po-gFM.text" = "Etichetta";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "g Totali";
@@ -49,20 +25,11 @@
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Etichetta";
 
-/* Class = "UINavigationItem"; title = "Settings"; ObjectID = "dmB-PQ-B44"; */
-"dmB-PQ-B44.title" = "Impostazioni";
-
-/* Class = "UILabel"; text = "DEVICES"; ObjectID = "DyC-Sv-qP8"; */
-"DyC-Sv-qP8.text" = "DISPOSITIVI";
-
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
 "E41-FN-nkk.text" = "probabile glic. 92 mg/dL";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Osservato";
-
-/* Class = "UILabel"; text = "Active Carbohydrates: 40g"; ObjectID = "hHZ-uY-aKw"; */
-"hHZ-uY-aKw.text" = "Carboidrati Attivi: 40g";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Effetti dei Carboidrati";
@@ -73,38 +40,17 @@
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Dettaglio";
 
-/* Class = "UILabel"; text = "⚠ Glucose Predicted Below Range"; ObjectID = "k0g-P7-OVN"; */
-"k0g-P7-OVN.text" = "⚠ Glicemie previste sotto il Range";
-
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
 "k3F-Na-7mn.text" = "Basale Raccomandata";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "Etichetta";
 
-/* Class = "UILabel"; text = "Label"; ObjectID = "l7l-mw-Oc9"; */
-"l7l-mw-Oc9.text" = "Etichetta";
-
-/* Class = "UILabel"; text = "Tap to set"; ObjectID = "m9c-SQ-djE"; */
-"m9c-SQ-djE.text" = "Imposta";
-
-/* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.accessibilityLabel" = "Unità";
-
-/* Class = "UILabel"; text = "U"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.text" = "U";
-
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
 "OFA-qT-ZAg.text" = "Etichetta";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Glicemia Predetta";
-
-/* Class = "UITableViewController"; title = "Insulin Model"; ObjectID = "pi6-Dh-72V"; */
-"pi6-Dh-72V.title" = "Modello Insulina";
-
-/* Class = "UILabel"; text = "An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments."; ObjectID = "PJv-p9-cFe"; */
-"PJv-p9-cFe.text" = "Un modello di attività insulinica viene utilizzato per stimare gli effetti dell'insulina sui livelli di glucosio. Un modello accurato può aiutare a prevenire l'accumulo di insulina e consigliare in modo sicuro trattamenti correttivi.";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "probabile glic. 92 mg/dL";
@@ -118,23 +64,11 @@
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
 "ufi-Kj-33k.text" = "Etichetta";
 
-/* Class = "UILabel"; text = "Active Insulin: 1.5U"; ObjectID = "viU-7a-kbI"; */
-"viU-7a-kbI.text" = "Insulina Attiva: 1.5U";
-
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Carboidrati";
 
-/* Class = "UITextField"; text = "4 hour"; ObjectID = "Wk3-xv-IM5"; */
-"Wk3-xv-IM5.text" = "4 ore";
-
-/* Class = "UIButton"; normalTitle = "Deliver"; ObjectID = "Ya0-9b-ZAS"; */
-"Ya0-9b-ZAS.normalTitle" = "Invia";
-
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";
-
-/* Class = "UILabel"; text = "Recommended"; ObjectID = "ywT-OR-NnU"; */
-"ywT-OR-NnU.text" = "Consigliato";
 
 /* Class = "UILabel"; text = "Title"; ObjectID = "zbc-87-wxZ"; */
 "zbc-87-wxZ.text" = "Titolo";

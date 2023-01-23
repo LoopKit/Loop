@@ -71,7 +71,7 @@
    Title text for button to set up a CGM */
 "Add CGM" = "Adicionar CGM";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Adicionar Refeição";
 
 /* Action sheet title selecting Pump
@@ -217,9 +217,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Aceleração da Glicose";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Indefinidamente";
 
@@ -254,9 +251,6 @@
 
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Carregando...";
-
-/* The title of the loggly service */
-"Loggly" = "Loggly";
 
 /* The notification title for a loop failure */
 "Loop Failure" = "Falha no Loop";

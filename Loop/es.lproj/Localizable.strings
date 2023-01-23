@@ -71,7 +71,7 @@
    Title text for button to set up a CGM */
 "Add CGM" = "Agregar CGM";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Agregar Alimento";
 
 /* Action sheet title selecting Pump
@@ -81,17 +81,14 @@
 /* Title text for button to set up a service */
 "Add Service" = "Add Service";
 
-/* Button title to delete a service */
-"Delete Service" = "Delete Service";
-
-/* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
-
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Ajustes de Algoritmo";
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "¿Está usted seguro de querer eliminar este CGM?";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
 
 /* Format fragment for a specific time */
 "at %@" = "a %@";
@@ -107,8 +104,7 @@
 "Basal Rates" = "Perfil Basal";
 
 /* The label of the bolus entry button
-   The notification title for a bolus failure
-   Title text for bolus screen (manual correction) */
+   The notification title for a bolus failure */
 "Bolus" = "Bolo";
 
 /* Alert title for an updated bolus recommendation */
@@ -129,7 +125,8 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Efectos de carbohidratos";
 
-/* Back button text for bolus screen to return to carb entry screen */
+/* Back button text for bolus screen to return to carb entry screen
+   Label for carb entry row on bolus screen */
 "Carb Entry" = "Entrada de Carbohidratos";
 
 /* The title of the carb ratios schedule screen
@@ -188,12 +185,11 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = "Glucosa actual de %1$@ está por debajo del rango correctivo.";
 
-/* Name of custom override
-   The title of the cell indicating a generic temporary override is enabled */
+/* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Sobreescritura personalizada";
 
-/* Button title to delete CGM */
-"Delete CGM" = "Eliminar CGM";
+/* Date picker label */
+"Date" = "Fecha";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -201,13 +197,13 @@
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Eliminar Cuenta";
 
-/* Title of the carb entry date picker cell */
-"Date" = "Fecha";
-
 /* Button title to delete CGM */
 "Delete CGM" = "Eliminar CGM";
 
-/* The button text to initiate a bolus */
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
+
+/* Button text to deliver a bolus */
 "Deliver" = "Entregar";
 
 /* Title text for delivery limits */
@@ -293,7 +289,7 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop no ha terminado correctamente en %@";
 
-/* Title text for bolus screen following a carb entry */
+/* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Bolo de Comida";
 
 /* The error message for missing data. (1: missing data details) */
@@ -310,12 +306,6 @@
 
 /* The title text for the override presets */
 "Override Presets" = "Sobreescritura de objetivos preestablecidos";
-
-/* Alert message for attempting to change basal rates before pump was configured. */
-"Please configure a pump to view or edit scheduled basal rates." = "Configure microinfusora para mirar o cambiar el perfil basal.";
-
-/* Name of pre-meal workout override */
-"Pre-Meal" = "Pre-Comida";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Objetivos Pre-Comida";
@@ -371,11 +361,10 @@
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Corrección Retrospectiva";
 
-/* The button text for attempting a manual loop
-   The title of the notification action to retry a bolus command */
+/* The title of the notification action to retry a bolus command */
 "Retry" = "Reintentar";
 
-/* The button text to save a carb entry without bolusing */
+/* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Guardar sin Entregar Bolo";
 
 /* The title of the services section in settings */
@@ -414,9 +403,6 @@
 /* The short unit display string for international units of insulin */
 "U" = "U";
 
-/* Alert title for unconfigured pump */
-"Unconfigured Pump" = "La microinfusora no está configurada";
-
 /* The format for the description of a temporary override end date */
 "until %@" = "hasta la %@";
 
@@ -428,9 +414,6 @@
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Cuando la glucosa actual o proyectada se encuentre debajo del nivel de suspensión, Loop no recomendará un bolo y siempre recomendará un basal temporal de 0 unidades por hora.";
-
-/* Name of legacy workout override */
-"Workout" = "Entrenamiento";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Objetivos de Ejercicio";

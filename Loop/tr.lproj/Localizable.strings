@@ -1,6 +1,21 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (pending: %@)";
 
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ absorbed";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ U Total";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
 
@@ -19,23 +34,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ absorbed";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ U Total";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 min glucose regression coefficient (b₁), continued with decay over 30 min";
@@ -75,20 +75,14 @@
    Title text for button to set up a new pump */
 "Add Pump" = "Add Pump";
 
-/* The title of the Amplitude service */
-"Amplitude" = "Amplitude";
-
 /* Title text for button to set up a service */
 "Add Service" = "Add Service";
 
-/* Button title to delete a service */
-"Delete Service" = "Delete Service";
-
-/* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
-
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algorithm Settings";
+
+/* The title of the Amplitude service */
+"Amplitude" = "Amplitude";
 
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
@@ -98,6 +92,9 @@
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Are you sure you want to delete this CGM?";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
 
 /* Format fragment for a specific time */
 "at %@" = "at %@";
@@ -181,14 +178,17 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Custom Override";
 
-/* Button title to delete CGM */
-"Delete CGM" = "Delete CGM";
-
 /* The short unit display string for decibles */
 "dB" = "dB";
 
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Delete Account";
+
+/* Button title to delete CGM */
+"Delete CGM" = "Delete CGM";
+
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Delivery Limits";
@@ -279,11 +279,11 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum effects";
 
-/* The title of the Nightscout service */
-"Nightscout" = "Nightscout";
-
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Needs Attention";
+
+/* The title of the Nightscout service */
+"Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "No connected devices, or failure during device connection";

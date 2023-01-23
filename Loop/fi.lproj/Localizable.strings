@@ -74,7 +74,7 @@
    Title text for button to set up a CGM */
 "Add CGM" = "Lisää CGM";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Lisää ateria";
 
 /* Action sheet title selecting Pump
@@ -107,8 +107,7 @@
 "Basal Rates" = "Basaalitasot";
 
 /* The label of the bolus entry button
-   The notification title for a bolus failure
-   Title text for bolus screen (manual correction) */
+   The notification title for a bolus failure */
 "Bolus" = "Bolus";
 
 /* Alert title for an updated bolus recommendation */
@@ -129,7 +128,8 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Hiilihydraattivaikutus";
 
-/* Back button text for bolus screen to return to carb entry screen */
+/* Back button text for bolus screen to return to carb entry screen
+   Label for carb entry row on bolus screen */
 "Carb Entry" = "Hiilihydraatit";
 
 /* The title of the carb ratios schedule screen
@@ -188,17 +188,16 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = "Nykyinen glukoosi %1$@ on korjausalueen alapuolella.";
 
-/* Name of custom override
-   The title of the cell indicating a generic temporary override is enabled */
+/* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Mukautettu tilapäisasetus";
 
-/* Title of the carb entry date picker cell */
+/* Date picker label */
 "Date" = "Aika";
 
 /* Button title to delete CGM */
 "Delete CGM" = "Poista CGM";
 
-/* The button text to initiate a bolus */
+/* Button text to deliver a bolus */
 "Deliver" = "Annostele";
 
 /* Title text for delivery limits */
@@ -243,9 +242,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Glukoosin liike";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://omaosoite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Toistaiseksi";
 
@@ -281,16 +277,13 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Ladataan...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "Loopin häiriö";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Häiriö Loopin toiminnassa %@";
 
-/* Title text for bolus screen following a carb entry */
+/* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Ateriabolus";
 
 /* The error message for missing data. (1: missing data details) */
@@ -305,14 +298,16 @@
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Ei yhdistettyjä laitteita tai häiriö laiteyhteydessä";
 
-/* Button text to acknowledge an updated bolus recommendation alert */
+/* Alert acknowledgment OK button
+   Critical Alert permissions disabled alert button
+   Default action for alert when alert acknowledgment fails
+   Notifications permissions disabled alert button
+   Text for ok action on notification of upcoming profile expiration
+   The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
 /* The title text for the override presets */
 "Override Presets" = "Tilapäisasetukset";
-
-/* Name of pre-meal workout override */
-"Pre-Meal" = "Ennen ateriaa";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Ennen ateriaa -tavoite";
@@ -368,11 +363,10 @@
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Retrospektiivinen korjaus";
 
-/* The button text for attempting a manual loop
-   The title of the notification action to retry a bolus command */
+/* The title of the notification action to retry a bolus command */
 "Retry" = "Uudelleen";
 
-/* The button text to save a carb entry without bolusing */
+/* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Tallenna ilman bolusta";
 
 /* The title of the services section in settings */
@@ -425,9 +419,6 @@
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Kun nykyinen tai ennustettu glukoosi on pysäytysrajan alapuolella, Loop ei suosittele bolusta ja suosittelee aina tilapäiseksi basaaliksi 0 yksikköä tunnissa.";
-
-/* Name of legacy workout override */
-"Workout" = "Liikunta";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Liikuntatavoitteet";

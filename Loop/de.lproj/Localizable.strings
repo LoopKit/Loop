@@ -139,9 +139,6 @@
    Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Benachrichtigungsberechtigungen";
 
-/* Alert Permissions Need Attention alert title */
-"Alert Permissions Need Attention" = "Mitteilungseinstellungen brauchen Deine Aufmerksamkeit";
-
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algorithmus-Einstellungen";
 
@@ -553,9 +550,6 @@
 /* The title text for the issue report cell */
 "Issue Report" = "Problembericht";
 
-/* Format for Notifications permissions disabled alert body. (1: app name) */
-"It is important that you always keep %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications turned ON in your phone’s settings to ensure that you get notified by the app." = "Es ist wichtig, dass Du %1$@ Benachrichtigungen, kritische Warnungen und zeitkritische Benachrichtigungen in den Einstellungen Deines Telefons immer aktiviert lässt, um sicherzustellen, dass Du von der App benachrichtigt wirst.";
-
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Startet die CGM-App";
 
@@ -780,9 +774,6 @@
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Wiederholen";
 
-/* Warning text for when Notifications or Critical Alerts Permissions is disabled */
-"Review Alert Permissions" = "Überprüfe die Berechtigungen für Warnungen";
-
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Speichern und Bolen";
 
@@ -869,9 +860,6 @@
 
 /* Title of the carb entry date picker cell */
 "Time" = "Zeit";
-
-/* Time change alert title */
-"Time Change Detected" = "Zeitänderung erkannt";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Zeitkritische Benachrichtigungen";
@@ -966,9 +954,6 @@
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "Deine maximale Bolusmenge beträgt %1$@.";
-
-/* Time change alert body. (1: app name) */
-"Your phone’s time has been changed. %1$@ needs accurate time records to make predictions about your glucose and adjust your insulin accordingly.\n\nCheck in your iPhone Settings (General / Date & Time) and verify that Set Automatically is enabled. Failure to resolve could lead to serious under-delivery or over-delivery of insulin." = "Die Uhrzeit Deines Telefons wurde geändert. %1$@ benötigt genaue Zeitaufzeichnungen, um Vorhersagen über Deinen Blutzucker zu treffen und Dein Insulin entsprechend anzupassen.\n\nÜberprüfe Deine iPhone-Einstellungen (Allgemein / Datum & Uhrzeit) und vergewissere Dich, dass Automatisch einstellen aktiviert ist. Wird dies nicht behoben, kann dies zu einer schwerwiegenden Unter- oder Überversorgung von Insulin führen.";
 
 /* Caption for bolus screen notice when pump data is missing or stale */
 "Your pump data is stale. %1$@ cannot recommend a bolus amount." = "Deine Pumpendaten sind veraltet. %1$@ kann keine Bolusmenge empfehlen.";
