@@ -90,9 +90,6 @@
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Paramètres de l'algorithme";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Un ajustement au modèle adulte basé sur des effets empiriques chez les enfants.";
-
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Voulez-vous vraiment supprimer ce CGM ?";
 
@@ -201,9 +198,6 @@
 
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Supprimer le compte";
-
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Token client";
 
 /* Title of the carb entry date picker cell */
 "Date" = "Date";

@@ -90,9 +90,6 @@
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "算法设置";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "在成人胰岛素模型基础上专为儿童修改的胰岛素代谢模型";
-
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "确定要删除该CGM数据源？";
 

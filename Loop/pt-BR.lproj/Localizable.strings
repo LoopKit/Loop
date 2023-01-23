@@ -81,9 +81,6 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Um ajuste do modelo para adultos baseado nos efeitos empíricos em crianças.";
-
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
 
@@ -174,9 +171,6 @@
 
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Sobreposições";
-
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Token do Cliente";
 
 /* Button title to delete CGM */
 "Delete CGM" = "Remover CGM";

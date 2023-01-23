@@ -90,9 +90,6 @@
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Impostazioni Algoritmo";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Un adattamento al modello adulto basato su effetti empirici nei bambini.";
-
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Sei sicuro di voler eliminare questo CGM?";
 

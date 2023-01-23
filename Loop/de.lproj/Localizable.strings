@@ -148,9 +148,6 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Eine Anpassung an das Erwachsenenmodell basierend auf empirischen Effekten bei Kindern.";
-
 /* Alert message for a carb entry persistence error */
 "An error occurred while trying to save your carb entry." = "Beim Speichern Deiner Kohlenhydrateingabe ist ein Fehler aufgetreten.";
 
@@ -350,9 +347,6 @@
 
 /* The title of the cell indicating a generic custom preset is enabled */
 "Custom Preset" = "Zielbereichänderung";
-
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Customer Token";
 
 /* Date picker label */
 "Date" = "Datum";

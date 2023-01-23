@@ -81,9 +81,6 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "大人モデルに経験効果を加算し調整したモデル。";
-
 /* The title of the amplitude API key credential */
 "API Key" = "API キー";
 
@@ -174,9 +171,6 @@
 
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "カスタムオーバーライド";
-
-/* The title of the Loggly customer token credential */
-"Customer Token" = "カスタマートークン";
 
 /* Button title to delete CGM */
 "Delete CGM" = "CGMを削除";

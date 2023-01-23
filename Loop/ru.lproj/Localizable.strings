@@ -87,9 +87,6 @@
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Настройки алгоритма";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Поправка к модели для взрослых основанная на эмпирических данных для детей.";
-
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Стереть этот мониторинг?";
 

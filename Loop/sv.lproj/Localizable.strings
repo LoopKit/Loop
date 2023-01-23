@@ -84,9 +84,6 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "En justering av vuxenmodellen baserad på empirisk effekt på barn.";
-
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
 
@@ -194,9 +191,6 @@
 /* Name of custom override
    The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Anpassad override";
-
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Inloggningsuppgift";
 
 /* Title of the carb entry date picker cell */
 "Date" = "Tid";
