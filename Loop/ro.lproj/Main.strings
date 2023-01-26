@@ -2,7 +2,7 @@
 "0RV-d5-muE.text" = "g";
 
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
-"3kU-n2-fha.title" = "Stare";
+"3kU-n2-fha.title" = "Status";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
 "5gz-kZ-iF1.text" = "3.5 U/oră @ 12:12 PM";
@@ -20,13 +20,13 @@
 "bIL-Ub-qYp.text" = "Etichetă";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Schimbare glicemie";
+"bq4-98-cQU.text" = "Glucose Change";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "g în total";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "Glicemia este estimată prin combinarea unui număr de date sursă. Folosiți acest instrument pentru a controla diverse surse de date și a felului în care influențează estimarea finala.";
+"D4C-I2-dhA.text" = "Glicemia este estimată prin combinarea unui număr de date sursă. Folosiți acest instrument pentru a controla diverse surse de date și a felului în care influențează estimarea.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Etichetă";
@@ -50,7 +50,7 @@
 "J7x-W5-gwo.text" = "Detaliu";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
-"k3F-Na-7mn.text" = "Rata bazala recomandata";
+"k3F-Na-7mn.text" = "Bazal recomandat";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "Etichetă";
@@ -74,7 +74,7 @@
 "Rse-x8-amW.text" = "estimată să ajungă la 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g Carbohidrați activi";
+"SQx-au-ZcM.text" = "g CLB";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glicemie";

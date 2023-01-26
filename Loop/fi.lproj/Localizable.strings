@@ -1,8 +1,5 @@
-/* No comment provided by engineer. */
-" " = " ";
-
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
-" (pending: %@)" = " (odot.: %@)";
+" (pending: %@)" = "(odot.: %@)";
 
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
 " Pre-meal Preset" = " Ennen ateriaa -esiasetus";
@@ -59,7 +56,7 @@
 "%1$@ U left: %2$@" = "%1$@ U jäljellä: %2$@";
 
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
-"%1$@ U/hour @ %2$@" = "%1$@ U/t klo %2$@";
+"%1$@ U/hour @ %2$@" = "%1$@ U/h klo %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
@@ -108,7 +105,7 @@
 "Active Carbs" = "Akt. hiilari";
 
 /* The title of the Insulin On-Board graph */
-"Active Insulin" = "Akt. insuliini";
+"Active Insulin" = "Aktiivinen insuliini";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktiivinen insuliini: %@";
@@ -156,7 +153,7 @@
 "API Key" = "API-avain";
 
 /* The title of the nightscout API secret credential */
-"API Secret" = "API-salausavain";
+"API Secret" = "API-salasana";
 
 /* Action sheet confirmation message for pump history deletion */
 "Are you sure you want to delete all history entries?" = "Haluatko varmasti poistaa kaikki historiatiedot?";
@@ -247,7 +244,7 @@
 "Carbohydrates" = "Hiilihydraatit";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
-"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Imeytyvät hiilihydraatit (g) ÷ Hiilihydraattisuhde (g/U) × Insuliiniherkkyys (%1$@/U)";
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Imeytyneet hiilihydraatit (g) ÷ Hiilihydraattisuhde (g/U) × Insuliiniherkkyys (%1$@/U)";
 
 /* The notification alert describing a low pump battery */
 "Change the pump battery immediately" = "Vaihda pumpun paristo välittömästi";
@@ -292,7 +289,7 @@
 "Configuration Error: %1$@" = "Määritysvirhe: %1$@";
 
 /* The title of the continuous glucose monitor section in settings */
-"Continuous Glucose Monitor" = "Jatkuva glukoosinseuranta (CGM)";
+"Continuous Glucose Monitor" = "Glukoosinseuranta (CGM)";
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
@@ -608,7 +605,7 @@
 "Pump Battery Low" = "Pumpun paristo vähissä";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
-"Pump data is %1$@ old" = "Pumpun tiedot ovat %1$@ vanhat";
+"Pump data is %1$@ old" = "Pumpputieto on %1$@ vanha";
 
 /* The title of the screen displaying a pump event */
 "Pump Event" = "Pumpun tapahtuma";
@@ -778,7 +775,7 @@
 "Use Pre-Meal Preset" = "Käytä Ennen ateriaa -esiasetusta";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Käytä liikuntatilan glukoositavoitetta";
+"Use Workout Glucose Targets" = "Käytä liikuntatilan glukoositavoitetteita";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Preset" = "Käytä liikuntatilaa";
@@ -796,7 +793,7 @@
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Kun suljettu säätö ei ole päällä, sovellus käyttää yksinkertaista boluslaskuria, kuten tavallisessa pumpussa.";
 
 /* The label of the workout mode toggle button */
-"Workout Targets" = "Liikuntatila";
+"Workout Targets" = "Liikuntatavoitteet";
 
 /* Workout override still on reminder alert body. */
 "Workout Temp Adjust has been turned on for more than 24 hours. Make sure you still want it enabled, or turn it off in the app." = "Liikuntatila on ollut käytössä yli 24 tuntia. Varmista, että haluat sen olevan edelleen käytössä, tai poista se käytöstä sovelluksessa.";

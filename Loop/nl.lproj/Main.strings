@@ -8,7 +8,7 @@
 "5gz-kZ-iF1.text" = "3,5 E/U @ 12:12 PM";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
-"87H-N1-0vJ.text" = "Voorspelde";
+"87H-N1-0vJ.text" = "Voorspeld";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
 "aCb-Qs-bpu.text" = "Detail";
@@ -20,13 +20,13 @@
 "bIL-Ub-qYp.text" = "Etiket";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Glucose verandering";
+"bq4-98-cQU.text" = "Glucoseverandering";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "gr totaal";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "De toekomstige glucose waarde wordt voorspeld door de effecten van meerdere input waardes mee te nemen. Gebruik deze tool om verschillende inputs aan en uit te zetten om ze zo te kunnen vergelijken met de uiteindelijke voorspelde waarde.";
+"D4C-I2-dhA.text" = "De toekomstige glucosewaarde wordt voorspeld door de effecten van meerdere inputwaarden te combineren. Gebruik dit hulpmiddel om verschillende inputwaarden aan en uit te zetten om ze zo te kunnen vergelijken met de uiteindelijke voorspelde glucosewaarde.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Etiket";
@@ -44,7 +44,7 @@
 "hZZ-2S-lrd.title" = "Effect koolhydraten";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Geobserveerde veranderingen in glucose. Kan gebruikt worden om de verhouding insuline/koolhydraten in te schatten, minus de veranderingen die reeds door insuline toediening hebben plaatsgevonden.";
+"IxU-As-glo.text" = "Waargenomen veranderingen in de glucose (minus de veranderingen die reeds door insulinetoediening hebben plaatsgevonden) kunnen worden gebruikt om de koolhydraatabsorptie in te schatten.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Detail";
@@ -68,13 +68,13 @@
 "QhO-Yi-AqQ.normalTitle" = "🌮";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
-"qPH-vU-xlu.text" = "Type voedsel";
+"qPH-vU-xlu.text" = "Type Voedsel";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "uiteindelijk 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g Actieve koolhydraten";
+"SQx-au-ZcM.text" = "gr KaB";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glucose";

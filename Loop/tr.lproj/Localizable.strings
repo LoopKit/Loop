@@ -1,14 +1,14 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
-" (pending: %@)" = " (pending: %@)";
+" (pending: %@)" = " (bekliyor: %@)";
 
 /* The format for an active override preset. (1: preset symbol)(2: preset name) */
 "%@ %@" = "%1$@ %2$@";
 
 /* Formats absorbed carb value */
-"%@ absorbed" = "%@ absorbed";
+"%@ absorbed" = "Emilen %@";
 
 /* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ U Total";
+"%@ U Total" = "Toplam %@ Ü";
 
 /* Appends a full-stop to a statement */
 "%@." = "%@.";
@@ -17,19 +17,19 @@
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
-"%1$@ %2$@/U" = "%1$@ %2$@/U";
+"%1$@ %2$@/U" = "%1$@ %2$@/Ü";
 
 /* Formats (1: carb start time) and (2: carb absorption duration) */
 "%1$@ + %2$@" = "%1$@ + %2$@";
 
 /* Low reservoir alert format string. (1: Number of units remaining) */
-"%1$@ U left" = "%1$@ U left";
+"%1$@ U left" = "%1$@ Ü kaldı";
 
 /* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
-"%1$@ U left: %2$@" = "%1$@ U left: %2$@";
+"%1$@ U left: %2$@" = "%1$@ Ü kalan: %2$@";
 
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
-"%1$@ U/hour @ %2$@" = "%1$@ U/hour @ %2$@";
+"%1$@ U/hour @ %2$@" = "%1$@ Ü/saat @ %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
@@ -38,181 +38,181 @@
 "%1$@: %2$@" = "%1$@: %2$@";
 
 /* Description of the prediction input effect for glucose momentum */
-"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 min glucose regression coefficient (b₁), continued with decay over 30 min";
+"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 dakikalık glikoz regresyon katsayısı (b₁), 30 dakika boyunca bozuk devam etti";
 
 /* Description of the prediction input effect for retrospective correction */
-"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min comparison of glucose prediction vs actual, continued with decay over 60 min";
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 dakikalık glikoz tahmini ile gerçek karşılaştırması, 60 dakika boyunca bozuk devam etti";
 
 /* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "A model based on the published absorption of Fiasp insulin.";
+"A model based on the published absorption of Fiasp insulin." = "Fiasp insülininin yayınlanmış emilimine dayanan bir model.";
 
 /* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults.";
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Yetişkinlerde yayınlanmış Humalog, Novolog ve Apidra insülin emilimine dayalı bir model.";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
-"AcceptRecommendedBolus" = "AcceptRecommendedBolus";
+"AcceptRecommendedBolus" = "ÖnerilenBolusuKabulEt";
 
 /* The title of the Carbs On-Board graph */
-"Active Carbohydrates" = "Active Carbohydrates";
+"Active Carbohydrates" = "Aktif Karbonhidrat";
 
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
-"Active Carbohydrates: %@" = "Active Carbohydrates: %@";
+"Active Carbohydrates: %@" = "Aktif Karbonhidrat: %@";
 
 /* The title of the Insulin On-Board graph */
-"Active Insulin" = "Active Insulin";
+"Active Insulin" = "Aktif İnsülin";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
-"Active Insulin: %@" = "Active Insulin: %@";
+"Active Insulin: %@" = "Aktif İnsülin: %@";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
-"Add CGM" = "Add CGM";
+"Add CGM" = "CGM Ekle";
 
 /* The label of the meal button */
-"Add Meal" = "Add Meal";
+"Add Meal" = "Öğün ekle";
 
 /* Action sheet title selecting Pump
    Title text for button to set up a new pump */
-"Add Pump" = "Add Pump";
+"Add Pump" = "Pompa Ekle";
 
 /* Title text for button to set up a service */
-"Add Service" = "Add Service";
+"Add Service" = "Servis Ekle";
 
 /* The title of the section containing algorithm settings */
-"Algorithm Settings" = "Algorithm Settings";
+"Algorithm Settings" = "Algoritma Ayarları";
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
 /* The title of the amplitude API key credential */
-"API Key" = "API Key";
+"API Key" = "API Anahtarı";
 
 /* The title of the nightscout API secret credential */
 "API Secret" = "API Secret";
 
 /* Confirmation message for deleting a CGM */
-"Are you sure you want to delete this CGM?" = "Are you sure you want to delete this CGM?";
+"Are you sure you want to delete this CGM?" = "Bu CGM'i silmek istediğinizden emin misiniz?";
 
 /* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
+"Are you sure you want to delete this service?" = "Bu servisi silmek istediğinizden emin misiniz?";
 
 /* Format fragment for a specific time */
-"at %@" = "at %@";
+"at %@" = "%@";
 
 /* The message displayed during a device authentication prompt for bolus specification */
-"Authenticate to Bolus %@ Units" = "Authenticate to Bolus %@ Units";
+"Authenticate to Bolus %@ Units" = "Bolus için kimlik doğrula %@ Ünite";
 
 /* Details for configuration error when basal rate schedule is missing */
-"Basal Rate Schedule" = "Basal Rate Schedule";
+"Basal Rate Schedule" = "Bazal Oran Çizelgesi";
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
-"Basal Rates" = "Basal Rates";
+"Basal Rates" = "Bazal Oranları";
 
 /* The label of the bolus entry button
    The notification title for a bolus failure */
 "Bolus" = "Bolus";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Bolused %1$@ of %2$@";
+"Bolused %1$@ of %2$@" = "İletilen Bolus %1$@ / %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Bolusing %1$@";
+"Bolusing %1$@" = "Bolus %1$@";
 
 /* The title of the cancel action in an action sheet */
-"Cancel" = "Cancel";
+"Cancel" = "İptal";
 
 /* The title of the cell indicating a bolus is being canceled */
-"Canceling Bolus" = "Canceling Bolus";
+"Canceling Bolus" = "Bolusu İtptal ediliyor";
 
 /* Details for missing data error when carb effects are missing */
-"Carb effects" = "Carb effects";
+"Carb effects" = "Karbonhidrat etkileri";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Carb Ratios";
+"Carb Ratios" = "Karbonhidrat Oranları";
 
 /* Title of the prediction input effect for carbohydrates */
-"Carbohydrates" = "Carbohydrates";
+"Carbohydrates" = "Karbonhidratlar";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
-"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)";
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Emilen Karb. (gr) ÷ Karb. Oranı (gr/Ü) × İnsulin duyarlılığı (%1$@/Ü)";
 
 /* The notification alert describing a low pump battery */
-"Change the pump battery immediately" = "Change the pump battery immediately";
+"Change the pump battery immediately" = "Pompa pilini hemen değiştirin";
 
 /* The notification alert describing an empty pump reservoir */
-"Change the pump reservoir now" = "Change the pump reservoir now";
+"Change the pump reservoir now" = "Pompa rezervuarını şimdi değiştirin";
 
 /* Details for configuration error when one or more loop settings are missing */
-"Check settings" = "Check settings";
+"Check settings" = "Ayarları kontrol et";
 
 /* Recovery suggestion when reservoir data is missing */
-"Check that your pump is in range" = "Check that your pump is in range";
+"Check that your pump is in range" = "Pompanızın menzil içinde olup olmadığını kontrol edin";
 
 /* Recovery suggestion when glucose data is missing */
-"Check your CGM data source" = "Check your CGM data source";
+"Check your CGM data source" = "CGM veri kaynağınızı kontrol edin";
 
 /* The title text for the looping enabled switch cell */
-"Closed Loop" = "Closed Loop";
+"Closed Loop" = "Kapalı Döngü";
 
 /* The title of the action used to dismiss an error alert */
-"com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
+"com.loudnate.LoopKit.errorAlertActionTitle" = "Tamam";
 
 /* The title of the configuration section in settings */
-"Configuration" = "Configuration";
+"Configuration" = "Konfigürasyon";
 
 /* The error message displayed for configuration errors. (1: configuration error details) */
-"Configuration Error: %1$@" = "Configuration Error: %1$@";
+"Configuration Error: %1$@" = "Konfigürasyon Hatası: %1$@";
 
 /* The title of the continuous glucose monitor section in settings */
-"Continuous Glucose Monitor" = "Continuous Glucose Monitor";
+"Continuous Glucose Monitor" = "Sürekli Glikoz İzleme";
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
-"Correction Range" = "Correction Range";
+"Correction Range" = "Düzeltme Aralığı";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Current glucose of %1$@ is below correction range.";
+"Current glucose of %1$@ is below correction range." = "Mevcut KŞ %1$@ düzeltme aralığının altında.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Custom Override";
+"Custom Override" = "Özel Geçersiz Kılma";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
 
 /* The title of the button to remove the credentials for a service */
-"Delete Account" = "Delete Account";
+"Delete Account" = "Hesabı sil";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Delete CGM";
+"Delete CGM" = "CGM Sil";
 
 /* Button title to delete a service */
-"Delete Service" = "Delete Service";
+"Delete Service" = "Servisi Sil";
 
 /* Title text for delivery limits */
-"Delivery Limits" = "Delivery Limits";
+"Delivery Limits" = "İletim Limitleri";
 
 /* The action hint of the workout mode toggle button when enabled */
-"Disables" = "Disables";
+"Disables" = "Devre Dışı";
 
 /* The action hint of the workout mode toggle button when disabled */
-"Enables" = "Enables";
+"Enables" = "Etkin";
 
 /* The placeholder text instructing users to enter a suspend treshold */
-"Enter suspend threshold" = "Enter suspend threshold";
+"Enter suspend threshold" = "Askıya alma eşiğini girin";
 
 /* The alert title for an error while canceling a bolus */
-"Error Canceling Bolus" = "Error Canceling Bolus";
+"Error Canceling Bolus" = "Bolus İptali Hatası";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Error Resuming";
+"Error Resuming" = "Sürdürme Hatası";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
-"Eventually %@" = "Eventually %@";
+"Eventually %@" = "Nihai KŞ %@";
 
 /* The title of the alert describing a maximum bolus validation error */
-"Exceeds Maximum Bolus" = "Exceeds Maximum Bolus";
+"Exceeds Maximum Bolus" = "Maksimum Bolusu Aşıyor";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
@@ -221,181 +221,181 @@
 "For %1$@" = "For %1$@";
 
 /* The title of the glucose and prediction graph */
-"Glucose" = "Glucose";
+"Glucose" = "KŞ";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "Glucose data is %1$@ old";
+"Glucose data is %1$@ old" = "%1$@ eski KŞ verisi";
 
 /* Description of error when glucose data is missing */
-"Glucose data not available" = "Glucose data not available";
+"Glucose data not available" = "KŞ verisi mevcut değil";
 
 /* Title of the prediction input effect for glucose momentum */
-"Glucose Momentum" = "Glucose Momentum";
+"Glucose Momentum" = "KŞ Momentumu";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
-"Indefinitely" = "Indefinitely";
+"Indefinitely" = "Süresiz";
 
 /* Title of the prediction input effect for insulin */
-"Insulin" = "Insulin";
+"Insulin" = "İnsülin";
 
 /* Description of the prediction input effect for insulin */
-"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)";
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Emilen İnsulin (Ü) × İnsulin Duyarlılığı (%1$@/Ü)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "İnsülin İletimi";
 
 /* Details for missing data error when insulin effects are missing */
-"Insulin effects" = "Insulin effects";
+"Insulin effects" = "İnsülin etkileri";
 
 /* Details for configuration error when insulin model is missing
    The title text for the insulin model setting row */
-"Insulin Model" = "Insulin Model";
+"Insulin Model" = "İnsülin Modeli";
 
 /* The title of the insulin sensitivities schedule screen
    The title text for the insulin sensitivity schedule */
-"Insulin Sensitivities" = "Insulin Sensitivities";
+"Insulin Sensitivities" = "İnsülin Duyarlılığı";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
-"Invalid data: %1$@" = "Invalid data: %1$@";
+"Invalid data: %1$@" = "Geçersiz veri: %1$@";
 
 /* The title text for the issue report cell */
-"Issue Report" = "Issue Report";
+"Issue Report" = "Sorun Raporu";
 
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Launches CGM app";
+"Launches CGM app" = "CGM uygulamasına erişim";
 
 /* The loading message for the diagnostic report screen */
-"Loading..." = "Loading...";
+"Loading..." = "Yükleniyor...";
 
 /* The notification title for a loop failure */
-"Loop Failure" = "Loop Failure";
+"Loop Failure" = "Döngü Hatası";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
-"Loop has not completed successfully in %@" = "Loop has not completed successfully in %@";
+"Loop has not completed successfully in %@" = "Döngü %@ içinde başarıyla tamamlanamadı";
 
 /* The error message for missing data. (1: missing data details) */
-"Missing data: %1$@" = "Missing data: %1$@";
+"Missing data: %1$@" = "Eksik veri: %1$@";
 
 /* Details for missing data error when momentum effects are missing */
-"Momentum effects" = "Momentum effects";
+"Momentum effects" = "Momentum etkileri";
 
 /* Sensor state description for the non-valid state */
-"Needs Attention" = "Needs Attention";
+"Needs Attention" = "İlgilenmeniz gerekiyor";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
-"No connected devices, or failure during device connection" = "No connected devices, or failure during device connection";
+"No connected devices, or failure during device connection" = "Bağlı cihaz yok veya cihaz bağlantısı sırasında hata";
 
 /* The title text for the override presets */
-"Override Presets" = "Override Presets";
+"Override Presets" = "Ön Ayarları Geçersiz Kılma";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Pre-Meal Targets";
+"Pre-Meal Targets" = "Öğün Öncesi Hedefler";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Predicted glucose at %1$@ is %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Tahmini KŞ %1$@  %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Predicted glucose of %1$@ is below your suspend threshold setting.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Tahmini KŞ %1$@ askıya alma eşiği ayarınızın altında.";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
-"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Predicted: %1$@\nActual: %2$@ (%3$@)";
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Tahmini: %1$@\nGüncel: %2$@ (%3$@)";
 
 /* The title of the pump section in settings */
-"Pump" = "Pump";
+"Pump" = "Pompa";
 
 /* The notification title for a low pump battery */
-"Pump Battery Low" = "Pump Battery Low";
+"Pump Battery Low" = "Pompa Pili Düşük";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
-"Pump data is %1$@ old" = "Pump data is %1$@ old";
+"Pump data is %1$@ old" = "Pompa verisi %1$@ eski";
 
 /* Details for configuration error when pump manager is missing */
-"Pump Manager" = "Pump Manager";
+"Pump Manager" = "Pompa Yöneticisi";
 
 /* The notification title for an empty pump reservoir */
-"Pump Reservoir Empty" = "Pump Reservoir Empty";
+"Pump Reservoir Empty" = "Pompa Rezervuarı Boş";
 
 /* The notification title for a low pump reservoir */
-"Pump Reservoir Low" = "Pump Reservoir Low";
+"Pump Reservoir Low" = "Pompa Rezervuarı Düşük";
 
 /* The title of the cell indicating the pump is suspended */
-"Pump Suspended" = "Pump Suspended";
+"Pump Suspended" = "Pompa Askıya Alındı";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Rapid-Acting – Adults";
+"Rapid-Acting – Adults" = "Hızlı Etkili – Yetişkinler";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Children" = "Rapid-Acting – Children";
+"Rapid-Acting – Children" = "Hızlı Etkili – Çocuklar";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
-"Recommendation expired: %1$@ old" = "Recommendation expired: %1$@ old";
+"Recommendation expired: %1$@ old" = "Önerinin süresi doldu: %1$@ eski";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Recommended Basal";
+"Recommended Basal" = "Önerilen Bazal";
 
 /* Accessibility hint describing recommended bolus units */
-"Recommended Bolus: %@ Units" = "Recommended Bolus: %@ Units";
+"Recommended Bolus: %@ Units" = "Önerilen Bolus: %@ Ünite";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Reservoir";
+"Reservoir" = "Rezervuar";
 
 /* Title of the prediction input effect for retrospective correction */
-"Retrospective Correction" = "Retrospective Correction";
+"Retrospective Correction" = "Geçmişe Dönük Düzeltme";
 
 /* The title of the notification action to retry a bolus command */
-"Retry" = "Retry";
+"Retry" = "Yeniden dene";
 
 /* The title of the services section in settings */
-"Services" = "Services";
+"Services" = "Servisler";
 
 /* The label of the settings button */
-"Settings" = "Settings";
+"Settings" = "Ayarlar";
 
 /* Loop Completion HUD accessibility hint */
-"Shows last loop error" = "Shows last loop error";
+"Shows last loop error" = "Son döngü hatasını gösterir";
 
 /* Format fragment for a start time */
-"since %@" = "since %@";
+"since %@" = "%@ den beri";
 
 /* The title of the nightscout site URL credential */
-"Site URL" = "Site URL";
+"Site URL" = "Nightscout URL";
 
 /* The format for the description of a temporary override start date */
-"starting at %@" = "starting at %@";
+"starting at %@" = "%@ tarihinde başladı";
 
 /* The title of the cell indicating a bolus is being sent */
-"Starting Bolus" = "Starting Bolus";
+"Starting Bolus" = "Bolus başlatılıyor";
 
 /* The title text in settings */
-"Suspend Threshold" = "Suspend Threshold";
+"Suspend Threshold" = "Eşiği Askıya Al";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Tap to Resume";
+"Tap to Resume" = "Sürdürmek için dokunun";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "The legacy model used by Loop, allowing customization of action duration.";
+"The legacy model used by Loop, allowing customization of action duration." = "Loop tarafından kullanılan ve eylem süresinin özelleştirilmesine izin veren eski model.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
-"The maximum bolus amount is %@ Units" = "The maximum bolus amount is %@ Units";
+"The maximum bolus amount is %@ Units" = "Maksimum bolus miktarı %@ Ünitedir";
 
 /* The short unit display string for international units of insulin */
-"U" = "U";
+"U" = "Ü";
 
 /* The format for the description of a temporary override end date */
-"until %@" = "until %@";
+"until %@" = "%@ tarihine kadar";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Use Workout Glucose Targets";
+"Use Workout Glucose Targets" = "Egzersiz KŞ Hedeflerini Kullanın";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Mevcut veya tahmin edilen KŞ askıya alma eşiğinin altında olduğunda, Loop bir bolus önermez ve her zaman saatte 0 birimlik geçici bir bazal hız önerir.";
 
 /* The label of the workout mode toggle button */
-"Workout Targets" = "Workout Targets";
+"Workout Targets" = "Egzersiz Hedefleri";
 

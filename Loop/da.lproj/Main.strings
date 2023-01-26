@@ -20,13 +20,13 @@
 "bIL-Ub-qYp.text" = "Label";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Blodsukker ændring";
+"bq4-98-cQU.text" = "Blodsukker Ændring";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "g Total";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "Det fremtidige blodsukker er beregnet ved at kombinere effekterne af mange inputs. Brug dette værktøj til at vælge mellem forskellige inputs, for at se hvordan de påvirker den endelige forudsigelse.";
+"D4C-I2-dhA.text" = "Fremtidige blodsukre er beregnet ved at kombinere effekterne af mange inputs. Brug dette værktøj til at vælge mellem forskellige inputs, for at se hvordan de passer med den endelige forudsigelse.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Label";
@@ -35,22 +35,22 @@
 "E41-FN-nkk.text" = "eventually 92 mg/dL";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
-"EAn-Ja-S1d.text" = "Observeret";
+"EAn-Ja-S1d.text" = "Observed";
 
 /* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
 "Fal-Vf-lfh.normalTitle" = "🍭";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
-"hZZ-2S-lrd.title" = "Kulhydrat effekt";
+"hZZ-2S-lrd.title" = "Kulhydrate Effekt";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Observeret ændringer i blodsukker, fratrukket ændringer modelleret fra insulin afgivelse, kan bruges til at vurdere kulhydrat absorption.";
+"IxU-As-glo.text" = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
-"J7x-W5-gwo.text" = "Detalje";
+"J7x-W5-gwo.text" = "Detail";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
-"k3F-Na-7mn.text" = "Anbefalet basal";
+"k3F-Na-7mn.text" = "Foreslået Basal";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "Label";
@@ -59,7 +59,7 @@
 "OFA-qT-ZAg.text" = "Label";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Forventet blodsukker";
+"PA3-sP-cWY.title" = "Predicted Glucose";
 
 /* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
 "Qe9-uc-vPR.normalTitle" = "🍽";
@@ -74,7 +74,7 @@
 "Rse-x8-amW.text" = "Til sidst 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g aktive kulhydrater";
+"SQx-au-ZcM.text" = "g Active Carbs";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Blodsukker";

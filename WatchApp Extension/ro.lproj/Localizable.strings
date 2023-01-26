@@ -35,7 +35,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Renunță";
+"Dismiss" = "Închide";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -69,7 +69,7 @@
 "On" = "Pornit";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Suprascriere";
+"Override" = "Înlocuire";
 
 /* Alert message for updated bolus recommendation on Apple Watch */
 "Please reconfirm the bolus amount." = "Vă rugăm să reconfirmați valoarea bolusului.";
@@ -112,7 +112,7 @@
 "U" = "U";
 
 /* The short unit display string for international units of insulin delivery per hour */
-"U/hr" = "U/h";
+"U/hr" = "U/oră";
 
 /* The title of the alert controller displayed after a potential carb entry send attempt fails */
 "Unable to Reach iPhone" = "Nu se poate conecta la iPhone";

@@ -1,36 +1,36 @@
 /* (No Comment) */
-"9KhaIS" = "Olen asettanut esiasetuksen";
+"9KhaIS" = "I've set the preset";
 
 /* (No Comment) */
 "80eo5o" = "Lisää hiilihydraatteja";
 
 /* (No Comment) */
-"b085BW" = "En voinut asettaa esiasetusta.";
+"b085BW" = "I wasn't able to set the preset.";
 
 /* (No Comment) */
-"I4OZy8" = "Ota tilapäisasetus käyttöön";
+"I4OZy8" = "Enable Override Preset";
 
 /* (No Comment) */
-"lYMuWV" = "Tilapäisasetuksen nimi";
+"lYMuWV" = "Override Name";
 
 /* (No Comment) */
-"nDKAmn" = "Minkä tilapäisasetuksen haluat ottaa käyttöön?";
+"nDKAmn" = "What's the name of the override you'd like to set?";
 
 /* (No Comment) */
 "OcNxIj" = "Lisää hiilihydraatteja";
 
 /* (No Comment) */
-"oLQSsJ" = "Ota '${overrideName}' -tilapäisasetus käyttöön";
+"oLQSsJ" = "Enable '${overrideName}' Override Preset";
 
 /* (No Comment) */
-"XNNmtH" = "Ota esiasetus käyttöön Loopissa";
+"XNNmtH" = "Enable preset in Loop";
 
 /* (No Comment) */
-"yBzwCL" = "Tilapäisasetuksen valinta";
+"yBzwCL" = "Override Selection";
 
 /* (No Comment) */
 "yc02Yq" = "Lisää hiilihydraatteja Loopiin";
 
 /* (No Comment) */
-"ZZ3mtM" = "Ota tilapäisasetus käyttöön Loopissa";
+"ZZ3mtM" = "Enable an override preset in Loop";
 

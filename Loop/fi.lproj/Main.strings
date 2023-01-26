@@ -5,7 +5,7 @@
 "3kU-n2-fha.title" = "Tila";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
-"5gz-kZ-iF1.text" = "3.5 U/t @ 12:12";
+"5gz-kZ-iF1.text" = "3.5 U/h @ 12:12";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
 "87H-N1-0vJ.text" = "Ennustettu";
@@ -44,7 +44,7 @@
 "hZZ-2S-lrd.title" = "Hiilihydraattivaikutus";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Havaittua glukoosin muutosta voidaan käyttää hiilihydraattien imeytymisen arviointiin sen jälkeen, kun siitä on vähennetty insuliinin mallinnettu vaikutus.";
+"IxU-As-glo.text" = "Havaittua glukoosin muutosta, josta on vähennetty insuliinin mallinnettu vaikutus, voidaan käyttää hiilihydraattien imeytymisen arviointiin.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Yksityiskohta";
@@ -74,7 +74,7 @@
 "Rse-x8-amW.text" = "ennuste 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g akt. hiilari";
+"SQx-au-ZcM.text" = "g Active Carbs";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glukoosi";

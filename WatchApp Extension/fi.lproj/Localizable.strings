@@ -35,7 +35,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Ohita";
+"Dismiss" = "Hylkää";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -112,7 +112,7 @@
 "U" = "U";
 
 /* The short unit display string for international units of insulin delivery per hour */
-"U/hr" = "U/t";
+"U/hr" = "U/h";
 
 /* The title of the alert controller displayed after a potential carb entry send attempt fails */
 "Unable to Reach iPhone" = "iPhoneen ei saada yhteyttä";

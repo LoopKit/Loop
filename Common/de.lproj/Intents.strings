@@ -1,36 +1,36 @@
 /* (No Comment) */
-"9KhaIS" = "Ich habe die Voreinstellung eingestellt";
+"9KhaIS" = "Voreinstellung gesetzt";
 
 /* (No Comment) */
 "80eo5o" = "KH-Eintrag hinzufügen";
 
 /* (No Comment) */
-"b085BW" = "Ich konnte die Voreinstellung nicht setzen.";
+"b085BW" = "Voreinstellung konnte nicht gesetzt werden.";
 
 /* (No Comment) */
-"I4OZy8" = "Aktiviere die Override-Voreinstellung";
+"I4OZy8" = "Enable Override Preset";
 
 /* (No Comment) */
-"lYMuWV" = "Override Name";
+"lYMuWV" = "Voreinstellungs-Name";
 
 /* (No Comment) */
-"nDKAmn" = "Wie heisst der Override, den du festlegen möchtest?";
+"nDKAmn" = "Welche Voreinstellung möchtest Du aktivieren?";
 
 /* (No Comment) */
 "OcNxIj" = "KH-Eintrag hinzufügen";
 
 /* (No Comment) */
-"oLQSsJ" = "Aktiviere '${overrideName}' Override Voreinstellung";
+"oLQSsJ" = "Aktiviere '${overrideName}' Voreinstellung";
 
 /* (No Comment) */
-"XNNmtH" = "Aktiviere die Voreinstellungen in Loop";
+"XNNmtH" = "Aktiviere Voreinstellung in Loop";
 
 /* (No Comment) */
-"yBzwCL" = "Override Auswahl";
+"yBzwCL" = "Voreinstellungsauswahl";
 
 /* (No Comment) */
-"yc02Yq" = "Fügen Sie einen KH-Eintrag zu Loop hinzu.";
+"yc02Yq" = "Füge einen KH-Eintrag zu Loop hinzu.";
 
 /* (No Comment) */
-"ZZ3mtM" = "Aktiviere eine Override Voreinstellung in Loop";
+"ZZ3mtM" = "Aktiviere eine Voreinstellung in Loop";
 

@@ -1,6 +1,3 @@
-/* No comment provided by engineer. */
-" " = " ";
-
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (återstår: %@)";
 
@@ -75,7 +72,7 @@
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 minuters glukosregressionskoefficient (b₁), fortsatt med 30 minuters avklingande";
 
 /* Description of the prediction input effect for retrospective correction */
-"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min jämförelse av glukosprediktion och faktiskt värde, fortsatt med 60 minuters avklingande";
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min jämförelse av glukosprediktion och faktiskt värde, fortsatt med 60 miuters avklingande.";
 
 /* Estimated remaining duration with a few seconds */
 "A few seconds remaining" = "Några sekunder återstår";
@@ -209,16 +206,16 @@
 "Bolus" = "Bolus";
 
 /* Alert title for an updated bolus recommendation */
-"Bolus Recommendation Updated" = "Bolusrekommendation har uppdaterats";
+"Bolus Recommendation Updated" = "Bolusrekommendation uppdaterad";
 
 /* Title for card displaying carb entry and bolus recommendation */
 "Bolus Summary" = "Bolus sammanfattning";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Gett %1$@ av %2$@ i bolus";
+"Bolused %1$@ of %2$@" = "Givit bolus %1$@ av %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Ger %1$@ i bolus";
+"Bolusing %1$@" = "Ger bolus %1$@ ";
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Avbryt";
@@ -241,7 +238,7 @@
 "carb-entry-title-add" = "Lägg till kolhydrater";
 
 /* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Ändra kolhydrater";
+"carb-entry-title-edit" = "Editera kolhydrater";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Kolhydrater";
@@ -253,10 +250,10 @@
 "Change the pump battery immediately" = "Byt pumpbatteri nu";
 
 /* The notification alert describing an empty pump reservoir */
-"Change the pump reservoir now" = "Byt insulinreservoar nu";
+"Change the pump reservoir now" = "Byt pumpreservoar nu";
 
 /* Details for configuration error when one or more loop settings are missing */
-"Check settings" = "Kontrollera inställningar";
+"Check settings" = "Kontrollera inställningarna";
 
 /* Recovery suggestion when reservoir data is missing */
 "Check that your pump is in range" = "Kontrollera att pumpen är inom räckhåll";
@@ -265,7 +262,7 @@
 "Check your CGM data source" = "Kontrollera din CGM:s datakälla";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Välj en längre absorptionstid för stora måltider eller måltider som innehåller fett och protein. Denna är endast en vägledning för algoritmen och behöver inte vara exakt.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Välj en längre absorbtionstid för stora måltider eller måltider som innehåller fett och protein. Detta är endast en rekommendation till algoritmen och behöver inte vara exakt.";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Sluten loop";
@@ -314,13 +311,13 @@
 "Current glucose of %1$@ is below correction range." = "Nuvarande glukosvärde %1$@ är under målvärde.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Anpassat undantag";
+"Custom Override" = "Anpassad override";
 
 /* The title of the cell indicating a generic custom preset is enabled */
 "Custom Preset" = "Anpassad förinställning";
 
 /* Date picker label */
-"Date" = "Datum";
+"Date" = "Tid";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -402,16 +399,16 @@
 "Error Exporting Logs" = "Fel vid export av loggar";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Fel vid försök att återuppta insulintillförsel";
+"Error Resuming" = "Fel vid försök att återgå";
 
 /* Segmented button title for insulin delivery log event history */
 "Event History" = "Händelsehistorik";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
-"Eventually %@" = "Eventuellt %@";
+"Eventually %@" = "Förväntat %@";
 
 /* The title of the alert describing a maximum bolus validation error */
-"Exceeds Maximum Bolus" = "Överskrider din inställning för maxbolus";
+"Exceeds Maximum Bolus" = "Överstiger maxbolusdos";
 
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Exportera kritiska händelseloggar";
@@ -435,13 +432,13 @@
 "g" = "g";
 
 /* The title of the glucose and prediction graph */
-"Glucose" = "Blodglukos";
+"Glucose" = "Glukos";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "Blodglukosvärde är %1$@ gammalt";
+"Glucose data is %1$@ old" = "Glukosvärde är %1$@ gammalt";
 
 /* Description of error when glucose data is missing */
-"Glucose data not available" = "Blodglukosvärde saknas";
+"Glucose data not available" = "Glukosvärde saknas";
 
 /* Alert title when glucose data returns while on bolus screen */
 "Glucose Data Now Available" = "Blodglukosvärde finns nu tillgängligt";
@@ -451,10 +448,10 @@
 "Glucose Entry Out of Range" = "Det manuellt inmatade blodsockervärdet utanför gränsvärden";
 
 /* Title of the prediction input effect for glucose momentum */
-"Glucose Momentum" = "Blodglukosförändring";
+"Glucose Momentum" = "Glukosförändring";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
-"Indefinitely" = "Tills vidare";
+"Indefinitely" = "Oändligt";
 
 /* Title of the prediction input effect for insulin */
 "Insulin" = "Insulin";
@@ -581,13 +578,13 @@
 "OK" = "OK";
 
 /* The title text for the override presets */
-"Override Presets" = "Förinställningar för Undantag";
+"Override Presets" = "Override förinställningar";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Målvärden före en måltid";
+"Pre-Meal Targets" = "Målvärden före måltid";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Förväntat blodglukosvärde kl %1$@ är %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Förväntat glukosvärde vid %1$@ är %2$@.";
 
 /* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
 "Predicted glucose of %1$@ is below your glucose safety limit setting." = "Förväntat blodsocker på %1$@ är under ditt tröskelvärde.";
@@ -608,7 +605,7 @@
 "Pump Battery Low" = "Låg batterinivå i pump";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
-"Pump data is %1$@ old" = "Pumpvärden är %1$@ gamla";
+"Pump data is %1$@ old" = "Pumpvärdena är %1$@ gamla";
 
 /* The title of the screen displaying a pump event */
 "Pump Event" = "Pumphändelse";
@@ -617,10 +614,10 @@
 "Pump Manager" = "Pumphantering";
 
 /* The notification title for an empty pump reservoir */
-"Pump Reservoir Empty" = "Insulinreservoaren är tom";
+"Pump Reservoir Empty" = "Pumpreservoaren är tom";
 
 /* The notification title for a low pump reservoir */
-"Pump Reservoir Low" = "Insulinreservoaren har låg nivå";
+"Pump Reservoir Low" = "Pumpreservoaren har låg nivå";
 
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Pumpen är pausad";
@@ -638,10 +635,10 @@
 "Rapid-Acting – Children" = "Snabbverkande – barn";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
-"Recommendation expired: %1$@ old" = "Rekommendation inaktuell: %1$@ gammal";
+"Recommendation expired: %1$@ old" = "Rekommendationen gick ut för %1$@ sedan";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Rekommenderad basaldos";
+"Recommended Basal" = "Rekommenderat basalvärde";
 
 /* Label for recommended bolus row on bolus screen
    Label for recommended bolus row on simple bolus screen */
@@ -651,7 +648,7 @@
 "Recommended Bolus: %@ Units" = "Rekommenderad bolus: %@ enheter";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Insulinreservoar";
+"Reservoir" = "Reservoar";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Retrospektiv korrigering";
@@ -672,7 +669,7 @@
 "Settings" = "Inställningar";
 
 /* Loop Completion HUD accessibility hint */
-"Shows last loop error" = "Visar senaste Loop-fel";
+"Shows last loop error" = "Visar senaste loopfelet";
 
 /* Title of simple bolus view when not displaying meal entry */
 "Simple Bolus Calculator" = "Förenklad bolusdoskalkylator";
@@ -687,7 +684,7 @@
 "Site URL" = "Adress (URL)";
 
 /* The format for the description of a temporary override start date */
-"starting at %@" = "börjar kl. %@";
+"starting at %@" = "Börjar kl.  %@";
 
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "Påbörjar bolus";
@@ -714,16 +711,16 @@
 "Tap to Add" = "Tryck för att ange";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Tryck för att återuppta insulintillförsel";
+"Tap to Resume" = "Tryck för att återuppta";
 
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Tryck för att stoppa";
 
 /* Alert message for an updated bolus recommendation */
-"The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusrekommendationen har uppdaterats. Bekräfta bolus.";
+"The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusrekommendationen har uppdaterats. Konfirmera bolus";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Äldre modell använd av Loop, vilken tillåter anpassning av insulinets verkningstid.";
+"The legacy model used by Loop, allowing customization of action duration." = "Äldre modell använd av Loop, vilken tillåter anpassing av effektvaraktighet.";
 
 /* Alert message for a maximum bolus validation error (1: max bolus value) */
 "The maximum bolus amount is %@ U." = "Den högst tillåtna bolusmängden är %@ E.";
@@ -790,7 +787,7 @@
 "When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "När nuvarande eller förväntat blodglukosvärde är under tröskelvärde kommer Loop inte att rekommendera en bolus, och kommer också alltid att föreslå en temporär basal på 0 enheter per timme.";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "När nuvarande eller förväntat framtida blodglukosvärde är under tröskelvärde kommer Loop inte att rekommendera en bolus, och dessutom alltid att föreslå en temporär basal på 0 enheter per timme.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "När nuvarande eller förväntat slutglukosvärde är under tröskelvärdet kommer Loop inte att rekommendera en bolus, utan kommer alltid att föreslå en temporär basal på 0 enheter per timme.";
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "När läget sluten Loop inte används, kommer appen använda en förenklad bolusdoskalkylator likt den en vanlig pump använder.";

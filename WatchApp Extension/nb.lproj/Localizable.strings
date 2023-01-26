@@ -87,7 +87,7 @@
 "Rec: %@ U" = "Rec: %@ E";
 
 /* Recommended bolus amount label on Apple Watch */
-"REC: %@ U" = "ANB: %@ IE";
+"REC: %@ U" = "REC: %@ E";
 
 /* Indicator that recommended bolus computation is in progress on Apple Watch */
 "REC: Calculating..." = "Beregner anbefalt bolus...";
@@ -103,7 +103,7 @@
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
-"Send Failed" = "Sending mislyktes";
+"Send Failed" = "Send mislyktes";
 
 /* Help text for bolus confirmation on Apple Watch */
 "Turn Digital Crown\nto bolus" = "Snu \"Digital Crown\" for å gi bolus";

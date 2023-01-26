@@ -1,0 +1,24 @@
+/* No comment provided by engineer. */
+"---" = "---";
+
+/* No comment provided by engineer. */
+"-U" = "-U";
+
+/* No comment provided by engineer. */
+"??" = "??";
+
+/* No comment provided by engineer. */
+"%@" = "%@";
+
+/* No comment provided by engineer. */
+"%@ U" = "%@ U";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* No comment provided by engineer. */
+"Eventual" = "Éventuel";
+
+/* No comment provided by engineer. */
+"Loop Status Widget" = "Widget d'état de Loop";
+

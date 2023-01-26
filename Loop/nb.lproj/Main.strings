@@ -44,7 +44,7 @@
 "hZZ-2S-lrd.title" = "Effekt av karbohydrater";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Endringer i blodsukker og forventet effekt av insulin kan brukes for å estimere absorpsjon av karbohydrater.";
+"IxU-As-glo.text" = "Observerte endringer i blodsukker, minus endringer fra levert insulin, kan brukes for å estimere absorpsjon av karbohydrater.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Detaljer";
@@ -74,10 +74,10 @@
 "Rse-x8-amW.text" = "omsider 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g aktive karbohydrater";
+"SQx-au-ZcM.text" = "g KaB";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
-"tuw-av-A3x.text" = "Blodsukker";
+"tuw-av-A3x.text" = "Glukose";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
 "Tz7-80-bJ7.title" = "Legg til/endre karbohydrater";
@@ -90,6 +90,9 @@
 
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
 "Wx8-Tf-FnG.text" = "Mengde karbohydrater\n(Mengde inntatt)";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Anbefalt Basal";
 
 /* Class = "UIButton"; normalTitle = "🍕"; ObjectID = "xl9-Wc-Pdu"; */
 "xl9-Wc-Pdu.normalTitle" = "🍕";

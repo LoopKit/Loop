@@ -1,5 +1,5 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Glicemia curentă de %1$@ este sub intervalul țintă de corecție.";
+"Current glucose of %1$@ is below correction range." = "Current glucose of %1$@ is below correction range.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -14,13 +14,13 @@
 "mmol/L" = "mmol/L";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Glicemia estimată la %1$@ este %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Predicted glucose at %1$@ is %2$@.";
 
 /* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
 "Predicted glucose of %1$@ is below your glucose safety limit setting." = "Glicemia prognozată de %1$@ se situează sub limita de siguranță configurată.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Glicemia estimată de %1$@ este sub limita de suspendare.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Predicted glucose of %1$@ is below your suspend threshold setting.";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";

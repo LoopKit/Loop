@@ -17,7 +17,7 @@
 "g" = "g";
 
 /* Placeholder for upper range entry */
-"Maximum" = "Maksimal";
+"Maximum" = "Maximum";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -41,10 +41,10 @@
 "Range" = "Interval";
 
 /* Title of config entry */
-"Start Date" = "Start dato";
+"Start Date" = "Start Dato";
 
 /* Lesson title */
-"Time in Range" = "Time in Range";
+"Time in Range" = "Tme in Range";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";

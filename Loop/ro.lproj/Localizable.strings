@@ -1,6 +1,3 @@
-/* No comment provided by engineer. */
-" " = " ";
-
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (urmează a fi administrate: %@)";
 
@@ -141,7 +138,7 @@
 "Algorithm Settings" = "Setări algoritm";
 
 /* The title of the Amplitude service */
-"Amplitude" = "Amplitudine";
+"Amplitude" = "Amplitude";
 
 /* Alert message for a carb entry persistence error */
 "An error occurred while trying to save your carb entry." = "Eroare la încercarea de salvare a carbohidraților.";
@@ -153,10 +150,10 @@
 "An updated bolus recommendation is available." = "Este disponibilă o recomandare de bolus nouă.";
 
 /* The title of the amplitude API key credential */
-"API Key" = "Cheie API";
+"API Key" = "API Key";
 
 /* The title of the nightscout API secret credential */
-"API Secret" = "Secret API";
+"API Secret" = "API Secret";
 
 /* Action sheet confirmation message for pump history deletion */
 "Are you sure you want to delete all history entries?" = "Sigur doriți să ștergeți toate înregistrările din istoric?";
@@ -215,7 +212,7 @@
 "Bolus Summary" = "Rezumat Bolus";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Bolus administrat %1$@ din %2$@";
+"Bolused %1$@ of %2$@" = "Bolus administrat %1$@ of %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
 "Bolusing %1$@" = "Bolus în administrare %1$@";
@@ -224,7 +221,7 @@
 "Cancel" = "Renunță";
 
 /* The title of the cell indicating a bolus is being canceled */
-"Canceling Bolus" = "Anulare Bolus";
+"Canceling Bolus" = "Întrerupere Bolus";
 
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Efecte carbohidrați";
@@ -247,19 +244,19 @@
 "Carbohydrates" = "Carbohidrați";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
-"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Carbohidrați absorbiți (g) ÷ Raport carbohidrați/insulina (g/U) × Factor de sensibilitate la insulină (%1$@/U)";
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Carbohidrați absorbiți (g) ÷ Raport carbohidrați (g/U) × Factor de sensibilitate la insulină (%1$@/U)";
 
 /* The notification alert describing a low pump battery */
 "Change the pump battery immediately" = "Schimbați bateria pompei imediat";
 
 /* The notification alert describing an empty pump reservoir */
-"Change the pump reservoir now" = "Schimbați rezervorul pompei acum";
+"Change the pump reservoir now" = "Schimbați bateria pompei acum";
 
 /* Details for configuration error when one or more loop settings are missing */
 "Check settings" = "Verificați setările";
 
 /* Recovery suggestion when reservoir data is missing */
-"Check that your pump is in range" = "Verificați că pompa este în aria de acoperire";
+"Check that your pump is in range" = "Verificați că pompa este în apropriere";
 
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Verificați sursa de date CGM";
@@ -268,7 +265,7 @@
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Alegeți o durată mai lungă de absorbție pentru mese mai mari sau pentru cele care conțin grăsimi și proteine. Nu e necesară o valoare exactă, scopul e să oferim doar o ghidare pentru algoritm.";
 
 /* The title text for the looping enabled switch cell */
-"Closed Loop" = "Bucla închisă";
+"Closed Loop" = "Loop automat";
 
 /* Alert title for closed loop off informational modal */
 "Closed Loop OFF" = "Buclă închisă oprită";
@@ -292,7 +289,7 @@
 "Configuration Error: %1$@" = "Eroare configurare: %1$@";
 
 /* The title of the continuous glucose monitor section in settings */
-"Continuous Glucose Monitor" = "Monitorizare continuă a glicemiei";
+"Continuous Glucose Monitor" = "Monitorizare glicemică continuă";
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
@@ -311,10 +308,10 @@
 "Current Glucose" = "Glicemia curentă";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Glicemia curentă de %1$@ se situează sub intervalul țintă de corecție.";
+"Current glucose of %1$@ is below correction range." = " Glicemia curentă de %1$@ se situează sub intervalul țintă de corecție.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Suprascriere personalizata";
+"Custom Override" = "Înlocuire";
 
 /* The title of the cell indicating a generic custom preset is enabled */
 "Custom Preset" = "Presetare particularizată";
@@ -492,7 +489,7 @@
 "Invalid data: %1$@" = "Date invalide: %1$@";
 
 /* The title text for the issue report cell */
-"Issue Report" = "Raport probleme";
+"Issue Report" = "Raportare probleme";
 
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Lansează aplicația CGM";
@@ -581,13 +578,13 @@
 "OK" = "OK";
 
 /* The title text for the override presets */
-"Override Presets" = "Presetări de suprascriere";
+"Override Presets" = "Presetări de înlocuire";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Ținte preprandiale";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Glicemia prognozată la momentul %1$@ este %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Glicemia prognozată pentru %1$@ este %2$@.";
 
 /* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
 "Predicted glucose of %1$@ is below your glucose safety limit setting." = "Glicemia prognozată de %1$@ se situează sub limita de siguranță configurată.";
@@ -632,16 +629,16 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Acțiune rapida – Adulți";
+"Rapid-Acting – Adults" = "Rapid-Acting – Adulți";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Children" = "Acțiune rapida – Copii";
+"Rapid-Acting – Children" = "Rapid-Acting – Copii";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
-"Recommendation expired: %1$@ old" = "Recomandare expirată: în urma cu %1$@";
+"Recommendation expired: %1$@ old" = "Recomandare expirată: acum %1$@";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Rata bazala recomandata";
+"Recommended Basal" = "Bazal recomandat";
 
 /* Label for recommended bolus row on bolus screen
    Label for recommended bolus row on simple bolus screen */
@@ -684,7 +681,7 @@
 "since %@" = "de la %@";
 
 /* The title of the nightscout site URL credential */
-"Site URL" = "URL site";
+"Site URL" = "Site URL";
 
 /* The format for the description of a temporary override start date */
 "starting at %@" = "începând de la %@";

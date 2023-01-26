@@ -1,3 +1,12 @@
+/* Red loop message (1: last loop  string) (2: app name) */
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippe auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, eine Schleife abzuschließen, aber achte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und Deinem CGM.";
+
+/* Yellow loop message (1: last loop string) (2: app name) */
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippe auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, eine Schleife abzuschließen, aber achte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und Deinem CGM.";
+
+/* Green closed loop OFF message (1: app name)(2: reason for open loop) */
+"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ arbeitet mit geschlossenem Regelkreis in der AUS-Position. Ihre Pumpe und CGM funktionieren weiter, aber die App passt die Dosierung nicht automatisch an.\n\n%2$@";
+
 /* No glucose value representation (3 dashes for mg/dL) */
 "– – –" = "– – –";
 
@@ -26,7 +35,7 @@
 "Closed Loop OFF" = "Closed Loop AUS";
 
 /* Title of green closed loop ON message */
-"Closed Loop ON" = "Closed Loop EIN";
+"Closed Loop ON" = "Closed Loop AN";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -38,13 +47,16 @@
 "HIGH" = "HOCH";
 
 /* Title of red loop message */
-"Loop Failure" = "Loopfehler";
+"Loop Failure" = "Loop Fehler";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop lief seit %@";
 
+/* Title of yellow loop message */
+"Loop Warning" = "Loop Warnung";
+
 /* String displayed instead of a glucose value below the CGM range */
-"LOW" = "TIEF";
+"LOW" = "NIEDRIG";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dl";
@@ -61,6 +73,9 @@
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
+/* Instructions for user to close loop if it is allowed. */
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Tippe auf Einstellungen, um Closed Loop einzuschalten, wenn Du möchtest, dass die App Dein Insulin automatisiert.";
+
 /* The short unit display string for international units of insulin */
 "U" = "IE";
 
@@ -68,5 +83,5 @@
 "Unknown" = "Unbekannt";
 
 /* Acessibility label describing completion HUD waiting for first run */
-"Waiting for first run" = "Warten auf erste Ausführung";
+"Waiting for first run" = "Warten auf die erste Ausführung";
 

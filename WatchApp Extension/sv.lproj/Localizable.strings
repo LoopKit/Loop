@@ -44,7 +44,7 @@
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
-"Make sure your iPhone is nearby and try again" = "Säkerställ att din telefon är inom räckhåll och försök igen";
+"Make sure your iPhone is nearby and try again" = "Säkerställ att telefonen är inom räckhåll och försök igen";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a potential carb entry send attempt fails */
@@ -69,7 +69,7 @@
 "On" = "På";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Undantag";
+"Override" = "Override";
 
 /* Alert message for updated bolus recommendation on Apple Watch */
 "Please reconfirm the bolus amount." = "Bekräfta bolusmängd.";
@@ -93,7 +93,7 @@
 "REC: Calculating..." = "Rek: Beräknar...";
 
 /* HUD row title for remaining reservoir volume */
-"Reservoir Volume" = "Insulinreservoarvolym";
+"Reservoir Volume" = "Reservoarvolym";
 
 /* Button text to confirm carb entry without bolusing on Apple Watch */
 "Save" = "Spara";

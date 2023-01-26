@@ -26,7 +26,7 @@
 "Bolus Failed" = "Bolus Échoué";
 
 /* Alert title for updated bolus recommendation on Apple Watch */
-"Bolus Recommendation Updated" = "Recommandation de Bolus mise à jour";
+"Bolus Recommendation Updated" = "Recommandation de Bolus modifiée";
 
 /* Button text to continue from carb entry to bolus entry on Apple Watch */
 "Continue" = "Continuer";
@@ -57,7 +57,7 @@
 "mmol/L" = "mmol/L";
 
 /* HUD row title for Net Basal Rate */
-"Net Basal Rate" = "Débit de basale net";
+"Net Basal Rate" = "Débit basal net";
 
 /* Label for off button */
 "Off" = "Désactivé";
@@ -69,7 +69,7 @@
 "On" = "Activé";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Surcharge";
+"Override" = "Ajustement";
 
 /* Alert message for updated bolus recommendation on Apple Watch */
 "Please reconfirm the bolus amount." = "Veuillez reconfirmer le bolus.";
@@ -118,5 +118,5 @@
 "Unable to Reach iPhone" = "Impossible d’atteindre l’iPhone";
 
 /* The text for the Watch button for enabling workout mode */
-"Workout" = "Sport";
+"Workout" = "Exercice";
 

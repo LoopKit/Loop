@@ -1,33 +1,33 @@
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
-"%@ ago" = "%@ ago";
+"%@ ago" = "%@ önce";
 
 /* The format string describing the basal rate. */
-"%@ U" = "%@ U";
+"%@ U" = "%@ Ü";
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
-"%1$@ at %2$@" = "%1$@ at %2$@";
+"%1$@ at %2$@" = "%1$@  %2$@";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
-"%1$@ units per hour at %2$@" = "%1$@ units per hour at %2$@";
+"%1$@ units per hour at %2$@" = "her %2$@ saatte %1$@ ünite";
 
 /* Format string describing glucose units per minute (1: glucose unit string) */
-"%1$@/min" = "%1$@/min";
+"%1$@/min" = "%1$@/dk";
 
 /* Accessibility hint describing completion HUD for a closed loop */
-"Closed loop" = "Closed loop";
+"Closed loop" = "Kapalı Döngü";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
-"Loop ran %@ ago" = "Loop ran %@ ago";
+"Loop ran %@ ago" = "Döngü %@ önce çalıştı";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
-"Needs attention" = "Needs attention";
+"Needs attention" = "İlgilenmeniz gerekiyor";
 
 /* Accessbility hint describing completion HUD for an open loop */
-"Open loop" = "Open loop";
+"Open loop" = "Açık döngü";
 
 /* Accessibility value for an unknown value */
-"Unknown" = "Unknown";
+"Unknown" = "Bilinmiyor";
 
 /* Acessibility label describing completion HUD waiting for first run */
-"Waiting for first run" = "Waiting for first run";
+"Waiting for first run" = "İlk çalıştırma için bekleniyor";
 

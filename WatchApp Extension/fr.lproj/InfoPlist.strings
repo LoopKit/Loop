@@ -4,3 +4,6 @@
 /* Bundle name */
 "CFBundleName" = "WatchApp Extension";
 
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Les données de glucides des repas entrées dans l'application ou la montre sont enregistrées dans la base de donnée Santé. Les données de taux de glucose provenant du MGC sont enregistrées de manière sécurisée dans HealthKit.";
+

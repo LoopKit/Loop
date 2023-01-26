@@ -2,5 +2,5 @@
 "CFBundleName" = "Leer";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Maaltijd data van de Health database wordt gebruikt om de glucose effecten te bepalen. Glucose data vanuit de Health database worden gebruikt voor het berekenen en weergeven van het momentum. Slaap data vanuit Health wordt gebruikt om de Apple Watch complicaties vooral actief te laten zijn als je wakker bent.";
+"NSHealthShareUsageDescription" = "Maaltijdgegevens uit de database Gezondheid (Health) worden gebruikt om glucose-effecenten te bepalen. Glucosegegevens uit de database Gezondheid worden gebruikt voor grafieken en het berekenen van trendlijnen. Slaapgegevens uit de database Gezondheid worden gebruikt om de Apple Watch complicatie bij te werken wanneer je wakker bent.";
 

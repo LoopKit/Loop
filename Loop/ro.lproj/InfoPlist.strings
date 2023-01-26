@@ -5,17 +5,17 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth este folosit pentru a comunica cu pompa de insulină și cu dispozitivele de monitorizare continua a glicemiei.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth este folosit pentru a comunica cu pompa de insulină, precum și cu dispozitivele de monitorizare glicemică continuă";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth este folosit pentru a comunica cu pompa de insulină și cu dispozitivele de monitorizare continua a glicemiei.";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth este folosit pentru a comunica cu pompa de insulină, precum și cu dispozitivele de monitorizare glicemică continuă.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID este utilizat pentru autentificarea la bolus și pentru salvarea modificărilor din setările terapiei.";
+"NSFaceIDUsageDescription" = "Face ID este folosit la autentificarea pentru bolus.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Datele despre mese din baza de date a aplicației Health sunt folosite pentru a determina efectele glicemice. Datele despre glicemie din baza de date Health sunt folosite pentru construirea graficelor și calcularea influențelor glicemice. Datele despre somn din baza de date Health sunt folosite pentru a optimiza ceasul Apple.";
+"NSHealthShareUsageDescription" = "Informațiile despre nutriție din baza de date Sănătate sunt folosite pentru a determina efectele glucozei. Informațiile despre glucoză din baza de date Sănătate sunt folosite pentru construirea de grafice și calcule de trend/momentum.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Carbohidrații introduși în aplicație și pe ceas sunt stocați în baza de date Health. Glicemiile din GCM sunt stocate în mod confidențial în HealthKit.";
+"NSHealthUpdateUsageDescription" = "Carbohidrații introduși în aplicație și pe ceas sunt stocați în baza de date Sănătate. Glicemiile din GCM sunt stocate în mod confidențial în HealthKit.";
 

@@ -10,12 +10,18 @@
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insuline pomp en de continue glucose meter.";
 
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Camera wordt gebruikt om barcodes van apparaten te scannen.";
+
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID wordt gebruikt voor het toestaan van een insuline bolus en het opslaan van wijzigingen in therapie instellingen.";
+"NSFaceIDUsageDescription" = "Face ID wordt gebruikt om de insulinebolus te authenticeren en om wijzigingen in de therapie-instellingen op te slaan.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Maaltijd data van de Health database wordt gebruikt om de glucose effecten te bepalen. Glucose data vanuit de Health database worden gebruikt voor het berekenen en weergeven van het momentum. Slaap data vanuit de Health database worden gebruikt om de Apple Watch complicatie te verbeteren";
+"NSHealthShareUsageDescription" = "Maaltijdgegevens uit de database Gezondheid (Health) worden gebruikt om glucose-effecten te bepalen. Glucosegegevens uit de database Gezondheid worden gebruikt voor grafieken en het berekenen van trendlijnen. Slaapgegevens uit de database Gezondheid worden gebruikt om de Apple Watch complicatie bij te werken.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Koolhydraten van de maaltijd die worden ingevoerd in de app op de apple watch worden opgeslagen in de Gezondheid database. Glucose gegevens ontvangen van de CGM wordt veilig opgeslagen in Gezondheid.";
+"NSHealthUpdateUsageDescription" = "Maaltijdkoolhydraten die worden ingevoerd in de app en met de watch worden opgeslagen in de database Gezondheid (Health). Ontvangen glucosegegevens van de CGM worden veilig opgeslagen in HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop gebruikt Siri om programma's met je stem te laten uitvoeren.";
 

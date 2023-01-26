@@ -23,13 +23,13 @@
 "dB" = "dB";
 
 /* The subtitle format describing eventual glucose.  (1: localized glucose value description) */
-"Eventually %1$@" = "Éventuellement %1$@";
+"Eventually %1$@" = "Finalement %1$@";
 
 /* The short unit display string for grams */
 "g" = "g";
 
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
-"IOB %1$@ U" = "IOB (insuline active) %1$@ U";
+"IOB %1$@ U" = "IOB %1$@ U";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";

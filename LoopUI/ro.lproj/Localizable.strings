@@ -20,7 +20,7 @@
 "%1$@/min" = "%1$@/min";
 
 /* Accessibility hint describing completion HUD for a closed loop */
-"Closed loop" = "Bucla inchisa";
+"Closed loop" = "Loop automat";
 
 /* Title of green open loop OFF message */
 "Closed Loop OFF" = "Buclă închisă dezactivata";
@@ -56,7 +56,7 @@
 "Needs attention" = "Necesită atenție";
 
 /* Accessbility hint describing completion HUD for an open loop */
-"Open loop" = "Bucla deschisa";
+"Open loop" = "Loop manual";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
