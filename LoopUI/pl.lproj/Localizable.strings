@@ -10,9 +10,6 @@
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ jednostek na godzinę o %2$@";
 
-/* Format string describing glucose units per minute (1: glucose unit string) */
-"%1$@/min" = "%1$@/min";
-
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "Zamknięta Loop";
 

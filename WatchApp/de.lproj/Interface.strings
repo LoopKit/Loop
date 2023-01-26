@@ -2,7 +2,7 @@
 "CsQ-fc-KLC.text" = "–";
 
 /* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
-"dea-qG-va8.text" = "GESAMT KH";
+"dea-qG-va8.text" = "Gesamtkohlenhydrate";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "Dt1-kz-jMZ"; */
 "Dt1-kz-jMZ.text" = "– – –";
@@ -20,7 +20,7 @@
 "jj3-Gq-HBy.text" = "Bolus fehlgeschlagen";
 
 /* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
-"JXa-s1-PJx.text" = "Läuft";
+"JXa-s1-PJx.text" = "Training";
 
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "Mhe-aR-kQQ"; */
 "Mhe-aR-kQQ.text" = "–";
@@ -29,7 +29,7 @@
 "MZU-QV-PtZ.text" = "TITEL";
 
 /* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
-"nC0-X3-oFJ.text" = "Voreinstellung";
+"nC0-X3-oFJ.text" = "Override";
 
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
 "rNf-Mh-tID.title" = "Loop";
@@ -38,7 +38,7 @@
 "smL-Rc-IZh.text" = "Bolus";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
-"T4U-wP-dSW.text" = "Beschriftung";
+"T4U-wP-dSW.text" = "Beschreibung";
 
 /* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
 "UVY-pa-SUL.text" = "🏃‍♀️";
@@ -50,11 +50,11 @@
 "XkS-y5-khE.text" = "<body>";
 
 /* Class = "WKInterfaceLabel"; text = "ACTIVE CARBS"; ObjectID = "ycL-5X-a05"; */
-"ycL-5X-a05.text" = "AKTIVE KH";
+"ycL-5X-a05.text" = "AKTIVE CARBS";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "yl8-ZP-c3l"; */
 "yl8-ZP-c3l.text" = "– – –";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "zO8-x6-bZd"; */
-"zO8-x6-bZd.text" = "Beschriftung";
+"zO8-x6-bZd.text" = "Beschreibung";
 

@@ -1,14 +1,8 @@
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con il microinfusore e i dispositivi CGM.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con il microinfusore e i dispositivi CGM.";
-
-/* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID viene utilizzato per autenticare il bolo.";
 
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "I dati sui pasti dal database Salute vengono utilizzati per determinare gli effetti del glucosio. I dati del glucosio del database Salute vengono utilizzati per il calcolo del grafico della glicemia.";

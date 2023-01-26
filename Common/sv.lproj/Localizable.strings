@@ -5,7 +5,7 @@
 "Add Carb Entry" = "Lägg till kolhydrater";
 
 /* Lesson subtitle */
-"Computes the percentage of glucose measurements within a specified range" = "Beräknar procentandelen glukosmätningar inom ett specifikt målvärde";
+"Computes the percentage of glucose measurements within a specified range" = "Beräknar procentandelen blodglukosmätningar som är inom ett specifikt intervall";
 
 /* Title of the button to begin lesson execution */
 "Continue" = "Fortsätt";
@@ -50,7 +50,7 @@
 "U" = "E";
 
 /* Lesson subtitle */
-"Visualizes the most frequent glucose values by time of day" = "Visar de vanligaste glukosvärdena under olika tider på dagen";
+"Visualizes the most frequent glucose values by time of day" = "Visar de vanligaste blodglukosvärdena under olika tider på dagen";
 
 /* Unit string for a count of calendar weeks */
 "Weeks" = "Veckor";

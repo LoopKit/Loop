@@ -1,11 +1,11 @@
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "CsQ-fc-KLC"; */
-"CsQ-fc-KLC.text" = "—";
+"CsQ-fc-KLC.text" = "–";
 
 /* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
 "dea-qG-va8.text" = "Kolh. totalt";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "Dt1-kz-jMZ"; */
-"Dt1-kz-jMZ.text" = "---";
+"Dt1-kz-jMZ.text" = "– – –";
 
 /* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
 "f5G-bS-9pd.text" = "Före måltid";
@@ -14,7 +14,7 @@
 "hln-CI-MRP.text" = "Kolh.";
 
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "IRi-4t-ESO"; */
-"IRi-4t-ESO.text" = "—";
+"IRi-4t-ESO.text" = "–";
 
 /* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
 "jj3-Gq-HBy.text" = "Bolus misslyckades";
@@ -23,13 +23,13 @@
 "JXa-s1-PJx.text" = "Löpning";
 
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "Mhe-aR-kQQ"; */
-"Mhe-aR-kQQ.text" = "—";
+"Mhe-aR-kQQ.text" = "–";
 
 /* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
-"MZU-QV-PtZ.text" = "TITLE";
+"MZU-QV-PtZ.text" = "Rubrik";
 
 /* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
-"nC0-X3-oFJ.text" = "Override";
+"nC0-X3-oFJ.text" = "Undantag";
 
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
 "rNf-Mh-tID.title" = "Loop";
@@ -38,7 +38,7 @@
 "smL-Rc-IZh.text" = "Bolus";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
-"T4U-wP-dSW.text" = "Label";
+"T4U-wP-dSW.text" = "Titel";
 
 /* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
 "UVY-pa-SUL.text" = "🏃‍♀️";
@@ -53,8 +53,8 @@
 "ycL-5X-a05.text" = "AKTIVA KOLH.";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "yl8-ZP-c3l"; */
-"yl8-ZP-c3l.text" = "---";
+"yl8-ZP-c3l.text" = "– – –";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "zO8-x6-bZd"; */
-"zO8-x6-bZd.text" = "Label";
+"zO8-x6-bZd.text" = "Titel";
 

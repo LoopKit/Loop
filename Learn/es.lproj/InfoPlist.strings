@@ -1,0 +1,3 @@
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Datos de alimentos de la base de datos de Salud se utiliza para determinar los efectos en el nivel de glucosa. Datos de glucosa de la base de datos de Salud se utilizan para graficar y determinar cálculos de momento. Datos de sueño de la base de datos de Salud se utilizan para optimizar las actualizaciones de la complicación del Apple Watch.";
+

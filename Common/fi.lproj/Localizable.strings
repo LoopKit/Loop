@@ -5,7 +5,7 @@
 "Add Carb Entry" = "Lisää hiilihydraatteja";
 
 /* Lesson subtitle */
-"Computes the percentage of glucose measurements within a specified range" = "Laskee glukoosimittausten prosenttimäärän määritellyllä alueella";
+"Computes the percentage of glucose measurements within a specified range" = "Laskee glukoosimittausten prosenttiosuuden tietyllä alueella";
 
 /* Title of the button to begin lesson execution */
 "Continue" = "Jatka";

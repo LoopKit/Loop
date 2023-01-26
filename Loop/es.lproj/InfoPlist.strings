@@ -1,5 +1,5 @@
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
 
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Bluetooth se utiliza para las comunicaciones con la microinfusora y los dispositivos de monitoreo continuo de glucosa.";
@@ -8,7 +8,7 @@
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth se utiliza para las comunicaciones con la microinfusora y los dispositivos de monitoreo continuo de glucosa.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Se utiliza reconocimiento facial para autenticar el bolo de insulina.";
+"NSFaceIDUsageDescription" = "Face ID se utiliza para autenticar el bolo de insulina y para guardar los cambios en los ajustes de terapia.";
 
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Datos de alimentos de la base de datos de Salud se utiliza para determinar los efectos en el nivel de glucosa. Datos de glucosa de la bsase de datos de Salud se utilizan para graficar y determinar cálculos de momento.";

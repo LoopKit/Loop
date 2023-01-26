@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
@@ -8,11 +11,11 @@
 "NSBluetoothPeripheralUsageDescription" = "Bluetoothin avulla kommunikoidaan insuliinipumpun ja glukoosinseurantalaitteen kanssa.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID:tä käytetään annettavan boluksen vahvistamiseen.";
+"NSFaceIDUsageDescription" = "Face ID:tä käytetään boluksen vahvistamiseen ja hoitoasetusten tallentamiseen.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Terveys-sovelluksen ateriatietoja käytetään glukoosivaikutusten määrittämiseen. Terveys-sovelluksen glukoositietoja käytetään graafeissa ja laskelmissa. Unitietoja käytetään Apple Watch -komplikaation toiminnan optimointiin hereillä olon aikana.";
+"NSHealthShareUsageDescription" = "Terveystietokannasta peräisin olevan aterian tietoja käytetään glukoosivaikutusten määrittämiseen. Terveystietokannan glukoositietoja käytetään graafeissa ja glukoosin liikkeen laskennassa. Terveystietokannan unitietoja käytetään Apple Watchin komplikaatioiden toiminnan optimointiin.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Sovelluksen ja kellon kautta tallennetut hiilihydraattitiedot tallennetaan Terveys-sovellukseen. Glukoosiseurannan kautta saadut glukoositiedot tallennetaan turvallisesti HealthKitiin.";
+"NSHealthUpdateUsageDescription" = "Sovellukseen ja kelloon syötetyt hiilihydraattiateriatiedot tallennetaan Terveystietokantaan. Jatkuvan glukoosiseurannan tiedot tallennetaan turvallisesti HealthKitiin.";
 

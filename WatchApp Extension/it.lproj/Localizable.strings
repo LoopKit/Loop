@@ -24,9 +24,6 @@
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Attiva regolazione manuale";
 
-/* The label and value showing the recommended bolus */
-"Rec: %@ U" = "Rec: %@ U";
-
 /* HUD row title for remaining reservoir volume */
 "Reservoir Volume" = "Volume serbatoio";
 

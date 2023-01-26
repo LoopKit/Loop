@@ -1,0 +1,6 @@
+/* Bundle name */
+"CFBundleName" = "Apprendre";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Les données sur les repas de la base de données Health sont utilisées pour déterminer les effets du glucose. Les données de glucose de la base de données Health sont utilisées pour le calcul graphique et le calcul de la dynamique. Les données de sommeil de la base de données Health sont utilisées pour optimiser la livraison des mises à jour de complications d'Apple Watch au moment où vous êtes réveillé. Les données de sommeil de la base de données Santé sont utilisées pour optimiser les mises à jour sur la complication d'Apple Watch en les limitant au moment où vous êtes réveillé.";
+

@@ -1,0 +1,6 @@
+/* Bundle name */
+"CFBundleName" = "Lær";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Måltider med karbohydrater lagret i helsedatabasen brukes til å bestemme blodsukkereffekter. Blodsukkerdata fra helsedatabasen brukes til beregning av grafer og momentum. Søvndata fra helsedatabasen brukes til å optimalisere leveringen av oppdateringer for Apple Watch når du er våken.";
+

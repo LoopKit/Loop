@@ -1,36 +1,36 @@
 /* (No Comment) */
-"9KhaIS" = "I've set the preset";
+"9KhaIS" = "J'ai défini le préréglage";
 
 /* (No Comment) */
 "80eo5o" = "Ajouter des glucides";
 
 /* (No Comment) */
-"b085BW" = "I wasn't able to set the preset.";
+"b085BW" = "Je n'ai pas pu définir le préréglage.";
 
 /* (No Comment) */
-"I4OZy8" = "Enable Override Preset";
+"I4OZy8" = "Activer le préréglage de remplacement";
 
 /* (No Comment) */
-"lYMuWV" = "Override Name";
+"lYMuWV" = "Nom de remplacement";
 
 /* (No Comment) */
-"nDKAmn" = "What's the name of the override you'd like to set?";
+"nDKAmn" = "Quel est le nom du remplacement que vous souhaitez définir?";
 
 /* (No Comment) */
 "OcNxIj" = "Ajouter des glucides";
 
 /* (No Comment) */
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
+"oLQSsJ" = "Activer le préréglage de remplacement '${overrideName}'";
 
 /* (No Comment) */
-"XNNmtH" = "Enable preset in Loop";
+"XNNmtH" = "Activer le préréglage dans Loop";
 
 /* (No Comment) */
-"yBzwCL" = "Override Selection";
+"yBzwCL" = "Remplacer la sélection";
 
 /* (No Comment) */
 "yc02Yq" = "Ajouter des glucides à Loop";
 
 /* (No Comment) */
-"ZZ3mtM" = "Enable an override preset in Loop";
+"ZZ3mtM" = "Activer un préréglage de remplacement pour Loop";
 

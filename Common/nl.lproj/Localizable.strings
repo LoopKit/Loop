@@ -50,7 +50,7 @@
 "U" = "E";
 
 /* Lesson subtitle */
-"Visualizes the most frequent glucose values by time of day" = "Geeft de meest voorkomende glucose waardes weer per moment van de dag ";
+"Visualizes the most frequent glucose values by time of day" = "Geeft de meest voorkomende glucose waardes weer per moment van de dag";
 
 /* Unit string for a count of calendar weeks */
 "Weeks" = "Weken";

@@ -5,7 +5,7 @@
 "Add Carb Entry" = "KH-Eintrag hinzufügen";
 
 /* Lesson subtitle */
-"Computes the percentage of glucose measurements within a specified range" = "Berechnet den Prozentsatz der Glukosemessungen innerhalb eines angegebenen Bereichs";
+"Computes the percentage of glucose measurements within a specified range" = "Berechnet den Prozentsatz der Glukosemessungen innerhalb eines bestimmten Bereichs";
 
 /* Title of the button to begin lesson execution */
 "Continue" = "Weiter";
@@ -41,16 +41,16 @@
 "Range" = "Bereich";
 
 /* Title of config entry */
-"Start Date" = "Start Datum";
+"Start Date" = "Startdatum";
 
 /* Lesson title */
-"Time in Range" = "Zeit im Bereich";
+"Time in Range" = "Zeit im Zielbereich";
 
 /* The short unit display string for international units of insulin */
 "U" = "IE";
 
 /* Lesson subtitle */
-"Visualizes the most frequent glucose values by time of day" = "Zeigt die häufigsten Glukosewerte nach Tageszeit";
+"Visualizes the most frequent glucose values by time of day" = "Visualisiert die häufigsten Glukosewerte nach Tageszeit";
 
 /* Unit string for a count of calendar weeks */
 "Weeks" = "Wochen";

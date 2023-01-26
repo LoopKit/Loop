@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
@@ -8,10 +11,10 @@
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insuline pomp en de continue glucose meter.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID wordt gebruikt om de insuline bolus te verifiëren.";
+"NSFaceIDUsageDescription" = "Face ID wordt gebruikt voor het toestaan van een insuline bolus en het opslaan van wijzigingen in therapie instellingen.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Maaltijd data van de Health database wordt gebruikt om de effecten op glucose te bepalen.Glucose data vanuit de Health database worden gebruikt voor het berekenen en weergeven van het momentum ";
+"NSHealthShareUsageDescription" = "Maaltijd data van de Health database wordt gebruikt om de glucose effecten te bepalen. Glucose data vanuit de Health database worden gebruikt voor het berekenen en weergeven van het momentum. Slaap data vanuit de Health database worden gebruikt om de Apple Watch complicatie te verbeteren";
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "Koolhydraten van de maaltijd die worden ingevoerd in de app op de apple watch worden opgeslagen in de Gezondheid database. Glucose gegevens ontvangen van de CGM wordt veilig opgeslagen in Gezondheid.";

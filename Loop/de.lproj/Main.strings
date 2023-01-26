@@ -1,8 +1,11 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "g";
+
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
 "3kU-n2-fha.title" = "Status";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
-"5gz-kZ-iF1.text" = "3,5 IE/h @ 12:12";
+"5gz-kZ-iF1.text" = "3,5 IE/h @ 12:12 PM";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
 "87H-N1-0vJ.text" = "Vorhergesagt";
@@ -11,7 +14,7 @@
 "aCb-Qs-bpu.text" = "Detail";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
-"ap1-M6-naG.text" = "Essensart";
+"ap1-M6-naG.text" = "Essens-Art";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Beschriftung";
@@ -23,7 +26,7 @@
 "d3X-AN-tA5.text" = "g insgesamt";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "Der Blutzuckerverlauf wird vorhergesagt, indem die Effekte mehrerer Eingaben kombiniert werden. Verwende dieses Tool, um verschiedene Eingaben ein- und auszuschalten, um zu sehen, wie sie die Vorhersage beeinflussen.";
+"D4C-I2-dhA.text" = "Der Blutzuckerverlauf wird vorhergesagt, indem die Effekte mehrerer Eingaben kombiniert werden. Verwenden Sie dieses Tool, um verschiedene Eingaben ein- und auszuschalten, um zu sehen, wie sie die Vorhersage beeinflussen.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Beschriftung";
@@ -34,8 +37,8 @@
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Beobachtet";
 
-/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
-"fWV-jg-ICt.text" = "3.5 IE/h @ 12:12";
+/* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
+"Fal-Vf-lfh.normalTitle" = "🍭";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Kohlenhydrat-Effekte";
@@ -58,20 +61,26 @@
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Vorhergesagter Blutzucker";
 
+/* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
+"Qe9-uc-vPR.normalTitle" = "🍽";
+
+/* Class = "UIButton"; normalTitle = "🌮"; ObjectID = "QhO-Yi-AqQ"; */
+"QhO-Yi-AqQ.normalTitle" = "🌮";
+
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
-"qPH-vU-xlu.text" = "Essenstyp";
+"qPH-vU-xlu.text" = "Essens-Art";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "voraussichtlich 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g COB";
+"SQx-au-ZcM.text" = "Aktive Kohlenhydrate";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Blutzucker";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
-"Tz7-80-bJ7.title" = "KH-Eintrag";
+"Tz7-80-bJ7.title" = "Hinzufügen/Bearbeiten von KH-Eintrag";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
 "ufi-Kj-33k.text" = "Beschriftung";
@@ -80,10 +89,10 @@
 "Vpi-5b-bY5.title" = "Kohlenhydrate";
 
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
-"Wx8-Tf-FnG.text" = "Menge gegessen";
+"Wx8-Tf-FnG.text" = "Verbrauchte Menge";
 
-/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
-"xhx-PI-bBI.text" = "Empfohlener Basalwert";
+/* Class = "UIButton"; normalTitle = "🍕"; ObjectID = "xl9-Wc-Pdu"; */
+"xl9-Wc-Pdu.normalTitle" = "🍕";
 
 /* Class = "UITextField"; placeholder = "0"; ObjectID = "Yf6-fw-Gex"; */
 "Yf6-fw-Gex.placeholder" = "0";

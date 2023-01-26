@@ -1,6 +1,15 @@
+/* Widget label title describing the active carbs */
+"Active Carbs" = "Carbohidratos activos";
+
+/* Widget label title describing the active insulin */
+"Active Insulin" = "Insulina Activa";
+
 /* The subtitle format describing eventual glucose.  (1: localized glucose value description) */
 "Eventually %1$@" = "Eventualmente %1$@";
 
-/* The subtitle format describing units of active insulin. (1: localized insulin value description) */
-"IOB %1$@ U" = "IOB %1$@ U";
+/* The short unit display string for grams */
+"g" = "g";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dl";
 
