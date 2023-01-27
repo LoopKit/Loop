@@ -7,6 +7,15 @@
 /* Status row title for workout override enabled (leading space is to separate from symbol) */
 " Workout Preset" = " Zielbereichsänderung";
 
+/* String denoting lack of a recommended bolus amount in the simple bolus calculator */
+"–" = "–";
+
+/* No comment provided by engineer. */
+"– –" = "– –";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
 /* The format for an active override preset. (1: preset symbol)(2: preset name) */
 "%@ %@" = "%1$@ %2$@";
 
@@ -27,6 +36,9 @@
 
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/IE";
@@ -63,6 +75,10 @@
 
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
+
+/* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
+   Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
+"%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 Minuten Blutzucker-Regressionskoeffizient (b₁), fortgesetzt mit Abfall über 30 min";
@@ -136,11 +152,12 @@
 "Adjusted for" = "Angepasst für";
 
 /* Alert Permissions button text
+   Title of alert management screen */
+"Alert Management" = "Alarm-Einstellungen";
+
+/* Alert Permissions button text
    Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Benachrichtigungsberechtigungen";
-
-/* Alert Permissions Need Attention alert title */
-"Alert Permissions Need Attention" = "Mitteilungseinstellungen brauchen Deine Aufmerksamkeit";
 
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algorithmus-Einstellungen";
@@ -454,6 +471,9 @@
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Protokolle kritischer Ereignisse exportieren";
 
+/* The export file name formatted string (1: timestamp) */
+"Export-%1$@" = "Export-%1$@";
+
 /* The alert title for a resume error */
 "Failed to Resume Insulin Delivery" = "Insulinabgabe konnte nicht fortgesetzt werden";
 
@@ -553,14 +573,11 @@
 /* The title text for the issue report cell */
 "Issue Report" = "Problembericht";
 
-/* Format for Notifications permissions disabled alert body. (1: app name) */
-"It is important that you always keep %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications turned ON in your phone’s settings to ensure that you get notified by the app." = "Es ist wichtig, dass Du %1$@ Benachrichtigungen, kritische Warnungen und zeitkritische Benachrichtigungen in den Einstellungen Deines Telefons immer aktiviert lässt, um sicherzustellen, dass Du von der App benachrichtigt wirst.";
-
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Startet die CGM-App";
 
 /* OK button title for alert shown when delivery status is uncertain */
-"Learn More" = "Lernmodus";
+"Learn More" = "Mehr erfahren";
 
 /* Estimated remaining duration with less than a minute */
 "Less than a minute remaining" = "Weniger als eine Minute verbleiben";
@@ -615,17 +632,26 @@
 /* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Mahzeiten Bolus";
 
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dl";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Fehlende Daten: %1$@";
 
 /* Remote command error description: missing maximum bolus in settings. */
 "Missing maximum allowed bolus in settings" = "Maximal erlaubter Bolus in den Einstellungen fehlt";
 
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/l";
+
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum-Effekte";
 
 /* Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Mehr Infos";
+
+/* Label for toggle to mute all alerts */
+"Mute All Alerts" = "Alle Alarme stummschalten";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Benötigt Aufmerksamkeit";
@@ -742,6 +768,9 @@
 /* The error message displayed for pumpSuspended errors. */
 "Pump Suspended. Automatic dosing is disabled." = "Pumpe unterbrochen. Die automatische Dosierung ist deaktiviert.";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Schnellwirkend - Erwachsene";
 
@@ -780,9 +809,6 @@
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Wiederholen";
 
-/* Warning text for when Notifications or Critical Alerts Permissions is disabled */
-"Review Alert Permissions" = "Überprüfe die Berechtigungen für Warnungen";
-
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Speichern und Bolen";
 
@@ -791,6 +817,9 @@
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Geplant";
+
+/* List header for mute all alerts period */
+"Select Mute Period" = "Stummschaltungsdauer auswählen";
 
 /* The title of the services section in settings */
 "Services" = "Dienste";
@@ -816,11 +845,20 @@
 /* The title of the nightscout site URL credential */
 "Site URL" = "Seiten URL";
 
+/* Software update button link text */
+"Software Update" = "Software-Aktualisierung";
+
 /* The format for the description of a temporary override start date */
 "starting at %@" = "Beginnt um %@";
 
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "Starte Bolus";
+
+/* Section title for Support
+   Support screen title
+   The title of the support item in settings
+   The title of the support section in settings */
+"Support" = "Support";
 
 /* The title text in settings */
 "Suspend Threshold" = "Wert für die Hypo-Abschaltung";
@@ -869,9 +907,6 @@
 
 /* Title of the carb entry date picker cell */
 "Time" = "Zeit";
-
-/* Time change alert title */
-"Time Change Detected" = "Zeitänderung erkannt";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Zeitkritische Benachrichtigungen";
@@ -928,6 +963,9 @@
 /* Title of insulin model setting */
 "Walsh" = "Walsh";
 
+/* Alert Permissions Need Attention alert title */
+"Warning! Safety notifications are turned OFF" = "Warnung! Sicherheitsbenachrichtigungen sind AUSGESCHALTET";
+
 /* Explanation of glucose safety limit */
 "When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder prognostizierte Glukosewert unter dem Glukosesicherheitsgrenzwert liegt, empfiehlt Loop keinen Bolus und immer eine temporäre Basalrate von 0 Einheiten pro Stunde.";
 
@@ -966,9 +1004,6 @@
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "Deine maximale Bolusmenge beträgt %1$@.";
-
-/* Time change alert body. (1: app name) */
-"Your phone’s time has been changed. %1$@ needs accurate time records to make predictions about your glucose and adjust your insulin accordingly.\n\nCheck in your iPhone Settings (General / Date & Time) and verify that Set Automatically is enabled. Failure to resolve could lead to serious under-delivery or over-delivery of insulin." = "Die Uhrzeit Deines Telefons wurde geändert. %1$@ benötigt genaue Zeitaufzeichnungen, um Vorhersagen über Deinen Blutzucker zu treffen und Dein Insulin entsprechend anzupassen.\n\nÜberprüfe Deine iPhone-Einstellungen (Allgemein / Datum & Uhrzeit) und vergewissere Dich, dass Automatisch einstellen aktiviert ist. Wird dies nicht behoben, kann dies zu einer schwerwiegenden Unter- oder Überversorgung von Insulin führen.";
 
 /* Caption for bolus screen notice when pump data is missing or stale */
 "Your pump data is stale. %1$@ cannot recommend a bolus amount." = "Deine Pumpendaten sind veraltet. %1$@ kann keine Bolusmenge empfehlen.";

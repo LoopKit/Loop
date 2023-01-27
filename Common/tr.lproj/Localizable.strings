@@ -2,13 +2,13 @@
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Add Carb Entry";
+"Add Carb Entry" = "Karbonhidrat Girişi Ekle";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
 
 /* The short unit display string for grams */
-"g" = "g";
+"g" = "gr";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -20,5 +20,5 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The short unit display string for international units of insulin */
-"U" = "U";
+"U" = "Ü";
 

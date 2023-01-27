@@ -4,6 +4,9 @@
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Aggiungi carboidrati assunti";
 
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Calcola la percentuale di misurazioni della glicemia entro un intervallo specifico";
+
 /* Title of the button to begin lesson execution */
 "Continue" = "Continua";
 
