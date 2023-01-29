@@ -10,6 +10,9 @@
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth est utilisé pour communiquer avec la pompe à insuline et les dispositifs de surveillance continue du glucose.";
 
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "La caméra est utilisée pour scanner les codes-barres des appareils.";
+
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID est utilisé pour authentifier le bolus d'insuline et sauvegarder les changements dans les réglages de thérapie.";
 

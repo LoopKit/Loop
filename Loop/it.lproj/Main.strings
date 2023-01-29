@@ -2,7 +2,7 @@
 "0RV-d5-muE.text" = "g";
 
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
-"3kU-n2-fha.title" = "Stato Attuale";
+"3kU-n2-fha.title" = "Stato";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
 "5gz-kZ-iF1.text" = "3.5 U/ora @ 12:12 PM";
@@ -20,7 +20,7 @@
 "bIL-Ub-qYp.text" = "Etichetta";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Modifica del Glucosio";
+"bq4-98-cQU.text" = "Modifica Glicemie";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "g Totali";
@@ -62,7 +62,7 @@
 "OFA-qT-ZAg.text" = "Etichetta";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Glicemia Predetta";
+"PA3-sP-cWY.title" = "Glicemia Prevista";
 
 /* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
 "Qe9-uc-vPR.normalTitle" = "🍽";
@@ -77,7 +77,7 @@
 "Rse-x8-amW.text" = "probabile glic. 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g Active Carbs";
+"SQx-au-ZcM.text" = "g Carboidrati Attivi";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glicemie";

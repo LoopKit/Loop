@@ -14,7 +14,7 @@
 "aCb-Qs-bpu.text" = "Detail";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
-"ap1-M6-naG.text" = "Type voedsel";
+"ap1-M6-naG.text" = "Type Eten";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Etiket";
@@ -40,11 +40,14 @@
 /* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
 "Fal-Vf-lfh.normalTitle" = "🍭";
 
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3,5 E/uur @ 12:12 uur";
+
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
-"hZZ-2S-lrd.title" = "Effect koolhydraten";
+"hZZ-2S-lrd.title" = "Koolhydraateffect";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Waargenomen veranderingen in de glucose (minus de veranderingen die reeds door insulinetoediening hebben plaatsgevonden) kunnen worden gebruikt om de koolhydraatabsorptie in te schatten.";
+"IxU-As-glo.text" = "Waargenomen veranderingen in de glucose, minus de veranderingen die al door insulinetoediening hebben plaatsgevonden, kunnen worden gebruikt om de koolhydraatabsorptie in te schatten.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Detail";
@@ -68,19 +71,19 @@
 "QhO-Yi-AqQ.normalTitle" = "🌮";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
-"qPH-vU-xlu.text" = "Type Voedsel";
+"qPH-vU-xlu.text" = "Type Eten";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "uiteindelijk 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "gr KaB";
+"SQx-au-ZcM.text" = "g Actieve Kh";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glucose";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
-"Tz7-80-bJ7.title" = "Toevoegen/bewerken koolhydraten invoer";
+"Tz7-80-bJ7.title" = "Toevoegen/Bewerken Koolhydraatinvoer";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
 "ufi-Kj-33k.text" = "Etiket";
@@ -89,7 +92,10 @@
 "Vpi-5b-bY5.title" = "Koolhydraten";
 
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
-"Wx8-Tf-FnG.text" = "Hoeveelheid geconsumeerd";
+"Wx8-Tf-FnG.text" = "Hoeveelheid Gegeten";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Aanbevolen Basaal";
 
 /* Class = "UIButton"; normalTitle = "🍕"; ObjectID = "xl9-Wc-Pdu"; */
 "xl9-Wc-Pdu.normalTitle" = "🍕";

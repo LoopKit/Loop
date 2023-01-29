@@ -25,6 +25,9 @@
 /* The short unit display string for grams */
 "g" = "g";
 
+/* No comment provided by engineer. */
+"Loop Status Widget" = "Loop";
+
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
 

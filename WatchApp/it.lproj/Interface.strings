@@ -8,7 +8,7 @@
 "Dt1-kz-jMZ.text" = "---";
 
 /* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
-"f5G-bS-9pd.text" = "Pre-Pasto";
+"f5G-bS-9pd.text" = "Pasto";
 
 /* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
 "hln-CI-MRP.text" = "Carboidrati";
@@ -29,7 +29,7 @@
 "MZU-QV-PtZ.text" = "TITOLO";
 
 /* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
-"nC0-X3-oFJ.text" = "Programma alternativo";
+"nC0-X3-oFJ.text" = "Programma Alternativo";
 
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
 "rNf-Mh-tID.title" = "Loop";

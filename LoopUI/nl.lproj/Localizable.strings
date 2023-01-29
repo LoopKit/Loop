@@ -1,6 +1,12 @@
 /* Green closed loop ON message (1: last loop string) (2: app name) */
 "\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n%2$@ werkt met Gesloten Loop in de AAN stand";
 
+/* Red loop message (1: last loop  string) (2: app name) */
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogrammen voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met uw pomp en CGM.";
+
+/* Yellow loop message (1: last loop string) (2: app name) */
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogrammen voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met uw pomp en CGM.";
+
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
 "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ werkt met Gesloten Loop in de UIT stand. Je pomp en CGM blijven werken, maar de app past de dosering niet automatisch aan.\n\n%2$@";
 
@@ -12,6 +18,12 @@
 
 /* The format string describing the basal rate. */
 "%@ U" = "%@ E";
+
+/* Format string describing last completion. (1: time ago */
+"%1$@ ago" = "%1$@ geleden";
+
+/* Format string describing last completion. (1: time ago, (2: the date */
+"%1$@ ago at %2$@" = "%1$@ geleden om %2$@";
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%1$@ op %2$@";
@@ -56,7 +68,7 @@
 "Loop ran %@ ago" = "Loop heeft %@ geleden gedraaid";
 
 /* Title of yellow loop message */
-"Loop Warning" = "Loop Waarschuwing";
+"Loop Warning" = "Loopwaarschuwing";
 
 /* String displayed instead of a glucose value below the CGM range */
 "LOW" = "LAAG";
@@ -77,7 +89,7 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Instructions for user to close loop if it is allowed. */
-"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Tik op Instellingen om Gesloten Loop AAN te zetten als je wilt dat de app uw insulinetoediening automatiseert.";
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Tik op Instellingen om Gesloten Loop AAN te zetten als je wilt dat de app je insulinetoediening automatiseert.";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";

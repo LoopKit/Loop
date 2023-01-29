@@ -5,7 +5,7 @@
 "\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\n Trykk på statusikonene for CGM og insulinpumpe for mer informasjon. %2$@ vil fortsette å prøve å fullføre en sløyfe, men se etter potensielle kommunikasjonsproblemer med pumpen og CGM.";
 
 /* Yellow loop message (1: last loop string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\n Trykk på statusikonene for CGM og insulinpumpe for mer informasjon. %2$@ vil fortsette å prøve å fullføre en loop, men se etter potensielle kommunikasjonsproblemer med pumpen og CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTrykk på statusikonene for CGM og insulinpumpe for mer informasjon. %2$@ vil fortsette å prøve å fullføre en loop, men se etter potensielle kommunikasjonsproblemer med pumpen og CGM.";
 
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
 "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ opererer med Closed Loop i OFF posisjon. Pumpen og CGM vil fortsette å fungere, men appen vil ikke justere doseringen automatisk.\n\n%2$@";
@@ -58,14 +58,20 @@
 /* String displayed instead of a glucose value above the CGM range */
 "HIGH" = "HØY";
 
+/* Last loop time completed message (1: last loop time string) */
+"Last completed loop %1$@." = "Sist fullført loop %1$@.";
+
 /* Title of red loop message */
 "Loop Failure" = "Loop feilet";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop kjørte %@ siden";
 
+/* Title of yellow loop message */
+"Loop Warning" = "Loop Varsel";
+
 /* String displayed instead of a glucose value below the CGM range */
-"LOW" = "LAVT";
+"LOW" = "LAV";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -81,6 +87,9 @@
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Instructions for user to close loop if it is allowed. */
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Trykk på Innstillinger for å slå Closed Loop PÅ om du ønsker at appen skal automatisere insulinet ditt.";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";

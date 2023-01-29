@@ -8,7 +8,7 @@
 "Computes the percentage of glucose measurements within a specified range" = "Berekent het percentage glucosemetingen in een specifiek bereik";
 
 /* Title of the button to begin lesson execution */
-"Continue" = "Ga verder";
+"Continue" = "Ga Verder";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -17,7 +17,7 @@
 "g" = "g";
 
 /* Placeholder for upper range entry */
-"Maximum" = "Maximum";
+"Maximum" = "Maximaal";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -50,7 +50,7 @@
 "U" = "E";
 
 /* Lesson subtitle */
-"Visualizes the most frequent glucose values by time of day" = "Geeft de meest voorkomende glucose waardes weer per moment van de dag ";
+"Visualizes the most frequent glucose values by time of day" = "Geeft de meest voorkomende glucosewaarden weer per moment van de dag";
 
 /* Unit string for a count of calendar weeks */
 "Weeks" = "Weken";
