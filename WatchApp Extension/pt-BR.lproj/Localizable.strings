@@ -21,12 +21,18 @@
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Sobrepor";
 
+/* The label and value showing the recommended bolus */
+"Rec: %@ U" = "Rec: %@ U";
+
 /* HUD row title for remaining reservoir volume */
 "Reservoir Volume" = "Volume do Reservatório";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Envio falhou";
+
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "U/hr";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Exercício";

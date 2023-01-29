@@ -10,6 +10,9 @@
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth brukes til å kommunisere med insulinpumpe og kontinuerlige glukosemonitorer.";
 
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Kamera brukes til å skanne strekkoder på enheter.";
+
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID brukes til å autentisere insulin bolus.";
 
@@ -18,4 +21,7 @@
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "Angitte karbohydrater i matdataene som tastes inn i appen blir lagret i Health-databasen.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop bruker Siri slik at du kan bruke forhåndsinnstillinger med stemmen din.";
 

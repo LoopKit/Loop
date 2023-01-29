@@ -35,7 +35,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Avskjedige";
+"Dismiss" = "Avvis";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */

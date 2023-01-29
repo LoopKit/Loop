@@ -11,13 +11,13 @@
 "%1$@ – %2$@ %3$@" = "%1$@ - %2$@ %3$@";
 
 /* HUD row title for COB */
-"Active Carbs" = "Actieve koolhydraten";
+"Active Carbs" = "Actieve Koolhydraten";
 
 /* HUD row title for IOB */
 "Active Insulin" = "Actieve insuline";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Voeg koolhydraten toe";
+"Add Carb Entry" = "Koolhydraatinvoer Toevoegen";
 
 /* Button text to confirm manual bolus on Apple Watch */
 "Bolus" = "Bolus";
@@ -29,13 +29,13 @@
 "Bolus Recommendation Updated" = "Bolusaanbeveling Bijgewerkt";
 
 /* Button text to continue from carb entry to bolus entry on Apple Watch */
-"Continue" = "Ga verder";
+"Continue" = "Ga Verder";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Afwijzen";
+"Dismiss" = "Sluiten";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -57,7 +57,7 @@
 "mmol/L" = "mmol/L";
 
 /* HUD row title for Net Basal Rate */
-"Net Basal Rate" = "Netto basaalsnelheid";
+"Net Basal Rate" = "Netto Basaalsnelheid";
 
 /* Label for off button */
 "Off" = "Uit";
@@ -78,7 +78,7 @@
 "Pre-Meal" = "Pre-Meal";
 
 /* The text for the Watch button for enabling a custom preset */
-"Preset" = "Programma";
+"Preset" = "Override";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@%2$@";
@@ -87,7 +87,7 @@
 "Rec: %@ U" = "Voorgesteld: %@ E";
 
 /* Recommended bolus amount label on Apple Watch */
-"REC: %@ U" = "REC: %@ U";
+"REC: %@ U" = "REC: %@ E";
 
 /* Indicator that recommended bolus computation is in progress on Apple Watch */
 "REC: Calculating..." = "REC: Berekenen...";

@@ -2,7 +2,7 @@
 " (pending: %@)" = " (prevista l'erogazione di: %@)";
 
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
-" Pre-meal Preset" = "Preimpostazioni pre-pasto";
+" Pre-meal Preset" = "Preimpostazioni del Pasto";
 
 /* Warning text for when Notifications or Critical Alerts Permissions is disabled */
 " Safety Notifications are OFF" = "Le notifiche di sicurezza risultano spente";
@@ -38,7 +38,7 @@
 "%@." = "%@.";
 
 /* Alert text for failing to cancel temp basal (1: reason description, 2: app name) */
-"%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@%2$@ non sono stati in grado di cancellare la tua attuale basale temporanea, che è più elevata di quella impostata come nuovo limite massimo di basale. Questo potrebbe comportare una maggiore infusione di insulina di quanto desiderato. \n\nConsidera di sospendere manualmente la somministrazione di insulina e quindi di riattivarla immediatamente per attivare la somministrazione di insulina basale con il corretto limite impostato.";
+"%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@%2$@ non sono stati in grado di cancellare la tua attuale basale temporanea, che è più elevata di quella impostata come nuovo limite massimo di basale. Questo potrebbe comportare una maggiore infusione d'insulina di quanto desiderato. \n\nConsidera di sospendere manualmente l'erogazione d'insulina e quindi di riattivarla immediatamente per attivare l'erogazione d'insulina basale con il corretto limite impostato.";
 
 /* Adds a full-stop to a statement (1: statement, 2: full stop character) */
 "%1@%2@" = "%1$@%2$@";
@@ -71,10 +71,10 @@
 "%1$@ U" = "%1$@ U";
 
 /* Low reservoir alert format string. (1: Number of units remaining) */
-"%1$@ U left" = "%1$@ U residue";
+"%1$@ U left" = "%1$@ U sinistra";
 
 /* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
-"%1$@ U left: %2$@" = "%1$@ U residue: %2$@";
+"%1$@ U left: %2$@" = "%1$@ U sinistra: %2$@";
 
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
 "%1$@ U/hour @ %2$@" = "%1$@ U/ora @ %2$@";
@@ -108,13 +108,13 @@
 "A manual glucose entry must be between %1$@ and %2$@." = "Una glicemia manuale deve essere inserita tra %1$@ e %2$@";
 
 /* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "Modello basato sull'assorbimento dell'insulina Fiasp.";
+"A model based on the published absorption of Fiasp insulin." = "Modello basato sull'assorbimento dichiarato dell'insulina Fiasp";
 
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Modello basato sull'assorbimento negli adulti dell'insulina Humalog, Novolog ed Apidra.";
 
 /* Software update available section footer (1: app name) */
-"A new version of %@ is available and is recommended to continue using the app." = "Una nuova versione di %@ è disponibile ed è raccomandato di utilizzare l'applicazione";
+"A new version of %@ is available and is recommended to continue using the app." = "Una nuova versione di %@ è disponibile ed è raccomandato di continuare a utilizzare l'app.";
 
 /* Required software update section footer (1: app name) */
 "A new version of %@ is available." = "È disponibile una nuova versione di %@ .";
@@ -144,7 +144,7 @@
 "Active Insulin: %@" = "Insulina Attiva: %@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Aggiungi carboidrati assunti";
+"Add Carb Entry" = "Agg. Carb. Assunti";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
@@ -155,21 +155,21 @@
 
 /* Action sheet title selecting Pump
    Title text for button to set up a new pump */
-"Add Pump" = "Aggiungi Microinfusore";
+"Add Pump" = "Agg. Microinfusore";
 
 /* Title text for button to set up a service */
-"Add Service" = "Add Service";
+"Add Service" = "Agg. Servizio";
 
 /* No comment provided by engineer. */
 "Adjusted for" = "Corretto per";
 
 /* Alert Permissions button text
    Title of alert management screen */
-"Alert Management" = "Gestione degli avvisi";
+"Alert Management" = "Gestione Avvisi";
 
 /* Alert Permissions button text
    Notification & Critical Alert Permissions screen title */
-"Alert Permissions" = "Autorizzazioni di avviso";
+"Alert Permissions" = "Avvisi";
 
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Impostazioni Algoritmo";
@@ -187,10 +187,10 @@
 "An error occurred while trying to save your manual glucose entry." = "Si è verificato un errore durante il tentativo di salvare l'inserimento manuale della Glicemia.";
 
 /* Invalid onboarding state */
-"An unexpected onboarding error state occurred." = "Si e' verificato un errore nell'inserimento";
+"An unexpected onboarding error state occurred." = "Si è verificato un errore nell'inserimento";
 
 /* Alert message when glucose data returns while on bolus screen */
-"An updated bolus recommendation is available." = "Un aggiornamento al bolo suggerito e' ora disponibile.";
+"An updated bolus recommendation is available." = "È disponibile una raccomandazione aggiornata sul bolo.";
 
 /* The title of the amplitude API key credential */
 "API Key" = "Chiave API";
@@ -199,13 +199,13 @@
 "API Secret" = "Chiave personale API";
 
 /* Action sheet confirmation message for pump history deletion */
-"Are you sure you want to delete all history entries?" = "Sei sicuro di voler eliminare tutti gli inserimenti della cronostoria?";
+"Are you sure you want to delete all history entries?" = "Sei sicuro di voler eliminare tutte le voci della cronologia?";
 
 /* Action sheet confirmation message for logged dose deletion */
 "Are you sure you want to delete all logged dose entries?" = "Sei sicuro di voler eliminare tutte le dosi inserite?";
 
 /* Action sheet confirmation message for reservoir deletion */
-"Are you sure you want to delete all reservoir values?" = "Sei sicuro di voler eliminare tutti  i valori del serbatoio?";
+"Are you sure you want to delete all reservoir values?" = "Sei sicuro di voler eliminare tutti i valori del serbatoio?";
 
 /* No comment provided by engineer. */
 "Are you sure you want to delete all your %@ Data?\n(This action is not reversible)" = "Sei sicuro di voler eliminare tutti i tuoi dati %@ ?\n (Questa azione non è reversibile)";
@@ -214,23 +214,23 @@
 "Are you sure you want to delete this CGM?" = "Sei sicuro di voler eliminare questo CGM?";
 
 /* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
+"Are you sure you want to delete this service?" = "Sei sicuro di voler eliminare questo servizio?";
 
 /* Format fragment for a specific time */
 "at %@" = "a %@";
 
 /* The message displayed during a device authentication prompt for bolus specification */
-"Authenticate to Bolus %@ Units" = "Autenticati per eseguire il bolo di %@ Unità";
+"Authenticate to Bolus %@ Units" = "Eseguire l'autenticazione per il bolo di %@ Unità";
 
 /* The message displayed during a device authentication prompt to log an insulin dose */
 "Authenticate to log %@ Units" = "Eseguire l'autenticazione per registrare %@ Unità";
 
 /* Details for configuration error when basal rate schedule is missing */
-"Basal Rate Schedule" = "Impostazione valori della basale";
+"Basal Rate Schedule" = "Impostazione Velocità Basale";
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
-"Basal Rates" = "Impostazione Basale";
+"Basal Rates" = "Velocità Basali";
 
 /* Caption for bolus screen notice when no bolus is recommended for the predicted glucose */
 "Based on your predicted glucose, no bolus is recommended." = "In base alla glicemia prevista, non è consigliato alcun bolo.";
@@ -252,10 +252,10 @@
 "Bolus" = "Bolo";
 
 /* The notification title for a bolus issue */
-"Bolus Issue" = "Problema con il  bolo";
+"Bolus Issue" = "Problema con il bolo";
 
 /* Alert title for an updated bolus recommendation */
-"Bolus Recommendation Updated" = "Il Suggerimento dei boli e' cambiato";
+"Bolus Recommendation Updated" = "Raccomandazioni sul bolo aggiornate";
 
 /* Title for card displaying carb entry and bolus recommendation */
 "Bolus Summary" = "Riepilogo Boli";
@@ -264,39 +264,39 @@
 "Bolus Too Small" = "Bolo troppo piccolo";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "%1$@ somministrato in bolo su %2$@";
+"Bolused %1$@ of %2$@" = "Bolo %1$@ di %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Somministrazione in bolo di %1$@ in corso";
+"Bolusing %1$@" = "Bolo in corso %1$@";
 
 /* The title of the cancel action in an action sheet */
-"Cancel" = "Cancella";
+"Cancel" = "Annulla";
 
 /* The title of the cell indicating a bolus is being canceled */
-"Canceling Bolus" = "Annullamento bolo in corso";
+"Canceling Bolus" = "Annullamento bolo";
 
 /* Details for missing data error when carb effects are missing */
-"Carb effects" = "Effetto dei carboidrati";
+"Carb effects" = "Effetto carboidrati";
 
 /* Back button text for bolus screen to return to carb entry screen
    Label for carb entry row on bolus screen */
-"Carb Entry" = "Aggiungi carboidrati assunti";
+"Carb Entry" = "Carboidrati Assunti";
 
 /* Details for configuration error when carb ratio schedule is missing */
-"Carb Ratio Schedule" = "Programma rapporto carboidrati";
+"Carb Ratio Schedule" = "Programma Rapporto Carboidrati";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Rapp. Carb:Insulina";
+"Carb Ratios" = "Rapporti Carboidrati";
 
 /* The title of the view controller to create a new carb entry */
-"carb-entry-title-add" = "Aggiungi carboidrati assunti";
+"carb-entry-title-add" = "Agg. Carb. Assunti";
 
 /* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Modifica carboidrati Assunti";
+"carb-entry-title-edit" = "Modifica Carboidrati Assunti";
 
 /* Title for bolus screen warning when carbohydrate entry is too large */
-"Carbohydrate Entry Too Large" = "Il numero dei Carboidrati inseriti e' troppo alto";
+"Carbohydrate Entry Too Large" = "Le voci dei Carboidrati inseriti sono troppo grandi";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Carboidrati";
@@ -335,7 +335,7 @@
 "Closed Loop OFF" = "Loop Chiuso Spento";
 
 /* The description text for the looping enabled switch cell when closed loop is not allowed because the sensor is inactive */
-"Closed Loop requires an active CGM Sensor Session" = "Loop  chiuso richiede almeno una sessione attiva del sensore CGM ";
+"Closed Loop requires an active CGM Sensor Session" = "Loop  chiuso richiede almeno una sessione attiva del sensore CGM";
 
 /* The description text for the looping enabled switch cell when onboarding is not complete */
 "Closed Loop requires Setup to be Complete" = "Loop Chiuso richiede che la sua configurazione sia completa";
@@ -384,13 +384,13 @@
 "Current Glucose" = "Glicemia Attuale";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "L'attuale valore glicemico di %1$@ e' inferiore al valore inferiore del target glicemico.";
+"Current glucose of %1$@ is below correction range." = "La glicemia attuale di %1$@ è al di sotto dell'intervallo glicemico selezionato.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Programma alternativo personalizzato";
+"Custom Override" = "Progr. Alternativo";
 
 /* The title of the cell indicating a generic custom preset is enabled */
-"Custom Preset" = "Preimpostazione personalizzata";
+"Custom Preset" = "Programmazione";
 
 /* Date picker label */
 "Date" = "Data";
@@ -408,10 +408,10 @@
 "Delete All" = "Cancella tutto";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Elimina CGM";
+"Delete CGM" = "Cancella CGM";
 
 /* Button title to delete a service */
-"Delete Service" = "Delete Service";
+"Delete Service" = "Cancella Servizio";
 
 /* No comment provided by engineer. */
 "Delete Testing CGM Data" = "Cancella i dati test del CGM";
@@ -439,10 +439,10 @@
 
 /* Default alert dismissal
    The button label of the action used to dismiss an error alert */
-"Dismiss" = "Dismettere";
+"Dismiss" = "Rimuovere";
 
 /* No comment provided by engineer. */
-"Done" = "Eseguito";
+"Done" = "Fine";
 
 /* Title for card to log dose */
 "Dose Summary" = "Riassunto della dose";
@@ -451,25 +451,25 @@
 "Dosing Strategy" = "Strategia di dosaggio";
 
 /* Message to the user to enable bluetooth */
-"Enable\nBluetooth" = "Abilitare\n Bluetooth";
+"Enable\nBluetooth" = "Abilita\n Bluetooth";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Abilita";
 
 /* Caption for bolus screen notice when glucose data is missing or stale */
-"Enter a blood glucose from a meter for a recommended bolus amount." = "Immettere una glicemia da un misuratore per una quantità di bolo consigliata.";
+"Enter a blood glucose from a meter for a recommended bolus amount." = "Inserisci una glicemia da glucometro per una quantità di bolo consigliata.";
 
 /* Button text to begin entering a bolus */
 "Enter Bolus" = "Inserisci Bolo";
 
 /* Button text prompting manual glucose entry on bolus screen */
-"Enter Fingerstick Glucose" = "Immettere Glicemia dal polpastrello";
+"Enter Fingerstick Glucose" = "Glicemia da Polpastrello";
 
 /* The placeholder text instructing users to enter a glucose safety limit */
-"Enter glucose safety limit" = "Inserisci il limite di sicurezza della glicemia";
+"Enter glucose safety limit" = "Inserisci limite di sicurezza";
 
 /* The placeholder text instructing users to enter a suspend treshold */
-"Enter suspend threshold" = "Inserisci il valore minimo sotto al quale l'erogazione e' sospesa";
+"Enter suspend threshold" = "Inserisci soglia di sospensione";
 
 /* The alert title for an error while canceling a bolus */
 "Error Canceling Bolus" = "Errore durante l’annullamento del bolo";
@@ -493,7 +493,7 @@
 "Exceeds maximum allowed carbs" = "Supera i carboidrati massimi consentiti";
 
 /* The title of the alert describing a maximum bolus validation error */
-"Exceeds Maximum Bolus" = "Valore superiore al Bolo Massimo";
+"Exceeds Maximum Bolus" = "Supera Bolo Massimo";
 
 /* Remote command error description: expired. */
 "Expired" = "Scaduto";
@@ -505,19 +505,19 @@
 "Export-%1$@" = "Esporta- %1$@";
 
 /* The alert title for a resume error */
-"Failed to Resume Insulin Delivery" = "Impossibile riprendere l'infusione d'insulina";
+"Failed to Resume Insulin Delivery" = "Impossibile riprendere l'erogazione dell'insulina";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
 
 /* Label for manual glucose entry row on bolus screen */
-"Fingerstick Glucose" = "Glicemia da test glucometrico\n";
+"Fingerstick Glucose" = "Glicemia da Polpastrello";
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Per %1$@";
 
 /* No comment provided by engineer. */
-"Forecasted blood glucose may still be higher than target range." = "La glicemia predetta potrebbe essere più elevata di quella impostata come obiettivo";
+"Forecasted blood glucose may still be higher than target range." = "La glicemia prevista potrebbe essere più elevata di quella impostata come obiettivo.";
 
 /* Title for forecast explanation modal on bolus view */
 "Forecasted Glucose" = "Glicemia prevista";
@@ -526,23 +526,23 @@
 "g" = "g";
 
 /* Get help with Alert Permissions support button text */
-"Get help with Alert Permissions" = "Ottieni assistenza per le autorizzazioni di avviso";
+"Get help with Alert Permissions" = "Ottieni assistenza per le autorizzazioni";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glicemie";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "L'ultimo valore glicemico e' di %1$@ fa";
+"Glucose data is %1$@ old" = "I dati sulla glicemia sono %1$@ vecchi";
 
 /* Description of error when glucose data is missing */
-"Glucose data not available" = "I dati sulla glicemia non sono disponibili";
+"Glucose data not available" = "I dati sulla glicemia non disponibili";
 
 /* Alert title when glucose data returns while on bolus screen */
-"Glucose Data Now Available" = "Dati sul glucosio ora disponibili";
+"Glucose Data Now Available" = "Dati Glicemie ora disponibili";
 
 /* Alert title for a manual glucose entry out of range error
    Title for bolus screen warning when glucose entry is out of range */
-"Glucose Entry Out of Range" = "Glicemia inserita fuori dal range";
+"Glucose Entry Out of Range" = "Glicemia inserita fuori dall'intervallo";
 
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Effetto Glicemico";
@@ -576,7 +576,7 @@
 
 /* Details for configuration error when insulin model is missing
    The title text for the insulin model setting row */
-"Insulin Model" = "Modello di azione dell'Insulina";
+"Insulin Model" = "Modello d'azione dell'Insulina";
 
 /* Descriptive text for Insulin Pump */
 "Insulin Pump" = "Microinfusore";
@@ -592,7 +592,7 @@
 "Insulin Suspended" = "Erogazione Insulina sospesa";
 
 /* Insulin type label */
-"Insulin Type" = "Tipo di insulina";
+"Insulin Type" = "Tipo d'insulina";
 
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Interrotto %1$@ : <b> %2$@ </b> di %3$@ %4$@";
@@ -635,7 +635,7 @@
 "Log Dose" = "Registra la dose";
 
 /* The title of the screen displaying a manually entered insulin dose */
-"Logged Insulin Dose" = "Dose di insulina registrata";
+"Logged Insulin Dose" = "Dose d'insulina registrata";
 
 /* Title for crash recovery alert */
 "Loop Crashed" = "Loop si è bloccato";
@@ -728,10 +728,10 @@
 "No Pump Configured" = "Nessun Microinfusore configurato";
 
 /* The title of the cell indicating that there is no recent glucose */
-"No Recent Glucose" = "Nessuna glícemia recente";
+"No Recent Glucose" = "No Glicemia Recente";
 
 /* Title for bolus screen notice when glucose data is missing or stale */
-"No Recent Glucose Data" = "Nessun dato recente sulla glicemia";
+"No Recent Glucose Data" = "Nessun Dato Recente Glicemia";
 
 /* Title for bolus screen notice when pump data is missing or stale */
 "No Recent Pump Data" = "Nessun dato recente sul Microinfusore";
@@ -775,10 +775,10 @@
 "On" = "Acceso";
 
 /* The title text for the override presets */
-"Override Presets" = "Impostazioni predefinite programma alternativo";
+"Override Presets" = "Programma Alternativo";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Obiettivo pre-pasto";
+"Pre-Meal Targets" = "Obiettivo Pasto";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
 "Predicted glucose at %1$@ is %2$@." = "La glicemia prevista tra %1$@ e' di %2$@.";
@@ -787,7 +787,7 @@
 "Predicted glucose is in range." = "La glicemia prevista e' nei valori giusti.";
 
 /* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
-"Predicted glucose of %1$@ is below your glucose safety limit setting." = "La glicemia predetta da %1$@ è al di sotto del tuo limite glicemico di sicurezza";
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "La glicemia prevista da %1$@ è al di sotto del tuo limite glicemico di sicurezza";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "La glicemia prevista %1$@ e' inferiore al valore soglia per la sospensione dell'erogazione.";
@@ -918,7 +918,7 @@
 "starting at %@" = "a partire da %@";
 
 /* The title of the cell indicating a bolus is being sent */
-"Starting Bolus" = "Invio Bolo";
+"Starting Bolus" = "Inizio Bolo";
 
 /* Section title for Support
    Support screen title
@@ -939,13 +939,13 @@
 "Tap here to set up a Service" = "Premi per configurare un servizio";
 
 /* The subtitle of the cell displaying an action to add a manually measurement glucose value */
-"Tap to Add" = "Tocca per aggiungere";
+"Tap to Add" = "Aggiungi";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Premi per riprendere";
+"Tap to Resume" = "Riprendi";
 
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
-"Tap to Stop" = "Tocca per interrompere";
+"Tap to Stop" = "Interrompi";
 
 /* The title of the cell indicating alerts are temporarily muted */
 "Temp Mute Alerts" = "Disattiva gli avvisi";
@@ -984,7 +984,7 @@
 "The remote command expired %.0f minutes ago." = "Il comando remoto è scaduto %.0f minuti fa.";
 
 /* Title text for button to Therapy Settings */
-"Therapy Settings" = "Impostazioni della terapia";
+"Therapy Settings" = "Impostazioni Terapia";
 
 /* Title of the carb entry date picker cell */
 "Time" = "Tempo";
@@ -1008,7 +1008,7 @@
 "Unable To Reach Pump" = "Impossibile raggiungere il microinfusore";
 
 /* Alert title for a carb entry persistence error */
-"Unable to Save Carb Entry" = "Impossibile salvare l'immissione di carboidrati";
+"Unable to Save Carb Entry" = "Impossibile salvare l'inserimento di carboidrati";
 
 /* Alert title for a manual glucose entry persistence error */
 "Unable to Save Manual Glucose Entry" = "Impossibile salvare l'inserimento manuale delle glicemie";
@@ -1084,7 +1084,7 @@
 "Your glucose is below your glucose safety limit, %1$@." = "La tua glicemia è al di sotto del limite di sicurezza, %1$@ .";
 
 /* Format string for meal bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold */
-"Your glucose is low. Eat carbs and consider waiting to bolus until your glucose is in a safe range." = "La tua Glicemia e'  Bassa! Mangia dei carboidrati semplici e valuta la possibilità' di aspettare di fare un Bolo fino a quando la tua Glicemia raggiunge valori di salvezza.";
+"Your glucose is low. Eat carbs and consider waiting to bolus until your glucose is in a safe range." = "La tua Glicemia è Bassa! Mangia dei carboidrati semplici e valuta la possibilità di aspettare a fare il Bolo fino a quando la tua Glicemia raggiunge un intervallo di sicurezza.";
 
 /* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
 "Your glucose is low. Eat carbs and monitor closely." = "La tua Glicemia è Bassa! Mangia dei Carboidrati Semplici e monitora la tua glicemia attivamente.";
@@ -1093,7 +1093,7 @@
 "Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "La tua Glicemia si sta alzando velocemente. Controlla che i carboidrati inseriti sono stati tutti registrati. Se hai inserito Carboidrati controlla anche che il tempo di quando sono stati registrati sia in linea con il tempo in cui hai iniziato a mangiare.";
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
-"Your maximum bolus amount is %1$@." = "La quantita' del tuo  Bolo Massimo e' %1$@";
+"Your maximum bolus amount is %1$@." = "La quantità del tuo Bolo Massimo è %1$@";
 
 /* Caption for bolus screen notice when pump data is missing or stale */
 "Your pump data is stale. %1$@ cannot recommend a bolus amount." = "I dati del microinfusore sono obsoleti. %1$@ non può consigliare una quantità di bolo.";

@@ -99,14 +99,14 @@
 "Save" = "Speichern";
 
 /* Button text to confirm carb entry and bolus on Apple Watch */
-"Save & Bolus" = "Speichern & Bolen";
+"Save & Bolus" = "Speichern & Bolus abgeben";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Senden fehlgeschlagen";
 
 /* Help text for bolus confirmation on Apple Watch */
-"Turn Digital Crown\nto bolus" = "Drehe die digitale \nKrone zum Bolen";
+"Turn Digital Crown\nto bolus" = "Drehe die digitale \nKrone für einen Bolus";
 
 /* The short unit display string for international units of insulin */
 "U" = "IE";

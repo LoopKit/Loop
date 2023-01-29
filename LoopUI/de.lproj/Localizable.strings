@@ -1,3 +1,6 @@
+/* Green closed loop ON message (1: last loop string) (2: app name) */
+"\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n%2$@ wird mit Closed Loop in der Position EIN betrieben.";
+
 /* Red loop message (1: last loop  string) (2: app name) */
 "\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippe auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, eine Schleife abzuschließen, aber achte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und Deinem CGM.";
 
@@ -16,6 +19,9 @@
 /* The format string describing the basal rate. */
 "%@ U" = "%@ IE";
 
+/* Format string describing last completion. (1: time ago */
+"%1$@ ago" = "%1$@ vor";
+
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%1$@ in %2$@";
 
@@ -27,6 +33,9 @@
 
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
+
+/* Format string describing last completion */
+"<1 min ago" = "vor <1 min";
 
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "Geschlossener Loop";
@@ -45,6 +54,9 @@
 
 /* String displayed instead of a glucose value above the CGM range */
 "HIGH" = "HOCH";
+
+/* Last loop time completed message (1: last loop time string) */
+"Last completed loop %1$@." = "Loop wurde nicht erfolgreich abgeschlossen seit %@";
 
 /* Title of red loop message */
 "Loop Failure" = "Loop Fehler";

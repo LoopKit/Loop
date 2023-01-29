@@ -88,6 +88,9 @@
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
+/* Instructions for user to close loop if it is allowed. */
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Appuyez sur Paramètres pour activer la boucle fermée si vous souhaitez que l'application automatise l'administration d'insuline.";
+
 /* The short unit display string for international units of insulin */
 "U" = "U";
 
@@ -96,4 +99,7 @@
 
 /* Acessibility label describing completion HUD waiting for first run */
 "Waiting for first run" = "En attente de la première exécution";
+
+/* Format string describing last completion. (1: the date */
+"was at %1$@" = "était à %1$@";
 

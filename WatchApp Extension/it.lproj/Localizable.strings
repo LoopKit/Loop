@@ -17,7 +17,7 @@
 "Active Insulin" = "Insulina attiva";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Aggiungi carboidrati assunti";
+"Add Carb Entry" = "Agg. Carb. Assunti";
 
 /* Button text to confirm manual bolus on Apple Watch */
 "Bolus" = "Bolo";
@@ -69,13 +69,13 @@
 "On" = "Acceso ";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Attiva programma alternativo";
+"Override" = "Programma Alternativo";
 
 /* Alert message for updated bolus recommendation on Apple Watch */
 "Please reconfirm the bolus amount." = "Si prega di riconfermare la quantità di bolo.";
 
 /* Title for sheet to enable/disable pre-meal on watch */
-"Pre-Meal" = "Pre-Pasto";
+"Pre-Meal" = "Pasto";
 
 /* The text for the Watch button for enabling a custom preset */
 "Preset" = "Preimpostato";

@@ -40,6 +40,9 @@
 /* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
 "Fal-Vf-lfh.normalTitle" = "🍭";
 
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3,5 E/time @ 12:12";
+
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Effekt av karbohydrater";
 
@@ -74,7 +77,7 @@
 "Rse-x8-amW.text" = "omsider 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g KaB";
+"SQx-au-ZcM.text" = "g Aktive karbohydrater";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glukose";
