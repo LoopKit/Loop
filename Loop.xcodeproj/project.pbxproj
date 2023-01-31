@@ -1582,6 +1582,7 @@
 		C19008FD25225D3900721625 /* SimpleBolusCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBolusCalculator.swift; sourceTree = "<group>"; };
 		C19008FF252271BB00721625 /* SimpleBolusCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBolusCalculatorTests.swift; sourceTree = "<group>"; };
 		C191D2A025B3ACAA00C26C0B /* DosingStrategySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DosingStrategySelectionView.swift; sourceTree = "<group>"; };
+		C19A2247298951AC000E4E71 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C19C8BB928651DFB0056D5E4 /* TrueTime.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TrueTime.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C19C8BC228651EAE0056D5E4 /* LoopTestingKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopTestingKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C19C8BC728651F0A0056D5E4 /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -4404,6 +4405,7 @@
 				C1004E212981F72D00B8CF94 /* fr */,
 				C1004E282981F74300B8CF94 /* fi */,
 				C1BCB5B3298309C4001C50FF /* it */,
+				C19A2247298951AC000E4E71 /* en */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
