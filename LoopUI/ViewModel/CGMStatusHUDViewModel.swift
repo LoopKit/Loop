@@ -60,10 +60,12 @@ public class CGMStatusHUDViewModel {
             if isManualGlucoseCurrent {
                 // If there is a current manual glucose, it displays the current status highlight icon
                 setManualGlucoseTrendIconOverride()
-            } else if let localizedMessage = storedStatusHighlight?.localizedMessage,
-                      let statusState = storedStatusHighlight?.state
+            }
+
+            if let localizedMessage = storedStatusHighlight?.localizedMessage.replacingOccurrences(of: "\n", with: " "),
+               let statusStateMessage = storedStatusHighlight?.state.localizedDescription
             {
-                accessibilityString = localizedMessage + ", " + statusState.localizedDescription
+                accessibilityString = localizedMessage + ", " + statusStateMessage
             }
         }
     }
@@ -156,15 +158,18 @@ public class CGMStatusHUDViewModel {
         if isManualGlucoseCurrent {
             // a manual glucose value presents any status highlight icon instead of a trend icon
             setManualGlucoseTrendIconOverride()
-            if let statusState = storedStatusHighlight?.state {
-                accessibilityStrings.append(statusState.localizedDescription)
-            }
         } else if let trend = glucoseDisplay?.trendType, glucoseValueCurrent {
             self.trend = trend
             glucoseTrendTintColor = glucoseDisplay?.glucoseRangeCategory?.trendColor ?? .glucoseTintColor
             accessibilityStrings.append(trend.localizedDescription)
         } else {
             glucoseTrendTintColor = .glucoseTintColor
+        }
+
+        if let statusStateMessage = storedStatusHighlight?.state.localizedDescription,
+           let localizedMessage = storedStatusHighlight?.localizedMessage.replacingOccurrences(of: "\n", with: " ")
+        {
+            accessibilityStrings.append(localizedMessage + ", " + statusStateMessage)
         }
                 
         unitsString = unit.localizedShortUnitString
