@@ -58,7 +58,7 @@ public struct SettingsView: View {
                     servicesSection
                 }
                 supportSection
-                if let profileExpiration = Bundle.main.profileExpiration {
+                if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
                     profileExpirationSection(profileExpiration: profileExpiration)
                 }
             }
@@ -339,6 +339,9 @@ extension SettingsView {
         }
     }
     
+    /*
+     DIY loop specific component to show users the amount of time remaining on their build before a rebuild is necessary.
+     */
     private func profileExpirationSection(profileExpiration:Date) -> some View {
         let nearExpiration : Bool = ProfileExpirationAlerter.isNearProfileExpiration(profileExpiration: profileExpiration)
         let profileExpirationMsg = ProfileExpirationAlerter.createProfileExpirationSettingsMessage(profileExpiration: profileExpiration)

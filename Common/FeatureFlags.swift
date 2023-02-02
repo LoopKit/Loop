@@ -37,6 +37,7 @@ struct FeatureFlagConfiguration: Decodable {
     let usePositiveMomentumAndRCForManualBoluses: Bool
     let dynamicCarbAbsorptionEnabled: Bool
     let adultChildInsulinModelSelectionEnabled: Bool
+    let profileExpirationSettingsViewEnabled: Bool
 
 
     fileprivate init() {
@@ -212,6 +213,12 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         self.dynamicCarbAbsorptionEnabled = true
+        
+        #if PROFILE_EXPIRATION_SETTINGS_VIEW_ENABLED
+        self.profileExpirationSettingsViewEnabled = true
+        #else
+        self.profileExpirationSettingsViewEnabled = false
+        #endif
     }
 }
 
@@ -244,7 +251,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* simpleBolusCalculatorEnabled: \(simpleBolusCalculatorEnabled)",
             "* usePositiveMomentumAndRCForManualBoluses: \(usePositiveMomentumAndRCForManualBoluses)",
             "* dynamicCarbAbsorptionEnabled: \(dynamicCarbAbsorptionEnabled)",
-            "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)"
+            "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)",
+            "* profileExpirationSettingsViewEnabled: \(profileExpirationSettingsViewEnabled)"
         ].joined(separator: "\n")
     }
 }
