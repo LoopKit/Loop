@@ -76,7 +76,8 @@ class ProfileExpirationAlerter {
     
     private static func relativeTimeFormatter(maxUnitCount:Int) -> DateComponentsFormatter {
         let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.day, .hour]
+        let includeHours = maxUnitCount == 2
+        formatter.allowedUnits = includeHours ? [.day, .hour] :  [.day]
         formatter.unitsStyle = .full
         formatter.zeroFormattingBehavior = .dropLeading
         formatter.maximumUnitCount = maxUnitCount

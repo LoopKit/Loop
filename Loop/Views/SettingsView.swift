@@ -365,7 +365,7 @@ extension SettingsView {
             }
         }
     }
-    
+
     private static var dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .long

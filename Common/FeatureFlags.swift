@@ -213,11 +213,12 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         self.dynamicCarbAbsorptionEnabled = true
-        
-        #if PROFILE_EXPIRATION_SETTINGS_VIEW_ENABLED
-        self.profileExpirationSettingsViewEnabled = true
-        #else
+
+        // ProfileExpirationSettingsView is inverse, since the default state is enabled.
+        #if PROFILE_EXPIRATION_SETTINGS_VIEW_DISABLED
         self.profileExpirationSettingsViewEnabled = false
+        #else
+        self.profileExpirationSettingsViewEnabled = true
         #endif
     }
 }
