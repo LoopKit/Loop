@@ -58,6 +58,9 @@ public struct SettingsView: View {
                     servicesSection
                 }
                 supportSection
+                if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
+                    profileExpirationSection(profileExpiration: profileExpiration)
+                }
             }
             .insetGroupedListStyle()
             .navigationBarTitle(Text(NSLocalizedString("Settings", comment: "Settings screen title")))
@@ -335,6 +338,40 @@ extension SettingsView {
             }
         }
     }
+    
+    /*
+     DIY loop specific component to show users the amount of time remaining on their build before a rebuild is necessary.
+     */
+    private func profileExpirationSection(profileExpiration:Date) -> some View {
+        let nearExpiration : Bool = ProfileExpirationAlerter.isNearProfileExpiration(profileExpiration: profileExpiration)
+        let profileExpirationMsg = ProfileExpirationAlerter.createProfileExpirationSettingsMessage(profileExpiration: profileExpiration)
+        let readableExpirationTime = Self.dateFormatter.string(from: profileExpiration)
+        
+        return Section(header: SectionHeader(label: NSLocalizedString("App Profile", comment: "Settings app profile section")),
+                       footer: Text(NSLocalizedString("Profile expires ", comment: "Time that profile expires") + readableExpirationTime)) {
+            if(nearExpiration) {
+                Text(profileExpirationMsg).foregroundColor(.red)
+            } else {
+                HStack {
+                    Text("Profile Expiration", comment: "Settings App Profile expiration view")
+                    Spacer()
+                    Text(profileExpirationMsg).foregroundColor(Color.secondary)
+                }
+            }
+            Button(action: {
+                UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/build/updating/")!)
+            }) {
+                Text(NSLocalizedString("How to update (LoopDocs)", comment: "The title text for how to update"))
+            }
+        }
+    }
+
+    private static var dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .long
+        dateFormatter.timeStyle = .short
+        return dateFormatter // formats date like "February 4, 2023 at 2:35 PM"
+    }()
 
     private var plusImage: some View {
         Image(systemName: "plus.circle")
