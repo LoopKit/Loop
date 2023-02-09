@@ -2,5 +2,5 @@
 "CFBundleName" = "Lær";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Mad-data fra sundhedsdatabasen bruges til at bestemme blodsukkereffekten. Blodsukkerdata fra sundhedsdatabasen bruges til graftegning og momentumberegning. Søvndata fra sundhedsdatabasen bruges til at optimere leveringen af opdateringer om komplikationer af Apple Watch i den tid, du er vågen.";
+"NSHealthShareUsageDescription" = "Mad-data fra Health-databasen bruges til at bestemme blodsukkereffekten. Blodsukkerdata fra Health-databasen bruges til graftegning og momentumberegning. Søvndata fra sundhedsdatabasen bruges til at optimere leveringen af opdateringer om komplikationer af Apple Watch i den tid, du er vågen.";
 

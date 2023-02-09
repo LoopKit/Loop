@@ -1,6 +1,15 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (pending: %@)";
 
+/* String denoting lack of a recommended bolus amount in the simple bolus calculator */
+"–" = "-";
+
+/* No comment provided by engineer. */
+"– –" = "--";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "---";
+
 /* The format for an active override preset. (1: preset symbol)(2: preset name) */
 "%@ %@" = "%1$@ %2$@";
 

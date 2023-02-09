@@ -10,6 +10,15 @@
 /* Status row title for workout override enabled (leading space is to separate from symbol) */
 " Workout Preset" = "Egzersiz Ön Ayarı";
 
+/* String denoting lack of a recommended bolus amount in the simple bolus calculator */
+"–" = "–";
+
+/* No comment provided by engineer. */
+"– –" = "– –";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
 /* Full stop character */
 "." = ".";
 
@@ -280,6 +289,12 @@
    The title text for the carb ratio schedule */
 "Carb Ratios" = "Karbonhidrat Oranları";
 
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Karb Girişi Ekle";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "Karb Girişini Düzenle";
+
 /* Title for bolus screen warning when carbohydrate entry is too large */
 "Carbohydrate Entry Too Large" = "Karbonhidrat Girişi Çok Büyük";
 
@@ -305,7 +320,7 @@
 "Check your CGM data source" = "CGM veri kaynağınızı kontrol edin";
 
 /* Caption for bolus screen notice when glucose data is in the future */
-"Check your device time and/or remove any invalid data from Apple Health." = "Aygıtınızın saatini kontrol edin ve/veya tüm geçersiz verileri Apple Health'ten kaldırın.";
+"Check your device time and/or remove any invalid data from Apple Health." = "Aygıtınızın saatini kontrol edin ve/veya tüm geçersiz verileri Apple Sağlık'tan kaldırın.";
 
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Daha büyük öğünler veya yağ ve protein içeren besinler için daha uzun bir emilim süresi seçin. Bu değer yalnızca algoritmaya rehberlik eder ve kesin olması gerekmez.";
@@ -324,6 +339,12 @@
 
 /* The description text for the looping enabled switch cell when onboarding is not complete */
 "Closed Loop requires Setup to be Complete" = "Kapalı Döngü, Kurulumun Tamamlanmasını gerektirir";
+
+/* The format string describing the date of an IOB value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.IOBDateLabel" = "%1$@";
+
+/* The format string describing the starting date of a total value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.totalDateLabel" = "%1$@ den beri";
 
 /* The title of the action used to dismiss an error alert */
 "com.loudnate.LoopKit.errorAlertActionTitle" = "Tamam";
@@ -501,6 +522,9 @@
 /* Title for forecast explanation modal on bolus view */
 "Forecasted Glucose" = "Tahmini KŞ";
 
+/* The short unit display string for grams */
+"g" = "gr";
+
 /* Get help with Alert Permissions support button text */
 "Get help with Alert Permissions" = "Uyarı İzinleri ile ilgili yardım alın";
 
@@ -614,7 +638,7 @@
 "Logged Insulin Dose" = "Kayıtlı İnsülin Dozu";
 
 /* Title for crash recovery alert */
-"Loop Crashed" = "Döngü Çöktü";
+"Loop Crashed" = "Loop Çöktü";
 
 /* The notification title for a loop failure */
 "Loop Failure" = "Döngü Hatası";
@@ -659,11 +683,17 @@
 /* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Yemek Bolusu";
 
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Eksik veri: %1$@";
 
 /* Remote command error description: missing maximum bolus in settings. */
 "Missing maximum allowed bolus in settings" = "Ayarlarda izin verilen maksimum bolus eksik";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum etkileri";
@@ -679,6 +709,9 @@
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
+
+/* Description of temporary mute alerts */
+"No alerts will sound while muted. Once this period ends, your alerts and alarms will resume as normal." = "Sessiz durumdayken hiçbir uyarı çalmaz. Bu süre sona erdiğinde, uyarılarınız ve alarmlarınız normal şekilde devam edecektir.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -703,6 +736,24 @@
 /* Title for bolus screen notice when pump data is missing or stale */
 "No Recent Pump Data" = "Son Pompa Verisi Yok";
 
+/* The title of the action used when rejecting the the amount of carbohydrates entered. */
+"No, edit amount" = "Hayır, miktarı düzenle";
+
+/* Notification Delivery Status text */
+"Notification Delivery" = "Bildirim Gönderimi";
+
+/* Format for Critical Alerts permissions disabled alert body. (1: app name) */
+"Notification delivery is set to Scheduled Summary in your phone’s settings.\n\nTo avoid delay in receiving notifications from %1$@, we recommend notification delivery be set to Immediate Delivery." = "Bildirim gönderimi, telefonunuzun ayarlarında Zamanlanmış Özet olarak ayarlanmıştır.\n\n%1$@ adresinden bildirim almakta gecikmeyi önlemek için bildirim gönderimini Anında Gönderim olarak ayarlanmasını öneririz.";
+
+/* Notifications Status text */
+"Notifications" = "Bildirimler";
+
+/* Scheduled Delivery Enabled alert title */
+"Notifications Delayed" = "Bildirimler Gecikti";
+
+/* Alert Permissions descriptive text (1: app name) */
+"Notifications give you important %1$@ app information without requiring you to open the app." = "Bildirimler, uygulamayı açmanıza gerek kalmadan size önemli %1$@ uygulama bilgilerini verir.";
+
 /* Alert Permissions descriptive text (1: app name) */
 "Notifications give you important %1$@ app information without requiring you to open the app.\n\nKeep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications." = "Bildirimler, uygulamayı açmanıza gerek kalmadan size önemli %1$@ uygulama bilgilerini verir. \n\n %1$@ Bildirimler, Kritik Uyarılar ve Zamana Duyarlı Bildirimler aldığınızdan emin olmak için telefonunuzun ayarlarında bunları AÇIK durumda tutun.";
 
@@ -710,7 +761,7 @@
 "Off" = "Kapalı";
 
 /* Modal body for crash recovery alert */
-"Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "Oh hayır! Dozlama sırasında döngü çöktü ve bu iletişim kutusu kapatılana kadar insülin ayarlamaları duraklatıldı. Dozlama geçmişi doğru olmayabilir. Lütfen İnsülin İletim tablolarını gözden geçirin ve kan şekerinizi dikkatle izleyin.";
+"Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "Oh hayır! Dozlama sırasında Loop çöktü ve bu iletişim kutusu kapatılana kadar insülin ayarlamaları duraklatıldı. Dozlama geçmişi doğru olmayabilir. Lütfen İnsülin İletim tablolarını gözden geçirin ve kan şekerinizi dikkatle izleyin.";
 
 /* Alert acknowledgment OK button
    Critical Alert permissions disabled alert button
@@ -893,17 +944,96 @@
 /* The subtitle of the cell displaying an action to resume insulin delivery */
 "Tap to Resume" = "Sürdürmek için dokunun";
 
+/* Message presented in the status row instructing the user to tap this row to stop a bolus */
+"Tap to Stop" = "Durdurmak için dokunun";
+
+/* The title of the cell indicating alerts are temporarily muted */
+"Temp Mute Alerts" = "Geçici Sessize Alınan Uyarılar";
+
+/* Alert message for a bolus too small validation error */
+"The bolus amount entered is smaller than the minimum deliverable." = "Girilen bolus miktarı, minimum teslim edilebilir miktardan daha küçük.";
+
+/* Forecast explanation modal on bolus view */
+"The bolus dosing algorithm uses a more conservative estimate of forecasted blood glucose than what is used to adjust your basal rate.\n\nAs a result, your forecasted blood glucose after a bolus may still be higher than your target range." = "Bolus dozlama algoritması, bazal hızınızı ayarlamak için kullanılandan daha ihtiyatlı bir kan şekeri tahmini kullanır. \n\n Sonuç olarak, bir bolustan sonra tahmin edilen kan şekeriniz, hedef aralığınızdan daha yüksek olabilir.";
+
+/* Alert message for an updated bolus recommendation */
+"The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolus önerisi güncellendi. Lütfen bolus miktarını yeniden onaylayın.";
+
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Loop tarafından kullanılan ve eylem süresinin özelleştirilmesine izin veren eski model.";
+
+/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
+"The maximum absorption time is %@" = "Maksimum emilim süresi %@";
+
+/* Alert body displayed for quantity greater than max (1: maximum quantity in grams) */
+"The maximum allowed amount is %@ grams." = "İzin verilen maksimum miktar %@ gramdır.";
+
+/* Warning for simple bolus when carbohydrate entry is too large. (1: maximum carbohydrate entry) */
+"The maximum amount allowed is %1$@." = "İzin verilen maksimum tutar %1$@.";
+
+/* Alert message for a maximum bolus validation error (1: max bolus value) */
+"The maximum bolus amount is %@ U." = "Maksimum bolus miktarı %@ Ü.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Maksimum bolus miktarı %@ Ünitedir";
 
+/* Alert message for a missing maximum bolus setting error */
+"The maximum bolus setting must be configured before a bolus can be delivered." = "Bir bolus verilmeden önce maksimum bolus ayarı yapılandırılmalıdır.";
+
+/* The notification body for a remote command expiration. (1: Expiration in minutes) */
+"The remote command expired %.0f minutes ago." = "Uzak komutun süresi %.0f dakika önce doldu.";
+
+/* Title text for button to Therapy Settings */
+"Therapy Settings" = "Tedavi Ayarları";
+
+/* Title of the carb entry date picker cell */
+"Time" = "Zaman";
+
+/* Time Sensitive Status text */
+"Time Sensitive Notifications" = "Zamana Duyarlı Bildirimler";
+
+/* Critical event log export error alert try again button */
+"Try Again" = "Tekrar deneyin";
+
+/* Bluetooth off foreground alert body */
+"Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Uyarıları, alarmları veya sensör KŞ okumalarını almak için Bluetooth'u açın.";
+
 /* The short unit display string for international units of insulin */
 "U" = "Ü";
 
+/* Title for alert shown when alert acknowledgement fails */
+"Unable To Clear Alert" = "Uyarı Silinemiyor";
+
+/* Title for alert shown when delivery status is uncertain */
+"Unable To Reach Pump" = "Pompaya Ulaşılamıyor";
+
+/* Alert title for a carb entry persistence error */
+"Unable to Save Carb Entry" = "Karb Girişi Kaydedilemiyor";
+
+/* Alert title for a manual glucose entry persistence error */
+"Unable to Save Manual Glucose Entry" = "Manuel KŞ Girişi Kaydedilemiyor";
+
+/* The alert body for an error while canceling a bolus */
+"Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Devam etmekte olan bolus durdurulamıyor. iPhone'unuzu pompaya yaklaştırın ve tekrar deneyin. Ayrıntılar için insülin uygulama geçmişinizi kontrol edin ve kan şekerinizi yakından takip edin.";
+
+/* Event title displayed when StoredPumpEvent.title is not set
+   The default description to use when an entry has no dose description */
+"Unknown" = "Bilinmeyen";
+
+/* The error message displayed for unknown errors. (1: unknown error) */
+"Unknown Error: %1$@" = "Bilinmeyen Hata: %1$@";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "%@ tarihine kadar";
+
+/* The title of a target alert action specifying pre-meal targets duration for 1 hour or until the user enters carbs (whichever comes first). */
+"Until I enter carbs" = "Karb girene kadar";
+
+/* The title of a target alert action specifying workout targets duration until it is turned off by the user */
+"Until I turn off" = "Ben kapatana kadar";
+
+/* The title of the alert controller used to select a duration for pre-meal targets */
+"Use Pre-Meal Preset" = "Yemek Öncesi Ön Ayarı Kullanın";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Egzersiz KŞ Hedeflerini Kullanın";
@@ -913,6 +1043,12 @@
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";
+
+/* Alert Permissions Need Attention alert title */
+"Warning! Safety notifications are turned OFF" = "Uyarı! Güvenlik bildirimleri KAPALI";
+
+/* Explanation of glucose safety limit */
+"When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Mevcut veya tahmin edilen KŞ,  KŞ güvenlik sınırının altında olduğunda Loop bir bolus önermez ve her zaman saatte 0  ünite geçici bazal oran önerir.";
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Mevcut veya tahmin edilen KŞ askıya alma eşiğinin altında olduğunda, Loop bir bolus önermez ve her zaman saatte 0 birimlik geçici bir bazal hız önerir.";
@@ -931,4 +1067,40 @@
 
 /* The title of the action used when confirming entered amount of carbohydrates. */
 "Yes" = "Evet";
+
+/* Format for Notifications permissions disabled alert body. (1: app name) */
+"You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications, Critical Alerts and Time Sensitive Notifications are turned ON." = "Kritik güvenlik bilgileriyle ilgili sesli, görsel veya titreşimli uyarılar alamayabilirsiniz. \n\n Sorunu çözmek için 'Ayarlar'a dokunun ve Bildirimlerin, Kritik Uyarıların ve Zamana Duyarlı Bildirimlerin AÇIK olduğundan emin olun.";
+
+/* Time change alert body. (1: app name) */
+"Your %1$@’s time has been changed. %2$@ needs accurate time records to make predictions about your glucose and adjust your insulin accordingly.\n\nCheck in your %1$@ Settings (General / Date & Time) and verify that 'Set Automatically' is turned ON. Failure to resolve could lead to serious under-delivery or over-delivery of insulin." = "%1$@ 'inizin saati değiştirildi. %2$@ KŞ ile ilgili tahminlerde bulunmak ve insülininizi buna göre ayarlamak için doğru zaman kayıtlarına ihtiyaç duyar. \n\n %1$@ Ayarlarınızı (Genel / Tarih ve Saat) kontrol edin ve 'Otomatik Olarak Ayarla' seçeneğinin AÇIK olduğunu doğrulayın. Çözülmemesi, insülinin ciddi şekilde yetersiz veya fazla verilmesine yol açabilir.";
+
+/* Format string for simple bolus screen warning when glucose is below glucose warning limit. */
+"Your glucose is below %1$@. Are you sure you want to bolus?" = "KŞ %1$@ altında. Bolus yapmak istediğinizden emin misiniz?";
+
+/* Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit */
+"Your glucose is below or predicted to go below your glucose safety limit, %@." = "KŞ güvenlik sınırınızın %@ altındadır veya altına düşeceği tahmin edilmektedir.";
+
+/* Format string for bolus screen warning when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold) */
+"Your glucose is below your glucose safety limit, %1$@." = "KŞ güvenlik sınırınızın altında, %1$@ .";
+
+/* Format string for meal bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold */
+"Your glucose is low. Eat carbs and consider waiting to bolus until your glucose is in a safe range." = "KŞ düşük. Karbonhidrat yiyin ve KŞ güvenli bir aralığa gelene kadar bolus yapmayı erteleyin.";
+
+/* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
+"Your glucose is low. Eat carbs and monitor closely." = "KŞ düşük. Karbonhidrat yiyin ve yakından izleyin.";
+
+/* Warning to ensure the carb entry is accurate */
+"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "KŞ hızla yükseliyor. Yediğiniz karbonhidratların kaydedilip kaydedilmediğini kontrol edin. Karbonhidratları kaydettiyseniz, girdiğiniz zamanın yemeye başladığınız zamanla aynı olup olmadığını kontrol edin.";
+
+/* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
+"Your maximum bolus amount is %1$@." = "Maksimum bolus miktarınız %1$@ .";
+
+/* Caption for bolus screen notice when pump data is missing or stale */
+"Your pump data is stale. %1$@ cannot recommend a bolus amount." = "Pompa verileriniz eski. %1$@ bir bolus miktarı öneremez.";
+
+/* The description text for the looping enabled switch cell when closed loop is not allowed because the pump is delivering a manual temp basal. */
+"Your pump is delivering a manual temporary basal rate." = "Pompanız manuel bir geçici bazal oran veriyor.";
+
+/* Warning for simple bolus when recommended bolus exceeds max bolus. (1: maximum bolus) */
+"Your recommended bolus exceeds your maximum bolus amount of %1$@." = "Önerilen bolus miktarı, maksimum bolus miktarınız olan %1$@ değerini aşıyor.";
 

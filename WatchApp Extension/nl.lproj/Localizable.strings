@@ -14,7 +14,7 @@
 "Active Carbs" = "Actieve Koolhydraten";
 
 /* HUD row title for IOB */
-"Active Insulin" = "Actieve insuline";
+"Active Insulin" = "Actieve Insuline";
 
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Koolhydraatinvoer Toevoegen";
@@ -23,10 +23,10 @@
 "Bolus" = "Bolus";
 
 /* The title of the alert controller displayed after a bolus attempt fails */
-"Bolus Failed" = "Bolus mislukt";
+"Bolus Failed" = "Bolus Mislukt";
 
 /* Alert title for updated bolus recommendation on Apple Watch */
-"Bolus Recommendation Updated" = "Bolusaanbeveling Bijgewerkt";
+"Bolus Recommendation Updated" = "Aanbevolen Bolus Bijgewerkt";
 
 /* Button text to continue from carb entry to bolus entry on Apple Watch */
 "Continue" = "Ga Verder";
@@ -35,7 +35,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Sluiten";
+"Dismiss" = "Afwijzen";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -87,10 +87,10 @@
 "Rec: %@ U" = "Voorgesteld: %@ E";
 
 /* Recommended bolus amount label on Apple Watch */
-"REC: %@ U" = "REC: %@ E";
+"REC: %@ U" = "AANBEVOLEN: %@ E";
 
 /* Indicator that recommended bolus computation is in progress on Apple Watch */
-"REC: Calculating..." = "REC: Berekenen...";
+"REC: Calculating..." = "AANBEVOLEN: Berekenen...";
 
 /* HUD row title for remaining reservoir volume */
 "Reservoir Volume" = "Reservoirinhoud";
@@ -103,7 +103,7 @@
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
-"Send Failed" = "Versturen mislukt";
+"Send Failed" = "Versturen Mislukt";
 
 /* Help text for bolus confirmation on Apple Watch */
 "Turn Digital Crown\nto bolus" = "Turn Digital Crown\nom te bolussen";

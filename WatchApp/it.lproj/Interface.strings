@@ -8,7 +8,7 @@
 "Dt1-kz-jMZ.text" = "---";
 
 /* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
-"f5G-bS-9pd.text" = "Pasto";
+"f5G-bS-9pd.text" = "Pre-Pasto";
 
 /* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
 "hln-CI-MRP.text" = "Carboidrati";

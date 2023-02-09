@@ -2,10 +2,10 @@
 "CsQ-fc-KLC.text" = "—";
 
 /* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
-"dea-qG-va8.text" = "Totaal koolhydraten";
+"dea-qG-va8.text" = "Totaal Koolhydraten";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "Dt1-kz-jMZ"; */
-"Dt1-kz-jMZ.text" = "---";
+"Dt1-kz-jMZ.text" = "– –";
 
 /* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
 "f5G-bS-9pd.text" = "Pre-Meal";
@@ -38,7 +38,7 @@
 "smL-Rc-IZh.text" = "Bolus";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
-"T4U-wP-dSW.text" = "Label";
+"T4U-wP-dSW.text" = "Etiket";
 
 /* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
 "UVY-pa-SUL.text" = "🏃‍♀️";
@@ -53,7 +53,7 @@
 "ycL-5X-a05.text" = "ACTIEVE KOOLHYDRATEN";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "yl8-ZP-c3l"; */
-"yl8-ZP-c3l.text" = "---";
+"yl8-ZP-c3l.text" = "– –";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "zO8-x6-bZd"; */
 "zO8-x6-bZd.text" = "Label";

@@ -23,7 +23,7 @@
 "bq4-98-cQU.text" = "Glucoseverandering";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
-"d3X-AN-tA5.text" = "gr totaal";
+"d3X-AN-tA5.text" = "g Totaal";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
 "D4C-I2-dhA.text" = "De toekomstige glucosewaarde wordt voorspeld door de effecten van meerdere inputwaarden te combineren. Gebruik dit hulpmiddel om verschillende inputwaarden aan en uit te zetten om ze zo te kunnen vergelijken met de uiteindelijke voorspelde glucosewaarde.";
@@ -47,7 +47,7 @@
 "hZZ-2S-lrd.title" = "Koolhydraateffect";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Waargenomen veranderingen in de glucose, minus de veranderingen die al door insulinetoediening hebben plaatsgevonden, kunnen worden gebruikt om de koolhydraatabsorptie in te schatten.";
+"IxU-As-glo.text" = "Waargenomen glucoseveranderingen, minus de veranderingen die al door insulinetoediening hebben plaatsgevonden, kunnen worden gebruikt om de koolhydraatopname in te schatten.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Detail";

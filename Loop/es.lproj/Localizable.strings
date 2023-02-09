@@ -55,6 +55,9 @@
 /* Formats (1: carb start time) and (2: carb absorption duration) */
 "%1$@ + %2$@" = "%1$@ + %2$@";
 
+/* Alert message for closed loop off informational modal. (1: app name) */
+"%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically." = "%1$@ está funcionando con Circuito Cerrado en la posición APAGADO. Su bomba y CGM seguirán funcionando, pero la aplicación no ajustará la dosis automáticamente.";
+
 /* Message for alert shown when alert acknowledgement fails for a device, and the device does not provide a LocalizedError. (1: app name) */
 "%1$@ is unable to clear the alert from your device" = "%1$@ no puede borrar la alerta de su dispositivo";
 
@@ -78,6 +81,9 @@
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration */
+"%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile." = "%1$@ dejará de funcionar en %2$@ . Deberá actualizar antes de eso, con un nuevo perfil de aprovisionamiento.";
 
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
@@ -171,11 +177,38 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
+/* Warning to ensure the carb entry is accurate during an override */
+"An active override is modifying your carb ratio and insulin sensitivity. If you don't want this to affect your bolus calculation and projected glucose, consider turning off the override." = "Un Ajuste Temporal activo modifica la proporción de carbohidratos y la sensibilidad a la insulina. Si no deseas que esto afecte el cálculo del bolo y la glucosa proyectada, considera desactivar el Ajuste Temporal.";
+
+/* Alert message for a carb entry persistence error */
+"An error occurred while trying to save your carb entry." = "Se produjo un error al intentar guardar la entrada de carbohidratos.";
+
+/* Alert message for a manual glucose entry persistence error */
+"An error occurred while trying to save your manual glucose entry." = "Se produjo un error al intentar guardar la entrada manual de glucosa.";
+
+/* Invalid onboarding state */
+"An unexpected onboarding error state occurred." = "Se ha producido un error inesperado";
+
+/* Alert message when glucose data returns while on bolus screen */
+"An updated bolus recommendation is available." = "Hay una recomendación actualizada de bolo.";
+
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
 
 /* The title of the nightscout API secret credential */
 "API Secret" = "Secreto API";
+
+/* Action sheet confirmation message for pump history deletion */
+"Are you sure you want to delete all history entries?" = "¿Estás seguro de que quieres borrar todas las entradas históricas?";
+
+/* Action sheet confirmation message for logged dose deletion */
+"Are you sure you want to delete all logged dose entries?" = "¿Estás seguro de que quieres borrar todas las entradas de dosis registradas?";
+
+/* Action sheet confirmation message for reservoir deletion */
+"Are you sure you want to delete all reservoir values?" = "¿Estás seguro de que quieres eliminar todos los datos del reservorio?";
+
+/* No comment provided by engineer. */
+"Are you sure you want to delete all your %@ Data?\n(This action is not reversible)" = "¿Estás seguro de que quieres eliminar todos tus datos de %@ ?\n (Esta acción no es reversible)";
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "¿Está usted seguro de querer eliminar este CGM?";
@@ -189,12 +222,21 @@
 /* The message displayed during a device authentication prompt for bolus specification */
 "Authenticate to Bolus %@ Units" = "Autenticar para Bolo %@ Unidades";
 
+/* The message displayed during a device authentication prompt to log an insulin dose */
+"Authenticate to log %@ Units" = "Autenticarse para registrar %@ Unidades";
+
 /* Details for configuration error when basal rate schedule is missing */
 "Basal Rate Schedule" = "Perfil Basal";
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
 "Basal Rates" = "Perfil Basal";
+
+/* Caption for bolus screen notice when no bolus is recommended for the predicted glucose */
+"Based on your predicted glucose, no bolus is recommended." = "Basándose en su glucosa proyectada, no se recomienda ningún bolo.";
+
+/* Message to the user to that the bluetooth is off */
+"Bluetooth\nOff" = "Bluetooth\nApagado";
 
 /* Message to the user that bluetooth is unavailable to the app */
 "Bluetooth\nUnavailable" = "Bluetooth \nNo Disponible";
@@ -209,11 +251,17 @@
    The notification title for a bolus failure */
 "Bolus" = "Bolo";
 
+/* The notification title for a bolus issue */
+"Bolus Issue" = "Problema con el bolo";
+
 /* Alert title for an updated bolus recommendation */
 "Bolus Recommendation Updated" = "Recomendación de bolo fue actualicada";
 
 /* Title for card displaying carb entry and bolus recommendation */
 "Bolus Summary" = "Resumen del bolo";
+
+/* Alert title for a bolus too small validation error */
+"Bolus Too Small" = "Bolo demasiado pequeño";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
 "Bolused %1$@ of %2$@" = "Administró bolo %1$@ de %2$@";
@@ -234,6 +282,9 @@
    Label for carb entry row on bolus screen */
 "Carb Entry" = "Entrada de Carbohidratos";
 
+/* Details for configuration error when carb ratio schedule is missing */
+"Carb Ratio Schedule" = "Calendario de ratio de carbohidratos";
+
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
 "Carb Ratios" = "Relacíon de carbohidratos";
@@ -243,6 +294,9 @@
 
 /* The title of the view controller to edit an existing carb entry */
 "carb-entry-title-edit" = "Editar Entrada de Carbohidratos";
+
+/* Title for bolus screen warning when carbohydrate entry is too large */
+"Carbohydrate Entry Too Large" = "Entrada de carbohidratos demasiado grande";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Carbohidratos";
@@ -265,8 +319,14 @@
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Verifique su fuente de datos CGM";
 
+/* Caption for bolus screen notice when glucose data is in the future */
+"Check your device time and/or remove any invalid data from Apple Health." = "Compruebe la hora de su dispositivo y/o elimine cualquier dato no válido de Apple Health.";
+
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Escoja un tiempo más largo de absorción para comidas más grandes, o las cuales que contienen más grasa o proteína. Éste es consejo al algoritmo y no es necesario de que sea exacto. ";
+
+/* The button label of the action used to dismiss the unsafe notification permission alert */
+"Close" = "Cerrar";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Asa cerrada";
@@ -277,6 +337,9 @@
 /* The description text for the looping enabled switch cell when closed loop is not allowed because the sensor is inactive */
 "Closed Loop requires an active CGM Sensor Session" = "La asa cerrada requiere una sesión de sensor CGM activa";
 
+/* The description text for the looping enabled switch cell when onboarding is not complete */
+"Closed Loop requires Setup to be Complete" = "El Circuito Cerrado requiere que la configuración esté completa";
+
 /* The format string describing the date of an IOB value. The first format argument is the localized date. */
 "com.loudnate.InsulinKit.IOBDateLabel" = "en %1$@";
 
@@ -286,11 +349,17 @@
 /* The title of the action used to dismiss an error alert */
 "com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
 
+/* Title text for button to complete setup */
+"Complete Setup" = "Completa la Configuración";
+
 /* The title of the configuration section in settings */
 "Configuration" = "Configuración";
 
 /* The error message displayed for configuration errors. (1: configuration error details) */
 "Configuration Error: %1$@" = "Error de Configuración: %1$@";
+
+/* Default alert dismissal */
+"Continue" = "Continuar";
 
 /* The title of the continuous glucose monitor section in settings */
 "Continuous Glucose Monitor" = "Monitor de glucosa continuo";
@@ -298,6 +367,18 @@
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
 "Correction Range" = "Rango de Correción";
+
+/* Critical Alerts Status text */
+"Critical Alerts" = "Alertas críticas";
+
+/* Critical event log ready text */
+"Critical Event Log Ready" = "Registro de eventos críticos listo";
+
+/* Critical event log export title */
+"Critical Event Logs" = "Registros de eventos críticos";
+
+/* Critical event log export error alert message */
+"Critical Event Logs were not able to be exported." = "No se han podido exportar los registros de eventos críticos.";
 
 /* Label for glucose entry row on simple bolus screen */
 "Current Glucose" = "Glucosa actual";
@@ -307,6 +388,9 @@
 
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Sobreescritura personalizada";
+
+/* The title of the cell indicating a generic custom preset is enabled */
+"Custom Preset" = "Preajuste personalizado";
 
 /* Date picker label */
 "Date" = "Fecha";
@@ -335,11 +419,20 @@
 /* No comment provided by engineer. */
 "Delete Testing Data" = "Eliminar datos de prueba";
 
+/* No comment provided by engineer. */
+"Delete Testing Pump Data" = "Borrar los datos de prueba de la bomba";
+
 /* Button text to deliver a bolus */
 "Deliver" = "Entregar";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Límites de Dosificación";
+
+/* Descriptive text for Therapy Settings */
+"Diabetes Treatment" = "Tratamiento de la diabetes";
+
+/* Alert body when entered carbohydrates is greater than threshold (1: entered quantity in grams) */
+"Did you intend to enter %1$@ grams as the amount of carbohydrates for this meal?" = "¿Quería introducir %1$@ gramos como cantidad de hidratos de carbono para esta comida?";
 
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Desactivar";
@@ -347,6 +440,9 @@
 /* Default alert dismissal
    The button label of the action used to dismiss an error alert */
 "Dismiss" = "Ignorar";
+
+/* No comment provided by engineer. */
+"Done" = "Completado";
 
 /* Title for card to log dose */
 "Dose Summary" = "Resumen de dosis";
@@ -369,11 +465,17 @@
 /* Button text prompting manual glucose entry on bolus screen */
 "Enter Fingerstick Glucose" = "Ingrese la glucosa de punción en el dedo";
 
+/* The placeholder text instructing users to enter a glucose safety limit */
+"Enter glucose safety limit" = "Introduzca el límite de seguridad de glucosa";
+
 /* The placeholder text instructing users to enter a suspend treshold */
 "Enter suspend threshold" = "Ingrese nivel de suspensión";
 
 /* The alert title for an error while canceling a bolus */
 "Error Canceling Bolus" = "Error de cancelación de bolo";
+
+/* Critical event log export error alert title */
+"Error Exporting Logs" = "Error al exportar registros";
 
 /* The alert title for a resume error */
 "Error Resuming" = "Error de reanudación";
@@ -384,8 +486,26 @@
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Eventualmente %@";
 
+/* Remote command error description: bolus exceeds maximum bolus in settings. */
+"Exceeds maximum allowed bolus in settings" = "Excede el bolo máximo permitido en la configuración";
+
+/* Remote command error description: carbs exceed maximum amount. */
+"Exceeds maximum allowed carbs" = "Supera el máximo permitido de carbohidratos definido en la configuración";
+
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Excede bolo máximo";
+
+/* Remote command error description: expired. */
+"Expired" = "Caducado";
+
+/* The title of the export critical event logs in support */
+"Export Critical Event Logs" = "Exportar registros de eventos críticos";
+
+/* The export file name formatted string (1: timestamp) */
+"Export-%1$@" = "Exportar- %1$@";
+
+/* The alert title for a resume error */
+"Failed to Resume Insulin Delivery" = "No se pudo reanudar la administración de insulina";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
@@ -396,8 +516,17 @@
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Por %1$@";
 
+/* No comment provided by engineer. */
+"Forecasted blood glucose may still be higher than target range." = "La glucosa en sangre pronosticada aún puede estar por encima del rango objetivo.";
+
+/* Title for forecast explanation modal on bolus view */
+"Forecasted Glucose" = "Glucosa pronosticada";
+
 /* The short unit display string for grams */
 "g" = "g";
+
+/* Get help with Alert Permissions support button text */
+"Get help with Alert Permissions" = "Ayuda con los Permisos de Alerta";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glucosa";
@@ -411,17 +540,33 @@
 /* Alert title when glucose data returns while on bolus screen */
 "Glucose Data Now Available" = "Datos de glucosa ahora disponibles";
 
+/* Alert title for a manual glucose entry out of range error
+   Title for bolus screen warning when glucose entry is out of range */
+"Glucose Entry Out of Range" = "Entrada de glucosa fuera de rango";
+
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Momento de Glucosa";
 
+/* Details for configuration error when glucose target range schedule is missing */
+"Glucose Target Range Schedule" = "Horario para el objetivo de glucosa";
+
+/* Immediate Delivery status text */
+"Immediate" = "Inmediato";
+
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Indefinidamente";
+
+/* Title of the alert when carb input maximum was exceeded. */
+"Input Maximum Exceeded" = "Máximo de entrada excedido";
 
 /* Title of the prediction input effect for insulin */
 "Insulin" = "Insulina";
 
 /* Description of the prediction input effect for insulin */
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulina Absorbida (U) x Sensibilidad a Insulina (%1$@/U)";
+
+/* Notification body for crash recovery alert */
+"Insulin adjustments have been disabled!" = "¡Se han deshabilitado los ajustes de insulina!";
 
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Administración de Insulina";
@@ -440,17 +585,38 @@
    The title text for the insulin sensitivity schedule */
 "Insulin Sensitivities" = "Sensibilidades a Insulina";
 
+/* Details for configuration error when insulin sensitivity schedule is missing */
+"Insulin Sensitivity Schedule" = "Horario de la sensibilidad a la insulina";
+
 /* The title of the cell indicating the pump is suspended */
 "Insulin Suspended" = "Insulina Suspendida";
 
 /* Insulin type label */
 "Insulin Type" = "Tipo de Insulina";
 
+/* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
+"Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "%1$@ interrumpido: <b> %2$@ </b> de %3$@ %4$@";
+
+/* Remote command error description: invalid carb amount. */
+"Invalid carb amount" = "Cantidad de carbohidratos no válida";
+
 /* The error message when invalid data was encountered. (1: details of invalid data) */
 "Invalid data: %1$@" = "Datos no válidos: %1$@";
 
+/* Title for bolus screen notice when glucose data is in the future */
+"Invalid Future Glucose" = "Glucosa futura no válida";
+
+/* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
+"Invalid glucose reading with a timestamp that is %1$@ in the future" = "Lectura de glucosa no válida de %1$@ en el futuro";
+
+/* Remote command error description: invalid OTP. */
+"Invalid OTP" = "OTP no válido";
+
 /* The title text for the issue report cell */
 "Issue Report" = "Informe de Errores";
+
+/* Title of the warning shown when a large meal was entered */
+"Large Meal Entered" = "Comida grande ingresada";
 
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Lanza app MCG";
@@ -471,6 +637,9 @@
 /* The title of the screen displaying a manually entered insulin dose */
 "Logged Insulin Dose" = "Dosis de insulina registrada";
 
+/* Title for crash recovery alert */
+"Loop Crashed" = "Falla del Loop";
+
 /* The notification title for a loop failure */
 "Loop Failure" = "Falla del Loop";
 
@@ -479,6 +648,37 @@
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop no ha terminado correctamente en %@";
+
+/* Description string for automatic bolus dosing strategy */
+"Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." = "Loop administrará bolos automáticamente cuando las necesidades de insulina estén por encima del basal programado y utilizará ajustes temporales de basal cuando sea necesario para reducir la administración de insulina por debajo del basal programado.";
+
+/* Bluetooth off background alert body. */
+"Loop will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop no funcionará correctamente hasta que el Bluetooth esté habilitado. No recibirá lecturas de glucosa ni podrá administrar bolus.";
+
+/* Description string for temp basal only dosing strategy */
+"Loop will set temporary basal rates to increase and decrease insulin delivery." = "Loop establecerá basal temporales para aumentar y disminuir la administración de insulina.";
+
+/* Title for bolus screen warning when glucose is below glucose warning limit.
+   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+"Low Glucose" = "Glucosa baja";
+
+/* Manage Permissions in Settings button text */
+"Manage Permissions in Settings" = "Administrar permisos en Configuración";
+
+/* Description of a bolus dose entry (1: value (? if no value) in bold, 2: unit) */
+"Manual Dose: <b>%1$@</b> %2$@" = "Dosis manual: <b> %1$@ </b> %2$@";
+
+/* Details for configuration error when maximum basal rate per hour is missing */
+"Maximum Basal Rate Per Hour" = "Tasa basal máxima por hora";
+
+/* Details for configuration error when maximum bolus is missing */
+"Maximum Bolus" = "Bolo Máximo";
+
+/* Title for bolus screen warning when max bolus is exceeded */
+"Maximum Bolus Exceeded" = "Bolo máximo excedido";
+
+/* Alert title when maximum duration exceeded. */
+"Maximum Duration Exceeded" = "Duración máxima excedida";
 
 /* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Bolo de Comida";
@@ -489,17 +689,29 @@
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Faltan Datos: %1$@";
 
+/* Remote command error description: missing maximum bolus in settings. */
+"Missing maximum allowed bolus in settings" = "Falta el bolo máximo permitido en la configuración";
+
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/l";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Efectos de Momento";
 
+/* Text for more info action on notification of upcoming profile expiration */
+"More Info" = "Más información";
+
+/* Label for toggle to mute all alerts */
+"Mute All Alerts" = "Silenciar todas las alertas";
+
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Necesita Atención";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
+
+/* Description of temporary mute alerts */
+"No alerts will sound while muted. Once this period ends, your alerts and alarms will resume as normal." = "No sonarán alertas mientras esté silenciado. Una vez que termine este período, sus alertas y alarmas se reanudarán con normalidad.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -524,6 +736,33 @@
 /* Title for bolus screen notice when pump data is missing or stale */
 "No Recent Pump Data" = "Sin datos de microinfusora recientes";
 
+/* The title of the action used when rejecting the the amount of carbohydrates entered. */
+"No, edit amount" = "No, editar cantidad";
+
+/* Notification Delivery Status text */
+"Notification Delivery" = "Entrega de notificaciones";
+
+/* Format for Critical Alerts permissions disabled alert body. (1: app name) */
+"Notification delivery is set to Scheduled Summary in your phone’s settings.\n\nTo avoid delay in receiving notifications from %1$@, we recommend notification delivery be set to Immediate Delivery." = "El envío de notificaciones está configurado como Resumen Programado en los ajustes del teléfono.\n\nPara evitar retrasos en la recepción de notificaciones de %1$@, le recomendamos que configure el envío de notificaciones como Entrega inmediata.";
+
+/* Notifications Status text */
+"Notifications" = "Notificaciones";
+
+/* Scheduled Delivery Enabled alert title */
+"Notifications Delayed" = "Retraso en las notificaciones";
+
+/* Alert Permissions descriptive text (1: app name) */
+"Notifications give you important %1$@ app information without requiring you to open the app." = "Las notificaciones te proporcionan información importante sobre la aplicación %1$@ sin que tengas que abrirla.";
+
+/* Alert Permissions descriptive text (1: app name) */
+"Notifications give you important %1$@ app information without requiring you to open the app.\n\nKeep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications." = "Las notificaciones te proporcionan información importante sobre la aplicación %1$@ sin que tengas que abrirla.\n\nManten estas activadas en los ajustes del teléfono para recibir notificaciones %1$@, alertas críticas y notificaciones sensibles al tiempo cuando se entregan.";
+
+/* Notification Setting Status is Off */
+"Off" = "Apagado";
+
+/* Modal body for crash recovery alert */
+"Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "¡Oh, no! Loop falló durante la dosificación y los ajustes de insulina se pausaron hasta que se cierre este cuadro de diálogo. El historial de dosificación puede no ser exacto. Revise los gráficos de administración de insulina y controle cuidadosamente su nivel de glucosa en sangre.";
+
 /* Alert acknowledgment OK button
    Critical Alert permissions disabled alert button
    Default action for alert when alert acknowledgment fails
@@ -531,6 +770,9 @@
    Text for ok action on notification of upcoming profile expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
+
+/* Notification Setting Status is On */
+"On" = "Encendido";
 
 /* The title text for the override presets */
 "Override Presets" = "Sobreescritura de objetivos preestablecidos";
@@ -540,6 +782,9 @@
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
 "Predicted glucose at %1$@ is %2$@." = "Glucosa proyectada en %1$@ es %2$@.";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "La glucosa proyectada está en rango";
 
 /* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
 "Predicted glucose of %1$@ is below your glucose safety limit setting." = "Glucosa proyectada de %1$@ se encuentra por debajo de tu nivel de suspensión.";
@@ -552,6 +797,9 @@
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Preparando registros de eventos críticos";
+
+/* The title for notification of upcoming profile expiration */
+"Profile Expires Soon" = "El perfil caduca pronto";
 
 /* The title of the pump section in settings */
 "Pump" = "Microinfusora";
@@ -568,6 +816,9 @@
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Administratión de Microinfusora";
 
+/* The error message displayed for pump manager errors. (1: pump manager error) */
+"Pump Manager Error: %1$@" = "Error del administrador de bomba: %1$@";
+
 /* The notification title for an empty pump reservoir */
 "Pump Reservoir Empty" = "Reservorio de Microinfusora Vacío";
 
@@ -579,6 +830,9 @@
 
 /* The error message displayed for pumpSuspended errors. */
 "Pump Suspended. Automatic dosing is disabled." = "Microinfusora suspendida. La dosificación automática está desactivada.";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Acción Rápida — Adultos";
@@ -596,8 +850,21 @@
    Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "Bolo recomendado";
 
+/* Title for bolus screen warning when recommended bolus exceeds max bolus */
+"Recommended Bolus Exceeds Maximum Bolus" = "El bolo recomendado supera al bolo máximo";
+
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Bolo Recomendado: %@ Unidades";
+
+/* The notification title for a remote bolus. (1: Bolus amount)
+   The notification title for a remote failure. (1: Bolus amount) */
+"Remote Bolus Entry: %@ U" = "Entrada remota de bolo: %@ U";
+
+/* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
+"Remote Carbs Entry: %d grams" = "Entrada remota de carbohidratos: %d gr";
+
+/* The notification title for the remote command expiration error */
+"Remote Command Expired" = "Comando remoto caducado";
 
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Reservorio";
@@ -614,11 +881,20 @@
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Guardar sin Entregar Bolo";
 
+/* Scheduled Delivery status text */
+"Scheduled" = "Programado";
+
+/* List header for mute all alerts period */
+"Select Mute Period" = "Seleccionar período de silenciamiento";
+
 /* The title of the services section in settings */
 "Services" = "Servicios";
 
 /* The label of the settings button */
 "Settings" = "Ajustes";
+
+/* The title of the cell indicating that onboarding is suspended */
+"Setup Incomplete" = "Configuración incompleta";
 
 /* Loop Completion HUD accessibility hint */
 "Shows last loop error" = "Muestra último error de Loop";
@@ -635,11 +911,20 @@
 /* The title of the nightscout site URL credential */
 "Site URL" = "URL de Sitio";
 
+/* Software update button link text */
+"Software Update" = "Actualización de software";
+
 /* The format for the description of a temporary override start date */
 "starting at %@" = "comenzando a la %@";
 
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "Comenzando Bolo";
+
+/* Section title for Support
+   Support screen title
+   The title of the support item in settings
+   The title of the support section in settings */
+"Support" = "Soporte";
 
 /* The title text in settings */
 "Suspend Threshold" = "Nivel de Suspensión";
@@ -662,11 +947,29 @@
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Pulsa para detener";
 
+/* The title of the cell indicating alerts are temporarily muted */
+"Temp Mute Alerts" = "Alertas de silencio temporal";
+
+/* Alert message for a bolus too small validation error */
+"The bolus amount entered is smaller than the minimum deliverable." = "La cantidad de bolo ingresada es menor que el mínimo que se puede administrar.";
+
+/* Forecast explanation modal on bolus view */
+"The bolus dosing algorithm uses a more conservative estimate of forecasted blood glucose than what is used to adjust your basal rate.\n\nAs a result, your forecasted blood glucose after a bolus may still be higher than your target range." = "El algoritmo de dosificación de bolo utiliza una estimación más conservadora de la glucosa en sangre pronosticada que la que se usa para ajustar su basal. \n\n Como resultado, su glucosa en sangre pronosticada después de un bolo aún puede ser más alta que su rango objetivo.";
+
 /* Alert message for an updated bolus recommendation */
 "The bolus recommendation has updated. Please reconfirm the bolus amount." = "La recomendación de bolo ha sido updatada. Reconfirme el bolo.";
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "El model utilizado por ediciones iniciales de Loop, permite ajustar duración de acción.";
+
+/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
+"The maximum absorption time is %@" = "El tiempo máximo de absorción es %@";
+
+/* Alert body displayed for quantity greater than max (1: maximum quantity in grams) */
+"The maximum allowed amount is %@ grams." = "La cantidad máxima permitida es %@ gr.";
+
+/* Warning for simple bolus when carbohydrate entry is too large. (1: maximum carbohydrate entry) */
+"The maximum amount allowed is %1$@." = "La cantidad máxima permitida es %1$@.";
 
 /* Alert message for a maximum bolus validation error (1: max bolus value) */
 "The maximum bolus amount is %@ U." = "Bolo máximo es %@ Unidades.";
@@ -674,11 +977,20 @@
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Bolo máximo es %@ Unidades";
 
+/* Alert message for a missing maximum bolus setting error */
+"The maximum bolus setting must be configured before a bolus can be delivered." = "El ajuste de bolo máximo debe configurarse antes de que se pueda administrar un bolo.";
+
+/* The notification body for a remote command expiration. (1: Expiration in minutes) */
+"The remote command expired %.0f minutes ago." = "El comando remoto expiró hace %.0f minutos.";
+
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Ajustes de la Terapia";
 
 /* Title of the carb entry date picker cell */
 "Time" = "Hora";
+
+/* Time Sensitive Status text */
+"Time Sensitive Notifications" = "Notificaciones sensibles al tiempo";
 
 /* Critical event log export error alert try again button */
 "Try Again" = "Inténtalo de nuevo";
@@ -688,6 +1000,9 @@
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Title for alert shown when alert acknowledgement fails */
+"Unable To Clear Alert" = "No se puede borrar la alerta";
 
 /* Title for alert shown when delivery status is uncertain */
 "Unable To Reach Pump" = "No se puede contactar con la bomba";
@@ -704,6 +1019,9 @@
 /* Event title displayed when StoredPumpEvent.title is not set
    The default description to use when an entry has no dose description */
 "Unknown" = "Desconocido";
+
+/* The error message displayed for unknown errors. (1: unknown error) */
+"Unknown Error: %1$@" = "Error desconocido: %1$@";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "hasta la %@";
@@ -740,6 +1058,36 @@
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Objetivos de Ejercicio";
+
+/* Workout override still on reminder alert body. */
+"Workout Temp Adjust has been turned on for more than 24 hours. Make sure you still want it enabled, or turn it off in the app." = "El Ajuste Temporal por Ejercicio se ha activado durante más de 24 horas. Asegúrate de que todavía quieres que esté habilitado o desactívalo en la aplicación.";
+
+/* Workout override still on reminder alert title */
+"Workout Temp Adjust Still On" = "Ajuste Temporal por Ejercicio todavía encendido";
+
+/* The title of the action used when confirming entered amount of carbohydrates. */
+"Yes" = "Sí";
+
+/* Format for Notifications permissions disabled alert body. (1: app name) */
+"You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications, Critical Alerts and Time Sensitive Notifications are turned ON." = "Es posible que no reciba alertas sonoras, visuales o por vibración relativas a información de seguridad crítica.\n\nPara solucionar el problema, toque \"Ajustes\" y asegúrese de que las notificaciones, las alertas críticas y las notificaciones sensibles al tiempo están activadas.";
+
+/* Time change alert body. (1: app name) */
+"Your %1$@’s time has been changed. %2$@ needs accurate time records to make predictions about your glucose and adjust your insulin accordingly.\n\nCheck in your %1$@ Settings (General / Date & Time) and verify that 'Set Automatically' is turned ON. Failure to resolve could lead to serious under-delivery or over-delivery of insulin." = "Se ha cambiado la hora de su %1$@. %2$@ necesita registros horarios precisos para hacer predicciones sobre su glucosa y ajustar su insulina.\n\nCompruebe en su %1$@ Ajustes (General / Fecha y Hora) y verifique que 'Ajustar automáticamente' está activado. Si no se resuelve, podría producirse un grave suministro insuficiente o excesivo de insulina.";
+
+/* Format string for simple bolus screen warning when glucose is below glucose warning limit. */
+"Your glucose is below %1$@. Are you sure you want to bolus?" = "Tu glucosa está por debajo de %1$@. ¿Estás seguro de que deseas administrar un bolo?";
+
+/* Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit */
+"Your glucose is below or predicted to go below your glucose safety limit, %@." = "Tu nivel de glucosa está por debajo o se prevé que vaya a estar por debajo de tu límite de seguridad de glucosa, %@.";
+
+/* Format string for bolus screen warning when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold) */
+"Your glucose is below your glucose safety limit, %1$@." = "Tu glucosa está por debajo del límite de seguridad de glucosa, %1$@.";
+
+/* Format string for meal bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold */
+"Your glucose is low. Eat carbs and consider waiting to bolus until your glucose is in a safe range." = "Tu glucosa está baja. Come carbohidratos y considera esperar para administrar el bolo hasta que tu glucosa esté en un rango seguro.";
+
+/* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
+"Your glucose is low. Eat carbs and monitor closely." = "Tienes la glucosa baja. Come carbohidratos y vigílalo de cerca.";
 
 /* Warning to ensure the carb entry is accurate */
 "Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "Tu glucosa está subiendo rápidamente. Compruebe que ha registrado todos los carbohidratos que ha ingerido. Si has registrado los carbohidratos, comprueba que la hora a la que los has introducido coincide con la hora a la que has empezado a comer.";

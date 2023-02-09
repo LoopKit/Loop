@@ -14,13 +14,13 @@
 "aCb-Qs-bpu.text" = "Detalje";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
-"ap1-M6-naG.text" = "Mad type";
+"ap1-M6-naG.text" = "Madtype";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
-"bIL-Ub-qYp.text" = "Label";
+"bIL-Ub-qYp.text" = "Etiket";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Blodsukker Ændring";
+"bq4-98-cQU.text" = "Blodsukkerændring";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "g Total";
@@ -29,37 +29,40 @@
 "D4C-I2-dhA.text" = "Fremtidige blodsukre er beregnet ved at kombinere effekterne af mange inputs. Brug dette værktøj til at vælge mellem forskellige inputs, for at se hvordan de passer med den endelige forudsigelse.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
-"d6m-qV-wWi.text" = "Label";
+"d6m-qV-wWi.text" = "Etiket";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
-"E41-FN-nkk.text" = "eventually 92 mg/dL";
+"E41-FN-nkk.text" = "Med tiden 5 mmol/L";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
-"EAn-Ja-S1d.text" = "Observed";
+"EAn-Ja-S1d.text" = "Observeret";
 
 /* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
 "Fal-Vf-lfh.normalTitle" = "🍭";
 
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3.5 E/time @ 12:12";
+
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
-"hZZ-2S-lrd.title" = "Kulhydrate Effekt";
+"hZZ-2S-lrd.title" = "Kulhydrateffekter";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption.";
+"IxU-As-glo.text" = "De observerede ændringer i glukose, fratrukket de ændringer, der er modelleret ud fra insulintilførslen, kan bruges til at estimere kulhydratabsorptionen.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
-"J7x-W5-gwo.text" = "Detail";
+"J7x-W5-gwo.text" = "Detalje";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
-"k3F-Na-7mn.text" = "Foreslået Basal";
+"k3F-Na-7mn.text" = "Anbefalet basal";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
-"Krd-Aa-ret.text" = "Label";
+"Krd-Aa-ret.text" = "Etiket";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
-"OFA-qT-ZAg.text" = "Label";
+"OFA-qT-ZAg.text" = "Etiket";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Predicted Glucose";
+"PA3-sP-cWY.title" = "Forventet blodsukker";
 
 /* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
 "Qe9-uc-vPR.normalTitle" = "🍽";
@@ -68,28 +71,31 @@
 "QhO-Yi-AqQ.normalTitle" = "🌮";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
-"qPH-vU-xlu.text" = "Mad type";
+"qPH-vU-xlu.text" = "Madtype";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
-"Rse-x8-amW.text" = "Til sidst 92 mg/dL";
+"Rse-x8-amW.text" = "Med tiden 5 mmol/L";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g Active Carbs";
+"SQx-au-ZcM.text" = "g aktive kulhydrater";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Blodsukker";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
-"Tz7-80-bJ7.title" = "Tilføj/Rediger kulhydrat";
+"Tz7-80-bJ7.title" = "Tilføj/rediger kulhydrater";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
-"ufi-Kj-33k.text" = "Label";
+"ufi-Kj-33k.text" = "Etiket";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Kulhydrater";
 
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
-"Wx8-Tf-FnG.text" = "Antal kulhydrater";
+"Wx8-Tf-FnG.text" = "Forbrugt mængde kulhydrater";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Anbefalet basal";
 
 /* Class = "UIButton"; normalTitle = "🍕"; ObjectID = "xl9-Wc-Pdu"; */
 "xl9-Wc-Pdu.normalTitle" = "🍕";

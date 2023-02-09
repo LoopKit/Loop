@@ -20,7 +20,7 @@
 "bIL-Ub-qYp.text" = "Etichetta";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Modifica Glicemie";
+"bq4-98-cQU.text" = "Modifica Carboidrati";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "g Totali";
