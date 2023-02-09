@@ -56,7 +56,7 @@
 "%1$@ + %2$@" = "%1$@ + %2$@";
 
 /* Alert message for closed loop off informational modal. (1: app name) */
-"%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically." = "%1$@ fonctionne avec la boucle fermée en position ARRÊT. Votre pompe et votre MGC continueront de fonctionner, mais l'application n'ajustera pas automatiquement le dosage.";
+"%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically." = "%1$@ fonctionne avec la boucle fermée en position ARRÊT. Votre pompe et votre CGM continueront de fonctionner, mais l'application n'ajustera pas automatiquement le dosage.";
 
 /* Message for alert shown when alert acknowledgement fails for a device, and the device does not provide a LocalizedError. (1: app name) */
 "%1$@ is unable to clear the alert from your device" = "%1$@ ne parvient pas à supprimer l'alerte de votre dispositif.";
@@ -148,7 +148,7 @@
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
-"Add CGM" = "Ajouter un MGC";
+"Add CGM" = "Ajouter un CGM";
 
 /* The label of the meal button */
 "Add Meal" = "Entrer un repas";
@@ -211,7 +211,7 @@
 "Are you sure you want to delete all your %@ Data?\n(This action is not reversible)" = "Voulez-vous vraiment effacer toutes vos valeurs de %@?\n(Cette action n'est pas réversible)";
 
 /* Confirmation message for deleting a CGM */
-"Are you sure you want to delete this CGM?" = "Voulez-vous vraiment supprimer ce MGC?";
+"Are you sure you want to delete this CGM?" = "Voulez-vous vraiment supprimer ce CGM?";
 
 /* Confirmation message for deleting a service */
 "Are you sure you want to delete this service?" = "Voulez-vous vraiment supprimer ce service ?";
@@ -317,7 +317,7 @@
 "Check that your pump is in range" = "Vérifier que votre pompe est à portée";
 
 /* Recovery suggestion when glucose data is missing */
-"Check your CGM data source" = "Vérifier votre source de données MGC";
+"Check your CGM data source" = "Vérifier votre source de données CGM";
 
 /* Caption for bolus screen notice when glucose data is in the future */
 "Check your device time and/or remove any invalid data from Apple Health." = "Vérifiez l'heure de votre appareil et/ou supprimez toute donnée invalide d'Apple Health.";
@@ -335,7 +335,7 @@
 "Closed Loop OFF" = "Boucle Ouverte";
 
 /* The description text for the looping enabled switch cell when closed loop is not allowed because the sensor is inactive */
-"Closed Loop requires an active CGM Sensor Session" = "Loop en boucle fermée requiert une session de capteur MGC active.";
+"Closed Loop requires an active CGM Sensor Session" = "Loop en boucle fermée requiert une session de capteur CGM active.";
 
 /* The description text for the looping enabled switch cell when onboarding is not complete */
 "Closed Loop requires Setup to be Complete" = "Loop en boucle fermée nécessite une configuration complète";
@@ -408,13 +408,13 @@
 "Delete All" = "Tout supprimer";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Supprimer le MGC";
+"Delete CGM" = "Supprimer le CGM";
 
 /* Button title to delete a service */
 "Delete Service" = "Supprimer le service";
 
 /* No comment provided by engineer. */
-"Delete Testing CGM Data" = "Effacer les données de test du MGC";
+"Delete Testing CGM Data" = "Effacer les données de test du CGM";
 
 /* No comment provided by engineer. */
 "Delete Testing Data" = "Supprimer les données de Test";
@@ -619,7 +619,7 @@
 "Large Meal Entered" = "Grand repas entré";
 
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Lance l'application MGC";
+"Launches CGM app" = "Lance l'application CGM";
 
 /* OK button title for alert shown when delivery status is uncertain */
 "Learn More" = "En savoir plus";
@@ -738,6 +738,12 @@
 
 /* The title of the action used when rejecting the the amount of carbohydrates entered. */
 "No, edit amount" = "Non, modifier la quantité";
+
+/* Notification Delivery Status text */
+"Notification Delivery" = "Notification de l'administration";
+
+/* Format for Critical Alerts permissions disabled alert body. (1: app name) */
+"Notification delivery is set to Scheduled Summary in your phone’s settings.\n\nTo avoid delay in receiving notifications from %1$@, we recommend notification delivery be set to Immediate Delivery." = "L'envoi des notifications est réglé sur \"Résumé programmé\" dans les paramètres de votre téléphone.\n\nPour éviter tout retard dans la réception des notifications de %1$@, nous vous recommandons de régler l'envoi des notifications sur \"Envoi immédiat\".";
 
 /* Notifications Status text */
 "Notifications" = "Notifications";
@@ -924,7 +930,7 @@
 "Suspend Threshold" = "Seuil de suspension";
 
 /* Descriptive text for button to add CGM device */
-"Tap here to set up a CGM" = "Appuyez ici pour configurer un MGC";
+"Tap here to set up a CGM" = "Appuyez ici pour configurer un CGM";
 
 /* Descriptive text for button to add pump device */
 "Tap here to set up a pump" = "Appuyez ici pour paramétrer une pompe";

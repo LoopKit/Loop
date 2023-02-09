@@ -16,6 +16,9 @@
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
 "Predicted glucose at %1$@ is %2$@." = "Предсказываемая гликемия в %1$@ - %2$@.";
 
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "Прогнозируемый уровень глюкозы находится в диапазоне.";
+
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Предсказываемая гликемия %1$@ ниже установленного вами порога  приостановки помпы";
 

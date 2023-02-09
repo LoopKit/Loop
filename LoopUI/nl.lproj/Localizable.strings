@@ -2,10 +2,10 @@
 "\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n%2$@ werkt met Gesloten Loop in de AAN stand";
 
 /* Red loop message (1: last loop  string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogrammen voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met uw pomp en CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogrammen voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met je pomp en CGM.";
 
 /* Yellow loop message (1: last loop string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogrammen voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met uw pomp en CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogrammen voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met je pomp en CGM.";
 
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
 "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ werkt met Gesloten Loop in de UIT stand. Je pomp en CGM blijven werken, maar de app past de dosering niet automatisch aan.\n\n%2$@";
@@ -26,10 +26,10 @@
 "%1$@ ago at %2$@" = "%1$@ geleden om %2$@";
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
-"%1$@ at %2$@" = "%1$@ op %2$@";
+"%1$@ at %2$@" = "%1$@ om %2$@";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
-"%1$@ units per hour at %2$@" = "%1$@ eenheden per uur op %2$@";
+"%1$@ units per hour at %2$@" = "%1$@ eenheden per uur om %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
@@ -44,7 +44,7 @@
 "Closed loop" = "Gesloten loop";
 
 /* Title of green open loop OFF message */
-"Closed Loop OFF" = "Gesloten Loop Uit";
+"Closed Loop OFF" = "Gesloten Loop UIT";
 
 /* Title of green closed loop ON message */
 "Closed Loop ON" = "Gesloten Loop AAN";
@@ -62,7 +62,7 @@
 "Last completed loop %1$@." = "Laatst voltooide loop %1$@.";
 
 /* Title of red loop message */
-"Loop Failure" = "Loop Storing";
+"Loop Failure" = "Loopstoring";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop heeft %@ geleden gedraaid";
@@ -98,8 +98,8 @@
 "Unknown" = "Onbekend";
 
 /* Acessibility label describing completion HUD waiting for first run */
-"Waiting for first run" = "Wachten op eerste run";
+"Waiting for first run" = "Aan het wachten op eerste run";
 
 /* Format string describing last completion. (1: the date */
-"was at %1$@" = "was op %1$@";
+"was at %1$@" = "was om %1$@";
 

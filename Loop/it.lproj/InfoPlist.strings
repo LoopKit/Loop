@@ -11,7 +11,7 @@
 "NSBluetoothPeripheralUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con il microinfusore e i dispositivi CGM.";
 
 /* Privacy - Camera Usage Description */
-"NSCameraUsageDescription" = "La fotocamera è utilizzata per scansionare i codici a barre dei tuoi dispositivi";
+"NSCameraUsageDescription" = "La fotocamera è utilizzata per scansionare i codici a barre dei tuoi dispositivi.";
 
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID viene utilizzato per autenticare il bolo.";

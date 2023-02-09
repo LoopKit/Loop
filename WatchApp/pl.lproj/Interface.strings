@@ -17,7 +17,7 @@
 "IRi-4t-ESO.text" = "—";
 
 /* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
-"jj3-Gq-HBy.text" = "Bolusa nie podany";
+"jj3-Gq-HBy.text" = "Bolus nie podany";
 
 /* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
 "JXa-s1-PJx.text" = "Pracuje";
@@ -35,7 +35,7 @@
 "rNf-Mh-tID.title" = "Loop";
 
 /* Class = "WKInterfaceLabel"; text = "Bolus"; ObjectID = "smL-Rc-IZh"; */
-"smL-Rc-IZh.text" = "Bolusa";
+"smL-Rc-IZh.text" = "Bolus";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
 "T4U-wP-dSW.text" = "Etykieta";

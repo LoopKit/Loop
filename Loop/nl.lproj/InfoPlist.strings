@@ -5,10 +5,10 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insuline pomp en de continue glucose meter.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insulinepomp en de continue glucosemeters.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insuline pomp en de continue glucose meter.";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insulinepomp en de continue glucosemeters.";
 
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "Camera wordt gebruikt om barcodes van apparaten te scannen.";

@@ -35,7 +35,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Rimuovere";
+"Dismiss" = "OK";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -75,7 +75,7 @@
 "Please reconfirm the bolus amount." = "Si prega di riconfermare la quantità di bolo.";
 
 /* Title for sheet to enable/disable pre-meal on watch */
-"Pre-Meal" = "Pasto";
+"Pre-Meal" = "Pre-Pasto";
 
 /* The text for the Watch button for enabling a custom preset */
 "Preset" = "Preimpostato";

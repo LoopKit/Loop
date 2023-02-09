@@ -2,7 +2,7 @@
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Voeg koolhydraten toe";
+"Add Carb Entry" = "Koolhydraatinvoer Toevoegen";
 
 /* Lesson subtitle */
 "Computes the percentage of glucose measurements within a specified range" = "Berekent het percentage glucosemetingen in een specifiek bereik";
@@ -17,7 +17,7 @@
 "g" = "g";
 
 /* Placeholder for upper range entry */
-"Maximum" = "Maximaal";
+"Maximum" = "Maximum";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -29,10 +29,10 @@
 "mmol/L" = "mmol/L";
 
 /* Lesson title */
-"Modal Day" = "Modale dag";
+"Modal Day" = "Modale Dag";
 
 /* Lesson result text for no data */
-"No data available" = "Geen data beschikbaar";
+"No data available" = "Geen gegevens beschikbaar";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
@@ -44,7 +44,7 @@
 "Start Date" = "Startdatum";
 
 /* Lesson title */
-"Time in Range" = "Tijd binnen bereik";
+"Time in Range" = "Tijd binnen Bereik";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";

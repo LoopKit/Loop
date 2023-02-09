@@ -92,7 +92,7 @@
 "Vpi-5b-bY5.title" = "Kohlenhydrate";
 
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
-"Wx8-Tf-FnG.text" = "Menge gegessen";
+"Wx8-Tf-FnG.text" = "KH Menge gegessen";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
 "xhx-PI-bBI.text" = "Empfohlener Basalwert";

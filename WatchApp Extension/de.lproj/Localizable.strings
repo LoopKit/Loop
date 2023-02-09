@@ -44,11 +44,11 @@
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
-"Make sure your iPhone is nearby and try again" = "Stelle sicher, dass Dein iPhone in der Nähe ist, und versuche es erneut.";
+"Make sure your iPhone is nearby and try again" = "Stellen Sie sicher, dass Ihr iPhone in der Nähe ist, und versuchen Sie es erneut.";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a potential carb entry send attempt fails */
-"Make sure your iPhone is nearby and try again." = "Stelle sicher, dass Dein iPhone in der Nähe ist, und versuche es erneut.";
+"Make sure your iPhone is nearby and try again." = "Stellen Sie sicher, dass Ihr iPhone in der Nähe ist, und versuchen Sie es erneut.";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -72,7 +72,7 @@
 "Override" = "Voreinstellung";
 
 /* Alert message for updated bolus recommendation on Apple Watch */
-"Please reconfirm the bolus amount." = "Bitte bestätige die Bolusmenge erneut.";
+"Please reconfirm the bolus amount." = "Bitte Bolusmenge erneut bestätigen.";
 
 /* Title for sheet to enable/disable pre-meal on watch */
 "Pre-Meal" = "Vor dem Essen";
@@ -115,7 +115,7 @@
 "U/hr" = "IE/h";
 
 /* The title of the alert controller displayed after a potential carb entry send attempt fails */
-"Unable to Reach iPhone" = "Dein iPhone kann nicht erreicht werden";
+"Unable to Reach iPhone" = "Ihr iPhone kann nicht erreicht werden";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Training";

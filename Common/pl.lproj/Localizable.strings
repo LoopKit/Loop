@@ -4,6 +4,9 @@
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Dodaj pozycję dla węglowodanów";
 
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Oblicza procent pomiarów glukozy w określonym zakresie";
+
 /* Title of the button to begin lesson execution */
 "Continue" = "Kontynuuj";
 
@@ -25,6 +28,9 @@
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";
 
+/* Lesson title */
+"Modal Day" = "Dzień modalny";
+
 /* Lesson result text for no data */
 "No data available" = "Brak danych";
 
@@ -37,6 +43,15 @@
 /* Title of config entry */
 "Start Date" = "Data rozpoczęcia";
 
+/* Lesson title */
+"Time in Range" = "Czas w zakresie (TIR)";
+
 /* The short unit display string for international units of insulin */
 "U" = "J";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Wizualizuje najczęstsze wartości glukozy według pory dnia";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Tygodnie";
 

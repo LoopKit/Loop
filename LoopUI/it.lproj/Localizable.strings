@@ -68,7 +68,7 @@
 "Loop ran %@ ago" = "Loop funziona %@ fa";
 
 /* Title of yellow loop message */
-"Loop Warning" = "Avviso loop";
+"Loop Warning" = "Avviso Loop";
 
 /* String displayed instead of a glucose value below the CGM range */
 "LOW" = "BASSO";

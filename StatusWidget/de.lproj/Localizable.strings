@@ -2,6 +2,9 @@
 "---" = "---";
 
 /* No comment provided by engineer. */
+"-U" = "-IE";
+
+/* No comment provided by engineer. */
 "??" = "??";
 
 /* No comment provided by engineer. */
@@ -15,6 +18,9 @@
 
 /* The short unit display string for decibles */
 "dB" = "dB";
+
+/* No comment provided by engineer. */
+"Eventual" = "Eventuell";
 
 /* The short unit display string for grams */
 "g" = "g";
