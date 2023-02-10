@@ -234,7 +234,9 @@ extension Collection where Element: GlucoseValue {
         at date: Date,
         suspendThreshold: HKQuantity,
         sensitivity: HKQuantity,
-        model: InsulinModel
+        model: InsulinModel,
+        insulinOnBoard: Double?,
+        automaticDosingIOBLimit: Double?
     ) -> InsulinCorrection? {
         var minGlucose: GlucoseValue?
         var eventualGlucose: GlucoseValue?
@@ -327,9 +329,19 @@ extension Collection where Element: GlucoseValue {
                 minTarget: minGlucoseTargets.lowerBound,
                 units: units
             )
-        } else if eventual.quantity > eventualGlucoseTargets.upperBound,
-            let minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
-        {
+        } else if eventual.quantity > eventualGlucoseTargets.upperBound, var minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose {
+            /// Don't allow the correction units + current `insulinOnBoard` to go over `automaticDosingIOBLimit`
+            if
+                let automaticDosingIOBLimit,
+                let insulinOnBoard,
+                minCorrectionUnits > 0,
+                insulinOnBoard + minCorrectionUnits > automaticDosingIOBLimit
+            {
+                let unitsOverAutomaticDosingLimit = (insulinOnBoard + minCorrectionUnits) - automaticDosingIOBLimit
+                // TO DO - nice to have logging but not required
+                minCorrectionUnits = Swift.max(minCorrectionUnits - unitsOverAutomaticDosingLimit, 0)
+            }
+
             return .aboveRange(
                 min: min,
                 correcting: correctingGlucose,
@@ -371,14 +383,18 @@ extension Collection where Element: GlucoseValue {
         rateRounder: ((Double) -> Double)? = nil,
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
-        continuationInterval: TimeInterval = .minutes(11)
+        continuationInterval: TimeInterval = .minutes(11),
+        insulinOnBoard: Double?,
+        automaticDosingIOBLimit: Double?
     ) -> TempBasalRecommendation? {
         let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model
+            model: model,
+            insulinOnBoard: insulinOnBoard,
+            automaticDosingIOBLimit: automaticDosingIOBLimit
         )
 
         let scheduledBasalRate = basalRates.value(at: date)
@@ -439,14 +455,18 @@ extension Collection where Element: GlucoseValue {
         rateRounder: ((Double) -> Double)? = nil,
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
-        continuationInterval: TimeInterval = .minutes(11)
+        continuationInterval: TimeInterval = .minutes(11),
+        insulinOnBoard: Double?,
+        automaticDosingIOBLimit: Double?
     ) -> AutomaticDoseRecommendation? {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model
+            model: model,
+            insulinOnBoard: insulinOnBoard,
+            automaticDosingIOBLimit: automaticDosingIOBLimit
         ) else {
             return nil
         }
@@ -516,7 +536,9 @@ extension Collection where Element: GlucoseValue {
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model
+            model: model,
+            insulinOnBoard: nil,
+            automaticDosingIOBLimit: nil
         ) else {
             return ManualBolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
         }

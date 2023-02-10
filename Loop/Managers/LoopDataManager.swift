@@ -63,6 +63,8 @@ final class LoopDataManager {
 
     private var timeBasedDoseApplicationFactor: Double = 1.0
 
+    private var insulinOnBoard: InsulinValue?
+
     deinit {
         for observer in notificationObservers {
             NotificationCenter.default.removeObserver(observer)
@@ -1034,16 +1036,13 @@ extension LoopDataManager {
                 updateGroup.leave()
             }
         }
-
-        var insulinOnBoard: InsulinValue?
-
         updateGroup.enter()
         doseStore.insulinOnBoard(at: now()) { result in
             switch result {
             case .failure(let error):
                 warnings.append(.fetchDataWarning(.insulinOnBoard(error: error)))
             case .success(let insulinValue):
-                insulinOnBoard = insulinValue
+                self.insulinOnBoard = insulinValue
             }
             updateGroup.leave()
         }
@@ -1064,7 +1063,7 @@ extension LoopDataManager {
         dosingDecision.date = now()
         dosingDecision.historicalGlucose = historicalGlucose
         dosingDecision.carbsOnBoard = carbsOnBoard
-        dosingDecision.insulinOnBoard = insulinOnBoard
+        dosingDecision.insulinOnBoard = self.insulinOnBoard
         dosingDecision.glucoseTargetRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
 
         // These will be updated by updatePredictedGlucoseAndRecommendedDose, if possible
@@ -1644,6 +1643,9 @@ extension LoopDataManager {
 
             let dosingRecommendation: AutomaticDoseRecommendation?
 
+            // automaticDosingIOBLimit calculated from the user entered maxBolus
+            let automaticDosingIOBLimit = maxBolus! * 2.0
+
             switch settings.automaticDosingStrategy {
             case .automaticBolus:
                 let volumeRounder = { (_ units: Double) in
@@ -1662,7 +1664,9 @@ extension LoopDataManager {
                     lastTempBasal: lastTempBasal,
                     volumeRounder: volumeRounder,
                     rateRounder: rateRounder,
-                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
+                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true,
+                    insulinOnBoard: self.insulinOnBoard?.value,
+                    automaticDosingIOBLimit: automaticDosingIOBLimit
                 )
             case .tempBasalOnly:
                 let temp = predictedGlucose.recommendedTempBasal(
@@ -1675,7 +1679,9 @@ extension LoopDataManager {
                     maxBasalRate: maxBasal!,
                     lastTempBasal: lastTempBasal,
                     rateRounder: rateRounder,
-                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
+                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true,
+                    insulinOnBoard: self.insulinOnBoard?.value,
+                    automaticDosingIOBLimit: automaticDosingIOBLimit
                 )
                 dosingRecommendation = AutomaticDoseRecommendation(basalAdjustment: temp)
             }
@@ -1760,6 +1766,9 @@ extension LoopDataManager {
 protocol LoopState {
     /// The last-calculated carbs on board
     var carbsOnBoard: CarbValue? { get }
+    
+    /// The last-calculated insulin on board
+    var insulinOnBoard: InsulinValue? { get }
 
     /// An error in the current state of the loop, or one that happened during the last attempt to loop.
     var error: LoopError? { get }
@@ -1861,6 +1870,11 @@ extension LoopDataManager {
         var carbsOnBoard: CarbValue? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return loopDataManager.carbsOnBoard
+        }
+        
+        var insulinOnBoard: InsulinValue? {
+            dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
+            return loopDataManager.insulinOnBoard
         }
 
         var error: LoopError? {
@@ -2066,6 +2080,7 @@ extension LoopDataManager {
                 "lastLoopCompleted: \(String(describing: manager.lastLoopCompleted))",
                 "basalDeliveryState: \(String(describing: manager.basalDeliveryState))",
                 "carbsOnBoard: \(String(describing: state.carbsOnBoard))",
+                "insulinOnBoard: \(String(describing: manager.insulinOnBoard))",
                 "error: \(String(describing: state.error))",
                 "overrideInUserDefaults: \(String(describing: UserDefaults.appGroup?.intentExtensionOverrideToSet))",
                 "",

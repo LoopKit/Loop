@@ -124,7 +124,7 @@ extension MockCarbStore {
             return "flat_and_stable_carb_effect"
         case .highAndStable:
             return "high_and_stable_carb_effect"
-        case .highAndRisingWithCOB:
+        case .highAndRisingWithCOB, .autoBolusIOBClamping:
             return "high_and_rising_with_cob_carb_effect"
         case .lowAndFallingWithCOB:
             return "low_and_falling_carb_effect"
