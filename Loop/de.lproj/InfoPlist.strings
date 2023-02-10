@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
@@ -20,5 +23,5 @@
 "NSHealthUpdateUsageDescription" = "Die in der App und auf der Uhr eingegebenen Kohlenhydratmengen werden in der Health-Datenbank gespeichert. Blutzuckerdaten, die vom CGM abgerufen werden, werden sicher in HealthKit gespeichert.";
 
 /* Privacy - Siri Usage Description */
-"NSSiriUsageDescription" = "Loop verwendet Siri, damit Du Voreinstellungen mit Deiner Sprache ausführen kannst.";
+"NSSiriUsageDescription" = "Loop verwendet Siri, damit Sie Voreinstellungen mit Ihrer Sprache ausführen können.";
 

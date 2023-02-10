@@ -1,0 +1,54 @@
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "添加碳水化合物";
+
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "计算在指定范围内的血糖测量值的百分比";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "继续";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "克";
+
+/* Placeholder for upper range entry */
+"Maximum" = "最大";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "毫克/分升";
+
+/* Placeholder for lower range entry */
+"Minimum" = "最小";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "毫摩尔/升";
+
+/* Lesson result text for no data */
+"No data available" = "无数据";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Section title for glucose range */
+"Range" = "范围";
+
+/* Title of config entry */
+"Start Date" = "开始日期";
+
+/* Lesson title */
+"Time in Range" = "在目标范围的时间";
+
+/* The short unit display string for international units of insulin */
+"U" = "单位";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "全天血糖数据";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "周";
+

@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Extensión de WatchApp";
+
+/* Bundle name */
+"CFBundleName" = "Extensión de WatchApp";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Los datos de alimentos de la base de datos de Salud se utilizan para determinar los efectos en el nivel de glucosa. Los datos de glucosa de la base de datos de Salud se utilizan para graficar y determinar cálculos de momento. Los datos de Sueño de la base de datos de Salud se utilizan para optimizar la entrega de actualizaciones de las complicaciones del Apple Watch durante el tiempo que está despierto.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Datos de alimentos ingresados en la aplicación y en el reloj son almacenados en la base de datos de Salud. Los datos de glucosa extraídos del monitor continuo de glucosa se almacenan de manera segura en HealthKit.";
+

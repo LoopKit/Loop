@@ -1,0 +1,6 @@
+/* Bundle name */
+"CFBundleName" = "Learn";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Dane posiłków z bazy danych aplikacji Zdrowie służą do określania wpływu glukozy. Dane dotyczące glukozy z bazy danych aplikacji Zdrowie są wykorzystywane do tworzenia wykresów i wyznaczania trendu. Dane dotyczące snu z bazy danych aplikacji Zdrowie służą do optymalizacji dostarczania aktualizacji komplikacji Apple Watch w czasie, gdy nie śpisz.";
+

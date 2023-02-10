@@ -71,7 +71,7 @@
    Title text for button to set up a CGM */
 "Add CGM" = "Khai báo CGM";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Khai báo bữa ăn";
 
 /* Action sheet title selecting Pump
@@ -80,9 +80,6 @@
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
-
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Sự điều chỉnh cho mẫu người lớn dựa trên hiệu ứng theo kinh nghiệm ở trẻ em.";
 
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
@@ -175,9 +172,6 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Chồng liều";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Customer Token";
-
 /* Button title to delete CGM */
 "Delete CGM" = "Xóa CGM";
 
@@ -223,9 +217,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Chuyển động của Glucose";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Vô hạn định";
 
@@ -260,9 +251,6 @@
 
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Đang tải...";
-
-/* The title of the loggly service */
-"Loggly" = "Loggly";
 
 /* The notification title for a loop failure */
 "Loop Failure" = "Loop lỗi";

@@ -1,18 +1,36 @@
 /* (No Comment) */
+"9KhaIS" = "J'ai défini le préréglage";
+
+/* (No Comment) */
 "80eo5o" = "Ajouter des glucides";
+
+/* (No Comment) */
+"b085BW" = "Je n'ai pas pu définir le préréglage.";
+
+/* (No Comment) */
+"I4OZy8" = "Activer l'ajustement préréglé";
+
+/* (No Comment) */
+"lYMuWV" = "Nom Ajustement";
+
+/* (No Comment) */
+"nDKAmn" = "Quel est le nom de l'ajustement que vous voulez définir ?";
 
 /* (No Comment) */
 "OcNxIj" = "Ajouter des glucides";
 
 /* (No Comment) */
+"oLQSsJ" = "Activer l'ajustement '${overrideName}' ";
+
+/* (No Comment) */
+"XNNmtH" = "Activer le préréglage dans Loop";
+
+/* (No Comment) */
+"yBzwCL" = "Selection Ajustement";
+
+/* (No Comment) */
 "yc02Yq" = "Ajouter des glucides à Loop";
 
-"9KhaIS" = "I've set the preset";
-"I4OZy8" = "Enable Override Preset";
-"XNNmtH" = "Enable preset in Loop";
-"ZZ3mtM" = "Enable an override preset in Loop";
-"b085BW" = "I wasn't able to set the preset.";
-"lYMuWV" = "Override Name";
-"nDKAmn" = "What's the name of the override you'd like to set?";
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
-"yBzwCL" = "Override Selection";
+/* (No Comment) */
+"ZZ3mtM" = "Activer un ajustement préréglé dans Loop";
+

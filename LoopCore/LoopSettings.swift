@@ -12,9 +12,9 @@ public extension AutomaticDosingStrategy {
     var title: String {
         switch self {
         case .tempBasalOnly:
-            return NSLocalizedString("Temp Basal Only", comment: "Title string for temp basal only dosing strategy")
+            return LocalizedString("Temp Basal Only", comment: "Title string for temp basal only dosing strategy")
         case .automaticBolus:
-            return NSLocalizedString("Automatic Bolus", comment: "Title string for automatic bolus dosing strategy")
+            return LocalizedString("Automatic Bolus", comment: "Title string for automatic bolus dosing strategy")
         }
     }
 }

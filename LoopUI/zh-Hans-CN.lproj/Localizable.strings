@@ -1,0 +1,33 @@
+/* Format string describing the time interval since the last completion date. (1: The localized date components */
+"%@ ago" = "之前%@";
+
+/* The format string describing the basal rate. */
+"%@ U" = "%@ 单位";
+
+/* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
+"%1$@ at %2$@" = "%2$@ 分钟时为 %1$@";
+
+/* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
+"%1$@ units per hour at %2$@" = "%1$@ 每小时的单位 %2$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/分钟";
+
+/* Accessibility hint describing completion HUD for a closed loop */
+"Closed loop" = "启动闭环";
+
+/* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
+"Loop ran %@ ago" = "闭环已停止运行%@";
+
+/* Accessibility label component for glucose HUD describing an invalid state */
+"Needs attention" = "请注意";
+
+/* Accessbility hint describing completion HUD for an open loop */
+"Open loop" = "关闭闭环";
+
+/* Accessibility value for an unknown value */
+"Unknown" = "未知";
+
+/* Acessibility label describing completion HUD waiting for first run */
+"Waiting for first run" = "等待第一次运行";
+

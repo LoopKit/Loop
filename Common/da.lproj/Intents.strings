@@ -1,18 +1,36 @@
 /* (No Comment) */
+"9KhaIS" = "Jeg har indstillet forudindstillingen";
+
+/* (No Comment) */
 "80eo5o" = "Tilføj kulhydrater";
+
+/* (No Comment) */
+"b085BW" = "Jeg var ikke i stand til at indstille forudindstillingen.";
+
+/* (No Comment) */
+"I4OZy8" = "Aktiver forudindstilling for Override";
+
+/* (No Comment) */
+"lYMuWV" = "Override navn";
+
+/* (No Comment) */
+"nDKAmn" = "Hvad er navnet på den Override, du vil angive?";
 
 /* (No Comment) */
 "OcNxIj" = "Tilføj kulhydrater";
 
 /* (No Comment) */
-"yc02Yq" = "Tilføj kulhydrater til Loop.";
+"oLQSsJ" = "Aktiver \"${overrideName}\" Override forudindstilling";
 
-"9KhaIS" = "I've set the preset";
-"I4OZy8" = "Enable Override Preset";
-"XNNmtH" = "Enable preset in Loop";
-"ZZ3mtM" = "Enable an override preset in Loop";
-"b085BW" = "I wasn't able to set the preset.";
-"lYMuWV" = "Override Name";
-"nDKAmn" = "What's the name of the override you'd like to set?";
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
-"yBzwCL" = "Override Selection";
+/* (No Comment) */
+"XNNmtH" = "Aktiver forudindstilling i Loop";
+
+/* (No Comment) */
+"yBzwCL" = "Override valg";
+
+/* (No Comment) */
+"yc02Yq" = "Tilføj kulhydrater til Loop";
+
+/* (No Comment) */
+"ZZ3mtM" = "Aktivere en forudindstilling for Override i Loop";
+

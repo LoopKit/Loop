@@ -2,7 +2,10 @@
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Aggiungi carboidrati assunti";
+"Add Carb Entry" = "Agg. Carb. Assunti";
+
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Calcola la percentuale di misurazioni della glicemia entro un intervallo specifico";
 
 /* Title of the button to begin lesson execution */
 "Continue" = "Continua";

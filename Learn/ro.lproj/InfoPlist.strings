@@ -1,0 +1,6 @@
+/* Bundle name */
+"CFBundleName" = "Learn";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Datele mesei din baza de date din aplicația Sănătate sunt folosite pentru a determina efectele glicemice. Datele despre glicemie din baza de date Sănătate sunt folosite pentru construirea graficelor și calcularea influențelor glicemice. Datele de somn din baza de date Sănătate sunt folosite pentru a optimiza livrarea de actualizări de datele ale ceasului Apple pe perioada când sunteți treaz.";
+

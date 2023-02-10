@@ -1,6 +1,3 @@
-/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ v%2$@";
-
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "添加碳水化合物";
 
@@ -9,9 +6,6 @@
 
 /* Title of the button to begin lesson execution */
 "Continue" = "继续";
-
-/* The short unit display string for decibles */
-"dB" = "dB";
 
 /* The short unit display string for grams */
 "g" = "克";
@@ -30,9 +24,6 @@
 
 /* Lesson result text for no data */
 "No data available" = "无数据";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Section title for glucose range */
 "Range" = "范围";

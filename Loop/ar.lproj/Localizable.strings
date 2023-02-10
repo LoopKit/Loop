@@ -1,6 +1,21 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (قيد الانتظار: %@)";
 
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ استغرق";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ وحدة بشكل كامل";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/وحدة";
 
@@ -19,23 +34,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ استغرق";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ وحدة بشكل كامل";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 دقيقة معامل انحدار قراءات سكر الدم (b₁), ويستمر بالاضمحلال خلال 30 دقيقة";
@@ -77,9 +77,6 @@
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
-
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "تعديل على نموذج الكبار على أساس التأثيرات التجريبية عند الأطفال.";
 
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
@@ -172,9 +169,6 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "تجاوز مخصص";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "رمز العميل";
-
 /* Button title to delete CGM */
 "Delete CGM" = "حذف CGM";
 
@@ -220,9 +214,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "مقاومة سكر الدم";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "إلى أجل غير مسمى";
 
@@ -257,9 +248,6 @@
 
 /* The loading message for the diagnostic report screen */
 "Loading..." = "تحميل...";
-
-/* The title of the loggly service */
-"Loggly" = "Loggly";
 
 /* The notification title for a loop failure */
 "Loop Failure" = "فشل في الحلقة المغلقة";
