@@ -63,17 +63,17 @@ struct BolusEntryView: View {
                 .supportedInterfaceOrientations(.portrait)
                 .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
                 .onReceive(self.viewModel.$recommendedBolus) { recommendation in
-                    // If the recommendation changes, and the user has not edited the bolus amount, update the bolus amount
-                    let amount = recommendation?.doubleValue(for: .internationalUnit()) ?? 0
-                    if !editedBolusAmount {
-                        var newEnteredBolusString: String
-                        if amount == 0 {
-                            newEnteredBolusString = ""
-                        } else {
-                            newEnteredBolusString = Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-                        }
-                        enteredBolusStringBinding.wrappedValue = newEnteredBolusString
+                    // If the user has not edited the bolus amount and there are recommendation changes, then update the bolus amount
+                    guard !editedBolusAmount else { return }
+
+                    guard let amount = recommendation?.doubleValue(for: .internationalUnit()),
+                          amount != 0
+                    else {
+                        enteredBolusStringBinding.wrappedValue = ""
+                        return
                     }
+
+                    enteredBolusStringBinding.wrappedValue = viewModel.formatBolusAmount(amount)
                 }
                 .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
                     // The view model can disable manual glucose entry if CGM data returns.
@@ -270,19 +270,12 @@ struct BolusEntryView: View {
         }
     }
 
-    private static let doseAmountFormatter: NumberFormatter = {
-        let quantityFormatter = QuantityFormatter()
-        quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
-        quantityFormatter.numberFormatter.roundingMode = .down
-        return quantityFormatter.numberFormatter
-    }()
-
     private var recommendedBolusRow: some View {
         HStack {
             Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
             Spacer()
             HStack(alignment: .firstTextBaseline) {
-                Text(recommendedBolusString)
+                Text(viewModel.recommendedBolusString)
                     .font(.title)
                     .foregroundColor(Color(.label))
                 bolusUnitsLabel
@@ -291,19 +284,9 @@ struct BolusEntryView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var recommendedBolusString: String {
-        guard let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) else {
-            return "–"
-        }
-        return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-    }
-
     private func didBeginEditing() {
         if !editedBolusAmount {
-            enteredBolusString = ""
-            DispatchQueue.main.async {
-                self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
-            }
+            enteredBolusStringBinding.wrappedValue = ""
             editedBolusAmount = true
         }
     }
@@ -315,7 +298,7 @@ struct BolusEntryView: View {
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
                     text: enteredBolusStringBinding,
-                    placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
+                    placeholder: viewModel.formatBolusAmount(0.0),
                     font: .preferredFont(forTextStyle: .title1),
                     textColor: .loopAccent,
                     textAlignment: .right,
@@ -338,10 +321,10 @@ struct BolusEntryView: View {
 
     private var enteredBolusStringBinding: Binding<String> {
         Binding(
-            get: { self.enteredBolusString },
+            get: { enteredBolusString },
             set: { newValue in
-                self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: Self.doseAmountFormatter.number(from: newValue)?.doubleValue ?? 0)
-                self.enteredBolusString = newValue
+                viewModel.updateEnteredBolus(newValue)
+                enteredBolusString = newValue
             }
         )
     }
