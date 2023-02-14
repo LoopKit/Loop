@@ -208,7 +208,7 @@ extension TestingScenariosManagerRequirements {
                 case .success(_):
                     pumpManager.reservoirFillFraction = 1.0
                     pumpManager.injectPumpEvents(instance.pumpEvents)
-                    cgmManager.injectGlucoseSamples(instance.glucoseSamples)
+                    cgmManager.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
                     self.activeScenario = scenario
                     completion(nil)
                 case .failure(let error):
