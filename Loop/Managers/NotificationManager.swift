@@ -219,18 +219,18 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    static func sendUnannouncedMealNotification(mealStart: Date, amountInGrams: Double, delay: TimeInterval? = nil) {
+    static func sendMissedMealNotification(mealStart: Date, amountInGrams: Double, delay: TimeInterval? = nil) {
         let notification = UNMutableNotificationContent()
         /// Notifications should expire after the missed meal is no longer relevant
         let expirationDate = mealStart.addingTimeInterval(LoopCoreConstants.defaultCarbAbsorptionTimes.slow)
 
-        notification.title =  String(format: NSLocalizedString("Possible Unannounced Meal", comment: "The notification title for a meal that was possibly not logged in Loop."))
+        notification.title =  String(format: NSLocalizedString("Possible Missed Meal", comment: "The notification title for a meal that was possibly not logged in Loop."))
         notification.body = String(format: NSLocalizedString("It looks like you may not have logged a meal you ate. Tap to log it now.", comment: "The notification description for a meal that was possibly not logged in Loop."))
         notification.sound = .default
         
         notification.userInfo = [
-            LoopNotificationUserInfoKey.unannouncedMealTime.rawValue: mealStart,
-            LoopNotificationUserInfoKey.unannouncedMealCarbAmount.rawValue: amountInGrams,
+            LoopNotificationUserInfoKey.missedMealTime.rawValue: mealStart,
+            LoopNotificationUserInfoKey.missedMealCarbAmount.rawValue: amountInGrams,
             LoopNotificationUserInfoKey.expirationDate.rawValue: expirationDate
         ]
         
@@ -242,7 +242,7 @@ extension NotificationManager {
 
         let request = UNNotificationRequest(
             /// We use the same `identifier` for all requests so a newer missed meal notification will replace a current one (if it exists)
-            identifier: LoopNotificationCategory.unannouncedMeal.rawValue,
+            identifier: LoopNotificationCategory.missedMeal.rawValue,
             content: notification,
             trigger: notificationTrigger
         )
@@ -259,7 +259,7 @@ extension NotificationManager {
                 let request = notification.request
                 
                 guard
-                    request.identifier == LoopNotificationCategory.unannouncedMeal.rawValue,
+                    request.identifier == LoopNotificationCategory.missedMeal.rawValue,
                     let expirationDate = request.content.userInfo[LoopNotificationUserInfoKey.expirationDate.rawValue] as? Date,
                     expirationDate < now
                 else {

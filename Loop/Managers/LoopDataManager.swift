@@ -1710,7 +1710,7 @@ extension LoopDataManager {
     private func enactRecommendedAutomaticDose() -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
         
-        mealDetectionManager.generateUnannouncedMealNotificationIfNeeded(
+        mealDetectionManager.generateMissedMealNotificationIfNeeded(
             using: insulinCounteractionEffects,
             pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
             bolusDurationEstimator: { [unowned self] bolusAmount in

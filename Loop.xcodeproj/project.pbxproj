@@ -607,9 +607,9 @@
 		E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
 		E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
 		E9B3552229358C440076AB04 /* MealDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3552129358C440076AB04 /* MealDetectionManager.swift */; };
-		E9B355292935919E0076AB04 /* UAMSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B35525293590980076AB04 /* UAMSettings.swift */; };
-		E9B3552A293591E70076AB04 /* UAMNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* UAMNotification.swift */; };
-		E9B3552B293591E70076AB04 /* UAMNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* UAMNotification.swift */; };
+		E9B355292935919E0076AB04 /* MissedMealSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B35525293590980076AB04 /* MissedMealSettings.swift */; };
+		E9B3552A293591E70076AB04 /* MissedMealNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* MissedMealNotification.swift */; };
+		E9B3552B293591E70076AB04 /* MissedMealNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* MissedMealNotification.swift */; };
 		E9B3552D293592B40076AB04 /* MealDetectionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */; };
 		E9B3552F2935968E0076AB04 /* HKHealthStoreMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3552E2935968E0076AB04 /* HKHealthStoreMock.swift */; };
 		E9B35538293706CB0076AB04 /* needs_clamping_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35532293706CA0076AB04 /* needs_clamping_counteraction_effect.json */; };
@@ -1742,9 +1742,9 @@
 		E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideIntentHandler.swift; sourceTree = "<group>"; };
 		E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+LoopIntents.swift"; sourceTree = "<group>"; };
 		E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentExtensionInfo.swift; sourceTree = "<group>"; };
-		E9B3551B292844010076AB04 /* UAMNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UAMNotification.swift; sourceTree = "<group>"; };
+		E9B3551B292844010076AB04 /* MissedMealNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedMealNotification.swift; sourceTree = "<group>"; };
 		E9B3552129358C440076AB04 /* MealDetectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealDetectionManager.swift; sourceTree = "<group>"; };
-		E9B35525293590980076AB04 /* UAMSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UAMSettings.swift; sourceTree = "<group>"; };
+		E9B35525293590980076AB04 /* MissedMealSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedMealSettings.swift; sourceTree = "<group>"; };
 		E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealDetectionManagerTests.swift; sourceTree = "<group>"; };
 		E9B3552E2935968E0076AB04 /* HKHealthStoreMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HKHealthStoreMock.swift; sourceTree = "<group>"; };
 		E9B35532293706CA0076AB04 /* needs_clamping_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = needs_clamping_counteraction_effect.json; sourceTree = "<group>"; };
@@ -2282,7 +2282,7 @@
 				4B60626A287E286000BF8BBB /* Localizable.strings */,
 				E9C00EEF24C620EF00628F35 /* LoopSettings.swift */,
 				C16575742539FD60004AE16E /* LoopCoreConstants.swift */,
-				E9B3551B292844010076AB04 /* UAMNotification.swift */,
+				E9B3551B292844010076AB04 /* MissedMealNotification.swift */,
 				C1D0B62F2986D4D90098D215 /* LocalizedString.swift */,
 			);
 			path = LoopCore;
@@ -3016,7 +3016,7 @@
 			isa = PBXGroup;
 			children = (
 				E9B3552129358C440076AB04 /* MealDetectionManager.swift */,
-				E9B35525293590980076AB04 /* UAMSettings.swift */,
+				E9B35525293590980076AB04 /* MissedMealSettings.swift */,
 			);
 			path = "Missed Meal Detection";
 			sourceTree = "<group>";
@@ -3816,7 +3816,7 @@
 				C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */,
 				A9B996F227238705002DC09C /* DosingDecisionStore.swift in Sources */,
 				43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */,
-				E9B355292935919E0076AB04 /* UAMSettings.swift in Sources */,
+				E9B355292935919E0076AB04 /* MissedMealSettings.swift in Sources */,
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				4372E48B213CB5F00068E043 /* Double.swift in Sources */,
@@ -4090,7 +4090,7 @@
 				A9CE912224CA032E00302A40 /* NSUserDefaults.swift in Sources */,
 				43C05CAB21EB2B4A006FB252 /* NSBundle.swift in Sources */,
 				43C05CC721EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
-				E9B3552B293591E70076AB04 /* UAMNotification.swift in Sources */,
+				E9B3552B293591E70076AB04 /* MissedMealNotification.swift in Sources */,
 				4345E40221F67300009E00E5 /* PotentialCarbEntryUserInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4143,7 +4143,7 @@
 				43C05CAA21EB2B49006FB252 /* NSBundle.swift in Sources */,
 				43C05CC821EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
 				43C05CAD21EB2BBF006FB252 /* NSUserDefaults.swift in Sources */,
-				E9B3552A293591E70076AB04 /* UAMNotification.swift in Sources */,
+				E9B3552A293591E70076AB04 /* MissedMealNotification.swift in Sources */,
 				4345E40121F67300009E00E5 /* PotentialCarbEntryUserInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

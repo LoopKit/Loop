@@ -9,16 +9,16 @@
 import SwiftUI
 
 public class AlertPermissionsViewModel: ObservableObject {
-    @Published var unannouncedMealNotificationsEnabled: Bool {
+    @Published var missedMealNotificationsEnabled: Bool {
         didSet {
-            UserDefaults.standard.unannouncedMealNotificationsEnabled = unannouncedMealNotificationsEnabled
+            UserDefaults.standard.missedMealNotificationsEnabled = missedMealNotificationsEnabled
         }
     }
     
     @Published var checker: AlertPermissionsChecker
     
     init(checker: AlertPermissionsChecker) {
-        self.unannouncedMealNotificationsEnabled = UserDefaults.standard.unannouncedMealNotificationsEnabled
+        self.missedMealNotificationsEnabled = UserDefaults.standard.missedMealNotificationsEnabled
         self.checker = checker
     }
 }
@@ -27,15 +27,15 @@ public class AlertPermissionsViewModel: ObservableObject {
 extension UserDefaults {
     
     private enum Key: String {
-        case unannouncedMealNotificationsEnabled = "com.loopkit.Loop.UnannouncedMealNotificationsEnabled"
+        case missedMealNotificationsEnabled = "com.loopkit.Loop.MissedMealNotificationsEnabled"
     }
     
-    var unannouncedMealNotificationsEnabled: Bool {
+    var missedMealNotificationsEnabled: Bool {
         get {
-            return object(forKey: Key.unannouncedMealNotificationsEnabled.rawValue) as? Bool ?? false
+            return object(forKey: Key.missedMealNotificationsEnabled.rawValue) as? Bool ?? false
         }
         set {
-            set(newValue, forKey: Key.unannouncedMealNotificationsEnabled.rawValue)
+            set(newValue, forKey: Key.missedMealNotificationsEnabled.rawValue)
         }
     }
 }

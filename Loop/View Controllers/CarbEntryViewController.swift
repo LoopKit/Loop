@@ -108,13 +108,13 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
     private var shouldBeginEditingFoodType = false
     
-    private var shouldDisplayUnannouncedMealWarning = false {
+    private var shouldDisplayMissedMealWarning = false {
         didSet {
-            if shouldDisplayUnannouncedMealWarning != oldValue {
+            if shouldDisplayMissedMealWarning != oldValue {
                 if shouldDisplayOverrideEnabledWarning {
-                    self.displayWarningRow(rowType: WarningRow.unannouncedMeal, isAddingRow: shouldDisplayUnannouncedMealWarning)
+                    self.displayWarningRow(rowType: WarningRow.missedMeal, isAddingRow: shouldDisplayMissedMealWarning)
                 } else {
-                    self.shouldDisplayWarning = shouldDisplayUnannouncedMealWarning || shouldDisplayOverrideEnabledWarning
+                    self.shouldDisplayWarning = shouldDisplayMissedMealWarning || shouldDisplayOverrideEnabledWarning
                 }
             }
         }
@@ -123,10 +123,10 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     private var shouldDisplayOverrideEnabledWarning = false {
         didSet {
             if shouldDisplayOverrideEnabledWarning != oldValue {
-                if shouldDisplayUnannouncedMealWarning {
+                if shouldDisplayMissedMealWarning {
                     self.displayWarningRow(rowType: WarningRow.override, isAddingRow: shouldDisplayOverrideEnabledWarning)
                 } else {
-                    self.shouldDisplayWarning = shouldDisplayOverrideEnabledWarning || shouldDisplayUnannouncedMealWarning
+                    self.shouldDisplayWarning = shouldDisplayOverrideEnabledWarning || shouldDisplayMissedMealWarning
                 }
             }
         }
@@ -267,8 +267,8 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         if shouldDisplayWarning {
             tableView.beginUpdates()
             
-            // If the unannounced meal warning is shown, use the positional index of the given row type.
-            let rowIndex = shouldDisplayUnannouncedMealWarning ? rowType.rawValue : 0
+            // If the missed meal warning is shown, use the positional index of the given row type.
+            let rowIndex = shouldDisplayMissedMealWarning ? rowType.rawValue : 0
             
             if isAddingRow {
                 tableView.insertRows(at: [IndexPath(row: rowIndex, section: Sections.warning.rawValue)], with: UITableView.RowAnimation.top)
@@ -297,9 +297,9 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             return displayWarningSection ? indexPath.section : indexPath.section + 1
         }
         
-        static func numberOfRows(for section: Int, displayUnannouncedMealWarning: Bool, displayOverrideWarning: Bool) -> Int {
-            if section == Sections.warning.rawValue && (displayUnannouncedMealWarning || displayOverrideWarning) {
-                return displayUnannouncedMealWarning && displayOverrideWarning ? WarningRow.allCases.count : WarningRow.allCases.count - 1
+        static func numberOfRows(for section: Int, displayMissedMealWarning: Bool, displayOverrideWarning: Bool) -> Int {
+            if section == Sections.warning.rawValue && (displayMissedMealWarning || displayOverrideWarning) {
+                return displayMissedMealWarning && displayOverrideWarning ? WarningRow.allCases.count : WarningRow.allCases.count - 1
             }
 
             return DetailsRow.allCases.count
@@ -334,7 +334,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     }
     
     fileprivate enum WarningRow: Int, CaseIterable {
-        case unannouncedMeal
+        case missedMeal
         case override
     }
 
@@ -343,15 +343,15 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Sections.numberOfRows(for: section, displayUnannouncedMealWarning: shouldDisplayUnannouncedMealWarning, displayOverrideWarning: shouldDisplayOverrideEnabledWarning)
+        return Sections.numberOfRows(for: section, displayMissedMealWarning: shouldDisplayMissedMealWarning, displayOverrideWarning: shouldDisplayOverrideEnabledWarning)
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch Sections(rawValue: Sections.section(for: indexPath, displayWarningSection: shouldDisplayWarning))! {
         case .warning:
             let cell: UITableViewCell
-            // if no unannounced meal warning should be shown OR if the given indexPath is for the override warning row, return the override warning cell.
-            if !shouldDisplayUnannouncedMealWarning || WarningRow(rawValue: indexPath.row)! == .override {
+            // if no missed meal warning should be shown OR if the given indexPath is for the override warning row, return the override warning cell.
+            if !shouldDisplayMissedMealWarning || WarningRow(rawValue: indexPath.row)! == .override {
                 if let existingCell = tableView.dequeueReusableCell(withIdentifier: "CarbEntryOverrideEnabledWarningCell") {
                     cell = existingCell
                 } else {
@@ -375,7 +375,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
                 cell.imageView?.image = UIImage(systemName: "exclamationmark.triangle.fill")
                 cell.imageView?.tintColor = .destructive
                 cell.textLabel?.numberOfLines = 0
-                cell.textLabel?.text = NSLocalizedString("Loop has detected an unannounced meal and estimated its size. Edit the carb amount to match the amount of any carbs you may have eaten.", comment: "Warning displayed when user is adding a meal from an unannounced meal notification")
+                cell.textLabel?.text = NSLocalizedString("Loop has detected an missed meal and estimated its size. Edit the carb amount to match the amount of any carbs you may have eaten.", comment: "Warning displayed when user is adding a meal from an missed meal notification")
                 cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
                 cell.textLabel?.textColor = .secondaryLabel
                 cell.isUserInteractionEnabled = false
@@ -533,8 +533,8 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
                 absorptionTimeWasEdited = true
             }
             
-            if activity.entryIsUnannouncedMeal {
-                shouldDisplayUnannouncedMealWarning = true
+            if activity.entryisMissedMeal {
+                shouldDisplayMissedMealWarning = true
             }
         }
     }

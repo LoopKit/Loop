@@ -1,5 +1,5 @@
 //
-//  UAMSettings.swift
+//  MissedMealSettings.swift
 //  Loop
 //
 //  Created by Anna Quinlan on 11/28/22.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct UAMSettings {
+public struct MissedMealSettings {
     /// Minimum grams of unannounced carbs that must be detected for a notification to be delivered
     public static let minCarbThreshold: Double = 15 // grams
     /// Maximum grams of unannounced carbs that the algorithm will search for

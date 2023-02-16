@@ -12,9 +12,9 @@ import OSLog
 import LoopCore
 import LoopKit
 
-enum UnannouncedMealStatus: Equatable {
-    case hasUnannouncedMeal(startTime: Date, carbAmount: Double)
-    case noUnannouncedMeal
+enum MissedMealStatus: Equatable {
+    case hasMissedMeal(startTime: Date, carbAmount: Double)
+    case noMissedMeal
 }
 
 class MealDetectionManager {
@@ -22,22 +22,22 @@ class MealDetectionManager {
     
     public var maximumBolus: Double?
     
-    /// The last unannounced meal notification that was sent
+    /// The last missed meal notification that was sent
     /// Internal for unit testing
-    var lastUAMNotification: UAMNotification? = UserDefaults.standard.lastUAMNotification {
+    var lastMissedMealNotification: MissedMealNotification? = UserDefaults.standard.lastMissedMealNotification {
         didSet {
-            UserDefaults.standard.lastUAMNotification = lastUAMNotification
+            UserDefaults.standard.lastMissedMealNotification = lastMissedMealNotification
         }
     }
     
     private var carbStore: CarbStoreProtocol
     
-    /// Debug info for UAM
-    /// Timeline from the most recent check for unannounced meals
-    private var lastEvaluatedUamTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
+    /// Debug info for missed meal detection
+    /// Timeline from the most recent check for missed meals
+    private var lastEvaluatedMissedMealTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
     
-    /// Timeline from the most recent detection of an unannounced meal
-    private var lastDetectedUamTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
+    /// Timeline from the most recent detection of an missed meal
+    private var lastDetectedMissedMealTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
     
     /// Allows for controlling uses of the system date in unit testing
     internal var test_currentDate: Date?
@@ -62,11 +62,11 @@ class MealDetectionManager {
     }
     
     // MARK: Meal Detection
-    func hasUnannouncedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], completion: @escaping (UnannouncedMealStatus) -> Void) {
+    func hasMissedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], completion: @escaping (MissedMealStatus) -> Void) {
         let delta = TimeInterval(minutes: 5)
 
-        let intervalStart = currentDate(timeIntervalSinceNow: -UAMSettings.maxRecency)
-        let intervalEnd = currentDate(timeIntervalSinceNow: -UAMSettings.minRecency)
+        let intervalStart = currentDate(timeIntervalSinceNow: -MissedMealSettings.maxRecency)
+        let intervalEnd = currentDate(timeIntervalSinceNow: -MissedMealSettings.minRecency)
         let now = self.currentDate
 
         carbStore.getGlucoseEffects(start: intervalStart, end: now, effectVelocities: insulinCounteractionEffects) {[weak self] result in
@@ -78,7 +78,7 @@ class MealDetectionManager {
                     self?.log.error("Failed to fetch glucose effects to check for missed meal: %{public}@", String(describing: error))
                 }
 
-                completion(.noUnannouncedMeal)
+                completion(.noMissedMeal)
                 return
             }
             
@@ -129,41 +129,41 @@ class MealDetectionManager {
                                                     delta: delta)
                                           .reversed()
             
-            /// Dates the algorithm is allowed to check for the presence of a UAM
+            /// Dates the algorithm is allowed to check for the presence of a missed meal
             let dateSearchRange = Set(LoopMath.simulationDateRange(from: intervalStart,
                                                          to: intervalEnd,
                                                          delta: delta))
             
             /// Timeline used for debug purposes
-            var uamTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
+            var missedMealTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
             
             for pastTime in summationRange {
                 guard
                     let unexpectedEffect = effectValueCache[pastTime],
                     !carbEntries.contains(where: { $0.startDate >= pastTime })
                 else {
-                    uamTimeline.append((pastTime, nil, nil, nil))
+                    missedMealTimeline.append((pastTime, nil, nil, nil))
                     continue
                 }
                 
                 unexpectedDeviation += unexpectedEffect
 
                 guard dateSearchRange.contains(pastTime) else {
-                    /// This time is too recent to check for a UAM
-                    uamTimeline.append((pastTime, unexpectedDeviation, nil, nil))
+                    /// This time is too recent to check for a missed meal
+                    missedMealTimeline.append((pastTime, unexpectedDeviation, nil, nil))
                     continue
                 }
                 
-                /// Find the threshold based on a minimum of `unannouncedMealGlucoseRiseThreshold` of change per minute
+                /// Find the threshold based on a minimum of `missedMealGlucoseRiseThreshold` of change per minute
                 let minutesAgo = now.timeIntervalSince(pastTime).minutes
-                let deviationChangeThreshold = UAMSettings.glucoseRiseThreshold * minutesAgo
+                let deviationChangeThreshold = MissedMealSettings.glucoseRiseThreshold * minutesAgo
                 
                 /// Find the total effect we'd expect to see for a meal with `carbThreshold`-worth of carbs that started at `pastTime`
-                guard let modeledMealEffectThreshold = self.effectThreshold(mealStart: pastTime, carbsInGrams: UAMSettings.minCarbThreshold) else {
+                guard let modeledMealEffectThreshold = self.effectThreshold(mealStart: pastTime, carbsInGrams: MissedMealSettings.minCarbThreshold) else {
                     continue
                 }
                 
-                uamTimeline.append((pastTime, unexpectedDeviation, modeledMealEffectThreshold, deviationChangeThreshold))
+                missedMealTimeline.append((pastTime, unexpectedDeviation, modeledMealEffectThreshold, deviationChangeThreshold))
                 
                 /// Use the higher of the 2 thresholds to ensure noisy CGM data doesn't cause false-positives for more recent times
                 let effectThreshold = max(deviationChangeThreshold, modeledMealEffectThreshold)
@@ -173,18 +173,18 @@ class MealDetectionManager {
                 }
             }
             
-            self.lastEvaluatedUamTimeline = uamTimeline.reversed()
+            self.lastEvaluatedMissedMealTimeline = missedMealTimeline.reversed()
             
-            let mealTimeTooRecent = now.timeIntervalSince(mealTime) < UAMSettings.minRecency
+            let mealTimeTooRecent = now.timeIntervalSince(mealTime) < MissedMealSettings.minRecency
             guard !mealTimeTooRecent else {
-                completion(.noUnannouncedMeal)
+                completion(.noMissedMeal)
                 return
             }
 
-            self.lastDetectedUamTimeline = uamTimeline.reversed()
+            self.lastDetectedMissedMealTimeline = missedMealTimeline.reversed()
             
             let carbAmount = self.determineCarbs(mealtime: mealTime, unexpectedDeviation: unexpectedDeviation)
-            completion(.hasUnannouncedMeal(startTime: mealTime, carbAmount: carbAmount ?? UAMSettings.minCarbThreshold))
+            completion(.hasMissedMeal(startTime: mealTime, carbAmount: carbAmount ?? MissedMealSettings.minCarbThreshold))
         }
     }
     
@@ -193,7 +193,7 @@ class MealDetectionManager {
         
         /// Search `carbAmount`s from `minCarbThreshold` to `maxCarbThreshold` in 5-gram increments,
         /// seeing if the deviation is at least `carbAmount` of carbs
-        for carbAmount in stride(from: UAMSettings.minCarbThreshold, through: UAMSettings.maxCarbThreshold, by: 5) {
+        for carbAmount in stride(from: MissedMealSettings.minCarbThreshold, through: MissedMealSettings.maxCarbThreshold, by: 5) {
             if
                 let modeledCarbEffect = effectThreshold(mealStart: mealtime, carbsInGrams: carbAmount),
                 unexpectedDeviation >= modeledCarbEffect
@@ -228,30 +228,30 @@ class MealDetectionManager {
     }
     
     // MARK: Notification Generation
-    func generateUnannouncedMealNotificationIfNeeded(
+    func generateMissedMealNotificationIfNeeded(
         using insulinCounteractionEffects: [GlucoseEffectVelocity],
         pendingAutobolusUnits: Double? = nil,
         bolusDurationEstimator: @escaping (Double) -> TimeInterval?
     ) {
-        hasUnannouncedMeal(insulinCounteractionEffects: insulinCounteractionEffects) {[weak self] status in
+        hasMissedMeal(insulinCounteractionEffects: insulinCounteractionEffects) {[weak self] status in
             self?.manageMealNotifications(for: status, pendingAutobolusUnits: pendingAutobolusUnits, bolusDurationEstimator: bolusDurationEstimator)
         }
     }
     
     
     // Internal for unit testing
-    func manageMealNotifications(for status: UnannouncedMealStatus, pendingAutobolusUnits: Double? = nil, bolusDurationEstimator getBolusDuration: (Double) -> TimeInterval?) {
+    func manageMealNotifications(for status: MissedMealStatus, pendingAutobolusUnits: Double? = nil, bolusDurationEstimator getBolusDuration: (Double) -> TimeInterval?) {
         // We should remove expired notifications regardless of whether or not there was a meal
         NotificationManager.removeExpiredMealNotifications()
         
         // Figure out if we should deliver a notification
         let now = self.currentDate
-        let notificationTimeTooRecent = now.timeIntervalSince(lastUAMNotification?.deliveryTime ?? .distantPast) < (UAMSettings.maxRecency - UAMSettings.minRecency)
+        let notificationTimeTooRecent = now.timeIntervalSince(lastMissedMealNotification?.deliveryTime ?? .distantPast) < (MissedMealSettings.maxRecency - MissedMealSettings.minRecency)
         
         guard
-            case .hasUnannouncedMeal(let startTime, let carbAmount) = status,
+            case .hasMissedMeal(let startTime, let carbAmount) = status,
             !notificationTimeTooRecent,
-            UserDefaults.standard.unannouncedMealNotificationsEnabled
+            UserDefaults.standard.missedMealNotificationsEnabled
         else {
             // No notification needed!
             return
@@ -268,20 +268,20 @@ class MealDetectionManager {
         
         log.debug("Delivering a missed meal notification")
 
-        /// Coordinate the unannounced meal notification time with any pending autoboluses that `update` may have started
+        /// Coordinate the missed meal notification time with any pending autoboluses that `update` may have started
         /// so that the user doesn't have to cancel the current autobolus to bolus in response to the missed meal notification
         if
             let pendingAutobolusUnits,
             pendingAutobolusUnits > 0,
             let estimatedBolusDuration = getBolusDuration(pendingAutobolusUnits),
-            estimatedBolusDuration < UAMSettings.maxNotificationDelay
+            estimatedBolusDuration < MissedMealSettings.maxNotificationDelay
         {
-            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount, delay: estimatedBolusDuration)
-            lastUAMNotification = UAMNotification(deliveryTime: now.advanced(by: estimatedBolusDuration),
+            NotificationManager.sendMissedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount, delay: estimatedBolusDuration)
+            lastMissedMealNotification = MissedMealNotification(deliveryTime: now.advanced(by: estimatedBolusDuration),
                                                   carbAmount: clampedCarbAmount)
         } else {
-            NotificationManager.sendUnannouncedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount)
-            lastUAMNotification = UAMNotification(deliveryTime: now, carbAmount: clampedCarbAmount)
+            NotificationManager.sendMissedMealNotification(mealStart: startTime, amountInGrams: clampedCarbAmount)
+            lastMissedMealNotification = MissedMealNotification(deliveryTime: now, carbAmount: clampedCarbAmount)
         }
     }
     
@@ -294,14 +294,14 @@ class MealDetectionManager {
         let report = [
             "## MealDetectionManager",
             "",
-            "* lastUnannouncedMealNotificationTime: \(String(describing: lastUAMNotification?.deliveryTime))",
-            "* lastUnannouncedMealCarbEstimate: \(String(describing: lastUAMNotification?.carbAmount))",
-            "* lastEvaluatedUnannouncedMealTimeline:",
-            lastEvaluatedUamTimeline.reduce(into: "", { (entries, entry) in
+            "* lastMissedMealNotificationTime: \(String(describing: lastMissedMealNotification?.deliveryTime))",
+            "* lastMissedMealCarbEstimate: \(String(describing: lastMissedMealNotification?.carbAmount))",
+            "* lastEvaluatedMissedMealTimeline:",
+            lastEvaluatedMissedMealTimeline.reduce(into: "", { (entries, entry) in
                 entries.append("  * date: \(entry.date), unexpectedDeviation: \(entry.unexpectedDeviation ?? -1), meal-based threshold: \(entry.mealThreshold ?? -1), change-based threshold: \(entry.rateOfChangeThreshold ?? -1) \n")
             }),
-            "* lastDetectedUnannouncedMealTimeline:",
-            lastDetectedUamTimeline.reduce(into: "", { (entries, entry) in
+            "* lastDetectedMissedMealTimeline:",
+            lastDetectedMissedMealTimeline.reduce(into: "", { (entries, entry) in
                 entries.append("  * date: \(entry.date), unexpectedDeviation: \(entry.unexpectedDeviation ?? -1), meal-based threshold: \(entry.mealThreshold ?? -1), change-based threshold: \(entry.rateOfChangeThreshold ?? -1) \n")
             })
         ]

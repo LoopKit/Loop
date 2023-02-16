@@ -20,7 +20,7 @@ extension UserDefaults {
         case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
-        case LastUAMNotification = "com.loopkit.Loop.lastUAMNotification"
+        case LastMissedMealNotification = "com.loopkit.Loop.lastMissedMealNotification"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -115,25 +115,25 @@ extension UserDefaults {
         }
     }
     
-    public var lastUAMNotification: UAMNotification? {
+    public var lastMissedMealNotification: MissedMealNotification? {
         get {
             let decoder = JSONDecoder()
-            guard let data = object(forKey: Key.LastUAMNotification.rawValue) as? Data else {
+            guard let data = object(forKey: Key.LastMissedMealNotification.rawValue) as? Data else {
                 return nil
             }
-            return try? decoder.decode(UAMNotification.self, from: data)
+            return try? decoder.decode(MissedMealNotification.self, from: data)
         }
         set {
             do {
                 if let newValue = newValue {
                     let encoder = JSONEncoder()
                     let data = try encoder.encode(newValue)
-                    set(data, forKey: Key.LastUAMNotification.rawValue)
+                    set(data, forKey: Key.LastMissedMealNotification.rawValue)
                 } else {
-                    set(nil, forKey: Key.LastUAMNotification.rawValue)
+                    set(nil, forKey: Key.LastMissedMealNotification.rawValue)
                 }
             } catch {
-                assertionFailure("Unable to encode UAMNotification")
+                assertionFailure("Unable to encode MissedMealNotification")
             }
         }
     }

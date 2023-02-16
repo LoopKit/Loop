@@ -1,5 +1,5 @@
 //
-//  UAMNotification.swift
+//  MissedMealNotification.swift
 //  Loop
 //
 //  Created by Anna Quinlan on 11/18/22.
@@ -8,8 +8,8 @@
 
 import Foundation
 
-/// Information about an unannounced meal notification
-public struct UAMNotification: Equatable, Codable {
+/// Information about a missed meal notification
+public struct MissedMealNotification: Equatable, Codable {
     public let deliveryTime: Date
     public let carbAmount: Double
     

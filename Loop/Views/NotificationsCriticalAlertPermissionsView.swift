@@ -66,7 +66,7 @@ public struct NotificationsCriticalAlertPermissionsView: View {
                     }
                 }
             }
-            unannouncedMealAlertSection
+            missedMealAlertSection
             notificationAndCriticalAlertPermissionSupportSection
         }
         .insetGroupedListStyle()
@@ -138,9 +138,9 @@ extension NotificationsCriticalAlertPermissionsView {
         }
     }
     
-    private var unannouncedMealAlertSection: some View {
-        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of unannounced meal notifications."))) {
-            Toggle("Missed Meal Notifications", isOn: $viewModel.unannouncedMealNotificationsEnabled)
+    private var missedMealAlertSection: some View {
+        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
+            Toggle("Missed Meal Notifications", isOn: $viewModel.missedMealNotificationsEnabled)
         }
     }
 
