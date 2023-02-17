@@ -445,7 +445,7 @@
 		B4CAD8792549D2540057946B /* LoopCompletionFreshnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4CAD8782549D2540057946B /* LoopCompletionFreshnessTests.swift */; };
 		B4D4534128E5CA7900F1A8D9 /* AlertMuterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D4534028E5CA7900F1A8D9 /* AlertMuterTests.swift */; };
 		B4D620D424D9EDB900043B3C /* GuidanceColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D620D324D9EDB900043B3C /* GuidanceColors.swift */; };
-		B4E202302661063E009421B5 /* ClosedLoopStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E2022F2661063E009421B5 /* ClosedLoopStatus.swift */; };
+		B4E202302661063E009421B5 /* AutomaticDosingStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */; };
 		B4E96D4B248A6B6E002DABAD /* DeviceStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */; };
 		B4E96D4F248A6E20002DABAD /* CGMStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4E248A6E20002DABAD /* CGMStatusHUDView.swift */; };
 		B4E96D53248A7386002DABAD /* GlucoseValueHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D52248A7386002DABAD /* GlucoseValueHUDView.swift */; };
@@ -1428,7 +1428,7 @@
 		B4CAD8782549D2540057946B /* LoopCompletionFreshnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCompletionFreshnessTests.swift; sourceTree = "<group>"; };
 		B4D4534028E5CA7900F1A8D9 /* AlertMuterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertMuterTests.swift; sourceTree = "<group>"; };
 		B4D620D324D9EDB900043B3C /* GuidanceColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidanceColors.swift; sourceTree = "<group>"; };
-		B4E2022F2661063E009421B5 /* ClosedLoopStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLoopStatus.swift; sourceTree = "<group>"; };
+		B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticDosingStatus.swift; sourceTree = "<group>"; };
 		B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusHUDView.swift; sourceTree = "<group>"; };
 		B4E96D4E248A6E20002DABAD /* CGMStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMStatusHUDView.swift; sourceTree = "<group>"; };
 		B4E96D52248A7386002DABAD /* GlucoseValueHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueHUDView.swift; sourceTree = "<group>"; };
@@ -1862,7 +1862,7 @@
 				43511CDD21FD80AD00566C63 /* RetrospectiveCorrection */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
 				C17824A41E1AD4D100D9D25C /* ManualBolusRecommendation.swift */,
-				B4E2022F2661063E009421B5 /* ClosedLoopStatus.swift */,
+				B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */,
 				B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */,
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
@@ -3638,7 +3638,7 @@
 				1D49795824E7289700948F05 /* ServicesViewModel.swift in Sources */,
 				1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */,
 				892D7C5123B54A15008A9656 /* CarbEntryViewController.swift in Sources */,
-				B4E202302661063E009421B5 /* ClosedLoopStatus.swift in Sources */,
+				B4E202302661063E009421B5 /* AutomaticDosingStatus.swift in Sources */,
 				C191D2A125B3ACAA00C26C0B /* DosingStrategySelectionView.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				A977A2F424ACFECF0059C207 /* CriticalEventLogExportManager.swift in Sources */,

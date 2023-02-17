@@ -98,7 +98,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         let currentDate = glucoseStore.latestGlucose!.startDate
         
         dosingDecisionStore = MockDosingDecisionStore()
-        automaticDosingStatus = AutomaticDosingStatus(isClosedLoop: true, isClosedLoopAllowed: true)
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)
         loopDataManager = LoopDataManager(
             lastLoopCompleted: currentDate,
             basalDeliveryState: basalDeliveryState ?? .active(currentDate),
@@ -391,12 +391,12 @@ class LoopDataManagerDosingTests: XCTestCase {
         let observer = NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: nil, queue: nil) { _ in
             exp.fulfill()
         }
-        automaticDosingStatus.isClosedLoop = false
+        automaticDosingStatus.automaticDosingEnabled = false
         wait(for: [exp], timeout: 1.0)
         let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel)
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
-        XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "closedLoopDisabled")
+        XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "automaticDosingDisabled")
         XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].automaticDoseRecommendation, expectedAutomaticDoseRecommendation)
         NotificationCenter.default.removeObserver(observer)
     }
@@ -446,7 +446,7 @@ class LoopDataManagerDosingTests: XCTestCase {
 
     func testLoopRecommendsTempBasalWithoutEnactingIfOpenLoop() {
         setUp(for: .highAndStable)
-        automaticDosingStatus.isClosedLoop = false
+        automaticDosingStatus.automaticDosingEnabled = false
         waitOnDataQueue()
         let delegate = MockDelegate()
         loopDataManager.delegate = delegate
@@ -518,7 +518,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         let currentDate = Date()
 
         dosingDecisionStore = MockDosingDecisionStore()
-        automaticDosingStatus = AutomaticDosingStatus(isClosedLoop: false, isClosedLoopAllowed: true)
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: false, isAutomaticDosingAllowed: true)
         let existingTempBasal = DoseEntry(
             type: .tempBasal,
             startDate: currentDate.addingTimeInterval(-.minutes(2)),

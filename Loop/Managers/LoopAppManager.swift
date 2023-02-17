@@ -80,7 +80,7 @@ class LoopAppManager: NSObject {
     private let log = DiagnosticLog(category: "LoopAppManager")
     private let widgetLog = DiagnosticLog(category: "LoopWidgets")
 
-    private let closedLoopStatus = ClosedLoopStatus(isClosedLoop: false, isClosedLoopAllowed: false)
+    private let automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: false, isAutomaticDosingAllowed: false)
 
     lazy private var cancellables = Set<AnyCancellable>()
 
@@ -176,7 +176,7 @@ class LoopAppManager: NSObject {
                                                    settingsManager: settingsManager,
                                                    bluetoothProvider: bluetoothStateManager,
                                                    alertPresenter: self,
-                                                   closedLoopStatus: closedLoopStatus,
+                                                   automaticDosingStatus: automaticDosingStatus,
                                                    cacheStore: cacheStore,
                                                    localCacheDuration: localCacheDuration,
                                                    overrideHistory: overrideHistory,
@@ -208,10 +208,10 @@ class LoopAppManager: NSObject {
                                         servicesManager: deviceDataManager.servicesManager,
                                         alertIssuer: alertManager)
 
-        closedLoopStatus.$isClosedLoopAllowed
+        automaticDosingStatus.$isAutomaticDosingAllowed
             .combineLatest(deviceDataManager.loopManager.$dosingEnabled)
             .map { $0 && $1 }
-            .assign(to: \.closedLoopStatus.isClosedLoop, on: self)
+            .assign(to: \.automaticDosingStatus.automaticDosingEnabled, on: self)
             .store(in: &cancellables)
 
         self.state = state.next
@@ -237,7 +237,7 @@ class LoopAppManager: NSObject {
         let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         statusTableViewController.alertPermissionsChecker = alertPermissionsChecker
         statusTableViewController.alertMuter = alertManager.alertMuter
-        statusTableViewController.closedLoopStatus = closedLoopStatus
+        statusTableViewController.automaticDosingStatus = automaticDosingStatus
         statusTableViewController.deviceManager = deviceDataManager
         statusTableViewController.onboardingManager = onboardingManager
         statusTableViewController.supportManager = supportManager

@@ -33,7 +33,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     var onboardingManager: OnboardingManager!
 
-    var closedLoopStatus: ClosedLoopStatus!
+    var automaticDosingStatus: AutomaticDosingStatus!
     
     var alertPermissionsChecker: AlertPermissionsChecker!
 
@@ -116,9 +116,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             },
         ]
 
-        closedLoopStatus.$isClosedLoop
+        automaticDosingStatus.$automaticDosingEnabled
             .receive(on: DispatchQueue.main)
-            .sink { self.closedLoopStatusChanged($0) }
+            .sink { self.automaticDosingStatusChanged($0) }
             .store(in: &cancellables)
 
         alertMuter.$configuration
@@ -287,7 +287,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
         toolbarItems![0].isEnabled = isPumpOnboarded
         toolbarItems![0].tintColor = UIColor.carbTintColor
-        toolbarItems![2].isEnabled = isPumpOnboarded && (closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+        toolbarItems![2].isEnabled = isPumpOnboarded && (automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
         toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
         toolbarItems![4].isEnabled = isPumpOnboarded
         toolbarItems![4].tintColor = UIColor.insulinTintColor
@@ -408,7 +408,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var carbsOnBoard: HKQuantity?
         let startDate = charts.startDate
         let basalDeliveryState = self.basalDeliveryState
-        let isClosedLoop = closedLoopStatus.isClosedLoop
+        let automaticDosingEnabled = automaticDosingStatus.automaticDosingEnabled
 
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
@@ -515,7 +515,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         }
 
-        updatePreMealModeAvailability(isClosedLoop: isClosedLoop)
+        updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
 
         if deviceManager.loopManager.settings.preMealTargetRange == nil {
             preMealMode = nil
@@ -536,7 +536,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let glucoseSamples = glucoseSamples {
                 self.statusCharts.setGlucoseValues(glucoseSamples)
             }
-            if (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled), let predictedGlucoseValues = predictedGlucoseValues {
+            if (automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled), let predictedGlucoseValues = predictedGlucoseValues {
                 self.statusCharts.setPredictedGlucoseValues(predictedGlucoseValues)
             } else {
                 self.statusCharts.setPredictedGlucoseValues([])
@@ -824,13 +824,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
             guard oldValue != preMealMode else {
                 return
             }
-            updatePreMealModeAvailability(isClosedLoop: closedLoopStatus.isClosedLoop)
+            updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingStatus.automaticDosingEnabled)
         }
     }
 
-    private func updatePreMealModeAvailability(isClosedLoop: Bool) {
+    private func updatePreMealModeAvailability(automaticDosingEnabled: Bool) {
         let allowed = onboardingManager.isComplete &&
-                (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+                (automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
                 && deviceManager.loopManager.settings.preMealTargetRange != nil
         toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
@@ -967,7 +967,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     return self?.statusCharts.glucoseChart(withFrame: frame)?.view
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
-                cell.doesNavigate = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
+                cell.doesNavigate = automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.iobChart(withFrame: frame)?.view
@@ -1122,7 +1122,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 } else {
                     cell.setSubtitleLabel(label: nil)
                 }
-                cell.doesNavigate = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
+                cell.doesNavigate = automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 if let currentIOB = currentIOBDescription {
                     cell.setSubtitleLabel(label: currentIOB)
@@ -1247,7 +1247,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
-                if closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled {
+                if automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled {
                     performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
                 }
             case .iob, .dose:
@@ -1306,7 +1306,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         switch targetViewController {
         case let vc as CarbAbsorptionViewController:
             vc.isOnboardingComplete = onboardingManager.isComplete
-            vc.closedLoopStatus = closedLoopStatus
+            vc.automaticDosingStatus = automaticDosingStatus
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
         case let vc as InsulinDeliveryTableViewController:
@@ -1339,7 +1339,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentCarbEntryScreen(_ activity: NSUserActivity?) {
         let navigationWrapper: UINavigationController
-        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
             if let activity = activity {
                 viewModel.restoreUserActivityState(activity)
@@ -1368,7 +1368,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentBolusEntryView(enableManualGlucoseEntry: Bool = false) {
         let hostingController: DismissibleHostingController
-        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: false)
             let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
@@ -1538,7 +1538,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           therapySettings: { [weak self] in self?.deviceManager.loopManager.therapySettings ?? TherapySettings() },
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
-                                          isClosedLoopAllowed: closedLoopStatus.$isClosedLoopAllowed,
+                                          isClosedLoopAllowed: automaticDosingStatus.$isAutomaticDosingAllowed,
                                           supportInfoProvider: deviceManager,
                                           automaticDosingStrategy: deviceManager.loopManager.settings.automaticDosingStrategy,
                                           availableSupports: supportManager.availableSupports,
@@ -1575,9 +1575,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         show(settings, sender: self)
     }
 
-    private func closedLoopStatusChanged(_ isClosedLoop: Bool) {
-        updatePreMealModeAvailability(isClosedLoop: isClosedLoop)
-        hudView?.loopCompletionHUD.loopIconClosed = isClosedLoop
+    private func automaticDosingStatusChanged(_ automaticDosingEnabled: Bool) {
+        updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
+        hudView?.loopCompletionHUD.loopIconClosed = automaticDosingEnabled
         hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
     }
 
@@ -1604,7 +1604,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             // when HUD view is initialized, update loop completion HUD (e.g., icon and last loop completed)
             hudView.loopCompletionHUD.stateColors = .loopStatus
-            hudView.loopCompletionHUD.loopIconClosed = closedLoopStatus.isClosedLoop
+            hudView.loopCompletionHUD.loopIconClosed = automaticDosingStatus.automaticDosingEnabled
             hudView.loopCompletionHUD.lastLoopCompleted = deviceManager.loopManager.lastLoopCompleted
 
             hudView.cgmStatusHUD.stateColors = .cgmStatus

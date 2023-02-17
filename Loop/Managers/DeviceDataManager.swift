@@ -47,7 +47,7 @@ final class DeviceDataManager {
 
     @Published var pumpIsAllowingAutomation: Bool
 
-    private let closedLoopStatus: ClosedLoopStatus
+    private let automaticDosingStatus: AutomaticDosingStatus
 
     var closedLoopDisallowedLocalizedDescription: String? {
         if !cgmHasValidSensorSession {
@@ -232,7 +232,7 @@ final class DeviceDataManager {
          settingsManager: SettingsManager,
          bluetoothProvider: BluetoothProvider,
          alertPresenter: AlertPresenter,
-         closedLoopStatus: ClosedLoopStatus,
+         automaticDosingStatus: AutomaticDosingStatus,
          cacheStore: PersistenceController,
          localCacheDuration: TimeInterval,
          overrideHistory: TemporaryScheduleOverrideHistory,
@@ -317,7 +317,7 @@ final class DeviceDataManager {
         
         self.cgmHasValidSensorSession = false
         self.pumpIsAllowingAutomation = true
-        self.closedLoopStatus = closedLoopStatus
+        self.automaticDosingStatus = automaticDosingStatus
 
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
         displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
@@ -350,7 +350,7 @@ final class DeviceDataManager {
         }
 
         //TODO The instantiation of these non-device related managers should be moved to LoopAppManager, and then LoopAppManager can wire up the connections between them.
-        statusExtensionManager = ExtensionDataManager(deviceDataManager: self, closedLoopStatus: closedLoopStatus)
+        statusExtensionManager = ExtensionDataManager(deviceDataManager: self, automaticDosingStatus: automaticDosingStatus)
 
         loopManager = LoopDataManager(
             lastLoopCompleted: ExtensionDataManager.lastLoopCompleted,
@@ -365,7 +365,7 @@ final class DeviceDataManager {
             dosingDecisionStore: dosingDecisionStore,
             latestStoredSettingsProvider: settingsManager,
             pumpInsulinType: pumpManager?.status.insulinType,
-            automaticDosingStatus: closedLoopStatus,
+            automaticDosingStatus: automaticDosingStatus,
             trustedTimeOffset: { trustedTimeChecker.detectedSystemTimeOffset }
         )
         cacheStore.delegate = loopManager
@@ -423,7 +423,7 @@ final class DeviceDataManager {
             .map { $0 && $1 }
             .receive(on: RunLoop.main)
             .removeDuplicates()
-            .assign(to: \.closedLoopStatus.isClosedLoopAllowed, on: self)
+            .assign(to: \.automaticDosingStatus.isAutomaticDosingAllowed, on: self)
             .store(in: &cancellables)
 
         NotificationCenter.default.addObserver(forName: .HealthStorePreferredGlucoseUnitDidChange, object: glucoseStore.healthStore, queue: nil) { [weak self] _ in
@@ -437,7 +437,6 @@ final class DeviceDataManager {
             }
         }
     }
-    
 
     var availablePumpManagers: [PumpManagerDescriptor] {
         return pluginManager.availablePumpManagers + availableStaticPumpManagers
@@ -1137,6 +1136,10 @@ extension DeviceDataManager: PumpManagerDelegate {
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
         dispatchPrecondition(condition: .onQueue(queue))
         return doseStore.pumpEventQueryAfterDate
+    }
+
+    var automaticDosingEnabled: Bool {
+        automaticDosingStatus.automaticDosingEnabled
     }
 }
 
