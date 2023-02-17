@@ -41,7 +41,7 @@ extension MissedMealTestType {
     var counteractionEffectFixture: String {
         switch self {
         case .missedMealNoCOB, .noMealWithCOB, .notificationTest:
-            return "uam_counteraction_effect"
+            return "missed_meal_counteraction_effect"
         case .noMeal, .announcedMeal:
             return "long_interval_counteraction_effect"
         case .noMealCounteractionEffectsNeedClamping:
