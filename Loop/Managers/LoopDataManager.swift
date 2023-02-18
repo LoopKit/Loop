@@ -1564,8 +1564,8 @@ extension LoopDataManager {
             errors.append(.configurationError(.glucoseTargetRangeSchedule))
         }
 
-        let basalRates = basalRateScheduleApplyingOverrideHistory
-        if basalRates == nil {
+        let basalRateSchedule = basalRateScheduleApplyingOverrideHistory
+        if basalRateSchedule == nil {
             errors.append(.configurationError(.basalRateSchedule))
         }
 
@@ -1649,6 +1649,7 @@ extension LoopDataManager {
 
             // automaticDosingIOBLimit calculated from the user entered maxBolus
             let automaticDosingIOBLimit = maxBolus! * 2.0
+            let iobHeadroom = automaticDosingIOBLimit - self.insulinOnBoard!.value
 
             switch settings.automaticDosingStrategy {
             case .automaticBolus:
@@ -1656,7 +1657,6 @@ extension LoopDataManager {
                     return self.delegate?.roundBolusVolume(units: units) ?? units
                 }
 
-                let iobHeadroom = automaticDosingIOBLimit - self.insulinOnBoard!.value
                 let maxAutomaticBolus = min(iobHeadroom, maxBolus! * LoopConstants.bolusPartialApplicationFactor)
 
                 dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
@@ -1665,7 +1665,7 @@ extension LoopDataManager {
                     suspendThreshold: settings.suspendThreshold?.quantity,
                     sensitivity: insulinSensitivity!,
                     model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
-                    basalRates: basalRates!,
+                    basalRates: basalRateSchedule!,
                     maxAutomaticBolus: maxAutomaticBolus,
                     partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor * self.timeBasedDoseApplicationFactor,
                     lastTempBasal: lastTempBasal,
@@ -1675,7 +1675,8 @@ extension LoopDataManager {
                 )
             case .tempBasalOnly:
 
-                // TODO: Adjust maxBasalRate so that max iob is not exceeded.
+                let maxThirtyMinuteRateToKeepIOBBelowLimit = iobHeadroom / 2.0  // 30 minutes of a U/hr rate
+                let maxTempBasalRate = min(maxThirtyMinuteRateToKeepIOBBelowLimit, maxBasal!)
 
                 let temp = predictedGlucose.recommendedTempBasal(
                     to: glucoseTargetRange!,
@@ -1683,8 +1684,8 @@ extension LoopDataManager {
                     suspendThreshold: settings.suspendThreshold?.quantity,
                     sensitivity: insulinSensitivity!,
                     model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
-                    basalRates: basalRates!,
-                    maxBasalRate: maxBasal!,
+                    basalRates: basalRateSchedule!,
+                    maxBasalRate: maxTempBasalRate,
                     lastTempBasal: lastTempBasal,
                     rateRounder: rateRounder,
                     isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true

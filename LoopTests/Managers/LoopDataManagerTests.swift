@@ -456,7 +456,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.577747629410191, duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.55, duration: .minutes(30)))
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         if dosingDecisionStore.dosingDecisions.count == 1 {
@@ -480,7 +480,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.577747629410191, duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.55, duration: .minutes(30)))
         XCTAssertNil(delegate.recommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "loop")
@@ -653,7 +653,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         }
         updateGroup.wait()
 
-        XCTAssertEqual(recommendedBasal!.unitsPerHour, 4.2, accuracy: 0.01)
+        XCTAssertEqual(recommendedBasal!.unitsPerHour, 4.25, accuracy: 0.01)
         XCTAssertEqual(insulinOnBoard?.value, 9.87)
     }
 
