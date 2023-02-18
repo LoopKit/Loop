@@ -55,16 +55,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     fileprivate let maxBasalRate = 3.0
 
-    fileprivate let maxBolus = 12.5
-
-    var automaticDosingIOBLimit: Double {
-        return 2.0 * maxBolus
-    }
-
-    var maxAutomaticBolus: Double {
-        return maxBolus * 0.4
-    }
-
     fileprivate let fortyIncrementsPerUnitRounder = { round($0 * 40) / 40 }
 
     func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseFixtureValue] {
