@@ -20,6 +20,8 @@ enum MissedMealStatus: Equatable {
 class MealDetectionManager {
     private let log = OSLog(category: "MealDetectionManager")
     
+    public var carbRatioScheduleApplyingOverrideHistory: CarbRatioSchedule?
+    public var insulinSensitivityScheduleApplyingOverrideHistory: InsulinSensitivitySchedule?
     public var maximumBolus: Double?
     
     /// The last missed meal notification that was sent
@@ -29,8 +31,6 @@ class MealDetectionManager {
             UserDefaults.standard.lastMissedMealNotification = lastMissedMealNotification
         }
     }
-    
-    private var carbStore: CarbStoreProtocol
     
     /// Debug info for missed meal detection
     /// Timeline from the most recent check for missed meals
@@ -52,140 +52,128 @@ class MealDetectionManager {
     }
     
     public init(
-        carbStore: CarbStoreProtocol,
+        carbRatioScheduleApplyingOverrideHistory: CarbRatioSchedule?,
+        insulinSensitivityScheduleApplyingOverrideHistory: InsulinSensitivitySchedule?,
         maximumBolus: Double?,
         test_currentDate: Date? = nil
     ) {
-        self.carbStore = carbStore
+        self.carbRatioScheduleApplyingOverrideHistory = carbRatioScheduleApplyingOverrideHistory
+        self.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivityScheduleApplyingOverrideHistory
         self.maximumBolus = maximumBolus
         self.test_currentDate = test_currentDate
     }
     
     // MARK: Meal Detection
-    func hasMissedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], completion: @escaping (MissedMealStatus) -> Void) {
+    func hasMissedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], carbEffects: [GlucoseEffect], completion: @escaping (MissedMealStatus) -> Void) {
         let delta = TimeInterval(minutes: 5)
 
         let intervalStart = currentDate(timeIntervalSinceNow: -MissedMealSettings.maxRecency)
         let intervalEnd = currentDate(timeIntervalSinceNow: -MissedMealSettings.minRecency)
         let now = self.currentDate
 
-        carbStore.getGlucoseEffects(start: intervalStart, end: now, effectVelocities: insulinCounteractionEffects) {[weak self] result in
-            guard
-                let self = self,
-                case .success((let carbEntries, let carbEffects)) = result
-            else {
-                if case .failure(let error) = result {
-                    self?.log.error("Failed to fetch glucose effects to check for missed meal: %{public}@", String(describing: error))
-                }
+        let filteredCarbEffects = carbEffects.filterDateRange(intervalStart, now)
+            
+        /// Compute how much of the ICE effect we can't explain via our entered carbs
+        /// Effect caching inspired by `LoopMath.predictGlucose`
+        var effectValueCache: [Date: Double] = [:]
+        let unit = HKUnit.milligramsPerDeciliter
 
-                completion(.noMissedMeal)
-                return
-            }
-            
-            /// Compute how much of the ICE effect we can't explain via our entered carbs
-            /// Effect caching inspired by `LoopMath.predictGlucose`
-            var effectValueCache: [Date: Double] = [:]
-            let unit = HKUnit.milligramsPerDeciliter
+        /// Carb effects are cumulative, so we have to subtract the previous effect value
+        var previousEffectValue: Double = filteredCarbEffects.first?.quantity.doubleValue(for: unit) ?? 0
 
-            /// Carb effects are cumulative, so we have to subtract the previous effect value
-            var previousEffectValue: Double = carbEffects.first?.quantity.doubleValue(for: unit) ?? 0
-
-            /// Counteraction effects only take insulin into account, so we need to account for the carb effects when computing the unexpected deviations
-            for effect in carbEffects {
-                let value = effect.quantity.doubleValue(for: unit)
-                /// We do `-1 * (value - previousEffectValue)` because this will compute the carb _counteraction_ effect
-                effectValueCache[effect.startDate] = (effectValueCache[effect.startDate] ?? 0) +  -1 * (value - previousEffectValue)
-                previousEffectValue = value
-            }
-
-            let processedICE = insulinCounteractionEffects
-                .filterDateRange(intervalStart, now)
-                .compactMap {
-                    /// Clamp starts & ends to `intervalStart...now` since our algorithm assumes all effects occur within that interval
-                    let start = max($0.startDate, intervalStart)
-                    let end = min($0.endDate, now)
-
-                    guard let effect = $0.effect(from: start, to: end) else {
-                        let item: GlucoseEffect? = nil // FIXME: we get a compiler error if we try to return `nil` directly
-                        return item
-                    }
-
-                    return GlucoseEffect(startDate: effect.startDate.dateFlooredToTimeInterval(delta),
-                                         quantity: effect.quantity)
-                }
-            
-            for effect in processedICE {
-                let value = effect.quantity.doubleValue(for: unit)
-                effectValueCache[effect.startDate] = (effectValueCache[effect.startDate] ?? 0) + value
-            }
-            
-            var unexpectedDeviation: Double = 0
-            var mealTime = now
-            
-            /// Dates the algorithm uses when computing effects
-            /// Have the range go from newest -> oldest time
-            let summationRange = LoopMath.simulationDateRange(from: intervalStart,
-                                                    to: now,
-                                                    delta: delta)
-                                          .reversed()
-            
-            /// Dates the algorithm is allowed to check for the presence of a missed meal
-            let dateSearchRange = Set(LoopMath.simulationDateRange(from: intervalStart,
-                                                         to: intervalEnd,
-                                                         delta: delta))
-            
-            /// Timeline used for debug purposes
-            var missedMealTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
-            
-            for pastTime in summationRange {
-                guard
-                    let unexpectedEffect = effectValueCache[pastTime],
-                    !carbEntries.contains(where: { $0.startDate >= pastTime })
-                else {
-                    missedMealTimeline.append((pastTime, nil, nil, nil))
-                    continue
-                }
-                
-                unexpectedDeviation += unexpectedEffect
-
-                guard dateSearchRange.contains(pastTime) else {
-                    /// This time is too recent to check for a missed meal
-                    missedMealTimeline.append((pastTime, unexpectedDeviation, nil, nil))
-                    continue
-                }
-                
-                /// Find the threshold based on a minimum of `missedMealGlucoseRiseThreshold` of change per minute
-                let minutesAgo = now.timeIntervalSince(pastTime).minutes
-                let rateThreshold = MissedMealSettings.glucoseRiseThreshold * minutesAgo
-                
-                /// Find the total effect we'd expect to see for a meal with `carbThreshold`-worth of carbs that started at `pastTime`
-                guard let mealThreshold = self.effectThreshold(mealStart: pastTime, carbsInGrams: MissedMealSettings.minCarbThreshold) else {
-                    continue
-                }
-                
-                missedMealTimeline.append((pastTime, unexpectedDeviation, mealThreshold, rateThreshold))
-                
-                /// Use the higher of the 2 thresholds to ensure noisy CGM data doesn't cause false-positives for more recent times
-                let effectThreshold = max(rateThreshold, mealThreshold)
-
-                if unexpectedDeviation >= effectThreshold {
-                    mealTime = pastTime
-                }
-            }
-            
-            self.lastEvaluatedMissedMealTimeline = missedMealTimeline.reversed()
-            
-            let mealTimeTooRecent = now.timeIntervalSince(mealTime) < MissedMealSettings.minRecency
-            guard !mealTimeTooRecent else {
-                completion(.noMissedMeal)
-                return
-            }
-
-            self.lastDetectedMissedMealTimeline = missedMealTimeline.reversed()
-            
-            let carbAmount = self.determineCarbs(mealtime: mealTime, unexpectedDeviation: unexpectedDeviation)
-            completion(.hasMissedMeal(startTime: mealTime, carbAmount: carbAmount ?? MissedMealSettings.minCarbThreshold))
+        /// Counteraction effects only take insulin into account, so we need to account for the carb effects when computing the unexpected deviations
+        for effect in filteredCarbEffects {
+            let value = effect.quantity.doubleValue(for: unit)
+            /// We do `-1 * (value - previousEffectValue)` because this will compute the carb _counteraction_ effect
+            effectValueCache[effect.startDate] = (effectValueCache[effect.startDate] ?? 0) +  -1 * (value - previousEffectValue)
+            previousEffectValue = value
         }
+
+        let processedICE = insulinCounteractionEffects
+            .filterDateRange(intervalStart, now)
+            .compactMap {
+                /// Clamp starts & ends to `intervalStart...now` since our algorithm assumes all effects occur within that interval
+                let start = max($0.startDate, intervalStart)
+                let end = min($0.endDate, now)
+
+                guard let effect = $0.effect(from: start, to: end) else {
+                    let item: GlucoseEffect? = nil // FIXME: we get a compiler error if we try to return `nil` directly
+                    return item
+                }
+
+//                    return GlucoseEffect(startDate: effect.endDate.dateCeiledToTimeInterval(delta),
+                return GlucoseEffect(startDate: effect.startDate.dateFlooredToTimeInterval(delta),
+                                     quantity: effect.quantity)
+            }
+        
+        for effect in processedICE {
+            let value = effect.quantity.doubleValue(for: unit)
+            effectValueCache[effect.startDate] = (effectValueCache[effect.startDate] ?? 0) + value
+        }
+        
+        var unexpectedDeviation: Double = 0
+        var mealTime = now
+        
+        /// Dates the algorithm uses when computing effects
+        /// Have the range go from newest -> oldest time
+        let summationRange = LoopMath.simulationDateRange(from: intervalStart,
+                                                to: now,
+                                                delta: delta)
+                                      .reversed()
+        
+        /// Dates the algorithm is allowed to check for the presence of a missed meal
+        let dateSearchRange = Set(LoopMath.simulationDateRange(from: intervalStart,
+                                                     to: intervalEnd,
+                                                     delta: delta))
+        
+        /// Timeline used for debug purposes
+        var missedMealTimeline: [(date: Date, unexpectedDeviation: Double?, mealThreshold: Double?, rateOfChangeThreshold: Double?)] = []
+        
+        for pastTime in summationRange {
+            guard let unexpectedEffect = effectValueCache[pastTime] else {
+                missedMealTimeline.append((pastTime, nil, nil, nil))
+                continue
+            }
+            
+            unexpectedDeviation += unexpectedEffect
+
+            guard dateSearchRange.contains(pastTime) else {
+                /// This time is too recent to check for a missed meal
+                missedMealTimeline.append((pastTime, unexpectedDeviation, nil, nil))
+                continue
+            }
+            
+            /// Find the threshold based on a minimum of `missedMealGlucoseRiseThreshold` of change per minute
+            let minutesAgo = now.timeIntervalSince(pastTime).minutes
+            let rateThreshold = MissedMealSettings.glucoseRiseThreshold * minutesAgo
+            
+            /// Find the total effect we'd expect to see for a meal with `carbThreshold`-worth of carbs that started at `pastTime`
+            guard let mealThreshold = self.effectThreshold(mealStart: pastTime, carbsInGrams: MissedMealSettings.minCarbThreshold) else {
+                continue
+            }
+            
+            missedMealTimeline.append((pastTime, unexpectedDeviation, mealThreshold, rateThreshold))
+            
+            /// Use the higher of the 2 thresholds to ensure noisy CGM data doesn't cause false-positives for more recent times
+            let effectThreshold = max(rateThreshold, mealThreshold)
+
+            if unexpectedDeviation >= effectThreshold {
+                mealTime = pastTime
+            }
+        }
+        
+        self.lastEvaluatedMissedMealTimeline = missedMealTimeline.reversed()
+        
+        let mealTimeTooRecent = now.timeIntervalSince(mealTime) < MissedMealSettings.minRecency
+        guard !mealTimeTooRecent else {
+            completion(.noMissedMeal)
+            return
+        }
+
+        self.lastDetectedMissedMealTimeline = missedMealTimeline.reversed()
+        
+        let carbAmount = self.determineCarbs(mealtime: mealTime, unexpectedDeviation: unexpectedDeviation)
+        completion(.hasMissedMeal(startTime: mealTime, carbAmount: carbAmount ?? MissedMealSettings.minCarbThreshold))
     }
     
     private func determineCarbs(mealtime: Date, unexpectedDeviation: Double) -> Double? {
@@ -206,34 +194,32 @@ class MealDetectionManager {
     }
     
     private func effectThreshold(mealStart: Date, carbsInGrams: Double) -> Double? {
-        do {
-            return try carbStore.glucoseEffects(
-                of: [NewCarbEntry(quantity: HKQuantity(unit: .gram(),
-                                                       doubleValue: carbsInGrams),
-                                  startDate: mealStart,
-                                  foodType: nil,
-                                  absorptionTime: nil)
-                    ],
-                startingAt: mealStart,
-                endingAt: nil,
-                effectVelocities: nil
-            )
-                .last?
-                .quantity.doubleValue(for: HKUnit.milligramsPerDeciliter)
-        } catch let error {
-            self.log.error("Error fetching carb glucose effects: %{public}@", String(describing: error))
+        guard
+            let carbRatio = carbRatioScheduleApplyingOverrideHistory?.value(at: mealStart),
+            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory?.value(at: mealStart)
+        else {
+            return nil
         }
         
-        return nil
+        return carbsInGrams / carbRatio * insulinSensitivity
     }
     
     // MARK: Notification Generation
+    /// Searches for any potential missed meals and sends a notification.
+    /// A missed meal notification can be delivered a maximum of every  `MissedMealSettings.maxRecency - MissedMealSettings.minRecency` minutes.
+    ///
+    /// - Parameters:
+    ///    - insulinCounteractionEffects: the current insulin counteraction effects that have been observed
+    ///    - carbEffects: the effects of any active carb entries. Must include effects from `currentDate() - MissedMealSettings.maxRecency` until `currentDate()`.
+    ///    - pendingAutobolusUnits: any autobolus units that are still being delivered. Used to delay the missed meal notification to avoid notifying during an autobolus.
+    ///    - bolusDurationEstimator: estimator of bolus duration that takes the units of the bolus as an input. Used to delay the missed meal notification to avoid notifying during an autobolus.
     func generateMissedMealNotificationIfNeeded(
-        using insulinCounteractionEffects: [GlucoseEffectVelocity],
+        insulinCounteractionEffects: [GlucoseEffectVelocity],
+        carbEffects: [GlucoseEffect],
         pendingAutobolusUnits: Double? = nil,
         bolusDurationEstimator: @escaping (Double) -> TimeInterval?
     ) {
-        hasMissedMeal(insulinCounteractionEffects: insulinCounteractionEffects) {[weak self] status in
+        hasMissedMeal(insulinCounteractionEffects: insulinCounteractionEffects, carbEffects: carbEffects) {[weak self] status in
             self?.manageMealNotifications(for: status, pendingAutobolusUnits: pendingAutobolusUnits, bolusDurationEstimator: bolusDurationEstimator)
         }
     }
@@ -260,7 +246,7 @@ class MealDetectionManager {
         var clampedCarbAmount = carbAmount
         if
             let maxBolus = maximumBolus,
-            let currentCarbRatio = carbStore.carbRatioSchedule?.quantity(at: now).doubleValue(for: .gram())
+            let currentCarbRatio = carbRatioScheduleApplyingOverrideHistory?.quantity(at: now).doubleValue(for: .gram())
         {
             let maxAllowedCarbAutofill = maxBolus * currentCarbRatio
             clampedCarbAmount = min(clampedCarbAmount, maxAllowedCarbAutofill)
