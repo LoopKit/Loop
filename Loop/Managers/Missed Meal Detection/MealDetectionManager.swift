@@ -156,17 +156,17 @@ class MealDetectionManager {
                 
                 /// Find the threshold based on a minimum of `missedMealGlucoseRiseThreshold` of change per minute
                 let minutesAgo = now.timeIntervalSince(pastTime).minutes
-                let deviationChangeThreshold = MissedMealSettings.glucoseRiseThreshold * minutesAgo
+                let rateThreshold = MissedMealSettings.glucoseRiseThreshold * minutesAgo
                 
                 /// Find the total effect we'd expect to see for a meal with `carbThreshold`-worth of carbs that started at `pastTime`
-                guard let modeledMealEffectThreshold = self.effectThreshold(mealStart: pastTime, carbsInGrams: MissedMealSettings.minCarbThreshold) else {
+                guard let mealThreshold = self.effectThreshold(mealStart: pastTime, carbsInGrams: MissedMealSettings.minCarbThreshold) else {
                     continue
                 }
                 
-                missedMealTimeline.append((pastTime, unexpectedDeviation, modeledMealEffectThreshold, deviationChangeThreshold))
+                missedMealTimeline.append((pastTime, unexpectedDeviation, mealThreshold, rateThreshold))
                 
                 /// Use the higher of the 2 thresholds to ensure noisy CGM data doesn't cause false-positives for more recent times
-                let effectThreshold = max(deviationChangeThreshold, modeledMealEffectThreshold)
+                let effectThreshold = max(rateThreshold, mealThreshold)
 
                 if unexpectedDeviation >= effectThreshold {
                     mealTime = pastTime
