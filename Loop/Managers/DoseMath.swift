@@ -122,7 +122,7 @@ extension InsulinCorrection {
 
         let partialDose = units * partialApplicationFactor
 
-        return Swift.min(Swift.max(0, volumeRounder?(partialDose) ?? partialDose),maxBolusUnits)
+        return Swift.min(Swift.max(0, volumeRounder?(partialDose) ?? partialDose),volumeRounder?(maxBolusUnits) ?? maxBolusUnits)
     }
 }
 
@@ -234,9 +234,7 @@ extension Collection where Element: GlucoseValue {
         at date: Date,
         suspendThreshold: HKQuantity,
         sensitivity: HKQuantity,
-        model: InsulinModel,
-        insulinOnBoard: Double?,
-        automaticDosingIOBLimit: Double?
+        model: InsulinModel
     ) -> InsulinCorrection? {
         var minGlucose: GlucoseValue?
         var eventualGlucose: GlucoseValue?
@@ -300,24 +298,24 @@ extension Collection where Element: GlucoseValue {
             minCorrectionUnits = correctionUnits
         }
 
-        guard let eventual = eventualGlucose, let min = minGlucose else {
+        guard let eventualGlucose, let minGlucose else {
             return nil
         }
 
         // Choose either the minimum glucose or eventual glucose as the correction delta
-        let minGlucoseTargets = correctionRange.quantityRange(at: min.startDate)
-        let eventualGlucoseTargets = correctionRange.quantityRange(at: eventual.startDate)
+        let minGlucoseTargets = correctionRange.quantityRange(at: minGlucose.startDate)
+        let eventualGlucoseTargets = correctionRange.quantityRange(at: eventualGlucose.startDate)
 
         // Treat the mininum glucose when both are below range
-        if min.quantity < minGlucoseTargets.lowerBound &&
-            eventual.quantity < eventualGlucoseTargets.lowerBound
+        if minGlucose.quantity < minGlucoseTargets.lowerBound &&
+            eventualGlucose.quantity < eventualGlucoseTargets.lowerBound
         {
-            let time = min.startDate.timeIntervalSince(date)
+            let time = minGlucose.startDate.timeIntervalSince(date)
             // For 0 <= time <= effectDelay, assume a small amount effected. This will result in large (negative) unit recommendation rather than no recommendation at all.
             let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time))
 
             guard let units = insulinCorrectionUnits(
-                fromValue: min.quantity.doubleValue(for: unit),
+                fromValue: minGlucose.quantity.doubleValue(for: unit),
                 toValue: minGlucoseTargets.averageValue(for: unit),
                 effectedSensitivity: sensitivityValue * percentEffected
             ) else {
@@ -325,25 +323,15 @@ extension Collection where Element: GlucoseValue {
             }
 
             return .entirelyBelowRange(
-                min: min,
+                min: minGlucose,
                 minTarget: minGlucoseTargets.lowerBound,
                 units: units
             )
-        } else if eventual.quantity > eventualGlucoseTargets.upperBound, var minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose {
-            /// Don't allow the correction units + current `insulinOnBoard` to go over `automaticDosingIOBLimit`
-            if
-                let automaticDosingIOBLimit,
-                let insulinOnBoard,
-                minCorrectionUnits > 0,
-                insulinOnBoard + minCorrectionUnits > automaticDosingIOBLimit
-            {
-                let unitsOverAutomaticDosingLimit = (insulinOnBoard + minCorrectionUnits) - automaticDosingIOBLimit
-                // TO DO - nice to have logging but not required
-                minCorrectionUnits = Swift.max(minCorrectionUnits - unitsOverAutomaticDosingLimit, 0)
-            }
-
+        } else if eventualGlucose.quantity > eventualGlucoseTargets.upperBound,
+            let minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
+        {
             return .aboveRange(
-                min: min,
+                min: minGlucose,
                 correcting: correctingGlucose,
                 minTarget: eventualGlucoseTargets.lowerBound,
                 units: minCorrectionUnits
@@ -383,18 +371,14 @@ extension Collection where Element: GlucoseValue {
         rateRounder: ((Double) -> Double)? = nil,
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
-        continuationInterval: TimeInterval = .minutes(11),
-        insulinOnBoard: Double?,
-        automaticDosingIOBLimit: Double?
+        continuationInterval: TimeInterval = .minutes(11)
     ) -> TempBasalRecommendation? {
         let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            model: model
         )
 
         let scheduledBasalRate = basalRates.value(at: date)
@@ -440,6 +424,7 @@ extension Collection where Element: GlucoseValue {
     ///   - isBasalRateScheduleOverrideActive: A flag describing whether a basal rate schedule override is in progress
     ///   - duration: The duration of the temporary basal
     ///   - continuationInterval: The duration of time before an ongoing temp basal should be continued with a new command
+    ///   - insulinOnBoard:
     /// - Returns: The recommended dosing, or nil if no dose adjustment recommended
     func recommendedAutomaticDose(
         to correctionRange: GlucoseRangeSchedule,
@@ -455,18 +440,14 @@ extension Collection where Element: GlucoseValue {
         rateRounder: ((Double) -> Double)? = nil,
         isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
-        continuationInterval: TimeInterval = .minutes(11),
-        insulinOnBoard: Double?,
-        automaticDosingIOBLimit: Double?
+        continuationInterval: TimeInterval = .minutes(11)
     ) -> AutomaticDoseRecommendation? {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            model: model
         ) else {
             return nil
         }
@@ -536,9 +517,7 @@ extension Collection where Element: GlucoseValue {
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
-            model: model,
-            insulinOnBoard: nil,
-            automaticDosingIOBLimit: nil
+            model: model
         ) else {
             return ManualBolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
         }

@@ -55,7 +55,15 @@ class RecommendTempBasalTests: XCTestCase {
 
     fileprivate let maxBasalRate = 3.0
 
-    fileprivate let maxBolus = 5.0
+    fileprivate let maxBolus = 12.5
+
+    var automaticDosingIOBLimit: Double {
+        return 2.0 * maxBolus
+    }
+
+    var maxAutomaticBolus: Double {
+        return maxBolus * 0.4
+    }
 
     fileprivate let fortyIncrementsPerUnitRounder = { round($0 * 40) / 40 }
 
@@ -107,13 +115,8 @@ class RecommendTempBasalTests: XCTestCase {
         return TimeInterval(hours: 4)
     }
 
-    var automaticDosingIOBLimit: Double {
-        return 2.0 * maxBolus
-    }
-
     func testNoChange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
-        let insulinOnBoard = 0.0
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -123,9 +126,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -133,7 +134,6 @@ class RecommendTempBasalTests: XCTestCase {
     
     func testNoChangeExponentialModel() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
-        let insulinOnBoard = 0.0
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -143,9 +143,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: exponentialInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -153,7 +151,6 @@ class RecommendTempBasalTests: XCTestCase {
     
     func testNoChangeAutomaticBolusing() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
-        let insulinOnBoard = 0.0
 
         let dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -164,9 +161,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -174,7 +169,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testNoChangeOverrideActive() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -185,9 +179,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
             lastTempBasal: nil,
-            isBasalRateScheduleOverrideActive: true,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            isBasalRateScheduleOverrideActive: true
         )
 
         XCTAssertEqual(0.8, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
@@ -196,7 +188,6 @@ class RecommendTempBasalTests: XCTestCase {
     
     func testNoChangeOverrideActiveAutomaticBolusing() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -208,9 +199,7 @@ class RecommendTempBasalTests: XCTestCase {
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
             lastTempBasal: nil,
-            isBasalRateScheduleOverrideActive: true,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            isBasalRateScheduleOverrideActive: true
         )
 
         XCTAssertEqual(0.8, dose!.basalAdjustment!.unitsPerHour, accuracy: 1.0 / 40.0)
@@ -220,7 +209,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testStartHighEndInRange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_in_range")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -230,9 +218,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -254,9 +240,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.unitsPerHour)
@@ -265,7 +249,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testStartHighEndInRangeAutomaticBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_in_range")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -276,9 +259,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -301,9 +282,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.basalAdjustment!.unitsPerHour)
@@ -313,7 +292,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testStartHighEndInRangeAutomaticBolusWithOverride() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_in_range")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -325,9 +303,7 @@ class RecommendTempBasalTests: XCTestCase {
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
             lastTempBasal: nil,
-            isBasalRateScheduleOverrideActive: true,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            isBasalRateScheduleOverrideActive: true
         )
 
         XCTAssertEqual(0.8, dose!.basalAdjustment!.unitsPerHour, accuracy: 1.0 / 40.0)
@@ -352,9 +328,7 @@ class RecommendTempBasalTests: XCTestCase {
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
             lastTempBasal: lastTempBasal,
-            isBasalRateScheduleOverrideActive: true,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            isBasalRateScheduleOverrideActive: true
         )
 
         XCTAssertNil(dose)
@@ -362,7 +336,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testStartLowEndInRange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_in_range")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -372,9 +345,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -395,9 +366,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.unitsPerHour)
@@ -406,7 +375,6 @@ class RecommendTempBasalTests: XCTestCase {
     
     func testStartLowEndInRangeExponentialModel() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_in_range")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -416,9 +384,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: exponentialInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -439,9 +405,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.unitsPerHour)
@@ -450,7 +414,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testStartLowEndInRangeAutomaticBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_in_range")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -461,9 +424,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -485,9 +446,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.basalAdjustment!.unitsPerHour)
@@ -497,7 +456,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testCorrectLowAtMin() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_correct_low_at_min")
-        let insulinOnBoard = 7.69
 
         // Cancel existing dose
         let lastTempBasal = DoseEntry(
@@ -516,9 +474,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.unitsPerHour)
@@ -532,9 +488,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -542,7 +496,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testCorrectLowAtMinAutomaticBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_correct_low_at_min")
-        let insulinOnBoard = 7.69
 
         // Cancel existing dose
         let lastTempBasal = DoseEntry(
@@ -562,9 +515,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.basalAdjustment!.unitsPerHour)
@@ -580,9 +531,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -590,7 +539,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testStartHighEndLow() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_low")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -600,9 +548,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(0, dose!.unitsPerHour)
@@ -611,7 +557,6 @@ class RecommendTempBasalTests: XCTestCase {
     
     func testStartHighEndLowAutomaticBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_low")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -622,9 +567,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(0, dose!.basalAdjustment!.unitsPerHour)
@@ -634,7 +577,6 @@ class RecommendTempBasalTests: XCTestCase {
     
     func testStartHighEndLowExponentialModel() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_low")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -644,9 +586,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: exponentialInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(0, dose!.unitsPerHour)
@@ -655,7 +595,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testStartLowEndHigh() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -665,9 +604,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -689,9 +626,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.unitsPerHour)
@@ -700,7 +635,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testStartLowEndHighAutomaticBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -711,9 +645,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -735,9 +667,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: lastTempBasal,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: lastTempBasal
         )
 
         XCTAssertEqual(0, dose!.basalAdjustment!.unitsPerHour)
@@ -747,7 +677,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testFlatAndHigh() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_flat_and_high")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -757,9 +686,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(3.0, dose!.unitsPerHour)
@@ -768,7 +695,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testFlatAndHighAutomaticBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_flat_and_high")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -779,9 +705,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose!.basalAdjustment)
@@ -790,7 +714,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testFlatAndHighAutomaticBolusWithOverride() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_flat_and_high")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -802,9 +725,7 @@ class RecommendTempBasalTests: XCTestCase {
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
             lastTempBasal: nil,
-            isBasalRateScheduleOverrideActive: true,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            isBasalRateScheduleOverrideActive: true
         )
 
         XCTAssertEqual(0.8, dose!.basalAdjustment!.unitsPerHour, accuracy: 1.0 / 40.0)
@@ -830,9 +751,7 @@ class RecommendTempBasalTests: XCTestCase {
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
             lastTempBasal: lastTempBasal,
-            isBasalRateScheduleOverrideActive: true,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            isBasalRateScheduleOverrideActive: true
         )
 
         XCTAssertNil(dose!.basalAdjustment)
@@ -842,7 +761,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testHighAndFalling() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_falling")
-        let insulinOnBoard = 7.69
 
         let insulinModel = WalshInsulinModel(actionDuration: insulinActionDuration, delay: 0)
 
@@ -854,9 +772,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: insulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(1.425, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
@@ -865,7 +781,6 @@ class RecommendTempBasalTests: XCTestCase {
  
     func testHighAndFallingAutomaticBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_falling")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -876,9 +791,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose!.basalAdjustment)
@@ -887,7 +800,6 @@ class RecommendTempBasalTests: XCTestCase {
     
     func testHighAndFallingExponentialModel() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_falling")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -897,9 +809,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: exponentialInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(2.68, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
@@ -908,7 +818,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testInRangeAndRisingAutomaticBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_in_range_and_rising")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedAutomaticDose(
             to: glucoseTargetRange,
@@ -919,9 +828,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose!.basalAdjustment)
@@ -930,7 +837,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testInRangeAndRising() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_in_range_and_rising")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -940,9 +846,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(1.60, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
@@ -951,7 +855,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testHighAndRising() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
-        let insulinOnBoard = 7.69
 
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -961,9 +864,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(3.0, dose!.unitsPerHour)
@@ -980,9 +881,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertEqual(2.975, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
@@ -991,7 +890,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testVeryLowAndRising() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_very_low_end_in_range")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -1001,9 +899,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
         
         XCTAssertEqual(0.0, dose!.unitsPerHour)
@@ -1012,7 +908,6 @@ class RecommendTempBasalTests: XCTestCase {
     
     func testRiseAfterExponentialModelDIA() {
         let glucose = loadGlucoseValueFixture("far_future_high_bg_forecast_after_6_hours")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -1022,9 +917,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: exponentialInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -1032,7 +925,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testRiseAfterDIA() {
         let glucose = loadGlucoseValueFixture("far_future_high_bg_forecast")
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -1042,9 +934,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)
@@ -1053,7 +943,6 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testNoInputGlucose() {
         let glucose: [GlucoseFixtureValue] = []
-        let insulinOnBoard = 7.69
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -1062,184 +951,7 @@ class RecommendTempBasalTests: XCTestCase {
             model: walshInsulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
-        )
-
-        XCTAssertNil(dose)
-    }
-
-    // Next four tests, recommended bolus is 2.30 U (no limit)
-    //   adjust IOB to modify AutomaticBolus
-
-    func testFlatAndHighAutomaticBolusNoLimit() {
-        let glucose = loadGlucoseValueFixture("recommend_temp_basal_flat_and_high")
-        let insulinOnBoard = 7.69
-
-        let dose = glucose.recommendedAutomaticDose(
-            to: glucoseTargetRange,
-            at: glucose.first!.startDate,
-            suspendThreshold: suspendThreshold.quantity,
-            sensitivity: insulinSensitivitySchedule,
-            model: exponentialInsulinModel,
-            basalRates: basalRateSchedule,
-            maxAutomaticBolus: maxBolus,
-            partialApplicationFactor: 1.0,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
-        )
-
-        XCTAssertNil(dose!.basalAdjustment)
-        XCTAssertEqual(2.30, dose!.bolusUnits!, accuracy: 1.0 / 40.0)
-    }
-
-    func testFlatAndHighAutomaticBolusWithLimit() {
-        let glucose = loadGlucoseValueFixture("recommend_temp_basal_flat_and_high")
-
-        // max allowed dose will be 0.5 units
-        let maxAutoCorrection = 0.5
-        let insulinOnBoard = automaticDosingIOBLimit - maxAutoCorrection
-
-        let dose = glucose.recommendedAutomaticDose(
-            to: glucoseTargetRange,
-            at: glucose.first!.startDate,
-            suspendThreshold: suspendThreshold.quantity,
-            sensitivity: insulinSensitivitySchedule,
-            model: exponentialInsulinModel,
-            basalRates: basalRateSchedule,
-            maxAutomaticBolus: maxBolus,
-            partialApplicationFactor: 1.0,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
-        )
-
-        XCTAssertNil(dose!.basalAdjustment)
-        XCTAssertEqual(maxAutoCorrection, dose!.bolusUnits!, accuracy: 1.0 / 40.0)
-    }
-
-    func testFlatAndHighAutomaticBolusWithLimitPAF() {
-        let glucose = loadGlucoseValueFixture("recommend_temp_basal_flat_and_high")
-
-        // max allowed dose will be 0.5 units
-        // for this test use partialApplicationFactor of 0.5, instead of 1.0
-        let maxAutoCorrection = 0.5
-        let partialApplicationFactor = 0.5
-        let insulinOnBoard = automaticDosingIOBLimit - maxAutoCorrection
-
-        let dose = glucose.recommendedAutomaticDose(
-            to: glucoseTargetRange,
-            at: glucose.first!.startDate,
-            suspendThreshold: suspendThreshold.quantity,
-            sensitivity: insulinSensitivitySchedule,
-            model: exponentialInsulinModel,
-            basalRates: basalRateSchedule,
-            maxAutomaticBolus: maxBolus,
-            partialApplicationFactor: partialApplicationFactor,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
-        )
-
-        XCTAssertNil(dose!.basalAdjustment)
-        XCTAssertEqual(partialApplicationFactor * maxAutoCorrection, dose!.bolusUnits!, accuracy: 1.0 / 40.0)
-    }
-
-    func testFlatAndHighAutomaticBolusFullLimit() {
-        let glucose = loadGlucoseValueFixture("recommend_temp_basal_flat_and_high")
-
-        // no automatic dose
-        let insulinOnBoard = automaticDosingIOBLimit + 0.1
-
-        let dose = glucose.recommendedAutomaticDose(
-            to: glucoseTargetRange,
-            at: glucose.first!.startDate,
-            suspendThreshold: suspendThreshold.quantity,
-            sensitivity: insulinSensitivitySchedule,
-            model: exponentialInsulinModel,
-            basalRates: basalRateSchedule,
-            maxAutomaticBolus: maxBolus,
-            partialApplicationFactor: 1.0,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
-        )
-
-        XCTAssertNil(dose)
-    }
-
-    // Next three test recommended TempBasal is 3.0 U/hr (no limit)
-    //   Adjust IOB to modify automatic TempBasal
-    let noLimitBasalRate = 3.0
-    let scheduledBasalRate = 0.8
-
-    func testHighAndRisingTempBasalNoLimit() {
-        let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
-
-        // no limit
-        let insulinOnBoard = 0.0
-
-        let dose = glucose.recommendedTempBasal(
-            to: glucoseTargetRange,
-            at: glucose.first!.startDate,
-            suspendThreshold: suspendThreshold.quantity,
-            sensitivity: self.insulinSensitivitySchedule,
-            model: exponentialInsulinModel,
-            basalRates: basalRateSchedule,
-            maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
-        )
-
-        XCTAssertEqual(noLimitBasalRate, dose!.unitsPerHour)
-        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
-    }
-
-    func testHighAndRisingTempBasalWithLimit() {
-        let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
-
-        // max allowed dose will be 0.5 units, temp basal twice that
-        let maxAutoCorrection = 0.5
-        let limitedBasalRate = scheduledBasalRate + 2.0 * maxAutoCorrection
-        let insulinOnBoard = automaticDosingIOBLimit - maxAutoCorrection
-
-        let dose = glucose.recommendedTempBasal(
-            to: glucoseTargetRange,
-            at: glucose.first!.startDate,
-            suspendThreshold: suspendThreshold.quantity,
-            sensitivity: self.insulinSensitivitySchedule,
-            model: exponentialInsulinModel,
-            basalRates: basalRateSchedule,
-            maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
-        )
-
-        XCTAssertEqual(limitedBasalRate, dose!.unitsPerHour)
-        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
-    }
-
-    func testHighAndRisingTempBasalFullLimit() {
-        let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
-
-        // no automatic dose
-        let insulinOnBoard = automaticDosingIOBLimit + 0.1
-
-        let dose = glucose.recommendedTempBasal(
-            to: glucoseTargetRange,
-            at: glucose.first!.startDate,
-            suspendThreshold: suspendThreshold.quantity,
-            sensitivity: self.insulinSensitivitySchedule,
-            model: exponentialInsulinModel,
-            basalRates: basalRateSchedule,
-            maxBasalRate: maxBasalRate,
-            lastTempBasal: nil,
-            insulinOnBoard: insulinOnBoard,
-            automaticDosingIOBLimit: automaticDosingIOBLimit
+            lastTempBasal: nil
         )
 
         XCTAssertNil(dose)

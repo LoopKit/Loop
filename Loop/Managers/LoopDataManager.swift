@@ -1604,6 +1604,10 @@ extension LoopDataManager {
             errors.append(.missingDataError(.insulinEffectIncludingPendingInsulin))
         }
 
+        if self.insulinOnBoard == nil {
+            errors.append(.missingDataError(.activeInsulin))
+        }
+
         dosingDecision.appendErrors(errors)
         if let error = errors.first {
             logger.error("%{public}@", String(describing: error))
@@ -1652,6 +1656,9 @@ extension LoopDataManager {
                     return self.delegate?.roundBolusVolume(units: units) ?? units
                 }
 
+                let iobHeadroom = automaticDosingIOBLimit - self.insulinOnBoard!.value
+                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * LoopConstants.bolusPartialApplicationFactor)
+
                 dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
                     to: glucoseTargetRange!,
                     at: predictedGlucose[0].startDate,
@@ -1659,16 +1666,17 @@ extension LoopDataManager {
                     sensitivity: insulinSensitivity!,
                     model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
                     basalRates: basalRates!,
-                    maxAutomaticBolus: maxBolus! * LoopConstants.bolusPartialApplicationFactor,
+                    maxAutomaticBolus: maxAutomaticBolus,
                     partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor * self.timeBasedDoseApplicationFactor,
                     lastTempBasal: lastTempBasal,
                     volumeRounder: volumeRounder,
                     rateRounder: rateRounder,
-                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true,
-                    insulinOnBoard: self.insulinOnBoard?.value,
-                    automaticDosingIOBLimit: automaticDosingIOBLimit
+                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
                 )
             case .tempBasalOnly:
+
+                // TODO: Adjust maxBasalRate so that max iob is not exceeded.
+
                 let temp = predictedGlucose.recommendedTempBasal(
                     to: glucoseTargetRange!,
                     at: predictedGlucose[0].startDate,
@@ -1679,9 +1687,7 @@ extension LoopDataManager {
                     maxBasalRate: maxBasal!,
                     lastTempBasal: lastTempBasal,
                     rateRounder: rateRounder,
-                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true,
-                    insulinOnBoard: self.insulinOnBoard?.value,
-                    automaticDosingIOBLimit: automaticDosingIOBLimit
+                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
                 )
                 dosingRecommendation = AutomaticDoseRecommendation(basalAdjustment: temp)
             }

@@ -61,10 +61,12 @@ class MockDoseStore: DoseStoreProtocol {
     
     func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
         switch testType {
-        case .highAndRisingWithCOB, .autoBolusIOBClamping:
+        case .highAndRisingWithCOB, .flatAndStable, .highAndFalling, .highAndStable, .lowAndFallingWithCOB, .lowWithLowTreatment:
             completion(.success(.init(startDate: MockDoseStore.currentDate(for: testType), value: 9.5)))
-        default:
-            completion(.failure(.configurationError))
+        case .autoBolusIOBClamping:
+            completion(.success(.init(startDate: MockDoseStore.currentDate(for: testType), value: 9.47)))
+        case .tempBasalIOBClamping:
+            completion(.success(.init(startDate: MockDoseStore.currentDate(for: testType), value: 9.87)))
         }
     }
     
@@ -117,7 +119,7 @@ class MockDoseStore: DoseStoreProtocol {
             return dateFormatter.date(from: "2020-08-11T20:45:02")!
         case .highAndStable:
             return dateFormatter.date(from: "2020-08-12T12:39:22")!
-        case .highAndRisingWithCOB, .autoBolusIOBClamping:
+        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
             return dateFormatter.date(from: "2020-08-11T21:48:17")!
         case .lowAndFallingWithCOB:
             return dateFormatter.date(from: "2020-08-11T22:06:06")!
@@ -145,7 +147,7 @@ extension MockDoseStore {
             return "flat_and_stable_insulin_effect"
         case .highAndStable:
             return "high_and_stable_insulin_effect"
-        case .highAndRisingWithCOB, .autoBolusIOBClamping:
+        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
             return "high_and_rising_with_cob_insulin_effect"
         case .lowAndFallingWithCOB:
             return "low_and_falling_insulin_effect"
