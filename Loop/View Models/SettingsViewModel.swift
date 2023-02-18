@@ -58,7 +58,7 @@ public protocol SettingsViewModelDelegate: AnyObject {
 
 public class SettingsViewModel: ObservableObject {
     
-    let alertPermissionsViewModel: AlertPermissionsViewModel
+    let alertPermissionsChecker: AlertPermissionsChecker
 
     let alertMuter: AlertMuter
 
@@ -102,7 +102,7 @@ public class SettingsViewModel: ObservableObject {
 
     lazy private var cancellables = Set<AnyCancellable>()
 
-    public init(alertPermissionsViewModel: AlertPermissionsViewModel,
+    public init(alertPermissionsChecker: AlertPermissionsChecker,
                 alertMuter: AlertMuter,
                 versionUpdateViewModel: VersionUpdateViewModel,
                 pumpManagerSettingsViewModel: PumpManagerViewModel,
@@ -120,7 +120,7 @@ public class SettingsViewModel: ObservableObject {
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
                 delegate: SettingsViewModelDelegate?
     ) {
-        self.alertPermissionsViewModel = alertPermissionsViewModel
+        self.alertPermissionsChecker = alertPermissionsChecker
         self.alertMuter = alertMuter
         self.versionUpdateViewModel = versionUpdateViewModel
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
@@ -139,7 +139,7 @@ public class SettingsViewModel: ObservableObject {
         self.delegate = delegate
 
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
-        alertPermissionsViewModel.checker.objectWillChange.sink { [weak self] in
+        alertPermissionsChecker.objectWillChange.sink { [weak self] in
             self?.objectWillChange.send()
         }
         .store(in: &cancellables)
@@ -181,7 +181,7 @@ extension SettingsViewModel {
     }
 
     static var preview: SettingsViewModel {
-        return SettingsViewModel(alertPermissionsViewModel: AlertPermissionsViewModel(checker: AlertPermissionsChecker()) ,
+        return SettingsViewModel(alertPermissionsChecker: AlertPermissionsChecker(),
                                  alertMuter: AlertMuter(),
                                  versionUpdateViewModel: VersionUpdateViewModel(supportManager: nil, guidanceColors: GuidanceColors()),
                                  pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),

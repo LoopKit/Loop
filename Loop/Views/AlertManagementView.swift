@@ -72,7 +72,7 @@ struct AlertManagementView: View {
     private var alertPermissionsSection: some View {
         Section(footer: DescriptiveText(label: String(format: NSLocalizedString("Notifications give you important %1$@ app information without requiring you to open the app.", comment: "Alert Permissions descriptive text (1: app name)"), appName))) {
             NavigationLink(destination:
-                            NotificationsCriticalAlertPermissionsView(mode: .flow, viewModel: AlertPermissionsViewModel(checker: checker) ))
+                            NotificationsCriticalAlertPermissionsView(mode: .flow, checker: checker))
             {
                 HStack {
                     Text(NSLocalizedString("Alert Permissions", comment: "Alert Permissions button text"))

@@ -14,7 +14,7 @@ public struct NotificationsCriticalAlertPermissionsView: View {
     @Environment(\.appName) private var appName
 
     private let backButtonText: String
-    @ObservedObject private var viewModel: AlertPermissionsViewModel
+    @ObservedObject private var checker: AlertPermissionsChecker
 
     // TODO: This screen is used in both the 'old Settings UI' and the 'new Settings UI'.  This is temporary.
     // In the old UI, it is a "top level" navigation view.  In the new UI, it is just part of the "flow".  This
@@ -24,18 +24,26 @@ public struct NotificationsCriticalAlertPermissionsView: View {
     }
     private let mode: PresentationMode
     
-    public init(backButtonText: String = "", mode: PresentationMode = .topLevel, viewModel: AlertPermissionsViewModel) {
+    public init(backButtonText: String = "", mode: PresentationMode = .topLevel, checker: AlertPermissionsChecker) {
         self.backButtonText = backButtonText
-        self.viewModel = viewModel
+        self.checker = checker
         self.mode = mode
     }
     
-    @ViewBuilder
     public var body: some View {
         switch mode {
-        case .flow: content()
-        case .topLevel: navigationContent()
+        case .flow: return AnyView(content())
+        case .topLevel: return AnyView(navigationContent())
         }
+    }
+    
+    private var missedMealNotificationsEnabled: Binding<Bool> {
+        Binding(
+            get: { UserDefaults.standard.missedMealNotificationsEnabled },
+            set: { enabled in
+                UserDefaults.standard.missedMealNotificationsEnabled = enabled
+            }
+        )
     }
     
     private func navigationContent() -> some View {
@@ -55,13 +63,13 @@ public struct NotificationsCriticalAlertPermissionsView: View {
                 manageNotifications
                 notificationsEnabledStatus
                 if #available(iOS 15.0, *) {
-                    if !viewModel.checker.notificationCenterSettings.notificationsDisabled {
+                    if !checker.notificationCenterSettings.notificationsDisabled {
                         notificationDelivery
                     }
                 }
                 criticalAlertsStatus
                 if #available(iOS 15.0, *) {
-                    if !viewModel.checker.notificationCenterSettings.notificationsDisabled {
+                    if !checker.notificationCenterSettings.notificationsDisabled {
                         timeSensitiveStatus
                     }
                 }
@@ -103,7 +111,7 @@ extension NotificationsCriticalAlertPermissionsView {
         HStack {
             Text("Notifications", comment: "Notifications Status text")
             Spacer()
-            onOff(!viewModel.checker.notificationCenterSettings.notificationsDisabled)
+            onOff(!checker.notificationCenterSettings.notificationsDisabled)
         }
     }
         
@@ -111,7 +119,7 @@ extension NotificationsCriticalAlertPermissionsView {
         HStack {
             Text("Critical Alerts", comment: "Critical Alerts Status text")
             Spacer()
-            onOff(!viewModel.checker.notificationCenterSettings.criticalAlertsDisabled)
+            onOff(!checker.notificationCenterSettings.criticalAlertsDisabled)
         }
     }
 
@@ -120,7 +128,7 @@ extension NotificationsCriticalAlertPermissionsView {
         HStack {
             Text("Time Sensitive Notifications", comment: "Time Sensitive Status text")
             Spacer()
-            onOff(!viewModel.checker.notificationCenterSettings.timeSensitiveNotificationsDisabled)
+            onOff(!checker.notificationCenterSettings.timeSensitiveNotificationsDisabled)
         }
     }
     
@@ -129,18 +137,12 @@ extension NotificationsCriticalAlertPermissionsView {
         HStack {
             Text("Notification Delivery", comment: "Notification Delivery Status text")
             Spacer()
-            if viewModel.checker.notificationCenterSettings.scheduledDeliveryEnabled {
+            if checker.notificationCenterSettings.scheduledDeliveryEnabled {
                 Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.critical)
                 Text("Scheduled", comment: "Scheduled Delivery status text")
             } else {
                 Text("Immediate", comment: "Immediate Delivery status text")
             }
-        }
-    }
-    
-    private var missedMealAlertSection: some View {
-        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
-            Toggle("Missed Meal Notifications", isOn: $viewModel.missedMealNotificationsEnabled)
         }
     }
 
@@ -151,17 +153,38 @@ extension NotificationsCriticalAlertPermissionsView {
             }
         }
     }
-
+    
+    private var missedMealAlertSection: some View {
+        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
+            Toggle("Missed Meal Notifications", isOn: missedMealNotificationsEnabled)
+        }
+    }
 }
+
+extension UserDefaults {
+    private enum Key: String {
+        case missedMealNotificationsEnabled = "com.loopkit.Loop.MissedMealNotificationsEnabled"
+    }
+    
+    var missedMealNotificationsEnabled: Bool {
+        get {
+            return object(forKey: Key.missedMealNotificationsEnabled.rawValue) as? Bool ?? false
+        }
+        set {
+            set(newValue, forKey: Key.missedMealNotificationsEnabled.rawValue)
+        }
+    }
+}
+
 
 struct NotificationsCriticalAlertPermissionsView_Previews: PreviewProvider {
     static var previews: some View {
         return Group {
-            NotificationsCriticalAlertPermissionsView(viewModel: AlertPermissionsViewModel(checker: AlertPermissionsChecker()))
+            NotificationsCriticalAlertPermissionsView(checker: AlertPermissionsChecker())
                 .colorScheme(.light)
                 .previewDevice(PreviewDevice(rawValue: "iPhone SE"))
                 .previewDisplayName("SE light")
-            NotificationsCriticalAlertPermissionsView(viewModel: AlertPermissionsViewModel(checker: AlertPermissionsChecker()))
+            NotificationsCriticalAlertPermissionsView(checker: AlertPermissionsChecker())
                 .colorScheme(.dark)
                 .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
                 .previewDisplayName("XS Max dark")
