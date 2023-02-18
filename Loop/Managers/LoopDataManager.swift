@@ -862,6 +862,14 @@ extension LoopDataManager {
         logger.default("Loop ended")
         notify(forChange: .loopFinished)
 
+        mealDetectionManager.generateMissedMealNotificationIfNeeded(
+            using: insulinCounteractionEffects,
+            pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
+            bolusDurationEstimator: { [unowned self] bolusAmount in
+                return self.delegate?.loopDataManager(self, estimateBolusDuration: bolusAmount)
+            }
+        )
+        
         // 5 second delay to allow stores to cache data before it is read by widget
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             self.widgetLog.default("Refreshing widget. Reason: Loop completed")
@@ -1709,14 +1717,6 @@ extension LoopDataManager {
     /// *This method should only be called from the `dataAccessQueue`*
     private func enactRecommendedAutomaticDose() -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
-        
-        mealDetectionManager.generateMissedMealNotificationIfNeeded(
-            using: insulinCounteractionEffects,
-            pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
-            bolusDurationEstimator: { [unowned self] bolusAmount in
-                return self.delegate?.loopDataManager(self, estimateBolusDuration: bolusAmount)
-            }
-        )
 
         guard let recommendedDose = self.recommendedAutomaticDose else {
             return nil
