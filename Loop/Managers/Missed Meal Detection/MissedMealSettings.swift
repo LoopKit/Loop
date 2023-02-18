@@ -16,7 +16,7 @@ public struct MissedMealSettings {
     /// Minimum threshold for glucose rise over the detection window
     static let glucoseRiseThreshold = 2.0 // mg/dL/m
     /// Minimum time from now that must have passed for the meal to be detected
-    public static let minRecency = TimeInterval(minutes: 25)
+    public static let minRecency = TimeInterval(minutes: 15)
     /// Maximum time from now that a meal can be detected
     public static let maxRecency = TimeInterval(hours: 2)
     /// Maximum delay allowed in missed meal notification time to avoid
