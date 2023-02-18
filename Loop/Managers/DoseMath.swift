@@ -424,7 +424,6 @@ extension Collection where Element: GlucoseValue {
     ///   - isBasalRateScheduleOverrideActive: A flag describing whether a basal rate schedule override is in progress
     ///   - duration: The duration of the temporary basal
     ///   - continuationInterval: The duration of time before an ongoing temp basal should be continued with a new command
-    ///   - insulinOnBoard:
     /// - Returns: The recommended dosing, or nil if no dose adjustment recommended
     func recommendedAutomaticDose(
         to correctionRange: GlucoseRangeSchedule,
