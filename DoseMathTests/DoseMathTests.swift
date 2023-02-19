@@ -751,7 +751,7 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testHighAndFalling() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_falling")
-        
+
         let insulinModel = WalshInsulinModel(actionDuration: insulinActionDuration, delay: 0)
 
         let dose = glucose.recommendedTempBasal(

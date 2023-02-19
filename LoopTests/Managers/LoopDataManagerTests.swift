@@ -21,6 +21,20 @@ enum DataManagerTestType {
     case lowAndFallingWithCOB
     case lowWithLowTreatment
     case highAndFalling
+    /// uses fixtures for .highAndRisingWithCOB with a low max bolus and dosing set to autobolus
+    case autoBolusIOBClamping
+    case tempBasalIOBClamping
+}
+
+extension DataManagerTestType {
+    var dosingStrategy: AutomaticDosingStrategy {
+        switch self {
+        case .autoBolusIOBClamping:
+            return .automaticBolus
+        default:
+            return .tempBasalOnly
+        }
+    }
 }
 
 extension TimeZone {
@@ -54,10 +68,6 @@ class LoopDataManagerDosingTests: XCTestCase {
     let dateFormatter = ISO8601DateFormatter.localTimeDate()
     let defaultAccuracy = 1.0 / 40.0
     
-    // MARK: Settings
-    let maxBasalRate = 5.0
-    let maxBolus = 10.0
-    
     var suspendThreshold: GlucoseThreshold {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter, value: 75)
     }
@@ -77,7 +87,7 @@ class LoopDataManagerDosingTests: XCTestCase {
     var automaticDosingStatus: AutomaticDosingStatus!
     var loopDataManager: LoopDataManager!
     
-    func setUp(for test: DataManagerTestType, basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil) {
+    func setUp(for test: DataManagerTestType, basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil, maxBolus: Double = 10, maxBasalRate: Double = 5.0) {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
 
         let settings = LoopSettings(
@@ -86,7 +96,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             basalRateSchedule: basalRateSchedule,
             maximumBasalRatePerHour: maxBasalRate,
             maximumBolus: maxBolus,
-            suspendThreshold: suspendThreshold
+            suspendThreshold: suspendThreshold,
+            automaticDosingStrategy: test.dosingStrategy
         )
         
         let doseStore = MockDoseStore(for: test)
@@ -304,8 +315,8 @@ class LoopDataManagerDosingTests: XCTestCase {
             self.recommendation = automaticDose.recommendation
             completion(error)
         }
-        func roundBasalRate(unitsPerHour: Double) -> Double { unitsPerHour }
-        func roundBolusVolume(units: Double) -> Double { units }
+        func roundBasalRate(unitsPerHour: Double) -> Double { Double(Int(unitsPerHour / 0.05)) * 0.05 }
+        func roundBolusVolume(units: Double) -> Double { Double(Int(units / 0.05)) * 0.05 }
         var pumpManagerStatus: PumpManagerStatus?
         var cgmManagerStatus: CGMManagerStatus?
         var pumpStatusHighlight: DeviceStatusHighlight?
@@ -432,7 +443,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.577747629410191, duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.55, duration: .minutes(30)))
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         if dosingDecisionStore.dosingDecisions.count == 1 {
@@ -456,7 +467,7 @@ class LoopDataManagerDosingTests: XCTestCase {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.577747629410191, duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.55, duration: .minutes(30)))
         XCTAssertNil(delegate.recommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "loop")
@@ -506,8 +517,8 @@ class LoopDataManagerDosingTests: XCTestCase {
         let settings = LoopSettings(
             dosingEnabled: false,
             glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
-            maximumBasalRatePerHour: maxBasalRate,
-            maximumBolus: maxBolus,
+            maximumBasalRatePerHour: 5,
+            maximumBolus: 10,
             suspendThreshold: suspendThreshold
         )
 
@@ -556,6 +567,82 @@ class LoopDataManagerDosingTests: XCTestCase {
         // Dose enacting happens asynchronously, as does receiving isClosedLoop signals
         waitOnMain(timeout: 5)
         XCTAssertNil(mockDelegate.recommendation)
+    }
+
+    func testAutoBolusMaxIOBClamping() {
+        /// `maximumBolus` is set to clamp the automatic dose
+        /// Autobolus without clamping: 0.65 U. Clamped recommendation: 0.2 U.
+        setUp(for: .autoBolusIOBClamping, maxBolus: 5)
+
+        // This sets up dose rounding
+        let delegate = MockDelegate()
+        loopDataManager.delegate = delegate
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        
+        var insulinOnBoard: InsulinValue?
+        var recommendedBolus: Double?
+        self.loopDataManager.getLoopState { _, state in
+            insulinOnBoard = state.insulinOnBoard
+            recommendedBolus = state.recommendedAutomaticDose?.recommendation.bolusUnits
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+
+        XCTAssertEqual(recommendedBolus!, 0.5, accuracy: 0.01)
+        XCTAssertEqual(insulinOnBoard?.value, 9.47)
+        
+        /// Set the `maximumBolus` to 10U so there's no clamping
+        updateGroup.enter()
+        self.loopDataManager.mutateSettings { settings in settings.maximumBolus = 10 }
+        self.loopDataManager.getLoopState { _, state in
+            insulinOnBoard = state.insulinOnBoard
+            recommendedBolus = state.recommendedAutomaticDose?.recommendation.bolusUnits
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+
+        XCTAssertEqual(recommendedBolus!, 0.65, accuracy: 0.01)
+        XCTAssertEqual(insulinOnBoard?.value, 9.47)
+    }
+
+    func testTempBasalMaxIOBClamping() {
+        /// `maximumBolus` is set to 5U to clamp max IOB at 10U
+        /// Without clamping: 4.25 U/hr. Clamped recommendation: 1.25 U/hr.
+        setUp(for: .tempBasalIOBClamping, maxBolus: 5)
+
+        // This sets up dose rounding
+        let delegate = MockDelegate()
+        loopDataManager.delegate = delegate
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+
+        var insulinOnBoard: InsulinValue?
+        var recommendedBasal: TempBasalRecommendation?
+        self.loopDataManager.getLoopState { _, state in
+            insulinOnBoard = state.insulinOnBoard
+            recommendedBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+
+        XCTAssertEqual(recommendedBasal!.unitsPerHour, 1.25, accuracy: 0.01)
+        XCTAssertEqual(insulinOnBoard?.value, 9.87)
+
+        /// Set the `maximumBolus` to 10U so there's no clamping
+        updateGroup.enter()
+        self.loopDataManager.mutateSettings { settings in settings.maximumBolus = 10 }
+        self.loopDataManager.getLoopState { _, state in
+            insulinOnBoard = state.insulinOnBoard
+            recommendedBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+
+        XCTAssertEqual(recommendedBasal!.unitsPerHour, 4.25, accuracy: 0.01)
+        XCTAssertEqual(insulinOnBoard?.value, 9.87)
     }
 
 }
