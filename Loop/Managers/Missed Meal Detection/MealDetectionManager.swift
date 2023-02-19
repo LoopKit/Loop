@@ -101,8 +101,7 @@ class MealDetectionManager {
                     return item
                 }
 
-//                    return GlucoseEffect(startDate: effect.endDate.dateCeiledToTimeInterval(delta),
-                return GlucoseEffect(startDate: effect.startDate.dateFlooredToTimeInterval(delta),
+                return GlucoseEffect(startDate: effect.endDate.dateCeiledToTimeInterval(delta),
                                      quantity: effect.quantity)
             }
         

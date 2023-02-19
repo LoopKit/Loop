@@ -73,9 +73,11 @@ extension MissedMealTestType {
     var missedMealDate: Date? {
         switch self {
         case .missedMealNoCOB:
-            return Self.dateFormatter.date(from: "2022-10-17T22:10:00")
+            return Self.dateFormatter.date(from: "2022-10-17T21:55:00")
         case .missedMealWithCOB:
-            return Self.dateFormatter.date(from: "2022-10-19T19:15:00")
+            return Self.dateFormatter.date(from: "2022-10-19T19:00:00")
+        case .manyMeals:
+            return Self.dateFormatter.date(from: "2022-10-19T20:40:00 ")
         case .dynamicCarbAutofill:
             return Self.dateFormatter.date(from: "2022-10-17T07:20:00")!
         default:
@@ -321,12 +323,13 @@ class MealDetectionManagerTests: XCTestCase {
     }
     
     func testManyMeals() {
-        let counteractionEffects = setUp(for: .manyMeals)
+        let testType = MissedMealTestType.manyMeals
+        let counteractionEffects = setUp(for: testType)
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
         mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
-            XCTAssertEqual(status, .noMissedMeal)
+            XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 40))
             updateGroup.leave()
         }
         updateGroup.wait()
