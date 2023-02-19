@@ -1347,8 +1347,8 @@ extension DeviceDataManager {
             log.default("Remote Notification: Finished handling")
         }
         
-        guard FeatureFlags.remoteOverridesEnabled else {
-            log.error("Remote Notification: Overrides not enabled.")
+        guard FeatureFlags.remoteCommandsEnabled else {
+            log.error("Remote Notification: Remote Commands not enabled.")
             return
         }
         

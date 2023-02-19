@@ -26,7 +26,7 @@ struct FeatureFlagConfiguration: Decodable {
     let observeHealthKitCarbSamplesFromOtherApps: Bool
     let observeHealthKitDoseSamplesFromOtherApps: Bool
     let observeHealthKitGlucoseSamplesFromOtherApps: Bool
-    let remoteOverridesEnabled: Bool
+    let remoteCommandsEnabled: Bool
     let predictedGlucoseChartClampEnabled: Bool
     let scenariosEnabled: Bool
     let sensitivityOverridesEnabled: Bool
@@ -161,10 +161,10 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         // Swift compiler config is inverse, since the default state is enabled.
-        #if REMOTE_OVERRIDES_DISABLED
-        self.remoteOverridesEnabled = false
+        #if REMOTE_COMMANDS_DISABLED || REMOTE_OVERRIDES_DISABLED //REMOTE_OVERRIDES_DISABLED: backwards compatibility of Loop 3 & prior
+        self.remoteCommandsEnabled = false
         #else
-        self.remoteOverridesEnabled = true
+        self.remoteCommandsEnabled = true
         #endif
         
         #if SCENARIOS_ENABLED
@@ -240,7 +240,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* observeHealthKitDoseSamplesFromOtherApps: \(observeHealthKitDoseSamplesFromOtherApps)",
             "* observeHealthKitGlucoseSamplesFromOtherApps: \(observeHealthKitGlucoseSamplesFromOtherApps)",
             "* predictedGlucoseChartClampEnabled: \(predictedGlucoseChartClampEnabled)",
-            "* remoteOverridesEnabled: \(remoteOverridesEnabled)",
+            "* remoteCommandsEnabled: \(remoteCommandsEnabled)",
             "* scenariosEnabled: \(scenariosEnabled)",
             "* sensitivityOverridesEnabled: \(sensitivityOverridesEnabled)",
             "* showEventualBloodGlucoseOnWatchEnabled: \(showEventualBloodGlucoseOnWatchEnabled)",
