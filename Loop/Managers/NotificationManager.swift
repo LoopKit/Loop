@@ -78,6 +78,7 @@ extension NotificationManager {
 
     // MARK: - Notifications
     
+    @MainActor
     static func sendRemoteCommandExpiredNotification(timeExpired: TimeInterval) {
         let notification = UNMutableNotificationContent()
 
@@ -134,6 +135,7 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
+    @MainActor
     static func sendRemoteBolusNotification(amount: Double) {
         let notification = UNMutableNotificationContent()
         let quantityFormatter = QuantityFormatter()
@@ -157,6 +159,7 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
+    @MainActor
     static func sendRemoteBolusFailureNotification(for error: Error, amount: Double) {
         let notification = UNMutableNotificationContent()
         let quantityFormatter = QuantityFormatter()
@@ -178,6 +181,7 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
+    @MainActor
     static func sendRemoteCarbEntryNotification(amountInGrams: Double) {
         let notification = UNMutableNotificationContent()
 
@@ -198,6 +202,7 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
+    @MainActor
     static func sendRemoteCarbEntryFailureNotification(for error: Error, amountInGrams: Double) {
         let notification = UNMutableNotificationContent()
         
