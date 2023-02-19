@@ -352,6 +352,7 @@ extension Collection where Element: GlucoseValue {
     ///   - sensitivity: The schedule of insulin sensitivities
     ///   - model: The insulin absorption model
     ///   - basalRates: The schedule of basal rates
+    ///   - additionalActiveInsulinClamp: Max amount of additional insulin above scheduled basal rate allowed to be scheduled
     ///   - maxBasalRate: The maximum allowed basal rate
     ///   - lastTempBasal: The previously set temp basal
     ///   - rateRounder: Closure that rounds recommendation to nearest supported rate. If nil, no rounding is performed
@@ -367,6 +368,7 @@ extension Collection where Element: GlucoseValue {
         model: InsulinModel,
         basalRates: BasalRateSchedule,
         maxBasalRate: Double,
+        additionalActiveInsulinClamp: Double? = nil,
         lastTempBasal: DoseEntry?,
         rateRounder: ((Double) -> Double)? = nil,
         isBasalRateScheduleOverrideActive: Bool = false,
@@ -389,6 +391,11 @@ extension Collection where Element: GlucoseValue {
             min.quantity < highBasalThreshold
         {
             maxBasalRate = scheduledBasalRate
+        }
+
+        if let additionalActiveInsulinClamp {
+            let maxThirtyMinuteRateToKeepIOBBelowLimit = additionalActiveInsulinClamp * 2.0 + scheduledBasalRate  // 30 minutes of a U/hr rate
+            maxBasalRate = Swift.min(maxThirtyMinuteRateToKeepIOBBelowLimit, maxBasalRate)
         }
 
         let temp = correction?.asTempBasal(
