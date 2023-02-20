@@ -37,15 +37,6 @@ public struct NotificationsCriticalAlertPermissionsView: View {
         }
     }
     
-    private var missedMealNotificationsEnabled: Binding<Bool> {
-        Binding(
-            get: { UserDefaults.standard.missedMealNotificationsEnabled },
-            set: { enabled in
-                UserDefaults.standard.missedMealNotificationsEnabled = enabled
-            }
-        )
-    }
-    
     private func navigationContent() -> some View {
         return NavigationView {
             content()
@@ -74,7 +65,6 @@ public struct NotificationsCriticalAlertPermissionsView: View {
                     }
                 }
             }
-            missedMealAlertSection
             notificationAndCriticalAlertPermissionSupportSection
         }
         .insetGroupedListStyle()
@@ -151,27 +141,6 @@ extension NotificationsCriticalAlertPermissionsView {
             NavigationLink(destination: Text("Get help with Alert Permissions")) {
                 Text(NSLocalizedString("Get help with Alert Permissions", comment: "Get help with Alert Permissions support button text"))
             }
-        }
-    }
-    
-    private var missedMealAlertSection: some View {
-        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
-            Toggle("Missed Meal Notifications", isOn: missedMealNotificationsEnabled)
-        }
-    }
-}
-
-extension UserDefaults {
-    private enum Key: String {
-        case missedMealNotificationsEnabled = "com.loopkit.Loop.MissedMealNotificationsEnabled"
-    }
-    
-    var missedMealNotificationsEnabled: Bool {
-        get {
-            return object(forKey: Key.missedMealNotificationsEnabled.rawValue) as? Bool ?? false
-        }
-        set {
-            set(newValue, forKey: Key.missedMealNotificationsEnabled.rawValue)
         }
     }
 }

@@ -405,8 +405,8 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         let settings = LoopSettings(
             dosingEnabled: false,
             glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
-            maximumBasalRatePerHour: maxBasalRate,
-            maximumBolus: maxBolus,
+            maximumBasalRatePerHour: 5,
+            maximumBolus: 10,
             suspendThreshold: suspendThreshold
         )
 
