@@ -21,6 +21,20 @@ enum DataManagerTestType {
     case lowAndFallingWithCOB
     case lowWithLowTreatment
     case highAndFalling
+    /// uses fixtures for .highAndRisingWithCOB with a low max bolus and dosing set to autobolus
+    case autoBolusIOBClamping
+    case tempBasalIOBClamping
+}
+
+extension DataManagerTestType {
+    var dosingStrategy: AutomaticDosingStrategy {
+        switch self {
+        case .autoBolusIOBClamping:
+            return .automaticBolus
+        default:
+            return .tempBasalOnly
+        }
+    }
 }
 
 extension TimeZone {
@@ -54,10 +68,6 @@ class LoopDataManagerTests: XCTestCase {
     let dateFormatter = ISO8601DateFormatter.localTimeDate()
     let defaultAccuracy = 1.0 / 40.0
     
-    // MARK: Settings
-    let maxBasalRate = 5.0
-    let maxBolus = 10.0
-    
     var suspendThreshold: GlucoseThreshold {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter, value: 75)
     }
@@ -78,7 +88,7 @@ class LoopDataManagerTests: XCTestCase {
     var automaticDosingStatus: AutomaticDosingStatus!
     var loopDataManager: LoopDataManager!
     
-    func setUp(for test: DataManagerTestType, basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil) {
+    func setUp(for test: DataManagerTestType, basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil, maxBolus: Double = 10, maxBasalRate: Double = 5.0) {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
         let carbRatioSchedule = CarbRatioSchedule(
             unit: .gram(),
@@ -95,7 +105,8 @@ class LoopDataManagerTests: XCTestCase {
             carbRatioSchedule: carbRatioSchedule,
             maximumBasalRatePerHour: maxBasalRate,
             maximumBolus: maxBolus,
-            suspendThreshold: suspendThreshold
+            suspendThreshold: suspendThreshold,
+            automaticDosingStrategy: test.dosingStrategy
         )
         
         let doseStore = MockDoseStore(for: test)

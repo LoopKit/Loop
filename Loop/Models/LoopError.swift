@@ -43,6 +43,7 @@ enum MissingDataErrorDetail: String, Codable {
     case momentumEffect
     case carbEffect
     case insulinEffect
+    case activeInsulin
     case insulinEffectIncludingPendingInsulin
     
     var localizedDetail: String {
@@ -55,6 +56,8 @@ enum MissingDataErrorDetail: String, Codable {
             return NSLocalizedString("Carb effects", comment: "Details for missing data error when carb effects are missing")
         case .insulinEffect:
             return NSLocalizedString("Insulin effects", comment: "Details for missing data error when insulin effects are missing")
+        case .activeInsulin:
+            return NSLocalizedString("Active Insulin", comment: "Details for missing data error when active insulin amount is missing")
         case .insulinEffectIncludingPendingInsulin:
             return NSLocalizedString("Insulin effects", comment: "Details for missing data error when insulin effects including pending insulin are missing")
         }
@@ -68,9 +71,7 @@ enum MissingDataErrorDetail: String, Codable {
             return nil
         case .carbEffect:
             return nil
-        case .insulinEffect:
-            return nil
-        case .insulinEffectIncludingPendingInsulin:
+        case .insulinEffect, .activeInsulin, .insulinEffectIncludingPendingInsulin:
             return nil
         }
     }

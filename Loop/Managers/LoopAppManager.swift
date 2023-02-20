@@ -106,7 +106,7 @@ class LoopAppManager: NSObject {
 
         registerBackgroundTasks()
 
-        if FeatureFlags.remoteOverridesEnabled {
+        if FeatureFlags.remoteCommandsEnabled {
             DispatchQueue.main.async {
 #if targetEnvironment(simulator)
                 self.remoteNotificationRegistrationDidFinish(.failure(SimulatorError.remoteNotificationsNotAvailable))

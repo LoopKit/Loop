@@ -112,7 +112,7 @@ extension MockGlucoseStore {
             return "flat_and_stable_counteraction_effect"
         case .highAndStable:
             return "high_and_stable_counteraction_effect"
-        case .highAndRisingWithCOB:
+        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
             return "high_and_rising_with_cob_counteraction_effect"
         case .lowAndFallingWithCOB:
             return "low_and_falling_counteraction_effect"
@@ -129,7 +129,7 @@ extension MockGlucoseStore {
             return "flat_and_stable_momentum_effect"
         case .highAndStable:
             return "high_and_stable_momentum_effect"
-        case .highAndRisingWithCOB:
+        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
             return "high_and_rising_with_cob_momentum_effect"
         case .lowAndFallingWithCOB:
             return "low_and_falling_momentum_effect"
@@ -146,7 +146,7 @@ extension MockGlucoseStore {
             return dateFormatter.date(from: "2020-08-11T20:45:02")!
         case .highAndStable:
             return dateFormatter.date(from: "2020-08-12T12:39:22")!
-        case .highAndRisingWithCOB:
+        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
             return dateFormatter.date(from: "2020-08-11T21:48:17")!
         case .lowAndFallingWithCOB:
             return dateFormatter.date(from: "2020-08-11T22:06:06")!
@@ -163,7 +163,7 @@ extension MockGlucoseStore {
             return 123.42849966275706
         case .highAndStable:
             return 200.0
-        case .highAndRisingWithCOB:
+        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
             return 129.93174411197853
         case .lowAndFallingWithCOB:
             return 75.10768374646841

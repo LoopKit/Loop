@@ -122,7 +122,7 @@ extension InsulinCorrection {
 
         let partialDose = units * partialApplicationFactor
 
-        return Swift.min(Swift.max(0, volumeRounder?(partialDose) ?? partialDose),maxBolusUnits)
+        return Swift.min(Swift.max(0, volumeRounder?(partialDose) ?? partialDose),volumeRounder?(maxBolusUnits) ?? maxBolusUnits)
     }
 }
 
@@ -298,24 +298,24 @@ extension Collection where Element: GlucoseValue {
             minCorrectionUnits = correctionUnits
         }
 
-        guard let eventual = eventualGlucose, let min = minGlucose else {
+        guard let eventualGlucose, let minGlucose else {
             return nil
         }
 
         // Choose either the minimum glucose or eventual glucose as the correction delta
-        let minGlucoseTargets = correctionRange.quantityRange(at: min.startDate)
-        let eventualGlucoseTargets = correctionRange.quantityRange(at: eventual.startDate)
+        let minGlucoseTargets = correctionRange.quantityRange(at: minGlucose.startDate)
+        let eventualGlucoseTargets = correctionRange.quantityRange(at: eventualGlucose.startDate)
 
         // Treat the mininum glucose when both are below range
-        if min.quantity < minGlucoseTargets.lowerBound &&
-            eventual.quantity < eventualGlucoseTargets.lowerBound
+        if minGlucose.quantity < minGlucoseTargets.lowerBound &&
+            eventualGlucose.quantity < eventualGlucoseTargets.lowerBound
         {
-            let time = min.startDate.timeIntervalSince(date)
+            let time = minGlucose.startDate.timeIntervalSince(date)
             // For 0 <= time <= effectDelay, assume a small amount effected. This will result in large (negative) unit recommendation rather than no recommendation at all.
             let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time))
 
             guard let units = insulinCorrectionUnits(
-                fromValue: min.quantity.doubleValue(for: unit),
+                fromValue: minGlucose.quantity.doubleValue(for: unit),
                 toValue: minGlucoseTargets.averageValue(for: unit),
                 effectedSensitivity: sensitivityValue * percentEffected
             ) else {
@@ -323,15 +323,15 @@ extension Collection where Element: GlucoseValue {
             }
 
             return .entirelyBelowRange(
-                min: min,
+                min: minGlucose,
                 minTarget: minGlucoseTargets.lowerBound,
                 units: units
             )
-        } else if eventual.quantity > eventualGlucoseTargets.upperBound,
+        } else if eventualGlucose.quantity > eventualGlucoseTargets.upperBound,
             let minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
         {
             return .aboveRange(
-                min: min,
+                min: minGlucose,
                 correcting: correctingGlucose,
                 minTarget: eventualGlucoseTargets.lowerBound,
                 units: minCorrectionUnits
@@ -352,6 +352,7 @@ extension Collection where Element: GlucoseValue {
     ///   - sensitivity: The schedule of insulin sensitivities
     ///   - model: The insulin absorption model
     ///   - basalRates: The schedule of basal rates
+    ///   - additionalActiveInsulinClamp: Max amount of additional insulin above scheduled basal rate allowed to be scheduled
     ///   - maxBasalRate: The maximum allowed basal rate
     ///   - lastTempBasal: The previously set temp basal
     ///   - rateRounder: Closure that rounds recommendation to nearest supported rate. If nil, no rounding is performed
@@ -367,6 +368,7 @@ extension Collection where Element: GlucoseValue {
         model: InsulinModel,
         basalRates: BasalRateSchedule,
         maxBasalRate: Double,
+        additionalActiveInsulinClamp: Double? = nil,
         lastTempBasal: DoseEntry?,
         rateRounder: ((Double) -> Double)? = nil,
         isBasalRateScheduleOverrideActive: Bool = false,
@@ -389,6 +391,11 @@ extension Collection where Element: GlucoseValue {
             min.quantity < highBasalThreshold
         {
             maxBasalRate = scheduledBasalRate
+        }
+
+        if let additionalActiveInsulinClamp {
+            let maxThirtyMinuteRateToKeepIOBBelowLimit = additionalActiveInsulinClamp * 2.0 + scheduledBasalRate  // 30 minutes of a U/hr rate
+            maxBasalRate = Swift.min(maxThirtyMinuteRateToKeepIOBBelowLimit, maxBasalRate)
         }
 
         let temp = correction?.asTempBasal(
