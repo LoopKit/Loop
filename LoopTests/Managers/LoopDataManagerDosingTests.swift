@@ -458,9 +458,9 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     }
 
     func testAutoBolusMaxIOBClamping() {
-        /// `maximumBolus` is set to clamp the automatic dose
+        /// `maxBolus` is set to clamp the automatic dose
         /// Autobolus without clamping: 0.65 U. Clamped recommendation: 0.2 U.
-        setUp(for: .autoBolusIOBClamping, maxBolus: 5)
+        setUp(for: .highAndRisingWithCOB, maxBolus: 5, dosingStrategy: .automaticBolus)
 
         // This sets up dose rounding
         let delegate = MockDelegate()
@@ -479,7 +479,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         updateGroup.wait()
 
         XCTAssertEqual(recommendedBolus!, 0.5, accuracy: 0.01)
-        XCTAssertEqual(insulinOnBoard?.value, 9.47)
+        XCTAssertEqual(insulinOnBoard?.value, 9.5)
 
         /// Set the `maximumBolus` to 10U so there's no clamping
         updateGroup.enter()
@@ -492,13 +492,13 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         updateGroup.wait()
 
         XCTAssertEqual(recommendedBolus!, 0.65, accuracy: 0.01)
-        XCTAssertEqual(insulinOnBoard?.value, 9.47)
+        XCTAssertEqual(insulinOnBoard?.value, 9.5)
     }
 
     func testTempBasalMaxIOBClamping() {
         /// `maximumBolus` is set to 5U to clamp max IOB at 10U
-        /// Without clamping: 4.25 U/hr. Clamped recommendation: 1.25 U/hr.
-        setUp(for: .tempBasalIOBClamping, maxBolus: 5)
+        /// Without clamping: 4.25 U/hr. Clamped recommendation: 2.0 U/hr.
+        setUp(for: .highAndRisingWithCOB, maxBolus: 5)
 
         // This sets up dose rounding
         let delegate = MockDelegate()
@@ -516,8 +516,8 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         updateGroup.wait()
 
-        XCTAssertEqual(recommendedBasal!.unitsPerHour, 1.25, accuracy: 0.01)
-        XCTAssertEqual(insulinOnBoard?.value, 9.87)
+        XCTAssertEqual(recommendedBasal!.unitsPerHour, 2.0, accuracy: 0.01)
+        XCTAssertEqual(insulinOnBoard?.value, 9.5)
 
         /// Set the `maximumBolus` to 10U so there's no clamping
         updateGroup.enter()
@@ -530,7 +530,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         updateGroup.wait()
 
         XCTAssertEqual(recommendedBasal!.unitsPerHour, 4.25, accuracy: 0.01)
-        XCTAssertEqual(insulinOnBoard?.value, 9.87)
+        XCTAssertEqual(insulinOnBoard?.value, 9.5)
     }
 
 }

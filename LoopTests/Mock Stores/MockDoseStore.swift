@@ -12,15 +12,15 @@ import LoopKit
 
 class MockDoseStore: DoseStoreProtocol {
     
-    init(for test: DataManagerTestType = .flatAndStable) {
-        self.testType = test // The store returns different effect values based on the test type
-        self.pumpEventQueryAfterDate = MockDoseStore.currentDate(for: test)
-        self.lastAddedPumpData = MockDoseStore.currentDate(for: test)
+    init(for scenario: DosingTestScenario = .flatAndStable) {
+        self.scenario = scenario // The store returns different effect values based on the scenario
+        self.pumpEventQueryAfterDate = MockDoseStore.currentDate(for: scenario)
+        self.lastAddedPumpData = MockDoseStore.currentDate(for: scenario)
     }
     
     static let dateFormatter = ISO8601DateFormatter.localTimeDate()
     
-    var testType: DataManagerTestType
+    var scenario: DosingTestScenario
     
     var basalProfileApplyingOverrideHistory: BasalRateSchedule?
     
@@ -50,7 +50,7 @@ class MockDoseStore: DoseStoreProtocol {
     var lastReservoirValue: ReservoirValue?
     
     var lastAddedPumpData: Date
-    
+
     func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (DoseStore.DoseStoreError?) -> Void) {
         completion(nil)
     }
@@ -60,14 +60,7 @@ class MockDoseStore: DoseStoreProtocol {
     }
     
     func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
-        switch testType {
-        case .highAndRisingWithCOB, .flatAndStable, .highAndFalling, .highAndStable, .lowAndFallingWithCOB, .lowWithLowTreatment:
-            completion(.success(.init(startDate: MockDoseStore.currentDate(for: testType), value: 9.5)))
-        case .autoBolusIOBClamping:
-            completion(.success(.init(startDate: MockDoseStore.currentDate(for: testType), value: 9.47)))
-        case .tempBasalIOBClamping:
-            completion(.success(.init(startDate: MockDoseStore.currentDate(for: testType), value: 9.87)))
-        }
+        completion(.success(.init(startDate: MockDoseStore.currentDate(for: scenario), value: 9.5)))
     }
     
     func generateDiagnosticReport(_ completion: @escaping (String) -> Void) {
@@ -113,13 +106,13 @@ class MockDoseStore: DoseStoreProtocol {
         }))
     }
     
-    static func currentDate(for testType: DataManagerTestType) -> Date {
+    static func currentDate(for testType: DosingTestScenario) -> Date {
         switch testType {
         case .flatAndStable:
             return dateFormatter.date(from: "2020-08-11T20:45:02")!
         case .highAndStable:
             return dateFormatter.date(from: "2020-08-12T12:39:22")!
-        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
+        case .highAndRisingWithCOB:
             return dateFormatter.date(from: "2020-08-11T21:48:17")!
         case .lowAndFallingWithCOB:
             return dateFormatter.date(from: "2020-08-11T22:06:06")!
@@ -142,12 +135,12 @@ extension MockDoseStore {
     }
     
     var fixtureToLoad: String {
-        switch testType {
+        switch scenario {
         case .flatAndStable:
             return "flat_and_stable_insulin_effect"
         case .highAndStable:
             return "high_and_stable_insulin_effect"
-        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
+        case .highAndRisingWithCOB:
             return "high_and_rising_with_cob_insulin_effect"
         case .lowAndFallingWithCOB:
             return "low_and_falling_insulin_effect"

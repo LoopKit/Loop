@@ -14,27 +14,13 @@ import LoopKit
 
 public typealias JSONDictionary = [String: Any]
 
-enum DataManagerTestType {
+enum DosingTestScenario {
     case flatAndStable
     case highAndStable
     case highAndRisingWithCOB
     case lowAndFallingWithCOB
     case lowWithLowTreatment
     case highAndFalling
-    /// uses fixtures for .highAndRisingWithCOB with a low max bolus and dosing set to autobolus
-    case autoBolusIOBClamping
-    case tempBasalIOBClamping
-}
-
-extension DataManagerTestType {
-    var dosingStrategy: AutomaticDosingStrategy {
-        switch self {
-        case .autoBolusIOBClamping:
-            return .automaticBolus
-        default:
-            return .tempBasalOnly
-        }
-    }
 }
 
 extension TimeZone {
@@ -88,7 +74,12 @@ class LoopDataManagerTests: XCTestCase {
     var automaticDosingStatus: AutomaticDosingStatus!
     var loopDataManager: LoopDataManager!
     
-    func setUp(for test: DataManagerTestType, basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil, maxBolus: Double = 10, maxBasalRate: Double = 5.0) {
+    func setUp(for test: DosingTestScenario,
+               basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil,
+               maxBolus: Double = 10,
+               maxBasalRate: Double = 5.0,
+               dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly)
+    {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
         let carbRatioSchedule = CarbRatioSchedule(
             unit: .gram(),
@@ -106,7 +97,7 @@ class LoopDataManagerTests: XCTestCase {
             maximumBasalRatePerHour: maxBasalRate,
             maximumBolus: maxBolus,
             suspendThreshold: suspendThreshold,
-            automaticDosingStrategy: test.dosingStrategy
+            automaticDosingStrategy: dosingStrategy
         )
         
         let doseStore = MockDoseStore(for: test)

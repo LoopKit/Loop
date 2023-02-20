@@ -11,11 +11,11 @@ import LoopKit
 @testable import Loop
 
 class MockCarbStore: CarbStoreProtocol {
-    init(for test: DataManagerTestType = .flatAndStable) {
-        self.testType = test // The store returns different effect values based on the test type
+    init(for scenario: DosingTestScenario = .flatAndStable) {
+        self.scenario = scenario // The store returns different effect values based on the scenario
     }
     
-    var testType: DataManagerTestType
+    var scenario: DosingTestScenario
     
     var sampleType: HKSampleType = HKSampleType.quantityType(forIdentifier: HKQuantityTypeIdentifier.dietaryCarbohydrates)!
     
@@ -119,12 +119,12 @@ extension MockCarbStore {
     }
     
     var fixtureToLoad: String {
-        switch testType {
+        switch scenario {
         case .flatAndStable:
             return "flat_and_stable_carb_effect"
         case .highAndStable:
             return "high_and_stable_carb_effect"
-        case .highAndRisingWithCOB, .autoBolusIOBClamping, .tempBasalIOBClamping:
+        case .highAndRisingWithCOB:
             return "high_and_rising_with_cob_carb_effect"
         case .lowAndFallingWithCOB:
             return "low_and_falling_carb_effect"
