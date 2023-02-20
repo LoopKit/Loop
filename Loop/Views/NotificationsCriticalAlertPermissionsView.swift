@@ -143,8 +143,8 @@ extension NotificationsCriticalAlertPermissionsView {
             }
         }
     }
-
 }
+
 
 struct NotificationsCriticalAlertPermissionsView_Previews: PreviewProvider {
     static var previews: some View {

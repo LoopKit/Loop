@@ -30,6 +30,8 @@ final class LoopDataManager {
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
     private let carbStore: CarbStoreProtocol
+    
+    private let mealDetectionManager: MealDetectionManager
 
     private let doseStore: DoseStoreProtocol
 
@@ -109,6 +111,11 @@ final class LoopDataManager {
         self.now = now
 
         self.latestStoredSettingsProvider = latestStoredSettingsProvider
+        self.mealDetectionManager = MealDetectionManager(
+            carbRatioScheduleApplyingOverrideHistory: carbStore.carbRatioScheduleApplyingOverrideHistory,
+            insulinSensitivityScheduleApplyingOverrideHistory: carbStore.insulinSensitivityScheduleApplyingOverrideHistory,
+            maximumBolus: settings.maximumBolus
+        )
         
         self.lockedPumpInsulinType = Locked(pumpInsulinType)
 
@@ -259,11 +266,16 @@ final class LoopDataManager {
 
             // Invalidate cached effects affected by the override
             invalidateCachedEffects = true
+            
+            // Update the affected schedules
+            mealDetectionManager.carbRatioScheduleApplyingOverrideHistory = carbRatioScheduleApplyingOverrideHistory
+            mealDetectionManager.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivityScheduleApplyingOverrideHistory
         }
 
         if newValue.insulinSensitivitySchedule != oldValue.insulinSensitivitySchedule {
             carbStore.insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
             doseStore.insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
+            mealDetectionManager.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivityScheduleApplyingOverrideHistory
             invalidateCachedEffects = true
             analyticsServicesManager.didChangeInsulinSensitivitySchedule()
         }
@@ -278,6 +290,7 @@ final class LoopDataManager {
 
         if newValue.carbRatioSchedule != oldValue.carbRatioSchedule {
             carbStore.carbRatioSchedule = newValue.carbRatioSchedule
+            mealDetectionManager.carbRatioScheduleApplyingOverrideHistory = carbRatioScheduleApplyingOverrideHistory
             invalidateCachedEffects = true
             analyticsServicesManager.didChangeCarbRatioSchedule()
         }
@@ -290,6 +303,10 @@ final class LoopDataManager {
             }
             invalidateCachedEffects = true
             analyticsServicesManager.didChangeInsulinModel()
+        }
+
+        if newValue.maximumBolus != oldValue.maximumBolus {
+            mealDetectionManager.maximumBolus = newValue.maximumBolus
         }
 
         if invalidateCachedEffects {
@@ -856,6 +873,28 @@ extension LoopDataManager {
 
         logger.default("Loop ended")
         notify(forChange: .loopFinished)
+
+        let carbEffectStart = now().addingTimeInterval(-MissedMealSettings.maxRecency)
+        carbStore.getGlucoseEffects(start: carbEffectStart, end: now(), effectVelocities: insulinCounteractionEffects) {[weak self] result in
+            guard
+                let self = self,
+                case .success((_, let carbEffects)) = result
+            else {
+                if case .failure(let error) = result {
+                    self?.logger.error("Failed to fetch glucose effects to check for missed meal: %{public}@", String(describing: error))
+                }
+                return
+            }
+            
+            self.mealDetectionManager.generateMissedMealNotificationIfNeeded(
+                insulinCounteractionEffects: self.insulinCounteractionEffects,
+                carbEffects: carbEffects,
+                pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
+                bolusDurationEstimator: { [unowned self] bolusAmount in
+                    return self.delegate?.loopDataManager(self, estimateBolusDuration: bolusAmount)
+                }
+            )
+        }
 
         // 5 second delay to allow stores to cache data before it is read by widget
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
@@ -1764,7 +1803,6 @@ extension LoopDataManager {
             }
         }
     }
-
 }
 
 /// Describes a view into the loop state
@@ -2104,16 +2142,21 @@ extension LoopDataManager {
                     self.doseStore.generateDiagnosticReport { (report) in
                         entries.append(report)
                         entries.append("")
-
-                        UNUserNotificationCenter.current().generateDiagnosticReport { (report) in
+                        
+                        self.mealDetectionManager.generateDiagnosticReport { report in
                             entries.append(report)
                             entries.append("")
-
-                            UIDevice.current.generateDiagnosticReport { (report) in
+                            
+                            UNUserNotificationCenter.current().generateDiagnosticReport { (report) in
                                 entries.append(report)
                                 entries.append("")
 
-                                completion(entries.joined(separator: "\n"))
+                                UIDevice.current.generateDiagnosticReport { (report) in
+                                    entries.append(report)
+                                    entries.append("")
+
+                                    completion(entries.joined(separator: "\n"))
+                                }
                             }
                         }
                     }
@@ -2147,7 +2190,14 @@ protocol LoopDataManagerDelegate: AnyObject {
     ///   - rate: The recommended rate in U/hr
     /// - Returns: a supported rate of delivery in Units/hr. The rate returned should not be larger than the passed in rate.
     func roundBasalRate(unitsPerHour: Double) -> Double
-
+    
+    /// Asks the delegate to estimate the duration to deliver the bolus.
+    ///
+    /// - Parameters:
+    ///   - bolusUnits: size of the bolus in U
+    /// - Returns: the estimated time it will take to deliver bolus
+    func loopDataManager(_ manager: LoopDataManager, estimateBolusDuration bolusUnits: Double) -> TimeInterval?
+    
     /// Asks the delegate to round a recommended bolus volume to a supported volume
     ///
     /// - Parameters:

@@ -1307,6 +1307,10 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 
         return rounded
     }
+    
+    func loopDataManager(_ manager: LoopDataManager, estimateBolusDuration units: Double) -> TimeInterval? {
+        pumpManager?.estimatedDuration(toBolus: units)
+    }
 
     func loopDataManager(
         _ manager: LoopDataManager,

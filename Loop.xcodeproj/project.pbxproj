@@ -588,6 +588,7 @@
 		E942DE96253BE68F00AC532D /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
 		E942DE9F253BE6A900AC532D /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		E942DF34253BF87F00AC532D /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
+		E950CA9129002D9000B5B692 /* LoopDataManagerDosingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E950CA9029002D9000B5B692 /* LoopDataManagerDosingTests.swift */; };
 		E95D380124EADE7C005E2F50 /* DoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */; };
 		E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */; };
 		E95D380524EADF78005E2F50 /* GlucoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */; };
@@ -605,6 +606,18 @@
 		E9B08021253BBDE900BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
 		E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */; };
 		E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */; };
+		E9B3552229358C440076AB04 /* MealDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3552129358C440076AB04 /* MealDetectionManager.swift */; };
+		E9B355292935919E0076AB04 /* MissedMealSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B35525293590980076AB04 /* MissedMealSettings.swift */; };
+		E9B3552A293591E70076AB04 /* MissedMealNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* MissedMealNotification.swift */; };
+		E9B3552B293591E70076AB04 /* MissedMealNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3551B292844010076AB04 /* MissedMealNotification.swift */; };
+		E9B3552D293592B40076AB04 /* MealDetectionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */; };
+		E9B3552F2935968E0076AB04 /* HKHealthStoreMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B3552E2935968E0076AB04 /* HKHealthStoreMock.swift */; };
+		E9B35538293706CB0076AB04 /* needs_clamping_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35532293706CA0076AB04 /* needs_clamping_counteraction_effect.json */; };
+		E9B35539293706CB0076AB04 /* dynamic_autofill_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35533293706CA0076AB04 /* dynamic_autofill_counteraction_effect.json */; };
+		E9B3553A293706CB0076AB04 /* missed_meal_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35534293706CB0076AB04 /* missed_meal_counteraction_effect.json */; };
+		E9B3553B293706CB0076AB04 /* noisy_cgm_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35535293706CB0076AB04 /* noisy_cgm_counteraction_effect.json */; };
+		E9B3553C293706CB0076AB04 /* realistic_report_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35536293706CB0076AB04 /* realistic_report_counteraction_effect.json */; };
+		E9B3553D293706CB0076AB04 /* long_interval_counteraction_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9B35537293706CB0076AB04 /* long_interval_counteraction_effect.json */; };
 		E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB27AA23B85C3500FB4987 /* SleepStore.swift */; };
 		E9C00EF224C6221B00628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
@@ -1710,6 +1723,7 @@
 		E93E86C824E2E02200FF40C8 /* high_and_stable_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_counteraction_effect.json; sourceTree = "<group>"; };
 		E93E86C924E2E02200FF40C8 /* high_and_stable_momentum_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_stable_momentum_effect.json; sourceTree = "<group>"; };
 		E942DE6D253BE5E100AC532D /* Loop Intent Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Intent Extension.entitlements"; sourceTree = "<group>"; };
+		E950CA9029002D9000B5B692 /* LoopDataManagerDosingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManagerDosingTests.swift; sourceTree = "<group>"; };
 		E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreProtocol.swift; sourceTree = "<group>"; };
 		E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStoreProtocol.swift; sourceTree = "<group>"; };
@@ -1727,6 +1741,17 @@
 		E9B07FED253BBC7100BAD8F8 /* OverrideIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideIntentHandler.swift; sourceTree = "<group>"; };
 		E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+LoopIntents.swift"; sourceTree = "<group>"; };
 		E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentExtensionInfo.swift; sourceTree = "<group>"; };
+		E9B3551B292844010076AB04 /* MissedMealNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedMealNotification.swift; sourceTree = "<group>"; };
+		E9B3552129358C440076AB04 /* MealDetectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealDetectionManager.swift; sourceTree = "<group>"; };
+		E9B35525293590980076AB04 /* MissedMealSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissedMealSettings.swift; sourceTree = "<group>"; };
+		E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealDetectionManagerTests.swift; sourceTree = "<group>"; };
+		E9B3552E2935968E0076AB04 /* HKHealthStoreMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HKHealthStoreMock.swift; sourceTree = "<group>"; };
+		E9B35532293706CA0076AB04 /* needs_clamping_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = needs_clamping_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35533293706CA0076AB04 /* dynamic_autofill_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dynamic_autofill_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35534293706CB0076AB04 /* missed_meal_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = missed_meal_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35535293706CB0076AB04 /* noisy_cgm_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = noisy_cgm_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35536293706CB0076AB04 /* realistic_report_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = realistic_report_counteraction_effect.json; sourceTree = "<group>"; };
+		E9B35537293706CB0076AB04 /* long_interval_counteraction_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = long_interval_counteraction_effect.json; sourceTree = "<group>"; };
 		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 		E9C00EEF24C620EF00628F35 /* LoopSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettings.swift; sourceTree = "<group>"; };
 		E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopSettings+Loop.swift"; sourceTree = "<group>"; };
@@ -1935,10 +1960,13 @@
 			isa = PBXGroup;
 			children = (
 				1DA7A84024476E98008257F0 /* Alerts */,
+				E950CA9429002E4B00B5B692 /* LoopDataManager */,
 				C16575722538AFF6004AE16E /* CGMStalenessMonitorTests.swift */,
 				A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */,
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
+				E950CA9029002D9000B5B692 /* LoopDataManagerDosingTests.swift */,
+				E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */,
 				1D70C40026EC0F9D00C62570 /* SupportManagerTests.swift */,
 				A9F5F1F4251050EC00E7C8A4 /* ZipArchiveTests.swift */,
 			);
@@ -2252,6 +2280,7 @@
 				4B60626A287E286000BF8BBB /* Localizable.strings */,
 				E9C00EEF24C620EF00628F35 /* LoopSettings.swift */,
 				C16575742539FD60004AE16E /* LoopCoreConstants.swift */,
+				E9B3551B292844010076AB04 /* MissedMealNotification.swift */,
 				C1D0B62F2986D4D90098D215 /* LocalizedString.swift */,
 			);
 			path = LoopCore;
@@ -2419,6 +2448,7 @@
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 				1DA6499D2441266400F61E75 /* Alerts */,
 				E95D37FF24EADE68005E2F50 /* Store Protocols */,
+				E9B355232935906B0076AB04 /* Missed Meal Detection */,
 				C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */,
 				A96DAC2B2838F31200D94E38 /* SharedLogging.swift */,
 			);
@@ -2918,6 +2948,7 @@
 				E93E86B124DDE21D00FF40C8 /* MockCarbStore.swift */,
 				E98A55F024EDD85E0008715D /* MockDosingDecisionStore.swift */,
 				E98A55F224EDD9530008715D /* MockSettingsStore.swift */,
+				E9B3552E2935968E0076AB04 /* HKHealthStoreMock.swift */,
 			);
 			path = "Mock Stores";
 			sourceTree = "<group>";
@@ -2946,6 +2977,13 @@
 			path = high_and_stable;
 			sourceTree = "<group>";
 		};
+		E950CA9429002E4B00B5B692 /* LoopDataManager */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = LoopDataManager;
+			sourceTree = "<group>";
+		};
 		E95D37FF24EADE68005E2F50 /* Store Protocols */ = {
 			isa = PBXGroup;
 			children = (
@@ -2971,9 +3009,32 @@
 			path = "Loop Intent Extension";
 			sourceTree = "<group>";
 		};
+		E9B355232935906B0076AB04 /* Missed Meal Detection */ = {
+			isa = PBXGroup;
+			children = (
+				E9B3552129358C440076AB04 /* MealDetectionManager.swift */,
+				E9B35525293590980076AB04 /* MissedMealSettings.swift */,
+			);
+			path = "Missed Meal Detection";
+			sourceTree = "<group>";
+		};
+		E9B355312937068A0076AB04 /* meal_detection */ = {
+			isa = PBXGroup;
+			children = (
+				E9B35533293706CA0076AB04 /* dynamic_autofill_counteraction_effect.json */,
+				E9B35532293706CA0076AB04 /* needs_clamping_counteraction_effect.json */,
+				E9B35534293706CB0076AB04 /* missed_meal_counteraction_effect.json */,
+				E9B35535293706CB0076AB04 /* noisy_cgm_counteraction_effect.json */,
+				E9B35537293706CB0076AB04 /* long_interval_counteraction_effect.json */,
+				E9B35536293706CB0076AB04 /* realistic_report_counteraction_effect.json */,
+			);
+			path = meal_detection;
+			sourceTree = "<group>";
+		};
 		E9C58A7624DB510500487A17 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				E9B355312937068A0076AB04 /* meal_detection */,
 				E90909EC24E35B3400F963D2 /* high_and_falling */,
 				E90909E124E352C300F963D2 /* low_with_low_treatment */,
 				E90909D624E34EC200F963D2 /* low_and_falling */,
@@ -3429,9 +3490,9 @@
 			targets = (
 				43776F8B1B8022E90074EA36 /* Loop */,
 				4F70C1DB1DE8DCA7006380B7 /* Loop Status Extension */,
-				14B1735B28AED9EC006CCD7C /* SmallStatusWidgetExtension */,
 				43A943711B926B7B0051FA24 /* WatchApp */,
 				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
+				14B1735B28AED9EC006CCD7C /* SmallStatusWidgetExtension */,
 				E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */,
 				43D9FFA121EA9A0C00AF44BF /* Learn */,
 				43D9FFCE21EAE05D00AF44BF /* LoopCore */,
@@ -3552,6 +3613,9 @@
 				E93E865424DB6CBA00FF40C8 /* retrospective_output.json in Resources */,
 				E9C58A7F24DB529A00487A17 /* counteraction_effect_falling_glucose.json in Resources */,
 				E93E865624DB731900FF40C8 /* predicted_glucose_without_retrospective.json in Resources */,
+				E9B3553D293706CB0076AB04 /* long_interval_counteraction_effect.json in Resources */,
+				E9B3553A293706CB0076AB04 /* missed_meal_counteraction_effect.json in Resources */,
+				E9B35538293706CB0076AB04 /* needs_clamping_counteraction_effect.json in Resources */,
 				E90909D424E34AC500F963D2 /* high_and_rising_with_cob_carb_effect.json in Resources */,
 				E93E86CC24E2E02200FF40C8 /* high_and_stable_predicted_glucose.json in Resources */,
 				E90909DC24E34F1600F963D2 /* low_and_falling_predicted_glucose.json in Resources */,
@@ -3566,10 +3630,13 @@
 				E90909DF24E34F1600F963D2 /* low_and_falling_insulin_effect.json in Resources */,
 				E93E86BE24E1FDC400FF40C8 /* flat_and_stable_carb_effect.json in Resources */,
 				E90909E824E3530200F963D2 /* low_with_low_treatment_insulin_effect.json in Resources */,
+				E9B3553B293706CB0076AB04 /* noisy_cgm_counteraction_effect.json in Resources */,
+				E9B3553C293706CB0076AB04 /* realistic_report_counteraction_effect.json in Resources */,
 				E93E865824DB75BE00FF40C8 /* predicted_glucose_very_negative.json in Resources */,
 				E93E86BC24E1FDC400FF40C8 /* flat_and_stable_predicted_glucose.json in Resources */,
 				E90909EB24E3530200F963D2 /* low_with_low_treatment_counteraction_effect.json in Resources */,
 				E90909F424E35B4D00F963D2 /* high_and_falling_insulin_effect.json in Resources */,
+				E9B35539293706CB0076AB04 /* dynamic_autofill_counteraction_effect.json in Resources */,
 				E90909F624E35B7C00F963D2 /* high_and_falling_momentum_effect.json in Resources */,
 				E93E86BA24E1FDC400FF40C8 /* flat_and_stable_insulin_effect.json in Resources */,
 				E90909E724E3530200F963D2 /* low_with_low_treatment_carb_effect.json in Resources */,
@@ -3746,6 +3813,7 @@
 				C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */,
 				A9B996F227238705002DC09C /* DosingDecisionStore.swift in Sources */,
 				43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */,
+				E9B355292935919E0076AB04 /* MissedMealSettings.swift in Sources */,
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				4372E48B213CB5F00068E043 /* Double.swift in Sources */,
@@ -3860,6 +3928,7 @@
 				43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */,
 				A9CBE45C248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift in Sources */,
 				433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */,
+				E9B3552229358C440076AB04 /* MealDetectionManager.swift in Sources */,
 				C16DA84222E8E112008624C2 /* PluginManager.swift in Sources */,
 				43785E932120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift in Sources */,
 				439A7944211FE22F0041B75F /* NSUserActivity.swift in Sources */,
@@ -4017,6 +4086,7 @@
 				A9CE912224CA032E00302A40 /* NSUserDefaults.swift in Sources */,
 				43C05CAB21EB2B4A006FB252 /* NSBundle.swift in Sources */,
 				43C05CC721EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
+				E9B3552B293591E70076AB04 /* MissedMealNotification.swift in Sources */,
 				4345E40221F67300009E00E5 /* PotentialCarbEntryUserInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4069,6 +4139,7 @@
 				43C05CAA21EB2B49006FB252 /* NSBundle.swift in Sources */,
 				43C05CC821EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
 				43C05CAD21EB2BBF006FB252 /* NSUserDefaults.swift in Sources */,
+				E9B3552A293591E70076AB04 /* MissedMealNotification.swift in Sources */,
 				4345E40121F67300009E00E5 /* PotentialCarbEntryUserInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4110,6 +4181,8 @@
 				8968B114240C55F10074BB48 /* LoopSettingsTests.swift in Sources */,
 				A9BD28E7272226B40071DF15 /* TestLocalizedError.swift in Sources */,
 				A9F5F1F5251050EC00E7C8A4 /* ZipArchiveTests.swift in Sources */,
+				E9B3552D293592B40076AB04 /* MealDetectionManagerTests.swift in Sources */,
+				E950CA9129002D9000B5B692 /* LoopDataManagerDosingTests.swift in Sources */,
 				B4CAD8792549D2540057946B /* LoopCompletionFreshnessTests.swift in Sources */,
 				1D8D55BC252274650044DBB6 /* BolusEntryViewModelTests.swift in Sources */,
 				A91E4C2124F867A700BE9213 /* StoredAlertTests.swift in Sources */,
@@ -4123,6 +4196,7 @@
 				E93E86B024DDE1BD00FF40C8 /* MockGlucoseStore.swift in Sources */,
 				A9E8A80528A7CAC000C0A8A4 /* RemoteCommandTests.swift in Sources */,
 				1DFE9E172447B6270082C280 /* UserNotificationAlertSchedulerTests.swift in Sources */,
+				E9B3552F2935968E0076AB04 /* HKHealthStoreMock.swift in Sources */,
 				B4BC56382518DEA900373647 /* CGMStatusHUDViewModelTests.swift in Sources */,
 				C1900900252271BB00721625 /* SimpleBolusCalculatorTests.swift in Sources */,
 				A9C1719725366F780053BCBD /* WatchHistoricalGlucoseTest.swift in Sources */,
