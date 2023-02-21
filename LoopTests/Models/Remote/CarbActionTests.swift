@@ -1,5 +1,5 @@
 //
-//  RemoteCarbActionTests.swift
+//  CarbActionTests.swift
 //  LoopTests
 //
 //  Created by Bill Gestrich on 1/14/23.
@@ -11,7 +11,7 @@ import HealthKit
 @testable import Loop
 import LoopKit
 
-class RemoteCarbActionTests: XCTestCase {
+class CarbActionTests: XCTestCase {
     
     override func setUpWithError() throws {
     }
@@ -28,7 +28,7 @@ class RemoteCarbActionTests: XCTestCase {
         let expectedAbsorptionTime = TimeInterval(hours: 4.0)
         let foodType = "🍕"
         
-        let action = RemoteCarbAction(amountInGrams: expectedCarbsInGrams, absorptionTime: expectedAbsorptionTime, foodType: foodType, startDate: expectedDate)
+        let action = CarbAction(amountInGrams: expectedCarbsInGrams, absorptionTime: expectedAbsorptionTime, foodType: foodType, startDate: expectedDate)
         
         //Act
         let carbEntry = try action.toValidCarbEntry(defaultAbsorptionTime: TimeInterval(hours: 3.0),
@@ -50,7 +50,7 @@ class RemoteCarbActionTests: XCTestCase {
         
         //Arrange
         let defaultAbsorptionTime = TimeInterval(hours: 4.0)
-        let action = RemoteCarbAction(amountInGrams: 15.0, startDate: Date())
+        let action = CarbAction(amountInGrams: 15.0, startDate: Date())
         
         //Act
         let carbEntry = try action.toValidCarbEntry(defaultAbsorptionTime: defaultAbsorptionTime,
@@ -68,7 +68,7 @@ class RemoteCarbActionTests: XCTestCase {
         
         //Arrange
         let minAbsorptionTime = TimeInterval(hours: 0.5)
-        let action = RemoteCarbAction(amountInGrams: 15.0,
+        let action = CarbAction(amountInGrams: 15.0,
                                       absorptionTime: minAbsorptionTime,
                                       startDate: Date())
         
@@ -89,7 +89,7 @@ class RemoteCarbActionTests: XCTestCase {
         //Arrange
         let minAbsorptionTime = TimeInterval(hours: 0.5)
         let aborptionOverrideTime = TimeInterval(hours: 0.4)
-        let action = RemoteCarbAction(amountInGrams: 15.0,
+        let action = CarbAction(amountInGrams: 15.0,
                                       absorptionTime: aborptionOverrideTime,
                                       startDate: Date())
         
@@ -108,7 +108,7 @@ class RemoteCarbActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteCarbActionError, case .invalidAbsorptionTime = validationError else {
+        guard let validationError = thrownError as? CarbActionError, case .invalidAbsorptionTime = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }
@@ -118,7 +118,7 @@ class RemoteCarbActionTests: XCTestCase {
         
         //Arrange
         let maxAbsorptionTime = TimeInterval(hours: 5.0)
-        let action = RemoteCarbAction(amountInGrams: 15.0,
+        let action = CarbAction(amountInGrams: 15.0,
                                       absorptionTime: maxAbsorptionTime,
                                       startDate: Date())
         
@@ -140,7 +140,7 @@ class RemoteCarbActionTests: XCTestCase {
         //Arrange
         let maxAbsorptionTime = TimeInterval(hours: 5.0)
         let absorptionTime = TimeInterval(hours: 5.1)
-        let action = RemoteCarbAction(amountInGrams: 15.0,
+        let action = CarbAction(amountInGrams: 15.0,
                                       absorptionTime: absorptionTime,
                                       startDate: Date())
         
@@ -159,7 +159,7 @@ class RemoteCarbActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteCarbActionError, case .invalidAbsorptionTime = validationError else {
+        guard let validationError = thrownError as? CarbActionError, case .invalidAbsorptionTime = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }
@@ -171,7 +171,7 @@ class RemoteCarbActionTests: XCTestCase {
         let maxCarbEntryPastTime = TimeInterval(hours: -12)
         let nowDate = Date()
         let startDate = nowDate.addingTimeInterval(maxCarbEntryPastTime)
-        let action = RemoteCarbAction(amountInGrams: 15.0,
+        let action = CarbAction(amountInGrams: 15.0,
                                       absorptionTime: TimeInterval(hours: 5.0),
                                       startDate: startDate)
         
@@ -195,7 +195,7 @@ class RemoteCarbActionTests: XCTestCase {
         let maxCarbEntryPastTime = TimeInterval(hours: -12)
         let nowDate = Date()
         let startDate = nowDate.addingTimeInterval(maxCarbEntryPastTime - 1)
-        let action = RemoteCarbAction(amountInGrams: 15.0,
+        let action = CarbAction(amountInGrams: 15.0,
                                       absorptionTime: TimeInterval(hours: 5.0),
                                       startDate: startDate)
         
@@ -214,7 +214,7 @@ class RemoteCarbActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteCarbActionError, case .invalidStartDate = validationError else {
+        guard let validationError = thrownError as? CarbActionError, case .invalidStartDate = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }
@@ -226,7 +226,7 @@ class RemoteCarbActionTests: XCTestCase {
         let maxCarbEntryFutureTime = TimeInterval(hours: 1)
         let nowDate = Date()
         let startDate = nowDate.addingTimeInterval(maxCarbEntryFutureTime)
-        let action = RemoteCarbAction(amountInGrams: 15.0,
+        let action = CarbAction(amountInGrams: 15.0,
                                       absorptionTime: TimeInterval(hours: 5.0),
                                       startDate: startDate)
         
@@ -250,7 +250,7 @@ class RemoteCarbActionTests: XCTestCase {
         let maxCarbEntryFutureTime = TimeInterval(hours: 1)
         let nowDate = Date()
         let startDate = nowDate.addingTimeInterval(maxCarbEntryFutureTime + 1)
-        let action = RemoteCarbAction(amountInGrams: 15.0,
+        let action = CarbAction(amountInGrams: 15.0,
                                       absorptionTime: TimeInterval(hours: 5.0),
                                       startDate: startDate)
         
@@ -269,7 +269,7 @@ class RemoteCarbActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteCarbActionError, case .invalidStartDate = validationError else {
+        guard let validationError = thrownError as? CarbActionError, case .invalidStartDate = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }
@@ -281,7 +281,7 @@ class RemoteCarbActionTests: XCTestCase {
         let carbsAmount = maxCarbsAmount
         
         //Arrange
-        let action = RemoteCarbAction(amountInGrams: carbsAmount,
+        let action = CarbAction(amountInGrams: carbsAmount,
                                       absorptionTime: TimeInterval(hours: 5.0),
                                       startDate: Date())
         
@@ -304,7 +304,7 @@ class RemoteCarbActionTests: XCTestCase {
         let carbsAmount = maxCarbsAmount + 1
         
         //Arrange
-        let action = RemoteCarbAction(amountInGrams: carbsAmount,
+        let action = CarbAction(amountInGrams: carbsAmount,
                                       absorptionTime: TimeInterval(hours: 5.0),
                                       startDate: Date())
         
@@ -323,7 +323,7 @@ class RemoteCarbActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteCarbActionError, case .exceedsMaxCarbs = validationError else {
+        guard let validationError = thrownError as? CarbActionError, case .exceedsMaxCarbs = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }
@@ -334,7 +334,7 @@ class RemoteCarbActionTests: XCTestCase {
         let carbsAmount = -1.0
         
         //Arrange
-        let action = RemoteCarbAction(amountInGrams: carbsAmount,
+        let action = CarbAction(amountInGrams: carbsAmount,
                                       absorptionTime: TimeInterval(hours: 5.0),
                                       startDate: Date())
         
@@ -353,7 +353,7 @@ class RemoteCarbActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteCarbActionError, case .invalidCarbs = validationError else {
+        guard let validationError = thrownError as? CarbActionError, case .invalidCarbs = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }
@@ -364,7 +364,7 @@ class RemoteCarbActionTests: XCTestCase {
         let carbsAmount = 0.0
         
         //Arrange
-        let action = RemoteCarbAction(amountInGrams: carbsAmount,
+        let action = CarbAction(amountInGrams: carbsAmount,
                                       absorptionTime: TimeInterval(hours: 5.0),
                                       startDate: Date())
         
@@ -383,7 +383,7 @@ class RemoteCarbActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteCarbActionError, case .invalidCarbs = validationError else {
+        guard let validationError = thrownError as? CarbActionError, case .invalidCarbs = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }

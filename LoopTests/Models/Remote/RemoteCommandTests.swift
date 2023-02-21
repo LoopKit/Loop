@@ -1,5 +1,5 @@
 //
-//  RemoteActionTests.swift
+//  RemoteCommandTests.swift
 //  LoopTests
 //
 //  Created by Bill Gestrich on 8/13/22.
@@ -11,7 +11,7 @@ import HealthKit
 @testable import Loop
 import LoopKit
 
-class RemoteActionTests: XCTestCase {
+class RemoteCommandTests: XCTestCase {
 
     override func setUpWithError() throws {
     }
@@ -40,7 +40,7 @@ class RemoteActionTests: XCTestCase {
         ]
         
         //Act
-        let action = try RemoteAction.createRemoteAction(notification: notification).get()
+        let action = try RemoteCommand.createRemoteAction(notification: notification).get()
         
         //Assert
         guard case .carbsEntry(let carbEntry) = action else {
@@ -66,7 +66,7 @@ class RemoteActionTests: XCTestCase {
         ]
         
         //Act
-        let action = try RemoteAction.createRemoteAction(notification: notification).get()
+        let action = try RemoteCommand.createRemoteAction(notification: notification).get()
         
         //Assert
         guard case .carbsEntry(let carbEntry) = action else {
@@ -93,7 +93,7 @@ class RemoteActionTests: XCTestCase {
         ]
         
         //Act + Assert
-        XCTAssertThrowsError(try RemoteAction.createRemoteAction(notification: notification).get())
+        XCTAssertThrowsError(try RemoteCommand.createRemoteAction(notification: notification).get())
     }
     
     

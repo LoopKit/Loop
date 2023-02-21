@@ -1,5 +1,5 @@
 //
-//  RemoteCarbAction.swift
+//  CarbAction.swift
 //  Loop
 //
 //  Created by Bill Gestrich on 2/21/23.
@@ -9,9 +9,9 @@
 import LoopKit
 import HealthKit
 
-extension RemoteCarbAction {
+extension CarbAction {
     
-    public func toValidCarbEntry(defaultAbsorptionTime: TimeInterval,
+    func toValidCarbEntry(defaultAbsorptionTime: TimeInterval,
                                  minAbsorptionTime: TimeInterval,
                                  maxAbsorptionTime: TimeInterval,
                                  maxCarbEntryQuantity: Double,
@@ -21,22 +21,22 @@ extension RemoteCarbAction {
         
         let absorptionTime = absorptionTime ?? defaultAbsorptionTime
         if absorptionTime < minAbsorptionTime || absorptionTime > maxAbsorptionTime {
-            throw RemoteCarbActionError.invalidAbsorptionTime(absorptionTime)
+            throw CarbActionError.invalidAbsorptionTime(absorptionTime)
         }
         
         guard amountInGrams > 0.0 else {
-            throw RemoteCarbActionError.invalidCarbs
+            throw CarbActionError.invalidCarbs
         }
 
         guard amountInGrams <= maxCarbEntryQuantity else {
-            throw RemoteCarbActionError.exceedsMaxCarbs
+            throw CarbActionError.exceedsMaxCarbs
         }
         
         if let startDate = startDate {
             let maxStartDate = nowDate.addingTimeInterval(maxCarbEntryFutureTime)
             let minStartDate = nowDate.addingTimeInterval(maxCarbEntryPastTime)
             guard startDate <= maxStartDate  && startDate >= minStartDate else {
-                throw RemoteCarbActionError.invalidStartDate(startDate)
+                throw CarbActionError.invalidStartDate(startDate)
             }
         }
         
@@ -45,14 +45,14 @@ extension RemoteCarbAction {
     }
 }
 
-enum RemoteCarbActionError: LocalizedError {
+enum CarbActionError: LocalizedError {
     
     case invalidAbsorptionTime(TimeInterval)
     case invalidStartDate(Date)
     case exceedsMaxCarbs
     case invalidCarbs
     
-    public var errorDescription: String? {
+    var errorDescription: String? {
              switch  self {
              case .exceedsMaxCarbs:
                  return NSLocalizedString("Exceeds maximum allowed carbs", comment: "Remote command error description: carbs exceed maximum amount.")

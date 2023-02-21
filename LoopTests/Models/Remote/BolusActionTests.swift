@@ -1,5 +1,5 @@
 //
-//  RemoteBolusActionTests.swift
+//  BolusActionTests.swift
 //  LoopKitTests
 //
 //  Created by Bill Gestrich on 1/14/23.
@@ -10,7 +10,7 @@ import XCTest
 @testable import Loop
 import LoopKit
 
-final class RemoteBolusActionTests: XCTestCase {
+final class BolusActionTests: XCTestCase {
 
     override func setUpWithError() throws {
     }
@@ -23,7 +23,7 @@ final class RemoteBolusActionTests: XCTestCase {
         //Arrange
         let maxBolusAmount = 10.0
         let bolusAmount = maxBolusAmount
-        let action = RemoteBolusAction(amountInUnits: bolusAmount)
+        let action = BolusAction(amountInUnits: bolusAmount)
         
         //Act
         let validatedBolusAmount = try action.toValidBolusAmount(maximumBolus: 10.0)
@@ -38,7 +38,7 @@ final class RemoteBolusActionTests: XCTestCase {
         //Arrange
         let maxBolusAmount = 10.0
         let bolusAmount = maxBolusAmount + 0.1
-        let action = RemoteBolusAction(amountInUnits: bolusAmount)
+        let action = BolusAction(amountInUnits: bolusAmount)
         
         //Act
         var thrownError: Error? = nil
@@ -49,7 +49,7 @@ final class RemoteBolusActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteBolusActionError, case .exceedsMaxBolus = validationError else {
+        guard let validationError = thrownError as? BolusActionError, case .exceedsMaxBolus = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }
@@ -59,7 +59,7 @@ final class RemoteBolusActionTests: XCTestCase {
         
         //Arrange
         let bolusAmount = 0.0
-        let action = RemoteBolusAction(amountInUnits: bolusAmount)
+        let action = BolusAction(amountInUnits: bolusAmount)
         
         //Act
         var thrownError: Error? = nil
@@ -70,7 +70,7 @@ final class RemoteBolusActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteBolusActionError, case .invalidBolus = validationError else {
+        guard let validationError = thrownError as? BolusActionError, case .invalidBolus = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }
@@ -80,7 +80,7 @@ final class RemoteBolusActionTests: XCTestCase {
         
         //Arrange
         let bolusAmount = -1.0
-        let action = RemoteBolusAction(amountInUnits: bolusAmount)
+        let action = BolusAction(amountInUnits: bolusAmount)
         
         //Act
         var thrownError: Error? = nil
@@ -91,7 +91,7 @@ final class RemoteBolusActionTests: XCTestCase {
         }
         
         //Assert
-        guard let validationError = thrownError as? RemoteBolusActionError, case .invalidBolus = validationError else {
+        guard let validationError = thrownError as? BolusActionError, case .invalidBolus = validationError else {
             XCTFail("Unexpected type \(thrownError.debugDescription)")
             return
         }

@@ -10,8 +10,8 @@ import Foundation
 import LoopKit
 
 // Push Notifications
-extension RemoteAction {
-    static func createRemoteAction(notification: [String: Any]) -> Result<RemoteAction, RemoteCommandParseError> {
+struct RemoteCommand {
+    static func createRemoteAction(notification: [String: Any]) -> Result<Action, RemoteCommandParseError> {
         if let overrideName = notification["override-name"] as? String,
             let remoteAddress = notification["remote-address"] as? String
         {
@@ -19,13 +19,13 @@ extension RemoteAction {
             if let overrideDurationMinutes = notification["override-duration-minutes"] as? Double {
                 overrideTime = TimeInterval(minutes: overrideDurationMinutes)
             }
-            return .success(.temporaryScheduleOverride(RemoteOverrideAction(name: overrideName, durationTime: overrideTime, remoteAddress: remoteAddress)))
+            return .success(.temporaryScheduleOverride(OverrideAction(name: overrideName, durationTime: overrideTime, remoteAddress: remoteAddress)))
         } else if let _ = notification["cancel-temporary-override"] as? String,
                   let remoteAddress = notification["remote-address"] as? String
         {
-            return .success(.cancelTemporaryOverride(RemoteOverrideCancelAction(remoteAddress: remoteAddress)))
+            return .success(.cancelTemporaryOverride(OverrideCancelAction(remoteAddress: remoteAddress)))
         }  else if let bolusValue = notification["bolus-entry"] as? Double {
-            return .success(.bolusEntry(RemoteBolusAction(amountInUnits: bolusValue)))
+            return .success(.bolusEntry(BolusAction(amountInUnits: bolusValue)))
         } else if let carbsValue = notification["carbs-entry"] as? Double {
             
             var absorptionTime: TimeInterval? = nil
@@ -46,7 +46,7 @@ extension RemoteAction {
                 }
             }
 
-            return .success(.carbsEntry(RemoteCarbAction(amountInGrams: carbsValue, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)))
+            return .success(.carbsEntry(CarbAction(amountInGrams: carbsValue, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)))
         } else {
             return .failure(RemoteCommandParseError.unhandledNotication("\(notification)"))
         }

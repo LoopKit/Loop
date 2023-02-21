@@ -1,5 +1,5 @@
 //
-//  RemoteOverrideAction.swift
+//  OverrideAction.swift
 //  Loop
 //
 //  Created by Bill Gestrich on 2/21/23.
@@ -8,11 +8,11 @@
 
 import LoopKit
 
-extension RemoteOverrideAction {
+extension OverrideAction {
     
-    public func toValidOverride(allowedPresets: [TemporaryScheduleOverridePreset]) throws -> TemporaryScheduleOverride {
+    func toValidOverride(allowedPresets: [TemporaryScheduleOverridePreset]) throws -> TemporaryScheduleOverride {
         guard let preset = allowedPresets.first(where: { $0.name == name }) else {
-            throw RemoteOverrideActionError.unknownPreset(name)
+            throw OverrideActionError.unknownPreset(name)
         }
         
         var remoteOverride = preset.createOverride(enactTrigger: .remote(remoteAddress))
@@ -20,11 +20,11 @@ extension RemoteOverrideAction {
         if let durationTime = durationTime {
             
             guard durationTime <= LoopConstants.maxOverrideDurationTime else {
-                throw RemoteOverrideActionError.durationExceedsMax(LoopConstants.maxOverrideDurationTime)
+                throw OverrideActionError.durationExceedsMax(LoopConstants.maxOverrideDurationTime)
             }
             
             guard durationTime >= 0 else {
-                throw RemoteOverrideActionError.negativeDuration
+                throw OverrideActionError.negativeDuration
             }
             
             if durationTime == 0 {
@@ -38,13 +38,13 @@ extension RemoteOverrideAction {
     }
 }
 
-public enum RemoteOverrideActionError: LocalizedError {
+enum OverrideActionError: LocalizedError {
     
     case unknownPreset(String)
     case durationExceedsMax(TimeInterval)
     case negativeDuration
     
-    public var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .unknownPreset(let presetName):
             return String(format: NSLocalizedString("Unknown preset: %1$@", comment: "Remote command error description: unknown preset (1: preset name)."), presetName)

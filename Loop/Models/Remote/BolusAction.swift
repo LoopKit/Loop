@@ -1,5 +1,5 @@
 //
-//  RemoteBolusAction.swift
+//  BolusAction.swift
 //  Loop
 //
 //  Created by Bill Gestrich on 2/21/23.
@@ -8,32 +8,32 @@
 
 import LoopKit
 
-extension RemoteBolusAction {
-    public func toValidBolusAmount(maximumBolus: Double?) throws -> Double {
+extension BolusAction {
+    func toValidBolusAmount(maximumBolus: Double?) throws -> Double {
         
         guard amountInUnits > 0 else {
-            throw RemoteBolusActionError.invalidBolus
+            throw BolusActionError.invalidBolus
         }
         
         guard let maxBolusAmount = maximumBolus else {
-            throw RemoteBolusActionError.missingMaxBolus
+            throw BolusActionError.missingMaxBolus
         }
         
         guard amountInUnits <= maxBolusAmount else {
-            throw RemoteBolusActionError.exceedsMaxBolus
+            throw BolusActionError.exceedsMaxBolus
         }
         
         return amountInUnits
     }
 }
 
-public enum RemoteBolusActionError: LocalizedError {
+enum BolusActionError: LocalizedError {
     
     case invalidBolus
     case missingMaxBolus
     case exceedsMaxBolus
     
-    public var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .invalidBolus:
             return NSLocalizedString("Invalid Bolus Amount", comment: "Remote command error description: invalid bolus amount.")

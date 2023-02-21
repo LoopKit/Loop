@@ -1388,10 +1388,10 @@ extension DeviceDataManager {
             }
         }
         
-        let action: RemoteAction
+        let action: Action
         
         do {
-            action = try RemoteAction.createRemoteAction(notification: notification).get()
+            action = try RemoteCommand.createRemoteAction(notification: notification).get()
         } catch {
             log.error("Remote Notification: Parse Error: %{public}@", String(describing: error))
             return
@@ -1402,20 +1402,20 @@ extension DeviceDataManager {
         switch action {
         case .temporaryScheduleOverride(let overrideAction):
             do {
-                try await handleRemoteOverrideAction(overrideAction)
+                try await handleOverrideAction(overrideAction)
             } catch {
                 log.error("Remote Notification: Override Action Error: %{public}@", String(describing: error))
             }
         case .cancelTemporaryOverride(let overrideCancelAction):
             do {
-                try await handleRemoteOverrideCancelAction(overrideCancelAction)
+                try await handleOverrideCancelAction(overrideCancelAction)
             } catch {
                 log.error("Remote Notification: Override Action Cancel Error: %{public}@", String(describing: error))
             }
         case .bolusEntry(let bolusAction):
             do {
                 try validatePushNotificationSource(notification: notification)
-                try await handleRemoteBolusAction(bolusAction)
+                try await handleBolusAction(bolusAction)
             } catch {
                 await NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAction.amountInUnits)
                 log.error("Remote Notification: Bolus Action Error: %{public}@", String(describing: notification))
@@ -1423,7 +1423,7 @@ extension DeviceDataManager {
         case .carbsEntry(let carbAction):
             do {
                 try validatePushNotificationSource(notification: notification)
-                try await handleRemoteCarbAction(carbAction)
+                try await handleCarbAction(carbAction)
             } catch {
                 await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: carbAction.amountInGrams)
                 log.error("Remote Notification: Carb Action Error: %{public}@", String(describing: notification))
@@ -1447,12 +1447,12 @@ extension DeviceDataManager {
     
     //Remote Overrides
     
-    func handleRemoteOverrideAction(_ action: RemoteOverrideAction) async throws {
+    func handleOverrideAction(_ action: OverrideAction) async throws {
         let remoteOverride = try action.toValidOverride(allowedPresets: loopManager.settings.overridePresets)
         await activateRemoteOverride(remoteOverride)
     }
     
-    func handleRemoteOverrideCancelAction(_ cancelAction: RemoteOverrideCancelAction) async throws {
+    func handleOverrideCancelAction(_ cancelAction: OverrideCancelAction) async throws {
         await activateRemoteOverride(nil)
     }
     
@@ -1463,7 +1463,7 @@ extension DeviceDataManager {
     
     //Remote Bolus
     
-    func handleRemoteBolusAction(_ bolusCommand: RemoteBolusAction) async throws {
+    func handleBolusAction(_ bolusCommand: BolusAction) async throws {
         let validBolusAmount = try bolusCommand.toValidBolusAmount(maximumBolus: loopManager.settings.maximumBolus)
         try await self.enactBolus(units: validBolusAmount, activationType: .manualNoRecommendation)
         await triggerBackgroundUpload(for: .dose)
@@ -1472,7 +1472,7 @@ extension DeviceDataManager {
     
     //Remote Carb Entry
     
-    func handleRemoteCarbAction(_ carbCommand: RemoteCarbAction) async throws {
+    func handleCarbAction(_ carbCommand: CarbAction) async throws {
         let candidateCarbEntry = try carbCommand.toValidCarbEntry(defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
                                                                   minAbsorptionTime: LoopConstants.minCarbAbsorptionTime,
                                                                   maxAbsorptionTime: LoopConstants.maxCarbAbsorptionTime,
