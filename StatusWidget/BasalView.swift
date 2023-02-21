@@ -26,8 +26,7 @@ struct BasalView: View {
                 .foregroundColor((isOld ? Color(UIColor.systemGray3) : Color("insulin")).opacity(0.5))
                 .frame(width: 44, height: 22)
 
-            if let rate = rate,
-                let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
+            if let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
                 Text("\(rateString) U")
                     .font(.footnote)
                     .foregroundColor(Color(isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
