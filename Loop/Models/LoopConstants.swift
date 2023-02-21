@@ -27,6 +27,7 @@ enum LoopConstants {
     static let maxCarbEntryPastTime = TimeInterval(hours: (-12))
     static let maxCarbEntryFutureTime = TimeInterval(hours: 1)
 
+    static let maxOverrideDurationTime = TimeInterval(hours: 24)
     
     // MARK - Display settings
 
