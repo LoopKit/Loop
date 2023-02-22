@@ -1356,7 +1356,9 @@ extension DeviceDataManager {
     
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
         Task {
+            let backgroundTask = await beginBackgroundTask(name: "Remote Data Upload")
             await handleRemoteNotification(notification)
+            await endBackgroundTask(backgroundTask)
         }
     }
     
@@ -1458,7 +1460,7 @@ extension DeviceDataManager {
     
     func activateRemoteOverride(_ remoteOverride: TemporaryScheduleOverride?) async {
         loopManager.mutateSettings { settings in settings.scheduleOverride = remoteOverride }
-        await triggerBackgroundUpload(for: .overrides)
+        await remoteDataServicesManager.triggerUpload(for: .overrides)
     }
     
     //Remote Bolus
@@ -1466,7 +1468,7 @@ extension DeviceDataManager {
     func handleBolusAction(_ action: BolusAction) async throws {
         let validBolusAmount = try action.toValidBolusAmount(maximumBolus: loopManager.settings.maximumBolus)
         try await self.enactBolus(units: validBolusAmount, activationType: .manualNoRecommendation)
-        await triggerBackgroundUpload(for: .dose)
+        await remoteDataServicesManager.triggerUpload(for: .dose)
         self.analyticsServicesManager.didBolus(source: "Remote", units: validBolusAmount)
     }
     
@@ -1482,7 +1484,7 @@ extension DeviceDataManager {
         )
         
         let _ = try await addRemoteCarbEntry(candidateCarbEntry)
-        await triggerBackgroundUpload(for: .carb)
+        await remoteDataServicesManager.triggerUpload(for: .carb)
     }
     
     //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
@@ -1501,13 +1503,6 @@ extension DeviceDataManager {
     }
     
     //Background Uploads
-    
-    func triggerBackgroundUpload(for triggeringType: RemoteDataType) async {
-        let backgroundTask = await beginBackgroundTask(name: "Remote Data Upload")
-        await remoteDataServicesManager.triggerUpload(for: triggeringType)
-        await endBackgroundTask(backgroundTask)
-
-    }
     
     func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
         var backgroundTask: UIBackgroundTaskIdentifier?
