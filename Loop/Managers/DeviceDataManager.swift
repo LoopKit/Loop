@@ -1452,7 +1452,7 @@ extension DeviceDataManager {
         await activateRemoteOverride(remoteOverride)
     }
     
-    func handleOverrideCancelAction(_ cancelAction: OverrideCancelAction) async throws {
+    func handleOverrideCancelAction(_ action: OverrideCancelAction) async throws {
         await activateRemoteOverride(nil)
     }
     
@@ -1463,8 +1463,8 @@ extension DeviceDataManager {
     
     //Remote Bolus
     
-    func handleBolusAction(_ bolusCommand: BolusAction) async throws {
-        let validBolusAmount = try bolusCommand.toValidBolusAmount(maximumBolus: loopManager.settings.maximumBolus)
+    func handleBolusAction(_ action: BolusAction) async throws {
+        let validBolusAmount = try action.toValidBolusAmount(maximumBolus: loopManager.settings.maximumBolus)
         try await self.enactBolus(units: validBolusAmount, activationType: .manualNoRecommendation)
         await triggerBackgroundUpload(for: .dose)
         self.analyticsServicesManager.didBolus(source: "Remote", units: validBolusAmount)
@@ -1472,8 +1472,8 @@ extension DeviceDataManager {
     
     //Remote Carb Entry
     
-    func handleCarbAction(_ carbCommand: CarbAction) async throws {
-        let candidateCarbEntry = try carbCommand.toValidCarbEntry(defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
+    func handleCarbAction(_ action: CarbAction) async throws {
+        let candidateCarbEntry = try action.toValidCarbEntry(defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
                                                                   minAbsorptionTime: LoopConstants.minCarbAbsorptionTime,
                                                                   maxAbsorptionTime: LoopConstants.maxCarbAbsorptionTime,
                                                                   maxCarbEntryQuantity: LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()),
