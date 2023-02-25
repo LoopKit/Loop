@@ -1376,78 +1376,53 @@ extension DeviceDataManager {
             log.error("Remote Notification: Remote Commands not enabled.")
             return
         }
-
-        if let expirationStr = notification["expiration"] as? String {
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
-            if let expiration = formatter.date(from: expirationStr) {
-                let nowDate = Date()
-                guard nowDate < expiration else {
-                    let expiredInterval = nowDate.timeIntervalSince(expiration)
-                    await NotificationManager.sendRemoteCommandExpiredNotification(timeExpired: expiredInterval)
-                    log.error("Remote Notification: Expired: %{public}@", String(describing: notification))
-                    return
-                }
-            } else {
-                log.error("Remote Notification: Invalid expiration: %{public}@", expirationStr)
-                return
-            }
-        }
         
-        let action: Action
-        
+        let command: RemoteCommand
         do {
-            action = try RemoteCommand.createRemoteAction(notification: notification).get()
+            command = try await remoteDataServicesManager.commandFromPushNotification(notification)
         } catch {
             log.error("Remote Notification: Parse Error: %{public}@", String(describing: error))
             return
         }
         
-        log.default("Remote Notification: Handling action %{public}@", String(describing: action))
+        await handleRemoteCommand(command)
+    }
+    
+    func handleRemoteCommand(_ command: RemoteCommand) async {
         
-        switch action {
+        log.default("Remote Notification: Handling command %{public}@", String(describing: command))
+        
+        switch command.action {
         case .temporaryScheduleOverride(let overrideAction):
             do {
+                try command.validate()
                 try await handleOverrideAction(overrideAction)
             } catch {
                 log.error("Remote Notification: Override Action Error: %{public}@", String(describing: error))
             }
         case .cancelTemporaryOverride(let overrideCancelAction):
             do {
+                try command.validate()
                 try await handleOverrideCancelAction(overrideCancelAction)
             } catch {
                 log.error("Remote Notification: Override Action Cancel Error: %{public}@", String(describing: error))
             }
         case .bolusEntry(let bolusAction):
             do {
-                try validatePushNotificationSource(notification: notification)
+                try command.validate()
                 try await handleBolusAction(bolusAction)
             } catch {
                 await NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAction.amountInUnits)
-                log.error("Remote Notification: Bolus Action Error: %{public}@", String(describing: notification))
+                log.error("Remote Notification: Bolus Action Error: %{public}@", String(describing: error))
             }
         case .carbsEntry(let carbAction):
             do {
-                try validatePushNotificationSource(notification: notification)
+                try command.validate()
                 try await handleCarbAction(carbAction)
             } catch {
                 await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: carbAction.amountInGrams)
-                log.error("Remote Notification: Carb Action Error: %{public}@", String(describing: notification))
+                log.error("Remote Notification: Carb Action Error: %{public}@", String(describing: error))
             }
-        }
-    }
-    
-    func validatePushNotificationSource(notification: [String: AnyObject]) throws {
-        
-        let defaultServiceIdentifier = "NightscoutService"
-        let serviceIdentifer = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
-        
-        let validationResult = remoteDataServicesManager.validatePushNotificationSource(notification, serviceIdentifier: serviceIdentifer)
-        switch validationResult {
-        case .success():
-            log.info("Remote Notification: Validation successful")
-        case .failure(let error):
-            throw error
         }
     }
     

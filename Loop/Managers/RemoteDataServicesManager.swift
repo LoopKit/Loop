@@ -597,13 +597,24 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
 
-    func validatePushNotificationSource(_ notification: [String: AnyObject], serviceIdentifier: String) -> Result<Void, Error> {
+    func serviceForPushNotification(_ notification: [String: AnyObject]) -> RemoteDataService? {
         
-        guard let matchedService = remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier}) else {
-            return .failure(PushNotificationValidationError.unsupportedService(serviceIdentifier: serviceIdentifier))
+        let defaultServiceIdentifier = "NightscoutService"
+        let serviceIdentifier = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
+        return remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier})
+    }
+    
+    func commandFromPushNotification(_ notification: [String : AnyObject]) async throws -> RemoteCommand {
+        
+        enum RemoteDataServicesManagerCommandError: LocalizedError {
+            case missingNotificationService
         }
         
-        return matchedService.validatePushNotificationSource(notification)
+        guard let service = serviceForPushNotification(notification) else {
+            throw RemoteDataServicesManagerCommandError.missingNotificationService
+        }
+        
+        return try await service.commandFromPushNotification(notification)
     }
     
     public func temporaryScheduleOverrideHistoryDidUpdate() {
@@ -644,20 +655,7 @@ extension RemoteDataServicesManager {
             UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides)
         }
     }
-    
-    private enum PushNotificationValidationError: LocalizedError {
-        case unsupportedService(serviceIdentifier: String)
-        
-        var errorDescription: String? {
-            switch self {
-            case .unsupportedService(let serviceIdentifier):
-                return "Unsupported Loop service: \(serviceIdentifier)"
-            }
-        }
-    }
-
 }
-
 
 protocol RemoteDataServicesManagerDelegate: AnyObject {
     var shouldSyncToRemoteService: Bool {get}
