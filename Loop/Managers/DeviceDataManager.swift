@@ -1227,7 +1227,7 @@ extension DeviceDataManager {
     func deleteTestingPumpData(completion: ((Error?) -> Void)? = nil) {
 
         guard let testingPumpManager = pumpManager as? TestingPumpManager else {
-            assertionFailure("\(#function) should be invoked only when a testing pump manager is in use")
+            completion?(nil)
             return
         }
 

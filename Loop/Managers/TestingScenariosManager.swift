@@ -96,12 +96,15 @@ extension TestingScenariosManagerRequirements {
 // MARK: - Implementation details
 
 private enum ScenarioLoadingError: LocalizedError {
-    case noTestingManagersEnabled
+    case noTestingCGMManagerEnabled
+    case noTestingPumpManagerEnabled
 
     var errorDescription: String? {
         switch self {
-        case .noTestingManagersEnabled:
-            return "Testing pump and CGM managers must be enabled to load scenarios"
+        case .noTestingCGMManagerEnabled:
+            return "Testing CGM manager must be enabled to load CGM scenarios"
+        case .noTestingPumpManagerEnabled:
+            return "Testing pump manager must be enabled to load pump scenarios"
         }
     }
 }
@@ -186,13 +189,28 @@ extension TestingScenariosManagerRequirements {
             log.error("%{public}@", String(describing: error))
             completion(error)
         }
-
-        guard
-            let pumpManager = deviceManager.pumpManager as? TestingPumpManager,
-            let cgmManager = deviceManager.cgmManager as? TestingCGMManager
-        else {
-            bail(with: ScenarioLoadingError.noTestingManagersEnabled)
-            return
+        
+        let instance = scenario.instantiate()
+        
+        var testingCGMManager: TestingCGMManager?
+        var testingPumpManager: TestingPumpManager?
+        
+        if instance.hasCGMData {
+            if let cgmManager = deviceManager.cgmManager as? TestingCGMManager {
+                testingCGMManager = cgmManager
+            } else {
+                bail(with: ScenarioLoadingError.noTestingCGMManagerEnabled)
+                return
+            }
+        }
+        
+        if instance.hasPumpData {
+            if let pumpManager = deviceManager.pumpManager as? TestingPumpManager {
+                testingPumpManager = pumpManager
+            } else {
+                bail(with: ScenarioLoadingError.noTestingPumpManagerEnabled)
+                return
+            }
         }
 
         wipeExistingData { error in
@@ -201,14 +219,12 @@ extension TestingScenariosManagerRequirements {
                 return
             }
 
-            let instance = scenario.instantiate()
-
             self.deviceManager.carbStore.addCarbEntries(instance.carbEntries) { result in
                 switch result {
                 case .success(_):
-                    pumpManager.reservoirFillFraction = 1.0
-                    pumpManager.injectPumpEvents(instance.pumpEvents)
-                    cgmManager.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
+                    testingPumpManager?.reservoirFillFraction = 1.0
+                    testingPumpManager?.injectPumpEvents(instance.pumpEvents)
+                    testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
                     self.activeScenario = scenario
                     completion(nil)
                 case .failure(let error):
