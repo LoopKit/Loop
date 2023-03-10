@@ -4,6 +4,9 @@
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
 " Pre-meal Preset" = "Yemek-Öncesi Ön Ayarı";
 
+/* remaining time in setting's profile expiration section */
+" remaining" = "kalan";
+
 /* Warning text for when Notifications or Critical Alerts Permissions is disabled */
 " Safety Notifications are OFF" = "Güvenlik Bildirimleri KAPALI";
 
@@ -197,6 +200,9 @@
 
 /* The title of the nightscout API secret credential */
 "API Secret" = "API Secret";
+
+/* Settings app profile section */
+"App Profile" = "Uygulama Profili";
 
 /* Action sheet confirmation message for pump history deletion */
 "Are you sure you want to delete all history entries?" = "Tüm geçmiş girişlerini silmek istediğinizden emin misiniz?";
@@ -495,9 +501,6 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Maksimum Bolusu Aşıyor";
 
-/* Remote command error description: expired. */
-"Expired" = "Süresi doldu";
-
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Kritik Olay Günlüklerini Dışa Aktarma";
 
@@ -549,6 +552,9 @@
 
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "KŞ Hedef Aralığı Programı";
+
+/* The title text for how to update */
+"How to update (LoopDocs)" = "Nasıl güncellenir (LoopDocs)";
 
 /* Immediate Delivery status text */
 "Immediate" = "Acilen";
@@ -608,9 +614,6 @@
 
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Gelecekte %1$@ olan bir zaman damgasıyla geçersiz KŞ okuması";
-
-/* Remote command error description: invalid OTP. */
-"Invalid OTP" = "Geçersiz OTP";
 
 /* The title text for the issue report cell */
 "Issue Report" = "Sorun Raporu";
@@ -797,6 +800,12 @@
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Kritik Olay Günlüklerinin Hazırlanması";
+
+/* Settings App Profile expiration view */
+"Profile Expiration" = "Profil Sona Erme";
+
+/* Time that profile expires */
+"Profile expires " = "Profilin süresi doluyor";
 
 /* The title for notification of upcoming profile expiration */
 "Profile Expires Soon" = "Profil Yakında Sona Eriyor";
@@ -1088,9 +1097,6 @@
 
 /* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
 "Your glucose is low. Eat carbs and monitor closely." = "KŞ düşük. Karbonhidrat yiyin ve yakından izleyin.";
-
-/* Warning to ensure the carb entry is accurate */
-"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "KŞ hızla yükseliyor. Yediğiniz karbonhidratların kaydedilip kaydedilmediğini kontrol edin. Karbonhidratları kaydettiyseniz, girdiğiniz zamanın yemeye başladığınız zamanla aynı olup olmadığını kontrol edin.";
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "Maksimum bolus miktarınız %1$@ .";

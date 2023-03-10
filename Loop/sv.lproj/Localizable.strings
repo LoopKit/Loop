@@ -807,6 +807,3 @@
 /* Format string for bolus screen warning when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold) */
 "Your glucose is below your glucose safety limit, %1$@." = "Ditt blodsocker är lägre än ditt tröskelvärde, %1$@.";
 
-/* Warning to ensure the carb entry is accurate */
-"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "Din blodglukos stiger snabbt. Kontrollera att alla kolhydrater du ätit har loggats. Om du lagt in kolhydrater, kontrollera att tiden du angav stämmer överens med när du faktiskt började äta.";
-

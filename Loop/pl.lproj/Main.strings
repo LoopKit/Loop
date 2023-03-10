@@ -8,7 +8,7 @@
 "5gz-kZ-iF1.text" = "3.5 J/godzinę @ 12:12 PM";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
-"87H-N1-0vJ.text" = "Przewidywany";
+"87H-N1-0vJ.text" = "Przewidywane";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
 "aCb-Qs-bpu.text" = "Szczegóły";

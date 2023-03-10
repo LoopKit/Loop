@@ -1,0 +1,21 @@
+/* remaining time in setting's profile expiration section */
+" remaining" = "zbývající";
+
+/* Settings app profile section */
+"App Profile" = "Profil";
+
+/* Secondary text for alerts disabled warning, which appears on the main status screen. */
+"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Opravit nyní zapnutím Oznámení, Kritických upozornění a Časově citlivých oznámení.";
+
+/* The title text for how to update */
+"How to update (LoopDocs)" = "Jak aktualizovat (LoopDocs)";
+
+/* Settings App Profile expiration view */
+"Profile Expiration" = "Vypršení platnosti profilu";
+
+/* Time that profile expires */
+"Profile expires " = "Platnost profilu vyprší";
+
+/* Unknown amount of time in settings' profile expiration section */
+"Unknown time" = "Neznámý čas";
+
