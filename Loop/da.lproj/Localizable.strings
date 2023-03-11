@@ -4,6 +4,9 @@
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
 " Pre-meal Preset" = "Før-måltid forudindstillinger";
 
+/* remaining time in setting's profile expiration section */
+" remaining" = " tilbage";
+
 /* Warning text for when Notifications or Critical Alerts Permissions is disabled */
 " Safety Notifications are OFF" = " Sikkerhedsmeddelelser er SLÅET FRA";
 
@@ -197,6 +200,9 @@
 
 /* The title of the nightscout API secret credential */
 "API Secret" = "API kodeord";
+
+/* Settings app profile section */
+"App Profile" = "App-profil";
 
 /* Action sheet confirmation message for pump history deletion */
 "Are you sure you want to delete all history entries?" = "Er du sikker på, at du vil slette alle gamle indtastninger?";
@@ -495,9 +501,6 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Overskrider maksimal bolus";
 
-/* Remote command error description: expired. */
-"Expired" = "Udløbet";
-
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Eksportér kritisk begivenhedslog";
 
@@ -512,6 +515,9 @@
 
 /* Label for manual glucose entry row on bolus screen */
 "Fingerstick Glucose" = "Fingerprik blodsukker";
+
+/* Secondary text for alerts disabled warning, which appears on the main status screen. */
+"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Løs nu ved at slå meddelelser, kritiske advarsler og tidsfølsomme meddelelser TIL.";
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "I %1$@";
@@ -550,6 +556,9 @@
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "Tidsplan for glukosemålområde";
 
+/* The title text for how to update */
+"How to update (LoopDocs)" = "Sådan opdaterer du (LoopDocs)";
+
 /* Immediate Delivery status text */
 "Immediate" = "Akut";
 
@@ -583,7 +592,7 @@
 
 /* The title of the insulin sensitivities schedule screen
    The title text for the insulin sensitivity schedule */
-"Insulin Sensitivities" = "Insulinfølsomheder";
+"Insulin Sensitivities" = "Insulinfølsomhed";
 
 /* Details for configuration error when insulin sensitivity schedule is missing */
 "Insulin Sensitivity Schedule" = "Insulinfølsomhed tidsplan";
@@ -608,9 +617,6 @@
 
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Ugyldig glukoseaflæsning med et tidsstempel, der er %1$@ i fremtiden";
-
-/* Remote command error description: invalid OTP. */
-"Invalid OTP" = "Ugyldig OTP";
 
 /* The title text for the issue report cell */
 "Issue Report" = "Fejlrapport";
@@ -797,6 +803,12 @@
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Forbereder kritiske begivenhedslogs";
+
+/* Settings App Profile expiration view */
+"Profile Expiration" = "Profiludløb";
+
+/* Time that profile expires */
+"Profile expires " = "Profil udløber ";
 
 /* The title for notification of upcoming profile expiration */
 "Profile Expires Soon" = "Profilen udløber snart";
@@ -1023,6 +1035,9 @@
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Ukendt fejl: %1$@";
 
+/* Unknown amount of time in settings' profile expiration section */
+"Unknown time" = "Ukendt tidspunkt";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "indtil %@";
 
@@ -1088,9 +1103,6 @@
 
 /* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
 "Your glucose is low. Eat carbs and monitor closely." = "Din glukose er lav. Spis kulhydrater og overvåg nøje.";
-
-/* Warning to ensure the carb entry is accurate */
-"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "Dit blodsukker er hastigt stigende. Kontroller, at du har indtastet alle kulhydrater, du har spist. Hvis du har indtastet kulhydrater: Kontroller, om det tidspunkt du indtastede stemmer overens med, da du begyndte at spise.";
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "Din maksimale bolusmængde er %1$@.";

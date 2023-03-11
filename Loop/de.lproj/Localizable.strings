@@ -4,6 +4,9 @@
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
 " Pre-meal Preset" = " Voreinstellung zum Essen";
 
+/* remaining time in setting's profile expiration section */
+" remaining" = " verbleiben";
+
 /* Warning text for when Notifications or Critical Alerts Permissions is disabled */
 " Safety Notifications are OFF" = "Sicherheitsbenachrichtigungen sind ausgeschaltet";
 
@@ -197,6 +200,9 @@
 
 /* The title of the nightscout API secret credential */
 "API Secret" = "API Geheimnis";
+
+/* Settings app profile section */
+"App Profile" = "App-Profil";
 
 /* Action sheet confirmation message for pump history deletion */
 "Are you sure you want to delete all history entries?" = "Möchten Sie wirklich alle Verlaufseinträge löschen?";
@@ -495,9 +501,6 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Überschreitet den maximalen Bolus";
 
-/* Remote command error description: expired. */
-"Expired" = "Abgelaufen";
-
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Protokolle kritischer Ereignisse exportieren";
 
@@ -512,6 +515,9 @@
 
 /* Label for manual glucose entry row on bolus screen */
 "Fingerstick Glucose" = "blutiger Blutzucker";
+
+/* Secondary text for alerts disabled warning, which appears on the main status screen. */
+"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Beheben Sie dies jetzt, indem Sie Benachrichtigungen, kritische Alarme und zeitkritische Benachrichtigungen einschalten.";
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Für %1$@";
@@ -549,6 +555,9 @@
 
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "Zeitplan für den Blutzucker-Zielbereich";
+
+/* The title text for how to update */
+"How to update (LoopDocs)" = "Wie man aktualisiert (LoopDocs)";
 
 /* Immediate Delivery status text */
 "Immediate" = "Sofort";
@@ -608,9 +617,6 @@
 
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Ungültiger Blutzuckermesswert mit einem Zeitstempel, der %1$@ in der Zukunft liegt";
-
-/* Remote command error description: invalid OTP. */
-"Invalid OTP" = "Ungültiges OTP";
 
 /* The title text for the issue report cell */
 "Issue Report" = "Problembericht";
@@ -797,6 +803,12 @@
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Vorbereiten der kritischer Ereigniss-Protokollen";
+
+/* Settings App Profile expiration view */
+"Profile Expiration" = "Ablauf des Profils";
+
+/* Time that profile expires */
+"Profile expires " = "Profil läuft ab";
 
 /* The title for notification of upcoming profile expiration */
 "Profile Expires Soon" = "Profil läuft in Kürze ab";
@@ -1023,6 +1035,9 @@
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Unbekannter Fehler: %1$@";
 
+/* Unknown amount of time in settings' profile expiration section */
+"Unknown time" = "Unbekannte Zeit";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "Endet um %@";
 
@@ -1088,9 +1103,6 @@
 
 /* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
 "Your glucose is low. Eat carbs and monitor closely." = "Ihr Blutzucker ist niedrig. Kohlenhydrate essen und genau beobachten.";
-
-/* Warning to ensure the carb entry is accurate */
-"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "Ihr Blutzucker steigt schnell an. Überprüfen Sie, ob alle Kohlenhydrate, die Sie gegessen haben, protokolliert wurden. Wenn Sie die Kohlenhydrate protokolliert haben, überprüfen Sie, ob die von Ihnen eingegebene Zeit mit dem Zeitpunkt übereinstimmt, an dem Sie mit dem Essen begonnen haben.";
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "Ihre maximale Bolusmenge beträgt %1$@.";

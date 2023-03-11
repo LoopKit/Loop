@@ -1,3 +1,6 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "г";
+
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
 "3kU-n2-fha.title" = "Состояние";
 
@@ -8,7 +11,10 @@
 "87H-N1-0vJ.text" = "Предсказываемый";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
-"aCb-Qs-bpu.text" = "Детали";
+"aCb-Qs-bpu.text" = "Подробнее";
+
+/* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
+"ap1-M6-naG.text" = "Тип еды";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Пометка";
@@ -31,6 +37,12 @@
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Наблюдается";
 
+/* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
+"Fal-Vf-lfh.normalTitle" = "🍭";
+
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3,5 ед./час @ 12:12 PM";
+
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Действие углеводов";
 
@@ -38,7 +50,7 @@
 "IxU-As-glo.text" = "Наблюдаются изменения СК, вычитаются изменения смоделированные на подаваемом инсулине, могут использоваться для оценки усвоения углеводов";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
-"J7x-W5-gwo.text" = "Детали";
+"J7x-W5-gwo.text" = "Подробнее";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
 "k3F-Na-7mn.text" = "Рекомендуемый базал";
@@ -52,20 +64,44 @@
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Предсказываемый СК";
 
+/* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
+"Qe9-uc-vPR.normalTitle" = "🍽";
+
+/* Class = "UIButton"; normalTitle = "🌮"; ObjectID = "QhO-Yi-AqQ"; */
+"QhO-Yi-AqQ.normalTitle" = "🌮";
+
+/* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
+"qPH-vU-xlu.text" = "Тип еды";
+
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "в конечном итоге 92 мг/дл";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "г COB";
+"SQx-au-ZcM.text" = "г активных углеводов";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Гликемия";
+
+/* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
+"Tz7-80-bJ7.title" = "Добавить/редактировать запись об углеводах";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
 "ufi-Kj-33k.text" = "Пометка";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Углеводы";
+
+/* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
+"Wx8-Tf-FnG.text" = "Потребляемое количество";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Рекомендуемый базал";
+
+/* Class = "UIButton"; normalTitle = "🍕"; ObjectID = "xl9-Wc-Pdu"; */
+"xl9-Wc-Pdu.normalTitle" = "🍕";
+
+/* Class = "UITextField"; placeholder = "0"; ObjectID = "Yf6-fw-Gex"; */
+"Yf6-fw-Gex.placeholder" = "0";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";

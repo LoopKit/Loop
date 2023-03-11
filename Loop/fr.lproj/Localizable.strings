@@ -495,9 +495,6 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Dépasse le bolus maximal";
 
-/* Remote command error description: expired. */
-"Expired" = "Expiré";
-
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Exporter les journaux d'événements critiques";
 
@@ -608,9 +605,6 @@
 
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Lecture de glucose non valide avec un horodatage situé à %1$@ dans le futur";
-
-/* Remote command error description: invalid OTP. */
-"Invalid OTP" = "OTP invalide";
 
 /* The title text for the issue report cell */
 "Issue Report" = "Editer rapport";
@@ -1088,9 +1082,6 @@
 
 /* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
 "Your glucose is low. Eat carbs and monitor closely." = "Votre glycémie est basse. Mangez des glucides et surveillez de près.";
-
-/* Warning to ensure the carb entry is accurate */
-"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "Votre glycémie augmente rapidement. Vérifiez que tous les glucides que vous avez mangés ont été correctement enregistrés. Si vous avez enregistré des glucides, vérifiez que l'heure correspond bien au debut de votre manger.";
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "La quantité maximum de votre bolus est de %1$@ U.";

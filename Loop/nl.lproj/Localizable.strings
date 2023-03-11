@@ -4,6 +4,9 @@
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
 " Pre-meal Preset" = " Pre-Meal Programma";
 
+/* remaining time in setting's profile expiration section */
+" remaining" = " resterend";
+
 /* Warning text for when Notifications or Critical Alerts Permissions is disabled */
 " Safety Notifications are OFF" = " Veiligheidsmeldingen staan UIT";
 
@@ -114,7 +117,7 @@
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Een model gebaseerd op de gepubliceerde opname van Humalog, Novorapid, en Apidra insuline bij volwassenen.";
 
 /* Software update available section footer (1: app name) */
-"A new version of %@ is available and is recommended to continue using the app." = "Er is een nieuwe versie van %@ beschikbaar die aanbevolen wordt om de app te blijven gebruiken.";
+"A new version of %@ is available and is recommended to continue using the app." = "Er is een nieuwe versie van %@ beschikbaar die aanbevolen wordt om de app te kunnen blijven gebruiken.";
 
 /* Required software update section footer (1: app name) */
 "A new version of %@ is available." = "Er is een nieuwe versie van %@ beschikbaar.";
@@ -197,6 +200,9 @@
 
 /* The title of the nightscout API secret credential */
 "API Secret" = "API Secret";
+
+/* Settings app profile section */
+"App Profile" = "App-Profiel";
 
 /* Action sheet confirmation message for pump history deletion */
 "Are you sure you want to delete all history entries?" = "Weet je zeker dat je de gehele pompgeschiedenis wilt verwijderen?";
@@ -311,7 +317,7 @@
 "Change the pump reservoir now" = "Vervang het pompreservoir nu";
 
 /* Details for configuration error when one or more loop settings are missing */
-"Check settings" = "Controleer je instellingen";
+"Check settings" = "Controleer instellingen";
 
 /* Recovery suggestion when reservoir data is missing */
 "Check that your pump is in range" = "Controleer of je pomp binnen bereik is";
@@ -439,7 +445,7 @@
 
 /* Default alert dismissal
    The button label of the action used to dismiss an error alert */
-"Dismiss" = "Afwijzen";
+"Dismiss" = "Sluiten";
 
 /* No comment provided by engineer. */
 "Done" = "Gereed";
@@ -451,7 +457,7 @@
 "Dosing Strategy" = "Doseerstrategie";
 
 /* Message to the user to enable bluetooth */
-"Enable\nBluetooth" = "Bluetooth Inschakelen";
+"Enable\nBluetooth" = "Bluetooth\nInschakelen";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Inschakelen";
@@ -495,9 +501,6 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Overschrijdt Maximale Bolus";
 
-/* Remote command error description: expired. */
-"Expired" = "Verlopen";
-
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Exporteer Kritieke Gebeurtenislogboek";
 
@@ -512,6 +515,9 @@
 
 /* Label for manual glucose entry row on bolus screen */
 "Fingerstick Glucose" = "Vingerprikglucose";
+
+/* Secondary text for alerts disabled warning, which appears on the main status screen. */
+"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Los nu op door Meldingen, Kritieke Meldingen en Tijdgevoelige Meldingen AAN te zetten.";
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Voor %1$@";
@@ -550,6 +556,9 @@
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "Glucosestreefbereikschema";
 
+/* The title text for how to update */
+"How to update (LoopDocs)" = "Hoe bij te werken (LoopDocs)";
+
 /* Immediate Delivery status text */
 "Immediate" = "Onmiddellijk";
 
@@ -586,7 +595,7 @@
 "Insulin Sensitivities" = "Insulinegevoeligheid";
 
 /* Details for configuration error when insulin sensitivity schedule is missing */
-"Insulin Sensitivity Schedule" = "Insulinegevoeligheid Schema";
+"Insulin Sensitivity Schedule" = "Insulinegevoeligheidschema";
 
 /* The title of the cell indicating the pump is suspended */
 "Insulin Suspended" = "Insuline Onderbroken";
@@ -609,11 +618,8 @@
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Ongeldige glucosemeting met een tijdstempel dat %1$@ in de toekomst ligt.";
 
-/* Remote command error description: invalid OTP. */
-"Invalid OTP" = "Ongeldige OTP";
-
 /* The title text for the issue report cell */
-"Issue Report" = "Incidentenrapportage";
+"Issue Report" = "Probleemrapportage";
 
 /* Title of the warning shown when a large meal was entered */
 "Large Meal Entered" = "Grote Maaltijd Ingevoerd";
@@ -740,7 +746,7 @@
 "No, edit amount" = "Nee, hoeveelheid aanpassen";
 
 /* Notification Delivery Status text */
-"Notification Delivery" = "Aflevering Meldingen";
+"Notification Delivery" = "Afleveren Meldingen";
 
 /* Format for Critical Alerts permissions disabled alert body. (1: app name) */
 "Notification delivery is set to Scheduled Summary in your phone’s settings.\n\nTo avoid delay in receiving notifications from %1$@, we recommend notification delivery be set to Immediate Delivery." = "De aflevering van meldingen in de instellingen van je telefoon staat op Gepland Overzicht.\n\nOm vertraging bij het ontvangen van meldingen van %1$@ te voorkomen, raden we je aan om de aflevering van meldingen in te stellen op Onmiddellijk Afleveren.";
@@ -752,10 +758,10 @@
 "Notifications Delayed" = "Meldingen Vertraagd";
 
 /* Alert Permissions descriptive text (1: app name) */
-"Notifications give you important %1$@ app information without requiring you to open the app." = "Meldingen geven je belangrijke %1$@ app-informatie zonder dat je de app hoeft te openen.";
+"Notifications give you important %1$@ app information without requiring you to open the app." = "Meldingen geven je belangrijke %1$@ appinformatie zonder dat je de app hoeft te openen.";
 
 /* Alert Permissions descriptive text (1: app name) */
-"Notifications give you important %1$@ app information without requiring you to open the app.\n\nKeep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications." = "Meldingen geven je belangrijke %1$@ app-informatie zonder dat je de app hoeft te openen.\n\nHoud deze instellingen AAN in je telefooninstellingen om ervoor te zorgen dat je %1$@Meldingen, Kritieke Meldingen en Tijdgevoelige Meldingen ontvangt.";
+"Notifications give you important %1$@ app information without requiring you to open the app.\n\nKeep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications." = "Meldingen geven je belangrijke %1$@ appinformatie zonder dat je de app hoeft te openen.\n\nHoud deze instellingen AAN in je telefooninstellingen om ervoor te zorgen dat %1$@ je Meldingen, Kritieke Meldingen en Tijdgevoelige Meldingen ontvangt.";
 
 /* Notification Setting Status is Off */
 "Off" = "Uit";
@@ -797,6 +803,12 @@
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Kritieke Gebeurtenislogboek Voorbereiden";
+
+/* Settings App Profile expiration view */
+"Profile Expiration" = "Profiel Vervaldatum";
+
+/* Time that profile expires */
+"Profile expires " = "Profiel verloopt ";
 
 /* The title for notification of upcoming profile expiration */
 "Profile Expires Soon" = "Profiel Verloopt Binnenkort";
@@ -1023,6 +1035,9 @@
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Onbekende Fout: %1$@";
 
+/* Unknown amount of time in settings' profile expiration section */
+"Unknown time" = "Onbekende tijd";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "tot %@";
 
@@ -1088,9 +1103,6 @@
 
 /* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
 "Your glucose is low. Eat carbs and monitor closely." = "Je glucose is laag. Eet koolhydraten en houd alles nauwlettend in de gaten.";
-
-/* Warning to ensure the carb entry is accurate */
-"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "Je glucose stijgt snel. Controleer of alle koolhydraten die je hebt gegeten zijn ingevoerd. Als je koolhydraten hebt ingevoerd, controleer dan of de tijd die je hebt ingevoerd overeenkomt met het moment waarop je bent begonnen te eten.";
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "Je maximale bolushoeveelheid is %1$@.";

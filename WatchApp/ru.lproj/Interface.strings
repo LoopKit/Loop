@@ -2,7 +2,7 @@
 "CsQ-fc-KLC.text" = "—";
 
 /* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
-"dea-qG-va8.text" = "ВСЕГО УГЛ";
+"dea-qG-va8.text" = "ВСЕГО УГЛЕВОДОВ";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "Dt1-kz-jMZ"; */
 "Dt1-kz-jMZ.text" = "---";
@@ -50,7 +50,7 @@
 "XkS-y5-khE.text" = "<body>";
 
 /* Class = "WKInterfaceLabel"; text = "ACTIVE CARBS"; ObjectID = "ycL-5X-a05"; */
-"ycL-5X-a05.text" = "АКТИВНЫЕ УГЛ";
+"ycL-5X-a05.text" = "АКТИВНЫЕ УГЛЕВОДЫ";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "yl8-ZP-c3l"; */
 "yl8-ZP-c3l.text" = "---";
