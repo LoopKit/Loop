@@ -88,6 +88,8 @@ public extension IOBChart {
             )
         }
 
+        let currentTimeLineLayer = VerticalTimeChartLine.create(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis)
+        
         let layers: [ChartLayer?] = [
             gridLayer,
             xAxisLayer,
@@ -96,6 +98,7 @@ public extension IOBChart {
             iobChartCache?.highlightLayer,
             iobArea,
             iobLine,
+            currentTimeLineLayer,
         ]
 
         return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.compactMap { $0 })

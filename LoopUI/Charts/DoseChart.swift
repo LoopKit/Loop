@@ -128,6 +128,8 @@ public extension DoseChart {
             )
         }
 
+        let currentTimeLineLayer = VerticalTimeChartLine.create(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis)
+
         let layers: [ChartLayer?] = [
             gridLayer,
             xAxisLayer,
@@ -136,7 +138,8 @@ public extension DoseChart {
             doseChartCache?.highlightLayer,
             doseArea,
             doseLine,
-            bolusLayer
+            bolusLayer,
+            currentTimeLineLayer,
         ]
 
         let chart = Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.compactMap { $0 })

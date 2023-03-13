@@ -74,13 +74,16 @@ public extension COBChart {
             )
         }
 
+        let currentTimeLineLayer = VerticalTimeChartLine.create(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis)
+        
         let layers: [ChartLayer?] = [
             gridLayer,
             xAxisLayer,
             yAxisLayer,
             cobChartCache?.highlightLayer,
             cobArea,
-            cobLine
+            cobLine,
+            currentTimeLineLayer,
         ]
 
         return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.compactMap { $0 })
