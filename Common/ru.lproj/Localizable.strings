@@ -4,21 +4,51 @@
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Введите углеводы";
 
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Вычисляет процент измерений глюкозы в заданном диапазоне";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Продолжить";
+
 /* The short unit display string for decibles */
 "dB" = "dB";
 
 /* The short unit display string for grams */
 "g" = "г";
 
+/* Placeholder for upper range entry */
+"Maximum" = "Максимум";
+
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "мг/дл";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Минимум";
 
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "ммоль/л";
 
+/* Lesson result text for no data */
+"No data available" = "Данные недоступны";
+
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
+/* Section title for glucose range */
+"Range" = "Диапазон";
+
+/* Title of config entry */
+"Start Date" = "Дата начала";
+
+/* Lesson title */
+"Time in Range" = "Время в диапазоне";
+
 /* The short unit display string for international units of insulin */
 "U" = "ед";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Визуализация наиболее частых значений глюкозы по времени суток";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Недели";
 

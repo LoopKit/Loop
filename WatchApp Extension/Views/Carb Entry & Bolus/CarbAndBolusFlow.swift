@@ -12,8 +12,8 @@ import LoopKit
 
 
 struct CarbAndBolusFlow: View {
-    enum Configuration {
-        case carbEntry
+    enum Configuration: Equatable {
+        case carbEntry(NewCarbEntry?)
         case manualBolus
     }
 
@@ -34,8 +34,10 @@ struct CarbAndBolusFlow: View {
     @Environment(\.sizeClass) private var sizeClass
 
     // MARK: - State: Carb Entry
+    // Date the user last changed the carb entry with the UI
     @State private var carbLastEntryDate = Date()
     @State private var carbAmount = 15
+    // Date of the carb entry
     @State private var carbEntryDate = Date()
     @State private var carbAbsorptionTime: CarbAbsorptionTime = .medium
     @State private var inputMode: CarbEntryInputMode = .carbs
@@ -54,8 +56,15 @@ struct CarbAndBolusFlow: View {
 
     init(viewModel: CarbAndBolusFlowViewModel) {
         switch viewModel.configuration {
-        case .carbEntry:
+        case .carbEntry(let entry):
             _flowState = State(initialValue: .carbEntry)
+            
+            if let entry = entry {
+                _carbEntryDate = State(initialValue: entry.startDate)
+                
+                let initialCarbAmount = entry.quantity.doubleValue(for: .gram())
+                _carbAmount = State(initialValue: Int(initialCarbAmount))                
+            }
         case .manualBolus:
             _flowState = State(initialValue: .bolusEntry)
         }
@@ -159,7 +168,11 @@ extension CarbAndBolusFlow {
         case .size42mm:
             return 0
         case .size40mm, .size41mm:
-            return configuration == .carbEntry ? 7 : 19
+            if case .carbEntry = configuration {
+                return 7
+            } else {
+                return 19
+            }
         case .size44mm, .size45mm:
             return 5
         }
@@ -205,7 +218,7 @@ extension CarbAndBolusFlow {
                 withAnimation {
                     self.flowState = .bolusConfirmation
                 }
-            } else if self.configuration == .carbEntry {
+            } else if case .carbEntry = self.configuration {
                 self.viewModel.addCarbsWithoutBolusing()
             }
         }

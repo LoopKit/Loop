@@ -212,7 +212,15 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                 return nil
             }
         case .graphicExtraLarge:
-            return nil
+            if #available(watchOSApplicationExtension 5.0, *) {
+                return CLKComplicationTemplateGraphicExtraLargeCircularOpenGaugeSimpleText(
+                    gaugeProvider: CLKSimpleGaugeProvider(style: .fill, gaugeColor: .tintColor, fillFraction: 1),
+                    bottomTextProvider: glucoseText,
+                    centerTextProvider: CLKSimpleTextProvider(text: "↘︎")
+                )
+            } else {
+                return nil
+            }
         @unknown default:
             return nil
         }

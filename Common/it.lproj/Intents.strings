@@ -1,18 +1,36 @@
 /* (No Comment) */
-"80eo5o" = "Aggiungi carboidrati assunti";
+"9KhaIS" = "Ho impostato la preimpostazione";
 
 /* (No Comment) */
-"OcNxIj" = "Aggiungi carboidrati assunti";
+"80eo5o" = "Agg. Carb. Assunti";
 
 /* (No Comment) */
-"yc02Yq" = "Aggiungi carboidrati assunti a Loop";
-
-"9KhaIS" = "I've set the preset";
-"I4OZy8" = "Enable Override Preset";
-"XNNmtH" = "Enable preset in Loop";
-"ZZ3mtM" = "Enable an override preset in Loop";
 "b085BW" = "I wasn't able to set the preset.";
-"lYMuWV" = "Override Name";
-"nDKAmn" = "What's the name of the override you'd like to set?";
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
-"yBzwCL" = "Override Selection";
+
+/* (No Comment) */
+"I4OZy8" = "Abilita Programma Alternativo";
+
+/* (No Comment) */
+"lYMuWV" = "Nome Programma Alternativo";
+
+/* (No Comment) */
+"nDKAmn" = "Qual'è il nome del programma alternativo che vuoi impostare?";
+
+/* (No Comment) */
+"OcNxIj" = "Agg. Carb. Assunti";
+
+/* (No Comment) */
+"oLQSsJ" = "Abilita '${overrideName}' Programma Alternativo";
+
+/* (No Comment) */
+"XNNmtH" = "Enable preset in Loop";
+
+/* (No Comment) */
+"yBzwCL" = "Selezione Programma Alternativo";
+
+/* (No Comment) */
+"yc02Yq" = "Aggiungi carboidrati a Loop";
+
+/* (No Comment) */
+"ZZ3mtM" = "Attiva Programma Alternativo in Loop";
+

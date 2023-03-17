@@ -860,7 +860,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             contentConfig.textProperties.color = .white
             contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
             contentConfig.textProperties.adjustsFontSizeToFitWidth = true
-            contentConfig.secondaryText = "Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON."
+            contentConfig.secondaryText = NSLocalizedString("Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON.", comment: "Secondary text for alerts disabled warning, which appears on the main status screen.")
             contentConfig.secondaryTextProperties.color = .white
             contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
             contentConfiguration = contentConfig

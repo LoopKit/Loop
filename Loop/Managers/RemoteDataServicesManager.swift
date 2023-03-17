@@ -209,6 +209,14 @@ final class RemoteDataServicesManager {
             completion()
         }
     }
+    
+    func triggerUpload(for triggeringType: RemoteDataType) async {
+        return await withCheckedContinuation { continuation in
+            triggerUpload(for: triggeringType) {
+                continuation.resume(returning: ())
+            }
+        }
+    }
 }
 
 extension RemoteDataServicesManager {

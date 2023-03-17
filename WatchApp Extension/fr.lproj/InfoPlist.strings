@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "WatchApp Extension";
+
+/* Bundle name */
+"CFBundleName" = "WatchApp Extension";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Les données sur les repas provenant de la base de données Santé sont utilisées pour déterminer les effets du glucose. Les données relatives au glucose provenant de la base de données Santé sont utilisées pour la création de graphiques et le calcul de l'élan. Les données relatives au sommeil provenant de la base de données Santé sont utilisées pour optimiser l'envoi des mises à jour des complications de l'Apple Watch pendant la période où vous êtes éveillé(e).";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Les données de glucides des repas entrées dans l'application ou la montre sont enregistrées dans la base de donnée Santé. Les données de taux de glucose provenant du CGM sont enregistrées de manière sécurisée dans HealthKit.";
+

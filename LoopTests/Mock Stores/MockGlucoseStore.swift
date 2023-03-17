@@ -12,13 +12,13 @@ import LoopKit
 
 class MockGlucoseStore: GlucoseStoreProtocol {
     
-    init(for test: DataManagerTestType = .flatAndStable) {
-        self.testType = test // The store returns different effect values based on the test type
+    init(for scenario: DosingTestScenario = .flatAndStable) {
+        self.scenario = scenario // The store returns different effect values based on the scenario
     }
     
     let dateFormatter = ISO8601DateFormatter.localTimeDate()
     
-    var testType: DataManagerTestType
+    var scenario: DosingTestScenario
     
     var latestGlucose: GlucoseSampleValue? {
         return StoredGlucoseSample(
@@ -107,7 +107,7 @@ extension MockGlucoseStore {
     }
     
     var counteractionEffectToLoad: String {
-        switch testType {
+        switch scenario {
         case .flatAndStable:
             return "flat_and_stable_counteraction_effect"
         case .highAndStable:
@@ -124,7 +124,7 @@ extension MockGlucoseStore {
     }
     
     var momentumEffectToLoad: String {
-        switch testType {
+        switch scenario {
         case .flatAndStable:
             return "flat_and_stable_momentum_effect"
         case .highAndStable:
@@ -141,7 +141,7 @@ extension MockGlucoseStore {
     }
     
     var glucoseStartDate: Date {
-        switch testType {
+        switch scenario {
         case .flatAndStable:
             return dateFormatter.date(from: "2020-08-11T20:45:02")!
         case .highAndStable:
@@ -158,7 +158,7 @@ extension MockGlucoseStore {
     }
     
     var latestGlucoseValue: Double {
-        switch testType {
+        switch scenario {
         case .flatAndStable:
             return 123.42849966275706
         case .highAndStable:

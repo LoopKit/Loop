@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
@@ -7,6 +10,9 @@
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con il microinfusore e i dispositivi CGM.";
 
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "La fotocamera è utilizzata per scansionare i codici a barre dei tuoi dispositivi.";
+
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID viene utilizzato per autenticare il bolo.";
 
@@ -15,4 +21,7 @@
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "I dati sui carboidrati inseriti nell'app e sull'orologio sono memorizzati nel database Salute. I dati relativi al glucosio recuperati dal CGM vengono memorizzati in modo sicuro in Salute.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop utilizza Siri per permettere l'attivazione delle preimpostazioni con la tua voce";
 

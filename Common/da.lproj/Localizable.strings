@@ -4,6 +4,9 @@
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Tilføj kulhydrater";
 
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Beregner procentdelen af ​​blodsukkermålinger inden for et specificeret interval";
+
 /* Title of the button to begin lesson execution */
 "Continue" = "Fortsæt";
 
@@ -14,7 +17,7 @@
 "g" = "g";
 
 /* Placeholder for upper range entry */
-"Maximum" = "Maximum";
+"Maximum" = "Maksimum";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -26,7 +29,7 @@
 "mmol/L" = "mmol/L";
 
 /* Lesson title */
-"Modal Day" = "Modal Dag";
+"Modal Day" = "Modal-dag";
 
 /* Lesson result text for no data */
 "No data available" = "Ingen data tilgængelige";
@@ -38,16 +41,16 @@
 "Range" = "Interval";
 
 /* Title of config entry */
-"Start Date" = "Start Dato";
+"Start Date" = "Startdato";
 
 /* Lesson title */
-"Time in Range" = "Tme in Range";
+"Time in Range" = "Tid inden for korrektionsområde";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";
 
 /* Lesson subtitle */
-"Visualizes the most frequent glucose values by time of day" = "Visualiserer de hyppigste blodsukker værdier fordelt på dagen";
+"Visualizes the most frequent glucose values by time of day" = "Visualiserer de hyppigste blodsukkerværdier fordelt på dagen";
 
 /* Unit string for a count of calendar weeks */
 "Weeks" = "Uger";

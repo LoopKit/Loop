@@ -1,0 +1,18 @@
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "蓝牙用于与胰岛素泵和连续血糖监测设备进行通信";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "蓝牙用于与胰岛素泵和连续血糖监测设备进行通信";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "使用人脸解锁来确认输注胰岛素剂量";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "数据库中的膳食数据用于确定葡萄糖影响。健康数据库中的葡萄糖数据用于绘图和动量计算。";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "在应用程序和手表中输入的碳水化合物膳食数据存储在健康数据库中。从CGM检索的葡萄糖数据安全地存储在HealthKit中。";
+

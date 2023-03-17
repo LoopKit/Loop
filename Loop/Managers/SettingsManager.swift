@@ -160,7 +160,7 @@ class SettingsManager {
 
         latestSettings = mergedSettings
 
-        if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteOverridesEnabled {
+        if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteCommandsEnabled {
             // remote notification registration not finished
             return
         }

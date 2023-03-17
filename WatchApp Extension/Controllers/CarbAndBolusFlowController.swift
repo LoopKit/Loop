@@ -25,7 +25,7 @@ final class CarbAndBolusFlowController: WKHostingController<CarbAndBolusFlow>, I
         )
     }()
 
-    private var configuration: CarbAndBolusFlow.Configuration = .carbEntry
+    private var configuration: CarbAndBolusFlow.Configuration = .carbEntry(nil)
 
     override var body: CarbAndBolusFlow {
         CarbAndBolusFlow(viewModel: viewModel)

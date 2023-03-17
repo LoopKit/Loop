@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Extensie WatchApp";
+
+/* Bundle name */
+"CFBundleName" = "Extensie WatchApp";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Datele mesei din baza de date din aplicația Sănătate sunt folosite pentru a determina efectele glicemice. Datele despre glicemie din baza de date Sănătate sunt folosite pentru construirea graficelor și calcularea influențelor glicemice. Datele de somn din baza de date Sănătate sunt folosite pentru a optimiza livrarea de actualizări de date pentru ceasul Apple pe perioada când sunteți treaz.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Carbohidrații introduși în aplicație și pe ceas sunt stocați în baza de date Sănătate. Glicemiile din GCM sunt stocate în siguranță în HealthKit.";
+

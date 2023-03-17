@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import LoopCore
+import HealthKit
 
 final class AnalyticsServicesManager {
 
@@ -163,7 +164,6 @@ final class AnalyticsServicesManager {
         logEvent("CGM Added", withProperties: ["identifier" : identifier])
     }
 
-
     func didAddCarbs(source: String, amount: Double, inSession: Bool = false) {
         logEvent("Carb entry created", withProperties: ["source" : source, "amount": "\(amount)"], outOfSession: inSession)
     }
@@ -200,9 +200,26 @@ final class AnalyticsServicesManager {
         logEvent("Alert Issued", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue])
     }
 
-    func didEnactOverride(name: String, symbol: String, duration: TemporaryScheduleOverride.Duration) {
+    func didEnactOverride(name: String, symbol: String, duration: TemporaryScheduleOverride.Duration, insulinSensitivityMultiplier: Double = 1.0, targetRange: ClosedRange<HKQuantity>? = nil)
+    {
         let combinedName = "\(symbol) - \(name)"
-        logEvent("Override Enacted", withProperties: ["name": name, "symbol": symbol, "nameWithEmoji": combinedName])
+
+        var properties: [String: Any] = [
+            "name": name,
+            "symbol": symbol,
+            "sensitivityMultiplier": insulinSensitivityMultiplier,
+            "nameWithEmoji": combinedName
+        ]
+
+        if let targetUpperBound = targetRange?.upperBound.doubleValue(for: HKUnit.milligramsPerDeciliter) {
+            properties["targetUpperBound"] = targetUpperBound
+        }
+        if let targetLowerBound = targetRange?.lowerBound.doubleValue(for: HKUnit.milligramsPerDeciliter) {
+            properties["targetLowerBound"] = targetLowerBound
+        }
+
+
+        logEvent("Override Enacted", withProperties: properties)
     }
 
     func didCancelOverride(name: String) {
@@ -222,7 +239,7 @@ extension AnalyticsServicesManager: PresetActivationObserver {
         case .custom:
             didEnactOverride(name: "custom", symbol: "", duration: duration)
         case .preset(let preset):
-            didEnactOverride(name: preset.name, symbol: preset.symbol, duration: duration)
+            didEnactOverride(name: preset.name, symbol: preset.symbol, duration: duration, insulinSensitivityMultiplier: preset.settings.effectiveInsulinNeedsScaleFactor, targetRange: preset.settings.targetRange)
         }
     }
 

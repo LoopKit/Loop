@@ -812,6 +812,18 @@ extension DeviceDataManager {
             self.loopManager.updateRemoteRecommendation()
         }
     }
+    
+    func enactBolus(units: Double, activationType: BolusActivationType) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            enactBolus(units: units, activationType: activationType) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                continuation.resume()
+            }
+        }
+    }
 
     var pumpManagerStatus: PumpManagerStatus? {
         return pumpManager?.status
@@ -1307,6 +1319,10 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 
         return rounded
     }
+    
+    func loopDataManager(_ manager: LoopDataManager, estimateBolusDuration units: Double) -> TimeInterval? {
+        pumpManager?.estimatedDuration(toBolus: units)
+    }
 
     func loopDataManager(
         _ manager: LoopDataManager,
@@ -1341,19 +1357,25 @@ extension Notification.Name {
 
 // MARK: - Remote Notification Handling
 extension DeviceDataManager {
+    
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
-
+        Task {
+            let backgroundTask = await beginBackgroundTask(name: "Remote Data Upload")
+            await handleRemoteNotification(notification)
+            await endBackgroundTask(backgroundTask)
+        }
+    }
+    
+    func handleRemoteNotification(_ notification: [String: AnyObject]) async {
+        
         defer {
             log.default("Remote Notification: Finished handling")
         }
         
-        guard FeatureFlags.remoteOverridesEnabled else {
-            log.error("Remote Notification: Overrides not enabled.")
+        guard FeatureFlags.remoteCommandsEnabled else {
+            log.error("Remote Notification: Remote Commands not enabled.")
             return
         }
-        
-        let defaultServiceIdentifier = "NightscoutService"
-        let serviceIdentifer = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
 
         if let expirationStr = notification["expiration"] as? String {
             let formatter = ISO8601DateFormatter()
@@ -1362,7 +1384,7 @@ extension DeviceDataManager {
                 let nowDate = Date()
                 guard nowDate < expiration else {
                     let expiredInterval = nowDate.timeIntervalSince(expiration)
-                    NotificationManager.sendRemoteCommandExpiredNotification(timeExpired: expiredInterval)
+                    await NotificationManager.sendRemoteCommandExpiredNotification(timeExpired: expiredInterval)
                     log.error("Remote Notification: Expired: %{public}@", String(describing: notification))
                     return
                 }
@@ -1372,156 +1394,137 @@ extension DeviceDataManager {
             }
         }
         
-        let command: RemoteCommand
+        let action: Action
         
         do {
-            command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets, defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium).get()
+            action = try RemoteCommand.createRemoteAction(notification: notification).get()
         } catch {
             log.error("Remote Notification: Parse Error: %{public}@", String(describing: error))
             return
         }
-
-        switch command {
-            
-        case .temporaryScheduleOverride(let remoteOverride):
-            log.default("Remote Notification: Enacting temporary override: %{public}@", String(describing: remoteOverride))
-            activateRemoteOverride(remoteOverride)
-        case .cancelTemporaryOverride:
-            log.default("Remote Notification: Canceling temporary override")
-            activateRemoteOverride(nil)
-        case .bolusEntry(let bolusAmount):
-            log.default("Remote Notification: Enacting bolus entry: %{public}@", String(describing: bolusAmount))
-            
-            //Remote bolus requires validation from its remote source
-            
-            let validationResult = remoteDataServicesManager.validatePushNotificationSource(notification, serviceIdentifier: serviceIdentifer)
-
-            switch validationResult {
-            case .success():
-                log.info("Remote Notification: Validation successful")
-            case .failure(let error):
-                NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAmount)
-                log.error("Remote Notification: Could not validate notification: %{public}@", String(describing: notification))
-                return
+        
+        log.default("Remote Notification: Handling action %{public}@", String(describing: action))
+        
+        switch action {
+        case .temporaryScheduleOverride(let overrideAction):
+            do {
+                try await handleOverrideAction(overrideAction)
+            } catch {
+                log.error("Remote Notification: Override Action Error: %{public}@", String(describing: error))
             }
-            
-            guard let maxBolusAmount = loopManager.settings.maximumBolus else {
-                NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.missingMaxBolus, amount: bolusAmount)
-                log.error("Remote Notification: No max bolus detected. Aborting...")
-                return
+        case .cancelTemporaryOverride(let overrideCancelAction):
+            do {
+                try await handleOverrideCancelAction(overrideCancelAction)
+            } catch {
+                log.error("Remote Notification: Override Action Cancel Error: %{public}@", String(describing: error))
             }
-            
-            guard bolusAmount.isLessThanOrEqualTo(maxBolusAmount) else {
-                NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.exceedsMaxBolus, amount: bolusAmount)
-                log.error("Remote Notification: Bolus exceeds maximum allowed. Aborting...")
-                return
+        case .bolusEntry(let bolusAction):
+            do {
+                try validatePushNotificationSource(notification: notification)
+                try await handleBolusAction(bolusAction)
+            } catch {
+                await NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAction.amountInUnits)
+                log.error("Remote Notification: Bolus Action Error: %{public}@", String(describing: notification))
             }
-            
-            self.enactRemoteBolus(units: bolusAmount) { error in
-                if let error = error {
-                    self.log.error("Remote Notification: Error adding bolus: %{public}@", String(describing: error))
-                    NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAmount)
-                } else {
-                    NotificationManager.sendRemoteBolusNotification(amount: bolusAmount)
-                }
-            }
-        case .carbsEntry(let candidateCarbEntry):
-            log.default("Remote Notification: Adding carbs entry: %{public}@", String(describing: candidateCarbEntry))
-            
-            let candidateCarbsInGrams = candidateCarbEntry.quantity.doubleValue(for: .gram())
-            
-            //Remote carb entry requires validation from its remote source
-            let validationResult = remoteDataServicesManager.validatePushNotificationSource(notification, serviceIdentifier: serviceIdentifer)
-            switch validationResult {
-            case .success():
-                log.info("Remote Notification: Validation successful")
-            case .failure(let error):
-                NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: candidateCarbsInGrams)
-                log.error("Remote Notification: Could not validate notification: %{public}@", String(describing: notification))
-                return
-            }
-            
-            guard candidateCarbsInGrams > 0.0 else {
-                NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidCarbs, amountInGrams: candidateCarbsInGrams)
-                log.error("Remote Notification: Invalid carb entry amount. Aborting...")
-                return
-            }
-            
-            guard candidateCarbsInGrams <= LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()) else {
-                NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.exceedsMaxCarbs, amountInGrams: candidateCarbsInGrams)
-                log.error("Remote Notification: Carbs higher than maximum. Aborting...")
-                return
-            }
-
-            addRemoteCarbEntry(candidateCarbEntry) { carbEntryAddResult in
-                switch carbEntryAddResult {
-                case .success(let completedCarbEntry):
-                    NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: completedCarbEntry.quantity.doubleValue(for: .gram()))
-                case .failure(let error):
-                    self.log.error("Remote Notification: Error adding carb entry: %{public}@", String(describing: error))
-                    NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: candidateCarbsInGrams)
-                }
+        case .carbsEntry(let carbAction):
+            do {
+                try validatePushNotificationSource(notification: notification)
+                try await handleCarbAction(carbAction)
+            } catch {
+                await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: carbAction.amountInGrams)
+                log.error("Remote Notification: Carb Action Error: %{public}@", String(describing: notification))
             }
         }
     }
     
-    func activateRemoteOverride(_ remoteOverride: TemporaryScheduleOverride?) {
+    func validatePushNotificationSource(notification: [String: AnyObject]) throws {
+        
+        let defaultServiceIdentifier = "NightscoutService"
+        let serviceIdentifer = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
+        
+        let validationResult = remoteDataServicesManager.validatePushNotificationSource(notification, serviceIdentifier: serviceIdentifer)
+        switch validationResult {
+        case .success():
+            log.info("Remote Notification: Validation successful")
+        case .failure(let error):
+            throw error
+        }
+    }
+    
+    //Remote Overrides
+    
+    func handleOverrideAction(_ action: OverrideAction) async throws {
+        let remoteOverride = try action.toValidOverride(allowedPresets: loopManager.settings.overridePresets)
+        await activateRemoteOverride(remoteOverride)
+    }
+    
+    func handleOverrideCancelAction(_ action: OverrideCancelAction) async throws {
+        await activateRemoteOverride(nil)
+    }
+    
+    func activateRemoteOverride(_ remoteOverride: TemporaryScheduleOverride?) async {
         loopManager.mutateSettings { settings in settings.scheduleOverride = remoteOverride }
-        self.triggerBackgroundUpload(for: .overrides)
+        await remoteDataServicesManager.triggerUpload(for: .overrides)
     }
     
-    func addRemoteCarbEntry(_ carbEntry: NewCarbEntry, completion: @escaping (_ result: CarbStoreResult<StoredCarbEntry>) -> Void) {
-
-        var backgroundTask: UIBackgroundTaskIdentifier?
-        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Add Remote Carb Entry") {
-            guard let backgroundTask = backgroundTask else {return}
-            UIApplication.shared.endBackgroundTask(backgroundTask)
-            self.log.error("Add Remote Carb Entry background task expired")
-        }
-
-        carbStore.addCarbEntry(carbEntry) { result in
-            self.triggerBackgroundUpload(for: .carb)
-            if let backgroundTask = backgroundTask {
-                UIApplication.shared.endBackgroundTask(backgroundTask)
+    //Remote Bolus
+    
+    func handleBolusAction(_ action: BolusAction) async throws {
+        let validBolusAmount = try action.toValidBolusAmount(maximumBolus: loopManager.settings.maximumBolus)
+        try await self.enactBolus(units: validBolusAmount, activationType: .manualNoRecommendation)
+        await remoteDataServicesManager.triggerUpload(for: .dose)
+        self.analyticsServicesManager.didBolus(source: "Remote", units: validBolusAmount)
+    }
+    
+    //Remote Carb Entry
+    
+    func handleCarbAction(_ action: CarbAction) async throws {
+        let candidateCarbEntry = try action.toValidCarbEntry(defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
+                                                                  minAbsorptionTime: LoopConstants.minCarbAbsorptionTime,
+                                                                  maxAbsorptionTime: LoopConstants.maxCarbAbsorptionTime,
+                                                                  maxCarbEntryQuantity: LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()),
+                                                                  maxCarbEntryPastTime: LoopConstants.maxCarbEntryPastTime,
+                                                                  maxCarbEntryFutureTime: LoopConstants.maxCarbEntryFutureTime
+        )
+        
+        let _ = try await addRemoteCarbEntry(candidateCarbEntry)
+        await remoteDataServicesManager.triggerUpload(for: .carb)
+    }
+    
+    //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
+    func addRemoteCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
+        return try await withCheckedThrowingContinuation { continuation in
+            carbStore.addCarbEntry(carbEntry) { result in
+                switch result {
+                case .success(let storedCarbEntry):
+                    self.analyticsServicesManager.didAddCarbs(source: "Remote", amount: carbEntry.quantity.doubleValue(for: .gram()))
+                    continuation.resume(returning: storedCarbEntry)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
             }
-            completion(result)
-            self.analyticsServicesManager.didAddCarbs(source: "Remote", amount: carbEntry.quantity.doubleValue(for: .gram()))
         }
     }
     
-    func enactRemoteBolus(units: Double, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
-        
+    //Background Uploads
+    
+    func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
         var backgroundTask: UIBackgroundTaskIdentifier?
-        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Enact Remote Bolus") {
+        backgroundTask = await UIApplication.shared.beginBackgroundTask(withName: name) {
             guard let backgroundTask = backgroundTask else {return}
-            UIApplication.shared.endBackgroundTask(backgroundTask)
-            self.log.error("Enact Remote Bolus background task expired")
+            Task {
+                await UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
+            
+            self.log.error("Background Task Expired: %{public}@", name)
         }
         
-        self.enactBolus(units: units, activationType: .manualNoRecommendation) { error in
-            self.triggerBackgroundUpload(for: .dose)
-            if let backgroundTask = backgroundTask {
-                UIApplication.shared.endBackgroundTask(backgroundTask)
-            }
-            completion(error)
-            self.analyticsServicesManager.didBolus(source: "Remote", units: units)
-        }
+        return backgroundTask
     }
     
-    func triggerBackgroundUpload(for triggeringType: RemoteDataType) {
-        
-        var backgroundTask: UIBackgroundTaskIdentifier?
-        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Remote Data Upload") {
-            guard let backgroundTask = backgroundTask else {return}
-            UIApplication.shared.endBackgroundTask(backgroundTask)
-            self.log.error("Remote Data Upload background task expired")
-        }
-        
-        self.remoteDataServicesManager.triggerUpload(for: triggeringType) {
-            if let backgroundTask = backgroundTask {
-                UIApplication.shared.endBackgroundTask(backgroundTask)
-            }
-        }
+    func endBackgroundTask(_ backgroundTask: UIBackgroundTaskIdentifier?) async {
+        guard let backgroundTask else {return}
+        await UIApplication.shared.endBackgroundTask(backgroundTask)
     }
 }
 

@@ -12,15 +12,15 @@ import LoopKit
 
 class MockDoseStore: DoseStoreProtocol {
     
-    init(for test: DataManagerTestType = .flatAndStable) {
-        self.testType = test // The store returns different effect values based on the test type
-        self.pumpEventQueryAfterDate = MockDoseStore.currentDate(for: test)
-        self.lastAddedPumpData = MockDoseStore.currentDate(for: test)
+    init(for scenario: DosingTestScenario = .flatAndStable) {
+        self.scenario = scenario // The store returns different effect values based on the scenario
+        self.pumpEventQueryAfterDate = MockDoseStore.currentDate(for: scenario)
+        self.lastAddedPumpData = MockDoseStore.currentDate(for: scenario)
     }
     
     static let dateFormatter = ISO8601DateFormatter.localTimeDate()
     
-    var testType: DataManagerTestType
+    var scenario: DosingTestScenario
     
     var basalProfileApplyingOverrideHistory: BasalRateSchedule?
     
@@ -50,7 +50,7 @@ class MockDoseStore: DoseStoreProtocol {
     var lastReservoirValue: ReservoirValue?
     
     var lastAddedPumpData: Date
-    
+
     func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (DoseStore.DoseStoreError?) -> Void) {
         completion(nil)
     }
@@ -60,7 +60,7 @@ class MockDoseStore: DoseStoreProtocol {
     }
     
     func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
-        completion(.failure(.configurationError))
+        completion(.success(.init(startDate: MockDoseStore.currentDate(for: scenario), value: 9.5)))
     }
     
     func generateDiagnosticReport(_ completion: @escaping (String) -> Void) {
@@ -106,7 +106,7 @@ class MockDoseStore: DoseStoreProtocol {
         }))
     }
     
-    static func currentDate(for testType: DataManagerTestType) -> Date {
+    static func currentDate(for testType: DosingTestScenario) -> Date {
         switch testType {
         case .flatAndStable:
             return dateFormatter.date(from: "2020-08-11T20:45:02")!
@@ -135,7 +135,7 @@ extension MockDoseStore {
     }
     
     var fixtureToLoad: String {
-        switch testType {
+        switch scenario {
         case .flatAndStable:
             return "flat_and_stable_insulin_effect"
         case .highAndStable:

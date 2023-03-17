@@ -1,18 +1,27 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth используется для связи с инсулиновой помпой и устройствами непрерывного мониторинга глюкозы.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Блутус применяется для коммуникации с инсулиновой помпой и устройствами непрерывного мониторинга СК";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth используется для связи с инсулиновой помпой и устройствами непрерывного мониторинга глюкозы.";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Камера используется для сканирования штрих-кодов устройств.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Идентификатор Face ID применяется для авторизации болюса инсулина";
+"NSFaceIDUsageDescription" = "Идентификатор Face ID применяется для авторизации ввода инсулина";
 
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Данные о пище из базы данных Здоровье используются для определения влияния на гликемию. Данные гликемии из базы данных Здоровье используются для графического отображения и вычисления скорости изменений";
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "Данные об углеводах в приложении и на смарт-часах хранятся в базе данных Здоровье. Данные о гликемии полученные от систем непрерывного мониторинга хранятся в безопасности в Комплексе Здоровья HealthKit ";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop использует Siri, чтобы вы могли активировать пресеты своим голосом.";
 

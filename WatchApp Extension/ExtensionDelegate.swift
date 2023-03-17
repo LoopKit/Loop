@@ -13,6 +13,7 @@ import Intents
 import os
 import os.log
 import UserNotifications
+import LoopKit
 
 
 final class ExtensionDelegate: NSObject, WKExtensionDelegate {
@@ -245,6 +246,39 @@ extension ExtensionDelegate: WCSessionDelegate {
 
 
 extension ExtensionDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        switch response.actionIdentifier {
+        case UNNotificationDefaultActionIdentifier:
+            guard
+                response.notification.request.identifier == LoopNotificationCategory.missedMeal.rawValue,
+                let statusController = WKExtension.shared().visibleInterfaceController as? HUDInterfaceController
+            else {
+                break
+            }
+
+            let userInfo = response.notification.request.content.userInfo
+            // If we have info about a meal, the carb entry UI should reflect it
+            if
+                let mealTime = userInfo[LoopNotificationUserInfoKey.missedMealTime.rawValue] as? Date,
+                let carbAmount = userInfo[LoopNotificationUserInfoKey.missedMealCarbAmount.rawValue] as? Double
+            {
+                let missedEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(),
+                                                                         doubleValue: carbAmount),
+                                                    startDate: mealTime,
+                                                    foodType: nil,
+                                                    absorptionTime: nil)
+                statusController.addCarbs(initialEntry: missedEntry)
+            // Otherwise, just provide the ability to add carbs
+            } else {
+                statusController.addCarbs()
+            }
+        default:
+            break
+        }
+
+        completionHandler()
+    }
+    
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.badge, .sound, .list, .banner])
     }

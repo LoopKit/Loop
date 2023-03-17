@@ -106,7 +106,7 @@ class LoopAppManager: NSObject {
 
         registerBackgroundTasks()
 
-        if FeatureFlags.remoteOverridesEnabled {
+        if FeatureFlags.remoteCommandsEnabled {
             DispatchQueue.main.async {
 #if targetEnvironment(simulator)
                 self.remoteNotificationRegistrationDidFinish(.failure(SimulatorError.remoteNotificationsNotAvailable))
@@ -484,7 +484,8 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.remoteBolus.rawValue,
              LoopNotificationCategory.remoteBolusFailure.rawValue,
              LoopNotificationCategory.remoteCarbs.rawValue,
-             LoopNotificationCategory.remoteCarbsFailure.rawValue:
+             LoopNotificationCategory.remoteCarbsFailure.rawValue,
+             LoopNotificationCategory.missedMeal.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:
             // For all others, banners are not to be displayed while in the foreground
@@ -516,6 +517,28 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                let managerIdentifier = userInfo[LoopNotificationUserInfoKey.managerIDForAlert.rawValue] as? String {
                 alertManager?.acknowledgeAlert(identifier: Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier))
             }
+        case UNNotificationDefaultActionIdentifier:
+            guard response.notification.request.identifier == LoopNotificationCategory.missedMeal.rawValue else {
+                break
+            }
+
+            let carbActivity = NSUserActivity.forNewCarbEntry()
+            let userInfo = response.notification.request.content.userInfo
+            
+            if
+                let mealTime = userInfo[LoopNotificationUserInfoKey.missedMealTime.rawValue] as? Date,
+                let carbAmount = userInfo[LoopNotificationUserInfoKey.missedMealCarbAmount.rawValue] as? Double
+            {
+                let missedEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(),
+                                                                         doubleValue: carbAmount),
+                                                    startDate: mealTime,
+                                                    foodType: nil,
+                                                    absorptionTime: nil)
+                carbActivity.update(from: missedEntry, isMissedMeal: true)
+            }
+            
+            rootViewController?.restoreUserActivityState(carbActivity)
+            
         default:
             break
         }

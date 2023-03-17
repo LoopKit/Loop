@@ -49,6 +49,15 @@ struct AlertManagementView: View {
     private var formatterDurations: [String] {
         AlertMuter.allowedDurations.compactMap { formatter.string(from: $0) }
     }
+    
+    private var missedMealNotificationsEnabled: Binding<Bool> {
+        Binding(
+            get: { UserDefaults.standard.missedMealNotificationsEnabled },
+            set: { enabled in
+                UserDefaults.standard.missedMealNotificationsEnabled = enabled
+            }
+        )
+    }
 
     public init(checker: AlertPermissionsChecker, alertMuter: AlertMuter = AlertMuter()) {
         self.checker = checker
@@ -65,6 +74,7 @@ struct AlertManagementView: View {
                     mutePeriodSection
                 }
             }
+            missedMealAlertSection
         }
         .navigationTitle(NSLocalizedString("Alert Management", comment: "Title of alert management screen"))
     }
@@ -107,6 +117,27 @@ struct AlertManagementView: View {
 
     private var muteAlertsFooterString: String {
         NSLocalizedString("No alerts will sound while muted. Once this period ends, your alerts and alarms will resume as normal.", comment: "Description of temporary mute alerts")
+    }
+    
+    private var missedMealAlertSection: some View {
+        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
+            Toggle("Missed Meal Notifications", isOn: missedMealNotificationsEnabled)
+        }
+    }
+}
+
+extension UserDefaults {
+    private enum Key: String {
+        case missedMealNotificationsEnabled = "com.loopkit.Loop.MissedMealNotificationsEnabled"
+    }
+    
+    var missedMealNotificationsEnabled: Bool {
+        get {
+            return object(forKey: Key.missedMealNotificationsEnabled.rawValue) as? Bool ?? false
+        }
+        set {
+            set(newValue, forKey: Key.missedMealNotificationsEnabled.rawValue)
+        }
     }
 }
 

@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
@@ -7,6 +10,9 @@
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth se utiliza para las comunicaciones con la microinfusora y los dispositivos de monitoreo continuo de glucosa.";
 
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "La cámara se utiliza para escanear los códigos de barras de los dispositivos.";
+
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Se utiliza reconocimiento facial para autenticar el bolo de insulina.";
 
@@ -15,4 +21,7 @@
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "Datos de alimentos ingresados en la aplicación y en el reloj son almacenados en la base de datos de Salud. Los datos de glucosa extraídos del monitor continuo de glucosa se almacenan de manera segura en Kit de Salud.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop utiliza Siri para permitirte activar ajustes preestablecidos con tu voz.";
 

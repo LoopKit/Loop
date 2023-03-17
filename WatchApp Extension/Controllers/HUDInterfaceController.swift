@@ -8,6 +8,7 @@
 
 import WatchKit
 import LoopCore
+import LoopKit
 
 class HUDInterfaceController: WKInterfaceController {
     private var activeContextObserver: NSObjectProtocol?
@@ -96,7 +97,11 @@ class HUDInterfaceController: WKInterfaceController {
     }
 
     @IBAction func addCarbs() {
-        presentController(withName: CarbAndBolusFlowController.className, context: CarbAndBolusFlow.Configuration.carbEntry)
+        presentController(withName: CarbAndBolusFlowController.className, context: CarbAndBolusFlow.Configuration.carbEntry(nil))
+    }
+    
+    func addCarbs(initialEntry: NewCarbEntry) {
+        presentController(withName: CarbAndBolusFlowController.className, context: CarbAndBolusFlow.Configuration.carbEntry(initialEntry))
     }
 
     @IBAction func setBolus() {

@@ -4,6 +4,9 @@
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Legg til karbohydrater";
 
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Beregner prosentandelen av blodsukkermålinger innenfor et spesifisert område";
+
 /* Title of the button to begin lesson execution */
 "Continue" = "Fortsett";
 
