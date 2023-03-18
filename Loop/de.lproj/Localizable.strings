@@ -456,6 +456,9 @@
 /* The title of the Dosing Strategy section in settings */
 "Dosing Strategy" = "Dosierungsstrategie";
 
+/* Remote command error description: duration exceed max (1: max duration in hours). */
+"Duration exceeds: %1$.1f hours" = "Dauer überschritten: %1$.1f Stunden";
+
 /* Message to the user to enable bluetooth */
 "Enable\nBluetooth" = "Bluetooth einschalten";
 
@@ -517,7 +520,7 @@
 "Fingerstick Glucose" = "blutiger Blutzucker";
 
 /* Secondary text for alerts disabled warning, which appears on the main status screen. */
-"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Beheben Sie dies jetzt, indem Sie Benachrichtigungen, kritische Alarme und zeitkritische Benachrichtigungen einschalten.";
+"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Behebe dies jetzt, indem Du Benachrichtigungen, kritische Alarme und zeitkritische Benachrichtigungen einschaltest.";
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Für %1$@";
@@ -606,6 +609,9 @@
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "%1$@ unterbrochen: <b>%2$@</b> von %3$@ %4$@";
 
+/* Remote command error description: invalid bolus amount. */
+"Invalid Bolus Amount" = "Ungültige Bolusmenge";
+
 /* Remote command error description: invalid carb amount. */
 "Invalid carb amount" = "Ungültige Kohlenhydratmenge";
 
@@ -620,6 +626,9 @@
 
 /* The title text for the issue report cell */
 "Issue Report" = "Problembericht";
+
+/* The notification description for a meal that was possibly not logged in Loop. */
+"It looks like you may not have logged a meal you ate. Tap to log it now." = "Es sieht so aus als ob du vergessen hast eine Mahlzeit einzugeben. Tippe um sie nun einzutragen.";
 
 /* Title of the warning shown when a large meal was entered */
 "Large Meal Entered" = "Große Mahlzeit eingegeben";
@@ -713,6 +722,9 @@
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Benötigt Aufmerksamkeit";
 
+/* Remote command error description: negative duration error. */
+"Negative duration not allowed" = "Eine negative Dauer ist nicht erlaubt";
+
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
 
@@ -783,6 +795,9 @@
 /* The title text for the override presets */
 "Override Presets" = "Voreinstellungen";
 
+/* The notification title for a meal that was possibly not logged in Loop. */
+"Possible Missed Meal" = "Wahrscheinlich eine Mahlzeit vergessen";
+
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Ziel vor dem Essen";
 
@@ -808,7 +823,7 @@
 "Profile Expiration" = "Ablauf des Profils";
 
 /* Time that profile expires */
-"Profile expires " = "Profil läuft ab";
+"Profile expires " = "Profil läuft ab ";
 
 /* The title for notification of upcoming profile expiration */
 "Profile Expires Soon" = "Profil läuft in Kürze ab";
@@ -926,6 +941,9 @@
 /* Software update button link text */
 "Software Update" = "Software-Aktualisierung";
 
+/* Remote command error description: invalid start time is out of range. */
+"Start time is out of range: %@" = "Startzeit liegt außerhalb des Bereichs: %@";
+
 /* The format for the description of a temporary override start date */
 "starting at %@" = "Beginnt um %@";
 
@@ -1035,6 +1053,9 @@
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Unbekannter Fehler: %1$@";
 
+/* Remote command error description: unknown preset (1: preset name). */
+"Unknown preset: %1$@" = "Unbekannte Voreinstellung: %1$@";
+
 /* Unknown amount of time in settings' profile expiration section */
 "Unknown time" = "Unbekannte Zeit";
 
@@ -1067,6 +1088,9 @@
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn die aktuelle oder prognostizierte Glukose unter dem Wert für die Hypo-Abschaltung liegt, empfiehlt Loop immer eine temporäre Basalrate von 0 Einheiten pro Stunde und - wenn kein gesonderter Bolusgrenzwert definiert ist - auch keinen Bolus.";
+
+/* Description of missed meal notifications. */
+"When enabled, Loop can notify you when it detects a meal that wasn't logged." = "Wenn aktiviert, kann Loop Dich benachrichtigen, wenn es eine Mahlzeit erkennt, die nicht protokolliert wurde.";
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Ist der Loop-Modus ausgeschaltet, dann verwendet die App einen vereinfachten Bolusrechner wie eine typische Pumpe.";

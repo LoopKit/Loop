@@ -1,8 +1,8 @@
 /* (No Comment) */
-"9KhaIS" = "Nastavil som predvoľbu";
+"9KhaIS" = "I've set the preset";
 
 /* (No Comment) */
-"80eo5o" = "Zadať sacharidy";
+"80eo5o" = "添加碳水化合物";
 
 /* (No Comment) */
 "b085BW" = "I wasn't able to set the preset.";
@@ -17,10 +17,10 @@
 "nDKAmn" = "What's the name of the override you'd like to set?";
 
 /* (No Comment) */
-"OcNxIj" = "Zadať sacharidy";
+"OcNxIj" = "添加碳水化合物";
 
 /* (No Comment) */
-"oLQSsJ" = "Enable '$%1$@' Override Preset";
+"oLQSsJ" = "Enable '${overrideName}' Override Preset";
 
 /* (No Comment) */
 "XNNmtH" = "Enable preset in Loop";
@@ -29,7 +29,7 @@
 "yBzwCL" = "Override Selection";
 
 /* (No Comment) */
-"yc02Yq" = "Zadať sacharidy do Loop";
+"yc02Yq" = "将碳水化合物添加到Loop";
 
 /* (No Comment) */
 "ZZ3mtM" = "Enable an override preset in Loop";
