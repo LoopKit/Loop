@@ -32,10 +32,10 @@
 "Continue" = "Продолжить";
 
 /* The short unit display string for decibles */
-"dB" = "dB";
+"dB" = "дБ";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Пропустить";
+"Dismiss" = "Отклонить";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -54,7 +54,7 @@
 "mg/dL" = "мг/дл";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "ммоль/л";
+"mmol/L" = "mmol/L";
 
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Чистая базальная доза";
@@ -109,10 +109,10 @@
 "Turn Digital Crown\nto bolus" = "Покрутите колесико\nдля болюса";
 
 /* The short unit display string for international units of insulin */
-"U" = "Ед";
+"U" = "ед";
 
 /* The short unit display string for international units of insulin delivery per hour */
-"U/hr" = "Ед/ч";
+"U/hr" = "U/hr";
 
 /* The title of the alert controller displayed after a potential carb entry send attempt fails */
 "Unable to Reach iPhone" = "Не удается подключиться к iPhone";

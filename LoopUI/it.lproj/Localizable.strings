@@ -11,7 +11,7 @@
 "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ sta funzionando con il ciclo chiuso in posizione OFF. Il microinfusore e il CGM continueranno a funzionare, ma l'applicazione non regolerà automaticamente il dosaggio.\n\n%2$@";
 
 /* No glucose value representation (3 dashes for mg/dL) */
-"– – –" = "– – –";
+"– – –" = "---";
 
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
 "%@ ago" = "%@ fa";
@@ -32,7 +32,7 @@
 "%1$@ units per hour at %2$@" = "%1$@ unità per ora a %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ v%2$@";
+"%1$@ v%2$@" = "%1$@ contro %2$@";
 
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
@@ -62,7 +62,7 @@
 "Last completed loop %1$@." = "Ultimo ciclo completato %1$@ .";
 
 /* Title of red loop message */
-"Loop Failure" = "Loop Fallito";
+"Loop Failure" = "Malfunzionamento di Loop";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop funziona %@ fa";

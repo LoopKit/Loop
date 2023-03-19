@@ -23,10 +23,10 @@
 "bq4-98-cQU.text" = "Modifica Carboidrati";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
-"d3X-AN-tA5.text" = "g Totali";
+"d3X-AN-tA5.text" = "Totale gr";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "La glicemia futura é predetta adottando una combinazione di multiple funzioni. Utilizzare questo strumento per attivare o meno le varie funzioni per valutare come esse influiscono sul valore glicemico predetto.";
+"D4C-I2-dhA.text" = "La glicemia futura è predetta combinando gli effetti di più dati inseriti. L'utilizzo di questo applicativo permette di valutare come i singoli dati inseriti influiscano sul valore finale predetto.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Etichetta";
@@ -44,7 +44,7 @@
 "fWV-jg-ICt.text" = "3.5 U/ora @ 12:12 PM";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
-"hZZ-2S-lrd.title" = "Effetti dei Carboidrati";
+"hZZ-2S-lrd.title" = "Effetti dei carboidrati";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
 "IxU-As-glo.text" = "Per valutare l'assorbimento dei carboidrati, è possibile utilizzare i cambiamenti osservati nel glucosio, sottraendo i cambiamenti modellati dall'erogazione di insulina.";
@@ -77,10 +77,10 @@
 "Rse-x8-amW.text" = "probabile glic. 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g Carboidrati Attivi";
+"SQx-au-ZcM.text" = "g Carboidrati attivi";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
-"tuw-av-A3x.text" = "Glicemie";
+"tuw-av-A3x.text" = "Glicemia";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
 "Tz7-80-bJ7.title" = "Aggiungi/Modifica carboidrati Assunti";

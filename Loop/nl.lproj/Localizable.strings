@@ -29,7 +29,7 @@
 "%@ %@" = "%1$@ %2$@";
 
 /* Formats absorbed carb value */
-"%@ absorbed" = "%@ opgenomen";
+"%@ absorbed" = "%@ geabsorbeerd";
 
 /* Estimated remaining duration with more than a minute */
 "%@ remaining" = "%@ resterend";
@@ -47,13 +47,13 @@
 "%1@%2@" = "%1$@%2$@";
 
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+"%1$@ – %2$@ %3$@" = "%1$@ - %2$@ %3$@";
 
 /* Format string combining carb entry quantity and absorption time emoji */
 "%1$@ %2$@" = "%1$@ %2$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
-"%1$@ %2$@/U" = "%1$@ %2$@/E";
+"%1$@ %2$@/U" = "%1$@ %2$@ /E";
 
 /* Formats (1: carb start time) and (2: carb absorption duration) */
 "%1$@ + %2$@" = "%1$@ + %2$@";
@@ -74,10 +74,10 @@
 "%1$@ U" = "%1$@ E";
 
 /* Low reservoir alert format string. (1: Number of units remaining) */
-"%1$@ U left" = "%1$@ E resterend";
+"%1$@ U left" = "%1$@ E over";
 
 /* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
-"%1$@ U left: %2$@" = "%1$@ E resterend: %2$@";
+"%1$@ U left: %2$@" = "%1$@ E over: %2$@";
 
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
 "%1$@ U/hour @ %2$@" = "%1$@ E/uur @ %2$@";
@@ -89,7 +89,7 @@
 "%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile." = "%1$@ stopt met werken in %2$@. Je zult eerder moeten updaten, met een nieuw beschikbaargesteld profiel.";
 
 /* Formats (1: carb value) and (2: food type) */
-"%1$@: %2$@" = "%1$@: %2$@";
+"%1$@: %2$@" = "%1$@ : %2$@";
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
@@ -114,7 +114,7 @@
 "A model based on the published absorption of Fiasp insulin." = "Een model gebaseerd op de gepubliceerde opname van Fiasp insuline.";
 
 /* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Een model gebaseerd op de gepubliceerde opname van Humalog, Novorapid, en Apidra insuline bij volwassenen.";
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Een model gebaseerd op de gepubliceerde absorptie van Humalog-, Novolog- en Apidra-insuline bij volwassenen.";
 
 /* Software update available section footer (1: app name) */
 "A new version of %@ is available and is recommended to continue using the app." = "Er is een nieuwe versie van %@ beschikbaar die aanbevolen wordt om de app te kunnen blijven gebruiken.";
@@ -147,18 +147,18 @@
 "Active Insulin: %@" = "Actieve Insuline: %@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Koolhydraatinvoer Toevoegen";
+"Add Carb Entry" = "Kh. Inv. Toevoegen";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
-"Add CGM" = "CGM Toevoegen";
+"Add CGM" = "Voeg CGM toe";
 
 /* The label of the meal button */
-"Add Meal" = "Maaltijd Toevoegen";
+"Add Meal" = "Voeg Maaltijd toe";
 
 /* Action sheet title selecting Pump
    Title text for button to set up a new pump */
-"Add Pump" = "Pomp Toevoegen";
+"Add Pump" = "Voeg Pomp toe";
 
 /* Title text for button to set up a service */
 "Add Service" = "Service Toevoegen";
@@ -220,7 +220,7 @@
 "Are you sure you want to delete this CGM?" = "Weet je zeker dat je deze CGM wilt verwijderen";
 
 /* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Weet je zeker dat je deze service wilt verwijderen?";
+"Are you sure you want to delete this service?" = "Weet je zeker dat je deze service wil verwijderen?";
 
 /* Format fragment for a specific time */
 "at %@" = "om %@";
@@ -353,7 +353,7 @@
 "com.loudnate.InsulinKit.totalDateLabel" = "sinds %1$@";
 
 /* The title of the action used to dismiss an error alert */
-"com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
+"com.loudnate.LoopKit.errorAlertActionTitle" = "Ok";
 
 /* Title text for button to complete setup */
 "Complete Setup" = "Volledige Installatie";
@@ -408,10 +408,10 @@
 "Delete" = "Verwijderen";
 
 /* The title of the button to remove the credentials for a service */
-"Delete Account" = "Account Verwijderen";
+"Delete Account" = "Verwijder Account";
 
 /* Button title to delete all objects */
-"Delete All" = "Alles Verwijderen";
+"Delete All" = "Verwijder Alles";
 
 /* Button title to delete CGM */
 "Delete CGM" = "Verwijder CGM";
@@ -487,7 +487,7 @@
 "Error Exporting Logs" = "Fout bij exporteren logboeken";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Fout bij vervolgen";
+"Error Resuming" = "Fout Bij Hervatten";
 
 /* Segmented button title for insulin delivery log event history */
 "Event History" = "Logboek";
@@ -595,7 +595,7 @@
 
 /* The title of the insulin sensitivities schedule screen
    The title text for the insulin sensitivity schedule */
-"Insulin Sensitivities" = "Insulinegevoeligheid";
+"Insulin Sensitivities" = "Insulinegevoeligheden";
 
 /* Details for configuration error when insulin sensitivity schedule is missing */
 "Insulin Sensitivity Schedule" = "Insulinegevoeligheidschema";
@@ -616,7 +616,7 @@
 "Invalid carb amount" = "Ongeldige hoeveelheid koolhydraten";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
-"Invalid data: %1$@" = "Niet valide gegevens: %1$@";
+"Invalid data: %1$@" = "Ongeldige gegevens: %1$@";
 
 /* Title for bolus screen notice when glucose data is in the future */
 "Invalid Future Glucose" = "Ongeldige Toekomstige Glucose";
@@ -634,7 +634,7 @@
 "Large Meal Entered" = "Grote Maaltijd Ingevoerd";
 
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Start de CGM app op";
+"Launches CGM app" = "Lanceert CGM app";
 
 /* OK button title for alert shown when delivery status is uncertain */
 "Learn More" = "Meer Informatie";
@@ -656,7 +656,7 @@
 "Loop Crashed" = "Loop is Vastgelopen";
 
 /* The notification title for a loop failure */
-"Loop Failure" = "Loop fout";
+"Loop Failure" = "Loopstoring";
 
 /* Bluetooth unavailable alert body. */
 "Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop heeft een probleem met je Bluetoothinstellingen gedetecteerd en zal niet goed werken totdat Bluetooth wordt ingeschakeld. Je ontvangt geen glucosemetingen en je kunt niet bolussen.";
@@ -705,7 +705,7 @@
 "mg/dL" = "mg/dL";
 
 /* The error message for missing data. (1: missing data details) */
-"Missing data: %1$@" = "Missende gegevens: %1$@";
+"Missing data: %1$@" = "Ontbrekende gegevens: %1$@";
 
 /* Remote command error description: missing maximum bolus in settings. */
 "Missing maximum allowed bolus in settings" = "Maximaal toegestane bolus ontbreekt in instellingen";
@@ -723,7 +723,7 @@
 "Mute All Alerts" = "Alle Waarschuwingen Dempen";
 
 /* Sensor state description for the non-valid state */
-"Needs Attention" = "Aandacht Vereist";
+"Needs Attention" = "Aandacht Nodig";
 
 /* Remote command error description: negative duration error. */
 "Negative duration not allowed" = "Negatieve duur niet toegestaan";
@@ -740,7 +740,7 @@
 "No Bolus Recommended" = "Geen Bolus Aanbevolen";
 
 /* The error message displayed for device connection errors. */
-"No connected devices, or failure during device connection" = "Geen gekoppelde apparaten, of fout bij apparaat verbinding";
+"No connected devices, or failure during device connection" = "Geen aangesloten apparaten of storingen tijdens het verbinden met het apparaat";
 
 /* Alert title for a missing maximum bolus setting error */
 "No Maximum Bolus Configured" = "Geen Maximale Bolus Geconfigureerd";
@@ -790,7 +790,7 @@
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
    The title of the notification action to acknowledge a device alert */
-"OK" = "OK";
+"OK" = "Ok";
 
 /* Notification Setting Status is On */
 "On" = "Aan";
@@ -805,7 +805,7 @@
 "Pre-Meal Targets" = "Pre-Meal Doelen";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Verwachte glucose op %1$@ is %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Voorspelde glucose om %1$@ is %2$@.";
 
 /* Notice when predicted glucose for bolus recommendation is in range */
 "Predicted glucose is in range." = "Voorspelde glucose is binnen bereik.";
@@ -844,7 +844,7 @@
 "Pump Event" = "Pompgebeurtenis";
 
 /* Details for configuration error when pump manager is missing */
-"Pump Manager" = "Pompbeheer";
+"Pump Manager" = "Pomp Manager";
 
 /* The error message displayed for pump manager errors. (1: pump manager error) */
 "Pump Manager Error: %1$@" = "Pompmanager Fout: %1$@";
@@ -862,7 +862,7 @@
 "Pump Suspended. Automatic dosing is disabled." = "Pomp Onderbroken. Automatisch doseren is uitgeschakeld.";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@%2$@";
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Snelwerkend - Volwassenen";
@@ -903,7 +903,7 @@
 "Retrospective Correction" = "Retroperspectieve Correctie";
 
 /* The title of the notification action to retry a bolus command */
-"Retry" = "Opnieuw proberen";
+"Retry" = "Opnieuw Proberen";
 
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Opslaan en Toedienen";
@@ -936,7 +936,7 @@
 "Simple Meal Calculator" = "Eenvoudige Maaltijdcalculator";
 
 /* Format fragment for a start time */
-"since %@" = "na %@";
+"since %@" = "sinds %@";
 
 /* The title of the nightscout site URL credential */
 "Site URL" = "Site URL";
@@ -993,7 +993,7 @@
 "The bolus recommendation has updated. Please reconfirm the bolus amount." = "De aanbevolen bolus is bijgewerkt. Bevestig de bolus opnieuw.";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Het oude model dat door Loop werd gebruikt dat toestaat de actieduur aan te passen.";
+"The legacy model used by Loop, allowing customization of action duration." = "Het model gebruikt bij Loop, staat verandering van actieduur toe.";
 
 /* Alert body displayed absorption time greater than max (1: maximum absorption time) */
 "The maximum absorption time is %@" = "De maximale opnametijd is %@";

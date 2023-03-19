@@ -38,7 +38,7 @@
 "mmol/L" = "mmol/L";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+"QUANTITY_VALUE_AND_UNIT" = "%1$@%2$@";
 
 /* The short unit display string for international units of insulin */
 "U" = "U";

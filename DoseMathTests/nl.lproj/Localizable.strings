@@ -1,5 +1,5 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Huidige glucose van %1$@ is onder het correctiebereik.";
+"Current glucose of %1$@ is below correction range." = "Huidige glucose %1$@ is lager dan het correctiebereik.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";

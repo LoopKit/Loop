@@ -105,7 +105,7 @@
 "Active Carbs" = "Akt. hiilari";
 
 /* The title of the Insulin On-Board graph */
-"Active Insulin" = "Aktiivinen insuliini";
+"Active Insulin" = "Akt. insuliini";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktiivinen insuliini: %@";
@@ -262,7 +262,10 @@
 "Check your CGM data source" = "Tarkista CGM-tietolähde";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Valitse pidempi imeytymisaika isoille tai paljon rasvaa ja proteiineja sisältäville aterioille. Tämä on suuntaa antava tieto, eikä sen tarvitse olla tarkka.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Valitse pidempi imeytymisaika isoille tai paljon rasvaa ja proteiineja sisältäville aterioille. Tämä on suuntaa antava ohje, eikä sen tarvitse olla tarkka.";
+
+/* The button label of the action used to dismiss the unsafe notification permission alert */
+"Close" = "Sulje";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Suljettu säätö";
@@ -287,6 +290,9 @@
 
 /* The error message displayed for configuration errors. (1: configuration error details) */
 "Configuration Error: %1$@" = "Määritysvirhe: %1$@";
+
+/* Default alert dismissal */
+"Continue" = "Jatka";
 
 /* The title of the continuous glucose monitor section in settings */
 "Continuous Glucose Monitor" = "Glukoosinseuranta (CGM)";
@@ -460,7 +466,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Imeytynyt insuliini (U) × Insuliiniherkkyys (%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insuliinin annostelu";
+"Insulin Delivery" = "Insulin Delivery";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Insuliinivaikutus";
@@ -525,6 +531,9 @@
 /* Description string for temp basal only dosing strategy */
 "Loop will set temporary basal rates to increase and decrease insulin delivery." = "Loop käyttää tilapäisiä basaalitasoja lisätäkseen tai vähentääkseen insuliinin annostelua.";
 
+/* Details for configuration error when maximum bolus is missing */
+"Maximum Bolus" = "Suurin sallittu bolus";
+
 /* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Ateriabolus";
 
@@ -539,6 +548,9 @@
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Liikevaikutukset (momentum)";
+
+/* Text for more info action on notification of upcoming profile expiration */
+"More Info" = "Lisätietoa";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Tarvitsee huomiota";
@@ -569,6 +581,9 @@
 /* Title for bolus screen notice when pump data is missing or stale */
 "No Recent Pump Data" = "Ei viimeaikaisia pumpun tietoja";
 
+/* Notification Setting Status is Off */
+"Off" = "Pois päältä";
+
 /* Alert acknowledgment OK button
    Critical Alert permissions disabled alert button
    Default action for alert when alert acknowledgment fails
@@ -576,6 +591,9 @@
    Text for ok action on notification of upcoming profile expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
+
+/* Notification Setting Status is On */
+"On" = "Päällä";
 
 /* The title text for the override presets */
 "Override Presets" = "Tilapäisasetukset";
@@ -608,7 +626,7 @@
 "Pump data is %1$@ old" = "Pumpputieto on %1$@ vanha";
 
 /* The title of the screen displaying a pump event */
-"Pump Event" = "Pumpun tapahtuma";
+"Pump Event" = "Pumpputapahtuma";
 
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Pumpun hallinta";
@@ -654,7 +672,7 @@
 "Retrospective Correction" = "Retrospektiivinen korjaus";
 
 /* The title of the notification action to retry a bolus command */
-"Retry" = "Uudelleen";
+"Retry" = "Yritä uudelleen";
 
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Tallenna ja annostele";
@@ -721,6 +739,9 @@
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Loopin vanha insuliinimalli, jossa voi muokata insuliinin vaikutusaikaa.";
+
+/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
+"The maximum absorption time is %@" = "Pisin sallittu imeytymisaika on %@";
 
 /* Alert message for a maximum bolus validation error (1: max bolus value) */
 "The maximum bolus amount is %@ U." = "Suurin sallittu bolus on %@ U.";

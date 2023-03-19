@@ -20,7 +20,7 @@
 "jj3-Gq-HBy.text" = "Bolus Başarısız";
 
 /* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
-"JXa-s1-PJx.text" = "Koşu";
+"JXa-s1-PJx.text" = "Çalışıyor";
 
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "Mhe-aR-kQQ"; */
 "Mhe-aR-kQQ.text" = "–";

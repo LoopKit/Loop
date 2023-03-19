@@ -1,3 +1,9 @@
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "---";
+
+/* Format string for glucose range (1: lower bound)(2: upper bound)(3: unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* HUD row title for COB */
 "Active Carbs" = "Lượng Carbs còn hoạt động";
 
@@ -5,24 +11,55 @@
 "Active Insulin" = "Lượng Insulin còn hoạt động";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Khai báo khối lượng Carb";
+"Add Carb Entry" = "Khai báo Carb";
+
+/* Button text to confirm manual bolus on Apple Watch */
+"Bolus" = "Bolus";
 
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus lỗi";
 
+/* Button text to continue from carb entry to bolus entry on Apple Watch */
+"Continue" = "Tiếp tục";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
 /* The action button title to dismiss an error message */
 "Dismiss" = "Từ bỏ";
+
+/* Short unit label for gram measurement
+   The short unit display string for grams */
+"g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Đảm bảo rằng iPhone của bạn đang ở gần và thử lại";
 
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Tỷ lệ liều basal ròng";
 
+/* No comment provided by engineer. */
+"OK" = "OK";
+
+/* Label for on button */
+"On" = "On";
+
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Chồng liều";
+"Override" = "Chồng lên";
+
+/* Title for sheet to enable/disable pre-meal on watch */
+"Pre-Meal" = "Trước bữa ăn";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Khuyến nghị: %@ U";
@@ -30,13 +67,19 @@
 /* HUD row title for remaining reservoir volume */
 "Reservoir Volume" = "Khối lượng ngăn chứa insulin";
 
+/* Button text to confirm carb entry without bolusing on Apple Watch */
+"Save" = "Lưu";
+
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Chuyển bị lỗi";
+
+/* The short unit display string for international units of insulin */
+"U" = "U";
 
 /* The short unit display string for international units of insulin delivery per hour */
 "U/hr" = "U/giờ";
 
 /* The text for the Watch button for enabling workout mode */
-"Workout" = "Tập luyện";
+"Workout" = "Workout";
 
