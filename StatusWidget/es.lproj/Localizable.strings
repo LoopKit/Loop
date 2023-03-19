@@ -23,7 +23,7 @@
 "Eventual" = "Eventual";
 
 /* The short unit display string for grams */
-"g" = "gr";
+"g" = "g";
 
 /* No comment provided by engineer. */
 "Loop Status Widget" = "Widget de Estado de Loop";

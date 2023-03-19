@@ -23,7 +23,7 @@
 "Bolus" = "Bolus";
 
 /* The title of the alert controller displayed after a bolus attempt fails */
-"Bolus Failed" = "Bolus Échoué";
+"Bolus Failed" = "Échec du bolus";
 
 /* Alert title for updated bolus recommendation on Apple Watch */
 "Bolus Recommendation Updated" = "Recommandation de Bolus modifiée";
@@ -35,7 +35,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Rejeter";
+"Dismiss" = "Fermer";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -75,7 +75,7 @@
 "Please reconfirm the bolus amount." = "Veuillez reconfirmer le bolus.";
 
 /* Title for sheet to enable/disable pre-meal on watch */
-"Pre-Meal" = "Pré-repas";
+"Pre-Meal" = "Pré-Repas";
 
 /* The text for the Watch button for enabling a custom preset */
 "Preset" = "Préréglage";

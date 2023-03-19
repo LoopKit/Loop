@@ -2,7 +2,7 @@
 "0RV-d5-muE.text" = "г";
 
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
-"3kU-n2-fha.title" = "Состояние";
+"3kU-n2-fha.title" = "Статус";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
 "5gz-kZ-iF1.text" = "3,5 ед./час @ 12:12 PM";
@@ -11,13 +11,13 @@
 "87H-N1-0vJ.text" = "Предсказываемый";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
-"aCb-Qs-bpu.text" = "Подробнее";
+"aCb-Qs-bpu.text" = "Detail";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
 "ap1-M6-naG.text" = "Тип еды";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
-"bIL-Ub-qYp.text" = "Пометка";
+"bIL-Ub-qYp.text" = "Ярлык";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
 "bq4-98-cQU.text" = "Изменение глюкозы";
@@ -29,7 +29,7 @@
 "D4C-I2-dhA.text" = "Будущие значения СК предсказываются на основе определения эффекта множественных факторов. Пользуйтесь этим инструментом для перехода между разными вводными чтобы увидеть как они сопоставимы с окончательным предсказанием";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
-"d6m-qV-wWi.text" = "Пометка";
+"d6m-qV-wWi.text" = "Ярлык";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
 "E41-FN-nkk.text" = "в конечном итоге 92 мг/дл";
@@ -50,16 +50,16 @@
 "IxU-As-glo.text" = "Наблюдаются изменения СК, вычитаются изменения смоделированные на подаваемом инсулине, могут использоваться для оценки усвоения углеводов";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
-"J7x-W5-gwo.text" = "Подробнее";
+"J7x-W5-gwo.text" = "Detail";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
 "k3F-Na-7mn.text" = "Рекомендуемый базал";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
-"Krd-Aa-ret.text" = "Пометка";
+"Krd-Aa-ret.text" = "Ярлык";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
-"OFA-qT-ZAg.text" = "Пометка";
+"OFA-qT-ZAg.text" = "Ярлык";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Предсказываемый СК";
@@ -80,13 +80,13 @@
 "SQx-au-ZcM.text" = "г активных углеводов";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
-"tuw-av-A3x.text" = "Гликемия";
+"tuw-av-A3x.text" = "Глюкоза";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
 "Tz7-80-bJ7.title" = "Добавить/редактировать запись об углеводах";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
-"ufi-Kj-33k.text" = "Пометка";
+"ufi-Kj-33k.text" = "Ярлык";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Углеводы";
@@ -107,7 +107,7 @@
 "yn7-2M-jZz.text" = "0";
 
 /* Class = "UILabel"; text = "Title"; ObjectID = "zbc-87-wxZ"; */
-"zbc-87-wxZ.text" = "Название";
+"zbc-87-wxZ.text" = "Title";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "zvZ-uf-zMX"; */
 "zvZ-uf-zMX.text" = "0";

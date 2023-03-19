@@ -1,0 +1,63 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "g";
+
+/* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
+"3kU-n2-fha.title" = "Stav";
+
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
+"5gz-kZ-iF1.text" = "3,5 i/hod o 12:12";
+
+/* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
+"87H-N1-0vJ.text" = "Predpoklad";
+
+/* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
+"aCb-Qs-bpu.text" = "Detail";
+
+/* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
+"bq4-98-cQU.text" = "Zmena glykémie";
+
+/* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
+"d3X-AN-tA5.text" = "g Celkom";
+
+/* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
+"D4C-I2-dhA.text" = "Budúca glykémia sa predpovedá kombináciou účinkov viacerých vstupov. Pomocou tohto nástroja môžete prepínať rôzne vstupy, aby ste videli, ako vplývajú v porovnaní s konečnou predpoveďou.";
+
+/* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
+"E41-FN-nkk.text" = "pravdepodobne 92mg/dl";
+
+/* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
+"EAn-Ja-S1d.text" = "Pozorované";
+
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3,5 i/hod o 12:12";
+
+/* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
+"hZZ-2S-lrd.title" = "Účinky sacharidov";
+
+/* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
+"J7x-W5-gwo.text" = "Detail";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
+"k3F-Na-7mn.text" = "Odporúčaný bazal";
+
+/* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
+"PA3-sP-cWY.title" = "Predpokladaná glykémia";
+
+/* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
+"Rse-x8-amW.text" = "pravdepodobne 92mg/dl";
+
+/* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
+"SQx-au-ZcM.text" = "g Aktívne sacharidy";
+
+/* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
+"tuw-av-A3x.text" = "Glykémia";
+
+/* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
+"Vpi-5b-bY5.title" = "Sacharidy";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Odporúčaný bazal";
+
+/* Class = "UILabel"; text = "Title"; ObjectID = "zbc-87-wxZ"; */
+"zbc-87-wxZ.text" = "Názov";
+

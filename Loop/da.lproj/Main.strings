@@ -5,7 +5,7 @@
 "3kU-n2-fha.title" = "Status";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
-"5gz-kZ-iF1.text" = "3.5 E/time @ 12:12 PM";
+"5gz-kZ-iF1.text" = "3.5 E/time @ 12:12";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
 "87H-N1-0vJ.text" = "Forventet";
@@ -80,7 +80,7 @@
 "SQx-au-ZcM.text" = "g aktive kulhydrater";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
-"tuw-av-A3x.text" = "Blodsukker";
+"tuw-av-A3x.text" = "Glukose";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
 "Tz7-80-bJ7.title" = "Tilføj/rediger kulhydrater";

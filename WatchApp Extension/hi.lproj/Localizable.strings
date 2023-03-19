@@ -1,0 +1,6 @@
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
+/* Button text to continue from carb entry to bolus entry on Apple Watch */
+"Continue" = "जारी";
+

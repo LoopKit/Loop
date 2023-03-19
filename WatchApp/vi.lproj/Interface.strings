@@ -11,7 +11,7 @@
 "f5G-bS-9pd.text" = "Trước bữa ăn";
 
 /* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
-"hln-CI-MRP.text" = "Lượng Carbs";
+"hln-CI-MRP.text" = "Carbs";
 
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "IRi-4t-ESO"; */
 "IRi-4t-ESO.text" = "—";

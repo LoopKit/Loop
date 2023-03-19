@@ -26,7 +26,7 @@
 "Eventually %1$@" = "Eventualmente %1$@";
 
 /* The short unit display string for grams */
-"g" = "gr";
+"g" = "g";
 
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
 "IOB %1$@ U" = "IOB %1$@ U";

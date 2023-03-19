@@ -35,7 +35,7 @@
 "%@ remaining" = "%@ verbleiben";
 
 /* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ Gesamt-IE";
+"%@ U Total" = "%@ IE gesamt";
 
 /* Appends a full-stop to a statement */
 "%@." = "%@.";
@@ -147,7 +147,7 @@
 "Active Insulin: %@" = "Aktives Insulin: %@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "KH-Eintrag hinzufügen";
+"Add Carb Entry" = "Kohlenhydrate hinzufügen";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
@@ -196,22 +196,22 @@
 "An updated bolus recommendation is available." = "Eine aktualisierte Bolusempfehlung ist verfügbar.";
 
 /* The title of the amplitude API key credential */
-"API Key" = "API Schlüssel";
+"API Key" = "API Key";
 
 /* The title of the nightscout API secret credential */
-"API Secret" = "API Geheimnis";
+"API Secret" = "API Secret";
 
 /* Settings app profile section */
 "App Profile" = "App-Profil";
 
 /* Action sheet confirmation message for pump history deletion */
-"Are you sure you want to delete all history entries?" = "Möchten Sie wirklich alle Verlaufseinträge löschen?";
+"Are you sure you want to delete all history entries?" = "Möchtest Du wirklich alle Verlaufseinträge löschen?";
 
 /* Action sheet confirmation message for logged dose deletion */
 "Are you sure you want to delete all logged dose entries?" = "Möchten Sie wirklich alle protokollierten Dosiseinträge löschen?";
 
 /* Action sheet confirmation message for reservoir deletion */
-"Are you sure you want to delete all reservoir values?" = "Möchten Sie wirklich alle Reservoirwerte löschen?";
+"Are you sure you want to delete all reservoir values?" = "Möchtest Du wirklich alle Reservoirwerte löschen?";
 
 /* No comment provided by engineer. */
 "Are you sure you want to delete all your %@ Data?\n(This action is not reversible)" = "Möchten Sie wirklich alle %@-Daten löschen?\n(Diese Aktion kann nicht rückgängig gemacht werden)";
@@ -220,7 +220,7 @@
 "Are you sure you want to delete this CGM?" = "Sind Sie sicher, dass Sie dieses CGM löschen wollen?";
 
 /* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Möchten Sie diesen Dienst wirklich löschen?";
+"Are you sure you want to delete this service?" = "Bist Du sicher, dass Du diesen Dienst löschen möchtest?";
 
 /* Format fragment for a specific time */
 "at %@" = "um %@";
@@ -232,11 +232,11 @@
 "Authenticate to log %@ Units" = "Authentifizieren Sie sich, um %@ Einheiten zu protokollieren";
 
 /* Details for configuration error when basal rate schedule is missing */
-"Basal Rate Schedule" = "Basalraten-Zeitplan";
+"Basal Rate Schedule" = "Basalratenplan";
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
-"Basal Rates" = "Basalraten";
+"Basal Rates" = "Basalrate";
 
 /* Caption for bolus screen notice when no bolus is recommended for the predicted glucose */
 "Based on your predicted glucose, no bolus is recommended." = "Basierend auf Ihrem vorhergesagten Blutzucker wird kein Bolus empfohlen.";
@@ -261,7 +261,7 @@
 "Bolus Issue" = "Bolus Problem";
 
 /* Alert title for an updated bolus recommendation */
-"Bolus Recommendation Updated" = "Bolusempfehlung aktualisiert";
+"Bolus Recommendation Updated" = "Aktualisierte Bolusempfehlung";
 
 /* Title for card displaying carb entry and bolus recommendation */
 "Bolus Summary" = "Bolus Zusammenfassung";
@@ -270,10 +270,10 @@
 "Bolus Too Small" = "Bolus zu gering";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "%1$@ abgegeben von %2$@";
+"Bolused %1$@ of %2$@" = "%1$@ von %2$@ als Bolus verabreicht";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Abgabe %1$@";
+"Bolusing %1$@" = "Bolusabgabe %1$@";
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Abbrechen";
@@ -293,10 +293,10 @@
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Kohlenhydratfaktoren";
+"Carb Ratios" = "KH-Verhältnis";
 
 /* The title of the view controller to create a new carb entry */
-"carb-entry-title-add" = "KH-Eintrag hinzufügen";
+"carb-entry-title-add" = "Kohlenhydrate hinzufügen";
 
 /* The title of the view controller to edit an existing carb entry */
 "carb-entry-title-edit" = "KH-Eintrag bearbeiten";
@@ -311,10 +311,10 @@
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Resorbierte Kohlenhydrate (g) ÷ Kohlenhydratfaktor (g/IE) × Insulinempfindlichkeit (%1$@/IE)";
 
 /* The notification alert describing a low pump battery */
-"Change the pump battery immediately" = "Wechsel sofort die Pumpenbatterie.";
+"Change the pump battery immediately" = "Wechseln Sie sofort die Pumpenbatterie";
 
 /* The notification alert describing an empty pump reservoir */
-"Change the pump reservoir now" = "Wechsel jetzt das Pumpenreservoir.";
+"Change the pump reservoir now" = "Wechseln Sie jetzt das Pumpenreservoir";
 
 /* Details for configuration error when one or more loop settings are missing */
 "Check settings" = "Überprüfe die Einstellungen.";
@@ -329,10 +329,10 @@
 "Check your device time and/or remove any invalid data from Apple Health." = "Überprüfen Sie die Uhrzeit Ihres Geräts und/oder entfernen Sie alle ungültigen Daten aus Apple Health.";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Wähle eine längere Resorptionsdauer für größere Mahlzeiten oder solche, die Fette und Proteine enthalten. Dies ist nur eine Anleitung für den Algorithmus und muss nicht genau sein.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Wähle eine längere Resorptionsdauer für größere Mahlzeiten, oder welche die viel Fett und Proteine beinhalten. Dies ist eine Unterstützung für den Algorithmus und muss nicht genau sein.";
 
 /* The button label of the action used to dismiss the unsafe notification permission alert */
-"Close" = "Schließen";
+"Close" = "Schliessen";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Closed Loop";
@@ -368,14 +368,14 @@
 "Continue" = "Weiter";
 
 /* The title of the continuous glucose monitor section in settings */
-"Continuous Glucose Monitor" = "Kontinuierliche Glukosemessung";
+"Continuous Glucose Monitor" = "Kontinuierliche Blutzuckermessung";
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
 "Correction Range" = "Korrekturbereich";
 
 /* Critical Alerts Status text */
-"Critical Alerts" = "Dringende Warnungen";
+"Critical Alerts" = "Kritische Warnungen";
 
 /* Critical event log ready text */
 "Critical Event Log Ready" = "Kritisches Ereignisprotokoll bereit";
@@ -393,10 +393,10 @@
 "Current glucose of %1$@ is below correction range." = "Der aktuelle Blutzucker von %1$@ liegt unter dem Korrekturbereich.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Eigene Voreinstellung";
+"Custom Override" = "Benutzerdefinierter Override";
 
 /* The title of the cell indicating a generic custom preset is enabled */
-"Custom Preset" = "Zielbereichänderung";
+"Custom Preset" = "Voreinstellung";
 
 /* Date picker label */
 "Date" = "Datum";
@@ -429,10 +429,10 @@
 "Delete Testing Pump Data" = "Pumpen-Test-Daten löschen";
 
 /* Button text to deliver a bolus */
-"Deliver" = "Bolus";
+"Deliver" = "Abgeben";
 
 /* Title text for delivery limits */
-"Delivery Limits" = "Verabreichungslimits";
+"Delivery Limits" = "Abgabelimits";
 
 /* Descriptive text for Therapy Settings */
 "Diabetes Treatment" = "Diabetes-Behandlung";
@@ -490,7 +490,7 @@
 "Error Resuming" = "Fehler beim Fortfahren";
 
 /* Segmented button title for insulin delivery log event history */
-"Event History" = "Ereignishistorie";
+"Event History" = "Ereignisverlauf";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Voraussichtlich %@";
@@ -511,7 +511,7 @@
 "Export-%1$@" = "Export-%1$@";
 
 /* The alert title for a resume error */
-"Failed to Resume Insulin Delivery" = "Insulinabgabe konnte nicht fortgesetzt werden";
+"Failed to Resume Insulin Delivery" = "Wiederaufnahme der Insulinabgabe fehlgeschlagen";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
@@ -541,10 +541,10 @@
 "Glucose" = "Blutzucker";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "Blutzucker ist %1$@ alt";
+"Glucose data is %1$@ old" = "Blutzuckerdaten sind %1$@ alt";
 
 /* Description of error when glucose data is missing */
-"Glucose data not available" = "Blutzucker ist nicht verfügbar";
+"Glucose data not available" = "Blutzuckerdaten nicht verfügbar";
 
 /* Alert title when glucose data returns while on bolus screen */
 "Glucose Data Now Available" = "Blutzucker jetzt verfügbar";
@@ -581,7 +581,7 @@
 "Insulin adjustments have been disabled!" = "Die Insulinanpassung wurde deaktiviert!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulinabgabe";
+"Insulin Delivery" = "Insulin Delivery";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Insulinwirkungen";
@@ -601,10 +601,10 @@
 "Insulin Sensitivity Schedule" = "Insulinsensitivitätsplan";
 
 /* The title of the cell indicating the pump is suspended */
-"Insulin Suspended" = "Insulin unterbrochen";
+"Insulin Suspended" = "Insulinabgabe unterbrochen";
 
 /* Insulin type label */
-"Insulin Type" = "Insulinart";
+"Insulin Type" = "Insulintyp";
 
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "%1$@ unterbrochen: <b>%2$@</b> von %3$@ %4$@";
@@ -634,7 +634,7 @@
 "Large Meal Entered" = "Große Mahlzeit eingegeben";
 
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Startet die CGM-App";
+"Launches CGM app" = "Öffnet die CGM-App";
 
 /* OK button title for alert shown when delivery status is uncertain */
 "Learn More" = "Mehr erfahren";
@@ -643,7 +643,7 @@
 "Less than a minute remaining" = "Weniger als eine Minute verbleiben";
 
 /* The loading message for the diagnostic report screen */
-"Loading..." = "laden ...";
+"Loading..." = "Wird geladen...";
 
 /* Button text to log a dose
    Title for dose logging screen */
@@ -656,7 +656,7 @@
 "Loop Crashed" = "Loop ist abgestürzt";
 
 /* The notification title for a loop failure */
-"Loop Failure" = "Loopfehler";
+"Loop Failure" = "Loop fehlgeschlagen";
 
 /* Bluetooth unavailable alert body. */
 "Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop hat ein Problem mit Ihren Bluetooth-Einstellungen festgestellt und funktioniert nicht, bis Bluetooth aktiviert ist. Sie erhalten keine Blutzucker-Werte und es kann kein Bolus abgeben werden.";
@@ -699,7 +699,7 @@
 "Meal Bolus" = "Mahzeiten Bolus";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dl";
+"mg/dL" = "mg/dL";
 
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Fehlende Daten: %1$@";
@@ -708,19 +708,19 @@
 "Missing maximum allowed bolus in settings" = "Maximal erlaubter Bolus in den Einstellungen fehlt";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/l";
+"mmol/L" = "mmol/L";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum-Effekte";
 
 /* Text for more info action on notification of upcoming profile expiration */
-"More Info" = "Mehr Infos";
+"More Info" = "Weitere Info";
 
 /* Label for toggle to mute all alerts */
 "Mute All Alerts" = "Alle Alarme stummschalten";
 
 /* Sensor state description for the non-valid state */
-"Needs Attention" = "Benötigt Aufmerksamkeit";
+"Needs Attention" = "Erfordert Aufmerksamkeit";
 
 /* Remote command error description: negative duration error. */
 "Negative duration not allowed" = "Eine negative Dauer ist nicht erlaubt";
@@ -814,7 +814,7 @@
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unter dem Grenzwert für die Hypo-Abschaltung.";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
-"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Vorausgesagt: %1$@\nAktuell: %2$@ (%3$@)";
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Vorhergesagt: %1$@\nAktuell: %2$@ (%3$@)";
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Vorbereiten der kritischer Ereigniss-Protokollen";
@@ -838,7 +838,7 @@
 "Pump data is %1$@ old" = "Pumpendaten sind %1$@ alt";
 
 /* The title of the screen displaying a pump event */
-"Pump Event" = "Pumpenereignis";
+"Pump Event" = "Pumpen-Ereignis";
 
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Pumpenmanager";
@@ -924,7 +924,7 @@
 "Setup Incomplete" = "Einrichtung unvollständig";
 
 /* Loop Completion HUD accessibility hint */
-"Shows last loop error" = "Zeigt den letzten Loopfehler an";
+"Shows last loop error" = "Zeigt den letzten Loop-Fehler an";
 
 /* Title of simple bolus view when not displaying meal entry */
 "Simple Bolus Calculator" = "Einfacher Bolusrechner";
@@ -936,7 +936,7 @@
 "since %@" = "seit %@";
 
 /* The title of the nightscout site URL credential */
-"Site URL" = "Seiten URL";
+"Site URL" = "Website URL";
 
 /* Software update button link text */
 "Software Update" = "Software-Aktualisierung";
@@ -954,10 +954,10 @@
    Support screen title
    The title of the support item in settings
    The title of the support section in settings */
-"Support" = "Support";
+"Support" = "Unterstützung";
 
 /* The title text in settings */
-"Suspend Threshold" = "Wert für die Hypo-Abschaltung";
+"Suspend Threshold" = "Grenzwert für Hypo-Abschaltung";
 
 /* Descriptive text for button to add CGM device */
 "Tap here to set up a CGM" = "Tippe hier, um ein CGM einzurichten";
@@ -990,7 +990,7 @@
 "The bolus recommendation has updated. Please reconfirm the bolus amount." = "Die Bolusempfehlung wurde aktualisiert. Bitte bestätigen Sie die Bolusmenge erneut.";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Das herkömmliche von Loop verwendete Modell, welches die Anpassung der Wirkungsdauer ermöglicht.";
+"The legacy model used by Loop, allowing customization of action duration." = "Das von Loop verwendete Legacy-Modell, das die Anpassung der Aktionsdauer ermöglicht.";
 
 /* Alert body displayed absorption time greater than max (1: maximum absorption time) */
 "The maximum absorption time is %@" = "Die maximale Resorptionszeit beträgt %@";
@@ -1014,7 +1014,7 @@
 "The remote command expired %.0f minutes ago." = "Der Fernbefehl ist vor %.0f Minuten abgelaufen.";
 
 /* Title text for button to Therapy Settings */
-"Therapy Settings" = "Behandlungseinstellungen";
+"Therapy Settings" = "Therapieeinstellungen";
 
 /* Title of the carb entry date picker cell */
 "Time" = "Zeit";
@@ -1087,7 +1087,7 @@
 "When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder prognostizierte Glukosewert unter dem Glukosesicherheitsgrenzwert liegt, empfiehlt Loop keinen Bolus und immer eine temporäre Basalrate von 0 Einheiten pro Stunde.";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn die aktuelle oder prognostizierte Glukose unter dem Wert für die Hypo-Abschaltung liegt, empfiehlt Loop immer eine temporäre Basalrate von 0 Einheiten pro Stunde und - wenn kein gesonderter Bolusgrenzwert definiert ist - auch keinen Bolus.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder prognostizierte Blutzucker unter dem Schwellenwert für die Unterbrechung liegt, empfiehlt Loop keinen Bolus, sondern immer eine temporäre Basalrate von 0 Einheiten pro Stunde.";
 
 /* Description of missed meal notifications. */
 "When enabled, Loop can notify you when it detects a meal that wasn't logged." = "Wenn aktiviert, kann Loop Dich benachrichtigen, wenn es eine Mahlzeit erkennt, die nicht protokolliert wurde.";

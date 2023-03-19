@@ -17,7 +17,7 @@
 "Active Insulin" = "Aktives Insulin";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "KH-Eintrag hinzufügen";
+"Add Carb Entry" = "Kohlenhydrate hinzufügen";
 
 /* Button text to confirm manual bolus on Apple Watch */
 "Bolus" = "Bolus";
@@ -35,7 +35,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Verwerfen";
+"Dismiss" = "Schließen";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */

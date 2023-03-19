@@ -95,7 +95,7 @@
 "U" = "Ü";
 
 /* Accessibility value for an unknown value */
-"Unknown" = "Bilinmiyor";
+"Unknown" = "Bilinmeyen";
 
 /* Acessibility label describing completion HUD waiting for first run */
 "Waiting for first run" = "İlk çalıştırma için bekleniyor";

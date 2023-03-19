@@ -2,10 +2,10 @@
 "\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n %2$@ działa z zamkniętą pętlą w pozycji WŁĄCZONA.";
 
 /* Red loop message (1: last loop  string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nDotknij ikony stanu CGM i pompy insulinowej, aby uzyskać więcej informacji. %2$@ będzie nadal próbował ukończyć pętlę, ale uważaj na potencjalne problemy z komunikacją z pompą i CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nStuknij ikonę stanu CGM i pompy insulinowej, aby uzyskać więcej informacji. %2$@ będzie nadal próbował ukończyć pętlę, ale uważaj na potencjalne problemy z komunikacją z pompą i CGM.";
 
 /* Yellow loop message (1: last loop string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nDotknij ikony stanu CGM i pompy insulinowej, aby uzyskać więcej informacji. %2$@ będzie nadal próbował ukończyć pętlę, ale uważaj na potencjalne problemy z komunikacją z pompą i CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nStuknij ikony stanu CGM i pompy insulinowej, aby uzyskać więcej informacji. %2$@ będzie nadal próbował ukończyć pętlę, ale uważaj na potencjalne problemy z komunikacją z pompą i CGM.";
 
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
 "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ działa z zamkniętą pętlą w pozycji WYŁĄCZONA. Twoja pompa i CGM będą nadal działać, ale aplikacja nie będzie automatycznie dostosowywać dawkowania. \n\n %2$@";
@@ -77,7 +77,7 @@
 "mg/dL" = "mg/dl";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/l";
+"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Wymaga uwagi";
@@ -89,7 +89,7 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Instructions for user to close loop if it is allowed. */
-"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Dotknij Ustawienia, aby włączyć Pętlę zamkniętą, jeśli chcesz, aby aplikacja zautomatyzowała podawanie insuliny.";
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Stuknij Ustawienia, aby włączyć Pętlę zamkniętą, jeśli chcesz, aby aplikacja zautomatyzowała podawanie insuliny.";
 
 /* The short unit display string for international units of insulin */
 "U" = "J";

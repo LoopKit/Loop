@@ -74,10 +74,10 @@
 "%1$@ U" = "%1$@ Ед.";
 
 /* Low reservoir alert format string. (1: Number of units remaining) */
-"%1$@ U left" = "%1$@ Осталось ед";
+"%1$@ U left" = "%1$@ Ед осталось";
 
 /* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
-"%1$@ U left: %2$@" = "%1$@ Осталось ед: %2$@ ";
+"%1$@ U left: %2$@" = "%1$@ Ед осталось: %2$@";
 
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
 "%1$@ U/hour @ %2$@" = "%1$@ ед/час @ %2$@";
@@ -93,7 +93,7 @@
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
-"%1$@: <b>%2$@</b> %3$@" = "%1$@ : <b> %2$@ </b> %3$@";
+"%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15-мин коэффициент регрессии гликемии (b1), продолжен с угасанием 30 мин";
@@ -141,7 +141,7 @@
 "Active Carbs" = "Активные углеводы";
 
 /* The title of the Insulin On-Board graph */
-"Active Insulin" = "Действующий инсулин";
+"Active Insulin" = "Активный инсулин";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Действующий инсулин: %@";
@@ -205,7 +205,7 @@
 "App Profile" = "Профиль приложения";
 
 /* Action sheet confirmation message for pump history deletion */
-"Are you sure you want to delete all history entries?" = "Вы уверены, что хотите удалить все записи истории?";
+"Are you sure you want to delete all history entries?" = "Подтвердите удаление всех записей истории?";
 
 /* Action sheet confirmation message for logged dose deletion */
 "Are you sure you want to delete all logged dose entries?" = "Вы уверены, что хотите удалить все зарегистрированные записи о дозах?";
@@ -296,10 +296,10 @@
 "Carb Ratios" = "Соотношения углеводов";
 
 /* The title of the view controller to create a new carb entry */
-"carb-entry-title-add" = "Добавление записи углеводов";
+"carb-entry-title-add" = "Добавить запись углеводов";
 
 /* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Редактирование записи углеводов";
+"carb-entry-title-edit" = "Редактировать запись углеводов";
 
 /* Title for bolus screen warning when carbohydrate entry is too large */
 "Carbohydrate Entry Too Large" = "Слишком много углеводов";
@@ -311,7 +311,7 @@
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Усвоенные углеводы (г) ÷ Коэффициент углеводов (г/U) × Чувствительность к инсулину (%1$@/U)";
 
 /* The notification alert describing a low pump battery */
-"Change the pump battery immediately" = "Замените батарею помпы немедленно";
+"Change the pump battery immediately" = "Немедленно замените батарейку в помпе";
 
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "Замените резервуар помпы сейчас";
@@ -329,7 +329,7 @@
 "Check your device time and/or remove any invalid data from Apple Health." = "Проверьте время вашего устройства и/или удалите недействительные данные из Apple Health.";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Выберите более длительное время усвоения для больших порций пищи или тех, которые содержат жиры и белки. Это лишь руководство к алгоритму и не обязательно должно быть точным.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Выберите более высокую длительность усвоения для обильной пищи или для пищи с белками и протеинами. Это единственное указание для алгоритма не нуждается в дополнительных уточнениях.";
 
 /* The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Закрыть";
@@ -393,7 +393,7 @@
 "Current glucose of %1$@ is below correction range." = "Гликемия %1$@ ниже диапазона коррекции";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Настраиваемая временная цель";
+"Custom Override" = "Настраиваемое ручное управление";
 
 /* The title of the cell indicating a generic custom preset is enabled */
 "Custom Preset" = "Пользовательский пресет";
@@ -411,10 +411,10 @@
 "Delete Account" = "Удалить аккаунт";
 
 /* Button title to delete all objects */
-"Delete All" = "Удалить все";
+"Delete All" = "Стереть все";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Удалить мониторинг";
+"Delete CGM" = "Удалить CGM";
 
 /* Button title to delete a service */
 "Delete Service" = "Удалить сервис";
@@ -432,7 +432,7 @@
 "Deliver" = "Подать";
 
 /* Title text for delivery limits */
-"Delivery Limits" = "Предел подачи";
+"Delivery Limits" = "Пределы подачи";
 
 /* Descriptive text for Therapy Settings */
 "Diabetes Treatment" = "Лечение диабета";
@@ -538,7 +538,7 @@
 "Get help with Alert Permissions" = "Справка по разрешениям на оповещения";
 
 /* The title of the glucose and prediction graph */
-"Glucose" = "Гликемия";
+"Glucose" = "Глюкоза";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "Данные о глюкозе устарели на %1$@";
@@ -581,7 +581,7 @@
 "Insulin adjustments have been disabled!" = "Регулировка инсулина была отключена!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Подача инсулина";
+"Insulin Delivery" = "Insulin Delivery";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Влияние инсулина";
@@ -656,7 +656,7 @@
 "Loop Crashed" = "Произошел сбой приложения";
 
 /* The notification title for a loop failure */
-"Loop Failure" = "Ошибка в работе цикла/контура";
+"Loop Failure" = "Ошибка в работе петли";
 
 /* Bluetooth unavailable alert body. */
 "Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop обнаружил проблему в настройках Bluetooth и не будет успешно работать, пока Bluetooth не будет включен. Вы не будете получать показания глюкозы и не сможете вводить болюс.";
@@ -690,7 +690,7 @@
 "Maximum Basal Rate Per Hour" = "Максимальная базальная скорость в час";
 
 /* Details for configuration error when maximum bolus is missing */
-"Maximum Bolus" = "Максимальный болюс";
+"Maximum Bolus" = "Максимальный Болюс";
 
 /* Title for bolus screen warning when max bolus is exceeded */
 "Maximum Bolus Exceeded" = "Превышен максимальный объем болюса";
@@ -711,13 +711,13 @@
 "Missing maximum allowed bolus in settings" = "Отсутствие максимально допустимого болюса в настройках";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "ммоль/л";
+"mmol/L" = "mmol/L";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Влияние динамики СК";
 
 /* Text for more info action on notification of upcoming profile expiration */
-"More Info" = "Дополнительная информация";
+"More Info" = "Доп. инфо";
 
 /* Label for toggle to mute all alerts */
 "Mute All Alerts" = "Выключить все оповещения";
@@ -796,7 +796,7 @@
 "On" = "Включено";
 
 /* The title text for the override presets */
-"Override Presets" = "Пресеты временных целей";
+"Override Presets" = "Редактировать параметры";
 
 /* The notification title for a meal that was possibly not logged in Loop. */
 "Possible Missed Meal" = "Возможный пропуск приема пищи";
@@ -805,7 +805,7 @@
 "Pre-Meal Targets" = "Целевые значения до еды";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Предсказываемая гликемия в %1$@ -- %2$@";
+"Predicted glucose at %1$@ is %2$@." = "Прогнозируемый уровень глюкозы на %1$@ составляет %2$@.";
 
 /* Notice when predicted glucose for bolus recommendation is in range */
 "Predicted glucose is in range." = "Прогнозируемый уровень глюкозы находится в диапазоне.";
@@ -835,7 +835,7 @@
 "Pump" = "Помпа";
 
 /* The notification title for a low pump battery */
-"Pump Battery Low" = "Низкий заряд батареи помпы";
+"Pump Battery Low" = "Батарея помпы разряжена";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Данные помпы от %1$@ ";
@@ -853,7 +853,7 @@
 "Pump Reservoir Empty" = "Резервуар помпы пуст";
 
 /* The notification title for a low pump reservoir */
-"Pump Reservoir Low" = "Низкий уровень резервуара помпы";
+"Pump Reservoir Low" = "Мало инсулина в резервуаре";
 
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Помпа приостановлена";
@@ -865,7 +865,7 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Боыстродействующий - взрослые";
+"Rapid-Acting – Adults" = "Быстродействующий - взрослые";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Children" = "Быстродействующий - дети";
@@ -897,13 +897,13 @@
 "Remote Command Expired" = "Срок действия удаленной команды истек";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Резервуар";
+"Reservoir" = "Reservoir";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Ретроспективная коррекция";
 
 /* The title of the notification action to retry a bolus command */
-"Retry" = "Повторить попытку";
+"Retry" = "Повторить";
 
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Сохранить и подать болюс";
@@ -1032,7 +1032,7 @@
 "Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Включите Bluetooth для получения предупреждений, сигналов тревоги или показаний датчика глюкозы.";
 
 /* The short unit display string for international units of insulin */
-"U" = "Ед";
+"U" = "ед";
 
 /* Title for alert shown when alert acknowledgement fails */
 "Unable To Clear Alert" = "Невозможно снять предупреждение";

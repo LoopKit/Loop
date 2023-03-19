@@ -11,13 +11,13 @@
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
 /* HUD row title for COB */
-"Active Carbs" = "Carbs Activos";
+"Active Carbs" = "Carbohidratos Activos";
 
 /* HUD row title for IOB */
 "Active Insulin" = "Insulina activa";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Agregar Entrada de Carbohydratos";
+"Add Carb Entry" = "Agregar Entrada de Carb";
 
 /* Button text to confirm manual bolus on Apple Watch */
 "Bolus" = "Bolo";
@@ -51,10 +51,10 @@
 "Make sure your iPhone is nearby and try again." = "Asegúrate que tu iPhone se encuentre cerca e inténtalo de nuevo.";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dl";
+"mg/dL" = "mg/dL";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/l";
+"mmol/L" = "mmol/L";
 
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Tasa basal neta";
@@ -96,7 +96,7 @@
 "Reservoir Volume" = "Volumen de Reservorio";
 
 /* Button text to confirm carb entry without bolusing on Apple Watch */
-"Save" = "Guardar";
+"Save" = "Agregar";
 
 /* Button text to confirm carb entry and bolus on Apple Watch */
 "Save & Bolus" = "Guardar & administrar bolo";
