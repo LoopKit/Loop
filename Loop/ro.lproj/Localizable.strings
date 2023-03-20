@@ -609,6 +609,9 @@
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Întrerupere %1$@: <b>%2$@</b> din %3$@ %4$@";
 
+/* Remote command error description: invalid absorption time. */
+"Invalid absorption time: %d hours" = "Timp invalid de absorbție: %li ore";
+
 /* Remote command error description: invalid bolus amount. */
 "Invalid Bolus Amount" = "Cantitate invalidă de bolus";
 
@@ -703,6 +706,9 @@
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
+
+/* Title for missed meal notifications toggle */
+"Missed Meal Notifications" = "Notificări privind mesele pierdute";
 
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Date lipsă: %1$@";
