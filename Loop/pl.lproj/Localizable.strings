@@ -2,7 +2,7 @@
 " (pending: %@)" = " (oczekujące: %@)";
 
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
-" Pre-meal Preset" = "Wstępne ustawienie przed posiłkiem";
+" Pre-meal Preset" = " Przed Posiłkiem";
 
 /* remaining time in setting's profile expiration section */
 " remaining" = " pozostały";
@@ -435,7 +435,7 @@
 "Delivery Limits" = "Limity podawania";
 
 /* Descriptive text for Therapy Settings */
-"Diabetes Treatment" = "Leczenie cukrzycy";
+"Diabetes Treatment" = "w leczeniu cukrzycy";
 
 /* Alert body when entered carbohydrates is greater than threshold (1: entered quantity in grams) */
 "Did you intend to enter %1$@ grams as the amount of carbohydrates for this meal?" = "Czy zamierzałeś wprowadzić %1$@ gramów jako ilość węglowodanów dla tego posiłku?";
@@ -796,7 +796,7 @@
 "On" = "Włącz";
 
 /* The title text for the override presets */
-"Override Presets" = "Wstępne ustawienia pominięcia";
+"Override Presets" = "Override Presets";
 
 /* The notification title for a meal that was possibly not logged in Loop. */
 "Possible Missed Meal" = "Możliwe pominięcie posiłku";
