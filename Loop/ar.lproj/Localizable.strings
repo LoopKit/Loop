@@ -309,6 +309,9 @@
    The title of the notification action to acknowledge a device alert */
 "OK" = "موافق";
 
+/* Notification Setting Status is On */
+"On" = "On";
+
 /* The title text for the override presets */
 "Override Presets" = "تخطي الإعدادات المسبقة";
 

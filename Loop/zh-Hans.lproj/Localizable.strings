@@ -159,6 +159,9 @@
 /* The error message displayed for configuration errors. (1: configuration error details) */
 "Configuration Error: %1$@" = "配置错误：%1$@";
 
+/* Default alert dismissal */
+"Continue" = "继续";
+
 /* The title of the continuous glucose monitor section in settings */
 "Continuous Glucose Monitor" = "连续葡萄糖监测";
 
@@ -197,7 +200,10 @@
 "Error Canceling Bolus" = "无法取消大剂量";
 
 /* The alert title for a resume error */
-"Error Resuming" = "无法恢复输注";
+"Error Resuming" = "恢复输注错误";
+
+/* Segmented button title for insulin delivery log event history */
+"Event History" = "历史事件";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "最终 %@";
@@ -276,6 +282,9 @@
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "没有连接的设备，或设备连接期间发生故障";
 
+/* Notification Setting Status is On */
+"On" = "开";
+
 /* The title text for the override presets */
 "Override Presets" = "覆盖预设置";
 
@@ -328,7 +337,7 @@
 "Recommended Bolus: %@ Units" = "推荐大剂量：%@单位";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "储药器";
+"Reservoir" = "胰岛素容量";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "回顾性修正";
@@ -368,6 +377,10 @@
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Event title displayed when StoredPumpEvent.title is not set
+   The default description to use when an entry has no dose description */
+"Unknown" = "未知";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "直到 %@";

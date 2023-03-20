@@ -121,7 +121,7 @@ struct AlertManagementView: View {
     
     private var missedMealAlertSection: some View {
         Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
-            Toggle("Missed Meal Notifications", isOn: missedMealNotificationsEnabled)
+            Toggle(NSLocalizedString("Missed Meal Notifications", comment: "Title for missed meal notifications toggle."), isOn: missedMealNotificationsEnabled)
         }
     }
 }

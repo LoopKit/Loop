@@ -10,6 +10,9 @@
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "大剂量输注失败";
 
+/* Button text to continue from carb entry to bolus entry on Apple Watch */
+"Continue" = "继续";
+
 /* The action button title to dismiss an error message */
 "Dismiss" = "忽略";
 
@@ -21,6 +24,9 @@
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "净基础率";
 
+/* Label for on button */
+"On" = "开";
+
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "覆盖";
 
@@ -29,6 +35,9 @@
 
 /* HUD row title for remaining reservoir volume */
 "Reservoir Volume" = "储药器容量";
+
+/* Button text to confirm carb entry without bolusing on Apple Watch */
+"Save" = "保存";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
