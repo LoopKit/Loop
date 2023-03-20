@@ -57,7 +57,7 @@ class ManualEntryDoseViewModelTests: XCTestCase {
 
     func testDoseLogging() throws {
         XCTAssertEqual(.novolog, manualEntryDoseViewModel.selectedInsulinType)
-        manualEntryDoseViewModel.enteredBolus = Self.exampleBolusQuantity
+        manualEntryDoseViewModel.enteredInsulin = Self.exampleBolusQuantity
         
         try saveAndDeliver(ManualEntryDoseViewModelTests.exampleBolusQuantity)
         XCTAssertEqual(delegate.manualEntryBolusUnits, Self.exampleBolusQuantity.doubleValue(for: .internationalUnit()))
@@ -65,7 +65,7 @@ class ManualEntryDoseViewModelTests: XCTestCase {
     }
     
     private func saveAndDeliver(_ bolus: HKQuantity, file: StaticString = #file, line: UInt = #line) throws {
-        manualEntryDoseViewModel.enteredBolus = bolus
+        manualEntryDoseViewModel.enteredInsulin = bolus
         manualEntryDoseViewModel.saveManualDose { self.saveAndDeliverSuccess = true }
         if bolus != ManualEntryDoseViewModelTests.noBolus {
             let authenticateOverrideCompletion = try XCTUnwrap(self.authenticateOverrideCompletion, file: file, line: line)
