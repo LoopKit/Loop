@@ -609,6 +609,9 @@
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Onderbroken %1$@: <b>%2$@</b> van %3$@ %4$@";
 
+/* Remote command error description: invalid absorption time. */
+"Invalid absorption time: %d hours" = "Ongeldige opnametijd: %d uur";
+
 /* Remote command error description: invalid bolus amount. */
 "Invalid Bolus Amount" = "Ongeldige bolushoeveelheid";
 
@@ -703,6 +706,9 @@
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
+
+/* Title for missed meal notifications toggle */
+"Missed Meal Notifications" = "Gemiste Maaltijdmeldingen";
 
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Ontbrekende gegevens: %1$@";
