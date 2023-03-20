@@ -64,8 +64,8 @@ final class ManualEntryDoseViewModel: ObservableObject {
     private var savedPreMealOverride: TemporaryScheduleOverride?
     @Published var scheduleOverride: TemporaryScheduleOverride?
 
-    @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
-    private var isInitiatingSaveOrBolus = false
+    @Published var enteredInsulin = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+    private var isInitiatingSaveOrInsulin = false
 
     private let log = OSLog(category: "ManualEntryDoseViewModel")
     private var cancellables: Set<AnyCancellable> = []
@@ -107,7 +107,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
         self.debounceIntervalMilliseconds = debounceIntervalMilliseconds
         self.uuidProvider = uuidProvider
         
-        self.insulinTypePickerOptions = [.novolog, .humalog, .apidra, .fiasp, .lyumjev, .afrezza]
+        self.insulinTypePickerOptions = [.novolog, .humalog, .apidra, .fiasp, .lyumjev, .afrezza, .lantus]
         
         self.chartDateInterval = DateInterval(start: Date(timeInterval: .hours(-1), since: now()), duration: .hours(7))
 
@@ -118,7 +118,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
         }
 
         observeLoopUpdates()
-        observeEnteredBolusChanges()
+        observeEnteredInsulinChanges()
         observeInsulinModelChanges()
         observeDoseDateChanges()
 
@@ -133,8 +133,8 @@ final class ManualEntryDoseViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private func observeEnteredBolusChanges() {
-        $enteredBolus
+    private func observeEnteredInsulinChanges() {
+        $enteredInsulin
             .removeDuplicates()
             .debounce(for: .milliseconds(debounceIntervalMilliseconds), scheduler: RunLoop.main)
             .sink { [weak self] _ in
@@ -173,8 +173,8 @@ final class ManualEntryDoseViewModel: ObservableObject {
 
     func saveManualDose(onSuccess completion: @escaping () -> Void) {
         // Authenticate before saving anything
-        if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
-            let message = String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt to log an insulin dose"), enteredBolusAmountString)
+        if enteredInsulin.doubleValue(for: .internationalUnit()) > 0 {
+            let message = String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt to log an insulin dose"), enteredInsulinAmountString)
             authenticate(message) {
                 switch $0 {
                 case .success:
@@ -189,7 +189,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
     }
     
     private func continueSaving(onSuccess completion: @escaping () -> Void) {
-        let doseVolume = enteredBolus.doubleValue(for: .internationalUnit())
+        let doseVolume = enteredInsulin.doubleValue(for: .internationalUnit())
         guard doseVolume > 0 else {
             completion()
             return
@@ -210,8 +210,8 @@ final class ManualEntryDoseViewModel: ObservableObject {
         return formatter
     }()
 
-    var enteredBolusAmountString: String {
-        let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
+    var enteredInsulinAmountString: String {
+        let bolusVolume = enteredInsulin.doubleValue(for: .internationalUnit())
         return bolusVolumeFormatter.numberFormatter.string(from: bolusVolume) ?? String(bolusVolume)
     }
 
@@ -221,7 +221,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
         dispatchPrecondition(condition: .onQueue(.main))
 
         // Prevent any UI updates after a bolus has been initiated.
-        guard !isInitiatingSaveOrBolus else { return }
+        guard !isInitiatingSaveOrInsulin else { return }
 
         updateChartDateInterval()
         updateStoredGlucoseValues()
@@ -255,15 +255,15 @@ final class ManualEntryDoseViewModel: ObservableObject {
     private func updatePredictedGlucoseValues(from state: LoopState, completion: @escaping () -> Void = {}) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let (enteredBolus, doseDate, insulinType) = DispatchQueue.main.sync { (self.enteredBolus, self.selectedDoseDate, self.selectedInsulinType) }
+        let (enteredInsulin, doseDate, insulinType) = DispatchQueue.main.sync { (self.enteredInsulin, self.selectedDoseDate, self.selectedInsulinType) }
         
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: insulinType)
+        let enteredInsulinDose = DoseEntry(type: insulinType.isBasal ? .basal : .bolus, startDate: doseDate, value: enteredInsulin.doubleValue(for: .internationalUnit()), unit: .units, insulinType: insulinType)
 
         let predictedGlucoseValues: [PredictedGlucoseValue]
         do {
             predictedGlucoseValues = try state.predictGlucose(
                 using: .all,
-                potentialBolus: enteredBolusDose,
+                potentialBolus: enteredInsulinDose,
                 potentialCarbEntry: nil,
                 replacingCarbEntry: nil,
                 includingPendingInsulin: true,

@@ -17,8 +17,8 @@ import LoopUI
 struct ManualEntryDoseView: View {
     @ObservedObject var viewModel: ManualEntryDoseViewModel
 
-    @State private var enteredBolusString = ""
-    @State private var shouldBolusEntryBecomeFirstResponder = false
+    @State private var enteredInsulinString = ""
+    @State private var shouldInsulinEntryBecomeFirstResponder = false
 
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
@@ -32,8 +32,8 @@ struct ManualEntryDoseView: View {
                     self.chartSection
                     self.summarySection
                 }
-                // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
-                // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Bolus".
+                // As of iOS 13, we can't programmatically scroll to the Insulin entry text field.  This ugly hack scoots the
+                // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Insulin".
                 // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
                 // TODO: Fix this in Xcode 12 when we're building for iOS 14.
                 .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : -28)
@@ -47,8 +47,8 @@ struct ManualEntryDoseView: View {
                 self.isKeyboardVisible = state.height > 0
                 
                 if state.height == 0 {
-                    // Ensure tapping 'Enter Bolus' can make the text field the first responder again
-                    self.shouldBolusEntryBecomeFirstResponder = false
+                    // Ensure tapping 'Enter Insulin' can make the text field the first responder again
+                    self.shouldInsulinEntryBecomeFirstResponder = false
                 }
             }
             .keyboardAware()
@@ -65,7 +65,7 @@ struct ManualEntryDoseView: View {
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
         // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
         // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
-        shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
+        shouldInsulinEntryBecomeFirstResponder && geometry.size.height < 640
     }
     
     private var chartSection: some View {
@@ -80,7 +80,7 @@ struct ManualEntryDoseView: View {
                 // Use a ZStack to allow horizontally clipping the predicted glucose chart,
                 // without clipping the point label on highlight, which draws outside the view's bounds.
                 ZStack(alignment: .topLeading) {
-                    Text("Glucose", comment: "Title for predicted glucose chart on bolus screen")
+                    Text("Glucose", comment: "Title for predicted glucose chart on insulin screen")
                         .font(.subheadline)
                         .bold()
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -144,7 +144,7 @@ struct ManualEntryDoseView: View {
             
             insulinTypePicker
 
-            bolusEntryRow
+            insulinEntryRow
         }
     }
     
@@ -180,24 +180,24 @@ struct ManualEntryDoseView: View {
             )
             .pickerStyle(WheelPickerStyle())
             
-            Text(NSLocalizedString("Date", comment: "Date picker label"))
+            Text("Date", comment: "Date picker label")
         }
     }
     
 
-    private var bolusEntryRow: some View {
+    private var insulinEntryRow: some View {
         HStack {
-            Text("Bolus", comment: "Label for bolus entry row on bolus screen")
+            Text("Amount", comment: "Label for insulin amount entry row on bolus screen")
             Spacer()
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
-                    text: typedBolusEntry,
+                    text: typedInsulinEntry,
                     placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
                     font: .preferredFont(forTextStyle: .title1),
                     textColor: .loopAccent,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
+                    shouldBecomeFirstResponder: shouldInsulinEntryBecomeFirstResponder,
                     maxLength: 5
                 )
                 bolusUnitsLabel
@@ -211,22 +211,22 @@ struct ManualEntryDoseView: View {
             .foregroundColor(Color(.secondaryLabel))
     }
 
-    private var typedBolusEntry: Binding<String> {
+    private var typedInsulinEntry: Binding<String> {
         Binding(
-            get: { self.enteredBolusString },
+            get: { self.enteredInsulinString },
             set: { newValue in
-                self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: Self.doseAmountFormatter.number(from: newValue)?.doubleValue ?? 0)
-                self.enteredBolusString = newValue
+                self.viewModel.enteredInsulin = HKQuantity(unit: .internationalUnit(), doubleValue: Self.doseAmountFormatter.number(from: newValue)?.doubleValue ?? 0)
+                self.enteredInsulinString = newValue
             }
         )
     }
 
-    private var enteredBolusAmount: Double {
-        Self.doseAmountFormatter.number(from: enteredBolusString)?.doubleValue ?? 0
+    private var enteredInsulinAmount: Double {
+        Self.doseAmountFormatter.number(from: enteredInsulinString)?.doubleValue ?? 0
     }
 
     private var actionButtonDisabled: Bool {
-        enteredBolusAmount <= 0
+        enteredInsulinAmount <= 0
     }
 
     private var actionArea: some View {
