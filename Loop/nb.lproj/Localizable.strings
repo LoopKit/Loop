@@ -181,7 +181,7 @@
 "Amplitude" = "Amplitude";
 
 /* Warning to ensure the carb entry is accurate during an override */
-"An active override is modifying your carb ratio and insulin sensitivity. If you don't want this to affect your bolus calculation and projected glucose, consider turning off the override." = "En aktiv overstyring er å endre karbohydratforholdet og insulinfølsomheten. Hvis du ikke vil at dette skal påvirke bolusberegningen og projisert blodsukker, bør du vurdere å slå av overstyringen.";
+"An active override is modifying your carb ratio and insulin sensitivity. If you don't want this to affect your bolus calculation and projected glucose, consider turning off the override." = "En aktiv overstyring modifiserer ditt karbohydratforhold og insulinfølsomhet. Hvis du ikke vil at dette skal påvirke bolusberegningen og projisert blodsukker, bør du vurdere å slå av overstyringen.";
 
 /* Alert message for a carb entry persistence error */
 "An error occurred while trying to save your carb entry." = "Det oppstod en feil under forsøk på å lagre karbohydratregistreringen.";
@@ -429,7 +429,7 @@
 "Delete Testing Pump Data" = "Slett data for testpumpe";
 
 /* Button text to deliver a bolus */
-"Deliver" = "Gi";
+"Deliver" = "Gi bolus";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Leveringsgrenser";

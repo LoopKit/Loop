@@ -46,6 +46,9 @@
 /* No comment provided by engineer. */
 "OK" = "موافق";
 
+/* Label for on button */
+"On" = "On";
+
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Override";
 
