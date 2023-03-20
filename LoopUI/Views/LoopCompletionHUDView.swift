@@ -208,7 +208,7 @@ extension LoopCompletionHUDView {
         switch freshness {
         case .fresh:
             if loopStateView.open {
-                let reason = closedLoopDisallowedLocalizedDescription ?? NSLocalizedString("Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Instructions for user to close loop if it is allowed.")
+                let reason = closedLoopDisallowedLocalizedDescription ?? LocalizedString("Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Instructions for user to close loop if it is allowed.")
                 return (title: LocalizedString("Closed Loop OFF", comment: "Title of green open loop OFF message"),
                         message: String(format: LocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@", comment: "Green closed loop OFF message (1: app name)(2: reason for open loop)"), Bundle.main.bundleDisplayName, reason))
             } else {
