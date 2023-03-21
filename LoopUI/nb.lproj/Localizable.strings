@@ -62,7 +62,7 @@
 "Last completed loop %1$@." = "Sist fullført loop %1$@.";
 
 /* Title of red loop message */
-"Loop Failure" = "Loop feilet";
+"Loop Failure" = "Loop-feil";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop kjørte %@ siden";

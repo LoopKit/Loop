@@ -32,7 +32,7 @@
 "IOB %1$@ U" = "IOB %1$@ E";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
+"mg/dL" = "mg/dl";
 
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";

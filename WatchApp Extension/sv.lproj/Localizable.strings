@@ -54,7 +54,7 @@
 "mg/dL" = "mg/dl";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/l";
+"mmol/L" = "mmol/L";
 
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Nettobasaldos";
@@ -112,7 +112,7 @@
 "U" = "E";
 
 /* The short unit display string for international units of insulin delivery per hour */
-"U/hr" = "E/h";
+"U/hr" = "E/timme";
 
 /* The title of the alert controller displayed after a potential carb entry send attempt fails */
 "Unable to Reach iPhone" = "Det går inte att nå iPhone";

@@ -1,3 +1,6 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "g";
+
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
 "3kU-n2-fha.title" = "الحالة";
 
@@ -11,7 +14,7 @@
 "aCb-Qs-bpu.text" = "تفاصيل";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
-"bIL-Ub-qYp.text" = "علامة";
+"bIL-Ub-qYp.text" = "Label";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
 "bq4-98-cQU.text" = "تغير قراءات السكر";
@@ -23,13 +26,16 @@
 "D4C-I2-dhA.text" = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
-"d6m-qV-wWi.text" = "علامة";
+"d6m-qV-wWi.text" = "Label";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
 "E41-FN-nkk.text" = "في النهاية 92 mg/dL";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "مُلاحظ";
+
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3.5 وحدة/ساعة @ 12:12 مساء";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "تأثيرات الكربوهيدرات";
@@ -44,10 +50,10 @@
 "k3F-Na-7mn.text" = "الضخ المستمر المقترح";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
-"Krd-Aa-ret.text" = "علامة";
+"Krd-Aa-ret.text" = "Label";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
-"OFA-qT-ZAg.text" = "علامة";
+"OFA-qT-ZAg.text" = "Label";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "سكر الدم المتوقع";
@@ -62,10 +68,13 @@
 "tuw-av-A3x.text" = "قراءات السكر";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
-"ufi-Kj-33k.text" = "علامة";
+"ufi-Kj-33k.text" = "Label";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "الكربوهيدرات";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "الضخ المستمر المقترح";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";

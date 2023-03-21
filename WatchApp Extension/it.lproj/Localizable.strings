@@ -2,7 +2,7 @@
 "---" = "---";
 
 /* No glucose value representation (3 dashes for mg/dL) */
-"– – –" = "– – –";
+"– – –" = "---";
 
 /* No comment provided by engineer. */
 "%@" = "%@";
@@ -11,7 +11,7 @@
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
 /* HUD row title for COB */
-"Active Carbs" = "Carboidrati attivi";
+"Active Carbs" = "Carb Attivi";
 
 /* HUD row title for IOB */
 "Active Insulin" = "Insulina attiva";
@@ -66,7 +66,7 @@
 "OK" = "OK";
 
 /* Label for on button */
-"On" = "Acceso ";
+"On" = "Acceso";
 
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Programma Alternativo";
@@ -118,5 +118,5 @@
 "Unable to Reach iPhone" = "Impossibile raggiungere iPhone";
 
 /* The text for the Watch button for enabling workout mode */
-"Workout" = "Attività fisica";
+"Workout" = "Allenarsi";
 

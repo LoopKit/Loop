@@ -93,7 +93,7 @@
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
-"%1$@: <b>%2$@</b> %3$@" = "%1$@ : <b> %2$@ </b> %3$@";
+"%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 dakikalık glikoz regresyon katsayısı (b₁), 30 dakika boyunca bozuk devam etti";
@@ -236,7 +236,7 @@
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
-"Basal Rates" = "Bazal Oranları";
+"Basal Rates" = "Bazal Oranlar";
 
 /* Caption for bolus screen notice when no bolus is recommended for the predicted glucose */
 "Based on your predicted glucose, no bolus is recommended." = "Tahmini KŞ'ne bağlı olarak bolus önerilmez.";
@@ -390,10 +390,10 @@
 "Current Glucose" = "Mevcut KŞ";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Mevcut KŞ %1$@ düzeltme aralığının altında.";
+"Current glucose of %1$@ is below correction range." = "%1$@ Mevcut KŞ düzeltme aralığının altında.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Özel Geçersiz Kılma";
+"Custom Override" = "Özel Geçersiz kılma";
 
 /* The title of the cell indicating a generic custom preset is enabled */
 "Custom Preset" = "Özel Ön Ayar";
@@ -517,7 +517,7 @@
 "Fingerstick Glucose" = "Parmak Ucu KŞ";
 
 /* The format string used to describe a finite workout targets duration */
-"For %1$@" = "For %1$@";
+"For %1$@" = "%1$@ için";
 
 /* No comment provided by engineer. */
 "Forecasted blood glucose may still be higher than target range." = "Öngörülen KŞ, hala hedef aralıktan yüksek olabilir.";
@@ -532,7 +532,7 @@
 "Get help with Alert Permissions" = "Uyarı İzinleri ile ilgili yardım alın";
 
 /* The title of the glucose and prediction graph */
-"Glucose" = "KŞ";
+"Glucose" = "Kan şekeri";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "%1$@ eski KŞ verisi";
@@ -575,7 +575,7 @@
 "Insulin adjustments have been disabled!" = "İnsülin ayarlamaları devre dışı bırakıldı!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "İnsülin İletimi";
+"Insulin Delivery" = "İnsulin İletimi";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "İnsülin etkileri";
@@ -778,13 +778,13 @@
 "On" = "Açık";
 
 /* The title text for the override presets */
-"Override Presets" = "Ön Ayarları Geçersiz Kılma";
+"Override Presets" = "Geçersiz Kılma Ön Ayarları";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Yemek Öncesi Hedefler";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Tahmini KŞ %1$@  %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Tahmini KŞ  %1$@  %2$@.";
 
 /* Notice when predicted glucose for bolus recommendation is in range */
 "Predicted glucose is in range." = "Tahmini KŞ aralık içinde.";

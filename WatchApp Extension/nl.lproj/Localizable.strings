@@ -17,7 +17,7 @@
 "Active Insulin" = "Actieve Insuline";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Koolhydraatinvoer Toevoegen";
+"Add Carb Entry" = "Kh. Inv. Toevoegen";
 
 /* Button text to confirm manual bolus on Apple Watch */
 "Bolus" = "Bolus";
@@ -63,7 +63,7 @@
 "Off" = "Uit";
 
 /* No comment provided by engineer. */
-"OK" = "OK";
+"OK" = "Ok";
 
 /* Label for on button */
 "On" = "Aan";
@@ -81,7 +81,7 @@
 "Preset" = "Override";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@%2$@";
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Voorgesteld: %@ E";

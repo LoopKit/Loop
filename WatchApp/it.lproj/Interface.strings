@@ -1,5 +1,5 @@
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "CsQ-fc-KLC"; */
-"CsQ-fc-KLC.text" = "—";
+"CsQ-fc-KLC.text" = "–";
 
 /* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
 "dea-qG-va8.text" = "TOTALE CARBOIDRATI";
@@ -11,19 +11,19 @@
 "f5G-bS-9pd.text" = "Pre-Pasto";
 
 /* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
-"hln-CI-MRP.text" = "Carboidrati";
+"hln-CI-MRP.text" = "Carb.";
 
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "IRi-4t-ESO"; */
-"IRi-4t-ESO.text" = "—";
+"IRi-4t-ESO.text" = "–";
 
 /* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
 "jj3-Gq-HBy.text" = "Bolo Fallito";
 
 /* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
-"JXa-s1-PJx.text" = "Attività fisica";
+"JXa-s1-PJx.text" = "Corsa";
 
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "Mhe-aR-kQQ"; */
-"Mhe-aR-kQQ.text" = "—";
+"Mhe-aR-kQQ.text" = "–";
 
 /* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
 "MZU-QV-PtZ.text" = "TITOLO";
