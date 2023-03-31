@@ -52,7 +52,7 @@ After the mute period ends, your alert sounds will resume.
                             Text(NSLocalizedString("iOS Focus Mode", comment: "Section title for description of how mute alerts work with focus mode"))
                                 .bold()
                         }
-                        Text(NSLocalizedString("If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered, but non-Critical Alerts will be silenced.", comment: "Description of how mute alerts works with focus mode"))
+                        Text(NSLocalizedString("If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered, but non-Critical Alerts will be silenced until Tidepool Loop is added to each Focus mode as an Allowed App.", comment: "Description of how mute alerts works with focus mode"))
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding()
