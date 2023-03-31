@@ -777,6 +777,18 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
     }
 }
 
+extension AlertManager {
+    func presentConfirmCrashAlert(confirmAction: @escaping () -> Void) {
+        let alert = UIAlertController(title: "New Study Product Detected", message: "We've detected a new study product is selected. In order to show use this study product, Tidepool Loop will need to restart.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+            confirmAction()
+            exit(0)
+        }))
+        
+        alertPresenter.present(alert, animated: true)
+    }
+}
+
 fileprivate extension UserDefaults {
     private enum Key: String {
         case hasIssuedNotificationPermissionsAlert = "com.loopkit.Loop.HasIssuedNotificationPermissionsAlert"

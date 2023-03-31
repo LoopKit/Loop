@@ -43,6 +43,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         log.default(#function)
+        
+        loopAppManager.askUserToConfirmCrashIfNecessary()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

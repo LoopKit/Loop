@@ -340,9 +340,9 @@ extension OnboardingManager: CGMManagerProvider {
         return cgmManagerType.onboardingImage
     }
 
-    func onboardCGMManager(withIdentifier identifier: String) -> Swift.Result<OnboardingResult<CGMManagerViewController, CGMManager>, Error> {
+    func onboardCGMManager(withIdentifier identifier: String, prefersToSkipUserInteraction: Bool) -> Swift.Result<OnboardingResult<CGMManagerViewController, CGMManager>, Error> {
         guard let cgmManager = deviceDataManager.cgmManager else {
-            return deviceDataManager.setupCGMManager(withIdentifier: identifier)
+            return deviceDataManager.setupCGMManager(withIdentifier: identifier, prefersToSkipUserInteraction: prefersToSkipUserInteraction)
         }
         guard cgmManager.managerIdentifier == identifier else {
             return .failure(OnboardingError.invalidState)
@@ -384,9 +384,9 @@ extension OnboardingManager: PumpManagerProvider {
                                        maximumBasalScheduleEntryCount: pumpManagerType.onboardingMaximumBasalScheduleEntryCount)
     }
 
-    func onboardPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<OnboardingResult<PumpManagerViewController, PumpManager>, Error> {
+    func onboardPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings, prefersToSkipUserInteraction: Bool) -> Swift.Result<OnboardingResult<PumpManagerViewController, PumpManager>, Error> {
         guard let pumpManager = deviceDataManager.pumpManager else {
-            return deviceDataManager.setupPumpManager(withIdentifier: identifier, initialSettings: settings)
+            return deviceDataManager.setupPumpManager(withIdentifier: identifier, initialSettings: settings, prefersToSkipUserInteraction: prefersToSkipUserInteraction)
         }
         guard pumpManager.managerIdentifier == identifier else {
             return .failure(OnboardingError.invalidState)
@@ -435,6 +435,7 @@ extension OnboardingManager: TherapySettingsProvider {
 
 extension OnboardingManager: OnboardingProvider {
     var allowDebugFeatures: Bool { FeatureFlags.allowDebugFeatures }   // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
+    var studyProduct: StudyProduct { StudyProduct(rawValue: UserDefaults.appGroup?.studyProductSelection ?? "none") ?? .none }
 }
 
 // MARK: - OnboardingUI
