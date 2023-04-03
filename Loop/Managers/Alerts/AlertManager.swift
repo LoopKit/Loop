@@ -784,6 +784,7 @@ extension AlertManager {
             confirmAction()
             exit(0)
         }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         
         alertPresenter.present(alert, animated: true)
     }
