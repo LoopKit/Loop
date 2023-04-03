@@ -370,6 +370,8 @@ class LoopAppManager: NSObject {
     }
     
     private func resetLoop() {
+        deviceDataManager.pumpManager?.prepareForDeactivation({ _ in })
+        
         resetLoopUserDefaults()
         resetLoopDocuments()
     }
