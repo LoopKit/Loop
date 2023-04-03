@@ -11,6 +11,7 @@ import Intents
 import Combine
 import LoopKit
 import LoopKitUI
+import TidepoolKit
 import MockKit
 import HealthKit
 import WidgetKit
