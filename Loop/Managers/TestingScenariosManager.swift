@@ -232,6 +232,11 @@ extension TestingScenariosManagerRequirements {
                 }
             }
         }
+        
+        instance.injectedActions.forEach { [testingCGMManager, testingPumpManager] action in
+            testingCGMManager?.inject(action: action)
+            testingPumpManager?.inject(action: action)
+        }
     }
 
     private func wipeExistingData(completion: @escaping (Error?) -> Void) {
