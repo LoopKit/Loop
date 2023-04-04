@@ -435,6 +435,7 @@ extension OnboardingManager: TherapySettingsProvider {
 
 extension OnboardingManager: OnboardingProvider {
     var allowDebugFeatures: Bool { FeatureFlags.allowDebugFeatures }   // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
+    var studyProductSelection: StudyProduct { StudyProduct(rawValue: UserDefaults.appGroup?.studyProductSelection ?? "none") ?? .none }
 }
 
 // MARK: - OnboardingUI
