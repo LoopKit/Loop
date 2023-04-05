@@ -355,7 +355,7 @@
         <image name="reservoir" width="28" height="44"/>
         <image name="reservoir_mask" width="28" height="39"/>
         <namedColor name="warning">
-            <color red="0.86299997568130493" green="0.45500001311302185" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.91699999570846558" green="0.7630000114440918" blue="0.26899999380111694" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
         </namedColor>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
