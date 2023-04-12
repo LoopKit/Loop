@@ -16,7 +16,14 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
 
     private var scenarioURLs: [URL] = [] {
         didSet {
-            options = scenarioURLs.map { $0.deletingPathExtension().lastPathComponent }
+            options = scenarioURLs.map {
+                $0                                                  // /Scenarios/HF-1-Scenario_1.json
+                    .deletingPathExtension()                        // /Scenarios/HF-1-Scenario_1
+                    .lastPathComponent                              // HF-1-Scenario_1
+                    .replacingOccurrences(of: "HF-1-", with: "")    // Scenario_1
+                    .replacingOccurrences(of: "HF-2-", with: "")    // Scenario_1
+                    .replacingOccurrences(of: "_", with: " ")       // Scenario 1
+            }
             if isViewLoaded {
                 DispatchQueue.main.async {
                     self.updateLoadButtonEnabled()
@@ -163,6 +170,8 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
 
 extension TestingScenariosTableViewController: TestingScenariosManagerDelegate {
     func testingScenariosManager(_ manager: TestingScenariosManager, didUpdateScenarioURLs scenarioURLs: [URL]) {
-        self.scenarioURLs = scenarioURLs
+        let rawStudyProduct = UserDefaults.appGroup?.studyProductSelection ?? "none"
+        let studyProduct = StudyProduct(rawValue: rawStudyProduct) ?? .none
+        self.scenarioURLs = studyProduct.filtered(scenarioURLs: scenarioURLs)
     }
 }
