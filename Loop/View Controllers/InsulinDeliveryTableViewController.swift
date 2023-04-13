@@ -609,7 +609,7 @@ fileprivate var numberFormatter: NumberFormatter {
 fileprivate func createAttributedDescription(from description: String, with font: UIFont) -> NSAttributedString? {
     let descriptionWithFont = String(format:"<style>body{font-family: '-apple-system', '\(font.fontName)'; font-size: \(font.pointSize);}</style>%@", description)
 
-    guard let attributedDescription = try? NSMutableAttributedString(data: Data(descriptionWithFont.utf8), options: [.documentType: NSAttributedString.DocumentType.html], documentAttributes: nil) else {
+    guard let attributedDescription = try? NSMutableAttributedString(data: descriptionWithFont.data(using: .utf16)!, options: [.documentType: NSAttributedString.DocumentType.html], documentAttributes: nil) else {
         return nil
     }
 
