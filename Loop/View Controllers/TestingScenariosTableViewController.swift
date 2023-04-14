@@ -170,8 +170,13 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
 
 extension TestingScenariosTableViewController: TestingScenariosManagerDelegate {
     func testingScenariosManager(_ manager: TestingScenariosManager, didUpdateScenarioURLs scenarioURLs: [URL]) {
-        let rawStudyProduct = UserDefaults.appGroup?.studyProductSelection ?? "none"
-        let studyProduct = StudyProduct(rawValue: rawStudyProduct) ?? .none
-        self.scenarioURLs = studyProduct.filtered(scenarioURLs: scenarioURLs)
+        var filteredURLs = Set<URL>()
+        manager.pluginManager.availableSupports.forEach { supportUI in
+            supportUI.filterScenarios(scenarioURLs: scenarioURLs).forEach { scenarioURL in
+                filteredURLs.insert(scenarioURL)
+            }
+        }
+        
+        self.scenarioURLs = Array(filteredURLs).sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
     }
 }

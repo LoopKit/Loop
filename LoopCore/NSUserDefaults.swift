@@ -20,7 +20,7 @@ extension UserDefaults {
         case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
-        case studyProductSelection = "com.loopkit.Loop.studyProductSelection"
+        case studyProductSelection = "org.tidepool.plugins.TidepoolSupport.StudyProductSelection"
         case resetLoop = "com.loopkit.Loop.resetLoop"
     }
 
