@@ -406,6 +406,7 @@ final class DeviceDataManager {
         
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
+            alertManager: alertManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
             remoteDataServicesManager: remoteDataServicesManager

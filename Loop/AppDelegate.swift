@@ -20,6 +20,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         log.default("%{public}@ with launchOptions: %{public}@", #function, String(describing: launchOptions))
 
+        setenv("CFNETWORK_DIAGNOSTICS", "3", 1)
+
         loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
         loopAppManager.launch()
         return loopAppManager.isLaunchComplete

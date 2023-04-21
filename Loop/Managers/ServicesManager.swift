@@ -15,6 +15,8 @@ class ServicesManager {
 
     private let pluginManager: PluginManager
 
+    private let alertManager: AlertManager
+
     let analyticsServicesManager: AnalyticsServicesManager
 
     let loggingServicesManager: LoggingServicesManager
@@ -32,11 +34,13 @@ class ServicesManager {
 
     init(
         pluginManager: PluginManager,
+        alertManager: AlertManager,
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
         remoteDataServicesManager: RemoteDataServicesManager
     ) {
         self.pluginManager = pluginManager
+        self.alertManager = alertManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
@@ -196,6 +200,16 @@ extension ServicesManager: ServiceDelegate {
     func serviceWantsDeletion(_ service: Service) {
         log.default("Service with identifier '%{public}@' deleted", service.serviceIdentifier)
         removeActiveService(service)
+    }
+}
+
+extension ServicesManager: AlertIssuer {
+    func issueAlert(_ alert: Alert) {
+        alertManager.issueAlert(alert)
+    }
+
+    func retractAlert(identifier: Alert.Identifier) {
+        alertManager.retractAlert(identifier: identifier)
     }
 }
 
