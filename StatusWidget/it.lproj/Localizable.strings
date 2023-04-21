@@ -14,7 +14,7 @@
 "%@ U" = "%@ U";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ v%2$@";
+"%1$@ v%2$@" = "%1$@ contro %2$@";
 
 /* The short unit display string for decibles */
 "dB" = "dB";

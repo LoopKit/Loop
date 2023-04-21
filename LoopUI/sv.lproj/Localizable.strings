@@ -50,7 +50,7 @@
 "mg/dL" = "mg/dl";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/l";
+"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Kräver åtgärd";

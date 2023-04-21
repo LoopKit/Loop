@@ -1,3 +1,6 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "g";
+
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
 "3kU-n2-fha.title" = "Tình trạng";
 
@@ -8,10 +11,10 @@
 "87H-N1-0vJ.text" = "Được dự đoán";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
-"aCb-Qs-bpu.text" = "Chi tiết";
+"aCb-Qs-bpu.text" = "Detail";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
-"bIL-Ub-qYp.text" = "Nhãn";
+"bIL-Ub-qYp.text" = "Label";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
 "bq4-98-cQU.text" = "Mức đường huyết thay đổi";
@@ -23,13 +26,16 @@
 "D4C-I2-dhA.text" = "Glucose trong tương lai được dự đoán bằng cách kết hợp các tác động của nhiều dữ liệu đầu vào. Sử dụng công cụ này để chuyển đổi các đầu vào khác nhau để xem cách chúng so sánh với dự đoán cuối cùng.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
-"d6m-qV-wWi.text" = "Nhãn";
+"d6m-qV-wWi.text" = "Label";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
-"E41-FN-nkk.text" = "kết quả 92 mg/dL";
+"E41-FN-nkk.text" = "kết quả là 92 mg/dL";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Được quan sát";
+
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3.5 U/hour @ 12:12 PM";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Carbohydrate Effects";
@@ -44,10 +50,10 @@
 "k3F-Na-7mn.text" = "Khuyến nghị liều Basal";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
-"Krd-Aa-ret.text" = "Nhãn";
+"Krd-Aa-ret.text" = "Label";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
-"OFA-qT-ZAg.text" = "Nhãn";
+"OFA-qT-ZAg.text" = "Label";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Đường huyết được dự đoán";
@@ -62,10 +68,13 @@
 "tuw-av-A3x.text" = "Đường huyết";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
-"ufi-Kj-33k.text" = "Nhãn";
+"ufi-Kj-33k.text" = "Label";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Carbohydrates";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Khuyến nghị liều Basal";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";

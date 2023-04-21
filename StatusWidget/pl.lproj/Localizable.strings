@@ -19,6 +19,9 @@
 /* The short unit display string for decibles */
 "dB" = "dB";
 
+/* No comment provided by engineer. */
+"Eventual" = "Możliwy";
+
 /* The short unit display string for grams */
 "g" = "g";
 
@@ -29,7 +32,7 @@
 "mg/dL" = "mg/dl";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/l";
+"mmol/L" = "mmol/L";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";

@@ -17,7 +17,7 @@
 "Active Insulin" = "Akt. insuliini";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Lisää hiilari";
+"Add Carb Entry" = "Lisää hiilihydraatteja";
 
 /* Button text to confirm manual bolus on Apple Watch */
 "Bolus" = "Bolus";
@@ -35,7 +35,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Hylkää";
+"Dismiss" = "Ohita";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -75,7 +75,7 @@
 "Please reconfirm the bolus amount." = "Vahvista bolus uudelleen.";
 
 /* Title for sheet to enable/disable pre-meal on watch */
-"Pre-Meal" = "E. ateriaa";
+"Pre-Meal" = "Ennen ateriaa";
 
 /* The text for the Watch button for enabling a custom preset */
 "Preset" = "Esiasetus";

@@ -1,5 +1,5 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
-" (pending: %@)" = " (en attente : %@)";
+" (pending: %@)" = " (en attente : %@)";
 
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
 " Pre-meal Preset" = " Préréglage Pré-repas";
@@ -26,13 +26,13 @@
 "%@ %@" = "%1$@ %2$@";
 
 /* Formats absorbed carb value */
-"%@ absorbed" = "%@ absorbé";
+"%@ absorbed" = "%@ absorbé(s)";
 
 /* Estimated remaining duration with more than a minute */
 "%@ remaining" = "%@ restant";
 
 /* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ U Totaux";
+"%@ U Total" = "%@ U total";
 
 /* Appends a full-stop to a statement */
 "%@." = "%@.";
@@ -96,7 +96,7 @@
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "Coefficient de régression du glucose de 15 minutes (b1), décroissance poursuivie au-delà de 30 min.";
 
 /* Description of the prediction input effect for retrospective correction */
-"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "Comparaison sur 30 min de la glycémie Prédiction vs Actuelle, suivie d'une décroissance (decay) sur 60 min.";
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "Comparaison sur 30 min de la glycémie prévue par rapport à celle réelle, suivie d'une décroissance (decay) sur 60 min.";
 
 /* Estimated remaining duration with a few seconds */
 "A few seconds remaining" = "Quelques secondes restantes";
@@ -108,10 +108,10 @@
 "A manual glucose entry must be between %1$@ and %2$@." = "Une saisie manuelle de la glycémie doit être comprise entre %1$@ et %2$@.";
 
 /* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "Un modèle basé sur l’absorption publiée de l’insuline FIASP.";
+"A model based on the published absorption of Fiasp insulin." = "Un modèle basé sur l’absorption de l’insuline FIASP (telle que publiée).";
 
 /* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Un modèle basé sur l’absorption publiée de l’Humalog, Novolog (Novorapid), et Apidra chez l’adulte.";
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Un modèle basé sur les absorptions de l’Humalog, Novolog (Novorapid), et Apidra chez l’adulte (telles que publiées).";
 
 /* Software update available section footer (1: app name) */
 "A new version of %@ is available and is recommended to continue using the app." = "Une nouvelle version de %@ est disponible et est recommandée pour continuer à utiliser l'application.";
@@ -123,7 +123,7 @@
 "A pump must be configured before a bolus can be delivered." = "Une pompe doit être configurée avant qu'un bolus puisse être administré.";
 
 /* Title of the carb entry absorption time cell */
-"Absorption Time" = "Durée d'absorption";
+"Absorption Time" = "Durée d’absorption";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
@@ -214,13 +214,13 @@
 "Are you sure you want to delete this CGM?" = "Voulez-vous vraiment supprimer ce CGM?";
 
 /* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Voulez-vous vraiment supprimer ce service ?";
+"Are you sure you want to delete this service?" = "Voulez-vous vraiment supprimer ce service?";
 
 /* Format fragment for a specific time */
-"at %@" = "at %@";
+"at %@" = "à %@";
 
 /* The message displayed during a device authentication prompt for bolus specification */
-"Authenticate to Bolus %@ Units" = "Authentifier pour effectuer un Bolus %@ Unités";
+"Authenticate to Bolus %@ Units" = "Authentifiez-vous pour administrer %@ Unités";
 
 /* The message displayed during a device authentication prompt to log an insulin dose */
 "Authenticate to log %@ Units" = "Authentifier pour enregistrer %@ unités";
@@ -287,13 +287,13 @@
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Ratios Glucides";
+"Carb Ratios" = "Ratios Insuline-Glucides";
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Ajouter des glucides";
 
 /* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Editer les glucides";
+"carb-entry-title-edit" = "Modifier l’entrée des glucides";
 
 /* Title for bolus screen warning when carbohydrate entry is too large */
 "Carbohydrate Entry Too Large" = "Les glucides saisis sont trop important";
@@ -323,7 +323,7 @@
 "Check your device time and/or remove any invalid data from Apple Health." = "Vérifiez l'heure de votre appareil et/ou supprimez toute donnée invalide d'Apple Health.";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Choisissez un temps d'absorption plus long pour les repas plus gros ou ceux contenant des graisses et des protéines. Ceci n'est qu'un guide pour l'algorithme et n'a pas besoin d'être exact.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Choisissez un temps d’absorption plus long pour les gros repas ou ceux contenant des graisses et des protéines. Ceci est seulement un guide pour l'algorithme et n'a pas besoin d'être exact.";
 
 /* The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Fermer";
@@ -405,10 +405,10 @@
 "Delete Account" = "Supprimer le compte";
 
 /* Button title to delete all objects */
-"Delete All" = "Tout supprimer";
+"Delete All" = "Supprimer tout";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Supprimer le CGM";
+"Delete CGM" = "Effacer le CGM";
 
 /* Button title to delete a service */
 "Delete Service" = "Supprimer le service";
@@ -426,7 +426,7 @@
 "Deliver" = "Administrer";
 
 /* Title text for delivery limits */
-"Delivery Limits" = "Limites de Administration";
+"Delivery Limits" = "Limites d'Administration";
 
 /* Descriptive text for Therapy Settings */
 "Diabetes Treatment" = "Traitement du diabète";
@@ -495,9 +495,6 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Dépasse le bolus maximal";
 
-/* Remote command error description: expired. */
-"Expired" = "Expiré";
-
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Exporter les journaux d'événements critiques";
 
@@ -505,7 +502,7 @@
 "Export-%1$@" = "Export-%1$@";
 
 /* The alert title for a resume error */
-"Failed to Resume Insulin Delivery" = "Échec de la reprise de la distribution d'Insuline";
+"Failed to Resume Insulin Delivery" = "Échec de la reprise de l’administration d’insuline";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
@@ -514,7 +511,7 @@
 "Fingerstick Glucose" = "Glucose capilaire";
 
 /* The format string used to describe a finite workout targets duration */
-"For %1$@" = "Pour %1$@";
+"For %1$@" = "Pendant %1$@";
 
 /* No comment provided by engineer. */
 "Forecasted blood glucose may still be higher than target range." = "Le taux de glucose sanguin prévu pourrait quand-même être plus élevé que la plage cible.";
@@ -532,7 +529,7 @@
 "Glucose" = "Glycémie";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "Données de glucose sont vielles de %1$@";
+"Glucose data is %1$@ old" = "Les dernières données de glucose remontent à %1$@";
 
 /* Description of error when glucose data is missing */
 "Glucose data not available" = "Les données de glucose ne sont pas disponibles";
@@ -563,7 +560,7 @@
 "Insulin" = "Insuline";
 
 /* Description of the prediction input effect for insulin */
-"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insuline absorbée x Facteur de sensibilité à l'insuline (%1$@/U)";
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insuline Absorbée (U) × Sensibilité à l'Insuline ( %1$@ /U)";
 
 /* Notification body for crash recovery alert */
 "Insulin adjustments have been disabled!" = "Les ajustements d’insuline ont été désactivés!";
@@ -609,11 +606,8 @@
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Lecture de glucose non valide avec un horodatage situé à %1$@ dans le futur";
 
-/* Remote command error description: invalid OTP. */
-"Invalid OTP" = "OTP invalide";
-
 /* The title text for the issue report cell */
-"Issue Report" = "Editer rapport";
+"Issue Report" = "Créer un rapport";
 
 /* Title of the warning shown when a large meal was entered */
 "Large Meal Entered" = "Grand repas entré";
@@ -705,7 +699,7 @@
 "Mute All Alerts" = "Enlever le son de toutes les alertes";
 
 /* Sensor state description for the non-valid state */
-"Needs Attention" = "Attention Requise";
+"Needs Attention" = "Demande votre attention";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
@@ -719,7 +713,7 @@
 "No Bolus Recommended" = "Aucun Bolus Recommandé";
 
 /* The error message displayed for device connection errors. */
-"No connected devices, or failure during device connection" = "Pas d'appareil connecté, ou échec durant la connectionà l'appareil";
+"No connected devices, or failure during device connection" = "Pas d'appareil connecté, ou échec durant la connexion à l'appareil";
 
 /* Alert title for a missing maximum bolus setting error */
 "No Maximum Bolus Configured" = "Aucun Bolus Maximum configuré";
@@ -775,7 +769,7 @@
 "On" = "Activé";
 
 /* The title text for the override presets */
-"Override Presets" = "Préréglage Ajustements";
+"Override Presets" = "Préréglages ajustement";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Objectif de Pré-Repas";
@@ -793,7 +787,7 @@
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Prédiction de la glycémie à %1$@ sous le seuil de suspension défini.";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
-"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Prédit: %1$@\nActuel: %2$@ (%3$@)";
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Prédit : %1$@\nRéel : %2$@ (%3$@)";
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Préparation des journaux d’événements critiques";
@@ -808,10 +802,10 @@
 "Pump Battery Low" = "Batterie de la pompe faible";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
-"Pump data is %1$@ old" = "Données de pompe sont vielles de %1$@";
+"Pump data is %1$@ old" = "Les données de la pompe remontent à %1$@";
 
 /* The title of the screen displaying a pump event */
-"Pump Event" = "Événement de la pompe";
+"Pump Event" = "Événement pompe";
 
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Gestionnaire de pompe";
@@ -823,7 +817,7 @@
 "Pump Reservoir Empty" = "Réservoir de la pompe vide";
 
 /* The notification title for a low pump reservoir */
-"Pump Reservoir Low" = "Niveau du réservoir de la pompe bas";
+"Pump Reservoir Low" = "Réservoir de la pompe bas";
 
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Pompe suspendue";
@@ -841,7 +835,7 @@
 "Rapid-Acting – Children" = "Action rapide - Enfant";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
-"Recommendation expired: %1$@ old" = "Recommandation expirée: veille de %1$@";
+"Recommendation expired: %1$@ old" = "Recommandation expirée, remonte à %1$@";
 
 /* The title of the cell displaying a recommended temp basal value */
 "Recommended Basal" = "Recommandation basal";
@@ -854,7 +848,7 @@
 "Recommended Bolus Exceeds Maximum Bolus" = "Le bolus recommandé dépasse le bolus maximal";
 
 /* Accessibility hint describing recommended bolus units */
-"Recommended Bolus: %@ Units" = "Bolus Recommendé: %@ Unités";
+"Recommended Bolus: %@ Units" = "Bolus recommandé: %@ Unités";
 
 /* The notification title for a remote bolus. (1: Bolus amount)
    The notification title for a remote failure. (1: Bolus amount) */
@@ -870,10 +864,10 @@
 "Reservoir" = "Réservoir";
 
 /* Title of the prediction input effect for retrospective correction */
-"Retrospective Correction" = "Correction Rétrospective";
+"Retrospective Correction" = "Correction rétrospective";
 
 /* The title of the notification action to retry a bolus command */
-"Retry" = "Nouvel essai";
+"Retry" = "Réessayer";
 
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Enregistrer et Administrer";
@@ -891,7 +885,7 @@
 "Services" = "Services";
 
 /* The label of the settings button */
-"Settings" = "Options";
+"Settings" = "Paramètres";
 
 /* The title of the cell indicating that onboarding is suspended */
 "Setup Incomplete" = "Configuration incomplète";
@@ -918,7 +912,7 @@
 "starting at %@" = "commence à %@";
 
 /* The title of the cell indicating a bolus is being sent */
-"Starting Bolus" = "Commencer un bolus";
+"Starting Bolus" = "Début du bolus";
 
 /* Section title for Support
    Support screen title
@@ -942,7 +936,7 @@
 "Tap to Add" = "Ajout";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Taper pour reprendre";
+"Tap to Resume" = "Appuyez pour reprendre";
 
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Stop";
@@ -960,7 +954,7 @@
 "The bolus recommendation has updated. Please reconfirm the bolus amount." = "La recommandation du bolus a changé. Veuillez reconfirmer la quantité du bolus";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Le modèle hérité utilisé par Loop, permettant de personnaliser la durée de l’action.";
+"The legacy model used by Loop, allowing customization of action duration." = "Le modèle original utilisé par Loop, permettant de gérer la durée d'action de l'insuline.";
 
 /* Alert body displayed absorption time greater than max (1: maximum absorption time) */
 "The maximum absorption time is %@" = "Le temps d'absorption maximum est de %@";
@@ -1057,7 +1051,7 @@
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "En dehors du mode Boucle fermée, l'application utilise un calcul de bolus simplifié comme pour une pompe classique.";
 
 /* The label of the workout mode toggle button */
-"Workout Targets" = "Objectifs d'entraînement";
+"Workout Targets" = "Objectifs exercice";
 
 /* Workout override still on reminder alert body. */
 "Workout Temp Adjust has been turned on for more than 24 hours. Make sure you still want it enabled, or turn it off in the app." = "Le réglage de la température d'entraînement est activé depuis plus de 24 heures. Vérifiez que vous souhaitez toujours l'activer ou désactivez-le dans l'application. Vérifiez que vous souhaitez toujours le garder actif ou désactivez-le dans l'application.";
@@ -1088,9 +1082,6 @@
 
 /* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
 "Your glucose is low. Eat carbs and monitor closely." = "Votre glycémie est basse. Mangez des glucides et surveillez de près.";
-
-/* Warning to ensure the carb entry is accurate */
-"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "Votre glycémie augmente rapidement. Vérifiez que tous les glucides que vous avez mangés ont été correctement enregistrés. Si vous avez enregistré des glucides, vérifiez que l'heure correspond bien au debut de votre manger.";
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "La quantité maximum de votre bolus est de %1$@ U.";

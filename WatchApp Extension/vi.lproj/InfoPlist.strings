@@ -1,0 +1,3 @@
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Dữ liệu Carbohydrate của bữa ăn được nhập trên phần mềm và trên đồng hồ thông minh sẽ được lưu trữ tại app Health. Các thông số glucose được lấy từ thiết bị theo dõi đường huyết liên tục/CGM sẽ được lưu trữ an toàn trong HealthKit.";
+

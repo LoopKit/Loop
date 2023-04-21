@@ -1,6 +1,12 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (pending: %@)";
 
+/* Status row title for premeal override enabled (leading space is to separate from symbol) */
+" Pre-meal Preset" = "קדם-ארוחה";
+
+/* Status row title for workout override enabled (leading space is to separate from symbol) */
+" Workout Preset" = "פעילות גופנית";
+
 /* String denoting lack of a recommended bolus amount in the simple bolus calculator */
 "–" = "-";
 
@@ -24,6 +30,9 @@
 
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
@@ -58,6 +67,9 @@
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults.";
 
+/* Title of the carb entry absorption time cell */
+"Absorption Time" = "Absorption Time";
+
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
 
@@ -67,11 +79,17 @@
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
 "Active Carbohydrates: %@" = "Active Carbohydrates: %@";
 
+/* Title describing quantity of still-absorbing carbohydrates */
+"Active Carbs" = "Active Carbs";
+
 /* The title of the Insulin On-Board graph */
 "Active Insulin" = "Active Insulin";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Active Insulin: %@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Add Carb Entry";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
@@ -99,8 +117,14 @@
 /* The title of the nightscout API secret credential */
 "API Secret" = "API Secret";
 
+/* Action sheet confirmation message for pump history deletion */
+"Are you sure you want to delete all history entries?" = "Are you sure you want to delete all history entries?";
+
+/* Action sheet confirmation message for reservoir deletion */
+"Are you sure you want to delete all reservoir values?" = "Are you sure you want to delete all reservoir values?";
+
 /* Confirmation message for deleting a CGM */
-"Are you sure you want to delete this CGM?" = "Are you sure you want to delete this CGM?";
+"Are you sure you want to delete this CGM?" = "האם למחוק את מד הסוכר הרציף?";
 
 /* Confirmation message for deleting a service */
 "Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
@@ -122,6 +146,15 @@
    The notification title for a bolus failure */
 "Bolus" = "Bolus";
 
+/* Alert title for an updated bolus recommendation */
+"Bolus Recommendation Updated" = "המלצת בולוס התעדכנה";
+
+/* Title for card displaying carb entry and bolus recommendation */
+"Bolus Summary" = "סיכום";
+
+/* Alert title for a bolus too small validation error */
+"Bolus Too Small" = "בולוס קטן מדי";
+
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
 "Bolused %1$@ of %2$@" = "Bolused %1$@ of %2$@";
 
@@ -137,9 +170,22 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Carb effects";
 
+/* Back button text for bolus screen to return to carb entry screen
+   Label for carb entry row on bolus screen */
+"Carb Entry" = "פחמימות";
+
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
 "Carb Ratios" = "Carb Ratios";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Add Carb Entry";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "Edit Carb Entry";
+
+/* Title for bolus screen warning when carbohydrate entry is too large */
+"Carbohydrate Entry Too Large" = "כמות פחמימות גדולה מדי";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Carbohydrates";
@@ -162,8 +208,17 @@
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Check your CGM data source";
 
+/* Carb entry section footer text explaining absorption time */
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact.";
+
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Closed Loop";
+
+/* The format string describing the date of an IOB value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.IOBDateLabel" = "at %1$@";
+
+/* The format string describing the starting date of a total value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.totalDateLabel" = "since %1$@";
 
 /* The title of the action used to dismiss an error alert */
 "com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
@@ -173,6 +228,9 @@
 
 /* The error message displayed for configuration errors. (1: configuration error details) */
 "Configuration Error: %1$@" = "Configuration Error: %1$@";
+
+/* Default alert dismissal */
+"Continue" = "Continue";
 
 /* The title of the continuous glucose monitor section in settings */
 "Continuous Glucose Monitor" = "Continuous Glucose Monitor";
@@ -187,14 +245,23 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Custom Override";
 
+/* Date picker label */
+"Date" = "תאריך";
+
 /* The short unit display string for decibles */
 "dB" = "dB";
+
+/* No comment provided by engineer. */
+"Delete" = "מחק";
 
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Delete Account";
 
+/* Button title to delete all objects */
+"Delete All" = "מחק הכל";
+
 /* Button title to delete CGM */
-"Delete CGM" = "Delete CGM";
+"Delete CGM" = "מחק מד סוכר רציף";
 
 /* Button title to delete a service */
 "Delete Service" = "Delete Service";
@@ -205,8 +272,24 @@
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Disables";
 
+/* Default alert dismissal
+   The button label of the action used to dismiss an error alert */
+"Dismiss" = "בטל";
+
+/* No comment provided by engineer. */
+"Done" = "בוצע";
+
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Enables";
+
+/* Caption for bolus screen notice when glucose data is missing or stale */
+"Enter a blood glucose from a meter for a recommended bolus amount." = "לקבלת המלצת בולוס יש להכניס מדידה ממד סוכר";
+
+/* Button text prompting manual glucose entry on bolus screen */
+"Enter Fingerstick Glucose" = "הכנס מדידת מד סוכר";
+
+/* The placeholder text instructing users to enter a glucose safety limit */
+"Enter glucose safety limit" = "הגדרת בטיחות";
 
 /* The placeholder text instructing users to enter a suspend treshold */
 "Enter suspend threshold" = "Enter suspend threshold";
@@ -217,6 +300,9 @@
 /* The alert title for a resume error */
 "Error Resuming" = "Error Resuming";
 
+/* Segmented button title for insulin delivery log event history */
+"Event History" = "Event History";
+
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Eventually %@";
 
@@ -226,8 +312,20 @@
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
 
+/* Label for manual glucose entry row on bolus screen */
+"Fingerstick Glucose" = "בדיקת סוכר מאצבע";
+
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "For %1$@";
+
+/* No comment provided by engineer. */
+"Forecasted blood glucose may still be higher than target range." = "רמת הסוכר הצפויה עשויה להיות גבוהה מטווח היעד";
+
+/* Title for forecast explanation modal on bolus view */
+"Forecasted Glucose" = "סוכר צפוי";
+
+/* The short unit display string for grams */
+"g" = "g";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glucose";
@@ -264,14 +362,29 @@
    The title text for the insulin sensitivity schedule */
 "Insulin Sensitivities" = "Insulin Sensitivities";
 
+/* Insulin type label */
+"Insulin Type" = "סוג האינסולין";
+
+/* Remote command error description: invalid carb amount. */
+"Invalid carb amount" = "כמות פחמימות לא תקינה";
+
 /* The error message when invalid data was encountered. (1: details of invalid data) */
 "Invalid data: %1$@" = "Invalid data: %1$@";
 
 /* The title text for the issue report cell */
 "Issue Report" = "Issue Report";
 
+/* Title of the warning shown when a large meal was entered */
+"Large Meal Entered" = "ארוחה גדולה נרשמה";
+
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Launches CGM app";
+"Launches CGM app" = "מפעיל אפליקציית חיישן";
+
+/* OK button title for alert shown when delivery status is uncertain */
+"Learn More" = "מידע נוסף";
+
+/* Estimated remaining duration with less than a minute */
+"Less than a minute remaining" = "נותרה פחות מדקה";
 
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Loading...";
@@ -282,11 +395,42 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop has not completed successfully in %@";
 
+/* Bluetooth off background alert body. */
+"Loop will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop לא יפעל עד הפעלת bluetooth. \nלא ניתן לקבל קריאות סוכר, ולא ניתן להזריק אינסולין.";
+
+/* Title for bolus screen warning when glucose is below glucose warning limit.
+   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+"Low Glucose" = "סוכר נמוך";
+
+/* Details for configuration error when maximum basal rate per hour is missing */
+"Maximum Basal Rate Per Hour" = "אינוסלין בזאלי מירבי בשעה";
+
+/* Details for configuration error when maximum bolus is missing */
+"Maximum Bolus" = "בולוס מירבי";
+
+/* Title for bolus screen warning when max bolus is exceeded */
+"Maximum Bolus Exceeded" = "מגבלת בולוס מירבי";
+
+/* Title for bolus entry screen when also entering carbs */
+"Meal Bolus" = "בולוס לכיסוי ארוחה";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Missing data: %1$@";
 
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum effects";
+
+/* Text for more info action on notification of upcoming profile expiration */
+"More Info" = "מידע נוסף";
+
+/* Label for toggle to mute all alerts */
+"Mute All Alerts" = "השתק את כל ההתראות";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Needs Attention";
@@ -294,17 +438,42 @@
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
 
+/* Title for bolus screen notice when no bolus is recommended
+   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+   Title for bolus screen warning when no bolus is recommended */
+"No Bolus Recommended" = "אין המלצה למתן בולוס";
+
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "No connected devices, or failure during device connection";
+
+/* Notification Setting Status is Off */
+"Off" = "כבוי";
+
+/* Alert acknowledgment OK button
+   Critical Alert permissions disabled alert button
+   Default action for alert when alert acknowledgment fails
+   Notifications permissions disabled alert button
+   Text for ok action on notification of upcoming profile expiration
+   The title of the notification action to acknowledge a device alert */
+"OK" = "OK";
+
+/* Notification Setting Status is On */
+"On" = "דולק";
 
 /* The title text for the override presets */
 "Override Presets" = "Override Presets";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Pre-Meal Targets";
+"Pre-Meal Targets" = "יעדי קדם-ארוחה";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
 "Predicted glucose at %1$@ is %2$@." = "Predicted glucose at %1$@ is %2$@.";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "ערכי הסוכר החזוי נמצא בטווח היעד";
+
+/* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "הסוכר הצפוי  %1$@ נמוך מהגדרת הבטיחות";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Predicted glucose of %1$@ is below your suspend threshold setting.";
@@ -321,6 +490,9 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Pump data is %1$@ old";
 
+/* The title of the screen displaying a pump event */
+"Pump Event" = "Pump Event";
+
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Pump Manager";
 
@@ -333,11 +505,14 @@
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Pump Suspended";
 
-/* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Rapid-Acting – Adults";
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Children" = "Rapid-Acting – Children";
+"Rapid-Acting – Adults" = "Rapid-Acting (אינסולין מהיר) מבוגרים";
+
+/* Title of insulin model preset */
+"Rapid-Acting – Children" = "Rapid-Acting (אינסולין מהיר) ילדים";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
 "Recommendation expired: %1$@ old" = "Recommendation expired: %1$@ old";
@@ -357,6 +532,9 @@
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Retry";
 
+/* Button text to save carbs and/or manual glucose entry without a bolus */
+"Save without Bolusing" = "שמור ללא מתן בולוס";
+
 /* The title of the services section in settings */
 "Services" = "Services";
 
@@ -370,7 +548,7 @@
 "since %@" = "since %@";
 
 /* The title of the nightscout site URL credential */
-"Site URL" = "Site URL";
+"Site URL" = "כתובת האתר";
 
 /* The format for the description of a temporary override start date */
 "starting at %@" = "starting at %@";
@@ -387,14 +565,30 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "The legacy model used by Loop, allowing customization of action duration.";
 
+/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
+"The maximum absorption time is %@" = "The maximum absorption time is %@";
+
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "The maximum bolus amount is %@ Units";
+
+/* Title of the carb entry date picker cell */
+"Time" = "שעה";
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
 
+/* Event title displayed when StoredPumpEvent.title is not set
+   The default description to use when an entry has no dose description */
+"Unknown" = "Unknown";
+
+/* The error message displayed for unknown errors. (1: unknown error) */
+"Unknown Error: %1$@" = "תקלה לא ידועה %1$@";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "until %@";
+
+/* The title of the alert controller used to select a duration for pre-meal targets */
+"Use Pre-Meal Preset" = "השתמש ביעד קדם-ארוחה";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Use Workout Glucose Targets";
@@ -407,4 +601,7 @@
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Workout Targets";
+
+/* The title of the action used when confirming entered amount of carbohydrates. */
+"Yes" = "כן";
 

@@ -4,6 +4,9 @@
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
 " Pre-meal Preset" = "Før-måltid forudindstillinger";
 
+/* remaining time in setting's profile expiration section */
+" remaining" = " tilbage";
+
 /* Warning text for when Notifications or Critical Alerts Permissions is disabled */
 " Safety Notifications are OFF" = " Sikkerhedsmeddelelser er SLÅET FRA";
 
@@ -138,7 +141,7 @@
 "Active Carbs" = "Aktive kulhydrater";
 
 /* The title of the Insulin On-Board graph */
-"Active Insulin" = "Aktiv insulin";
+"Active Insulin" = "Aktivt insulin";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktiv insulin: %@";
@@ -198,14 +201,17 @@
 /* The title of the nightscout API secret credential */
 "API Secret" = "API kodeord";
 
+/* Settings app profile section */
+"App Profile" = "App-profil";
+
 /* Action sheet confirmation message for pump history deletion */
-"Are you sure you want to delete all history entries?" = "Er du sikker på, at du vil slette alle gamle indtastninger?";
+"Are you sure you want to delete all history entries?" = "Er du sikker på at du vil slette alle gamle indtastninger?";
 
 /* Action sheet confirmation message for logged dose deletion */
 "Are you sure you want to delete all logged dose entries?" = "Er du sikker på, at du vil slette alle logget dosis?";
 
 /* Action sheet confirmation message for reservoir deletion */
-"Are you sure you want to delete all reservoir values?" = "Er du sikker på, at du vil slette alle reservoir-værdier?";
+"Are you sure you want to delete all reservoir values?" = "Er du sikker på at du vil slette alle reservoirværdier?";
 
 /* No comment provided by engineer. */
 "Are you sure you want to delete all your %@ Data?\n(This action is not reversible)" = "Er du sikker på, at du vil slette alle dine %@ data?\n(Denne handling kan ikke fortrydes)";
@@ -323,7 +329,7 @@
 "Check your device time and/or remove any invalid data from Apple Health." = "Tjek din enheds tid og/eller fjern ugyldige data fra Apple Health.";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Vælg en længere absorptionstid for større måltider, eller dem, der indeholder fedt og proteiner. Dette er kun vejledning til algoritmen og behøver ikke være nøjagtig.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Vælg en længere absorptionstid ved større måltider, eller dem med fedt og proteiner. Det er blot hjælp til algoritmen og behøver ikke være nøjagtig.";
 
 /* The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Luk";
@@ -332,7 +338,7 @@
 "Closed Loop" = "Lukket Loop";
 
 /* Alert title for closed loop off informational modal */
-"Closed Loop OFF" = "Lukket Loop slået fra";
+"Closed Loop OFF" = "Lukket loop FRA";
 
 /* The description text for the looping enabled switch cell when closed loop is not allowed because the sensor is inactive */
 "Closed Loop requires an active CGM Sensor Session" = "Lukket Loop kræver en aktiv CGM sensor-session";
@@ -384,7 +390,7 @@
 "Current Glucose" = "Nuværende blodsukker";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = " Nuværende blodsukker på %1$@ er under dit korrektionsområde.";
+"Current glucose of %1$@ is below correction range." = "Den aktuelle glukose for %1$@ er under korrektionsområdet.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Brugerdefineret Override";
@@ -411,7 +417,7 @@
 "Delete CGM" = "Slet CGM";
 
 /* Button title to delete a service */
-"Delete Service" = "Slet tjeneste";
+"Delete Service" = "Slet service";
 
 /* No comment provided by engineer. */
 "Delete Testing CGM Data" = "Slet CGM testdata";
@@ -426,7 +432,7 @@
 "Deliver" = "Afgiv";
 
 /* Title text for delivery limits */
-"Delivery Limits" = "Indgivningsgrænser";
+"Delivery Limits" = "Insulingrænser";
 
 /* Descriptive text for Therapy Settings */
 "Diabetes Treatment" = "Diabetesbehandling";
@@ -439,7 +445,7 @@
 
 /* Default alert dismissal
    The button label of the action used to dismiss an error alert */
-"Dismiss" = "Luk";
+"Dismiss" = "Afvis";
 
 /* No comment provided by engineer. */
 "Done" = "Udført";
@@ -478,7 +484,7 @@
 "Error Exporting Logs" = "Der opstod en fejl under eksport af log";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Fejl ved forsøg på genoptagelse";
+"Error Resuming" = "Fejl ved genoptagelse";
 
 /* Segmented button title for insulin delivery log event history */
 "Event History" = "Hændelseshistorik";
@@ -495,9 +501,6 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Overskrider maksimal bolus";
 
-/* Remote command error description: expired. */
-"Expired" = "Udløbet";
-
 /* The title of the export critical event logs in support */
 "Export Critical Event Logs" = "Eksportér kritisk begivenhedslog";
 
@@ -512,6 +515,9 @@
 
 /* Label for manual glucose entry row on bolus screen */
 "Fingerstick Glucose" = "Fingerprik blodsukker";
+
+/* Secondary text for alerts disabled warning, which appears on the main status screen. */
+"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Løs nu ved at slå meddelelser, kritiske advarsler og tidsfølsomme meddelelser TIL.";
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "I %1$@";
@@ -529,7 +535,7 @@
 "Get help with Alert Permissions" = "Få hjælp til advarselstilladelser";
 
 /* The title of the glucose and prediction graph */
-"Glucose" = "Blodsukker";
+"Glucose" = "Glukose";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "Blodsukkerdata er %1$@ gamle";
@@ -550,6 +556,9 @@
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "Tidsplan for glukosemålområde";
 
+/* The title text for how to update */
+"How to update (LoopDocs)" = "Sådan opdaterer du (LoopDocs)";
+
 /* Immediate Delivery status text */
 "Immediate" = "Akut";
 
@@ -569,7 +578,7 @@
 "Insulin adjustments have been disabled!" = "Insulinjusteringer er blevet deaktiveret!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulinindgivelse";
+"Insulin Delivery" = "Insulintilførsel";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Insulineffekter";
@@ -608,9 +617,6 @@
 
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Ugyldig glukoseaflæsning med et tidsstempel, der er %1$@ i fremtiden";
-
-/* Remote command error description: invalid OTP. */
-"Invalid OTP" = "Ugyldig OTP";
 
 /* The title text for the issue report cell */
 "Issue Report" = "Fejlrapport";
@@ -775,28 +781,34 @@
 "On" = "Tændt";
 
 /* The title text for the override presets */
-"Override Presets" = "Override forudinstillinger";
+"Override Presets" = "Override forudindstillinger";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Før-måltid Mål";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Forventet blodsukker ved %1$@ er %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Forventet glukose ved %1$@ er %2$@.";
 
 /* Notice when predicted glucose for bolus recommendation is in range */
-"Predicted glucose is in range." = "Det forventede glukose er inden for intervallet.";
+"Predicted glucose is in range." = "Den forventede glukose er inden for intervallet.";
 
 /* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
-"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Forventet blodsukker på %1$@ er under den indstillede suspenderingsgrænse.";
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Det forventede glukoseindhold på %1$@ er under din indstilling af glukose-sikkerhedsgrænsen.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet blodsukker på %1$@ er under den indstillede suspenderingsgrænse.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet glukose på %1$@ er under din indstilling for suspenderingstærskel.";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Forventet: %1$@\nFaktisk: %2$@ (%3$@)";
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Forbereder kritiske begivenhedslogs";
+
+/* Settings App Profile expiration view */
+"Profile Expiration" = "Profiludløb";
+
+/* Time that profile expires */
+"Profile expires " = "Profil udløber ";
 
 /* The title for notification of upcoming profile expiration */
 "Profile Expires Soon" = "Profilen udløber snart";
@@ -811,7 +823,7 @@
 "Pump data is %1$@ old" = "Pumpedata er %1$@ gammel";
 
 /* The title of the screen displaying a pump event */
-"Pump Event" = "Pumpehændelse";
+"Pump Event" = "Pumpe-hændelse";
 
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Pumpemanager";
@@ -835,16 +847,16 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Hurtigtvirkende – Voksne";
+"Rapid-Acting – Adults" = "Hurtigt-virkende (Rapid) – Voksne";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Children" = "Hurtigtvirkende – Børn";
+"Rapid-Acting – Children" = "Hurtigt-virkende (Rapid) – Børn";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
 "Recommendation expired: %1$@ old" = "Forslag udløbet: %1$@ gamle";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Foreslået Basal";
+"Recommended Basal" = "Anbefalet basal";
 
 /* Label for recommended bolus row on bolus screen
    Label for recommended bolus row on simple bolus screen */
@@ -909,7 +921,7 @@
 "since %@" = "siden %@";
 
 /* The title of the nightscout site URL credential */
-"Site URL" = "Side URL";
+"Site URL" = "Side-URL";
 
 /* Software update button link text */
 "Software Update" = "Software-opdatering";
@@ -960,7 +972,7 @@
 "The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusanbefalingen er opdateret. Bekræft venligst bolus.";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Den model, der bruges af Loop, tillader tilpasning af handlingens varighed.";
+"The legacy model used by Loop, allowing customization of action duration." = "Ældre model, der bruges af Loop, og som gør det muligt at tilpasse insulinens varighed.";
 
 /* Alert body displayed absorption time greater than max (1: maximum absorption time) */
 "The maximum absorption time is %@" = "Den maksimale absorptionstid er %@";
@@ -984,10 +996,10 @@
 "The remote command expired %.0f minutes ago." = "Fjernkommandoen udløb for %.0f minutter siden.";
 
 /* Title text for button to Therapy Settings */
-"Therapy Settings" = "Indstillinger";
+"Therapy Settings" = "Behandlingsindstillinger";
 
 /* Title of the carb entry date picker cell */
-"Time" = "Tidspunkt";
+"Time" = "Tid";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Tidsfølsomme meddelelser";
@@ -1022,6 +1034,9 @@
 
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Ukendt fejl: %1$@";
+
+/* Unknown amount of time in settings' profile expiration section */
+"Unknown time" = "Ukendt tidspunkt";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "indtil %@";
@@ -1088,9 +1103,6 @@
 
 /* Bolus screen warning when no bolus is recommended due to glucose input value below recommendation threshold for meal bolus */
 "Your glucose is low. Eat carbs and monitor closely." = "Din glukose er lav. Spis kulhydrater og overvåg nøje.";
-
-/* Warning to ensure the carb entry is accurate */
-"Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating." = "Dit blodsukker er hastigt stigende. Kontroller, at du har indtastet alle kulhydrater, du har spist. Hvis du har indtastet kulhydrater: Kontroller, om det tidspunkt du indtastede stemmer overens med, da du begyndte at spise.";
 
 /* Warning for simple bolus when max bolus is exceeded. (1: maximum bolus) */
 "Your maximum bolus amount is %1$@." = "Din maksimale bolusmængde er %1$@.";

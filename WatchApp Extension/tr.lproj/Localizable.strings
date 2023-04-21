@@ -69,7 +69,7 @@
 "On" = "Açık";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Geçersiz Kıl";
+"Override" = "Geçersiz kıl";
 
 /* Alert message for updated bolus recommendation on Apple Watch */
 "Please reconfirm the bolus amount." = "Lütfen bolus miktarını tekrar onaylayın.";

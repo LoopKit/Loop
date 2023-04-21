@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "ループ";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 

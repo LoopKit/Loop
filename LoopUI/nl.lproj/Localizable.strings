@@ -2,10 +2,10 @@
 "\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n%2$@ werkt met Gesloten Loop in de AAN stand";
 
 /* Red loop message (1: last loop  string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogrammen voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met je pomp en CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogram voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met je pomp en CGM.";
 
 /* Yellow loop message (1: last loop string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogrammen voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met je pomp en CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTik op je CGM- en insulinepompstatuspictogram voor meer informatie. %2$@ blijft proberen een loop te voltooien, maar let op mogelijke communicatieproblemen met je pomp en CGM.";
 
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
 "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ werkt met Gesloten Loop in de UIT stand. Je pomp en CGM blijven werken, maar de app past de dosering niet automatisch aan.\n\n%2$@";

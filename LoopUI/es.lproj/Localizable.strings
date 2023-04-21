@@ -14,7 +14,7 @@
 "– – –" = "– – –";
 
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
-"%@ ago" = "hace %@";
+"%@ ago" = "Hace %@";
 
 /* The format string describing the basal rate. */
 "%@ U" = "%@ U";
@@ -56,7 +56,7 @@
 "g" = "g";
 
 /* String displayed instead of a glucose value above the CGM range */
-"HIGH" = "ALTA";
+"HIGH" = "ALTO";
 
 /* Last loop time completed message (1: last loop time string) */
 "Last completed loop %1$@." = "Último loop completado %1$@.";
@@ -71,13 +71,13 @@
 "Loop Warning" = "Advertencia de Loop";
 
 /* String displayed instead of a glucose value below the CGM range */
-"LOW" = "BAJA";
+"LOW" = "BAJO";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dl";
+"mg/dL" = "mg/dL";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/l";
+"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Necesita atención";

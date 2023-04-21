@@ -1,0 +1,3 @@
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+

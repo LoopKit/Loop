@@ -1,5 +1,5 @@
 /* The complication template example time string */
-"3MIN" = "3min";
+"3MIN" = "3 min";
 
 /* The complication template example glucose string */
 "120" = "120";

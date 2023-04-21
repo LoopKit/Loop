@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Расширение WatchApp";
+
+/* Bundle name */
+"CFBundleName" = "Расширение WatchApp";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Данные о приеме пищи из базы данных Health используются для определения влияния глюкозы. Данные о глюкозе из базы данных Health используются для построения графиков и расчетов. Данные о сне из базы данных Health используются для оптимизации доставки обновлений усложнений Apple Watch во время вашего бодрствования.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Данные об углеводах в приложении и на смарт-часах хранятся в базе данных Здоровье. Данные о гликемии полученные от систем непрерывного мониторинга хранятся в безопасности в Комплексе Здоровья HealthKit ";
+

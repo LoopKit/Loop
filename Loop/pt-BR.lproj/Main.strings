@@ -1,5 +1,8 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "g";
+
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
-"3kU-n2-fha.title" = "Status";
+"3kU-n2-fha.title" = "Estado";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
 "5gz-kZ-iF1.text" = "3.5 U/hora @ 12:12 PM";
@@ -8,7 +11,7 @@
 "87H-N1-0vJ.text" = "Prevista";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
-"aCb-Qs-bpu.text" = "Detalhes";
+"aCb-Qs-bpu.text" = "Detail";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Rótulo";
@@ -31,6 +34,9 @@
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Observada";
 
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3.5 U/hora @ 12:12 PM";
+
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Efeitos dos Carboidratos";
 
@@ -38,7 +44,7 @@
 "IxU-As-glo.text" = "Alterações observadas na glicose, subtraindo alterações modeladas da administração de insulina, podem ser usadas para estimar a absorção de carboidratos.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
-"J7x-W5-gwo.text" = "Detalhes";
+"J7x-W5-gwo.text" = "Detail";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
 "k3F-Na-7mn.text" = "Basal Recomendada";
@@ -67,11 +73,14 @@
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Carboidratos";
 
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Basal Recomendada";
+
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";
 
 /* Class = "UILabel"; text = "Title"; ObjectID = "zbc-87-wxZ"; */
-"zbc-87-wxZ.text" = "Título";
+"zbc-87-wxZ.text" = "Title";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "zvZ-uf-zMX"; */
 "zvZ-uf-zMX.text" = "0";

@@ -62,7 +62,7 @@
 "Last completed loop %1$@." = "Loop wurde nicht erfolgreich abgeschlossen seit %@";
 
 /* Title of red loop message */
-"Loop Failure" = "Loop Fehler";
+"Loop Failure" = "Loop fehlgeschlagen";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop lief seit %@";
@@ -74,7 +74,7 @@
 "LOW" = "NIEDRIG";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dl";
+"mg/dL" = "mg/dL";
 
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";
