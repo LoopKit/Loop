@@ -291,7 +291,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Lượng insulin tiêu hao (U) × Độ nhạy của insulin (%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Khối lượng tiêm insulin";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Tác dụng của insulin";

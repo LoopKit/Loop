@@ -96,7 +96,7 @@
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* Description of the prediction input effect for glucose momentum */
-"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 minutowy współczynnik regresji glukozy (b₁), kontynuowany z rozkładem przez 30 min.";
+"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15-minutowy współczynnik regresji glukozy (b₁), kontynuowany z rozkładem przez 30 min.";
 
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 minutowe porównanie przewidywania stężenia glukozy w stosunku do rzeczywistego, kontynuowane z rozkładem przez 60 min.";
@@ -261,19 +261,19 @@
 "Bolus Issue" = "Problem z bolusem";
 
 /* Alert title for an updated bolus recommendation */
-"Bolus Recommendation Updated" = "Zaktualizowano rekomendowanego Bolus";
+"Bolus Recommendation Updated" = "Zaktualizowano rekomendowanego bolusa";
 
 /* Title for card displaying carb entry and bolus recommendation */
 "Bolus Summary" = "Podsumowanie bolusa";
 
 /* Alert title for a bolus too small validation error */
-"Bolus Too Small" = "Za mały Bolus";
+"Bolus Too Small" = "Za mały bolus";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Podano %1$@ of %2$@";
+"Bolused %1$@ of %2$@" = "Podano %1$@ z %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Bolusowanie %1$@";
+"Bolusing %1$@" = "Podawanie %1$@";
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Anuluj";
@@ -282,7 +282,7 @@
 "Canceling Bolus" = "Anulowanie bolusa";
 
 /* Details for missing data error when carb effects are missing */
-"Carb effects" = "wpływ węglowodanów";
+"Carb effects" = "Wpływ węglowodanów";
 
 /* Back button text for bolus screen to return to carb entry screen
    Label for carb entry row on bolus screen */
@@ -445,7 +445,7 @@
 
 /* Default alert dismissal
    The button label of the action used to dismiss an error alert */
-"Dismiss" = "Odrzucać";
+"Dismiss" = "Rozumiem";
 
 /* No comment provided by engineer. */
 "Done" = "Gotowe";
@@ -493,7 +493,7 @@
 "Event History" = "Historia zdarzeń";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
-"Eventually %@" = "docelowo %@";
+"Eventually %@" = "Docelowo %@";
 
 /* Remote command error description: bolus exceeds maximum bolus in settings. */
 "Exceeds maximum allowed bolus in settings" = "Przekracza maksymalny dozwolony bolus.";
@@ -581,7 +581,7 @@
 "Insulin adjustments have been disabled!" = "Korekty insuliny zostały wyłączone!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Podaż insuliny";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "wpływ insuliny";
@@ -601,7 +601,7 @@
 "Insulin Sensitivity Schedule" = "Harmonogram wrażliwości na insulinę";
 
 /* The title of the cell indicating the pump is suspended */
-"Insulin Suspended" = "Podawanie insuliny zawieszone";
+"Insulin Suspended" = "Podawanie Zawieszone";
 
 /* Insulin type label */
 "Insulin Type" = "Rodzaj insuliny";
@@ -687,7 +687,7 @@
 "Manage Permissions in Settings" = "Zarządzaj uprawnieniami w Ustawieniach";
 
 /* Description of a bolus dose entry (1: value (? if no value) in bold, 2: unit) */
-"Manual Dose: <b>%1$@</b> %2$@" = "Dawka ręczna: <b> %1$@ </b> %2$@";
+"Manual Dose: <b>%1$@</b> %2$@" = "Dawka z pena: <b> %1$@ </b> %2$@";
 
 /* Details for configuration error when maximum basal rate per hour is missing */
 "Maximum Basal Rate Per Hour" = "Maksymalna dawka podstawowa na godzinę";
@@ -782,7 +782,7 @@
 "Notifications give you important %1$@ app information without requiring you to open the app." = "Powiadomienia zawierają ważne informacje o aplikacji %1$@ bez konieczności otwierania aplikacji.";
 
 /* Alert Permissions descriptive text (1: app name) */
-"Notifications give you important %1$@ app information without requiring you to open the app.\n\nKeep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications." = "Powiadomienia dostarczają ważnych informacji o aplikacji %1$@ bez konieczności otwierania aplikacji. \n\n Włącz je w ustawieniach telefonu, aby mieć pewność, że będziesz otrzymywać powiadomienia %1$@ , alerty krytyczne i powiadomienia czasowe.";
+"Notifications give you important %1$@ app information without requiring you to open the app.\n\nKeep these turned ON in your phone’s settings to ensure you receive %1$@ Notifications, Critical Alerts, and Time Sensitive Notifications." = "Powiadomienia dostarczają ważnych informacji o aplikacji %1$@ bez konieczności otwierania aplikacji. \n\nWłącz je w ustawieniach telefonu, aby mieć pewność, że będziesz otrzymywać powiadomienia %1$@ , alerty krytyczne i powiadomienia czasowe.";
 
 /* Notification Setting Status is Off */
 "Off" = "Wyłącz";

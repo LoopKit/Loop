@@ -291,7 +291,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulina Absorvida (U) × Sensibilidade a Insulina (%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Insulina Entregue";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Efeitos da Insulina";
