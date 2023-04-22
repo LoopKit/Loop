@@ -23,6 +23,8 @@ class ServicesManager {
 
     let remoteDataServicesManager: RemoteDataServicesManager
     
+    weak var remoteActionDelegate: RemoteActionDelegate?
+    
     private var services = [Service]()
 
     private let servicesLock = UnfairLock()
@@ -37,13 +39,15 @@ class ServicesManager {
         alertManager: AlertManager,
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
-        remoteDataServicesManager: RemoteDataServicesManager
+        remoteDataServicesManager: RemoteDataServicesManager,
+        remoteActionDelegate: RemoteActionDelegate
     ) {
         self.pluginManager = pluginManager
         self.alertManager = alertManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
+        self.remoteActionDelegate = remoteActionDelegate
         restoreState()
     }
 
@@ -200,6 +204,42 @@ extension ServicesManager: ServiceDelegate {
     func serviceWantsDeletion(_ service: Service) {
         log.default("Service with identifier '%{public}@' deleted", service.serviceIdentifier)
         removeActiveService(service)
+    }
+    
+    func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
+        try await remoteActionDelegate?.handleRemoteOverride(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
+    }
+    
+    func handleRemoteOverrideCancel() async throws {
+        try await remoteActionDelegate?.handleRemoteOverrideCancel()
+    }
+    
+    func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
+        do {
+            try await remoteActionDelegate?.handleRemoteCarb(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
+            await NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
+        } catch {
+            await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
+            throw error
+        }
+    }
+    
+    func handleRemoteBolus(amountInUnits: Double) async throws {
+        do {
+            try await remoteActionDelegate?.handleRemoteBolus(amountInUnits: amountInUnits)
+            await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
+        } catch {
+            await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
+            throw error
+        }
+    }
+    
+    func handleRemoteClosedLoop(activate: Bool) async throws {
+        try await remoteActionDelegate?.handleRemoteClosedLoop(activate: activate)
+    }
+    
+    func handleRemoteAutobolus(activate: Bool) async throws {
+        try await remoteActionDelegate?.handleRemoteAutobolus(activate: activate)
     }
 }
 

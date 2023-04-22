@@ -407,7 +407,6 @@ final class DeviceDataManager {
             overrideHistory: overrideHistory,
             insulinDeliveryStore: doseStore.insulinDeliveryStore
         )
-        
 
         settingsManager.remoteDataServicesManager = remoteDataServicesManager
         
@@ -416,7 +415,8 @@ final class DeviceDataManager {
             alertManager: alertManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
-            remoteDataServicesManager: remoteDataServicesManager
+            remoteDataServicesManager: remoteDataServicesManager,
+            remoteActionDelegate: self
         )
 
         let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
@@ -1339,6 +1339,15 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             self.crashRecoveryManager.dosingFinished()
         }
     }
+    
+    func loopDataManager(
+        _ manager: LoopDataManager,
+        loopDidFinishWithDosingDecision:
+        StoredDosingDecision, error: LoopError?
+    ) {
+        processPendingRemoteCommands()
+    }
+
 }
 
 extension Notification.Name {
@@ -1348,84 +1357,74 @@ extension Notification.Name {
 }
 
 // MARK: - Remote Notification Handling
-extension DeviceDataManager {
+
+extension DeviceDataManager: RemoteActionDelegate {
     
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
         Task {
-            let backgroundTask = await beginBackgroundTask(name: "Remote Data Upload")
-            await handleRemoteNotification(notification)
+            log.default("Remote Notification: Handling notification %{public}@", notification)
+            
+            guard FeatureFlags.remoteCommandsEnabled else {
+                log.error("Remote Notification: Remote Commands not enabled.")
+                return
+            }
+            
+            let backgroundTask = await beginBackgroundTask(name: "Handle Remote Notification")
+            do {
+                try await remoteDataServicesManager.handleRemoteNotification(notification)
+            } catch {
+                log.error("Remote Notification: Error: %{public}@", String(describing: error))
+            }
+            
             await endBackgroundTask(backgroundTask)
-        }
-    }
-    
-    func handleRemoteNotification(_ notification: [String: AnyObject]) async {
-        
-        defer {
             log.default("Remote Notification: Finished handling")
         }
-        
-        guard FeatureFlags.remoteCommandsEnabled else {
-            log.error("Remote Notification: Remote Commands not enabled.")
-            return
-        }
-        
-        let command: RemoteCommand
-        do {
-            command = try await remoteDataServicesManager.commandFromPushNotification(notification)
-        } catch {
-            log.error("Remote Notification: Parse Error: %{public}@", String(describing: error))
-            return
-        }
-        
-        await handleRemoteCommand(command)
     }
     
-    func handleRemoteCommand(_ command: RemoteCommand) async {
-        
-        log.default("Remote Notification: Handling command %{public}@", String(describing: command))
-        
-        switch command.action {
-        case .temporaryScheduleOverride(let overrideAction):
-            do {
-                try command.validate()
-                try await handleOverrideAction(overrideAction)
-            } catch {
-                log.error("Remote Notification: Override Action Error: %{public}@", String(describing: error))
+    func processPendingRemoteCommands() {
+        Task {
+            guard FeatureFlags.remoteCommandsEnabled else {
+                return
             }
-        case .cancelTemporaryOverride(let overrideCancelAction):
-            do {
-                try command.validate()
-                try await handleOverrideCancelAction(overrideCancelAction)
-            } catch {
-                log.error("Remote Notification: Override Action Cancel Error: %{public}@", String(describing: error))
-            }
-        case .bolusEntry(let bolusAction):
-            do {
-                try command.validate()
-                try await handleBolusAction(bolusAction)
-            } catch {
-                await NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAction.amountInUnits)
-                log.error("Remote Notification: Bolus Action Error: %{public}@", String(describing: error))
-            }
-        case .carbsEntry(let carbAction):
-            do {
-                try command.validate()
-                try await handleCarbAction(carbAction)
-            } catch {
-                await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: carbAction.amountInGrams)
-                log.error("Remote Notification: Carb Action Error: %{public}@", String(describing: error))
-            }
+            
+            let backgroundTask = await beginBackgroundTask(name: "Handle Pending Remote Commands")
+            await remoteDataServicesManager.processPendingRemoteCommands()
+            await endBackgroundTask(backgroundTask)
         }
     }
     
     //Remote Overrides
     
-    func handleOverrideAction(_ action: OverrideAction) async throws {
-        let remoteOverride = try action.toValidOverride(allowedPresets: loopManager.settings.overridePresets)
+    func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
+        
+        guard let preset = loopManager.settings.overridePresets.first(where: { $0.name == name }) else {
+            throw OverrideActionError.unknownPreset(name)
+        }
+        
+        var remoteOverride = preset.createOverride(enactTrigger: .remote(remoteAddress))
+        
+        if let durationTime = durationTime {
+            
+            guard durationTime <= LoopConstants.maxOverrideDurationTime else {
+                throw OverrideActionError.durationExceedsMax(LoopConstants.maxOverrideDurationTime)
+            }
+            
+            guard durationTime >= 0 else {
+                throw OverrideActionError.negativeDuration
+            }
+            
+            if durationTime == 0 {
+                remoteOverride.duration = .indefinite
+            } else {
+                remoteOverride.duration = .finite(durationTime)
+            }
+        }
+        
         await activateRemoteOverride(remoteOverride)
     }
     
-    func handleOverrideCancelAction(_ action: OverrideCancelAction) async throws {
+    
+    func handleRemoteOverrideCancel() async throws {
         await activateRemoteOverride(nil)
     }
     
@@ -1434,28 +1433,144 @@ extension DeviceDataManager {
         await remoteDataServicesManager.triggerUpload(for: .overrides)
     }
     
+    enum OverrideActionError: LocalizedError {
+        
+        case unknownPreset(String)
+        case durationExceedsMax(TimeInterval)
+        case negativeDuration
+        
+        var errorDescription: String? {
+            switch self {
+            case .unknownPreset(let presetName):
+                return String(format: NSLocalizedString("Unknown preset: %1$@", comment: "Remote command error description: unknown preset (1: preset name)."), presetName)
+            case .durationExceedsMax(let maxDurationTime):
+                return String(format: NSLocalizedString("Duration exceeds: %1$.1f hours", comment: "Remote command error description: duration exceed max (1: max duration in hours)."), maxDurationTime.hours)
+            case .negativeDuration:
+                return String(format: NSLocalizedString("Negative duration not allowed", comment: "Remote command error description: negative duration error."))
+            }
+        }
+    }
+    
     //Remote Bolus
     
-    func handleBolusAction(_ action: BolusAction) async throws {
-        let validBolusAmount = try action.toValidBolusAmount(maximumBolus: loopManager.settings.maximumBolus)
-        try await self.enactBolus(units: validBolusAmount, activationType: .manualNoRecommendation)
+    func handleRemoteBolus(amountInUnits: Double) async throws {
+        
+        guard amountInUnits > 0 else {
+            throw BolusActionError.invalidBolus
+        }
+        
+        guard let maxBolusAmount = loopManager.settings.maximumBolus else {
+            throw BolusActionError.missingMaxBolus
+        }
+        
+        guard amountInUnits <= maxBolusAmount else {
+            throw BolusActionError.exceedsMaxBolus
+        }
+        
+        try await self.enactBolus(units: amountInUnits, activationType: .manualNoRecommendation)
         await remoteDataServicesManager.triggerUpload(for: .dose)
-        self.analyticsServicesManager.didBolus(source: "Remote", units: validBolusAmount)
+        self.analyticsServicesManager.didBolus(source: "Remote", units: amountInUnits)
+    }
+    
+    enum BolusActionError: LocalizedError {
+        
+        case invalidBolus
+        case missingMaxBolus
+        case exceedsMaxBolus
+        
+        var errorDescription: String? {
+            switch self {
+            case .invalidBolus:
+                return NSLocalizedString("Invalid Bolus Amount", comment: "Remote command error description: invalid bolus amount.")
+            case .missingMaxBolus:
+                return NSLocalizedString("Missing maximum allowed bolus in settings", comment: "Remote command error description: missing maximum bolus in settings.")
+            case .exceedsMaxBolus:
+                return NSLocalizedString("Exceeds maximum allowed bolus in settings", comment: "Remote command error description: bolus exceeds maximum bolus in settings.")
+            }
+        }
     }
     
     //Remote Carb Entry
     
-    func handleCarbAction(_ action: CarbAction) async throws {
-        let candidateCarbEntry = try action.toValidCarbEntry(defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
-                                                                  minAbsorptionTime: LoopConstants.minCarbAbsorptionTime,
-                                                                  maxAbsorptionTime: LoopConstants.maxCarbAbsorptionTime,
-                                                                  maxCarbEntryQuantity: LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()),
-                                                                  maxCarbEntryPastTime: LoopConstants.maxCarbEntryPastTime,
-                                                                  maxCarbEntryFutureTime: LoopConstants.maxCarbEntryFutureTime
-        )
+    func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
+        
+        let absorptionTime = absorptionTime ?? carbStore.defaultAbsorptionTimes.medium
+        if absorptionTime < LoopConstants.minCarbAbsorptionTime || absorptionTime > LoopConstants.maxCarbAbsorptionTime {
+            throw CarbActionError.invalidAbsorptionTime(absorptionTime)
+        }
+        
+        guard amountInGrams > 0.0 else {
+            throw CarbActionError.invalidCarbs
+        }
+        
+        guard amountInGrams <= LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()) else {
+            throw CarbActionError.exceedsMaxCarbs
+        }
+        
+        if let startDate = startDate {
+            let maxStartDate = Date().addingTimeInterval(LoopConstants.maxCarbEntryFutureTime)
+            let minStartDate = Date().addingTimeInterval(LoopConstants.maxCarbEntryPastTime)
+            guard startDate <= maxStartDate  && startDate >= minStartDate else {
+                throw CarbActionError.invalidStartDate(startDate)
+            }
+        }
+        
+        let quantity = HKQuantity(unit: .gram(), doubleValue: amountInGrams)
+        let candidateCarbEntry = NewCarbEntry(quantity: quantity, startDate: startDate ?? Date(), foodType: foodType, absorptionTime: absorptionTime)
         
         let _ = try await addRemoteCarbEntry(candidateCarbEntry)
         await remoteDataServicesManager.triggerUpload(for: .carb)
+    }
+    
+    enum CarbActionError: LocalizedError {
+        
+        case invalidAbsorptionTime(TimeInterval)
+        case invalidStartDate(Date)
+        case exceedsMaxCarbs
+        case invalidCarbs
+        
+        var errorDescription: String? {
+            switch  self {
+            case .exceedsMaxCarbs:
+                return NSLocalizedString("Exceeds maximum allowed carbs", comment: "Remote command error description: carbs exceed maximum amount.")
+            case .invalidCarbs:
+                return NSLocalizedString("Invalid carb amount", comment: "Remote command error description: invalid carb amount.")
+            case .invalidAbsorptionTime(let absorptionTime):
+                let absorptionHoursFormatted = Self.numberFormatter.string(from: absorptionTime.hours) ?? ""
+                return String(format: NSLocalizedString("Invalid absorption time: %1$@ hours", comment: "Remote command error description: invalid absorption time. (1: Input duration in hours)."), absorptionHoursFormatted)
+            case .invalidStartDate(let startDate):
+                let startDateFormatted = Self.dateFormatter.string(from: startDate)
+                return String(format: NSLocalizedString("Start time is out of range: %@", comment: "Remote command error description: invalid start time is out of range."), startDateFormatted)
+            }
+        }
+        
+        static var numberFormatter: NumberFormatter = {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            return formatter
+        }()
+        
+        static var dateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .medium
+            return formatter
+        }()
+    }
+    
+    //Remote Autobolus Update
+    
+    func handleRemoteAutobolus(activate: Bool) async throws {
+        loopManager.mutateSettings { settings in
+            settings.automaticDosingStrategy = activate ? .automaticBolus : .tempBasalOnly
+        }
+    }
+    
+    //Remote Closed Loop Update
+    
+    func handleRemoteClosedLoop(activate: Bool) async throws {
+        loopManager.mutateSettings { settings in
+            settings.dosingEnabled = activate
+        }
     }
     
     //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
