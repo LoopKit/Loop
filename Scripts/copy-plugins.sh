@@ -14,7 +14,7 @@ function copy_plugins {
     for f in "$1"/*.loopplugin; do
       plugin=$(basename "$f")
       echo Copying plugin: $plugin to frameworks directory in app
-      plugin_path="$(readlink "$f" || echo "$f")"
+      plugin_path="$(readlink -f "$f" || echo "$f")"
       plugin_as_framework_path="${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/${plugin%.*}.framework"
       rsync -va --exclude=Frameworks "$plugin_path/." "${plugin_as_framework_path}"
       # Rename .plugin to .framework
@@ -29,7 +29,7 @@ function copy_plugins {
         framework=$(basename "$framework_path")
         echo "Copying plugin's framework $framework_path to ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/."
         cp -avf "$framework_path" "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/."
-        plugin_path="$(readlink "$f" || echo "$f")"
+        plugin_path="$(readlink -f "$f" || echo "$f")"
         if [ "$EXPANDED_CODE_SIGN_IDENTITY" != "-" ] && [ "$EXPANDED_CODE_SIGN_IDENTITY" != "" ]; then
           echo "Signing $framework for $plugin with $EXPANDED_CODE_SIGN_IDENTITY_NAME"
           /usr/bin/codesign --force --sign ${EXPANDED_CODE_SIGN_IDENTITY} --timestamp=none --preserve-metadata=identifier,entitlements,flags "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/${framework}"
