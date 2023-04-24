@@ -72,7 +72,7 @@ class SupportManagerTests: XCTestCase {
     }
     
     func testVersionCheckOneService() throws {
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, getVersion())
         mockSupport.mockResult = .success(.required)
         XCTAssertEqual(.required, getVersion())
     }
@@ -80,13 +80,13 @@ class SupportManagerTests: XCTestCase {
     func testVersionCheckOneServiceError() throws {
         // Error doesn't really do anything but log
         mockSupport.mockResult = .failure(MockError.nothing)
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, getVersion())
     }
     
     func testVersionCheckMultipleServices() throws {
         let anotherSupport = AnotherMockSupport()
         supportManager.addSupport(anotherSupport)
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, getVersion())
         anotherSupport.mockResult = .success(.required)
         XCTAssertEqual(.required, getVersion())
         mockSupport.mockResult = .success(.recommended)
