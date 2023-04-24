@@ -1,11 +1,11 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Huidige glucose van %1$@ is onder het correctie bereik.";
+"Current glucose of %1$@ is below correction range." = "Huidige glucose %1$@ is lager dan het correctiebereik.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
 
 /* The short unit display string for grams */
-"g" = "gr";
+"g" = "g";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -14,10 +14,16 @@
 "mmol/L" = "mmol/L";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Voorspelde glucose van %1$@ is %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Voorspelde glucose om %1$@ is %2$@.";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "Voorspelde glucose is binnen bereik.";
+
+/* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Voorspelde glucose van %1$@ ligt onder je ingestelde glucoseveiligheidslimiet.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Voorspelde glucose van %1$@ is onder het onderbreken van basaal instelling.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Verwachte glucose van %1$@ is lager dan je ingestelde insulineonderbrekingsdrempel.";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";

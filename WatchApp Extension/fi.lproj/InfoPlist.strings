@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "WatchApp-laajennus";
+
+/* Bundle name */
+"CFBundleName" = "WatchApp-laajennus";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Terveys-sovelluksen ateriatietoja käytetään glukoosivaikutusten määrittämiseen. Terveys-sovelluksen glukoositietoja käytetään graafeissa ja laskelmissa. Unitietoja käytetään Apple Watch -komplikaation toiminnan optimointiin hereillä olon aikana.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Sovelluksen ja kellon kautta tallennetut hiilihydraattitiedot tallennetaan Terveys-sovellukseen. Glukoosiseurannan kautta saadut glukoositiedot tallennetaan turvallisesti HealthKitiin.";
+

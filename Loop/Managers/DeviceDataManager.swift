@@ -94,6 +94,15 @@ final class DeviceDataManager {
         didSet {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
+
+            if cgmManager?.managerIdentifier != oldValue?.managerIdentifier {
+                if let cgmManager = cgmManager {
+                    analyticsServicesManager.cgmWasAdded(identifier: cgmManager.managerIdentifier)
+                } else {
+                    analyticsServicesManager.cgmWasRemoved()
+                }
+            }
+
             NotificationCenter.default.post(name: .CGMManagerChanged, object: self, userInfo: nil)
             rawCGMManager = cgmManager?.rawValue
             UserDefaults.appGroup?.clearLegacyCGMManagerRawValue()
@@ -112,6 +121,14 @@ final class DeviceDataManager {
             // If the current CGMManager is a PumpManager, we clear it out.
             if cgmManager is PumpManagerUI {
                 cgmManager = nil
+            }
+
+            if pumpManager?.managerIdentifier != oldValue?.managerIdentifier {
+                if let pumpManager = pumpManager {
+                    analyticsServicesManager.pumpWasAdded(identifier: pumpManager.managerIdentifier)
+                } else {
+                    analyticsServicesManager.pumpWasRemoved()
+                }
             }
 
             setupPump()
@@ -201,8 +218,6 @@ final class DeviceDataManager {
 
     var analyticsServicesManager: AnalyticsServicesManager
 
-    var loggingServicesManager: LoggingServicesManager
-
     var settingsManager: SettingsManager
 
     var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
@@ -230,6 +245,8 @@ final class DeviceDataManager {
     init(pluginManager: PluginManager,
          alertManager: AlertManager,
          settingsManager: SettingsManager,
+         loggingServicesManager: LoggingServicesManager,
+         analyticsServicesManager: AnalyticsServicesManager,
          bluetoothProvider: BluetoothProvider,
          alertPresenter: AlertPresenter,
          automaticDosingStatus: AutomaticDosingStatus,
@@ -250,9 +267,6 @@ final class DeviceDataManager {
             }
         }
         deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
-
-        loggingServicesManager = LoggingServicesManager()
-        analyticsServicesManager = AnalyticsServicesManager()
 
         self.pluginManager = pluginManager
         self.alertManager = alertManager
@@ -286,6 +300,8 @@ final class DeviceDataManager {
         } else {
             insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
         }
+
+        self.analyticsServicesManager = analyticsServicesManager
         
         self.doseStore = DoseStore(
             healthStore: healthStore,
@@ -369,7 +385,8 @@ final class DeviceDataManager {
             trustedTimeOffset: { trustedTimeChecker.detectedSystemTimeOffset }
         )
         cacheStore.delegate = loopManager
-        loopManager.presetActivationObserver = alertManager
+        loopManager.presetActivationObservers.append(alertManager)
+        loopManager.presetActivationObservers.append(analyticsServicesManager)
 
         watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 
@@ -389,6 +406,7 @@ final class DeviceDataManager {
         
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
+            alertManager: alertManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
             remoteDataServicesManager: remoteDataServicesManager
@@ -717,6 +735,8 @@ private extension DeviceDataManager {
             alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
                                               soundVendor: cgmManager)            
             cgmHasValidSensorSession = cgmManager.cgmManagerStatus.hasValidSensorSession
+
+            analyticsServicesManager.identifyCGMType(cgmManager.managerIdentifier)
         }
 
         if let cgmManagerUI = cgmManager as? CGMManagerUI {
@@ -744,6 +764,8 @@ private extension DeviceDataManager {
                                                     soundVendor: pumpManager)
             
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
+
+            analyticsServicesManager.identifyPumpType(pumpManager.managerIdentifier)
         }
     }
 
@@ -762,28 +784,43 @@ extension DeviceDataManager {
             return
         }
 
-        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true), completion: nil)
-        pumpManager.enactBolus(units: units, activationType: activationType) { (error) in
-            if let error = error {
-                self.log.error("%{public}@", String(describing: error))
-                switch error {
-                case .uncertainDelivery:
-                    // Do not generate notification on uncertain delivery error
-                    break
-                default:
-                    // Do not generate notifications for automatic boluses that fail.
-                    if !activationType.isAutomatic {
-                        NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), activationType: activationType)
+        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true)) {
+            pumpManager.enactBolus(units: units, activationType: activationType) { (error) in
+                if let error = error {
+                    self.log.error("%{public}@", String(describing: error))
+                    switch error {
+                    case .uncertainDelivery:
+                        // Do not generate notification on uncertain delivery error
+                        break
+                    default:
+                        // Do not generate notifications for automatic boluses that fail.
+                        if !activationType.isAutomatic {
+                            NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), activationType: activationType)
+                        }
+                    }
+                    
+                    self.loopManager.bolusRequestFailed(error) {
+                        completion(error)
+                    }
+                } else {
+                    self.loopManager.bolusConfirmed() {
+                        completion(nil)
                     }
                 }
-                
-                self.loopManager.bolusRequestFailed(error) {
-                    completion(error)
+            }
+            // Trigger forecast/recommendation update for remote clients
+            self.loopManager.updateRemoteRecommendation()
+        }
+    }
+    
+    func enactBolus(units: Double, activationType: BolusActivationType) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            enactBolus(units: units, activationType: activationType) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
                 }
-            } else {
-                self.loopManager.bolusConfirmed() {
-                    completion(nil)
-                }
+                continuation.resume()
             }
         }
     }
@@ -1284,6 +1321,10 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 
         return rounded
     }
+    
+    func loopDataManager(_ manager: LoopDataManager, estimateBolusDuration units: Double) -> TimeInterval? {
+        pumpManager?.estimatedDuration(toBolus: units)
+    }
 
     func loopDataManager(
         _ manager: LoopDataManager,
@@ -1318,112 +1359,149 @@ extension Notification.Name {
 
 // MARK: - Remote Notification Handling
 extension DeviceDataManager {
+    
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
-
+        Task {
+            let backgroundTask = await beginBackgroundTask(name: "Remote Data Upload")
+            await handleRemoteNotification(notification)
+            await endBackgroundTask(backgroundTask)
+        }
+    }
+    
+    func handleRemoteNotification(_ notification: [String: AnyObject]) async {
+        
         defer {
-            log.info("Finished handling remote notification")
+            log.default("Remote Notification: Finished handling")
         }
         
         guard FeatureFlags.remoteCommandsEnabled else {
+            log.error("Remote Notification: Remote Commands not enabled.")
             return
-        }
-
-        if let expirationStr = notification["expiration"] as? String {
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
-            if let expiration = formatter.date(from: expirationStr) {
-                guard expiration > Date() else {
-                    log.error("Expired notification: %{public}@", String(describing: notification))
-                    return
-                }
-            } else {
-                log.error("Invalid expiration: %{public}@", expirationStr)
-                return
-            }
         }
         
         let command: RemoteCommand
-        
         do {
-            command = try RemoteCommand.createRemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets, defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium).get()
+            command = try await remoteDataServicesManager.commandFromPushNotification(notification)
         } catch {
-            log.error("Remote Notification Error: %{public}@", String(describing: error))
+            log.error("Remote Notification: Parse Error: %{public}@", String(describing: error))
             return
         }
-
-        switch command {
-            
-        case .temporaryScheduleOverride(let override):
-            log.default("Enacting remote temporary override: %{public}@", String(describing: override))
-            loopManager.mutateSettings { settings in settings.scheduleOverride = override }
-        case .cancelTemporaryOverride:
-            log.default("Canceling temporary override from remote command")
-            loopManager.mutateSettings { settings in settings.scheduleOverride = nil }
-        case .bolusEntry(let bolusAmount):
-            log.default("Enacting remote bolus entry: %{public}@", String(describing: bolusAmount))
-            
-            //Remote bolus requires validation from its remote source
-            guard remoteDataServicesManager.validatePushNotificationSource(notification) else {
-                NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.invalidOTP, amount: bolusAmount)
-                log.info("Could not validate notification: %{public}@", String(describing: notification))
-                return
+        
+        await handleRemoteCommand(command)
+    }
+    
+    func handleRemoteCommand(_ command: RemoteCommand) async {
+        
+        log.default("Remote Notification: Handling command %{public}@", String(describing: command))
+        
+        switch command.action {
+        case .temporaryScheduleOverride(let overrideAction):
+            do {
+                try command.validate()
+                try await handleOverrideAction(overrideAction)
+            } catch {
+                log.error("Remote Notification: Override Action Error: %{public}@", String(describing: error))
             }
-            
-            guard let maxBolusAmount = loopManager.settings.maximumBolus else {
-                NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.missingMaxBolus, amount: bolusAmount)
-                log.default("No max bolus detected. Aborting...")
-                return
+        case .cancelTemporaryOverride(let overrideCancelAction):
+            do {
+                try command.validate()
+                try await handleOverrideCancelAction(overrideCancelAction)
+            } catch {
+                log.error("Remote Notification: Override Action Cancel Error: %{public}@", String(describing: error))
             }
-            
-            guard bolusAmount.isLessThanOrEqualTo(maxBolusAmount) else {
-                NotificationManager.sendRemoteBolusFailureNotification(for: RemoteCommandError.exceedsMaxBolus, amount: bolusAmount)
-                log.default("Remote bolus higher than maximum. Aborting...")
-                return
+        case .bolusEntry(let bolusAction):
+            do {
+                try command.validate()
+                try await handleBolusAction(bolusAction)
+            } catch {
+                await NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAction.amountInUnits)
+                log.error("Remote Notification: Bolus Action Error: %{public}@", String(describing: error))
             }
-            
-            // For remote boluses, assume manual no recommendation.
-            self.enactBolus(units: bolusAmount, activationType: .manualNoRecommendation) { error in
-                if let error = error {
-                    NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAmount)
-                } else {
-                    NotificationManager.sendRemoteBolusNotification(amount: bolusAmount)
-                }
+        case .carbsEntry(let carbAction):
+            do {
+                try command.validate()
+                try await handleCarbAction(carbAction)
+            } catch {
+                await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: carbAction.amountInGrams)
+                log.error("Remote Notification: Carb Action Error: %{public}@", String(describing: error))
             }
-        case .carbsEntry(let candidateCarbEntry):
-            log.default("Adding carbs entry.")
-            
-            let candidateCarbsInGrams = candidateCarbEntry.quantity.doubleValue(for: .gram())
-            
-            //Remote carb entry requires validation from its remote source
-            guard remoteDataServicesManager.validatePushNotificationSource(notification) else {
-                NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidOTP, amountInGrams: candidateCarbsInGrams)
-                log.info("Could not validate notification: %{public}@", String(describing: notification))
-                return
-            }
-            
-            guard candidateCarbsInGrams > 0.0 else {
-                NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.invalidCarbs, amountInGrams: candidateCarbsInGrams)
-                log.default("Invalid carb entry amount. Aborting...")
-                return
-            }
-            
-            guard candidateCarbsInGrams <= LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()) else {
-                NotificationManager.sendRemoteCarbEntryFailureNotification(for: RemoteCommandError.exceedsMaxCarbs, amountInGrams: candidateCarbsInGrams)
-                log.default("Carbs higher than maximum. Aborting...")
-                return
-            }
-            
-            carbStore.addCarbEntry(candidateCarbEntry) { carbEntryAddResult in
-                switch carbEntryAddResult {
-                case .success(let completedCarbEntry):
-                    NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: completedCarbEntry.quantity.doubleValue(for: .gram()))
+        }
+    }
+    
+    //Remote Overrides
+    
+    func handleOverrideAction(_ action: OverrideAction) async throws {
+        let remoteOverride = try action.toValidOverride(allowedPresets: loopManager.settings.overridePresets)
+        await activateRemoteOverride(remoteOverride)
+    }
+    
+    func handleOverrideCancelAction(_ action: OverrideCancelAction) async throws {
+        await activateRemoteOverride(nil)
+    }
+    
+    func activateRemoteOverride(_ remoteOverride: TemporaryScheduleOverride?) async {
+        loopManager.mutateSettings { settings in settings.scheduleOverride = remoteOverride }
+        await remoteDataServicesManager.triggerUpload(for: .overrides)
+    }
+    
+    //Remote Bolus
+    
+    func handleBolusAction(_ action: BolusAction) async throws {
+        let validBolusAmount = try action.toValidBolusAmount(maximumBolus: loopManager.settings.maximumBolus)
+        try await self.enactBolus(units: validBolusAmount, activationType: .manualNoRecommendation)
+        await remoteDataServicesManager.triggerUpload(for: .dose)
+        self.analyticsServicesManager.didBolus(source: "Remote", units: validBolusAmount)
+    }
+    
+    //Remote Carb Entry
+    
+    func handleCarbAction(_ action: CarbAction) async throws {
+        let candidateCarbEntry = try action.toValidCarbEntry(defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
+                                                                  minAbsorptionTime: LoopConstants.minCarbAbsorptionTime,
+                                                                  maxAbsorptionTime: LoopConstants.maxCarbAbsorptionTime,
+                                                                  maxCarbEntryQuantity: LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()),
+                                                                  maxCarbEntryPastTime: LoopConstants.maxCarbEntryPastTime,
+                                                                  maxCarbEntryFutureTime: LoopConstants.maxCarbEntryFutureTime
+        )
+        
+        let _ = try await addRemoteCarbEntry(candidateCarbEntry)
+        await remoteDataServicesManager.triggerUpload(for: .carb)
+    }
+    
+    //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
+    func addRemoteCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
+        return try await withCheckedThrowingContinuation { continuation in
+            carbStore.addCarbEntry(carbEntry) { result in
+                switch result {
+                case .success(let storedCarbEntry):
+                    self.analyticsServicesManager.didAddCarbs(source: "Remote", amount: carbEntry.quantity.doubleValue(for: .gram()))
+                    continuation.resume(returning: storedCarbEntry)
                 case .failure(let error):
-                    NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: candidateCarbsInGrams)
+                    continuation.resume(throwing: error)
                 }
             }
         }
-        // Wait up to 25 seconds for uploads triggered by these commands to finish
-        let _ = remoteDataServicesManager.waitForUploadsToFinish(timeout: .now() + TimeInterval(25))
+    }
+    
+    //Background Uploads
+    
+    func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
+        var backgroundTask: UIBackgroundTaskIdentifier?
+        backgroundTask = await UIApplication.shared.beginBackgroundTask(withName: name) {
+            guard let backgroundTask = backgroundTask else {return}
+            Task {
+                await UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
+            
+            self.log.error("Background Task Expired: %{public}@", name)
+        }
+        
+        return backgroundTask
+    }
+    
+    func endBackgroundTask(_ backgroundTask: UIBackgroundTaskIdentifier?) async {
+        guard let backgroundTask else {return}
+        await UIApplication.shared.endBackgroundTask(backgroundTask)
     }
 }
 

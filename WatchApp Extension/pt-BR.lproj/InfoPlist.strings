@@ -1,0 +1,3 @@
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Dados de carboidratos inseridos no aplicativo e no  Apple Watch são armazenados no banco de dados de saúde. Dados de glicemia recebidos do CGM são armazenados de modo seguro no HealthKit.";
+

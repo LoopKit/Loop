@@ -1,0 +1,45 @@
+/* No comment provided by engineer. */
+"---" = "---";
+
+/* No comment provided by engineer. */
+"-U" = "-U";
+
+/* No comment provided by engineer. */
+"??" = "??";
+
+/* No comment provided by engineer. */
+"%@" = "%@";
+
+/* No comment provided by engineer. */
+"%@ U" = "%@ U";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* No comment provided by engineer. */
+"Eventual" = "Eventual";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* No comment provided by engineer. */
+"Loop Status Widget" = "Widget de Estado de Loop";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* No comment provided by engineer. */
+"See your current blood glucose and insulin delivery." = "Mira tu glucosa en sangre actual y la administración de insulina.";
+
+/* The short unit display string for international units of insulin */
+"U" = "U";
+

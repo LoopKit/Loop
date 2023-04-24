@@ -50,21 +50,25 @@ public final class AlertManager {
 
     private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
 
+    var analyticsServicesManager: AnalyticsServicesManager
+
     lazy private var cancellables = Set<AnyCancellable>()
 
     // For testing
     var getCurrentDate = { return Date() }
     
-    public init(alertPresenter: AlertPresenter,
+    init(alertPresenter: AlertPresenter,
                 modalAlertScheduler: InAppModalAlertScheduler? = nil,
                 userNotificationAlertScheduler: UserNotificationAlertScheduler,
                 fileManager: FileManager = FileManager.default,
                 alertStore: AlertStore? = nil,
                 expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
                 bluetoothProvider: BluetoothProvider,
+                analyticsServicesManager: AnalyticsServicesManager,
                 preventIssuanceBeforePlayback: Bool = true
     ) {
         self.fileManager = fileManager
+        self.analyticsServicesManager = analyticsServicesManager
         playbackFinished = !preventIssuanceBeforePlayback
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
         let alertStoreDirectory = documentsDirectory?.appendingPathComponent("AlertStore")
@@ -85,8 +89,10 @@ public final class AlertManager {
         bluetoothProvider.addBluetoothObserver(self, queue: .main)
 
         NotificationCenter.default.publisher(for: .LoopCompleted)
-            .sink { [weak self] _ in
-                self?.loopDidComplete(self?.getLastLoopDate())
+            .sink { [weak self] publisher in
+                if let loopDataManager = publisher.object as? LoopDataManager {
+                    self?.loopDidComplete(loopDataManager.lastLoopCompleted)
+                }
             }
             .store(in: &cancellables)
 
@@ -174,8 +180,9 @@ public final class AlertManager {
         var scheduledNotifications: [StoredLoopNotRunningNotification] = []
 
         for (minutes, isCritical) in [(20.0, false), (40.0, false), (60.0, true), (120.0, true)] {
-            let failureInterval = lastLoopDate.addingTimeInterval(.minutes(minutes)).timeIntervalSinceNow
-            guard failureInterval >= 0 else { break }
+            let warningInterval = TimeInterval(minutes: minutes)
+            let timeUntilNotification = lastLoopDate.addingTimeInterval(.minutes(minutes)).timeIntervalSinceNow
+            guard timeUntilNotification >= 0 else { break }
 
             let formatter = DateComponentsFormatter()
             formatter.maximumUnitCount = 1
@@ -183,12 +190,12 @@ public final class AlertManager {
             formatter.unitsStyle = .full
 
             let notificationContent = UNMutableNotificationContent()
-            if let failureIntervalString = formatter.string(from: failureInterval)?.localizedLowercase {
+            if let failureIntervalString = formatter.string(from: warningInterval)?.localizedLowercase {
                 notificationContent.body = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failureIntervalString)
             }
 
             notificationContent.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            let shouldMuteAlert = alertMuter.shouldMuteAlert(scheduledAt: failureInterval)
+            let shouldMuteAlert = alertMuter.shouldMuteAlert(scheduledAt: timeUntilNotification)
             if isCritical, FeatureFlags.criticalAlertsEnabled {
                 if #available(iOS 15.0, *) {
                     notificationContent.interruptionLevel = .critical
@@ -204,14 +211,13 @@ public final class AlertManager {
             notificationContent.threadIdentifier = LoopNotificationCategory.loopNotRunning.rawValue
 
             let trigger = UNTimeIntervalNotificationTrigger(
-                timeInterval: failureInterval + gracePeriod,
+                timeInterval: timeUntilNotification + gracePeriod,
                 repeats: false
             )
 
-            let intervalIdentifierValue = TimeInterval(minutes: minutes)
 
             let request = UNNotificationRequest(
-                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(intervalIdentifierValue)",
+                identifier: "\(LoopNotificationCategory.loopNotRunning.rawValue)\(warningInterval)",
                 content: notificationContent,
                 trigger: trigger
             )
@@ -221,7 +227,7 @@ public final class AlertManager {
                     alertAt: nextTriggerDate,
                     title: notificationContent.title,
                     body: notificationContent.body,
-                    timeInterval: failureInterval,
+                    timeInterval: warningInterval,
                     isCritical: isCritical)
                 scheduledNotifications.append(scheduledNotification)
             }
@@ -356,6 +362,7 @@ extension AlertManager: AlertIssuer {
             deferredAlerts.append(alert)
             return
         }
+        analyticsServicesManager.didIssueAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel)
         scheduleAlertWithSchedulers(alert)
         alertStore.recordIssued(alert: alert)
     }

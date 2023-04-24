@@ -1,5 +1,5 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Glycémie actuelle %1$@ sous la plage de correction.";
+"Current glucose of %1$@ is below correction range." = "Glycémie actuelle de %1$@ est en dessous de la plage de correction.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -14,7 +14,13 @@
 "mmol/L" = "mmol/L";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Glycémie de %2$@ prédite pour %1$@.";
+"Predicted glucose at %1$@ is %2$@." = "Glycémie prévue à %1$@ est %2$@.";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "La glycémie prévue est dans la plage.";
+
+/* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "La glycémie estimée à %1$@ est sous le seuil de suspension.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Prédiction de la glycémie à %1$@ sous le seuil de suspension défini.";

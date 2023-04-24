@@ -1,18 +1,27 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth est utilisé pour communiquer avec la pompe à insuline et les dispositifs de surveillance continue du glucose.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth est utilisé pour communiquer avec la pompe à insuline et les dispositifs de surveillance continue du glucose.";
 
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "La caméra est utilisée pour scanner les codes-barres des appareils.";
+
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "ID de visage est utilisé pour authentifier le bolus d'insuline.";
+"NSFaceIDUsageDescription" = "Face ID est utilisé pour authentifier le bolus d'insuline et sauvegarder les changements dans les réglages de thérapie.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Les données sur les repas provenant de la base de données Health sont utilisées pour déterminer les effets du glucose. Les données sur la glycémie de la base de données Health sont utilisées pour le calcul graphique et le calcul du momentum.";
+"NSHealthShareUsageDescription" = "Les données sur les repas provenant de la base de données Health sont utilisées pour déterminer les effets du glucose. Les données sur la glycémie de la base de données Health sont utilisées pour le calcul graphique et le calcul du momentum. Les données de sommeil provenant de la base de données Health sont utilisées pour améliorer les cadrans Apple Watch.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Les données sur les repas glucidiques saisies dans l'application et sur la montre sont stockées dans la base de données Health. Les données de glucose extraites du CGM sont stockées de manière sécurisée dans HealthKit.";
+"NSHealthUpdateUsageDescription" = "Les données de glucides des repas entrées dans l'application ou la montre sont enregistrées dans la base de donnée Santé. Les données de taux de glucose provenant du CGM sont enregistrées de manière sécurisée dans HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop utilise Siri pour vous permettre d’activer des préréglages avec votre voix.";
 

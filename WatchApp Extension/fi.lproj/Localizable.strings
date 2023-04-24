@@ -1,3 +1,15 @@
+/* No glucose value representation (3 dashes for mg/dL; no spaces as this will get truncated in the watch complication) */
+"---" = "---";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
+/* No comment provided by engineer. */
+"%@" = "%@";
+
+/* Format string for glucose range (1: lower bound)(2: upper bound)(3: unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* HUD row title for COB */
 "Active Carbs" = "Akt. hiilari";
 
@@ -5,37 +17,105 @@
 "Active Insulin" = "Akt. insuliini";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Lisää hiilari";
+"Add Carb Entry" = "Lisää hiilihydraatteja";
+
+/* Button text to confirm manual bolus on Apple Watch */
+"Bolus" = "Bolus";
 
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus epäonnistui";
 
+/* Alert title for updated bolus recommendation on Apple Watch */
+"Bolus Recommendation Updated" = "Bolussuositus päivitetty";
+
+/* Button text to continue from carb entry to bolus entry on Apple Watch */
+"Continue" = "Jatka";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
 /* The action button title to dismiss an error message */
-"Dismiss" = "Hylkää";
+"Dismiss" = "Ohita";
+
+/* Short unit label for gram measurement
+   The short unit display string for grams */
+"g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Varmista, että iPhone on riittävän lähellä ja yritä uudelleen";
 
+/* The recovery message displayed after a bolus attempt fails
+   The recovery message displayed after a potential carb entry send attempt fails */
+"Make sure your iPhone is nearby and try again." = "Varmista, että iPhone on riittävän lähellä ja yritä uudelleen.";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Basaali netto";
+
+/* Label for off button */
+"Off" = "Pois päältä";
+
+/* No comment provided by engineer. */
+"OK" = "OK";
+
+/* Label for on button */
+"On" = "Päällä";
 
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Tilapäisas.";
 
+/* Alert message for updated bolus recommendation on Apple Watch */
+"Please reconfirm the bolus amount." = "Vahvista bolus uudelleen.";
+
+/* Title for sheet to enable/disable pre-meal on watch */
+"Pre-Meal" = "Ennen ateriaa";
+
+/* The text for the Watch button for enabling a custom preset */
+"Preset" = "Esiasetus";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Suosit: %@ U";
 
+/* Recommended bolus amount label on Apple Watch */
+"REC: %@ U" = "SUOSIT: %@ U";
+
+/* Indicator that recommended bolus computation is in progress on Apple Watch */
+"REC: Calculating..." = "SUOSIT: Lasketaan...";
+
 /* HUD row title for remaining reservoir volume */
 "Reservoir Volume" = "Säiliön määrä";
+
+/* Button text to confirm carb entry without bolusing on Apple Watch */
+"Save" = "Tallenna";
+
+/* Button text to confirm carb entry and bolus on Apple Watch */
+"Save & Bolus" = "Tallenna & Bolus";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Lähetys epäonnistui";
 
+/* Help text for bolus confirmation on Apple Watch */
+"Turn Digital Crown\nto bolus" = "Vahvista pyörittämällä Digital Crownia";
+
+/* The short unit display string for international units of insulin */
+"U" = "U";
+
 /* The short unit display string for international units of insulin delivery per hour */
 "U/hr" = "U/h";
+
+/* The title of the alert controller displayed after a potential carb entry send attempt fails */
+"Unable to Reach iPhone" = "iPhoneen ei saada yhteyttä";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Liikunta";

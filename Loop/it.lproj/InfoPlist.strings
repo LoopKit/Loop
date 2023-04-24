@@ -1,11 +1,17 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con il microinfusore e i dispositivi CGM.";
+"NSBluetoothAlwaysUsageDescription" = "Il Bluetooth è utilizzato per comunicare con il microinfusore ed il sensore glicemico";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con il microinfusore e i dispositivi CGM.";
+"NSBluetoothPeripheralUsageDescription" = "Il Bluetooth è utilizzato per comunicare con il microinfusore ed il sensore glicemico";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "La fotocamera è utilizzata per scansionare i codici a barre dei tuoi dispositivi.";
 
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID viene utilizzato per autenticare il bolo.";
@@ -14,5 +20,8 @@
 "NSHealthShareUsageDescription" = "I dati sui pasti dal database Salute vengono utilizzati per determinare gli effetti del glucosio. I dati del glucosio del database Salute vengono utilizzati per il calcolo del grafico della glicemia.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "I dati sui carboidrati inseriti nell'app e sull'orologio sono memorizzati nel database Salute. I dati relativi al glucosio recuperati dal CGM vengono memorizzati in modo sicuro in Salute.";
+"NSHealthUpdateUsageDescription" = "I dati sui carboidrati dei pasti inseriti nell'app e sull'orologio sono trasferiti nel database di Salute. I dati recuperati dal sensore CGM sono storati nel database di HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop utilizza Siri per permettere l'attivazione delle preimpostazioni con la tua voce";
 

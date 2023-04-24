@@ -1,18 +1,36 @@
 /* (No Comment) */
+"9KhaIS" = "Я установил пресет";
+
+/* (No Comment) */
 "80eo5o" = "Добавить запись углеводов";
+
+/* (No Comment) */
+"b085BW" = "Я не смог установить пресет.";
+
+/* (No Comment) */
+"I4OZy8" = "Включить пресет временной цели";
+
+/* (No Comment) */
+"lYMuWV" = "Имя пресета";
+
+/* (No Comment) */
+"nDKAmn" = "Как называется пресет, которое вы хотите установить?";
 
 /* (No Comment) */
 "OcNxIj" = "Добавить запись углеводов";
 
 /* (No Comment) */
+"oLQSsJ" = "Включить '${overrideName}' пресет";
+
+/* (No Comment) */
+"XNNmtH" = "Включить пресет в Loop";
+
+/* (No Comment) */
+"yBzwCL" = "Выбор временных целей";
+
+/* (No Comment) */
 "yc02Yq" = "Добавьте запись углеводов в алгоритм цикла";
 
-"9KhaIS" = "I've set the preset";
-"I4OZy8" = "Enable Override Preset";
-"XNNmtH" = "Enable preset in Loop";
-"ZZ3mtM" = "Enable an override preset in Loop";
-"b085BW" = "I wasn't able to set the preset.";
-"lYMuWV" = "Override Name";
-"nDKAmn" = "What's the name of the override you'd like to set?";
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
-"yBzwCL" = "Override Selection";
+/* (No Comment) */
+"ZZ3mtM" = "Включение  пресета ВЦ в Loop";
+

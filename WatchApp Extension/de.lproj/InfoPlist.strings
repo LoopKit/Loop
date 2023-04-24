@@ -1,5 +1,11 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "WatchApp-Erweiterung";
+
+/* Bundle name */
+"CFBundleName" = "WatchApp-Erweiterung";
+
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Mahlzeitendaten aus der HealthKit-Datenbank werden verwendet, um Glukoseeffekte zu bestimmen. Glukosedaten aus der HealthKit-Datenbank werden für die grafische Darstellung und Impulsberechnung verwendet. Schlafdaten aus der HealthKit-Datenbank werden verwendet, um die Bereitstellung von Apple Watch-Komplikationsupdates während der Zeit, in der Du wach bist, zu optimieren.";
+"NSHealthShareUsageDescription" = "Mahlzeitendaten aus der Health Datenbank werden verwendet, um die Glukoseeffekte zu bestimmen. Glukosedaten aus der Health Datenbank werden zur grafischen Darstellung und Impulsberechnung verwendet. Schlafdaten aus der Health-Datenbank werden verwendet, um die Bereitstellung von Apple Watch-Komplikationsupdates während Ihrer Wachzeit zu optimieren.";
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "In der App und auf der Uhr eingegebene Daten zu Kohlenhydratmahlzeiten werden in der HealthKit-Datenbank  gespeichert. Vom CGM abgerufene Glukosedaten werden sicher in HealthKit-Datenbank gespeichert.";

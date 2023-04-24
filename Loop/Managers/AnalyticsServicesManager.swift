@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import LoopCore
+import HealthKit
 
 final class AnalyticsServicesManager {
 
@@ -35,16 +36,42 @@ final class AnalyticsServicesManager {
         analyticsServices.forEach { $0.recordAnalyticsEvent(name, withProperties: properties, outOfSession: outOfSession) }
     }
 
+    private func identify(_ property: String, value: String) {
+        log.debug("Identify %{public}@: %{public}@", property, value)
+        analyticsServices.forEach { $0.recordIdentify(property, value: value) }
+    }
+
     // MARK: - UIApplicationDelegate
 
     func application(didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any]?) {
         logEvent("App Launch")
     }
 
+    func identifyAppName(_ appName: String) {
+        identify("App Name", value: appName)
+    }
+
+    func identifyWorkspaceGitRevision(_ revision: String) {
+        identify("Workspace Revision", value: revision)
+    }
+
+    // MARK: - Device Type
+    func identifyPumpType(_ pumpType: String) {
+        identify("Pump Type", value: pumpType)
+    }
+
+    func identifyCGMType(_ cgmType: String) {
+        identify("CGM Type", value: cgmType)
+    }
+
     // MARK: - Screens
 
     func didDisplayBolusScreen() {
         logEvent("Bolus Screen")
+    }
+
+    func didDisplayCarbEntryScreen() {
+        logEvent("Carb Entry Screen")
     }
 
     func didDisplaySettingsScreen() {
@@ -121,16 +148,32 @@ final class AnalyticsServicesManager {
 
     // MARK: - Loop Events
 
-    func didAddCarbsFromWatch() {
-        logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
+    func pumpWasRemoved() {
+        logEvent("Pump Removed")
+    }
+
+    func pumpWasAdded(identifier: String) {
+        logEvent("Pump Added", withProperties: ["identifier" : identifier])
+    }
+
+    func cgmWasRemoved() {
+        logEvent("CGM Removed")
+    }
+
+    func cgmWasAdded(identifier: String) {
+        logEvent("CGM Added", withProperties: ["identifier" : identifier])
+    }
+
+    func didAddCarbs(source: String, amount: Double, inSession: Bool = false) {
+        logEvent("Carb entry created", withProperties: ["source" : source, "amount": "\(amount)"], outOfSession: inSession)
     }
 
     func didRetryBolus() {
-        logEvent("Bolus Retry", outOfSession: true)
+        logEvent("Bolus Retry")
     }
 
-    func didSetBolusFromWatch(_ units: Double) {
-        logEvent("Bolus set", withProperties: ["source" : "Watch"], outOfSession: true)
+    func didBolus(source: String, units: Double, inSession: Bool = false) {
+        logEvent("Bolus set", withProperties: ["source" : source, "units": "\(units)"], outOfSession: true)
     }
 
     func didFetchNewCGMData() {
@@ -141,8 +184,72 @@ final class AnalyticsServicesManager {
         logEvent("Loop success", withProperties: ["duration": duration], outOfSession: true)
     }
 
-    func loopDidError(error: Error) {
-        logEvent("Loop error", withProperties: ["description": error.localizedDescription], outOfSession: true)
+    func loopDidError(error: LoopError) {
+        var props = [AnyHashable: Any]()
+
+        props["issueId"] = error.issueId
+
+        for (detailKey, detail) in error.issueDetails {
+            props[detailKey] = detail
+        }
+
+        logEvent("Loop error", withProperties: props, outOfSession: true)
     }
 
+    func didIssueAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel) {
+        logEvent("Alert Issued", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue])
+    }
+
+    func didEnactOverride(name: String, symbol: String, duration: TemporaryScheduleOverride.Duration, insulinSensitivityMultiplier: Double = 1.0, targetRange: ClosedRange<HKQuantity>? = nil)
+    {
+        let combinedName = "\(symbol) - \(name)"
+
+        var properties: [String: Any] = [
+            "name": name,
+            "symbol": symbol,
+            "sensitivityMultiplier": insulinSensitivityMultiplier,
+            "nameWithEmoji": combinedName
+        ]
+
+        if let targetUpperBound = targetRange?.upperBound.doubleValue(for: HKUnit.milligramsPerDeciliter) {
+            properties["targetUpperBound"] = targetUpperBound
+        }
+        if let targetLowerBound = targetRange?.lowerBound.doubleValue(for: HKUnit.milligramsPerDeciliter) {
+            properties["targetLowerBound"] = targetLowerBound
+        }
+
+
+        logEvent("Override Enacted", withProperties: properties)
+    }
+
+    func didCancelOverride(name: String) {
+        logEvent("Override Canceled", withProperties: ["name": name])
+    }
 }
+
+
+// MARK: - PresetActivationObserver
+extension AnalyticsServicesManager: PresetActivationObserver {
+    func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration) {
+        switch context {
+        case .legacyWorkout:
+            didEnactOverride(name: "workout", symbol: "", duration: duration)
+        case .preMeal:
+            didEnactOverride(name: "preMeal", symbol: "", duration: duration)
+        case .custom:
+            didEnactOverride(name: "custom", symbol: "", duration: duration)
+        case .preset(let preset):
+            didEnactOverride(name: preset.name, symbol: preset.symbol, duration: duration, insulinSensitivityMultiplier: preset.settings.effectiveInsulinNeedsScaleFactor, targetRange: preset.settings.targetRange)
+        }
+    }
+
+    func presetDeactivated(context: TemporaryScheduleOverride.Context) {
+        switch context {
+        case .legacyWorkout:
+            break
+        default:
+            break
+        }
+    }
+}
+

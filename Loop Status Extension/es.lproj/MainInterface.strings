@@ -1,6 +1,12 @@
-/* Class = "UILabel"; text = "Eventually 92 mg/dL"; ObjectID = "9iF-xY-Bh4"; */
-"9iF-xY-Bh4.text" = "Eventualmente 92 mg/dL";
+/* Class = "UILabel"; text = "Active Carbs"; ObjectID = "9iF-xY-Bh4"; */
+"9iF-xY-Bh4.text" = "Carbohidratos Activos";
 
-/* Class = "UILabel"; text = "IOB 1.0 U"; ObjectID = "UPi-dG-yYD"; */
-"UPi-dG-yYD.text" = "IOB 1.0 U";
+/* Class = "UILabel"; text = "0 g"; ObjectID = "dPp-lJ-5sh"; */
+"dPp-lJ-5sh.text" = "0 gr";
+
+/* Class = "UILabel"; text = "Active Insulin"; ObjectID = "UPi-dG-yYD"; */
+"UPi-dG-yYD.text" = "Insulina activa";
+
+/* Class = "UILabel"; text = "0 U"; ObjectID = "Vgf-p1-2QP"; */
+"Vgf-p1-2QP.text" = "0 U";
 

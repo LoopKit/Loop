@@ -30,12 +30,14 @@ struct FeatureFlagConfiguration: Decodable {
     let predictedGlucoseChartClampEnabled: Bool
     let scenariosEnabled: Bool
     let sensitivityOverridesEnabled: Bool
+    let showEventualBloodGlucoseOnWatchEnabled: Bool
     let simulatedCoreDataEnabled: Bool
     let siriEnabled: Bool
     let simpleBolusCalculatorEnabled: Bool
     let usePositiveMomentumAndRCForManualBoluses: Bool
     let dynamicCarbAbsorptionEnabled: Bool
     let adultChildInsulinModelSelectionEnabled: Bool
+    let profileExpirationSettingsViewEnabled: Bool
 
 
     fileprivate init() {
@@ -159,7 +161,7 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         // Swift compiler config is inverse, since the default state is enabled.
-        #if REMOTE_COMMANDS_DISABLED
+        #if REMOTE_COMMANDS_DISABLED || REMOTE_OVERRIDES_DISABLED //REMOTE_OVERRIDES_DISABLED: backwards compatibility of Loop 3 & prior
         self.remoteCommandsEnabled = false
         #else
         self.remoteCommandsEnabled = true
@@ -171,6 +173,13 @@ struct FeatureFlagConfiguration: Decodable {
         self.scenariosEnabled = false
         #endif
 
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if SHOW_EVENTUAL_BLOOD_GLUCOSE_ON_WATCH_DISABLED
+        self.showEventualBloodGlucoseOnWatchEnabled = false
+        #else
+        self.showEventualBloodGlucoseOnWatchEnabled = true
+        #endif
+        
         #if SIMULATED_CORE_DATA_ENABLED
         self.simulatedCoreDataEnabled = true
         #else
@@ -204,6 +213,13 @@ struct FeatureFlagConfiguration: Decodable {
         #endif
 
         self.dynamicCarbAbsorptionEnabled = true
+
+        // ProfileExpirationSettingsView is inverse, since the default state is enabled.
+        #if PROFILE_EXPIRATION_SETTINGS_VIEW_DISABLED
+        self.profileExpirationSettingsViewEnabled = false
+        #else
+        self.profileExpirationSettingsViewEnabled = true
+        #endif
     }
 }
 
@@ -227,6 +243,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* remoteCommandsEnabled: \(remoteCommandsEnabled)",
             "* scenariosEnabled: \(scenariosEnabled)",
             "* sensitivityOverridesEnabled: \(sensitivityOverridesEnabled)",
+            "* showEventualBloodGlucoseOnWatchEnabled: \(showEventualBloodGlucoseOnWatchEnabled)",
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
             "* siriEnabled: \(siriEnabled)",
             "* automaticBolusEnabled: \(automaticBolusEnabled)",
@@ -235,7 +252,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* simpleBolusCalculatorEnabled: \(simpleBolusCalculatorEnabled)",
             "* usePositiveMomentumAndRCForManualBoluses: \(usePositiveMomentumAndRCForManualBoluses)",
             "* dynamicCarbAbsorptionEnabled: \(dynamicCarbAbsorptionEnabled)",
-            "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)"
+            "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)",
+            "* profileExpirationSettingsViewEnabled: \(profileExpirationSettingsViewEnabled)"
         ].joined(separator: "\n")
     }
 }

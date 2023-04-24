@@ -1,8 +1,29 @@
+/* Green closed loop ON message (1: last loop string) (2: app name) */
+"\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n %2$@ operează cu bucla închisă în poziția ON.";
+
+/* Red loop message (1: last loop  string) (2: app name) */
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nAtingeți pictogramele de stare ale CGM și ale pompei de insulină pentru mai multe informații. %2$@ va continua să încerce să finalizeze o buclă, dar verificați eventualele probleme de comunicare cu pompa și CGM-ul dvs.";
+
+/* Yellow loop message (1: last loop string) (2: app name) */
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\n Atingeți pictogramele de stare pentru CGM și pompa de insulină pentru mai multe informații. %2$@ va continua să încerce să finalizeze o buclă, dar urmăriți eventualele probleme de comunicare cu pompa și CGM.";
+
+/* Green closed loop OFF message (1: app name)(2: reason for open loop) */
+"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ operează cu bucla închisă în poziția OFF. Pompa și CGM vor continua să funcționeze, dar aplicația nu va ajusta automat dozarea. \n\n %2$@";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
-"%@ ago" = "acum %@";
+"%@ ago" = "%@ în urmă";
 
 /* The format string describing the basal rate. */
 "%@ U" = "%@ U";
+
+/* Format string describing last completion. (1: time ago */
+"%1$@ ago" = "%@ în urmă";
+
+/* Format string describing last completion. (1: time ago, (2: the date */
+"%1$@ ago at %2$@" = "Acum %1$@ la %2$@";
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%1$@ la %2$@";
@@ -10,14 +31,53 @@
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ unități pe oră la %2$@";
 
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
+
+/* Format string describing last completion */
+"<1 min ago" = "< 1 min în urmă";
 
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "Loop automat";
 
+/* Title of green open loop OFF message */
+"Closed Loop OFF" = "Buclă închisă dezactivata";
+
+/* Title of green closed loop ON message */
+"Closed Loop ON" = "Buclă închisă activata";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* String displayed instead of a glucose value above the CGM range */
+"HIGH" = "HIPER";
+
+/* Last loop time completed message (1: last loop time string) */
+"Last completed loop %1$@." = "Ultima buclă finalizată %1$@ .";
+
+/* Title of red loop message */
+"Loop Failure" = "Eșec Loop";
+
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop a rulat acum %@";
+
+/* Title of yellow loop message */
+"Loop Warning" = "Avertizare Loop";
+
+/* String displayed instead of a glucose value below the CGM range */
+"LOW" = "HIPO";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Necesită atenție";
@@ -25,9 +85,21 @@
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Loop manual";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@%2$@";
+
+/* Instructions for user to close loop if it is allowed. */
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Atingeți Setări pentru a activa bucla închisă dacă doriți ca aplicația să vă automatizeze administrarea de insulină.";
+
+/* The short unit display string for international units of insulin */
+"U" = "U";
+
 /* Accessibility value for an unknown value */
-"Unknown" = "Necunoscută";
+"Unknown" = "Necunoscut";
 
 /* Acessibility label describing completion HUD waiting for first run */
 "Waiting for first run" = "Se așteaptă prima rulare";
+
+/* Format string describing last completion. (1: the date */
+"was at %1$@" = "a fost la %1$@";
 

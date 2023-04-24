@@ -176,10 +176,6 @@ final class RemoteDataServicesManager {
         clearSettingsQueryAnchor(for: remoteDataService)
     }
 
-    public func waitForUploadsToFinish(timeout: DispatchTime = .now() + TimeInterval(10)) -> DispatchTimeoutResult {
-        return uploadGroup.wait(timeout: timeout)
-    }
-
     func triggerUpload(for triggeringType: RemoteDataType) {
         let uploadTypes = [triggeringType] + failedUploads.map { $0.remoteDataType }
 
@@ -203,6 +199,21 @@ final class RemoteDataServicesManager {
                 remoteDataServices.forEach { self.uploadSettingsData(to: $0) }
             case .overrides:
                 remoteDataServices.forEach { self.uploadTemporaryOverrideData(to: $0) }
+            }
+        }
+    }
+    
+    func triggerUpload(for triggeringType: RemoteDataType, completion: @escaping () -> Void) {
+        triggerUpload(for: triggeringType)
+        self.uploadGroup.notify(queue: DispatchQueue.main) {
+            completion()
+        }
+    }
+    
+    func triggerUpload(for triggeringType: RemoteDataType) async {
+        return await withCheckedContinuation { continuation in
+            triggerUpload(for: triggeringType) {
+                continuation.resume(returning: ())
             }
         }
     }
@@ -586,15 +597,24 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
 
-    func validatePushNotificationSource(_ notification: [String: AnyObject]) -> Bool {
-        for service in remoteDataServices {
-            let validated = service.validatePushNotificationSource(notification)
-            if validated {
-                return validated
-            }
+    func serviceForPushNotification(_ notification: [String: AnyObject]) -> RemoteDataService? {
+        
+        let defaultServiceIdentifier = "NightscoutService"
+        let serviceIdentifier = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
+        return remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier})
+    }
+    
+    func commandFromPushNotification(_ notification: [String : AnyObject]) async throws -> RemoteCommand {
+        
+        enum RemoteDataServicesManagerCommandError: LocalizedError {
+            case missingNotificationService
         }
         
-        return false
+        guard let service = serviceForPushNotification(notification) else {
+            throw RemoteDataServicesManagerCommandError.missingNotificationService
+        }
+        
+        return try await service.commandFromPushNotification(notification)
     }
     
     public func temporaryScheduleOverrideHistoryDidUpdate() {
@@ -635,9 +655,7 @@ extension RemoteDataServicesManager {
             UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides)
         }
     }
-
 }
-
 
 protocol RemoteDataServicesManagerDelegate: AnyObject {
     var shouldSyncToRemoteService: Bool {get}

@@ -1,18 +1,27 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insuline pomp en de continue glucose meter.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insulinepomp en de continue glucosemeters.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insuline pomp en de continue glucose meter.";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth wordt gebruikt om te communiceren met de insulinepomp en de continue glucosemeters.";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Camera wordt gebruikt om barcodes van apparaten te scannen.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID wordt gebruikt om de insuline bolus te verifiëren.";
+"NSFaceIDUsageDescription" = "Face ID wordt gebruikt om de insulinebolus te authenticeren en om wijzigingen in de therapieinstellingen op te slaan.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Maaltijd data van de Health database wordt gebruikt om de effecten op glucose te bepalen.Glucose data vanuit de Health database worden gebruikt voor het berekenen en weergeven van het momentum ";
+"NSHealthShareUsageDescription" = "Maaltijdgegevens uit de database Gezondheid worden gebruikt om glucoseëffecten te bepalen. Glucosegegevens uit de database Gezondheid worden gebruikt voor grafieken en het berekenen van trendlijnen. Slaapgegevens uit de database Gezondheid worden gebruikt om de Apple Watch complicatie bij te werken.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Koolhydraten van de maaltijd die worden ingevoerd in de app op de apple watch worden opgeslagen in de Gezondheid database. Glucose gegevens ontvangen van de CGM wordt veilig opgeslagen in Gezondheid.";
+"NSHealthUpdateUsageDescription" = "Maaltijdkoolhydraten die worden ingevoerd in de app en met de watch worden opgeslagen in de database Gezondheid. Ontvangen glucosegegevens van de CGM worden veilig opgeslagen in HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop gebruikt Siri om programma's met je stem te laten uitvoeren.";
 

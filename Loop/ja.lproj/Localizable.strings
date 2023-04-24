@@ -1,6 +1,12 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (保留中: %@)";
 
+/* String denoting lack of a recommended bolus amount in the simple bolus calculator */
+"–" = "—";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "---";
+
 /* The format for an active override preset. (1: preset symbol)(2: preset name) */
 "%@ %@" = "%1$@ %2$@";
 
@@ -15,6 +21,9 @@
 
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
@@ -49,6 +58,9 @@
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "大人使用時の Humalog、Novolog、Apidraインスリンの公表吸収率に基づいたモデル。";
 
+/* Title of the carb entry absorption time cell */
+"Absorption Time" = "吸収時間";
+
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "推奨ボーラス値を使う";
 
@@ -58,6 +70,9 @@
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
 "Active Carbohydrates: %@" = "残存糖質: %@";
 
+/* Title describing quantity of still-absorbing carbohydrates */
+"Active Carbs" = "残存糖質";
+
 /* The title of the Insulin On-Board graph */
 "Active Insulin" = "残存インスリン";
 
@@ -65,13 +80,13 @@
 "Active Insulin: %@" = "残存インスリン: %@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "カーボを追加";
+"Add Carb Entry" = "糖質の記入を追加";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
 "Add CGM" = "CGMを追加";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "食事を追加";
 
 /* Action sheet title selecting Pump
@@ -81,14 +96,17 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "大人モデルに経験効果を加算し調整したモデル。";
-
 /* The title of the amplitude API key credential */
 "API Key" = "API キー";
 
 /* The title of the nightscout API secret credential */
-"API Secret" = "API シークレット";
+"API Secret" = "APIシークレット";
+
+/* Action sheet confirmation message for pump history deletion */
+"Are you sure you want to delete all history entries?" = "入力履歴をすべて削除しますか?";
+
+/* Action sheet confirmation message for reservoir deletion */
+"Are you sure you want to delete all reservoir values?" = "リザーバの値をすべて削除しますか?";
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "このCGMを削除しますか?";
@@ -117,7 +135,7 @@
 "Bolusing %1$@" = "%1$@ ボーラス中";
 
 /* The title of the cancel action in an action sheet */
-"Cancel" = "取消";
+"Cancel" = "キャンセル";
 
 /* The title of the cell indicating a bolus is being canceled */
 "Canceling Bolus" = "ボーラスをキャンセルします";
@@ -127,10 +145,16 @@
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "糖質比";
+"Carb Ratios" = "Carb Ratios";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "糖質の記入を追加";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "糖質の記入を編集";
 
 /* Title of the prediction input effect for carbohydrates */
-"Carbohydrates" = "糖質";
+"Carbohydrates" = "残存糖質";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "吸収済糖質(g) ÷ 糖質比 (g/U) × インスリン効果値(%1$@/U)";
@@ -150,8 +174,17 @@
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "CGM データソースを確認してください";
 
+/* Carb entry section footer text explaining absorption time */
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "量の多い食事や脂質やたんぱく質を含んだ食事には長い吸収時間を選んでください。これはアルゴリズムのための参考で、厳密である必要はありません。";
+
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "クローズドループ";
+
+/* The format string describing the date of an IOB value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.IOBDateLabel" = "%1$@ 時点";
+
+/* The format string describing the starting date of a total value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.totalDateLabel" = "%1$@ より";
 
 /* The title of the action used to dismiss an error alert */
 "com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
@@ -162,12 +195,15 @@
 /* The error message displayed for configuration errors. (1: configuration error details) */
 "Configuration Error: %1$@" = "設定エラー: %1$@";
 
+/* Default alert dismissal */
+"Continue" = "次へ";
+
 /* The title of the continuous glucose monitor section in settings */
 "Continuous Glucose Monitor" = "CGM";
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
-"Correction Range" = "補正範囲";
+"Correction Range" = "ターゲット範囲";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = "現在の血糖値は %1$@ で補正範囲を下回っています。";
@@ -175,17 +211,33 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "カスタムオーバーライド";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "カスタマートークン";
+/* Date picker label */
+"Date" = "日付";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "アカウントを削除";
+
+/* Button title to delete all objects */
+"Delete All" = "すべて削除";
 
 /* Button title to delete CGM */
 "Delete CGM" = "CGMを削除";
+
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "注入限度";
 
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "無効にする";
+
+/* Default alert dismissal
+   The button label of the action used to dismiss an error alert */
+"Dismiss" = "閉じる";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "有効にする";
@@ -199,6 +251,9 @@
 /* The alert title for a resume error */
 "Error Resuming" = "再開エラー";
 
+/* Segmented button title for insulin delivery log event history */
+"Event History" = "Event History";
+
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "予想 %@";
 
@@ -210,6 +265,9 @@
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "%1$@につき";
+
+/* The short unit display string for grams */
+"g" = "g";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "血糖値";
@@ -233,7 +291,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "吸収済インスリン(U) × インスリン効果値(%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "インスリン放出";
+"Insulin Delivery" = "Insulin Delivery";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "インスリン効果";
@@ -258,26 +316,52 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "ロード中...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "ループの不良";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "ループが %@ の間クローズされていません";
 
+/* Details for configuration error when maximum bolus is missing */
+"Maximum Bolus" = "最大ボーラス";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "データがありません: %1$@";
 
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "モメンタム効果";
+
+/* Text for more info action on notification of upcoming profile expiration */
+"More Info" = "詳細";
+
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "注意してください";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "機器が未接続、または接続に問題";
+
+/* Alert acknowledgment OK button
+   Critical Alert permissions disabled alert button
+   Default action for alert when alert acknowledgment fails
+   Notifications permissions disabled alert button
+   Text for ok action on notification of upcoming profile expiration
+   The title of the notification action to acknowledge a device alert */
+"OK" = "OK";
+
+/* Notification Setting Status is On */
+"On" = "オン";
+
+/* The title text for the override presets */
+"Override Presets" = "オーバーライドプリセット";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "食前ターゲット";
@@ -300,6 +384,9 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "ポンプデータが %1$@前のものです";
 
+/* The title of the screen displaying a pump event */
+"Pump Event" = "ポンプイベント";
+
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "ポンプ設定";
 
@@ -311,6 +398,9 @@
 
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "ポンプ一時停止中";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "超速攻型 - 大人";
@@ -328,7 +418,7 @@
 "Recommended Bolus: %@ Units" = "推奨ボーラス: %@ 単位";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "リザーバ";
+"Reservoir" = "Reservoir";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "レトロ補正";
@@ -349,7 +439,7 @@
 "since %@" = "%@ から";
 
 /* The title of the nightscout site URL credential */
-"Site URL" = "アドレス";
+"Site URL" = "URL";
 
 /* The format for the description of a temporary override start date */
 "starting at %@" = "%@から開始";
@@ -366,11 +456,18 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "ループのレガシーモデルで、作用期間をカスタマイズできます。";
 
+/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
+"The maximum absorption time is %@" = "最大吸収時間: %@";
+
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "最大ボーラス量は %@単位です";
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Event title displayed when StoredPumpEvent.title is not set
+   The default description to use when an entry has no dose description */
+"Unknown" = "不明";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "%@まで";

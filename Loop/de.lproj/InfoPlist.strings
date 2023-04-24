@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
@@ -17,8 +20,8 @@
 "NSHealthShareUsageDescription" = "Mahlzeit-Daten aus der HealthKit-Datenbank werden verwendet, um Blutzuckereffekte zu bestimmen. Blutzuckerdaten aus der HealthKit-Datenbank werden für die Grafik- und Momentumberechnung verwendet.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Die in der App und auf der Uhr eingegebenen Kohlenhydratmengen werden in der Health-Datenbank gespeichert. Blutzuckerdaten, die vom CGM abgerufen werden, werden sicher in HealthKit gespeichert.";
+"NSHealthUpdateUsageDescription" = "In der App und auf der Uhr eingegebene Daten zu Kohlenhydratmahlzeiten werden in der HealthKit-Datenbank  gespeichert. Vom CGM abgerufene Glukosedaten werden sicher in HealthKit-Datenbank gespeichert.";
 
 /* Privacy - Siri Usage Description */
-"NSSiriUsageDescription" = "Loop verwendet Siri, damit Du Voreinstellungen mit Deiner Sprache ausführen kannst.";
+"NSSiriUsageDescription" = "Loop verwendet Siri, damit Sie Voreinstellungen mit Ihrer Sprache ausführen können.";
 

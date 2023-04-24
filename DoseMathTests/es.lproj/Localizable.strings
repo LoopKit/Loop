@@ -1,5 +1,5 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Glucosa actual de %1$@ está debajo del rango correctivo.";
+"Current glucose of %1$@ is below correction range." = "Glucosa actual de %1$@ está por debajo del rango de corrección.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -14,10 +14,16 @@
 "mmol/L" = "mmol/L";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Glucosa proyectada en %1$@ es %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Glucosa proyectada a las %1$@ es %2$@.";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "La glucosa proyectada está en rango";
+
+/* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Glucosa proyectada de %1$@ se encuentra por debajo de tu nivel de suspensión.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Glucosa proyectada de %1$@ se encuentra debajo de tu nivel de suspensión.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Glucosa proyectada de %1$@ se encuentra por debajo de su nivel de suspensión.";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";

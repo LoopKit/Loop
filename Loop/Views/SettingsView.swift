@@ -48,7 +48,7 @@ public struct SettingsView: View {
                 }
                 alertManagementSection
                 if viewModel.pumpManagerSettingsViewModel.isSetUp() {
-                    therapySettingsSection
+                    configurationSection
                 }
                 deviceSettingsSection
                 if viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice {
@@ -58,6 +58,9 @@ public struct SettingsView: View {
                     servicesSection
                 }
                 supportSection
+                if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
+                    profileExpirationSection(profileExpiration: profileExpiration)
+                }
             }
             .insetGroupedListStyle()
             .navigationBarTitle(Text(NSLocalizedString("Settings", comment: "Settings screen title")))
@@ -71,6 +74,16 @@ public struct SettingsView: View {
             set: { self.viewModel.closedLoopPreference = $0 }
         )
     }
+}
+
+struct ConfigurationMenuItem: Identifiable {
+    var id: String {
+        return pluginIdentifier + String(describing: offset)
+    }
+
+    let view: AnyView
+    let pluginIdentifier: String
+    let offset: Int
 }
 
 extension SettingsView {
@@ -145,7 +158,7 @@ extension SettingsView {
         }
     }
         
-    private var therapySettingsSection: some View {
+    private var configurationSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
             LargeButton(action: { self.therapySettingsIsPresented = true },
                             includeArrow: true,
@@ -167,9 +180,21 @@ extension SettingsView {
                         .environment(\.guidanceColors, self.guidanceColors)
                         .environment(\.insulinTintColor, self.insulinTintColor)
             }
+            
+            ForEach(configurationMenuItemsForSupportPlugins) { item in
+                item.view
+            }
         }
     }
-    
+
+    private var configurationMenuItemsForSupportPlugins: [ConfigurationMenuItem] {
+        self.viewModel.availableSupports.flatMap { plugin in
+            plugin.configurationMenuItems().enumerated().map { index, view in
+                ConfigurationMenuItem(view: view, pluginIdentifier: plugin.identifier, offset: index)
+            }
+        }
+    }
+
     private var deviceSettingsSection: some View {
         Section {
             pumpSection
@@ -320,6 +345,40 @@ extension SettingsView {
             }
         }
     }
+    
+    /*
+     DIY loop specific component to show users the amount of time remaining on their build before a rebuild is necessary.
+     */
+    private func profileExpirationSection(profileExpiration:Date) -> some View {
+        let nearExpiration : Bool = ProfileExpirationAlerter.isNearProfileExpiration(profileExpiration: profileExpiration)
+        let profileExpirationMsg = ProfileExpirationAlerter.createProfileExpirationSettingsMessage(profileExpiration: profileExpiration)
+        let readableExpirationTime = Self.dateFormatter.string(from: profileExpiration)
+        
+        return Section(header: SectionHeader(label: NSLocalizedString("App Profile", comment: "Settings app profile section")),
+                       footer: Text(NSLocalizedString("Profile expires ", comment: "Time that profile expires") + readableExpirationTime)) {
+            if(nearExpiration) {
+                Text(profileExpirationMsg).foregroundColor(.red)
+            } else {
+                HStack {
+                    Text("Profile Expiration", comment: "Settings App Profile expiration view")
+                    Spacer()
+                    Text(profileExpirationMsg).foregroundColor(Color.secondary)
+                }
+            }
+            Button(action: {
+                UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/build/updating/")!)
+            }) {
+                Text(NSLocalizedString("How to update (LoopDocs)", comment: "The title text for how to update"))
+            }
+        }
+    }
+
+    private static var dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .long
+        dateFormatter.timeStyle = .short
+        return dateFormatter // formats date like "February 4, 2023 at 2:35 PM"
+    }()
 
     private var plusImage: some View {
         Image(systemName: "plus.circle")

@@ -1,5 +1,5 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Der aktuelle Blutzucker von %1$@ liegt unterhalb des Korrekturbereiches.";
+"Current glucose of %1$@ is below correction range." = "Der aktuelle Blutzucker von %1$@ liegt unter dem Korrekturbereich.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -8,22 +8,22 @@
 "g" = "g";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dl";
+"mg/dL" = "mg/dL";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/l";
+"mmol/L" = "mmol/L";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Der vorhergesagte Blutzucker um %1$@ ist %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Vorhergesagte Glukose um %1$@ ist %2$@.";
 
 /* Notice when predicted glucose for bolus recommendation is in range */
-"Predicted glucose is in range." = "Der vorhergesagte Glukosewert liegt im Bereich.";
+"Predicted glucose is in range." = "Der vorhergesagte Blutzucker liegt im Zielbereich.";
 
 /* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
-"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Der vorhergesagte Glukosewert von %1$@ liegt unter Ihrer Glukose-Sicherheitsgrenzwerteinstellung.";
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unter der Sicherheitsgrenze.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unterhalb des eingestellten Schwellwertes zur Unterbrechung der Basalrate. ";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unter dem Grenzwert für die Hypo-Abschaltung.";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";

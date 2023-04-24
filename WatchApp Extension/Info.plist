@@ -31,6 +31,7 @@
 		<string>CLKComplicationFamilyGraphicBezel</string>
 		<string>CLKComplicationFamilyGraphicCircular</string>
 		<string>CLKComplicationFamilyGraphicCorner</string>
+		<string>CLKComplicationFamilyGraphicExtraLarge</string>
 		<string>CLKComplicationFamilyGraphicRectangular</string>
 		<string>CLKComplicationFamilyModularLarge</string>
 		<string>CLKComplicationFamilyModularSmall</string>

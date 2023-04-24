@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Estensione WatchApp";
+
+/* Bundle name */
+"CFBundleName" = "Estensione WatchApp";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "I dati sui pasti del database Salute vengono utilizzati per determinare gli effetti del glucosio. I dati sul glucosio del database Salute vengono utilizzati per la rappresentazione grafica e il calcolo del momento. I dati sul sonno del database Salute vengono utilizzati per ottimizzare la consegna degli aggiornamenti delle complicazioni di Apple Watch durante il periodo di veglia.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "I dati sui carboidrati dei pasti inseriti nell'app e sull'orologio sono trasferiti nel database di Salute. I dati recuperati dal sensore CGM sono storati nel database di HealthKit.";
+

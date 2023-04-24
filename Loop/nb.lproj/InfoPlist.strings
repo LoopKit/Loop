@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
@@ -7,6 +10,9 @@
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth brukes til å kommunisere med insulinpumpe og kontinuerlige glukosemonitorer.";
 
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Kamera brukes til å skanne strekkoder på enheter.";
+
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID brukes til å autentisere insulin bolus.";
 
@@ -14,5 +20,8 @@
 "NSHealthShareUsageDescription" = "Matdata fra Health-databasen brukes til å bestemme blodsukkereffekt. Blodsukkerdata hentes fra HealthKit for opptegning og analyse.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Angitte karbohydrater i matdataene som tastes inn i appen blir lagret i Health-databasen.";
+"NSHealthUpdateUsageDescription" = "Karbohydratmåltidsdata som legges inn i appen og på klokken lagres i Helsedatabasen. Glukosedata hentet fra CGM lagres sikkert i HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop bruker Siri slik at du kan bruke forhåndsinnstillinger med stemmen din.";
 

@@ -885,7 +885,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             contentConfig.textProperties.color = .white
             contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
             contentConfig.textProperties.adjustsFontSizeToFitWidth = true
-            contentConfig.secondaryText = NSLocalizedString("Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON.", comment: "instructions on how to fix alert permission warning")
+            contentConfig.secondaryText = NSLocalizedString("Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON.", comment: "Secondary text for alerts disabled warning, which appears on the main status screen.")
             contentConfig.secondaryTextProperties.color = .white
             contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
             contentConfiguration = contentConfig
@@ -1360,6 +1360,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
         }
         present(navigationWrapper, animated: true)
+        deviceManager.analyticsServicesManager.didDisplayCarbEntryScreen()
     }
 
     @IBAction func presentBolusScreen() {
@@ -1373,14 +1374,18 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         } else {
-            let viewModel = BolusEntryViewModel(delegate: deviceManager, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
-            viewModel.generateRecommendationAndStartObserving()
+            let viewModel = BolusEntryViewModel(delegate: deviceManager, screenWidth: UIScreen.main.bounds.width, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
+            Task { @MainActor in
+                await viewModel.generateRecommendationAndStartObserving()
+            }
+            viewModel.analyticsServicesManager = deviceManager.analyticsServicesManager
             let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         }
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
         hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
         present(navigationWrapper, animated: true)
+        deviceManager.analyticsServicesManager.didDisplayBolusScreen()
     }
 
     private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {

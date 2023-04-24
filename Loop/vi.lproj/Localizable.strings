@@ -1,6 +1,12 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (đang chờ xử lý: %@)";
 
+/* String denoting lack of a recommended bolus amount in the simple bolus calculator */
+"–" = "—";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "---";
+
 /* The format for an active override preset. (1: preset symbol)(2: preset name) */
 "%@ %@" = "%1$@ %2$@";
 
@@ -15,6 +21,9 @@
 
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
@@ -49,6 +58,9 @@
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Mô hình dựa trên sự hấp thụ được công bố của các loại insulin Humalog, Novolog và Apidra ở người lớn.";
 
+/* Title of the carb entry absorption time cell */
+"Absorption Time" = "Thời gian Hấp thụ";
+
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
 
@@ -58,6 +70,9 @@
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
 "Active Carbohydrates: %@" = "Lượng Carbohydrates còn hoạt động: %@";
 
+/* Title describing quantity of still-absorbing carbohydrates */
+"Active Carbs" = "Lượng Carbs còn hoạt động";
+
 /* The title of the Insulin On-Board graph */
 "Active Insulin" = "Lượng Insulin còn hoạt động";
 
@@ -65,13 +80,13 @@
 "Active Insulin: %@" = "Lượng Insulin còn hoạt động: %@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Khai báo khối lượng Carb";
+"Add Carb Entry" = "Khai báo Carb";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
 "Add CGM" = "Khai báo CGM";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Khai báo bữa ăn";
 
 /* Action sheet title selecting Pump
@@ -81,14 +96,17 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Sự điều chỉnh cho mẫu người lớn dựa trên hiệu ứng theo kinh nghiệm ở trẻ em.";
-
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
 
 /* The title of the nightscout API secret credential */
 "API Secret" = "API Secret";
+
+/* Action sheet confirmation message for pump history deletion */
+"Are you sure you want to delete all history entries?" = "Bạn có chắc muốn xóa hết các dữ liệu cũ?";
+
+/* Action sheet confirmation message for reservoir deletion */
+"Are you sure you want to delete all reservoir values?" = "Bạn có chắc muốn xóa hết mọi giá trị của ngăn chứa insulin?";
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Bạn có chắc sẽ xóa CGM này?";
@@ -104,11 +122,11 @@
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
-"Basal Rates" = "Basal Rates";
+"Basal Rates" = "Lịch biểu tiêm liều nền";
 
 /* The label of the bolus entry button
    The notification title for a bolus failure */
-"Bolus" = "Liều Bolus";
+"Bolus" = "Bolus";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
 "Bolused %1$@ of %2$@" = "Đã thực hiện Bolus %1$@ của %2$@";
@@ -127,10 +145,16 @@
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Tỷ lệ Carb";
+"Carb Ratios" = "Carb Ratios";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Khai báo Carb";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "Chỉnh sửa Carb";
 
 /* Title of the prediction input effect for carbohydrates */
-"Carbohydrates" = "Các bon hydrat";
+"Carbohydrates" = "Carbohydrates";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Khối lượng carb tiêu thụ (g) ÷ Tỷ lệ Carb (g/U) × Độ nhạy của Insulin (%1$@/U)";
@@ -150,8 +174,17 @@
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Kiểm tra nguồn dữ liệu CGM của bạn";
 
+/* Carb entry section footer text explaining absorption time */
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Lựa chọn khoảng thời gian tiêu hóa dài hơn cho các bữa ăn no, hoặc những bữa ăn nhiều chất béo và protein. Đây chỉ là hướng dẫn cho thuật toán Algorithm và không cần phải chính xác.";
+
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Vòng lặp kín";
+
+/* The format string describing the date of an IOB value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.IOBDateLabel" = "lúc %1$@";
+
+/* The format string describing the starting date of a total value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.totalDateLabel" = "từ lúc %1$@";
 
 /* The title of the action used to dismiss an error alert */
 "com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
@@ -162,30 +195,49 @@
 /* The error message displayed for configuration errors. (1: configuration error details) */
 "Configuration Error: %1$@" = "Lỗi cấu hình: %1$@";
 
+/* Default alert dismissal */
+"Continue" = "Tiếp tục";
+
 /* The title of the continuous glucose monitor section in settings */
 "Continuous Glucose Monitor" = "Kiểm soát đường huyết liên tục";
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
-"Correction Range" = "Phạm vi Điều chỉnh";
+"Correction Range" = "Phạm vi liều Bổ sung";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = " Chỉ số glucose hiện tại %1$@ nằm dưới Phạm vi Điều chỉnh.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Chồng liều";
+"Custom Override" = "Thói quen Chồng liều";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Customer Token";
+/* Date picker label */
+"Date" = "Ngày";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Xóa Tài khoản";
+
+/* Button title to delete all objects */
+"Delete All" = "Xóa hết";
 
 /* Button title to delete CGM */
 "Delete CGM" = "Xóa CGM";
 
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
+
 /* Title text for delivery limits */
-"Delivery Limits" = "Giới hạn tiêm";
+"Delivery Limits" = "Giới hạn liều tiêm";
 
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Vô hiệu hóa";
+
+/* Default alert dismissal
+   The button label of the action used to dismiss an error alert */
+"Dismiss" = "Từ bỏ";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Cho phép";
@@ -197,7 +249,10 @@
 "Error Canceling Bolus" = "Lỗi hủy liều Bolus";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Lỗi trong việc Bắt đầu lại";
+"Error Resuming" = "Lỗi khi đang tái thực hiện";
+
+/* Segmented button title for insulin delivery log event history */
+"Event History" = "Event History";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Kết quả %@";
@@ -211,6 +266,9 @@
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "For %1$@";
 
+/* The short unit display string for grams */
+"g" = "g";
+
 /* The title of the glucose and prediction graph */
 "Glucose" = "Đường huyết";
 
@@ -223,9 +281,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Chuyển động của Glucose";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Vô hạn định";
 
@@ -236,7 +291,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Lượng insulin tiêu hao (U) × Độ nhạy của insulin (%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Khối lượng tiêm insulin";
+"Insulin Delivery" = "Insulin Delivery";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Tác dụng của insulin";
@@ -261,20 +316,32 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Đang tải...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "Loop lỗi";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop không hoạt động thành công trong %@";
 
+/* Details for configuration error when maximum bolus is missing */
+"Maximum Bolus" = "Liều Bolus tối đa";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Dữ liệu thiếu: %1$@";
 
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Hiệu ứng động lượng";
+
+/* Text for more info action on notification of upcoming profile expiration */
+"More Info" = "Thêm thông tin";
+
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "Cần chú ý";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
@@ -282,8 +349,19 @@
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Không có thiết bị nào được kết nối, hoặc lỗi trong quá trình kết nối";
 
+/* Alert acknowledgment OK button
+   Critical Alert permissions disabled alert button
+   Default action for alert when alert acknowledgment fails
+   Notifications permissions disabled alert button
+   Text for ok action on notification of upcoming profile expiration
+   The title of the notification action to acknowledge a device alert */
+"OK" = "OK";
+
+/* Notification Setting Status is On */
+"On" = "On";
+
 /* The title text for the override presets */
-"Override Presets" = "Ghi đè cài đặt trước";
+"Override Presets" = "Cài đặt chồng liều";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Mục tiêu trước bữa ăn";
@@ -306,6 +384,9 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Dữ liệu bơm %1$@ là cũ";
 
+/* The title of the screen displaying a pump event */
+"Pump Event" = "Pump Event";
+
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Trình quản lý bơm";
 
@@ -318,6 +399,9 @@
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Bơm đã tạm ngưng";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Thuốc tác động nhanh cho người lớn";
 
@@ -328,13 +412,13 @@
 "Recommendation expired: %1$@ old" = "Khuyến cáo hết hạn: %1$@ phút";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Liều Basal khuyến nghị";
+"Recommended Basal" = "Khuyến nghị liều Basal";
 
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Liều Bolus khuyến nghị: %@ Units";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Ngăn chứa insulin";
+"Reservoir" = "Reservoir";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Liều Bổ sung còn hiệu lực";
@@ -372,11 +456,18 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Mô hình cũ được Loop sử dụng, cho phép tùy chỉnh thời lượng hành động.";
 
+/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
+"The maximum absorption time is %@" = "Thời gian tiêu hóa tối đa là  %@";
+
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Số lượng bolus tối đa là %@ Units";
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Event title displayed when StoredPumpEvent.title is not set
+   The default description to use when an entry has no dose description */
+"Unknown" = "Không nhận ra";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "cho đến khi %@";

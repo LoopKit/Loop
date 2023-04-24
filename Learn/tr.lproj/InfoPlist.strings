@@ -1,0 +1,6 @@
+/* Bundle name */
+"CFBundleName" = "Öğren";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Sağlık veri tabanından alınan yemek verileri, glikoz etkilerini belirlemek için kullanılır. Sağlık veri tabanından alınan glikoz verileri, grafik ve momentum hesaplaması için kullanılır. Sağlık veritabanındaki uyku verileri, uyanık olduğunuz süre boyunca Apple Watch komplikasyon güncellemelerinin teslimini optimize etmek için kullanılır.";
+

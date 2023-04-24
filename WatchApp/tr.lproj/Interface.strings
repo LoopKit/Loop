@@ -1,45 +1,35 @@
-
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "CsQ-fc-KLC"; */
 "CsQ-fc-KLC.text" = "–";
+
+/* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
+"dea-qG-va8.text" = "TOPLAM KARB";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "Dt1-kz-jMZ"; */
 "Dt1-kz-jMZ.text" = "– – –";
 
+/* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
+"f5G-bS-9pd.text" = "Yemek öncesi";
+
+/* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
+"hln-CI-MRP.text" = "Karb";
+
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "IRi-4t-ESO"; */
 "IRi-4t-ESO.text" = "–";
 
-/* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
-"JXa-s1-PJx.text" = "Running";
+/* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
+"jj3-Gq-HBy.text" = "Bolus Başarısız";
 
-/* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
-"MZU-QV-PtZ.text" = "TITLE";
+/* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
+"JXa-s1-PJx.text" = "Çalışıyor";
 
 /* Class = "WKInterfaceLabel"; text = "–"; ObjectID = "Mhe-aR-kQQ"; */
 "Mhe-aR-kQQ.text" = "–";
 
-/* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
-"T4U-wP-dSW.text" = "Label";
-
-/* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
-"UVY-pa-SUL.text" = "🏃‍♀️";
-
-/* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
-"XkS-y5-khE.text" = "<body>";
-
-/* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
-"dea-qG-va8.text" = "TOTAL CARBS";
-
-/* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
-"f5G-bS-9pd.text" = "Pre-Meal";
-
-/* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
-"hln-CI-MRP.text" = "Carbs";
-
-/* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
-"jj3-Gq-HBy.text" = "Bolus Failed";
+/* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
+"MZU-QV-PtZ.text" = "BAŞLIK";
 
 /* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
-"nC0-X3-oFJ.text" = "Override";
+"nC0-X3-oFJ.text" = "Geçersiz kıl";
 
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
 "rNf-Mh-tID.title" = "Loop";
@@ -47,14 +37,24 @@
 /* Class = "WKInterfaceLabel"; text = "Bolus"; ObjectID = "smL-Rc-IZh"; */
 "smL-Rc-IZh.text" = "Bolus";
 
+/* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
+"T4U-wP-dSW.text" = "Etiket";
+
+/* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
+"UVY-pa-SUL.text" = "🏃‍♀️";
+
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "v5b-sO-bb8"; */
 "v5b-sO-bb8.title" = "Loop";
 
+/* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
+"XkS-y5-khE.text" = "<body>";
+
 /* Class = "WKInterfaceLabel"; text = "ACTIVE CARBS"; ObjectID = "ycL-5X-a05"; */
-"ycL-5X-a05.text" = "ACTIVE CARBS";
+"ycL-5X-a05.text" = "AKTİF KARB";
 
 /* Class = "WKInterfaceLabel"; text = "– – –"; ObjectID = "yl8-ZP-c3l"; */
 "yl8-ZP-c3l.text" = "– – –";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "zO8-x6-bZd"; */
-"zO8-x6-bZd.text" = "Label";
+"zO8-x6-bZd.text" = "Etiket";
+

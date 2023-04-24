@@ -184,7 +184,15 @@ extension CLKComplicationTemplate {
                 return nil
             }
         case .graphicExtraLarge:
-            return nil
+            if #available(watchOSApplicationExtension 5.0, *) {
+                return CLKComplicationTemplateGraphicExtraLargeCircularOpenGaugeSimpleText(
+                    gaugeProvider: CLKSimpleGaugeProvider(style: .fill, gaugeColor: tintColor, fillFraction: 1),
+                    bottomTextProvider: CLKSimpleTextProvider(text: trendString),
+                    centerTextProvider: CLKSimpleTextProvider(text: glucoseString)
+                )
+            } else {
+                return nil
+            }
         @unknown default:
             return nil
         }

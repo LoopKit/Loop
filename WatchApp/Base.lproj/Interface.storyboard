@@ -34,6 +34,9 @@
                                                 <label height="1" alignment="left" hidden="YES" textAlignment="center" id="MHD-Is-5mK">
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
+                                                <label height="1" alignment="right" hidden="YES" textAlignment="center" id="hOH-sV-9TN" userLabel="Eventual Glucose Label">
+                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
+                                                </label>
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
@@ -155,6 +158,7 @@
                         <outlet property="carbsButton" destination="5iF-jW-tC8" id="him-XO-Jod"/>
                         <outlet property="carbsButtonBackground" destination="C7f-Mo-eUU" id="ere-wU-Kax"/>
                         <outlet property="carbsButtonImage" destination="4aO-ao-Sp9" id="Nlk-SP-VmT"/>
+                        <outlet property="eventualGlucoseLabel" destination="hOH-sV-9TN" id="c4T-Va-zeT"/>
                         <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>
                         <outlet property="loopHUDImage" destination="Q7C-xN-eH8" id="CIe-B3-umI"/>
                         <outlet property="overrideButton" destination="dYe-c2-Sfm" id="m7H-fY-Cxg"/>
@@ -191,6 +195,9 @@
                                                 </label>
                                                 <label height="1" alignment="right" hidden="YES" text="– – –" textAlignment="center" id="yl8-ZP-c3l">
                                                     <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
+                                                </label>
+                                                <label height="1" alignment="right" hidden="YES" textAlignment="center" id="6sn-Q8-nGV" userLabel="Eventual Glucose Label">
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
                                             </items>
@@ -264,6 +271,7 @@
                     </items>
                     <variation key="device=watch38mm" spacing="5"/>
                     <connections>
+                        <outlet property="eventualGlucoseLabel" destination="6sn-Q8-nGV" id="tX0-mq-Heq"/>
                         <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
                         <outlet property="glucoseScene" destination="9BI-AC-l6c" id="O4a-P8-cHI"/>
                         <outlet property="loopHUDImage" destination="ifw-dh-btK" id="Bc0-er-dfe"/>

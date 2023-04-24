@@ -1,0 +1,90 @@
+/* remaining time in setting's profile expiration section */
+" remaining" = "zbývající";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
+/* The title of the nightscout API secret credential */
+"API Secret" = "API Secret";
+
+/* Settings app profile section */
+"App Profile" = "Profil";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Opravdu chcete tuto službu smazat?";
+
+/* The title of the basal rate profile screen
+   The title text for the basal rate schedule */
+"Basal Rates" = "Úrovně bazálu";
+
+/* The title of the cancel action in an action sheet */
+"Cancel" = "Zrušit";
+
+/* The title of the action used to dismiss an error alert */
+"com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
+
+/* The title of the configuration section in settings */
+"Configuration" = "Konfigurace";
+
+/* Default alert dismissal */
+"Continue" = "Pokračovat";
+
+/* Critical Alerts Status text */
+"Critical Alerts" = "Kritická upozornění";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Smazat účet";
+
+/* Button title to delete a service */
+"Delete Service" = "Smazat službu";
+
+/* Title text for delivery limits */
+"Delivery Limits" = "Limity podávání";
+
+/* No comment provided by engineer. */
+"Done" = "Hotovo";
+
+/* Secondary text for alerts disabled warning, which appears on the main status screen. */
+"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Opravit nyní zapnutím Oznámení, Kritických upozornění a Časově citlivých oznámení.";
+
+/* The title of the glucose and prediction graph */
+"Glucose" = "Glukóza";
+
+/* The title text for how to update */
+"How to update (LoopDocs)" = "Jak aktualizovat (LoopDocs)";
+
+/* Insulin type label */
+"Insulin Type" = "Typ inzulínu";
+
+/* The title of the Nightscout service */
+"Nightscout" = "Nightscout";
+
+/* Notification Setting Status is Off */
+"Off" = "Vypnuto";
+
+/* Alert acknowledgment OK button
+   Critical Alert permissions disabled alert button
+   Default action for alert when alert acknowledgment fails
+   Notifications permissions disabled alert button
+   Text for ok action on notification of upcoming profile expiration
+   The title of the notification action to acknowledge a device alert */
+"OK" = "OK";
+
+/* Notification Setting Status is On */
+"On" = "Zapnuto";
+
+/* Settings App Profile expiration view */
+"Profile Expiration" = "Vypršení platnosti profilu";
+
+/* Time that profile expires */
+"Profile expires " = "Platnost profilu vyprší";
+
+/* The title of the notification action to retry a bolus command */
+"Retry" = "Zkusit znovu";
+
+/* The title of the nightscout site URL credential */
+"Site URL" = "URL adresa webu";
+
+/* Unknown amount of time in settings' profile expiration section */
+"Unknown time" = "Neznámý čas";
+

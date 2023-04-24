@@ -1,18 +1,27 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth, insülin pompası ve sürekli glikoz izleme cihazlarıyla iletişim kurmak için kullanılır.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth, insülin pompası ve sürekli glikoz izleme cihazlarıyla iletişim kurmak için kullanılır.";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Kamera, cihazların barkodlarını taramak için kullanılır.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID is used to authenticate insulin bolus and to save changes to therapy settings.";
+"NSFaceIDUsageDescription" = "Face ID, bolus insülini doğrulamak ve tedavi ayarlarındaki değişiklikleri kaydetmek için kullanılır.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to improve the Apple Watch complication.";
+"NSHealthShareUsageDescription" = "Sağlık veri tabanından alınan yemek verileri, glikoz etkilerini belirlemek için kullanılır. Sağlık veri tabanından alınan glikoz verileri, grafik ve momentum hesaplaması için kullanılır. Sağlık veritabanındaki uyku verileri, Apple Watch komplikasyonunu iyileştirmek için kullanılır.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.";
+"NSHealthUpdateUsageDescription" = "Uygulamaya ve saate girilen öğün karbonhidrat verileri Sağlık veritabanında saklanır. CGM'den alınan KŞ verileri, HealthKit'te güvenli bir şekilde saklanır.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop, ön ayarları sesinizle gerçekleştirmenize izin vermek için Siri'yi kullanır.";
 

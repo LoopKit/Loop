@@ -1,38 +1,122 @@
+/* No glucose value representation (3 dashes for mg/dL; no spaces as this will get truncated in the watch complication) */
+"---" = "---";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
+/* No comment provided by engineer. */
+"%@" = "%@";
+
+/* Format string for glucose range (1: lower bound)(2: upper bound)(3: unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* HUD row title for COB */
 "Active Carbs" = "Aktywne węglowodany";
 
 /* HUD row title for IOB */
 "Active Insulin" = "Aktywna insulina";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Wprowadź węglowodany";
+
+/* Button text to confirm manual bolus on Apple Watch */
+"Bolus" = "Bolus";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
-"Bolus Failed" = "Podanie bolusa nie powiodło się";
+"Bolus Failed" = "Bolus nie podany";
+
+/* Alert title for updated bolus recommendation on Apple Watch */
+"Bolus Recommendation Updated" = "Zaktualizowano rekomendowanego Bolus";
+
+/* Button text to continue from carb entry to bolus entry on Apple Watch */
+"Continue" = "Kontynuuj";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Zignoruj";
+"Dismiss" = "Odrzucać";
+
+/* Short unit label for gram measurement
+   The short unit display string for grams */
+"g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Upewnij się, że Twój iPhone jest w pobliżu i spróbuj ponownie";
 
+/* The recovery message displayed after a bolus attempt fails
+   The recovery message displayed after a potential carb entry send attempt fails */
+"Make sure your iPhone is nearby and try again." = "Upewnij się, że Twój iPhone jest w pobliżu i spróbuj ponownie.";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dl";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Dawka podstawowa netto";
+
+/* Label for off button */
+"Off" = "Wyłącz";
+
+/* No comment provided by engineer. */
+"OK" = "OK";
+
+/* Label for on button */
+"On" = "Włącz";
 
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Pominięcie";
 
+/* Alert message for updated bolus recommendation on Apple Watch */
+"Please reconfirm the bolus amount." = "Potwierdź ponownie wielkość bolusa.";
+
+/* Title for sheet to enable/disable pre-meal on watch */
+"Pre-Meal" = "Przed posiłkiem";
+
+/* The text for the Watch button for enabling a custom preset */
+"Preset" = "Ustawienie wstępne";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Rekomendowane: %@ J";
 
+/* Recommended bolus amount label on Apple Watch */
+"REC: %@ U" = "Rek: %@ J";
+
+/* Indicator that recommended bolus computation is in progress on Apple Watch */
+"REC: Calculating..." = "Rek: Obliczanie...";
+
 /* HUD row title for remaining reservoir volume */
 "Reservoir Volume" = "Objętość w zbiorniku";
+
+/* Button text to confirm carb entry without bolusing on Apple Watch */
+"Save" = "Zapisz";
+
+/* Button text to confirm carb entry and bolus on Apple Watch */
+"Save & Bolus" = "Zapisz i bolus";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Wysyłanie nie powiodło się";
 
+/* Help text for bolus confirmation on Apple Watch */
+"Turn Digital Crown\nto bolus" = "Przekręć Digital Crown aby podać bolus";
+
+/* The short unit display string for international units of insulin */
+"U" = "J";
+
 /* The short unit display string for international units of insulin delivery per hour */
-"U/hr" = "J/godz.";
+"U/hr" = "J/godz";
+
+/* The title of the alert controller displayed after a potential carb entry send attempt fails */
+"Unable to Reach iPhone" = "Nie można połączyć się z iPhone'em";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Wysiłek fizyczny";
+

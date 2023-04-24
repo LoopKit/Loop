@@ -1,44 +1,121 @@
+/* No glucose value representation (3 dashes for mg/dL; no spaces as this will get truncated in the watch complication) */
+"---" = "--";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– –";
+
+/* No comment provided by engineer. */
+"%@" = "%@";
+
+/* Format string for glucose range (1: lower bound)(2: upper bound)(3: unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ - %2$@ %3$@";
+
 /* HUD row title for COB */
-"Active Carbs" = "Actieve koolhydraten";
+"Active Carbs" = "Actieve Koolhydraten";
 
 /* HUD row title for IOB */
-"Active Insulin" = "Actieve insuline";
+"Active Insulin" = "Actieve Insuline";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Voeg koolhydraten toe";
+"Add Carb Entry" = "Kh. Inv. Toevoegen";
+
+/* Button text to confirm manual bolus on Apple Watch */
+"Bolus" = "Bolus";
 
 /* The title of the alert controller displayed after a bolus attempt fails */
-"Bolus Failed" = "Bolus mislukt";
+"Bolus Failed" = "Bolus Mislukt";
+
+/* Alert title for updated bolus recommendation on Apple Watch */
+"Bolus Recommendation Updated" = "Aanbevolen Bolus Bijgewerkt";
+
+/* Button text to continue from carb entry to bolus entry on Apple Watch */
+"Continue" = "Ga Verder";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Verwerp";
+"Dismiss" = "Sluiten";
+
+/* Short unit label for gram measurement
+   The short unit display string for grams */
+"g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Zorg dat je iPhone in de buurt is en probeer opnieuw";
 
+/* The recovery message displayed after a bolus attempt fails
+   The recovery message displayed after a potential carb entry send attempt fails */
+"Make sure your iPhone is nearby and try again." = "Zorg dat je iPhone in de buurt is en probeer het opnieuw.";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* HUD row title for Net Basal Rate */
-"Net Basal Rate" = "Netto basaalsnelheid";
+"Net Basal Rate" = "Netto Basaalsnelheid";
+
+/* Label for off button */
+"Off" = "Uit";
+
+/* No comment provided by engineer. */
+"OK" = "Ok";
+
+/* Label for on button */
+"On" = "Aan";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Aangepast programma";
+"Override" = "Override";
+
+/* Alert message for updated bolus recommendation on Apple Watch */
+"Please reconfirm the bolus amount." = "Bevestig bolus opnieuw.";
+
+/* Title for sheet to enable/disable pre-meal on watch */
+"Pre-Meal" = "Pre-Meal";
+
+/* The text for the Watch button for enabling a custom preset */
+"Preset" = "Override";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Voorgesteld: %@ E";
 
+/* Recommended bolus amount label on Apple Watch */
+"REC: %@ U" = "AANBEVOLEN: %@ E";
+
+/* Indicator that recommended bolus computation is in progress on Apple Watch */
+"REC: Calculating..." = "AANBEVOLEN: Berekenen...";
+
 /* HUD row title for remaining reservoir volume */
-"Reservoir Volume" = "Reservoir inhoud";
+"Reservoir Volume" = "Reservoirinhoud";
+
+/* Button text to confirm carb entry without bolusing on Apple Watch */
+"Save" = "Opslaan";
+
+/* Button text to confirm carb entry and bolus on Apple Watch */
+"Save & Bolus" = "Opslaan & Bolussen";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
-"Send Failed" = "Versturen mislukt";
+"Send Failed" = "Versturen Mislukt";
+
+/* Help text for bolus confirmation on Apple Watch */
+"Turn Digital Crown\nto bolus" = "Turn Digital Crown\nom te bolussen";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";
 
 /* The short unit display string for international units of insulin delivery per hour */
 "U/hr" = "E/uur";
+
+/* The title of the alert controller displayed after a potential carb entry send attempt fails */
+"Unable to Reach iPhone" = "Kan iPhone niet bereiken";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Training";

@@ -24,8 +24,6 @@ struct BolusEntryView: View {
     @State private var enteredBolusString = ""
     @State private var shouldBolusEntryBecomeFirstResponder = false
 
-    @State private var isManualGlucoseEntryRowVisible = false
-
     @State private var isInteractingWithChart = false
     @State private var isKeyboardVisible = false
     @State private var pickerShouldExpand = false
@@ -60,25 +58,21 @@ struct BolusEntryView: View {
             .keyboardAware()
             .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
             .navigationBarTitle(self.title)
-                .supportedInterfaceOrientations(.portrait)
-                .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
-                .onReceive(self.viewModel.$recommendedBolus) { recommendation in
-                    // If the user has not edited the bolus amount and there are recommendation changes, then update the bolus amount
-                    guard !editedBolusAmount else { return }
-
-                    guard let amount = recommendation?.doubleValue(for: .internationalUnit()),
-                          amount != 0
-                    else {
-                        enteredBolusStringBinding.wrappedValue = ""
-                        return
+            .supportedInterfaceOrientations(.portrait)
+            .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
+            .onReceive(self.viewModel.$recommendedBolus) { recommendation in
+                // If the recommendation changes, and the user has not edited the bolus amount, update the bolus amount
+                let amount = recommendation?.doubleValue(for: .internationalUnit()) ?? 0
+                if !editedBolusAmount {
+                    var newEnteredBolusString: String
+                    if amount == 0 {
+                        newEnteredBolusString = ""
+                    } else {
+                        newEnteredBolusString = Self.doseAmountFormatter.string(from: amount) ?? String(amount)
                     }
-
-                    enteredBolusStringBinding.wrappedValue = viewModel.formatBolusAmount(amount)
+                    enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                 }
-                .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
-                    // The view model can disable manual glucose entry if CGM data returns.
-                    self.isManualGlucoseEntryRowVisible = isManualGlucoseEntryEnabled
-                }
+            }
         }
     }
     
@@ -92,7 +86,7 @@ struct BolusEntryView: View {
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
         // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
         // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
-        shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
+        return shouldBolusEntryBecomeFirstResponder && geometry.size.height > 640
     }
     
     private var chartSection: some View {
@@ -185,7 +179,7 @@ struct BolusEntryView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 if viewModel.isManualGlucoseEntryEnabled {
-                    manualGlucoseEntryRow
+                    ManualGlucoseEntryRow(quantity: $viewModel.manualGlucoseQuantity)
                 } else if viewModel.potentialCarbEntry != nil {
                     potentialCarbEntryRow
                 } else {
@@ -214,43 +208,6 @@ struct BolusEntryView: View {
         QuantityFormatter(for: displayGlucoseUnitObservable.displayGlucoseUnit).numberFormatter
     }
 
-    @ViewBuilder
-    private var manualGlucoseEntryRow: some View {
-        if viewModel.isManualGlucoseEntryEnabled {
-            HStack {
-                Text("Fingerstick Glucose", comment: "Label for manual glucose entry row on bolus screen")
-                Spacer()
-                HStack(alignment: .firstTextBaseline) {
-                    DismissibleKeyboardTextField(
-                        text: enteredManualGlucose,
-                        placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
-                        font: .heavy(.title1),
-                        textAlignment: .right,
-                        keyboardType: .decimalPad,
-                        shouldBecomeFirstResponder: isManualGlucoseEntryRowVisible,
-                        maxLength: 4,
-                        doneButtonColor: .loopAccent
-                    )
-                    Text(QuantityFormatter().string(from: displayGlucoseUnitObservable.displayGlucoseUnit))
-                        .foregroundColor(Color(.secondaryLabel))
-                }
-            }
-            .onKeyboardStateChange { state in
-                if state.animationDuration > 0 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + state.animationDuration) {
-                         self.isManualGlucoseEntryRowVisible = true
-                    }
-                }
-            }
-        }
-    }
-
-    private var enteredManualGlucose: Binding<String> {
-        Binding(
-            get: { viewModel.manualGlucoseString },
-            set: { newValue in viewModel.manualGlucoseString = newValue }
-        )
-    }
 
     @ViewBuilder
     private var potentialCarbEntryRow: some View {
@@ -361,6 +318,11 @@ struct BolusEntryView: View {
                 title: Text("No Recent Glucose Data", comment: "Title for bolus screen notice when glucose data is missing or stale"),
                 caption: Text("Enter a blood glucose from a meter for a recommended bolus amount.", comment: "Caption for bolus screen notice when glucose data is missing or stale")
             )
+        case .futureGlucoseData:
+            return WarningView(
+                title: Text("Invalid Future Glucose", comment: "Title for bolus screen notice when glucose data is in the future"),
+                caption: Text("Check your device time and/or remove any invalid data from Apple Health.", comment: "Caption for bolus screen notice when glucose data is in the future")
+            )
         case .stalePumpData:
             return WarningView(
                 title: Text("No Recent Pump Data", comment: "Title for bolus screen notice when pump data is missing or stale"),
@@ -394,7 +356,11 @@ struct BolusEntryView: View {
                 if self.viewModel.actionButtonAction == .enterBolus {
                     self.shouldBolusEntryBecomeFirstResponder = true
                 } else {
-                    self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
+                    Task {
+                        if await self.viewModel.didPressActionButton() {
+                            dismiss()
+                        }
+                    }
                 }
             },
             label: {
@@ -411,7 +377,7 @@ struct BolusEntryView: View {
             }
         )
         .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
-        .disabled(viewModel.isInitiatingSaveOrBolus)
+        .disabled(viewModel.enacting)
         .padding()
     }
 

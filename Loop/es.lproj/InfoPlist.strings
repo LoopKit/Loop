@@ -1,11 +1,17 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth se utiliza para las comunicaciones con la microinfusora y los dispositivos de monitoreo continuo de glucosa.";
+"NSBluetoothAlwaysUsageDescription" = "El bluetooth se utiliza para las comunicaciones con la bomba de insulina y los dispositivos de monitoreo continuo de glucosa.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth se utiliza para las comunicaciones con la microinfusora y los dispositivos de monitoreo continuo de glucosa.";
+"NSBluetoothPeripheralUsageDescription" = "El bluetooth se utiliza para las comunicaciones con la bomba de insulina y los dispositivos de monitoreo continuo de glucosa.";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "La cámara se utiliza para escanear los códigos de barras de los dispositivos.";
 
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Se utiliza reconocimiento facial para autenticar el bolo de insulina.";
@@ -14,5 +20,8 @@
 "NSHealthShareUsageDescription" = "Datos de alimentos de la base de datos de Salud se utiliza para determinar los efectos en el nivel de glucosa. Datos de glucosa de la bsase de datos de Salud se utilizan para graficar y determinar cálculos de momento.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Datos de alimentos ingresados en la aplicación y en el reloj son almacenados en la base de datos de Salud. Los datos de glucosa extraídos del monitor continuo de glucosa se almacenan de manera segura en Kit de Salud.";
+"NSHealthUpdateUsageDescription" = "Datos de alimentos ingresados en la aplicación y en el reloj son almacenados en la base de datos de Salud. Los datos de glucosa extraídos del monitor continuo de glucosa se almacenan de manera segura en HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop utiliza Siri para permitirte activar ajustes preestablecidos con tu voz.";
 

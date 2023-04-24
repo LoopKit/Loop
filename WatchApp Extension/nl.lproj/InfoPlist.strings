@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "WatchApp Extensie";
+
+/* Bundle name */
+"CFBundleName" = "WatchApp Extensie";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Maaltijdgegevens uit de database Gezondheid worden gebruikt om glucose-effecenten te bepalen. Glucosegegevens uit de database Gezondheid worden gebruikt voor grafieken en het berekenen van trendlijnen. Slaapgegevens uit de database Gezondheid worden gebruikt om de Apple Watch complicatie bij te werken wanneer je wakker bent.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Maaltijdkoolhydraten die worden ingevoerd in de app en met de watch worden opgeslagen in de database Gezondheid. Ontvangen glucosegegevens van de CGM worden veilig opgeslagen in HealthKit.";
+

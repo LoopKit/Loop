@@ -1,0 +1,24 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth sa používa na komunikáciu s inzulínovou pumpou a zariadeniami pre kontinuálne snímanie glykémie.";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth sa používa na komunikáciu s inzulínovou pumpou a zariadeniami pre kontinuálne snímanie glykémie.";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Fotoaparát sa používa na skenovanie čiarových kódov zariadení.";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Face ID sa používa na overenie podania bolusu inzulínu a na uloženie zmien v nastaveniach terapie.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Údaje o jedle z databázy Health sa používajú na určenie účinkov glukózy. Údaje o glukóze z databázy Health sa používajú na vytváranie grafov a výpočet hybnosti. Údaje o spánku z databázy Health slúžia na vylepšenie komplikácie Apple Watch.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Údaje o uhlohydrátoch zadané v aplikácii a na hodinkách sú uložené v databáze Health. Údaje o glukóze získané z CGM sú bezpečne uložené v HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop používa Siri, aby vám umožnila aktivovať predvoľby pomocou vášho hlasu.";
+

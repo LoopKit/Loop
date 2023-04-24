@@ -9,9 +9,13 @@ import Foundation
 import LoopKit
 import LoopKitUI
 import SwiftCharts
+import HealthKit
 
 
 public class IOBChart: ChartProviding {
+
+    static let chartUnit = HKUnit.internationalUnit()
+
     public init() {
     }
 
@@ -106,7 +110,7 @@ public extension IOBChart {
         iobPoints = iobValues.map {
             return ChartPoint(
                 x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                y: ChartAxisValueDoubleUnit($0.value, unitString: "U", formatter: doseFormatter)
+                y: ChartAxisValueDoubleUnit($0.value, unitString: Self.chartUnit.localizedShortUnitString, formatter: doseFormatter)
             )
         }
     }

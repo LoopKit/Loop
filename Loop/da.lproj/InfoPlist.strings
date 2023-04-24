@@ -1,18 +1,27 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth bliver brugt til at kommunikere med din insulin pumpe og din glukose monitor.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth bliver brugt til at kommunikere med din insulinpumpe og din glukosemonitor.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth bliver brugt til at kommunikere med din insulin pumpe og din glukose monitor.";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth bliver brugt til at kommunikere med din insulinpumpe og din glukosemonitor.";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Kamera bruges til at scanne stregkoder på enheder.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID bliver brugt til at godkende en insulin bolus.";
+"NSFaceIDUsageDescription" = "Face ID bliver brugt til at godkende en insulinbolus.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Måltidsdata fra Apple Sundhed bliver brugt til at glukosens effekt på dit blodsukker. Glukose data fra Apple Sundhed bliver brugt til at danne grafer og udregninger.";
+"NSHealthShareUsageDescription" = "Måltidsdata fra Apple Health bliver brugt til at glukosens effekt på dit blodsukker. Glukose data fra Apple Health bliver brugt til at danne grafer og udregninger.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Kulhydrater indtastet i appen og på uret gemmes i Apple Sundhedsdatabasen. Glukosedata hentet fra CGM gemmes sikkert i SundhedsKit.";
+"NSHealthUpdateUsageDescription" = "Data om kulhydratmåltider, der indtastes i appen og på uret, gemmes i Apples Health-database. Glukosedata, der hentes fra CGM'en, gemmes sikkert i HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop bruger Siri til at give dig mulighed for at udføre forudindstillinger med din stemme.";
 

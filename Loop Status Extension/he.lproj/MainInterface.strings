@@ -1,6 +1,8 @@
-
 /* Class = "UILabel"; text = "Active Carbs"; ObjectID = "9iF-xY-Bh4"; */
 "9iF-xY-Bh4.text" = "Active Carbs";
+
+/* Class = "UILabel"; text = "0 g"; ObjectID = "dPp-lJ-5sh"; */
+"dPp-lJ-5sh.text" = "0 g";
 
 /* Class = "UILabel"; text = "Active Insulin"; ObjectID = "UPi-dG-yYD"; */
 "UPi-dG-yYD.text" = "Active Insulin";
@@ -8,5 +10,3 @@
 /* Class = "UILabel"; text = "0 U"; ObjectID = "Vgf-p1-2QP"; */
 "Vgf-p1-2QP.text" = "0 U";
 
-/* Class = "UILabel"; text = "0 g"; ObjectID = "dPp-lJ-5sh"; */
-"dPp-lJ-5sh.text" = "0 g";

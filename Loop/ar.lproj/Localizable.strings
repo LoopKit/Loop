@@ -1,6 +1,30 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (قيد الانتظار: %@)";
 
+/* String denoting lack of a recommended bolus amount in the simple bolus calculator */
+"–" = "—";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "---";
+
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ استغرق";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ وحدة بشكل كامل";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/وحدة";
 
@@ -19,23 +43,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ استغرق";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ وحدة بشكل كامل";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 دقيقة معامل انحدار قراءات سكر الدم (b₁), ويستمر بالاضمحلال خلال 30 دقيقة";
@@ -58,11 +67,17 @@
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
 "Active Carbohydrates: %@" = "الكربوهيدرات النشطة: %@";
 
+/* Title describing quantity of still-absorbing carbohydrates */
+"Active Carbs" = "كارب النشط";
+
 /* The title of the Insulin On-Board graph */
-"Active Insulin" = "الأنسولين النشط";
+"Active Insulin" = "أنسولين نشط";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "الأنسولين النشط: %@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Add Carb Entry";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
@@ -77,9 +92,6 @@
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
-
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "تعديل على نموذج الكبار على أساس التأثيرات التجريبية عند الأطفال.";
 
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
@@ -105,7 +117,7 @@
 
 /* The label of the bolus entry button
    The notification title for a bolus failure */
-"Bolus" = "الجرعة";
+"Bolus" = "Bolus";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
 "Bolused %1$@ of %2$@" = "تم ضخ %1$@ من %2$@";
@@ -125,6 +137,9 @@
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
 "Carb Ratios" = "معاملات الكارب";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Add Carb Entry";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "الكربوهيدرات";
@@ -172,8 +187,8 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "تجاوز مخصص";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "رمز العميل";
+/* The short unit display string for decibles */
+"dB" = "dB";
 
 /* Button title to delete CGM */
 "Delete CGM" = "حذف CGM";
@@ -183,6 +198,10 @@
 
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "تعطيل";
+
+/* Default alert dismissal
+   The button label of the action used to dismiss an error alert */
+"Dismiss" = "تجاهل";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "تفعيل";
@@ -208,6 +227,9 @@
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "لمدة %1$@";
 
+/* The short unit display string for grams */
+"g" = "g";
+
 /* The title of the glucose and prediction graph */
 "Glucose" = "قراءات السكر";
 
@@ -219,9 +241,6 @@
 
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "مقاومة سكر الدم";
-
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "إلى أجل غير مسمى";
@@ -258,17 +277,20 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "تحميل...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "فشل في الحلقة المغلقة";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "لم تتم الحلقة المغلقة بنجاح منذ %@";
 
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "بيانات مفقودة: %1$@";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "تأثيرات النشاط";
@@ -278,6 +300,17 @@
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "لا يوجد أجهزة متصلة, أو يوجد خطأ أثناء الاتصال";
+
+/* Alert acknowledgment OK button
+   Critical Alert permissions disabled alert button
+   Default action for alert when alert acknowledgment fails
+   Notifications permissions disabled alert button
+   Text for ok action on notification of upcoming profile expiration
+   The title of the notification action to acknowledge a device alert */
+"OK" = "موافق";
+
+/* Notification Setting Status is On */
+"On" = "On";
 
 /* The title text for the override presets */
 "Override Presets" = "تخطي الإعدادات المسبقة";
@@ -315,6 +348,9 @@
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "تم إيقاف الضخ مؤقتا";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "التأثيرالسريع - كبار";
 
@@ -325,7 +361,7 @@
 "Recommendation expired: %1$@ old" = "انتهت صلاحية التوصية منذ: %1$@ ";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "الضخ المستمر الموصى به";
+"Recommended Basal" = "الضخ المستمر المقترح";
 
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "الجرعة الموصى بها: %@ وحدات";
@@ -374,6 +410,10 @@
 
 /* The short unit display string for international units of insulin */
 "U" = "وحدة";
+
+/* Event title displayed when StoredPumpEvent.title is not set
+   The default description to use when an entry has no dose description */
+"Unknown" = "Unknown";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "حتى %@";
