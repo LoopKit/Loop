@@ -198,7 +198,7 @@ class LoopAppManager: NSObject {
                                               analyticsServicesManager: analyticsServicesManager,
                                               bluetoothProvider: bluetoothStateManager,
                                               alertPresenter: self,
-                                              closedLoopStatus: closedLoopStatus,
+                                              automaticDosingStatus: automaticDosingStatus,
                                               cacheStore: cacheStore,
                                               localCacheDuration: localCacheDuration,
                                               overrideHistory: overrideHistory,

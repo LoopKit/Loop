@@ -68,7 +68,7 @@ struct BolusEntryView: View {
                     if amount == 0 {
                         newEnteredBolusString = ""
                     } else {
-                        newEnteredBolusString = Self.doseAmountFormatter.string(from: amount) ?? String(amount)
+                        newEnteredBolusString = viewModel.formatBolusAmount(amount)
                     }
                     enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                 }

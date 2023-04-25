@@ -74,11 +74,8 @@ public class VersionUpdateViewModel: ObservableObject {
     }
     
     public func update() {
-        supportManager?.checkVersion { [weak self] versionUpdate in
-            DispatchQueue.main.async {
-                self?.versionUpdate = versionUpdate
-            }
+        Task { @MainActor in
+            versionUpdate = await supportManager?.checkVersion()
         }
     }
-    
 }

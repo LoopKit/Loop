@@ -22,6 +22,7 @@ extension UserDefaults {
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
         case resetLoop = "com.loopkit.Loop.resetLoop"
         case LastMissedMealNotification = "com.loopkit.Loop.lastMissedMealNotification"
+        case studyProductSelection = "com.loopkit.Loop.studyProductSelection"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
