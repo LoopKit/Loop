@@ -166,7 +166,7 @@ extension TestingScenariosTableViewController: TestingScenariosManagerDelegate {
     func testingScenariosManager(_ manager: TestingScenariosManager, didUpdateScenarioURLs scenarioURLs: [URL]) {
         var filteredScenarios = Set<LoopScenario>()
         manager.pluginManager.availableSupports.forEach { supportUI in
-            supportUI.filteredScenarios(scenarioURLs: scenarioURLs).forEach { scenario in
+            supportUI.getScenarios(from: scenarioURLs).forEach { scenario in
                 filteredScenarios.insert(scenario)
             }
         }
