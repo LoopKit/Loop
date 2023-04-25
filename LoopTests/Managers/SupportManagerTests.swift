@@ -89,8 +89,8 @@ class SupportManagerTests: XCTestCase {
         let result = await supportManager.checkVersion()
         XCTAssertEqual(VersionUpdate.noUpdateNeeded, result)
 
-        let result2 = await supportManager.checkVersion()
         anotherSupport.mockResult = .success(.required)
+        let result2 = await supportManager.checkVersion()
         XCTAssertEqual(.required, result2)
 
         let result3 = await supportManager.checkVersion()
