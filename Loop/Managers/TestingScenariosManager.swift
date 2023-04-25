@@ -234,9 +234,12 @@ extension TestingScenariosManagerRequirements {
             }
         }
         
-        instance.injectedActions.forEach { [testingCGMManager, testingPumpManager] action in
-            testingCGMManager?.inject(action: action)
-            testingPumpManager?.inject(action: action)
+        instance.deviceActions.forEach { [testingCGMManager, testingPumpManager] action in
+            if testingCGMManager?.managerIdentifier == action.managerIdentifier {
+                testingCGMManager?.trigger(action: action)
+            } else if testingPumpManager?.managerIdentifier == action.managerIdentifier {
+                testingPumpManager?.trigger(action: action)
+            }
         }
     }
 
