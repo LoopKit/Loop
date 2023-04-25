@@ -14,16 +14,10 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
 
     private let scenariosManager: TestingScenariosManager
 
-    private var scenarioURLs: [URL] = [] {
+    private var scenarios: [LoopScenario] = [] {
         didSet {
-            options = scenarioURLs.map {
-                $0                                                  // /Scenarios/HF-1-Scenario_1.json
-                    .deletingPathExtension()                        // /Scenarios/HF-1-Scenario_1
-                    .lastPathComponent                              // HF-1-Scenario_1
-                    .replacingOccurrences(of: "HF-1-", with: "")    // Scenario_1
-                    .replacingOccurrences(of: "HF-2-", with: "")    // Scenario_1
-                    .replacingOccurrences(of: "_", with: " ")       // Scenario 1
-            }
+            options = scenarios.map(\.name)
+            
             if isViewLoaded {
                 DispatchQueue.main.async {
                     self.updateLoadButtonEnabled()
@@ -65,14 +59,14 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
         contextHelp = "The scenarios directory location is available in the debug output of the Xcode console."
 
         if let activeScenarioURL = scenariosManager.activeScenarioURL {
-            selectedIndex = scenarioURLs.firstIndex(of: activeScenarioURL)
+            selectedIndex = scenarios.firstIndex(where: { $0.url == activeScenarioURL })
         }
 
         updateLoadButtonEnabled()
     }
 
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let url = scenarioURLs[indexPath.row]
+        let url = scenarios[indexPath.row].url
 
         let rewindScenario = contextualAction(
             rowTitle: "⏮ Rewind",
@@ -86,7 +80,7 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
     }
 
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let url = scenarioURLs[indexPath.row]
+        let url = scenarios[indexPath.row].url
 
         let advanceScenario = contextualAction(
             rowTitle: "Advance ⏭",
@@ -137,7 +131,7 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
     }
 
     private func updateLoadButtonEnabled() {
-        loadButtonItem.isEnabled = !scenarioURLs.isEmpty && selectedIndex != nil
+        loadButtonItem.isEnabled = !scenarios.isEmpty && selectedIndex != nil
     }
 
     @objc private func loadSelectedScenario() {
@@ -146,7 +140,7 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
             return
         }
 
-        let url = scenarioURLs[selectedIndex]
+        let url = scenarios[selectedIndex].url
 
         loadButtonItem.isEnabled = false
         loadButtonItem.title = "Loading..."
@@ -170,13 +164,13 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
 
 extension TestingScenariosTableViewController: TestingScenariosManagerDelegate {
     func testingScenariosManager(_ manager: TestingScenariosManager, didUpdateScenarioURLs scenarioURLs: [URL]) {
-        var filteredURLs = Set<URL>()
+        var filteredScenarios = Set<LoopScenario>()
         manager.pluginManager.availableSupports.forEach { supportUI in
-            supportUI.filterScenarios(scenarioURLs: scenarioURLs).forEach { scenarioURL in
-                filteredURLs.insert(scenarioURL)
+            supportUI.filteredScenarios(scenarioURLs: scenarioURLs).forEach { scenario in
+                filteredScenarios.insert(scenario)
             }
         }
         
-        self.scenarioURLs = Array(filteredURLs).sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
+        self.scenarios = Array(filteredScenarios).sorted(by: { $0.name < $1.name })
     }
 }
