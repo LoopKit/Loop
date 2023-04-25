@@ -437,6 +437,12 @@ extension OnboardingManager: OnboardingProvider {
     var allowDebugFeatures: Bool { FeatureFlags.allowDebugFeatures }   // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
 }
 
+// MARK: - SupportProvider
+
+extension OnboardingManager: SupportProvider {
+    var availableSupports: [SupportUI] { deviceDataManager.pluginManager.availableSupports }
+}
+
 // MARK: - OnboardingUI
 
 fileprivate extension OnboardingUI {
