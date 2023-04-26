@@ -80,6 +80,6 @@ enum LoopConstants {
     static let minPartialApplicationFactor = 0.15 // similar to temp basal strategy
     static let maxPartialApplicationFactor = 1.00 // full correction
     static let scalingNumerator = maxPartialApplicationFactor - minPartialApplicationFactor
-    static let maxGlucoseSlidingScale = 250.0 // mg/dL value at which full correction is applied
     static let minGlucoseDeltaSlidingScale = 10.0 // mg/dL delta from low end of correction range for minPartialApplicationFactor
+    static let maxGlucoseSlidingScale = 250.0 // mg/dL value at which full correction is applied
 }
