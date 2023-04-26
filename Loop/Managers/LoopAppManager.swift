@@ -370,45 +370,14 @@ class LoopAppManager: NSObject {
         return false
     }
     
-    private func resetLoop() {
-        deviceDataManager.pumpManager?.prepareForDeactivation({ _ in })
-        
-        resetLoopUserDefaults()
-        resetLoopDocuments()
-    }
-    
-    private func resetLoopUserDefaults() {
-        // Store values to persist
-        let allowDebugFeatures = UserDefaults.appGroup?.allowDebugFeatures
-        let studyProductSelection = UserDefaults.appGroup?.studyProductSelection
-        
-        // Wipe away whole domain
-        UserDefaults.appGroup?.removePersistentDomain(forName: Bundle.main.appGroupSuiteName)
-        
-        // Restore values to persist
-        UserDefaults.appGroup?.allowDebugFeatures = allowDebugFeatures ?? false
-        UserDefaults.appGroup?.studyProductSelection = studyProductSelection
-    }
-    
-    private func resetLoopDocuments() {
-        let appGroup = Bundle.main.appGroupSuiteName
-        guard let directoryURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup) else {
-            preconditionFailure("Could not get a container directory URL. Please ensure App Groups are set up correctly in entitlements.")
-        }
-        
-        let documents: URL = directoryURL.appendingPathComponent("com.loopkit.LoopKit", isDirectory: true)
-        try? FileManager.default.removeItem(at: documents)
-        
-        guard let localDocuments = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
-            preconditionFailure("Could not get a documents directory URL.")
-        }
-        try? FileManager.default.removeItem(at: localDocuments)
-    }
-    
     func askUserToConfirmCrashIfNecessary() {
-        if UserDefaults.appGroup?.resetLoop == true {
-            alertManager.presentConfirmCrashAlert() { [weak self] in
-                self?.resetLoop()
+        deviceDataManager.pluginManager.availableSupports.forEach { supportUI in
+            if supportUI.loopNeedsReset {
+                supportUI.loopNeedsReset = false
+                alertManager.presentConfirmCrashAlert() { [weak self] in
+                    self?.deviceDataManager.pumpManager?.prepareForDeactivation({ _ in })
+                    supportUI.resetLoop()
+                }
             }
         }
     }
