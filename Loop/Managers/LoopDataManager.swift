@@ -1712,6 +1712,39 @@ extension LoopDataManager {
                     rateRounder: rateRounder,
                     isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
                 )
+            case .automaticBolusSlidingScale:
+                let volumeRounder = { (_ units: Double) in
+                    return self.delegate?.roundBolusVolume(units: units) ?? units
+                }
+
+                // slidingPartialBolusApplicationFactor calculated based on LoopConstants
+                //    and current glucose and current target range
+                let currentGlucose = glucose.quantity.doubleValue(for: settings.glucoseUnit ?? .milligramsPerDeciliter)
+                let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
+                let correctionRange = correctionRangeSchedule!.quantityRange(at: now())
+                let lowerBoundTarget = correctionRange.lowerBound.doubleValue(for: settings.glucoseUnit ?? .milligramsPerDeciliter)
+                let minGlucoseSlidingScale = LoopConstants.minGlucoseDeltaSlidingScale + lowerBoundTarget
+                let scalingFraction = LoopConstants.scalingNumerator/(LoopConstants.maxGlucoseSlidingScale-minGlucoseSlidingScale)
+                let scalingGlucose = max(currentGlucose - minGlucoseSlidingScale, 0.0)
+                let slidingPartialBolusApplicationFactor = min(LoopConstants.minPartialApplicationFactor + scalingGlucose * scalingFraction, LoopConstants.maxPartialApplicationFactor)
+
+                // If a user customizes maxPartialApplicationFactor > 1; this respects maxBolus
+                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * min(slidingPartialBolusApplicationFactor, 1.0))
+
+                dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
+                    to: glucoseTargetRange!,
+                    at: predictedGlucose[0].startDate,
+                    suspendThreshold: settings.suspendThreshold?.quantity,
+                    sensitivity: insulinSensitivity!,
+                    model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
+                    basalRates: basalRateSchedule!,
+                    maxAutomaticBolus: maxAutomaticBolus,
+                    partialApplicationFactor: slidingPartialBolusApplicationFactor * self.timeBasedDoseApplicationFactor,
+                    lastTempBasal: lastTempBasal,
+                    volumeRounder: volumeRounder,
+                    rateRounder: rateRounder,
+                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
+                )
             case .tempBasalOnly:
 
                 let temp = predictedGlucose.recommendedTempBasal(

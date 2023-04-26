@@ -15,6 +15,8 @@ public extension AutomaticDosingStrategy {
             return LocalizedString("Temp Basal Only", comment: "Title string for temp basal only dosing strategy")
         case .automaticBolus:
             return LocalizedString("Automatic Bolus", comment: "Title string for automatic bolus dosing strategy")
+        case .automaticBolusSlidingScale:
+            return LocalizedString("Automatic Bolus: Sliding Scale", comment: "Title string for automatic bolus with sliding scale dosing strategy")
         }
     }
 }
