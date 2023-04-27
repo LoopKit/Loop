@@ -874,26 +874,28 @@ extension LoopDataManager {
         logger.default("Loop ended")
         notify(forChange: .loopFinished)
 
-        let carbEffectStart = now().addingTimeInterval(-MissedMealSettings.maxRecency)
-        carbStore.getGlucoseEffects(start: carbEffectStart, end: now(), effectVelocities: insulinCounteractionEffects) {[weak self] result in
-            guard
-                let self = self,
-                case .success((_, let carbEffects)) = result
-            else {
-                if case .failure(let error) = result {
-                    self?.logger.error("Failed to fetch glucose effects to check for missed meal: %{public}@", String(describing: error))
+        if FeatureFlags.missedMealNotifications {
+            let carbEffectStart = now().addingTimeInterval(-MissedMealSettings.maxRecency)
+            carbStore.getGlucoseEffects(start: carbEffectStart, end: now(), effectVelocities: insulinCounteractionEffects) {[weak self] result in
+                guard
+                    let self = self,
+                    case .success((_, let carbEffects)) = result
+                else {
+                    if case .failure(let error) = result {
+                        self?.logger.error("Failed to fetch glucose effects to check for missed meal: %{public}@", String(describing: error))
+                    }
+                    return
                 }
-                return
+                
+                self.mealDetectionManager.generateMissedMealNotificationIfNeeded(
+                    insulinCounteractionEffects: self.insulinCounteractionEffects,
+                    carbEffects: carbEffects,
+                    pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
+                    bolusDurationEstimator: { [unowned self] bolusAmount in
+                        return self.delegate?.loopDataManager(self, estimateBolusDuration: bolusAmount)
+                    }
+                )
             }
-            
-            self.mealDetectionManager.generateMissedMealNotificationIfNeeded(
-                insulinCounteractionEffects: self.insulinCounteractionEffects,
-                carbEffects: carbEffects,
-                pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
-                bolusDurationEstimator: { [unowned self] bolusAmount in
-                    return self.delegate?.loopDataManager(self, estimateBolusDuration: bolusAmount)
-                }
-            )
         }
 
         // 5 second delay to allow stores to cache data before it is read by widget
