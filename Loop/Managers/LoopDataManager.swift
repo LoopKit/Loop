@@ -67,6 +67,21 @@ final class LoopDataManager {
 
     private var insulinOnBoard: InsulinValue?
 
+    // Calculate the effectiveBolusApplicationFactor
+    private func calculateEffectiveBolusApplicationFactor(glucose: HKQuantity, correctionRangeSchedule: GlucoseRangeSchedule, settings: LoopSettings) -> Double {
+        // Calculate current glucose and lower bound target
+        let currentGlucose = glucose.doubleValue(for: .milligramsPerDeciliter)
+        let correctionRange = correctionRangeSchedule.quantityRange(at: now())
+        let lowerBoundTarget = correctionRange.lowerBound.doubleValue(for: .milligramsPerDeciliter)
+        // Calculate minimum glucose sliding scale and scaling fraction
+        let minGlucoseSlidingScale = LoopConstants.minGlucoseDeltaSlidingScale + lowerBoundTarget
+        let scalingFraction = (LoopConstants.maxPartialApplicationFactor-LoopConstants.minPartialApplicationFactor) / (LoopConstants.maxGlucoseSlidingScale - minGlucoseSlidingScale)
+        let scalingGlucose = max(currentGlucose - minGlucoseSlidingScale, 0.0)
+        // Calculate effectiveBolusApplicationFactor
+        let effectiveBolusApplicationFactor = min(LoopConstants.minPartialApplicationFactor + scalingGlucose * scalingFraction, LoopConstants.maxPartialApplicationFactor)
+        return effectiveBolusApplicationFactor
+    }
+
     deinit {
         for observer in notificationObservers {
             NotificationCenter.default.removeObserver(observer)
@@ -1696,40 +1711,19 @@ extension LoopDataManager {
                     return self.delegate?.roundBolusVolume(units: units) ?? units
                 }
 
-                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * LoopConstants.bolusPartialApplicationFactor)
+                var effectiveBolusApplicationFactor = LoopConstants.bolusPartialApplicationFactor
 
-                dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
-                    to: glucoseTargetRange!,
-                    at: predictedGlucose[0].startDate,
-                    suspendThreshold: settings.suspendThreshold?.quantity,
-                    sensitivity: insulinSensitivity!,
-                    model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
-                    basalRates: basalRateSchedule!,
-                    maxAutomaticBolus: maxAutomaticBolus,
-                    partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor * self.timeBasedDoseApplicationFactor,
-                    lastTempBasal: lastTempBasal,
-                    volumeRounder: volumeRounder,
-                    rateRounder: rateRounder,
-                    isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
-                )
-            case .automaticBolusSlidingScale:
-                let volumeRounder = { (_ units: Double) in
-                    return self.delegate?.roundBolusVolume(units: units) ?? units
+                // TO DO: make this a selectable flag in Dosing Strategy screen
+                let flagSlidingScale = true
+
+                if flagSlidingScale {
+                    let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
+                    var effectiveBolusApplicationFactor = calculateEffectiveBolusApplicationFactor(glucose: glucose.quantity, correctionRangeSchedule: correctionRangeSchedule!, settings: settings)
+                    print(" *** Glucose, effectiveBolusApplicationFactor: ", glucose.quantity, effectiveBolusApplicationFactor)
                 }
 
-                // slidingPartialBolusApplicationFactor calculated based on LoopConstants
-                //    and current glucose and current target range
-                let currentGlucose = glucose.quantity.doubleValue(for: settings.glucoseUnit ?? .milligramsPerDeciliter)
-                let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
-                let correctionRange = correctionRangeSchedule!.quantityRange(at: now())
-                let lowerBoundTarget = correctionRange.lowerBound.doubleValue(for: settings.glucoseUnit ?? .milligramsPerDeciliter)
-                let minGlucoseSlidingScale = LoopConstants.minGlucoseDeltaSlidingScale + lowerBoundTarget
-                let scalingFraction = LoopConstants.scalingNumerator/(LoopConstants.maxGlucoseSlidingScale-minGlucoseSlidingScale)
-                let scalingGlucose = max(currentGlucose - minGlucoseSlidingScale, 0.0)
-                let slidingPartialBolusApplicationFactor = min(LoopConstants.minPartialApplicationFactor + scalingGlucose * scalingFraction, LoopConstants.maxPartialApplicationFactor)
-
                 // If a user customizes maxPartialApplicationFactor > 1; this respects maxBolus
-                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * min(slidingPartialBolusApplicationFactor, 1.0))
+                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * min(effectiveBolusApplicationFactor, 1.0))
 
                 dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
                     to: glucoseTargetRange!,
@@ -1739,7 +1733,7 @@ extension LoopDataManager {
                     model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
                     basalRates: basalRateSchedule!,
                     maxAutomaticBolus: maxAutomaticBolus,
-                    partialApplicationFactor: slidingPartialBolusApplicationFactor * self.timeBasedDoseApplicationFactor,
+                    partialApplicationFactor: effectiveBolusApplicationFactor * self.timeBasedDoseApplicationFactor,
                     lastTempBasal: lastTempBasal,
                     volumeRounder: volumeRounder,
                     rateRounder: rateRounder,
