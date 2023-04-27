@@ -59,8 +59,6 @@ extension AutomaticDosingStrategy {
             return NSLocalizedString("Loop will set temporary basal rates to increase and decrease insulin delivery.", comment: "Description string for temp basal only dosing strategy")
         case .automaticBolus:
             return NSLocalizedString("Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal.", comment: "Description string for automatic bolus dosing strategy")
-        case .automaticBolusSlidingScale:
-            return NSLocalizedString("Loop will automatically bolus using partial bolus factor that increases with glucose level when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal.", comment: "Description string for sliding scale    automatic bolus dosing strategy")
         }
     }
 
