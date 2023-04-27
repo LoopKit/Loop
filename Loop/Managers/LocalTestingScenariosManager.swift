@@ -30,6 +30,10 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
             delegate?.testingScenariosManager(self, didUpdateScenarioURLs: scenarioURLs)
         }
     }
+    
+    var pluginManager: PluginManager {
+        deviceManager.pluginManager
+    }
 
     init(deviceManager: DeviceDataManager) {
         guard FeatureFlags.scenariosEnabled else {
@@ -63,7 +67,6 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
         do {
             let scenarioURLs = try fileManager.contentsOfDirectory(at: scenariosSource, includingPropertiesForKeys: nil)
                 .filter { $0.pathExtension == "json" }
-                .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
             self.scenarioURLs = scenarioURLs
             delegate?.testingScenariosManager(self, didUpdateScenarioURLs: scenarioURLs)
             log.debug("Reloaded scenario URLs")
