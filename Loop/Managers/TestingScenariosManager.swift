@@ -8,7 +8,7 @@
 
 import LoopKit
 import LoopTestingKit
-
+import LoopKitUI
 
 protocol TestingScenariosManagerDelegate: AnyObject {
     func testingScenariosManager(_ manager: TestingScenariosManager, didUpdateScenarioURLs scenarioURLs: [URL])
@@ -198,7 +198,11 @@ extension TestingScenariosManagerRequirements {
         
         if instance.hasCGMData {
             if let cgmManager = deviceManager.cgmManager as? TestingCGMManager {
-                testingCGMManager = cgmManager
+                if instance.shouldReloadManager?.cgm == true {
+                    testingCGMManager = reloadCGMManager(withIdentifier: cgmManager.managerIdentifier)
+                } else {
+                    testingCGMManager = cgmManager
+                }
             } else {
                 bail(with: ScenarioLoadingError.noTestingCGMManagerEnabled)
                 return
@@ -207,7 +211,11 @@ extension TestingScenariosManagerRequirements {
         
         if instance.hasPumpData {
             if let pumpManager = deviceManager.pumpManager as? TestingPumpManager {
-                testingPumpManager = pumpManager
+                if instance.shouldReloadManager?.pump == true {
+                    testingPumpManager = reloadPumpManager(withIdentifier: pumpManager.managerIdentifier)
+                } else {
+                    testingPumpManager = pumpManager
+                }
             } else {
                 bail(with: ScenarioLoadingError.noTestingPumpManagerEnabled)
                 return
@@ -242,12 +250,55 @@ extension TestingScenariosManagerRequirements {
             }
         }
     }
+    
+    private func reloadPumpManager(withIdentifier pumpManagerIdentifier: String) -> TestingPumpManager {
+        deviceManager.pumpManager = nil
+        guard let maximumBasalRate = deviceManager.loopManager.settings.maximumBasalRatePerHour,
+              let maxBolus = deviceManager.loopManager.settings.maximumBolus,
+              let basalSchedule = deviceManager.loopManager.settings.basalRateSchedule else
+        {
+            fatalError("Failed to reload pump manager. Missing initial settings")
+        }
+        let initialSettings = PumpManagerSetupSettings(maxBasalRateUnitsPerHour: maximumBasalRate,
+                                                       maxBolusUnits: maxBolus,
+                                                       basalSchedule: basalSchedule)
+        let result = deviceManager.setupPumpManager(withIdentifier: pumpManagerIdentifier,
+                                                    initialSettings: initialSettings,
+                                                    prefersToSkipUserInteraction: true)
+        switch result {
+        case .success(let setupUIResult):
+            switch setupUIResult {
+            case .createdAndOnboarded(let pumpManager):
+                return pumpManager as! TestingPumpManager
+            default:
+                fatalError("Failed to reload pump manager. UI interaction required for setup")
+            }
+        default:
+            fatalError("Failed to reload pump manager. Setup failed")
+        }
+    }
+    
+    private func reloadCGMManager(withIdentifier cgmManagerIdentifier: String) -> TestingCGMManager {
+        deviceManager.cgmManager = nil
+        let result = deviceManager.setupCGMManager(withIdentifier: cgmManagerIdentifier, prefersToSkipUserInteraction: true)
+        switch result {
+        case .success(let setupUIResult):
+            switch setupUIResult {
+            case .createdAndOnboarded(let cgmManager):
+                return cgmManager as! TestingCGMManager
+            default:
+                fatalError("Failed to reload CGM manager. UI interaction required for setup")
+            }
+        default:
+            fatalError("Failed to reload CGM manager. Setup failed")
+        }
+    }
 
     private func wipeExistingData(completion: @escaping (Error?) -> Void) {
         guard FeatureFlags.scenariosEnabled else {
             fatalError("\(#function) should be invoked only when scenarios are enabled")
         }
-
+        
         deviceManager.deleteTestingPumpData { error in
             guard error == nil else {
                 completion(error!)
@@ -260,7 +311,14 @@ extension TestingScenariosManagerRequirements {
                     return
                 }
 
-                self.deviceManager.carbStore.deleteAllCarbEntries(completion: completion)
+                self.deviceManager.carbStore.deleteAllCarbEntries() { error in
+                    guard error == nil else {
+                        completion(error!)
+                        return
+                    }
+                    
+                    self.deviceManager.alertManager.alertStore.purge(before: Date(), completion: completion)
+                }
             }
         }
     }
