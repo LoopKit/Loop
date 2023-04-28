@@ -52,6 +52,7 @@ public typealias PumpManagerViewModel = DeviceViewModel<PumpManagerDescriptor>
 public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: AutomaticDosingStrategy)
+    func applyLinearRampToBolusApplicationFactorChanged(_: Bool)
     func didTapIssueReport(title: String)
     var closedLoopDescriptiveText: String? { get }
 }
@@ -94,6 +95,12 @@ public class SettingsViewModel: ObservableObject {
         }
     }
 
+    @Published var applyLinearRampToBolusApplicationFactor: Bool {
+        didSet {
+            delegate?.applyLinearRampToBolusApplicationFactorChanged(applyLinearRampToBolusApplicationFactor)
+        }
+    }
+
     var closedLoopPreference: Bool {
        didSet {
            delegate?.dosingEnabledChanged(closedLoopPreference)
@@ -115,6 +122,7 @@ public class SettingsViewModel: ObservableObject {
                 isClosedLoopAllowed: Published<Bool>.Publisher,
                 supportInfoProvider: SupportInfoProvider,
                 automaticDosingStrategy: AutomaticDosingStrategy,
+                applyLinearRampToBolusApplicationFactor: Bool,
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
@@ -132,6 +140,7 @@ public class SettingsViewModel: ObservableObject {
         self.closedLoopPreference = initialDosingEnabled
         self.isClosedLoopAllowed = false
         self.automaticDosingStrategy = automaticDosingStrategy
+        self.applyLinearRampToBolusApplicationFactor = applyLinearRampToBolusApplicationFactor
         self.supportInfoProvider = supportInfoProvider
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
@@ -194,6 +203,7 @@ extension SettingsViewModel {
                                  isClosedLoopAllowed: FakeClosedLoopAllowedPublisher().$mockIsClosedLoopAllowed,
                                  supportInfoProvider: MockSupportInfoProvider(),
                                  automaticDosingStrategy: .automaticBolus,
+                                 applyLinearRampToBolusApplicationFactor: false,
                                  availableSupports: [],
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,

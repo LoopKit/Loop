@@ -73,6 +73,8 @@ public struct LoopSettings: Equatable {
     
     public var automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly
 
+    public var applyLinearRampToBolusApplicationFactor: Bool = false
+
     public var defaultRapidActingModel: ExponentialInsulinModelPreset?
 
     public var glucoseUnit: HKUnit? {
@@ -94,6 +96,7 @@ public struct LoopSettings: Equatable {
         maximumBolus: Double? = nil,
         suspendThreshold: GlucoseThreshold? = nil,
         automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
+        applyLinearRampToBolusApplicationFactor: Bool = false,
         defaultRapidActingModel: ExponentialInsulinModelPreset? = nil
     ) {
         self.dosingEnabled = dosingEnabled
@@ -110,6 +113,7 @@ public struct LoopSettings: Equatable {
         self.maximumBolus = maximumBolus
         self.suspendThreshold = suspendThreshold
         self.automaticDosingStrategy = automaticDosingStrategy
+        self.applyLinearRampToBolusApplicationFactor = applyLinearRampToBolusApplicationFactor
         self.defaultRapidActingModel = defaultRapidActingModel
     }
 }
@@ -277,13 +281,18 @@ extension LoopSettings: RawRepresentable {
         {
             self.automaticDosingStrategy = automaticDosingStrategy
         }
+
+        if let applyLinearRampToBolusApplicationFactor = rawValue["applyLinearRampToBolusApplicationFactor"] as? Bool {
+            self.applyLinearRampToBolusApplicationFactor = applyLinearRampToBolusApplicationFactor
+        }
     }
 
     public var rawValue: RawValue {
         var raw: RawValue = [
             "version": LoopSettings.version,
             "dosingEnabled": dosingEnabled,
-            "overridePresets": overridePresets.map { $0.rawValue }
+            "overridePresets": overridePresets.map { $0.rawValue },
+            "applyLinearRampToBolusApplicationFactor": applyLinearRampToBolusApplicationFactor
         ]
 
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue

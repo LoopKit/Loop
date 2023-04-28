@@ -14,11 +14,13 @@ import LoopKitUI
 public struct DosingStrategySelectionView: View {
     
     @Binding private var automaticDosingStrategy: AutomaticDosingStrategy
-    
+    @Binding private var applyLinearRampToBolusApplicationFactor: Bool
+
     @State private var internalDosingStrategy: AutomaticDosingStrategy
     
-    public init(automaticDosingStrategy: Binding<AutomaticDosingStrategy>) {
+    public init(automaticDosingStrategy: Binding<AutomaticDosingStrategy>, applyLinearRampToBolusApplicationFactor: Binding<Bool>) {
         self._automaticDosingStrategy = automaticDosingStrategy
+        self._applyLinearRampToBolusApplicationFactor = applyLinearRampToBolusApplicationFactor
         self._internalDosingStrategy = State(initialValue: automaticDosingStrategy.wrappedValue)
     }
     
@@ -45,10 +47,31 @@ public struct DosingStrategySelectionView: View {
                             self.internalDosingStrategy = strategy // Hack to force update. :(
                         }
                     }
-                )
+                ),
+                trailingView: strategy.isAutomaticBolus ? linearRampVolusApplicationFactorSection : nil
             )
             .padding(.vertical, 4)
         }
+    }
+}
+
+extension DosingStrategySelectionView {
+    var linearRampVolusApplicationFactorSection: AnyView {
+        return AnyView(
+            Toggle(isOn: $applyLinearRampToBolusApplicationFactor) {
+                VStack(alignment: .leading) {
+                    Text("Linear Bolus Ramp", comment: "The title text for the Apply Linear Ramp to Bolus Application Factor toggle")
+                        .padding(.vertical, 0.5)
+                    Text("Loop will apply a linear ramp to the bolus application factor, gradually increasing the partial bolus factor as glucose levels rise. ", comment: "Description string for Apply Linear Ramp to Bolus Application Factor toggle")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            .disabled(!automaticDosingStrategy.isAutomaticBolus)
+        )
     }
 }
 
@@ -62,10 +85,13 @@ extension AutomaticDosingStrategy {
         }
     }
 
+    var isAutomaticBolus: Bool {
+        return self == .automaticBolus
+    }
 }
 
 struct DosingStrategySelectionView_Previews: PreviewProvider {
     static var previews: some View {
-        DosingStrategySelectionView(automaticDosingStrategy: .constant(.automaticBolus))
+        DosingStrategySelectionView(automaticDosingStrategy: .constant(.automaticBolus), applyLinearRampToBolusApplicationFactor: .constant(false))
     }
 }

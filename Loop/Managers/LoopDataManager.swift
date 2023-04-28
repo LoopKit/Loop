@@ -1713,14 +1713,13 @@ extension LoopDataManager {
 
                 var effectiveBolusApplicationFactor = LoopConstants.bolusPartialApplicationFactor
 
-                // TO DO: make this a selectable flag in Dosing Strategy screen
-                let flagSlidingScale = true
+                let flagSlidingScale = settings.applyLinearRampToBolusApplicationFactor
 
                 if flagSlidingScale {
                     let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
-                    var effectiveBolusApplicationFactor = calculateEffectiveBolusApplicationFactor(glucose: glucose.quantity, correctionRangeSchedule: correctionRangeSchedule!, settings: settings)
-                    print(" *** Glucose, effectiveBolusApplicationFactor: ", glucose.quantity, effectiveBolusApplicationFactor)
+                    effectiveBolusApplicationFactor = calculateEffectiveBolusApplicationFactor(glucose: glucose.quantity, correctionRangeSchedule: correctionRangeSchedule!, settings: settings)
                 }
+                print(" *** Glucose, effectiveBolusApplicationFactor: ", glucose.quantity, Double(Int(100.0*effectiveBolusApplicationFactor))/100.0)
 
                 // If a user customizes maxPartialApplicationFactor > 1; this respects maxBolus
                 let maxAutomaticBolus = min(iobHeadroom, maxBolus! * min(effectiveBolusApplicationFactor, 1.0))
