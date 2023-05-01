@@ -227,7 +227,6 @@ public final class AlertManager {
                     alertAt: nextTriggerDate,
                     title: notificationContent.title,
                     body: notificationContent.body,
-                    timeInterval: warningInterval,
                     isCritical: isCritical)
                 scheduledNotifications.append(scheduledNotification)
             }
