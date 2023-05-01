@@ -374,9 +374,21 @@ class LoopAppManager: NSObject {
         deviceDataManager.pluginManager.availableSupports.forEach { supportUI in
             if supportUI.loopNeedsReset {
                 supportUI.loopNeedsReset = false
-                alertManager.presentConfirmCrashAlert() { [weak self] in
-                    self?.deviceDataManager.pumpManager?.prepareForDeactivation({ _ in })
-                    supportUI.resetLoop()
+                alertManager.presentConfirmCrashAlert() { [weak self] completion in
+                    guard let pumpManager = self?.deviceDataManager.pumpManager else {
+                        supportUI.resetLoop()
+                        completion()
+                        return
+                    }
+                    
+                    pumpManager.prepareForDeactivation() { [weak self] error in
+                        guard let error = error else {
+                            supportUI.resetLoop()
+                            completion()
+                            return
+                        }
+                        self?.alertManager.presentCouldNotResetLoopAlert(error: error)
+                    }
                 }
             }
         }
