@@ -181,7 +181,7 @@ public final class AlertManager {
 
         for (minutes, isCritical) in [(20.0, false), (40.0, false), (60.0, true), (120.0, true)] {
             let warningInterval = TimeInterval(minutes: minutes)
-            let timeUntilNotification = lastLoopDate.addingTimeInterval(.minutes(minutes)).timeIntervalSinceNow
+            let timeUntilNotification = lastLoopDate.addingTimeInterval(warningInterval).timeIntervalSinceNow
             guard timeUntilNotification >= 0 else { break }
 
             let formatter = DateComponentsFormatter()
