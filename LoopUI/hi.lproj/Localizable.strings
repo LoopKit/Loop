@@ -1,0 +1,9 @@
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
+/* String displayed instead of a glucose value above the CGM range */
+"HIGH" = "HIGH";
+
+/* String displayed instead of a glucose value below the CGM range */
+"LOW" = "LOW";
+

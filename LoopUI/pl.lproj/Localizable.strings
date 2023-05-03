@@ -1,11 +1,17 @@
-/* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
-"%1$@ at %2$@" = "%1$@ o %2$@";
+/* Green closed loop ON message (1: last loop string) (2: app name) */
+"\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n %2$@ działa z zamkniętą pętlą w pozycji WŁĄCZONA.";
 
-/* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
-"%1$@ units per hour at %2$@" = "%1$@ jednostek na godzinę o %2$@";
+/* Red loop message (1: last loop  string) (2: app name) */
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nStuknij ikonę stanu CGM i pompy insulinowej, aby uzyskać więcej informacji. %2$@ będzie nadal próbował ukończyć pętlę, ale uważaj na potencjalne problemy z komunikacją z pompą i CGM.";
 
-/* Format string describing glucose units per minute (1: glucose unit string) */
-"%1$@/min" = "%1$@/min";
+/* Yellow loop message (1: last loop string) (2: app name) */
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nStuknij ikony stanu CGM i pompy insulinowej, aby uzyskać więcej informacji. %2$@ będzie nadal próbował ukończyć pętlę, ale uważaj na potencjalne problemy z komunikacją z pompą i CGM.";
+
+/* Green closed loop OFF message (1: app name)(2: reason for open loop) */
+"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ działa z zamkniętą pętlą w pozycji WYŁĄCZONA. Twoja pompa i CGM będą nadal działać, ale aplikacja nie będzie automatycznie dostosowywać dawkowania. \n\n %2$@";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
 
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
 "%@ ago" = "%@ temu";
@@ -13,11 +19,65 @@
 /* The format string describing the basal rate. */
 "%@ U" = "%@ J";
 
+/* Format string describing last completion. (1: time ago */
+"%1$@ ago" = "%1$@ temu";
+
+/* Format string describing last completion. (1: time ago, (2: the date */
+"%1$@ ago at %2$@" = "%1$@ temu o %2$@";
+
+/* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
+"%1$@ at %2$@" = "%1$@ o %2$@";
+
+/* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
+"%1$@ units per hour at %2$@" = "%1$@ jednostek na godzinę o %2$@";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/min";
+
+/* Format string describing last completion */
+"<1 min ago" = "< 1 minutę temu";
+
 /* Accessibility hint describing completion HUD for a closed loop */
-"Closed loop" = "Zamknięta Loop";
+"Closed loop" = "Pętla zamknięta";
+
+/* Title of green open loop OFF message */
+"Closed Loop OFF" = "Pętla zamknięta WYŁĄCZONA";
+
+/* Title of green closed loop ON message */
+"Closed Loop ON" = "Zamknięta pętla WŁĄCZONA";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* String displayed instead of a glucose value above the CGM range */
+"HIGH" = "WYSOKI";
+
+/* Last loop time completed message (1: last loop time string) */
+"Last completed loop %1$@." = "Ostatnia ukończona pętla %1$@ .";
+
+/* Title of red loop message */
+"Loop Failure" = "Awaria pętli";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Pętla była uruchomiona %@ temu";
+
+/* Title of yellow loop message */
+"Loop Warning" = "Ostrzeżenie o pętli";
+
+/* String displayed instead of a glucose value below the CGM range */
+"LOW" = "NISKI";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dl";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Wymaga uwagi";
@@ -25,8 +85,21 @@
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Otwarta Loop";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Instructions for user to close loop if it is allowed. */
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Stuknij Ustawienia, aby włączyć Pętlę zamkniętą, jeśli chcesz, aby aplikacja zautomatyzowała podawanie insuliny.";
+
+/* The short unit display string for international units of insulin */
+"U" = "J";
+
 /* Accessibility value for an unknown value */
 "Unknown" = "Nieznany";
 
 /* Acessibility label describing completion HUD waiting for first run */
 "Waiting for first run" = "Oczekiwanie na pierwsze uruchomienie";
+
+/* Format string describing last completion. (1: the date */
+"was at %1$@" = "był na %1$@";
+

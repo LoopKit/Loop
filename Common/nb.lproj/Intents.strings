@@ -1,18 +1,36 @@
 /* (No Comment) */
+"9KhaIS" = "Jeg har angitt forhåndsinnstillingen";
+
+/* (No Comment) */
 "80eo5o" = "Legg til karbohydrater";
+
+/* (No Comment) */
+"b085BW" = "Jeg kunne ikke angi forhåndsinnstillingen.";
+
+/* (No Comment) */
+"I4OZy8" = "Aktiver forhåndsinnstillt overstyring";
+
+/* (No Comment) */
+"lYMuWV" = "Navn på overstyring";
+
+/* (No Comment) */
+"nDKAmn" = "Hva heter overstyringen du vil angi?";
 
 /* (No Comment) */
 "OcNxIj" = "Legg til karbohydrater";
 
 /* (No Comment) */
+"oLQSsJ" = "Enable '${overrideName}' Override Preset";
+
+/* (No Comment) */
+"XNNmtH" = "Aktiver forhåndsinnstilling i Loop";
+
+/* (No Comment) */
+"yBzwCL" = "Overstyr valg";
+
+/* (No Comment) */
 "yc02Yq" = "Legg til karbohydrater i Loop";
 
-"9KhaIS" = "I've set the preset";
-"I4OZy8" = "Enable Override Preset";
-"XNNmtH" = "Enable preset in Loop";
-"ZZ3mtM" = "Enable an override preset in Loop";
-"b085BW" = "I wasn't able to set the preset.";
-"lYMuWV" = "Override Name";
-"nDKAmn" = "What's the name of the override you'd like to set?";
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
-"yBzwCL" = "Override Selection";
+/* (No Comment) */
+"ZZ3mtM" = "Aktiver en forhåndsinnstilling for overstyring i Loop";
+

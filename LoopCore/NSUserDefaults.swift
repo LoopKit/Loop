@@ -20,6 +20,7 @@ extension UserDefaults {
         case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
+        case LastMissedMealNotification = "com.loopkit.Loop.lastMissedMealNotification"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -111,6 +112,29 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.lastProfileExpirationAlertDate.rawValue)
+        }
+    }
+    
+    public var lastMissedMealNotification: MissedMealNotification? {
+        get {
+            let decoder = JSONDecoder()
+            guard let data = object(forKey: Key.LastMissedMealNotification.rawValue) as? Data else {
+                return nil
+            }
+            return try? decoder.decode(MissedMealNotification.self, from: data)
+        }
+        set {
+            do {
+                if let newValue = newValue {
+                    let encoder = JSONEncoder()
+                    let data = try encoder.encode(newValue)
+                    set(data, forKey: Key.LastMissedMealNotification.rawValue)
+                } else {
+                    set(nil, forKey: Key.LastMissedMealNotification.rawValue)
+                }
+            } catch {
+                assertionFailure("Unable to encode MissedMealNotification")
+            }
         }
     }
     

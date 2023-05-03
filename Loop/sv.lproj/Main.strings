@@ -1,47 +1,26 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "g";
+
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
 "3kU-n2-fha.title" = "Status";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
 "5gz-kZ-iF1.text" = "3.5 E/h kl. 12:12";
 
-/* Class = "UILabel"; text = "Bolus"; ObjectID = "5oA-6d-ZTL"; */
-"5oA-6d-ZTL.text" = "Bolus";
-
-/* Class = "UILabel"; text = "Pump ID"; ObjectID = "5TX-kX-nBo"; */
-"5TX-kX-nBo.text" = "Pump-ID";
-
-/* Class = "UITextField"; accessibilityLabel = "Bolus Amount"; ObjectID = "7LT-50-ZzK"; */
-"7LT-50-ZzK.accessibilityLabel" = "Bolusmängd";
-
-/* Class = "UITextField"; placeholder = "0.0"; ObjectID = "7LT-50-ZzK"; */
-"7LT-50-ZzK.placeholder" = "0,0";
-
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
 "87H-N1-0vJ.text" = "Förväntat";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
-"aCb-Qs-bpu.text" = "Detalj";
-
-/* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
-"aiu-ZA-zVa.title" = "Bolus";
+"aCb-Qs-bpu.text" = "Detail";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
 "ap1-M6-naG.text" = "Typ av mat";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
-"bIL-Ub-qYp.text" = "Etikett";
+"bIL-Ub-qYp.text" = "Label";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
 "bq4-98-cQU.text" = "Glukosförändring";
-
-/* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.accessibilityLabel" = "Enheter";
-
-/* Class = "UILabel"; text = "U"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.text" = "E";
-
-/* Class = "UILabel"; text = "Label"; ObjectID = "cpo-Po-gFM"; */
-"cpo-Po-gFM.text" = "Titel";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "g totalt";
@@ -50,19 +29,19 @@
 "D4C-I2-dhA.text" = "Förväntat glukosvärde beräknas genom kombination av flera inmatningar. Använd det här verktyget för att jämföra hur de påverkar det förväntade resultatet.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
-"d6m-qV-wWi.text" = "Titel";
-
-/* Class = "UINavigationItem"; title = "Settings"; ObjectID = "dmB-PQ-B44"; */
-"dmB-PQ-B44.title" = "Inställningar";
-
-/* Class = "UILabel"; text = "DEVICES"; ObjectID = "DyC-Sv-qP8"; */
-"DyC-Sv-qP8.text" = "ENHETER";
+"d6m-qV-wWi.text" = "Label";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
-"E41-FN-nkk.text" = "förväntat 5,1 mmol/l";
+"E41-FN-nkk.text" = "Förväntat 5,1 mmol/l";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Observerad";
+
+/* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
+"Fal-Vf-lfh.normalTitle" = "🍭";
+
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3.5 E/h kl. 12:12";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Kolhydrateffekter";
@@ -71,13 +50,7 @@
 "IxU-As-glo.text" = "Observerad glukosförändring, med borttagen förändring modellerad från insulindoser, kan användas för att uppskatta kolhydratabsorptionen.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
-"J7x-W5-gwo.text" = "Detalj";
-
-/* Class = "UILabel"; text = "Detail"; ObjectID = "jQv-xb-gwu"; */
-"jQv-xb-gwu.text" = "Detalj";
-
-/* Class = "UILabel"; text = "⚠ Glucose Predicted Below Range"; ObjectID = "k0g-P7-OVN"; */
-"k0g-P7-OVN.text" = "⚠ Förväntat glukosvärde hamnar under målvärdet";
+"J7x-W5-gwo.text" = "Detail";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
 "k3F-Na-7mn.text" = "Rekommenderad basaldos";
@@ -85,29 +58,17 @@
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "Label";
 
-/* Class = "UILabel"; text = "Label"; ObjectID = "l7l-mw-Oc9"; */
-"l7l-mw-Oc9.text" = "Titel";
-
-/* Class = "UILabel"; text = "Tap to set"; ObjectID = "m9c-SQ-djE"; */
-"m9c-SQ-djE.text" = "Klicka för att ange";
-
-/* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.accessibilityLabel" = "Enheter";
-
-/* Class = "UILabel"; text = "U"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.text" = "E";
-
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
 "OFA-qT-ZAg.text" = "Label";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Förväntat glukosvärde";
 
-/* Class = "UITableViewController"; title = "Insulin Model"; ObjectID = "pi6-Dh-72V"; */
-"pi6-Dh-72V.title" = "Insulinmodell";
+/* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
+"Qe9-uc-vPR.normalTitle" = "🍽";
 
-/* Class = "UILabel"; text = "An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments."; ObjectID = "PJv-p9-cFe"; */
-"PJv-p9-cFe.text" = "En insulinaktivitetsmodell används för att beräkna effekterna på blodglukosnivåerna. En rättvisande modell kan hjälpa till att förhindra att flera insulindoser läggs på varandra, och istället rekommendera en säkrare korrigering.";
+/* Class = "UIButton"; normalTitle = "🌮"; ObjectID = "QhO-Yi-AqQ"; */
+"QhO-Yi-AqQ.normalTitle" = "🌮";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
 "qPH-vU-xlu.text" = "Typ av mat";
@@ -121,26 +82,32 @@
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glukos";
 
+/* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
+"Tz7-80-bJ7.title" = "Lägg till/Ändra kolhydrater";
+
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
-"ufi-Kj-33k.text" = "Titel";
+"ufi-Kj-33k.text" = "Label";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Kolhydrater";
 
-/* Class = "UITextField"; text = "4 hour"; ObjectID = "Wk3-xv-IM5"; */
-"Wk3-xv-IM5.text" = "4 timmar";
-
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
 "Wx8-Tf-FnG.text" = "Mängd";
+
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Rekommenderad basaldos";
+
+/* Class = "UIButton"; normalTitle = "🍕"; ObjectID = "xl9-Wc-Pdu"; */
+"xl9-Wc-Pdu.normalTitle" = "🍕";
+
+/* Class = "UITextField"; placeholder = "0"; ObjectID = "Yf6-fw-Gex"; */
+"Yf6-fw-Gex.placeholder" = "0";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";
 
-/* Class = "UILabel"; text = "Recommended"; ObjectID = "ywT-OR-NnU"; */
-"ywT-OR-NnU.text" = "Rekommenderad";
-
 /* Class = "UILabel"; text = "Title"; ObjectID = "zbc-87-wxZ"; */
-"zbc-87-wxZ.text" = "Titel";
+"zbc-87-wxZ.text" = "Title";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "zvZ-uf-zMX"; */
 "zvZ-uf-zMX.text" = "0";

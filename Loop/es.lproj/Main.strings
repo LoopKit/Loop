@@ -1,29 +1,17 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "g";
+
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
-"3kU-n2-fha.title" = "Estatus";
+"3kU-n2-fha.title" = "Estado";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
 "5gz-kZ-iF1.text" = "3.5 U/hora @ 12:12 PM";
-
-/* Class = "UILabel"; text = "Bolus"; ObjectID = "5oA-6d-ZTL"; */
-"5oA-6d-ZTL.text" = "Bolo";
-
-/* Class = "UILabel"; text = "Pump ID"; ObjectID = "5TX-kX-nBo"; */
-"5TX-kX-nBo.text" = "ID de Microinfusora";
-
-/* Class = "UITextField"; accessibilityLabel = "Bolus Amount"; ObjectID = "7LT-50-ZzK"; */
-"7LT-50-ZzK.accessibilityLabel" = "Cantidad de Bolo";
-
-/* Class = "UITextField"; placeholder = "0.0"; ObjectID = "7LT-50-ZzK"; */
-"7LT-50-ZzK.placeholder" = "0.0";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
 "87H-N1-0vJ.text" = "Proyectada";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
 "aCb-Qs-bpu.text" = "Detalle";
-
-/* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
-"aiu-ZA-zVa.title" = "Bolo";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
 "ap1-M6-naG.text" = "Típo de Comida";
@@ -34,29 +22,14 @@
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
 "bq4-98-cQU.text" = "Cambio de Glucosa";
 
-/* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.accessibilityLabel" = "Unidades";
-
-/* Class = "UILabel"; text = "U"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.text" = "U";
-
-/* Class = "UILabel"; text = "Label"; ObjectID = "cpo-Po-gFM"; */
-"cpo-Po-gFM.text" = "Etiqueta";
-
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "gr Totales";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "La glucosa futura se predice combinando los efectos de diversas entradada de datos.  Utiliza esta herramienta para cambiar datos de entrada y ver como varía la predicción final.";
+"D4C-I2-dhA.text" = "La glucosa futura se predice combinando los efectos de diversos datos de entrada.  Utiliza esta herramienta para cambiar datos de entrada y ver como varía la predicción final.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Etiqueta";
-
-/* Class = "UINavigationItem"; title = "Settings"; ObjectID = "dmB-PQ-B44"; */
-"dmB-PQ-B44.title" = "Ajustes";
-
-/* Class = "UILabel"; text = "DEVICES"; ObjectID = "DyC-Sv-qP8"; */
-"DyC-Sv-qP8.text" = "DISPOSITIVOS";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
 "E41-FN-nkk.text" = "eventualmente 92 mg/dL";
@@ -64,14 +37,14 @@
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Observado";
 
-/* Class = "UILabel"; text = "Eventually 92 mg/dL"; ObjectID = "G51-pt-pmi"; */
-"G51-pt-pmi.text" = "Eventualmente 92 mg/dL";
+/* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
+"Fal-Vf-lfh.normalTitle" = "🍭";
+
+/* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
+"fWV-jg-ICt.text" = "3.5 U/hora @ 12:12 PM";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Efecto de Carbohidratos";
-
-/* Class = "UILabel"; text = "Label"; ObjectID = "IRb-Yj-AQH"; */
-"IRb-Yj-AQH.text" = "Etiqueta";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
 "IxU-As-glo.text" = "Los cambios observados en glucosa sustrayendo los cambios modelados para la entrega de insulina pueden ser utilizados para estimar la absorción de carbohidratos.";
@@ -79,29 +52,11 @@
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Detalle";
 
-/* Class = "UILabel"; text = "Detail"; ObjectID = "jQv-xb-gwu"; */
-"jQv-xb-gwu.text" = "Detaille";
-
-/* Class = "UILabel"; text = "⚠ Glucose Predicted Below Range"; ObjectID = "k0g-P7-OVN"; */
-"k0g-P7-OVN.text" = "⚠ Glucosa Proyectada Por Debajo Del Rango.";
-
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
 "k3F-Na-7mn.text" = "Basal Recomendada";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "Etiqueta";
-
-/* Class = "UILabel"; text = "Label"; ObjectID = "l7l-mw-Oc9"; */
-"l7l-mw-Oc9.text" = "Etiqueta";
-
-/* Class = "UILabel"; text = "Tap to set"; ObjectID = "m9c-SQ-djE"; */
-"m9c-SQ-djE.text" = "Toca para definir";
-
-/* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.accessibilityLabel" = "Unidades";
-
-/* Class = "UILabel"; text = "U"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.text" = "U";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
 "OFA-qT-ZAg.text" = "Etiqueta";
@@ -109,8 +64,11 @@
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Glucosa Proyectada";
 
-/* Class = "UITableViewController"; title = "Insulin Model"; ObjectID = "pi6-Dh-72V"; */
-"pi6-Dh-72V.title" = "Modelo de Insulina";
+/* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
+"Qe9-uc-vPR.normalTitle" = "🍽";
+
+/* Class = "UIButton"; normalTitle = "🌮"; ObjectID = "QhO-Yi-AqQ"; */
+"QhO-Yi-AqQ.normalTitle" = "🌮";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
 "qPH-vU-xlu.text" = "Típo de Comida";
@@ -119,7 +77,7 @@
 "Rse-x8-amW.text" = "eventualmente 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "gr CAB";
+"SQx-au-ZcM.text" = "gr Carbohidratos Activos";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glucosa";
@@ -133,17 +91,20 @@
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Carbohidratos";
 
-/* Class = "UITextField"; text = "4 hour"; ObjectID = "Wk3-xv-IM5"; */
-"Wk3-xv-IM5.text" = "4 horas";
-
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
 "Wx8-Tf-FnG.text" = "Cantidad Consumida";
 
+/* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
+"xhx-PI-bBI.text" = "Basal Recomendada";
+
+/* Class = "UIButton"; normalTitle = "🍕"; ObjectID = "xl9-Wc-Pdu"; */
+"xl9-Wc-Pdu.normalTitle" = "🍕";
+
+/* Class = "UITextField"; placeholder = "0"; ObjectID = "Yf6-fw-Gex"; */
+"Yf6-fw-Gex.placeholder" = "0";
+
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";
-
-/* Class = "UILabel"; text = "Recommended"; ObjectID = "ywT-OR-NnU"; */
-"ywT-OR-NnU.text" = "Recomendado";
 
 /* Class = "UILabel"; text = "Title"; ObjectID = "zbc-87-wxZ"; */
 "zbc-87-wxZ.text" = "Título";

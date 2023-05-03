@@ -45,6 +45,15 @@ struct AlertManagementView: View {
     private var formatterDurations: [String] {
         AlertMuter.allowedDurations.compactMap { formatter.string(from: $0) }
     }
+    
+    private var missedMealNotificationsEnabled: Binding<Bool> {
+        Binding(
+            get: { UserDefaults.standard.missedMealNotificationsEnabled },
+            set: { enabled in
+                UserDefaults.standard.missedMealNotificationsEnabled = enabled
+            }
+        )
+    }
 
     public init(checker: AlertPermissionsChecker, alertMuter: AlertMuter = AlertMuter()) {
         self.checker = checker
@@ -56,6 +65,9 @@ struct AlertManagementView: View {
             alertPermissionsSection
             if FeatureFlags.criticalAlertsEnabled {
                 muteAlertsSection
+            }
+            if FeatureFlags.missedMealNotifications {
+                missedMealAlertSection
             }
         }
         .navigationTitle(NSLocalizedString("Alert Management", comment: "Title of alert management screen"))
@@ -154,6 +166,27 @@ struct AlertManagementView: View {
             title: Text(NSLocalizedString("Mute All Alerts Temporarily", comment: "Title for mute alert duration selection action sheet")),
             message: Text(NSLocalizedString("No alerts or alarms will sound while muted. Select how long you would you like to mute for.", comment: "Message for mute alert duration selection action sheet")),
             buttons: muteAlertDurationOptions)
+    }
+    
+    private var missedMealAlertSection: some View {
+        Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
+            Toggle(NSLocalizedString("Missed Meal Notifications", comment: "Title for missed meal notifications toggle"), isOn: missedMealNotificationsEnabled)
+        }
+    }
+}
+
+extension UserDefaults {
+    private enum Key: String {
+        case missedMealNotificationsEnabled = "com.loopkit.Loop.MissedMealNotificationsEnabled"
+    }
+    
+    var missedMealNotificationsEnabled: Bool {
+        get {
+            return object(forKey: Key.missedMealNotificationsEnabled.rawValue) as? Bool ?? false
+        }
+        set {
+            set(newValue, forKey: Key.missedMealNotificationsEnabled.rawValue)
+        }
     }
 }
 

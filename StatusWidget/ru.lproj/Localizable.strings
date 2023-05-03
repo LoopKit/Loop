@@ -1,0 +1,45 @@
+/* No comment provided by engineer. */
+"---" = "---";
+
+/* No comment provided by engineer. */
+"-U" = "-Ед";
+
+/* No comment provided by engineer. */
+"??" = "??";
+
+/* No comment provided by engineer. */
+"%@" = "%@";
+
+/* No comment provided by engineer. */
+"%@ U" = "%@ ед";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ против %2$@";
+
+/* The short unit display string for decibles */
+"dB" = "дБ";
+
+/* No comment provided by engineer. */
+"Eventual" = "В конечном итоге";
+
+/* The short unit display string for grams */
+"g" = "г";
+
+/* No comment provided by engineer. */
+"Loop Status Widget" = "Виджет состояния петли";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "мг/дл";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* No comment provided by engineer. */
+"See your current blood glucose and insulin delivery." = "Смотрите текущий уровень глюкозы в крови и ввод инсулина.";
+
+/* The short unit display string for international units of insulin */
+"U" = "ед";
+

@@ -1,5 +1,5 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Nåværende blodsukker på %1$@ er under målområde.";
+"Current glucose of %1$@ is below correction range." = "Gjeldende glukose på %1$@ er under korreksjonsområdet.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -14,10 +14,16 @@
 "mmol/L" = "mmol/L";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Forventet blodsukker om %1$@ er %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Forventet blodsukker kl %1$@ er %2$@.";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "Forventet blodsukker er innenfor målområdet.";
+
+/* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Forventet blodsukker på %1$@ er lavere enn innstillingen for blodsukkersikkerhet.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet blodsukker %1$@ er under innstillingen for insulinstopp.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet blodsukker %1$@ er lavere enn innstilling for insulinstopp";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";

@@ -1,18 +1,36 @@
 /* (No Comment) */
-"80eo5o" = "Voeg koolhydraten toe";
+"9KhaIS" = "Ik heb het programma ingesteld";
 
 /* (No Comment) */
-"OcNxIj" = "Voeg koolhydraten toe";
+"80eo5o" = "Kh. Inv. Toevoegen";
 
 /* (No Comment) */
-"yc02Yq" = "Voeg koolhydraten toe aan Loop";
+"b085BW" = "Ik kon het programma niet instellen.";
 
-"9KhaIS" = "I've set the preset";
-"I4OZy8" = "Enable Override Preset";
-"XNNmtH" = "Enable preset in Loop";
-"ZZ3mtM" = "Enable an override preset in Loop";
-"b085BW" = "I wasn't able to set the preset.";
-"lYMuWV" = "Override Name";
-"nDKAmn" = "What's the name of the override you'd like to set?";
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
-"yBzwCL" = "Override Selection";
+/* (No Comment) */
+"I4OZy8" = "Override Programma Inschakelen";
+
+/* (No Comment) */
+"lYMuWV" = "Override Naam";
+
+/* (No Comment) */
+"nDKAmn" = "Wat is de naam van de override die je zou willen instellen?";
+
+/* (No Comment) */
+"OcNxIj" = "Kh. Inv. Toevoegen";
+
+/* (No Comment) */
+"oLQSsJ" = "Override '${overrideName}' Inschakelen";
+
+/* (No Comment) */
+"XNNmtH" = "Programma in Loop inschakelen";
+
+/* (No Comment) */
+"yBzwCL" = "Overrideselectie";
+
+/* (No Comment) */
+"yc02Yq" = "Voeg koolhydrateninvoer toe aan Loop";
+
+/* (No Comment) */
+"ZZ3mtM" = "Een override programma in Loop inschakelen";
+

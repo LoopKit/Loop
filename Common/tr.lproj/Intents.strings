@@ -1,24 +1,36 @@
-"80eo5o" = "Add Carb Entry";
+/* (No Comment) */
+"9KhaIS" = "Ön ayarı yaptım";
 
-"9KhaIS" = "I've set the preset";
+/* (No Comment) */
+"80eo5o" = "Karb Girişi Ekle";
 
-"I4OZy8" = "Enable Override Preset";
+/* (No Comment) */
+"b085BW" = "Ön ayarı yapamadım.";
 
-"OcNxIj" = "Add Carb Entry";
+/* (No Comment) */
+"I4OZy8" = "Ön Ayarı Geçersiz Kıl";
 
-"XNNmtH" = "Enable preset in Loop";
+/* (No Comment) */
+"lYMuWV" = "Geçersiz Kılma Adı";
 
-"ZZ3mtM" = "Enable an override preset in Loop";
+/* (No Comment) */
+"nDKAmn" = "Ayarlamak istediğiniz geçersiz kılmanın adı nedir?";
 
-"b085BW" = "I wasn't able to set the preset.";
+/* (No Comment) */
+"OcNxIj" = "Karb Girişi Ekle";
 
-"lYMuWV" = "Override Name";
+/* (No Comment) */
+"oLQSsJ" = "'${overrideName}' Ön Ayarını Geçersiz Kılmayı Etkinleştir";
 
-"nDKAmn" = "What's the name of the override you'd like to set?";
+/* (No Comment) */
+"XNNmtH" = "Döngüde ön ayarı etkinleştir";
 
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
+/* (No Comment) */
+"yBzwCL" = "Geçersiz Kılma Seçimi";
 
-"yBzwCL" = "Override Selection";
+/* (No Comment) */
+"yc02Yq" = "Döngüye bir karbonhidrat girişi ekleyin";
 
-"yc02Yq" = "Add a carb entry to Loop";
+/* (No Comment) */
+"ZZ3mtM" = "Döngüde ön ayarı geçersiz kıl";
 

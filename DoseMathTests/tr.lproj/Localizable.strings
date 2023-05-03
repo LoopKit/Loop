@@ -1,11 +1,11 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Current glucose of %1$@ is below correction range.";
+"Current glucose of %1$@ is below correction range." = "%1$@ Mevcut KŞ düzeltme aralığının altında.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
 
 /* The short unit display string for grams */
-"g" = "g";
+"g" = "gr";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -14,13 +14,20 @@
 "mmol/L" = "mmol/L";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Predicted glucose at %1$@ is %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Tahmini KŞ  %1$@  %2$@.";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "Tahmini KŞ aralık içinde.";
+
+/* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "%1$@ tahmini KŞ, KŞ güvenlik limiti ayarınızın altında.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Predicted glucose of %1$@ is below your suspend threshold setting.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Tahmini KŞ %1$@ askıya alma eşiği ayarınızın altında.";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The short unit display string for international units of insulin */
-"U" = "U";
+"U" = "Ü";
+

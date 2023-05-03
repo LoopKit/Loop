@@ -15,12 +15,19 @@ enum LoopConstants {
     
     // Input field bounds
     
-    static let maxCarbEntryQuantity = HKQuantity(unit: .gram(), doubleValue: 250)
+    static let maxCarbEntryQuantity = HKQuantity(unit: .gram(), doubleValue: 250) // cannot exceed this value
+
+    static let warningCarbEntryQuantity = HKQuantity(unit: .gram(), doubleValue: 99) // user is warned above this value
     
     static let validManualGlucoseEntryRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 10)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 600)
     
+    static let minCarbAbsorptionTime = TimeInterval(minutes: 30)
     static let maxCarbAbsorptionTime = TimeInterval(hours: 8)
+    
+    static let maxCarbEntryPastTime = TimeInterval(hours: (-12))
+    static let maxCarbEntryFutureTime = TimeInterval(hours: 1)
 
+    static let maxOverrideDurationTime = TimeInterval(hours: 24)
     
     // MARK - Display settings
 

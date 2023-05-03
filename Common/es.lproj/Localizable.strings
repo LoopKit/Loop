@@ -7,17 +7,32 @@
 /* Lesson subtitle */
 "Computes the percentage of glucose measurements within a specified range" = "Calcula el porcentaje de medidas de glucosa entre una gama especificada";
 
+/* Title of the button to begin lesson execution */
+"Continue" = "Continuar";
+
 /* The short unit display string for decibles */
 "dB" = "dB";
 
 /* The short unit display string for grams */
 "g" = "g";
 
+/* Placeholder for upper range entry */
+"Maximum" = "Máximo";
+
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
 
+/* Placeholder for lower range entry */
+"Minimum" = "Mínimo";
+
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";
+
+/* Lesson title */
+"Modal Day" = "Día modal";
+
+/* Lesson result text for no data */
+"No data available" = "Datos no disponibles";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
@@ -28,6 +43,15 @@
 /* Title of config entry */
 "Start Date" = "Fecha de Inicio";
 
+/* Lesson title */
+"Time in Range" = "Tiempo en Rango";
+
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Visualiza los valores de glucosa más frecuentes por hora del día";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Semanas";
 

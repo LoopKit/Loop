@@ -1,18 +1,36 @@
 /* (No Comment) */
+"9KhaIS" = "I've set the preset";
+
+/* (No Comment) */
 "80eo5o" = "添加碳水化合物";
+
+/* (No Comment) */
+"b085BW" = "I wasn't able to set the preset.";
+
+/* (No Comment) */
+"I4OZy8" = "Enable Override Preset";
+
+/* (No Comment) */
+"lYMuWV" = "Override Name";
+
+/* (No Comment) */
+"nDKAmn" = "What's the name of the override you'd like to set?";
 
 /* (No Comment) */
 "OcNxIj" = "添加碳水化合物";
 
 /* (No Comment) */
+"oLQSsJ" = "Enable '${overrideName}' Override Preset";
+
+/* (No Comment) */
+"XNNmtH" = "Enable preset in Loop";
+
+/* (No Comment) */
+"yBzwCL" = "Override Selection";
+
+/* (No Comment) */
 "yc02Yq" = "将碳水化合物添加到Loop";
 
-"9KhaIS" = "I've set the preset";
-"I4OZy8" = "Enable Override Preset";
-"XNNmtH" = "Enable preset in Loop";
+/* (No Comment) */
 "ZZ3mtM" = "Enable an override preset in Loop";
-"b085BW" = "I wasn't able to set the preset.";
-"lYMuWV" = "Override Name";
-"nDKAmn" = "What's the name of the override you'd like to set?";
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
-"yBzwCL" = "Override Selection";
+

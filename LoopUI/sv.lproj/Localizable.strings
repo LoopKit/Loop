@@ -1,3 +1,6 @@
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
 "%@ ago" = "%@ sedan";
 
@@ -10,20 +13,53 @@
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ enheter/h kl. %2$@";
 
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
 
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "Sluten loop";
 
+/* Title of green open loop OFF message */
+"Closed Loop OFF" = "Sluten Loop är AV";
+
+/* Title of green closed loop ON message */
+"Closed Loop ON" = "Sluten Loop är PÅ";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* String displayed instead of a glucose value above the CGM range */
+"HIGH" = "HÖGT";
+
+/* Title of red loop message */
+"Loop Failure" = "Loopfel";
+
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop kördes för %@ sedan";
+
+/* String displayed instead of a glucose value below the CGM range */
+"LOW" = "LÅGT";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dl";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Kräver åtgärd";
 
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Öppen loop";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";

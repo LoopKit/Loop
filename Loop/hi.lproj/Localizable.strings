@@ -1,0 +1,18 @@
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
+/* The title of the nightscout API secret credential */
+"API Secret" = "एपीआई पास्वर्ड";
+
+/* The title of the cancel action in an action sheet */
+"Cancel" = "निरस्त";
+
+/* Default alert dismissal */
+"Continue" = "जारी";
+
+/* The title of the glucose and prediction graph */
+"Glucose" = "शुगर";
+
+/* Title of the carb entry date picker cell */
+"Time" = "समय";
+

@@ -386,11 +386,13 @@ final class WatchDataManager: NSObject {
 
             deviceManager.enactBolus(units: bolus.value, activationType: bolus.activationType) { (error) in
                 if error == nil {
-                    self.deviceManager.analyticsServicesManager.didSetBolusFromWatch(bolus.value)
+                    self.deviceManager.analyticsServicesManager.didBolus(source: "Watch", units: bolus.value)
                 }
 
                 // When we've successfully started the bolus, send a new context with our new prediction
                 self.sendWatchContextIfNeeded()
+
+                self.deviceManager.loopManager.updateRemoteRecommendation()
             }
         }
 
@@ -399,7 +401,7 @@ final class WatchDataManager: NSObject {
                 switch result {
                 case .success(let storedCarbEntry):
                     dosingDecision.carbEntry = storedCarbEntry
-                    self.deviceManager.analyticsServicesManager.didAddCarbsFromWatch()
+                    self.deviceManager.analyticsServicesManager.didAddCarbs(source: "Watch", amount: storedCarbEntry.quantity.doubleValue(for: .gram()))
                     enactBolus()
                 case .failure(let error):
                     self.log.error("%{public}@", String(describing: error))

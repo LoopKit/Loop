@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "WatchApp-udvidelse";
+
+/* Bundle name */
+"CFBundleName" = "WatchApp-udvidelse";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Mad-data fra Health-databasen bruges til at bestemme blodsukkereffekten. Blodsukkerdata fra Health-databasen bruges til graftegning og momentumberegning. Søvndata fra sundhedsdatabasen bruges til at optimere leveringen af opdateringer om komplikationer af Apple Watch i den tid, du er vågen.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Data om kulhydratmåltider, der indtastes i appen og på uret, gemmes i Apples Health-database. Glukosedata, der hentes fra CGM'en, gemmes sikkert i HealthKit.";
+

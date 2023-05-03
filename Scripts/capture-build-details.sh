@@ -89,7 +89,7 @@ fi
 
 # determine if this is a workspace build
 # if so, fill out the git revision and branch
-if [ -e ../Loop.xcworkspace ]
+if [ -e ../LoopWorkspace.xcworkspace ]
 then
     pushd . > /dev/null
     cd ..

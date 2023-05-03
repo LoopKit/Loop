@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "WatchApp Uzantısı";
+
+/* Bundle name */
+"CFBundleName" = "WatchApp Uzantısı";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Sağlık veri tabanından alınan yemek verileri, KŞ etkilerini belirlemek için kullanılır. Sağlık veri tabanından alınan KŞ verileri, grafik ve momentum hesaplaması için kullanılır. Sağlık veritabanındaki uyku verileri, uyanık olduğunuz süre boyunca Apple Watch komplikasyon güncellemelerinin teslimini optimize etmek için kullanılır.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Uygulamaya ve saate girilen öğün karbonhidrat verileri Sağlık veritabanında saklanır. CGM'den alınan KŞ verileri, HealthKit'te güvenli bir şekilde saklanır.";
+

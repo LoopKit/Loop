@@ -1,3 +1,5 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
 
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
@@ -16,3 +18,4 @@
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "بيانات كربوهيدرات الوجبة المدخلة للتطبيق و الساعة محفوظة في قواعد بيانات تطبيق صحتي. يتم تخزين بيانات سكر الدم المستردة من نظام متابعة سكر الدم المستمرة بشكل آمن في تطبيق صحتي.";
+

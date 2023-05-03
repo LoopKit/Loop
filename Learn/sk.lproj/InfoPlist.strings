@@ -1,0 +1,3 @@
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Údaje o jedle z databázy Health sa používajú na určenie účinkov glukózy. Údaje o glukóze z databázy Health sa používajú na vytváranie grafov a výpočet hybnosti. Údaje o spánku z databázy Health sa používajú na optimalizáciu doručovania aktualizácií komplikácií Apple Watch v čase, keď ste hore.";
+

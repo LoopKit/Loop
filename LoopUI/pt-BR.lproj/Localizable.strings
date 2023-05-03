@@ -1,3 +1,6 @@
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "---";
+
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
 "%@ ago" = "%@ atrás";
 
@@ -10,20 +13,44 @@
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ unidades por hora em %2$@";
 
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
 
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "Ciclo fechado";
 
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* Title of red loop message */
+"Loop Failure" = "Falha no Loop";
+
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Ciclo executado %@ atrás";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Precisa de atenção";
 
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Ciclo aberto";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* The short unit display string for international units of insulin */
+"U" = "U";
 
 /* Accessibility value for an unknown value */
 "Unknown" = "Desconhecido";

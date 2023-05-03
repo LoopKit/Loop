@@ -1,8 +1,11 @@
+/* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
+"0RV-d5-muE.text" = "g";
+
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
 "3kU-n2-fha.title" = "Status";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
-"5gz-kZ-iF1.text" = "3,5 IE/h @ 12:12";
+"5gz-kZ-iF1.text" = "3.5 IE/h @ 12:12";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
 "87H-N1-0vJ.text" = "Vorhergesagt";
@@ -11,7 +14,7 @@
 "aCb-Qs-bpu.text" = "Detail";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
-"ap1-M6-naG.text" = "Essensart";
+"ap1-M6-naG.text" = "Essenstyp";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Beschriftung";
@@ -34,6 +37,9 @@
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Beobachtet";
 
+/* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
+"Fal-Vf-lfh.normalTitle" = "🍭";
+
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "fWV-jg-ICt"; */
 "fWV-jg-ICt.text" = "3.5 IE/h @ 12:12";
 
@@ -41,7 +47,7 @@
 "hZZ-2S-lrd.title" = "Kohlenhydrat-Effekte";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Die beobachtete Blutzuckerveränderung abzüglich der modellbasierten Veränderung kann verwendet werden, um die Kohlenhydratabsorption abzuschätzen.";
+"IxU-As-glo.text" = "Die beobachtete Blutzuckerveränderung abzüglich der modellbasierten Veränderung kann verwendet werden, um die Kohlenhydratresorption abzuschätzen.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Detail";
@@ -58,6 +64,12 @@
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Vorhergesagter Blutzucker";
 
+/* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
+"Qe9-uc-vPR.normalTitle" = "🍽";
+
+/* Class = "UIButton"; normalTitle = "🌮"; ObjectID = "QhO-Yi-AqQ"; */
+"QhO-Yi-AqQ.normalTitle" = "🌮";
+
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
 "qPH-vU-xlu.text" = "Essenstyp";
 
@@ -65,7 +77,7 @@
 "Rse-x8-amW.text" = "voraussichtlich 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g COB";
+"SQx-au-ZcM.text" = "g aktive Kohlenhydrate";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Blutzucker";
@@ -80,10 +92,13 @@
 "Vpi-5b-bY5.title" = "Kohlenhydrate";
 
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
-"Wx8-Tf-FnG.text" = "Menge gegessen";
+"Wx8-Tf-FnG.text" = "KH Menge gegessen";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
-"xhx-PI-bBI.text" = "Empfohlener Basalwert";
+"xhx-PI-bBI.text" = "Empfohlene Basalrate";
+
+/* Class = "UIButton"; normalTitle = "🍕"; ObjectID = "xl9-Wc-Pdu"; */
+"xl9-Wc-Pdu.normalTitle" = "🍕";
 
 /* Class = "UITextField"; placeholder = "0"; ObjectID = "Yf6-fw-Gex"; */
 "Yf6-fw-Gex.placeholder" = "0";

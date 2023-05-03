@@ -15,6 +15,8 @@ class ServicesManager {
 
     private let pluginManager: PluginManager
 
+    private let alertManager: AlertManager
+
     let analyticsServicesManager: AnalyticsServicesManager
 
     let loggingServicesManager: LoggingServicesManager
@@ -32,11 +34,13 @@ class ServicesManager {
 
     init(
         pluginManager: PluginManager,
+        alertManager: AlertManager,
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
         remoteDataServicesManager: RemoteDataServicesManager
     ) {
         self.pluginManager = pluginManager
+        self.alertManager = alertManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
@@ -68,7 +72,7 @@ class ServicesManager {
             return .failure(UnknownServiceIdentifierError())
         }
 
-        let result = serviceUIType.setupViewController(colorPalette: .default)
+        let result = serviceUIType.setupViewController(colorPalette: .default, pluginHost: self)
         if case .createdAndOnboarded(let serviceUI) = result {
             serviceOnboarding(didCreateService: serviceUI)
             serviceOnboarding(didOnboardService: serviceUI)
@@ -173,6 +177,22 @@ class ServicesManager {
 // MARK: - ServiceDelegate
 
 extension ServicesManager: ServiceDelegate {
+    var hostIdentifier: String {
+        return "com.loopkit.Loop"
+    }
+
+    var hostVersion: String {
+        var semanticVersion = Bundle.main.shortVersionString
+
+        while semanticVersion.split(separator: ".").count < 3 {
+            semanticVersion += ".0"
+        }
+
+        semanticVersion += "+\(Bundle.main.version)"
+
+        return semanticVersion
+    }
+
     func serviceDidUpdateState(_ service: Service) {
         saveState()
     }
@@ -180,6 +200,16 @@ extension ServicesManager: ServiceDelegate {
     func serviceWantsDeletion(_ service: Service) {
         log.default("Service with identifier '%{public}@' deleted", service.serviceIdentifier)
         removeActiveService(service)
+    }
+}
+
+extension ServicesManager: AlertIssuer {
+    func issueAlert(_ alert: Alert) {
+        alertManager.issueAlert(alert)
+    }
+
+    func retractAlert(identifier: Alert.Identifier) {
+        alertManager.retractAlert(identifier: identifier)
     }
 }
 

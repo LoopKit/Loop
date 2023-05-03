@@ -1,6 +1,12 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (pendente: %@)";
 
+/* String denoting lack of a recommended bolus amount in the simple bolus calculator */
+"–" = "—";
+
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "---";
+
 /* The format for an active override preset. (1: preset symbol)(2: preset name) */
 "%@ %@" = "%1$@ %2$@";
 
@@ -15,6 +21,9 @@
 
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
@@ -49,6 +58,9 @@
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Um modelo baseado na absorção publicada das insulinas Humalog, Novolog e Apidra em adultos.";
 
+/* Title of the carb entry absorption time cell */
+"Absorption Time" = "Tempo de Absorção";
+
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AceitarBolusRecomendado";
 
@@ -57,6 +69,9 @@
 
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
 "Active Carbohydrates: %@" = "Carboidratos Ativos: %@";
+
+/* Title describing quantity of still-absorbing carbohydrates */
+"Active Carbs" = "Carboidratos Ativos";
 
 /* The title of the Insulin On-Board graph */
 "Active Insulin" = "Insulina Ativa";
@@ -71,7 +86,7 @@
    Title text for button to set up a CGM */
 "Add CGM" = "Adicionar CGM";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Adicionar Refeição";
 
 /* Action sheet title selecting Pump
@@ -81,14 +96,17 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Um ajuste do modelo para adultos baseado nos efeitos empíricos em crianças.";
-
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
 
 /* The title of the nightscout API secret credential */
-"API Secret" = "API Secret";
+"API Secret" = "Chave API";
+
+/* Action sheet confirmation message for pump history deletion */
+"Are you sure you want to delete all history entries?" = "Tem certeza de que deseja excluir todas as entradas do histórico?";
+
+/* Action sheet confirmation message for reservoir deletion */
+"Are you sure you want to delete all reservoir values?" = "Tem certeza de que deseja excluir todos os valores do reservatório?";
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Você está certo que quer remover este CGM?";
@@ -104,7 +122,7 @@
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
-"Basal Rates" = "Taxa Basal";
+"Basal Rates" = "Taxas Basais";
 
 /* The label of the bolus entry button
    The notification title for a bolus failure */
@@ -127,7 +145,13 @@
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Relação Carb";
+"Carb Ratios" = "Taxas de Carbs";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Adicionar Carb";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "Editar Carb";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Carboidratos";
@@ -150,42 +174,70 @@
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Verifique seu dispositivo CGM";
 
+/* Carb entry section footer text explaining absorption time */
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Escolha um tempo de absorção mais longo para refeições maiores ou aquelas que contenham gorduras e proteínas. Esta é apenas uma orientação para o algoritmo e não precisa ser exata.";
+
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Ciclo Fechado";
+
+/* The format string describing the date of an IOB value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.IOBDateLabel" = "em %1$@";
+
+/* The format string describing the starting date of a total value. The first format argument is the localized date. */
+"com.loudnate.InsulinKit.totalDateLabel" = "desde %1$@";
 
 /* The title of the action used to dismiss an error alert */
 "com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
 
 /* The title of the configuration section in settings */
-"Configuration" = "Configurações";
+"Configuration" = "Configuração";
 
 /* The error message displayed for configuration errors. (1: configuration error details) */
 "Configuration Error: %1$@" = "Erro de Configuração: %1$@";
+
+/* Default alert dismissal */
+"Continue" = "Continuar";
 
 /* The title of the continuous glucose monitor section in settings */
 "Continuous Glucose Monitor" = "Monitoramento Contínuo de Glicose";
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
-"Correction Range" = "Zona de correção";
+"Correction Range" = "Faixa de Correção";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = " Glicemia atual %1$@ está abaixo da zona de correção.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Sobreposições";
+"Custom Override" = "Sobreposição Personalizada";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Token do Cliente";
+/* Date picker label */
+"Date" = "Data";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Remover Conta";
+
+/* Button title to delete all objects */
+"Delete All" = "Remover Todos";
 
 /* Button title to delete CGM */
 "Delete CGM" = "Remover CGM";
 
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
+
 /* Title text for delivery limits */
-"Delivery Limits" = "Limites de entrega";
+"Delivery Limits" = "Limites de Entrega";
 
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Desativa";
+
+/* Default alert dismissal
+   The button label of the action used to dismiss an error alert */
+"Dismiss" = "Dispensar";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Ativar";
@@ -199,6 +251,9 @@
 /* The alert title for a resume error */
 "Error Resuming" = "Erro ao Retomar";
 
+/* Segmented button title for insulin delivery log event history */
+"Event History" = "Event History";
+
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Eventualmente %@";
 
@@ -210,6 +265,9 @@
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Por %1$@";
+
+/* The short unit display string for grams */
+"g" = "g";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glicose";
@@ -223,9 +281,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Aceleração da Glicose";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Indefinidamente";
 
@@ -236,7 +291,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulina Absorvida (U) × Sensibilidade a Insulina (%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulina Entregue";
+"Insulin Delivery" = "Insulin Delivery";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Efeitos da Insulina";
@@ -261,26 +316,49 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Carregando...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "Falha no Loop";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Nenhum ciclo completo com sucesso em %@";
 
+/* Details for configuration error when maximum bolus is missing */
+"Maximum Bolus" = "Bolus Máximo";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Dados ausentes: %1$@";
 
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Efeitos de aceleração";
+
+/* Text for more info action on notification of upcoming profile expiration */
+"More Info" = "Mais Info";
+
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "Precisa de Atenção";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Nenhum dispositivo conectado ou falha durante a conexão";
+
+/* Alert acknowledgment OK button
+   Critical Alert permissions disabled alert button
+   Default action for alert when alert acknowledgment fails
+   Notifications permissions disabled alert button
+   Text for ok action on notification of upcoming profile expiration
+   The title of the notification action to acknowledge a device alert */
+"OK" = "OK";
+
+/* Notification Setting Status is On */
+"On" = "Ligado";
 
 /* The title text for the override presets */
 "Override Presets" = "Sobreposições Predefinidas";
@@ -306,6 +384,9 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Dados da bomba são de %1$@ atrás";
 
+/* The title of the screen displaying a pump event */
+"Pump Event" = "Eventos da Bomba";
+
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Gerenciamento da Bomba";
 
@@ -317,6 +398,9 @@
 
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Bomba Suspensa";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Ação-Rápida – Adultos";
@@ -334,13 +418,13 @@
 "Recommended Bolus: %@ Units" = "Bolus Recomendado: %@ Unidades";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Reservatório";
+"Reservoir" = "Reservoir";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Correção Retrospectiva";
 
 /* The title of the notification action to retry a bolus command */
-"Retry" = "Tentar novamente";
+"Retry" = "Tentar de Novo";
 
 /* The title of the services section in settings */
 "Services" = "Serviços";
@@ -372,11 +456,18 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "O modelo antigo utilizado pelo Loop permitindo personalização da duração da ação.";
 
+/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
+"The maximum absorption time is %@" = "O tempo máximo de absorção é %@";
+
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "O bolus máximo é %@ Unidades";
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Event title displayed when StoredPumpEvent.title is not set
+   The default description to use when an entry has no dose description */
+"Unknown" = "Desconhecido";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "até %@";

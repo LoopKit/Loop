@@ -37,14 +37,4 @@ struct LoopCircleView: View {
             return Color.red
         }
     }
-
-    static let formatter: DateComponentsFormatter = {
-        let formatter = DateComponentsFormatter()
-
-        formatter.allowedUnits = [.day, .hour, .minute]
-        formatter.maximumUnitCount = 1
-        formatter.unitsStyle = .short
-
-        return formatter
-    }()
 }

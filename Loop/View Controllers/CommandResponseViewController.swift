@@ -19,7 +19,7 @@ extension CommandResponseViewController {
             deviceManager.generateDiagnosticReport { (report) in
                 DispatchQueue.main.async {
                     completionHandler([
-                        "Use the Share button above save this diagnostic report to aid investigating your problem. Issues can be filed at https://github.com/LoopKit/Loop/issues.",
+                        "Use the Share button above to save this diagnostic report to aid investigating your problem. Issues can be filed at https://github.com/LoopKit/Loop/issues.",
                         "Generated: \(date)",
                         "",
                         report,

@@ -1,0 +1,276 @@
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
+
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ absorbované";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ j Celkom";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@ .";
+
+/* Alert text for failing to cancel temp basal (1: reason description, 2: app name) */
+"%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@%2$@ nedokázal zrušiť vašu aktuálnu dočasnú bazálnu dávku, ktorá je vyššia ako nový maximálny bazálny limit, ktorý ste nastavili. To môže viesť k vyššiemu dodávaniu inzulínu, ako je požadované.\n\nZvážte ručné pozastavenie podávania inzulínu a následné okamžité obnovenie, aby ste uplatnili novým bazálny limit.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
+
+/* Format string for carb ratio average. (1: value)(2: carb unit) */
+"%1$@ %2$@/U" = "%1$@ %2$@ /j";
+
+/* Formats (1: carb start time) and (2: carb absorption duration) */
+"%1$@ + %2$@" = "%1$@ + %2$@";
+
+/* Message for alert shown when delivery status is uncertain. (1: app name) */
+"%1$@ is unable to communicate with your insulin pump. The app will continue trying to reach your pump, but insulin delivery information cannot be updated and no automation can continue.\nYou can wait several minutes to see if the issue resolves or tap the button below to learn more about other options." = "%1$@ nedokáže komunikovať s vašou inzulínovou pumpou. Aplikácia sa bude naďalej pokúšať kontaktovať vašu pumpu, ale informácie o podávaní inzulínu nemožno aktualizovať a nemôže pokračovať žiadna automatizácia.\nMôžete počkať niekoľko minút, aby ste zistili, či sa problém vyriešil, alebo klepnutím na tlačidlo nižšie sa dozviete viac o ďalších možnostiach.";
+
+/* Reservoir entry (1: volume value) */
+"%1$@ U" = "%@ j";
+
+/* Low reservoir alert format string. (1: Number of units remaining) */
+"%1$@ U left" = "Zostáva %1$@ j";
+
+/* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
+"%1$@ U left: %2$@" = "Zostáva %1$@ j: %2$@";
+
+/* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
+"%1$@ U/hour @ %2$@" = "%1$@ j/hod @ %2$@";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v %2$@";
+
+/* Formats (1: carb value) and (2: food type) */
+"%1$@: %2$@" = "%1$@ : %2$@";
+
+/* Description of the prediction input effect for glucose momentum */
+"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 minútový regresný koeficient glykémie (b1), pokračujúci s poklesom počas 30 minút";
+
+/* Subtitle of Fiasp preset */
+"A model based on the published absorption of Fiasp insulin." = "Model založený na publikovanej absorpcii inzulínu Fiasp.";
+
+/* Subtitle of Rapid-Acting – Adult preset */
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Model založený na publikovanej absorpcii inzulínu Humalog, Novolog a Apidra u dospelých.";
+
+/* Action to copy the recommended Bolus value to the actual Bolus Field */
+"AcceptRecommendedBolus" = "Akceptovať Odporúčaný Bolus";
+
+/* The title of the Carbs On-Board graph */
+"Active Carbohydrates" = "Aktívne sacharidy";
+
+/* The string format describing active carbohydrates. (1: localized glucose value description) */
+"Active Carbohydrates: %@" = "Aktívne sacharidy: %@";
+
+/* Title describing quantity of still-absorbing carbohydrates */
+"Active Carbs" = "Aktívne sacharidy";
+
+/* The title of the Insulin On-Board graph */
+"Active Insulin" = "Aktívny inzulín";
+
+/* The string format describing active insulin. (1: localized insulin value description) */
+"Active Insulin: %@" = "Aktívny inzulín: %@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Zadať sacharidy";
+
+/* Action sheet title selecting CGM
+   Title text for button to set up a CGM */
+"Add CGM" = "Pridať CGM";
+
+/* The label of the meal button */
+"Add Meal" = "Zadať jedlo";
+
+/* Action sheet title selecting Pump
+   Title text for button to set up a new pump */
+"Add Pump" = "Pridať pumpu";
+
+/* The title of the amplitude API key credential */
+"API Key" = "Kľúč API";
+
+/* The title of the nightscout API secret credential */
+"API Secret" = "API Secret";
+
+/* Confirmation message for deleting a CGM */
+"Are you sure you want to delete this CGM?" = "Naozaj chcete odstrániť toto CGM?";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Naozaj chcete odstrániť túto službu?";
+
+/* Format fragment for a specific time */
+"at %@" = "o %@";
+
+/* The message displayed during a device authentication prompt for bolus specification */
+"Authenticate to Bolus %@ Units" = "Potvrdiť pre Bolus %@ Jednotky";
+
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "Harmonogram bazálnej dávky";
+
+/* The title of the basal rate profile screen
+   The title text for the basal rate schedule */
+"Basal Rates" = "Bazálne dávky";
+
+/* The label of the bolus entry button
+   The notification title for a bolus failure */
+"Bolus" = "Bolus";
+
+/* The format string for bolus progress. (1: delivered volume)(2: total volume) */
+"Bolused %1$@ of %2$@" = "Podaný bolus %1$@ z %2$@";
+
+/* The format string for bolus in progress showing total volume. (1: total volume) */
+"Bolusing %1$@" = "Bolus sa podáva";
+
+/* The title of the cancel action in an action sheet */
+"Cancel" = "Zrušiť";
+
+/* The title of the cell indicating a bolus is being canceled */
+"Canceling Bolus" = "Bolus sa ruší";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "Účinky sacharidov";
+
+/* The title of the carb ratios schedule screen
+   The title text for the carb ratio schedule */
+"Carb Ratios" = "Inzulínovo sacharidový pomer";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Zadať sacharidy";
+
+/* Title of the prediction input effect for carbohydrates */
+"Carbohydrates" = "Sacharidy";
+
+/* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Absorbované sacharidy (g) ÷ Inzulínovo sacharidový pomer (g/j) × Faktor citlivosti na inzulín (%1$@/j)";
+
+/* The notification alert describing a low pump battery */
+"Change the pump battery immediately" = "Ihneď vymeňte batériu pumpy";
+
+/* The notification alert describing an empty pump reservoir */
+"Change the pump reservoir now" = "Ihneď vymeňte zásobník pumpy";
+
+/* The title of the action used to dismiss an error alert */
+"com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
+
+/* The title of the configuration section in settings */
+"Configuration" = "Konfigurácia";
+
+/* Default alert dismissal */
+"Continue" = "Pokračovať";
+
+/* Critical Alerts Status text */
+"Critical Alerts" = "Kritické výstrahy";
+
+/* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
+"Current glucose of %1$@ is below correction range." = "Aktuálna glykémie %1$@ je pod cieľovým rozsahom.";
+
+/* Date picker label */
+"Date" = "Dátum";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Odstrániť účet";
+
+/* Button title to delete CGM */
+"Delete CGM" = "Odstrániť CGM";
+
+/* Button title to delete a service */
+"Delete Service" = "Odstrániť službu";
+
+/* Button text to deliver a bolus */
+"Deliver" = "Podať";
+
+/* Title text for delivery limits */
+"Delivery Limits" = "Limity podávania";
+
+/* No comment provided by engineer. */
+"Done" = "Hotovo";
+
+/* The alert title for a resume error */
+"Error Resuming" = "Chyba pri obnovení";
+
+/* The alert title for a resume error */
+"Failed to Resume Insulin Delivery" = "Obnovenie podávania inzulínu zlyhalo";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* The title of the glucose and prediction graph */
+"Glucose" = "Glykémia";
+
+/* The title of the insulin delivery graph */
+"Insulin Delivery" = "Podávanie inzulínu";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
+"Insulin Model" = "Inzulínový model";
+
+/* Insulin type label */
+"Insulin Type" = "Typ inzulínu";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
+/* The title of the Nightscout service */
+"Nightscout" = "Nightscout";
+
+/* Notification Setting Status is Off */
+"Off" = "Vypnuté";
+
+/* Alert acknowledgment OK button
+   Critical Alert permissions disabled alert button
+   Default action for alert when alert acknowledgment fails
+   Notifications permissions disabled alert button
+   Text for ok action on notification of upcoming profile expiration
+   The title of the notification action to acknowledge a device alert */
+"OK" = "OK";
+
+/* Notification Setting Status is On */
+"On" = "Zapnuté";
+
+/* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
+"Predicted glucose at %1$@ is %2$@." = "Predpokladaná glykémia o %1$@ je %2$@ .";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "Predpokladaná glykémia je v cieľovom rozsahu.";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* The title of the cell displaying a recommended temp basal value */
+"Recommended Basal" = "Odporúčaný bazal";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "Rezervoár";
+
+/* The title of the notification action to retry a bolus command */
+"Retry" = "Skúsiť znova";
+
+/* The label of the settings button */
+"Settings" = "Nastavenia";
+
+/* The title of the nightscout site URL credential */
+"Site URL" = "URL adresa webu";
+
+/* Title of the carb entry date picker cell */
+"Time" = "Čas";
+
+/* The short unit display string for international units of insulin */
+"U" = "j";
+
+/* Event title displayed when StoredPumpEvent.title is not set
+   The default description to use when an entry has no dose description */
+"Unknown" = "Neznáme";
+
+/* The title of the action used when confirming entered amount of carbohydrates. */
+"Yes" = "Áno";
+

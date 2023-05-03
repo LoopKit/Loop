@@ -1,8 +1,44 @@
+/* Displayed in the widget when the amount of active carbs cannot be determined. */
+"? g" = "? g";
+
+/* Displayed in the widget when the amount of active insulin cannot be determined. */
+"? U" = "? E";
+
+/* The subtitle format describing the grams of active carbs.  (1: localized carb value description) */
+"%1$@" = "%1$@";
+
+/* The subtitle format describing units of active insulin. (1: localized insulin value description) */
+"%1$@ U" = "%1$@ E";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Widget label title describing the active carbs */
+"Active Carbs" = "Aktive kulhydrater";
+
+/* Widget label title describing the active insulin */
+"Active Insulin" = "Aktivt insulin";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
 /* The subtitle format describing eventual glucose.  (1: localized glucose value description) */
-"Eventually %1$@" = "Til sidst %1$@";
+"Eventually %1$@" = "Med tiden %1$@";
+
+/* The short unit display string for grams */
+"g" = "g";
 
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
 "IOB %1$@ U" = "IOB %1$@ E";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";

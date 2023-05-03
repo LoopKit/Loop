@@ -1,18 +1,36 @@
-/* INIntentTitle */
-"80eo5o" = "Add Carb Entry";
+/* (No Comment) */
+"9KhaIS" = "Ustawiłem Cel Tymczas.";
 
-/* INIntentParameterCombinationTitle */
-"OcNxIj" = "Add Carb Entry";
+/* (No Comment) */
+"80eo5o" = "Wprowadź węglowodany";
 
-/* INIntentDescription */
-"yc02Yq" = "Add a carb entry to Loop";
+/* (No Comment) */
+"b085BW" = "Nie mogłem ustawić celu.";
 
-"9KhaIS" = "I've set the preset";
-"I4OZy8" = "Enable Override Preset";
-"XNNmtH" = "Enable preset in Loop";
-"ZZ3mtM" = "Enable an override preset in Loop";
-"b085BW" = "I wasn't able to set the preset.";
-"lYMuWV" = "Override Name";
-"nDKAmn" = "What's the name of the override you'd like to set?";
-"oLQSsJ" = "Enable '${overrideName}' Override Preset";
-"yBzwCL" = "Override Selection";
+/* (No Comment) */
+"I4OZy8" = "Włącz Cel Tymczasowy";
+
+/* (No Comment) */
+"lYMuWV" = "Nazwa Celu Tymczas.";
+
+/* (No Comment) */
+"nDKAmn" = "Jak nazywa się Cel Tymczasowy, który chcesz włączyć?";
+
+/* (No Comment) */
+"OcNxIj" = "Wprowadź węglowodany";
+
+/* (No Comment) */
+"oLQSsJ" = "Włącz '${overrideName}' Cel Tymczasowy";
+
+/* (No Comment) */
+"XNNmtH" = "Włącz Cel Tymczasowy w pętli";
+
+/* (No Comment) */
+"yBzwCL" = "Wybierz Cel Tymczasowy";
+
+/* (No Comment) */
+"yc02Yq" = "Dodaj węglowodany do pętli";
+
+/* (No Comment) */
+"ZZ3mtM" = "Włącz Cel Tymczasowy w pętli";
+

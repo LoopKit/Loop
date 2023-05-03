@@ -1,32 +1,44 @@
+/* Green closed loop ON message (1: last loop string) (2: app name) */
+"\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n%2$@ wird mit Closed Loop in der Position EIN betrieben.";
+
 /* Red loop message (1: last loop  string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippe auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, eine Schleife abzuschließen, aber achte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und Deinem CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippen Sie auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, einen Loop abzuschließen, aber achten Sie auf mögliche Kommunikationsprobleme mit Ihrer Pumpe und CGM.";
 
 /* Yellow loop message (1: last loop string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippe auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, eine Schleife abzuschließen, aber achte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und Deinem CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippen Sie auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, einen Loop abzuschließen, aber achten Sie auf mögliche Kommunikationsprobleme mit Ihrer Pumpe und CGM.";
 
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
 "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ arbeitet mit geschlossenem Regelkreis in der AUS-Position. Ihre Pumpe und CGM funktionieren weiter, aber die App passt die Dosierung nicht automatisch an.\n\n%2$@";
 
-/* Green closed loop ON message (1: app name) (2: last loop string) */
-"\n%1$@ is operating with Closed Loop in the ON position. %2$@" = "\n%1$@ arbeitet mit  geschlossenem Regelkreis in der EIN-Position. %2$@";
+/* No glucose value representation (3 dashes for mg/dL) */
+"– – –" = "– – –";
 
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
-"%@ ago" = "vor %@";
+"%@ ago" = "%@ vor";
 
 /* The format string describing the basal rate. */
 "%@ U" = "%@ IE";
 
+/* Format string describing last completion. (1: time ago */
+"%1$@ ago" = "%1$@ vor";
+
+/* Format string describing last completion. (1: time ago, (2: the date */
+"%1$@ ago at %2$@" = "Vor %1$@ am %2$@";
+
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%1$@ in %2$@";
-
-/* Last loop time completed message (1: app name) (2: last loop time string) */
-"%1$@ last successfully completed a loop %2$@ ago." = "%1$@ hat zuletzt vor %2$@ erfolgreich eine Schleife beendet.";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ Einheiten pro Stunde in %2$@";
 
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
+
+/* Format string describing last completion */
+"<1 min ago" = "vor <1 min";
 
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "Geschlossener Loop";
@@ -37,11 +49,20 @@
 /* Title of green closed loop ON message */
 "Closed Loop ON" = "Closed Loop AN";
 
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "g";
+
 /* String displayed instead of a glucose value above the CGM range */
 "HIGH" = "HOCH";
 
+/* Last loop time completed message (1: last loop time string) */
+"Last completed loop %1$@." = "Loop wurde nicht erfolgreich abgeschlossen seit %@";
+
 /* Title of red loop message */
-"Loop Failure" = "Loop Fehler";
+"Loop Failure" = "Loop fehlgeschlagen";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop lief seit %@";
@@ -52,14 +73,23 @@
 /* String displayed instead of a glucose value below the CGM range */
 "LOW" = "NIEDRIG";
 
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Erfordert Aufmerksamkeit";
 
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Offener Loop";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* Instructions for user to close loop if it is allowed. */
-"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Tippe auf Einstellungen, um Closed Loop einzuschalten, wenn Du möchtest, dass die App Dein Insulin automatisiert.";
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Tippen Sie auf Einstellungen, um Closed Loop einzuschalten, wenn Sie möchten, dass die App Ihr Insulin automatisiert.";
 
 /* The short unit display string for international units of insulin */
 "U" = "IE";
@@ -69,4 +99,7 @@
 
 /* Acessibility label describing completion HUD waiting for first run */
 "Waiting for first run" = "Warten auf die erste Ausführung";
+
+/* Format string describing last completion. (1: the date */
+"was at %1$@" = "Zuletzt abgeschlossen %1$@";
 

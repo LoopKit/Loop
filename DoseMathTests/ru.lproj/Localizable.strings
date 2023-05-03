@@ -1,8 +1,8 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = " Текущая гликемия %1$@ ниже диапазона коррекции";
+"Current glucose of %1$@ is below correction range." = "Гликемия %1$@ ниже диапазона коррекции";
 
 /* The short unit display string for decibles */
-"dB" = "dB";
+"dB" = "дБ";
 
 /* The short unit display string for grams */
 "g" = "г";
@@ -11,13 +11,19 @@
 "mg/dL" = "мг/дл";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "ммоль/л";
+"mmol/L" = "mmol/L";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Предсказываемая гликемия в %1$@ - %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Прогнозируемый уровень глюкозы на %1$@ составляет %2$@.";
+
+/* Notice when predicted glucose for bolus recommendation is in range */
+"Predicted glucose is in range." = "Прогнозируемый уровень глюкозы находится в диапазоне.";
+
+/* Notice message when recommending bolus when BG is below the glucose safety limit. (1: glucose value) */
+"Predicted glucose of %1$@ is below your glucose safety limit setting." = "Прогнозируемое значение глюкозы %1$@ ниже установленного вами предела безопасности глюкозы.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Предсказываемая гликемия %1$@ ниже установленного вами порога  приостановки помпы";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Предсказываемая гликемия %1$@ ниже ваших настроек порога приостановки помпы";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
