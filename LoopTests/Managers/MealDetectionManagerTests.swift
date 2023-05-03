@@ -356,7 +356,7 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 25))
             updateGroup.leave()
         }
