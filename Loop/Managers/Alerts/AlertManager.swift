@@ -785,7 +785,7 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
 
 extension AlertManager {
     func presentConfirmCrashAlert(confirmAction: @escaping (@escaping () -> Void) -> Void) {
-        let alert = UIAlertController(title: "New Study Product Detected", message: "We've detected a new study product is selected. In order to show use this study product, Tidepool Loop will need to restart.", preferredStyle: .alert)
+        let alert = UIAlertController(title: "New Study Product Detected", message: "We've detected a new study product is selected. In order to show use this study product, Loop will need to restart.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
             confirmAction() {
                 fatalError("DEBUG: Resetting Loop")
@@ -797,7 +797,7 @@ extension AlertManager {
     }
     
     func presentCouldNotResetLoopAlert(error: Error) {
-        let alert = UIAlertController(title: "Could Not Restart Tidepool Loop", message: "While trying to restart Tidepool Loop an error occured.\n\n\(error.localizedDescription)", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Could Not Restart Loop", message: "While trying to restart Loop an error occured.\n\n\(error.localizedDescription)", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         
         alertPresenter.present(alert, animated: true)
