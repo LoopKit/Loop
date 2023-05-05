@@ -181,7 +181,7 @@ public final class AlertManager {
 
         for (minutes, isCritical) in [(20.0, false), (40.0, false), (60.0, true), (120.0, true)] {
             let warningInterval = TimeInterval(minutes: minutes)
-            let timeUntilNotification = lastLoopDate.addingTimeInterval(.minutes(minutes)).timeIntervalSinceNow
+            let timeUntilNotification = lastLoopDate.addingTimeInterval(warningInterval).timeIntervalSinceNow
             guard timeUntilNotification >= 0 else { break }
 
             let formatter = DateComponentsFormatter()
@@ -227,7 +227,6 @@ public final class AlertManager {
                     alertAt: nextTriggerDate,
                     title: notificationContent.title,
                     body: notificationContent.body,
-                    timeInterval: warningInterval,
                     isCritical: isCritical)
                 scheduledNotifications.append(scheduledNotification)
             }
@@ -781,6 +780,27 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
         alertPresenter.dismissAlert(alertController, animated: true) { [weak self] in
             self?.unsafeNotificationPermissionsAlertController = nil
         }
+    }
+}
+
+extension AlertManager {
+    func presentConfirmCrashAlert(confirmAction: @escaping (@escaping () -> Void) -> Void) {
+        let alert = UIAlertController(title: "New Study Product Detected", message: "We've detected a new study product is selected. In order to show use this study product, Tidepool Loop will need to restart.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+            confirmAction() {
+                fatalError("DEBUG: Resetting Loop")
+            }
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        alertPresenter.present(alert, animated: true)
+    }
+    
+    func presentCouldNotResetLoopAlert(error: Error) {
+        let alert = UIAlertController(title: "Could Not Restart Tidepool Loop", message: "While trying to restart Tidepool Loop an error occured.\n\n\(error.localizedDescription)", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        alertPresenter.present(alert, animated: true)
     }
 }
 

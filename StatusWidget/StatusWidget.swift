@@ -223,7 +223,7 @@ extension Date {
     }
 }
 
-@main
+#if NOT_USED_IN_TIDEPOOL_LOOP
 struct SmallStatusWidget: Widget {
     let kind: String = "SmallStatusWidget"
 
@@ -235,4 +235,14 @@ struct SmallStatusWidget: Widget {
         .description("See your current blood glucose and insulin delivery.")
         .supportedFamilies([.systemSmall])
     }
+}
+#endif
+
+@main
+struct SmallStatusWidgets: WidgetBundle {
+    var body: some Widget {
+#if NOT_USED_IN_TIDEPOOL_LOOP
+        SmallStatusWidget()
+#endif
+   }
 }

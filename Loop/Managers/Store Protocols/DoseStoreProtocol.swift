@@ -42,8 +42,6 @@ protocol DoseStoreProtocol: AnyObject {
     var pumpEventQueryAfterDate: Date { get }
     
     // MARK: dose management
-    func resetPumpData(completion: ((_ error: DoseStore.DoseStoreError?) -> Void)?)
-    
     func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void)
     
     func addReservoirValue(_ unitVolume: Double, at date: Date, completion: @escaping (_ value: ReservoirValue?, _ previousValue: ReservoirValue?, _ areStoredValuesContinuous: Bool, _ error: DoseStore.DoseStoreError?) -> Void)

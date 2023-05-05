@@ -114,7 +114,15 @@ final class BolusEntryViewModel: ObservableObject {
     let selectedCarbAbsorptionTimeEmoji: String?
 
     @Published var recommendedBolus: HKQuantity?
+    var recommendedBolusAmount: Double? {
+        recommendedBolus?.doubleValue(for: .internationalUnit())
+    }
     @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+    var enteredBolusAmount: Double {
+        enteredBolus.doubleValue(for: .internationalUnit())
+    }
+    private var userChangedBolusAmount = false
+    @Published var isInitiatingSaveOrBolus = false
     @Published var enacting = false
 
     private var dosingDecision = BolusDosingDecision(for: .normalBolus)
@@ -287,11 +295,11 @@ final class BolusEntryViewModel: ObservableObject {
     // MARK: - View API
 
     var isBolusRecommended: Bool {
-        guard let recommendedBolus = recommendedBolus else {
+        guard let recommendedBolusAmount = recommendedBolusAmount else {
             return false
         }
 
-        return recommendedBolus.doubleValue(for: .internationalUnit()) > 0
+        return recommendedBolusAmount > 0
     }
 
     func saveCarbEntry(_ entry: NewCarbEntry, replacingEntry: StoredCarbEntry?) async -> StoredCarbEntry? {
@@ -335,15 +343,13 @@ final class BolusEntryViewModel: ObservableObject {
             return false
         }
 
-        let amountEntered = enteredBolus.doubleValue(for: .internationalUnit())
-
-        let amountToDeliver = delegate.roundBolusVolume(units: amountEntered)
-        guard amountEntered == 0 || amountToDeliver > 0 else {
+        let amountToDeliver = delegate.roundBolusVolume(units: enteredBolusAmount)
+        guard enteredBolusAmount == 0 || amountToDeliver > 0 else {
             presentAlert(.bolusTooSmall)
             return false
         }
 
-        let amountToDeliverString = bolusVolumeFormatter.numberFormatter.string(from: amountToDeliver) ?? String(amountToDeliver)
+        let amountToDeliverString = formatBolusAmount(amountToDeliver)
 
         let manualGlucoseSample = manualGlucoseSample
         let potentialCarbEntry = potentialCarbEntry
@@ -435,7 +441,12 @@ final class BolusEntryViewModel: ObservableObject {
         activeAlert = alert
     }
 
-    private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit())
+    private lazy var bolusAmountFormatter: NumberFormatter = {
+        let formatter = QuantityFormatter()
+        formatter.setPreferredNumberFormatter(for: .internationalUnit())
+        formatter.numberFormatter.roundingMode = .down
+        return formatter.numberFormatter
+    }()
 
     private lazy var absorptionTimeFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -447,15 +458,15 @@ final class BolusEntryViewModel: ObservableObject {
     }()
 
     var enteredBolusAmountString: String {
-        let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
-        return bolusVolumeFormatter.numberFormatter.string(from: bolusVolume) ?? String(bolusVolume)
+        let bolusAmount = enteredBolusAmount
+        return formatBolusAmount(bolusAmount)
     }
 
     var maximumBolusAmountString: String? {
-        guard let maxBolusVolume = maximumBolus?.doubleValue(for: .internationalUnit()) else {
+        guard let maxBolusAmount = maximumBolus?.doubleValue(for: .internationalUnit()) else {
             return nil
         }
-        return bolusVolumeFormatter.numberFormatter.string(from: maxBolusVolume) ?? String(maxBolusVolume)
+        return formatBolusAmount(maxBolusAmount)
     }
 
     var carbEntryAmountAndEmojiString: String? {
@@ -641,18 +652,25 @@ final class BolusEntryViewModel: ObservableObject {
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
+        guard let delegate = delegate else {
+            assertionFailure("Missing BolusEntryViewModelDelegate")
+            return
+        }
+
         let now = Date()
         var recommendation: ManualBolusRecommendation?
         let recommendedBolus: HKQuantity?
         let notice: Notice?
         do {
             recommendation = try computeBolusRecommendation(from: state)
-            if let recommendation = recommendation {
-                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
 
+            if let recommendation = recommendation {
+                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: recommendation.amount))
+                //recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
+                
                 switch recommendation.notice {
                 case .glucoseBelowSuspendThreshold:
-                    if let suspendThreshold = delegate?.settings.suspendThreshold {
+                    if let suspendThreshold = delegate.settings.suspendThreshold {
                         notice = .predictedGlucoseBelowSuspendThreshold(suspendThreshold: suspendThreshold.quantity)
                     } else {
                         notice = nil
@@ -772,6 +790,25 @@ final class BolusEntryViewModel: ObservableObject {
         ) ?? date
 
         chartDateInterval = DateInterval(start: chartStartDate, duration: .hours(totalHours))
+    }
+
+    func formatBolusAmount(_ bolusAmount: Double) -> String {
+        bolusAmountFormatter.string(from: bolusAmount) ?? String(bolusAmount)
+    }
+
+    var recommendedBolusString: String {
+        guard let amount = recommendedBolusAmount else {
+            return "–"
+        }
+        return formatBolusAmount(amount)
+    }
+
+    func updateEnteredBolus(_ enteredBolusString: String) {
+        updateEnteredBolus(bolusAmountFormatter.number(from: enteredBolusString)?.doubleValue)
+    }
+
+    func updateEnteredBolus(_ enteredBolusAmount: Double?) {
+        enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: enteredBolusAmount ?? 0)
     }
 }
 

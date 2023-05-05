@@ -12,7 +12,6 @@ struct StoredLoopNotRunningNotification: Codable {
     var alertAt: Date
     var title: String
     var body: String
-    var timeInterval: TimeInterval
     var isCritical: Bool
 }
 

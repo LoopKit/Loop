@@ -30,6 +30,10 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
             delegate?.testingScenariosManager(self, didUpdateScenarioURLs: scenarioURLs)
         }
     }
+    
+    var pluginManager: PluginManager {
+        deviceManager.pluginManager
+    }
 
     init(deviceManager: DeviceDataManager) {
         guard FeatureFlags.scenariosEnabled else {
@@ -37,10 +41,9 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
         }
 
         self.deviceManager = deviceManager
-        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        self.scenariosSource = documentsDirectory.appendingPathComponent("scenarios")
+        self.scenariosSource = Bundle.main.bundleURL.appendingPathComponent("Scenarios")
 
-        log.debug("Place testing scenarios in %{public}@", scenariosSource.path)
+        log.debug("Loading testing scenarios from %{public}@", scenariosSource.path)
         if !fileManager.fileExists(atPath: scenariosSource.path) {
             do {
                 try fileManager.createDirectory(at: scenariosSource, withIntermediateDirectories: false)
@@ -64,7 +67,6 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
         do {
             let scenarioURLs = try fileManager.contentsOfDirectory(at: scenariosSource, includingPropertiesForKeys: nil)
                 .filter { $0.pathExtension == "json" }
-                .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
             self.scenarioURLs = scenarioURLs
             delegate?.testingScenariosManager(self, didUpdateScenarioURLs: scenarioURLs)
             log.debug("Reloaded scenario URLs")

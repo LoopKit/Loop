@@ -290,12 +290,12 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         let observer = NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: nil, queue: nil) { _ in
             exp.fulfill()
         }
-        automaticDosingStatus.isClosedLoop = false
+        automaticDosingStatus.automaticDosingEnabled = false
         wait(for: [exp], timeout: 1.0)
         let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel)
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
-        XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "closedLoopDisabled")
+        XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "automaticDosingDisabled")
         XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].automaticDoseRecommendation, expectedAutomaticDoseRecommendation)
         NotificationCenter.default.removeObserver(observer)
     }
@@ -345,7 +345,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
 
     func testLoopRecommendsTempBasalWithoutEnactingIfOpenLoop() {
         setUp(for: .highAndStable)
-        automaticDosingStatus.isClosedLoop = false
+        automaticDosingStatus.automaticDosingEnabled = false
         waitOnDataQueue()
         let delegate = MockDelegate()
         loopDataManager.delegate = delegate
@@ -417,7 +417,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         let currentDate = Date()
 
         dosingDecisionStore = MockDosingDecisionStore()
-        automaticDosingStatus = AutomaticDosingStatus(isClosedLoop: false, isClosedLoopAllowed: true)
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: false, isAutomaticDosingAllowed: true)
         let existingTempBasal = DoseEntry(
             type: .tempBasal,
             startDate: currentDate.addingTimeInterval(-.minutes(2)),
