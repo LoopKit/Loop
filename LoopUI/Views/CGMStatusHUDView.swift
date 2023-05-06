@@ -68,6 +68,8 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         defer {
             // when the status highlight is updated, the trend icon may also need to be updated
             updateTrendIcon()
+            // when the status highlight is updated, the accessibility string is updated
+            accessibilityValue = viewModel.accessibilityString
         }
         
         guard statusStackView.arrangedSubviews.contains(glucoseValueHUD),
@@ -89,6 +91,8 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         defer {
             // when the status highlight is updated, the trend icon may also need to be updated
             updateTrendIcon()
+            // when the status highlight is updated, the accessibility string is updated
+            accessibilityValue = viewModel.accessibilityString
         }
         
         guard statusStackView.arrangedSubviews.contains(statusHighlightView) else {

@@ -38,6 +38,7 @@ struct FeatureFlagConfiguration: Decodable {
     let dynamicCarbAbsorptionEnabled: Bool
     let adultChildInsulinModelSelectionEnabled: Bool
     let profileExpirationSettingsViewEnabled: Bool
+    let missedMealNotifications: Bool
 
 
     fileprivate init() {
@@ -220,6 +221,14 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.profileExpirationSettingsViewEnabled = true
         #endif
+
+        // Missed meal notifications compiler flag is inverse, since the default state is enabled.
+        #if MISSED_MEAL_NOTIFICATIONS_DISABLED
+        self.missedMealNotifications = false
+        #else
+        self.missedMealNotifications = true
+        #endif
+
     }
 }
 
@@ -253,7 +262,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* usePositiveMomentumAndRCForManualBoluses: \(usePositiveMomentumAndRCForManualBoluses)",
             "* dynamicCarbAbsorptionEnabled: \(dynamicCarbAbsorptionEnabled)",
             "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)",
-            "* profileExpirationSettingsViewEnabled: \(profileExpirationSettingsViewEnabled)"
+            "* profileExpirationSettingsViewEnabled: \(profileExpirationSettingsViewEnabled)",
+            "* missedMealNotifications: \(missedMealNotifications)"
         ].joined(separator: "\n")
     }
 }

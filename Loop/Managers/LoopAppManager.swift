@@ -89,7 +89,7 @@ class LoopAppManager: NSObject {
     private let log = DiagnosticLog(category: "LoopAppManager")
     private let widgetLog = DiagnosticLog(category: "LoopWidgets")
 
-    private let closedLoopStatus = ClosedLoopStatus(isClosedLoop: false, isClosedLoopAllowed: false)
+    private let automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: false, isAutomaticDosingAllowed: false)
 
     lazy private var cancellables = Set<AnyCancellable>()
 
@@ -198,7 +198,7 @@ class LoopAppManager: NSObject {
                                               analyticsServicesManager: analyticsServicesManager,
                                               bluetoothProvider: bluetoothStateManager,
                                               alertPresenter: self,
-                                              closedLoopStatus: closedLoopStatus,
+                                              automaticDosingStatus: automaticDosingStatus,
                                               cacheStore: cacheStore,
                                               localCacheDuration: localCacheDuration,
                                               overrideHistory: overrideHistory,
@@ -237,10 +237,10 @@ class LoopAppManager: NSObject {
                                         servicesManager: deviceDataManager.servicesManager,
                                         alertIssuer: alertManager)
 
-        closedLoopStatus.$isClosedLoopAllowed
+        automaticDosingStatus.$isAutomaticDosingAllowed
             .combineLatest(deviceDataManager.loopManager.$dosingEnabled)
             .map { $0 && $1 }
-            .assign(to: \.closedLoopStatus.isClosedLoop, on: self)
+            .assign(to: \.automaticDosingStatus.automaticDosingEnabled, on: self)
             .store(in: &cancellables)
 
         state = state.next
@@ -266,7 +266,7 @@ class LoopAppManager: NSObject {
         let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         statusTableViewController.alertPermissionsChecker = alertPermissionsChecker
         statusTableViewController.alertMuter = alertManager.alertMuter
-        statusTableViewController.closedLoopStatus = closedLoopStatus
+        statusTableViewController.automaticDosingStatus = automaticDosingStatus
         statusTableViewController.deviceManager = deviceDataManager
         statusTableViewController.onboardingManager = onboardingManager
         statusTableViewController.supportManager = supportManager
@@ -396,6 +396,30 @@ class LoopAppManager: NSObject {
             log.error("Could not create after first unlock test file: %@", String(describing: error))
         }
         return false
+    }
+    
+    func askUserToConfirmCrashIfNecessary() {
+        deviceDataManager.pluginManager.availableSupports.forEach { supportUI in
+            if supportUI.loopNeedsReset {
+                supportUI.loopNeedsReset = false
+                alertManager.presentConfirmCrashAlert() { [weak self] completion in
+                    guard let pumpManager = self?.deviceDataManager.pumpManager else {
+                        supportUI.resetLoop()
+                        completion()
+                        return
+                    }
+                    
+                    pumpManager.prepareForDeactivation() { [weak self] error in
+                        guard let error = error else {
+                            supportUI.resetLoop()
+                            completion()
+                            return
+                        }
+                        self?.alertManager.presentCouldNotResetLoopAlert(error: error)
+                    }
+                }
+            }
+        }
     }
 
     private var rootViewController: UIViewController? {

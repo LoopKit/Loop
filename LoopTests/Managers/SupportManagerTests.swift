@@ -23,8 +23,13 @@ class SupportManagerTests: XCTestCase {
             nil
         }
         var mockResult: Result<VersionUpdate?, Error> = .success(.default)
-        func checkVersion(bundleIdentifier: String, currentVersion: String, completion: @escaping (Result<VersionUpdate?, Error>) -> Void) {
-            completion(mockResult)
+        func checkVersion(bundleIdentifier: String, currentVersion: String) async -> VersionUpdate? {
+            switch mockResult {
+            case .success(let update):
+                return update
+            case .failure:
+                return nil
+            }
         }
         weak var delegate: SupportUIDelegate?
     }
@@ -34,6 +39,11 @@ class SupportManagerTests: XCTestCase {
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
+        
+        var loopNeedsReset: Bool = false
+        var studyProductSelection: String? = nil
+        func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
+        func resetLoop() {}
     }
     class AnotherMockSupport: Mixin, SupportUI {
         func configurationMenuItems() -> [AnyView] { return [] }
@@ -41,6 +51,11 @@ class SupportManagerTests: XCTestCase {
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
+        
+        var loopNeedsReset: Bool = false
+        var studyProductSelection: String? = nil
+        func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
+        func resetLoop() {}
     }
     
     class MockAlertIssuer: AlertIssuer {
@@ -62,37 +77,35 @@ class SupportManagerTests: XCTestCase {
         supportManager.addSupport(mockSupport)
     }
     
-    func getVersion(fn: String = #function) -> VersionUpdate? {
-        let e = expectation(description: fn)
-        var result: VersionUpdate?
-        supportManager.checkVersion {
-            result = $0
-            e.fulfill()
-        }
-        wait(for: [e], timeout: 1.0)
-        return result
-    }
-    
-    func testVersionCheckOneService() throws {
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+    func testVersionCheckOneService() async throws {
+        let result = await supportManager.checkVersion()
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, result)
         mockSupport.mockResult = .success(.required)
-        XCTAssertEqual(.required, getVersion())
+
+        let result2 = await supportManager.checkVersion()
+        XCTAssertEqual(.required, result2)
     }
     
-    func testVersionCheckOneServiceError() throws {
+    func testVersionCheckOneServiceError() async throws {
         // Error doesn't really do anything but log
         mockSupport.mockResult = .failure(MockError.nothing)
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+        let result = await supportManager.checkVersion()
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, result)
     }
     
-    func testVersionCheckMultipleServices() throws {
+    func testVersionCheckMultipleServices() async throws {
         let anotherSupport = AnotherMockSupport()
         supportManager.addSupport(anotherSupport)
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+        let result = await supportManager.checkVersion()
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, result)
+
         anotherSupport.mockResult = .success(.required)
-        XCTAssertEqual(.required, getVersion())
+        let result2 = await supportManager.checkVersion()
+        XCTAssertEqual(.required, result2)
+
+        let result3 = await supportManager.checkVersion()
         mockSupport.mockResult = .success(.recommended)
-        XCTAssertEqual(.required, getVersion())
+        XCTAssertEqual(.required, result3)
     }
     
 }

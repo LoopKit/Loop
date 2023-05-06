@@ -276,7 +276,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusNoNotice() async throws {
         await setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        let recommendation = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        let recommendation = ManualBolusRecommendation(amount: 1.25, pendingInsulin: 4.321)
         delegate.loopState.bolusRecommendationResult = recommendation
         await bolusEntryViewModel.update()
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
@@ -293,7 +293,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusWithNotice() async throws {
         delegate.settings.suspendThreshold = GlucoseThreshold(unit: .milligramsPerDeciliter, value: Self.exampleCGMGlucoseQuantity.doubleValue(for: .milligramsPerDeciliter))
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        let recommendation = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
+        let recommendation = ManualBolusRecommendation(amount: 1.25, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
         delegate.loopState.bolusRecommendationResult = recommendation
         await bolusEntryViewModel.update()
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
@@ -306,7 +306,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusWithNoticeMissingSuspendThreshold() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         delegate.settings.suspendThreshold = nil
-        let recommendation = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
+        let recommendation = ManualBolusRecommendation(amount: 1.25, pendingInsulin: 4.321, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
         delegate.loopState.bolusRecommendationResult = recommendation
         await bolusEntryViewModel.update()
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
@@ -318,7 +318,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
     func testUpdateRecommendedBolusWithOtherNotice() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        let recommendation = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321, notice: BolusRecommendationNotice.currentGlucoseBelowTarget(glucose: Self.exampleGlucoseValue))
+        let recommendation = ManualBolusRecommendation(amount: 1.25, pendingInsulin: 4.321, notice: BolusRecommendationNotice.currentGlucoseBelowTarget(glucose: Self.exampleGlucoseValue))
         delegate.loopState.bolusRecommendationResult = recommendation
         await bolusEntryViewModel.update()
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
@@ -382,7 +382,7 @@ class BolusEntryViewModelTests: XCTestCase {
         await setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
         bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        let recommendation = ManualBolusRecommendation(amount: 1.234, pendingInsulin: 4.321)
+        let recommendation = ManualBolusRecommendation(amount: 1.25, pendingInsulin: 4.321)
         delegate.loopState.bolusRecommendationResult = recommendation
         await bolusEntryViewModel.update()
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
