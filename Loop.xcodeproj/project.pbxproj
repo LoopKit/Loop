@@ -482,8 +482,6 @@
 		C19C8BBF28651E3D0056D5E4 /* LoopKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C19C8BC328651EAE0056D5E4 /* LoopTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19C8BC228651EAE0056D5E4 /* LoopTestingKit.framework */; };
 		C19C8BC428651EAE0056D5E4 /* LoopTestingKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C19C8BC228651EAE0056D5E4 /* LoopTestingKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C19C8BC528651EE50056D5E4 /* MKRingProgressView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; };
-		C19C8BC628651EE50056D5E4 /* MKRingProgressView.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C19C8BCE28651F520056D5E4 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		C19C8BCF28651F520056D5E4 /* LoopKitUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C19C8C1E28663B040056D5E4 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
@@ -502,6 +500,7 @@
 		C1D0B6302986D4D90098D215 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D0B62F2986D4D90098D215 /* LocalizedString.swift */; };
 		C1D0B6312986D4D90098D215 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D0B62F2986D4D90098D215 /* LocalizedString.swift */; };
 		C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */; };
+		C1D6EEA02A06C7270047DE5C /* MKRingProgressView in Frameworks */ = {isa = PBXBuildFile; productRef = C1D6EE9F2A06C7270047DE5C /* MKRingProgressView */; };
 		C1DE5D23251BFC4D00439E49 /* SimpleBolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */; };
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		C1E3862628247C6100F561A4 /* StoredLoopNotRunningNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */; };
@@ -733,7 +732,6 @@
 				C1F00C78285A8256006302C5 /* SwiftCharts in Embed Frameworks */,
 				C19C8BBF28651E3D0056D5E4 /* LoopKit.framework in Embed Frameworks */,
 				43D9FFD721EAE05D00AF44BF /* LoopCore.framework in Embed Frameworks */,
-				C19C8BC628651EE50056D5E4 /* MKRingProgressView.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1820,6 +1818,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1D6EEA02A06C7270047DE5C /* MKRingProgressView in Frameworks */,
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
 				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
 				C19C8BBC28651E1C0056D5E4 /* Minizip.framework in Frameworks */,
@@ -1829,7 +1828,6 @@
 				C19C8BBE28651E3D0056D5E4 /* LoopKit.framework in Frameworks */,
 				C19C8BBA28651DFB0056D5E4 /* TrueTime.framework in Frameworks */,
 				C1F00C60285A802A006302C5 /* SwiftCharts in Frameworks */,
-				C19C8BC528651EE50056D5E4 /* MKRingProgressView.framework in Frameworks */,
 				C19C8BC328651EAE0056D5E4 /* LoopTestingKit.framework in Frameworks */,
 				C19C8BCE28651F520056D5E4 /* LoopKitUI.framework in Frameworks */,
 			);
@@ -3141,6 +3139,7 @@
 			name = Loop;
 			packageProductDependencies = (
 				C1F00C5F285A802A006302C5 /* SwiftCharts */,
+				C1D6EE9F2A06C7270047DE5C /* MKRingProgressView */,
 			);
 			productName = Loop;
 			productReference = 43776F8C1B8022E90074EA36 /* Loop.app */;
@@ -3464,6 +3463,7 @@
 			mainGroup = 43776F831B8022E90074EA36;
 			packageReferences = (
 				C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */,
+				C1D6EE9E2A06C7270047DE5C /* XCRemoteSwiftPackageReference "MKRingProgressView" */,
 			);
 			productRefGroup = 43776F8D1B8022E90074EA36 /* Products */;
 			projectDirPath = "";
@@ -5891,6 +5891,14 @@
 				kind = branch;
 			};
 		};
+		C1D6EE9E2A06C7270047DE5C /* XCRemoteSwiftPackageReference "MKRingProgressView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maxkonovalov/MKRingProgressView.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -5903,6 +5911,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
 			productName = SwiftCharts;
+		};
+		C1D6EE9F2A06C7270047DE5C /* MKRingProgressView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1D6EE9E2A06C7270047DE5C /* XCRemoteSwiftPackageReference "MKRingProgressView" */;
+			productName = MKRingProgressView;
 		};
 		C1E3DC4628595FAA00CA19FF /* SwiftCharts */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -1270,7 +1270,6 @@ extension DeviceDataManager {
         let devicePredicate = HKQuery.predicateForObjects(from: [testingPumpManager.testingDevice])
         let insulinDeliveryStore = doseStore.insulinDeliveryStore
         
-        let healthStore = insulinDeliveryStore.healthStore
         doseStore.resetPumpData { doseStoreError in
             guard doseStoreError == nil else {
                 completion?(doseStoreError!)
