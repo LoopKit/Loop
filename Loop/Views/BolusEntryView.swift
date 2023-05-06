@@ -68,7 +68,7 @@ struct BolusEntryView: View {
                     if amount == 0 {
                         newEnteredBolusString = ""
                     } else {
-                        newEnteredBolusString = Self.doseAmountFormatter.string(from: amount) ?? String(amount)
+                        newEnteredBolusString = viewModel.formatBolusAmount(amount)
                     }
                     enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                 }
@@ -227,18 +227,12 @@ struct BolusEntryView: View {
         }
     }
 
-    private static let doseAmountFormatter: NumberFormatter = {
-        let quantityFormatter = QuantityFormatter()
-        quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
-        return quantityFormatter.numberFormatter
-    }()
-
     private var recommendedBolusRow: some View {
         HStack {
             Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
             Spacer()
             HStack(alignment: .firstTextBaseline) {
-                Text(recommendedBolusString)
+                Text(viewModel.recommendedBolusString)
                     .font(.title)
                     .foregroundColor(Color(.label))
                 bolusUnitsLabel
@@ -247,19 +241,9 @@ struct BolusEntryView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var recommendedBolusString: String {
-        guard let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) else {
-            return "–"
-        }
-        return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-    }
-
     private func didBeginEditing() {
         if !editedBolusAmount {
-            enteredBolusString = ""
-            DispatchQueue.main.async {
-                self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
-            }
+            enteredBolusStringBinding.wrappedValue = ""
             editedBolusAmount = true
         }
     }
@@ -271,7 +255,7 @@ struct BolusEntryView: View {
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
                     text: enteredBolusStringBinding,
-                    placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
+                    placeholder: viewModel.formatBolusAmount(0.0),
                     font: .preferredFont(forTextStyle: .title1),
                     textColor: .loopAccent,
                     textAlignment: .right,
@@ -294,10 +278,10 @@ struct BolusEntryView: View {
 
     private var enteredBolusStringBinding: Binding<String> {
         Binding(
-            get: { self.enteredBolusString },
+            get: { enteredBolusString },
             set: { newValue in
-                self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: Self.doseAmountFormatter.number(from: newValue)?.doubleValue ?? 0)
-                self.enteredBolusString = newValue
+                viewModel.updateEnteredBolus(newValue)
+                enteredBolusString = newValue
             }
         )
     }

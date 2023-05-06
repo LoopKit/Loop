@@ -33,7 +33,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     var onboardingManager: OnboardingManager!
 
-    var closedLoopStatus: ClosedLoopStatus!
+    var automaticDosingStatus: AutomaticDosingStatus!
     
     var alertPermissionsChecker: AlertPermissionsChecker!
 
@@ -46,8 +46,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func viewDidLoad() {
 
         super.viewDidLoad()
+        
+        setupToolbarItems()
+        
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
+        tableView.register(MuteAlertsWarningCell.self, forCellReuseIdentifier: MuteAlertsWarningCell.className)
 
         if FeatureFlags.predictedGlucoseChartClampEnabled {
             statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
@@ -112,9 +116,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             },
         ]
 
-        closedLoopStatus.$isClosedLoop
+        automaticDosingStatus.$automaticDosingEnabled
             .receive(on: DispatchQueue.main)
-            .sink { self.closedLoopStatusChanged($0) }
+            .sink { self.automaticDosingStatusChanged($0) }
             .store(in: &cancellables)
 
         alertMuter.$configuration
@@ -135,14 +139,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         // Estimate an initial value
         landscapeMode = UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height
-
-        // Toolbar
-        toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
-        toolbarItems![0].tintColor = UIColor.carbTintColor
-        toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
-        toolbarItems![4].tintColor = UIColor.insulinTintColor
-        toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
-        toolbarItems![8].tintColor = UIColor.secondaryLabel
 
         addScenarioStepGestureRecognizers()
 
@@ -165,6 +161,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         navigationController?.setNavigationBarHidden(true, animated: animated)
         navigationController?.setToolbarHidden(false, animated: animated)
+        
+        setupToolbarItems()
+        updateToolbarItems()
 
         alertPermissionsChecker.checkNow()
 
@@ -261,15 +260,40 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
     }
 
+    private func setupToolbarItems() {
+        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+        let carbs = UIBarButtonItem(image: UIImage(named: "carbs"), style: .plain, target: self, action: #selector(userTappedAddCarbs))
+        let preMeal = createPreMealButtonItem(selected: false, isEnabled: true)
+        let bolus = UIBarButtonItem(image: UIImage(named: "bolus"), style: .plain, target: self, action: #selector(presentBolusScreen))
+        let workout = createWorkoutButtonItem(selected: false, isEnabled: true)
+        let settings = UIBarButtonItem(image: UIImage(named: "settings"), style: .plain, target: self, action: #selector(onSettingsTapped))
+        
+        toolbarItems = [
+            carbs,
+            space,
+            preMeal,
+            space,
+            bolus,
+            space,
+            workout,
+            space,
+            settings
+        ]
+    }
+    
     private func updateToolbarItems() {
         let isPumpOnboarded = onboardingManager.isComplete || deviceManager.pumpManager?.isOnboarded == true
-        let isClosedLoop = closedLoopStatus.isClosedLoop
 
+        toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
         toolbarItems![0].isEnabled = isPumpOnboarded
-        toolbarItems![2].isEnabled = isPumpOnboarded && (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+        toolbarItems![0].tintColor = UIColor.carbTintColor
+        toolbarItems![2].isEnabled = isPumpOnboarded && (automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
+        toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
         toolbarItems![4].isEnabled = isPumpOnboarded
+        toolbarItems![4].tintColor = UIColor.insulinTintColor
         toolbarItems![6].isEnabled = isPumpOnboarded
-        toolbarItems![8].isEnabled = true
+        toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
+        toolbarItems![8].tintColor = UIColor.secondaryLabel
     }
 
     public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil {
@@ -384,7 +408,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var carbsOnBoard: HKQuantity?
         let startDate = charts.startDate
         let basalDeliveryState = self.basalDeliveryState
-        let isClosedLoop = closedLoopStatus.isClosedLoop
+        let automaticDosingEnabled = automaticDosingStatus.automaticDosingEnabled
 
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
@@ -491,7 +515,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         }
 
-        updatePreMealModeAvailability(isClosedLoop: isClosedLoop)
+        updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
 
         if deviceManager.loopManager.settings.preMealTargetRange == nil {
             preMealMode = nil
@@ -512,7 +536,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let glucoseSamples = glucoseSamples {
                 self.statusCharts.setGlucoseValues(glucoseSamples)
             }
-            if (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled), let predictedGlucoseValues = predictedGlucoseValues {
+            if (automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled), let predictedGlucoseValues = predictedGlucoseValues {
                 self.statusCharts.setPredictedGlucoseValues(predictedGlucoseValues)
             } else {
                 self.statusCharts.setPredictedGlucoseValues([])
@@ -615,7 +639,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private enum Section: Int, CaseIterable {
-        case alertPermissionsDisabledWarning
+        case alertWarning
         case hud
         case status
         case charts
@@ -661,7 +685,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case pumpSuspended(resuming: Bool)
         case onboardingSuspended
         case recommendManualGlucoseEntry
-        case tempMuteAlerts
 
         var hasRow: Bool {
             switch self {
@@ -700,22 +723,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
             !premealOverride.hasFinished()
         {
             statusRowMode = .scheduleOverrideEnabled(premealOverride)
-        } else if alertMuter.shouldMuteAlert() {
-            statusRowMode = .tempMuteAlerts
         } else {
             statusRowMode = .hidden
         }
 
         return statusRowMode
     }
-    
+
+    private var shouldShowBannerWarning: Bool {
+        alertPermissionsChecker.showWarning || alertMuter.configuration.shouldMute
+    }
+
     private func updateBannerRow(animated: Bool) {
-        let warningWasVisible = tableView.numberOfRows(inSection: Section.alertPermissionsDisabledWarning.rawValue) != 0
-        let showWarning = alertPermissionsChecker.showWarning
-        if !showWarning && warningWasVisible {
-            tableView.deleteRows(at: [IndexPath(row: 0, section: Section.alertPermissionsDisabledWarning.rawValue)], with: animated ? .top : .none)
-        } else if showWarning && !warningWasVisible {
-            tableView.insertRows(at: [IndexPath(row: 0, section: Section.alertPermissionsDisabledWarning.rawValue)], with: animated ? .top : .none)
+        let warningWasVisible = tableView.numberOfRows(inSection: Section.alertWarning.rawValue) != 0
+        if !shouldShowBannerWarning && warningWasVisible {
+            tableView.deleteRows(at: [IndexPath(row: 0, section: Section.alertWarning.rawValue)], with: animated ? .top : .none)
+        } else if shouldShowBannerWarning && !warningWasVisible {
+            tableView.insertRows(at: [IndexPath(row: 0, section: Section.alertWarning.rawValue)], with: animated ? .top : .none)
+        } else {
+            tableView.reloadRows(at: [IndexPath(row: 0, section: Section.alertWarning.rawValue)], with: .none)
         }
     }
 
@@ -798,13 +824,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
             guard oldValue != preMealMode else {
                 return
             }
-            updatePreMealModeAvailability(isClosedLoop: closedLoopStatus.isClosedLoop)
+            updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingStatus.automaticDosingEnabled)
         }
     }
 
-    private func updatePreMealModeAvailability(isClosedLoop: Bool) {
+    private func updatePreMealModeAvailability(automaticDosingEnabled: Bool) {
         let allowed = onboardingManager.isComplete &&
-                (isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled)
+                (automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
                 && deviceManager.loopManager.settings.preMealTargetRange != nil
         toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
     }
@@ -832,8 +858,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
-        case .alertPermissionsDisabledWarning:
-            return alertPermissionsChecker.showWarning ? 1 : 0
+        case .alertWarning:
+            return shouldShowBannerWarning ? 1 : 0
         case .hud:
             return shouldShowHUD ? 1 : 0
         case .charts:
@@ -844,7 +870,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private class AlertPermissionsDisabledWarningCell: UITableViewCell {
-         
         override func updateConfiguration(using state: UICellConfigurationState) {
             super.updateConfiguration(using: state)
 
@@ -879,12 +904,55 @@ final class StatusTableViewController: LoopChartsTableViewController {
             contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
         }
     }
+
+    private class MuteAlertsWarningCell: UITableViewCell {
+        var formattedAlertMuteEndTime: String = NSLocalizedString("Unknown", comment: "label for when the alert mute end time is unknown")
+
+        override func updateConfiguration(using state: UICellConfigurationState) {
+            super.updateConfiguration(using: state)
+
+            let adjustViewForNarrowDisplay = bounds.width < 350
+
+            var contentConfig = defaultContentConfiguration().updated(for: state)
+            let title = NSMutableAttributedString(string: NSLocalizedString("All Alerts Muted", comment: "Warning text for when alerts are muted"))
+            contentConfig.image = UIImage(systemName: "speaker.slash.fill")
+            contentConfig.imageProperties.tintColor = .white
+            contentConfig.attributedText = title
+            contentConfig.textProperties.color = .white
+            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
+            contentConfig.textProperties.adjustsFontSizeToFitWidth = true
+            contentConfig.secondaryText = String(format: NSLocalizedString("Until %1$@", comment: "indication of when alerts will be unmuted (1: time when alerts unmute)"), formattedAlertMuteEndTime)
+            contentConfig.secondaryTextProperties.color = .white
+            contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
+            contentConfiguration = contentConfig
+
+            var backgroundConfig = backgroundConfiguration?.updated(for: state)
+            backgroundConfig?.backgroundColor = .warning.withAlphaComponent(0.8)
+            backgroundConfiguration = backgroundConfig
+            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10)
+            backgroundConfiguration?.cornerRadius = 10
+
+            let unmuteIndicator = UIImage(systemName: "stop.circle")?.withTintColor(.white)
+            let imageView = UIImageView(image: unmuteIndicator)
+            imageView.tintColor = .white
+            imageView.frame.size = CGSize(width: 30, height: 30)
+            accessoryView = imageView
+
+            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
+        }
+    }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch Section(rawValue: indexPath.section)! {
-        case .alertPermissionsDisabledWarning:
-            let cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
-            return cell
+        case .alertWarning:
+            if alertPermissionsChecker.showWarning {
+                let cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: MuteAlertsWarningCell.className, for: indexPath) as! MuteAlertsWarningCell
+                cell.formattedAlertMuteEndTime = alertMuter.formattedEndTime
+                return cell
+            }
         case .hud:
             let cell = tableView.dequeueReusableCell(withIdentifier: HUDViewTableViewCell.className, for: indexPath) as! HUDViewTableViewCell
             hudView = cell.hudView
@@ -899,7 +967,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     return self?.statusCharts.glucoseChart(withFrame: frame)?.view
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
-                cell.doesNavigate = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
+                cell.doesNavigate = automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.iobChart(withFrame: frame)?.view
@@ -940,11 +1008,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             switch StatusRow(rawValue: indexPath.row)! {
             case .status:
                 switch statusRowMode {
-                case .tempMuteAlerts:
-                    //TODO testing (need design to make the correct status row)
-                    let cell = getTitleSubtitleCell()
-                    cell.titleLabel.text = NSLocalizedString("Temp Mute Alerts", comment: "The title of the cell indicating alerts are temporarily muted")
-                    return cell
                 case .hidden:
                     let cell = getTitleSubtitleCell()
                     return cell
@@ -1059,7 +1122,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 } else {
                     cell.setSubtitleLabel(label: nil)
                 }
-                cell.doesNavigate = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
+                cell.doesNavigate = automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 if let currentIOB = currentIOBDescription {
                     cell.setSubtitleLabel(label: currentIOB)
@@ -1083,7 +1146,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     cell.setSubtitleLabel(label: nil)
                 }
             }
-        case .hud, .status, .alertPermissionsDisabledWarning:
+        case .hud, .status, .alertWarning:
             break
         }
     }
@@ -1104,16 +1167,21 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case .iob, .dose, .cob:
                 return max(106, 0.21 * availableSize)
             }
-        case .hud, .status, .alertPermissionsDisabledWarning:
+        case .hud, .status, .alertWarning:
             return UITableView.automaticDimension
         }
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section)! {
-        case .alertPermissionsDisabledWarning:
-            tableView.deselectRow(at: indexPath, animated: true)
-            AlertPermissionsChecker.gotoSettings()
+        case .alertWarning:
+            if alertPermissionsChecker.showWarning {
+                tableView.deselectRow(at: indexPath, animated: true)
+                AlertPermissionsChecker.gotoSettings()
+            } else {
+                tableView.deselectRow(at: indexPath, animated: true)
+                presentUnmuteAlertConfirmation()
+            }
         case .hud:
             break
         case .status:
@@ -1179,7 +1247,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
-                if closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled {
+                if automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled {
                     performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
                 }
             case .iob, .dose:
@@ -1188,6 +1256,20 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
             }
         }
+    }
+
+    private func presentUnmuteAlertConfirmation() {
+        let title = NSLocalizedString("Unmute Alerts?", comment: "The alert title for unmute alert confirmation")
+        let body = NSLocalizedString("Tap Unmute to resume sound for your alerts and alarms.", comment: "The alert body for unmute alert confirmation")
+        let action = UIAlertAction(
+            title: NSLocalizedString("Unmute", comment: "The title of the action used to unmute alerts"),
+            style: .default) { _ in
+                self.alertMuter.unmuteAlerts()
+            }
+        let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
+        alert.addAction(action)
+        alert.addCancelAction { _ in }
+        present(alert, animated: true, completion: nil)
     }
 
     private func presentErrorCancelingBolus(_ error: (Error)) {
@@ -1224,7 +1306,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         switch targetViewController {
         case let vc as CarbAbsorptionViewController:
             vc.isOnboardingComplete = onboardingManager.isComplete
-            vc.closedLoopStatus = closedLoopStatus
+            vc.automaticDosingStatus = automaticDosingStatus
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
         case let vc as InsulinDeliveryTableViewController:
@@ -1257,7 +1339,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentCarbEntryScreen(_ activity: NSUserActivity?) {
         let navigationWrapper: UINavigationController
-        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
             if let activity = activity {
                 viewModel.restoreUserActivityState(activity)
@@ -1287,7 +1369,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentBolusEntryView(enableManualGlucoseEntry: Bool = false) {
         let hostingController: DismissibleHostingController
-        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: false)
             let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
@@ -1461,7 +1543,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           therapySettings: { [weak self] in self?.deviceManager.loopManager.therapySettings ?? TherapySettings() },
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
-                                          isClosedLoopAllowed: closedLoopStatus.$isClosedLoopAllowed,
+                                          isClosedLoopAllowed: automaticDosingStatus.$isAutomaticDosingAllowed,
                                           supportInfoProvider: deviceManager,
                                           automaticDosingStrategy: deviceManager.loopManager.settings.automaticDosingStrategy,
                                           applyLinearRampToBolusApplicationFactor: deviceManager.loopManager.settings.applyLinearRampToBolusApplicationFactor,
@@ -1499,9 +1581,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         show(settings, sender: self)
     }
 
-    private func closedLoopStatusChanged(_ isClosedLoop: Bool) {
-        updatePreMealModeAvailability(isClosedLoop: isClosedLoop)
-        hudView?.loopCompletionHUD.loopIconClosed = isClosedLoop
+    private func automaticDosingStatusChanged(_ automaticDosingEnabled: Bool) {
+        updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
+        hudView?.loopCompletionHUD.loopIconClosed = automaticDosingEnabled
         hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
     }
 
@@ -1528,7 +1610,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             // when HUD view is initialized, update loop completion HUD (e.g., icon and last loop completed)
             hudView.loopCompletionHUD.stateColors = .loopStatus
-            hudView.loopCompletionHUD.loopIconClosed = closedLoopStatus.isClosedLoop
+            hudView.loopCompletionHUD.loopIconClosed = automaticDosingStatus.automaticDosingEnabled
             hudView.loopCompletionHUD.lastLoopCompleted = deviceManager.loopManager.lastLoopCompleted
 
             hudView.cgmStatusHUD.stateColors = .cgmStatus

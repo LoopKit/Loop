@@ -61,6 +61,12 @@ public class CGMStatusHUDViewModel {
                 // If there is a current manual glucose, it displays the current status highlight icon
                 setManualGlucoseTrendIconOverride()
             }
+
+            if let localizedMessage = storedStatusHighlight?.localizedMessage.replacingOccurrences(of: "\n", with: " "),
+               let statusStateMessage = storedStatusHighlight?.state.localizedDescription
+            {
+                accessibilityString = localizedMessage + ", " + statusStateMessage
+            }
         }
     }
     
@@ -158,6 +164,12 @@ public class CGMStatusHUDViewModel {
             accessibilityStrings.append(trend.localizedDescription)
         } else {
             glucoseTrendTintColor = .glucoseTintColor
+        }
+
+        if let statusStateMessage = storedStatusHighlight?.state.localizedDescription,
+           let localizedMessage = storedStatusHighlight?.localizedMessage.replacingOccurrences(of: "\n", with: " ")
+        {
+            accessibilityStrings.append(localizedMessage + ", " + statusStateMessage)
         }
                 
         unitsString = unit.localizedShortUnitString

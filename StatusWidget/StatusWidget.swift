@@ -223,7 +223,6 @@ extension Date {
     }
 }
 
-@main
 struct SmallStatusWidget: Widget {
     let kind: String = "SmallStatusWidget"
 
@@ -235,4 +234,11 @@ struct SmallStatusWidget: Widget {
         .description("See your current blood glucose and insulin delivery.")
         .supportedFamilies([.systemSmall])
     }
+}
+
+@main
+struct SmallStatusWidgets: WidgetBundle {
+    var body: some Widget {
+        SmallStatusWidget()
+   }
 }

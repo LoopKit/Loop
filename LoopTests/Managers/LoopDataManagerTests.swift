@@ -110,7 +110,7 @@ class LoopDataManagerTests: XCTestCase {
         now = currentDate
         
         dosingDecisionStore = MockDosingDecisionStore()
-        automaticDosingStatus = AutomaticDosingStatus(isClosedLoop: true, isClosedLoopAllowed: true)
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)
         loopDataManager = LoopDataManager(
             lastLoopCompleted: currentDate,
             basalDeliveryState: basalDeliveryState ?? .active(currentDate),

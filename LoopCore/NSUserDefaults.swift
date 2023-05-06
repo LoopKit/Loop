@@ -139,7 +139,12 @@ extension UserDefaults {
     }
     
     public var allowDebugFeatures: Bool {
-        return bool(forKey: Key.allowDebugFeatures.rawValue)
+        get {
+            bool(forKey: Key.allowDebugFeatures.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.allowDebugFeatures.rawValue)
+        }
     }
 
     public var allowSimulators: Bool {

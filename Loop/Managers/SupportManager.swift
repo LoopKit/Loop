@@ -103,8 +103,9 @@ extension SupportManager {
 // MARK: Version checking
 extension SupportManager {
     func performCheck() {
-        checkVersion { [weak self] versionUpdate in
-            self?.notify(versionUpdate)
+        Task { @MainActor in
+            let versionUpdate = await checkVersion()
+            self.notify(versionUpdate)
         }
     }
     
@@ -114,37 +115,41 @@ extension SupportManager {
         }
     }
         
-    func checkVersion(completion: @escaping (VersionUpdate) -> Void) {
-        let group = DispatchGroup()
-        var results = [String: Result<VersionUpdate?, Error>]()
-        supports.value.values.forEach { support in
-            group.enter()
-            support.checkVersion(bundleIdentifier: Bundle.main.bundleIdentifier!, currentVersion: Bundle.main.shortVersionString) { result in
-                results[support.identifier] = result
-                group.leave()
+    func checkVersion() async -> VersionUpdate {
+
+        let results = await withTaskGroup(of: (VersionUpdate?,String).self) { group in
+            var updatesFromServices = [(VersionUpdate?,String)]()
+
+            supports.value.values.forEach { support in
+                group.addTask {
+                    return (await support.checkVersion(bundleIdentifier: Bundle.main.bundleIdentifier!, currentVersion: Bundle.main.shortVersionString), support.identifier)
+                }
             }
+
+            for await update in group {
+                updatesFromServices.append(update)
+            }
+
+            return updatesFromServices
         }
-        group.notify(queue: DispatchQueue.main) { [weak self] in
-            guard let self = self else { return }
-            self.saveState()
-            let (identifierWithHighestVersionUpdate, aggregatedVersionUpdate) = self.aggregate(results: results)
-            self.identifierWithHighestVersionUpdate = identifierWithHighestVersionUpdate
-            completion(aggregatedVersionUpdate)
-        }
+
+        self.saveState()
+        let (identifierWithHighestVersionUpdate, aggregatedVersionUpdate) = self.aggregate(results: results)
+        self.identifierWithHighestVersionUpdate = identifierWithHighestVersionUpdate
+        return aggregatedVersionUpdate
     }
 
-    private func aggregate(results: [String : Result<VersionUpdate?, Error>]) -> (String?, VersionUpdate) {
+    private func aggregate(results: [(VersionUpdate?,String)]) -> (String?, VersionUpdate) {
         var aggregatedVersionUpdate = VersionUpdate.default
         var identifierWithHighestVersionUpdate: String?
-        results.forEach { key, value in
-            switch value {
-            case .failure(let error):
-                self.log.error("Error from version check %{public}@: %{public}@", key, error.localizedDescription)
-            case .success(let versionUpdate):
-                if let versionUpdate = versionUpdate, versionUpdate > aggregatedVersionUpdate {
+        results.forEach { versionUpdate, identifier in
+            if let versionUpdate {
+                if versionUpdate > aggregatedVersionUpdate {
                     aggregatedVersionUpdate = versionUpdate
-                    identifierWithHighestVersionUpdate = key
+                    identifierWithHighestVersionUpdate = identifier
                 }
+            } else {
+                self.log.error("Version check failed for %{public}@", identifier)
             }
         }
         return (identifierWithHighestVersionUpdate, aggregatedVersionUpdate)
@@ -225,8 +230,8 @@ extension SupportManager {
 fileprivate extension Result where Success == VersionUpdate? {
     var value: VersionUpdate {
         switch self {
-        case .failure: return .none
-        case .success(let val): return val ?? .none
+        case .failure: return .noUpdateNeeded
+        case .success(let val): return val ?? .noUpdateNeeded
         }
     }
 }

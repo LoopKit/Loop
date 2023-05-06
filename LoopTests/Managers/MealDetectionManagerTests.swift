@@ -33,6 +33,8 @@ enum MissedMealTestType {
     case dynamicCarbAutofill
     /// Test case for purely testing the notifications (not the algorithm)
     case notificationTest
+    /// Test case for testing the algorithm with settings in mmol/L
+    case mmolUser
 }
 
 extension MissedMealTestType {
@@ -48,7 +50,7 @@ extension MissedMealTestType {
             return "noisy_cgm_counteraction_effect"
         case .manyMeals, .missedMealWithCOB:
             return "realistic_report_counteraction_effect"
-        case .dynamicCarbAutofill:
+        case .dynamicCarbAutofill, .mmolUser:
             return "dynamic_autofill_counteraction_effect"
         }
     }
@@ -65,7 +67,7 @@ extension MissedMealTestType {
             return Self.dateFormatter.date(from: "2022-10-19T19:50:15")!
         case .manyMeals:
             return Self.dateFormatter.date(from: "2022-10-19T21:50:15")!
-        case .dynamicCarbAutofill:
+        case .dynamicCarbAutofill, .mmolUser:
             return Self.dateFormatter.date(from: "2022-10-17T07:51:09")!
         }
     }
@@ -78,7 +80,7 @@ extension MissedMealTestType {
             return Self.dateFormatter.date(from: "2022-10-19T19:00:00")
         case .manyMeals:
             return Self.dateFormatter.date(from: "2022-10-19T20:40:00 ")
-        case .dynamicCarbAutofill:
+        case .dynamicCarbAutofill, .mmolUser:
             return Self.dateFormatter.date(from: "2022-10-17T07:20:00")!
         default:
             return nil
@@ -136,13 +138,26 @@ extension MissedMealTestType {
     }
     
     var insulinSensitivitySchedule: InsulinSensitivitySchedule {
-        InsulinSensitivitySchedule(
-            unit: HKUnit.milligramsPerDeciliter,
-            dailyItems: [
-                RepeatingScheduleValue(startTime: 0.0, value: 50.0)
-            ],
-            timeZone: .utcTimeZone
-        )!
+        let value = 50.0
+        switch self {
+        case .mmolUser:
+            return InsulinSensitivitySchedule(
+                unit: HKUnit.millimolesPerLiter,
+                dailyItems: [
+                    RepeatingScheduleValue(startTime: 0.0,
+                                           value: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: value).doubleValue(for: .millimolesPerLiter))
+                ],
+                timeZone: .utcTimeZone
+            )!
+        default:
+            return InsulinSensitivitySchedule(
+                unit: HKUnit.milligramsPerDeciliter,
+                dailyItems: [
+                    RepeatingScheduleValue(startTime: 0.0, value: value)
+                ],
+                timeZone: .utcTimeZone
+            )!
+        }
     }
 }
 
@@ -330,6 +345,19 @@ class MealDetectionManagerTests: XCTestCase {
         updateGroup.enter()
         mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 40))
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+    }
+    
+    func testMMOLUser() {
+        let testType = MissedMealTestType.mmolUser
+        let counteractionEffects = setUp(for: testType)
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+            XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 25))
             updateGroup.leave()
         }
         updateGroup.wait()
