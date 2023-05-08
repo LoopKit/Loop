@@ -8,11 +8,14 @@
 
 import XCTest
 import Loop
+import LoopKit
+import ZIPFoundation
+
 
 class ZipArchiveTests: XCTestCase {
     var url: URL!
     var archive: ZipArchive!
-    var outputStream: OutputStream?
+    var outputStream: DataOutputStream?
 
     override func setUp() {
         url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
@@ -20,9 +23,7 @@ class ZipArchiveTests: XCTestCase {
     }
 
     override func tearDown() {
-        if outputStream?.streamStatus == .open {
-           outputStream?.close()
-        }
+        try? outputStream?.finish(sync: true)
         archive.close()
         try? FileManager.default.removeItem(at: url)
     }
@@ -39,62 +40,17 @@ class ZipArchiveTests: XCTestCase {
     func testCreateWriteCloseArchiveFile() {
         outputStream = archive.createArchiveFile(withPath: "testCreateWriteCloseArchiveFile")
         XCTAssertNotNil(outputStream)
-        XCTAssertEqual(outputStream?.streamStatus, .notOpen)
         XCTAssertNil(outputStream?.streamError)
-        outputStream?.open()
-        XCTAssertEqual(outputStream?.streamStatus, .open)
-        XCTAssertEqual(outputStream?.hasSpaceAvailable, true)
         XCTAssertNoThrow(try outputStream?.write("testCreateWriteCloseArchiveFile"))
-        outputStream?.close()
-        XCTAssertEqual(outputStream?.streamStatus, .closed)
+        XCTAssertNoThrow(try outputStream?.finish(sync: true))
         XCTAssertNil(archive.close())
-    }
-
-    func testCreateWriteArchiveFileWithoutOpen() {
-        outputStream = archive.createArchiveFile(withPath: "testCreateWriteArchiveFileWithoutOpen")
-        XCTAssertNotNil(outputStream)
-        XCTAssertThrowsError(try outputStream?.write("testCreateWriteArchiveFileWithoutOpen"))
-        XCTAssertEqual(outputStream?.streamStatus, .error)
-        XCTAssertEqual(outputStream?.streamError as? ZipArchiveError, ZipArchiveError.unexpectedStatus(.notOpen))
-        XCTAssertEqual(archive.close() as? ZipArchiveError, ZipArchiveError.unexpectedStatus(.notOpen))
     }
 
     func testCreateWriteArchiveFileAfterClose() {
         outputStream = archive.createArchiveFile(withPath: "testCreateWriteArchiveFileAfterClose")
         XCTAssertNotNil(outputStream)
-        outputStream?.open()
-        outputStream?.close()
+        XCTAssertNoThrow(try outputStream?.finish(sync: true))
         XCTAssertThrowsError(try outputStream?.write("testCreateWriteArchiveFileAfterClose"))
-        XCTAssertEqual(outputStream?.streamStatus, .error)
-        XCTAssertEqual(outputStream?.streamError as? ZipArchiveError, ZipArchiveError.unexpectedStatus(.closed))
-        XCTAssertEqual(archive.close() as? ZipArchiveError, ZipArchiveError.unexpectedStatus(.closed))
-    }
-
-    func testCreateWriteCloseArchiveFileWithCompressionNone() {
-        outputStream = archive.createArchiveFile(withPath: "testCreateWriteCloseArchiveFileWithCompressionNone", compression: .bestSpeed)
-        XCTAssertNotNil(outputStream)
-        outputStream?.open()
-        XCTAssertNoThrow(try outputStream?.write("testCreateWriteCloseArchiveFileWithCompressionNone"))
-        outputStream?.close()
-        XCTAssertNil(archive.close())
-    }
-
-    func testCreateWriteCloseArchiveFileWithCompressionBestSpeed() {
-        outputStream = archive.createArchiveFile(withPath: "testCreateWriteCloseArchiveFileWithCompressionBestSpeed", compression: .bestSpeed)
-        XCTAssertNotNil(outputStream)
-        outputStream?.open()
-        XCTAssertNoThrow(try outputStream?.write("testCreateWriteCloseArchiveFileWithCompressionBestSpeed"))
-        outputStream?.close()
-        XCTAssertNil(archive.close())
-    }
-
-    func testCreateWriteCloseArchiveFileWithCompressionBestCompression() {
-        outputStream = archive.createArchiveFile(withPath: "testCreateWriteCloseArchiveFileWithCompressionBestCompression", compression: .bestCompression)
-        XCTAssertNotNil(outputStream)
-        outputStream?.open()
-        XCTAssertNoThrow(try outputStream?.write("testCreateWriteCloseArchiveFileWithCompressionBestCompression"))
-        outputStream?.close()
-        XCTAssertNil(archive.close())
     }
 
     func testCreateArchiveFileWithContents() {
@@ -102,28 +58,59 @@ class ZipArchiveTests: XCTestCase {
         XCTAssertNoThrow(try "testCreateArchiveFileWithContents".data(using: .utf8)!.write(to: contentsURL))
         XCTAssertNil(archive.createArchiveFile(withPath: "testCreateArchiveFileWithContents", contentsOf: contentsURL))
         XCTAssertNil(archive.close())
+
+        let archive = Archive(url: url, accessMode: .read)
+        XCTAssertNotNil(archive)
+
+        let entry = archive!["testCreateArchiveFileWithContents"]
+        XCTAssertNotNil(entry)
+
+        XCTAssertEqual(entry!.type, .file)
+        XCTAssertEqual(entry!.path, "testCreateArchiveFileWithContents")
+
+        var extractedData = Data()
+
+        let _ = try? archive!.extract(entry!, consumer: { (data) in
+            extractedData.append(data)
+        })
+
+        XCTAssertEqual(String(data: extractedData, encoding: .utf8), "testCreateArchiveFileWithContents")
     }
 
-    func testCreateArchiveFileWithContentsCompressionNone() {
-        let contentsURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        XCTAssertNoThrow(try "testCreateArchiveFileWithContentsCompressionNone".data(using: .utf8)!.write(to: contentsURL))
-        XCTAssertNil(archive.createArchiveFile(withPath: "testCreateArchiveFileWithContentsCompressionNone", contentsOf: contentsURL, compression: .none))
+    func testCreateArchiveFileWithMultipleFiles() {
+        let contentsURL1 = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        XCTAssertNoThrow(try "testCreateArchiveFileWithContents1".data(using: .utf8)!.write(to: contentsURL1))
+        let contentsURL2 = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        XCTAssertNoThrow(try "testCreateArchiveFileWithContents2".data(using: .utf8)!.write(to: contentsURL2))
+
+        XCTAssertNil(archive.createArchiveFile(withPath: "testCreateArchiveFileWithContents1", contentsOf: contentsURL1))
+        XCTAssertNil(archive.createArchiveFile(withPath: "testCreateArchiveFileWithContents2", contentsOf: contentsURL2))
         XCTAssertNil(archive.close())
+
+        let archive = Archive(url: url, accessMode: .read)
+        XCTAssertNotNil(archive)
+
+        let entry1 = archive!["testCreateArchiveFileWithContents1"]
+        XCTAssertNotNil(entry1)
+        XCTAssertEqual(entry1!.type, .file)
+        XCTAssertEqual(entry1!.path, "testCreateArchiveFileWithContents1")
+        var extractedData1 = Data()
+        let _ = try? archive!.extract(entry1!, consumer: { (data) in
+            extractedData1.append(data)
+        })
+        XCTAssertEqual(String(data: extractedData1, encoding: .utf8), "testCreateArchiveFileWithContents1")
+
+        let entry2 = archive!["testCreateArchiveFileWithContents2"]
+        XCTAssertNotNil(entry2)
+        XCTAssertEqual(entry2!.type, .file)
+        XCTAssertEqual(entry2!.path, "testCreateArchiveFileWithContents2")
+        var extractedData2 = Data()
+        let _ = try? archive!.extract(entry2!, consumer: { (data) in
+            extractedData2.append(data)
+        })
+        XCTAssertEqual(String(data: extractedData2, encoding: .utf8), "testCreateArchiveFileWithContents2")
     }
 
-    func testCreateArchiveFileWithContentsCompressionBestSpeed() {
-        let contentsURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        XCTAssertNoThrow(try "testCreateArchiveFileWithContentsCompressionBestSpeed".data(using: .utf8)!.write(to: contentsURL))
-        XCTAssertNil(archive.createArchiveFile(withPath: "testCreateArchiveFileWithContentsCompressionBestSpeed", contentsOf: contentsURL, compression: .bestSpeed))
-        XCTAssertNil(archive.close())
-    }
-
-    func testCreateArchiveFileWithContentsCompressionBestCompression() {
-        let contentsURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        XCTAssertNoThrow(try "testCreateArchiveFileWithContents".data(using: .utf8)!.write(to: contentsURL))
-        XCTAssertNil(archive.createArchiveFile(withPath: "testCreateArchiveFileWithContents", contentsOf: contentsURL, compression: .bestCompression))
-        XCTAssertNil(archive.close())
-    }
 }
 
 fileprivate extension OutputStream {
