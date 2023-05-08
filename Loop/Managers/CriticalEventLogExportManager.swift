@@ -323,7 +323,7 @@ public class CriticalEventLogHistoricalExporter: CriticalEventLogBaseExporter, C
             return CriticalEventLogError.cancelled
         }
 
-        purge(now: now.addingTimeInterval(.days(10))) // Purge first to reduce disk space
+        purge(now: now) // Purge first to reduce disk space
 
         do {
             try manager.fileManager.createDirectory(at: manager.directory, withIntermediateDirectories: true, attributes: nil)
