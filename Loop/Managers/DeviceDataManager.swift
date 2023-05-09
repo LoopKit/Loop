@@ -1286,9 +1286,6 @@ extension DeviceDataManager {
             }
             
             insulinDeliveryStore.purgeAllDoseEntries(healthKitPredicate: devicePredicate) { error in
-                if error == nil {
-                    insulinDeliveryStore.test_lastImmutableBasalEndDate = nil
-                }
                 completion?(error)
             }
         }
