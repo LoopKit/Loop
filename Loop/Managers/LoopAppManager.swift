@@ -289,6 +289,8 @@ class LoopAppManager: NSObject {
         self.state = state.next
 
         alertManager.playbackAlertsFromPersistence()
+        
+        askUserToConfirmCrashIfNecessary()
     }
 
     // MARK: - Life Cycle
@@ -401,7 +403,6 @@ class LoopAppManager: NSObject {
     func askUserToConfirmCrashIfNecessary() {
         deviceDataManager.pluginManager.availableSupports.forEach { supportUI in
             if supportUI.loopNeedsReset {
-                supportUI.loopNeedsReset = false
                 alertManager.presentConfirmCrashAlert() { [weak self] completion in
                     guard let pumpManager = self?.deviceDataManager.pumpManager else {
                         supportUI.resetLoop()
