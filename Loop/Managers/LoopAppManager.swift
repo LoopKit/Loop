@@ -290,7 +290,7 @@ class LoopAppManager: NSObject {
 
         alertManager.playbackAlertsFromPersistence()
         
-        askUserToConfirmCrashIfNecessary()
+        askUserToConfirmLoopReset()
     }
 
     // MARK: - Life Cycle
@@ -400,27 +400,68 @@ class LoopAppManager: NSObject {
         return false
     }
     
-    func askUserToConfirmCrashIfNecessary() {
-        deviceDataManager.pluginManager.availableSupports.forEach { supportUI in
-            if supportUI.loopNeedsReset {
-                alertManager.presentConfirmCrashAlert() { [weak self] completion in
+    func askUserToConfirmLoopReset() {
+        if UserDefaults.appGroup?.userRequestedLoopReset == true {
+            alertManager.presentLoopResetConfirmationAlert(
+                confirmAction: { [weak self] completion in
                     guard let pumpManager = self?.deviceDataManager.pumpManager else {
-                        supportUI.resetLoop()
+                        self?.resetLoop()
                         completion()
                         return
                     }
                     
                     pumpManager.prepareForDeactivation() { [weak self] error in
                         guard let error = error else {
-                            supportUI.resetLoop()
+                            self?.resetLoop()
                             completion()
                             return
                         }
                         self?.alertManager.presentCouldNotResetLoopAlert(error: error)
                     }
+                },
+                cancelAction: {
+                    UserDefaults.appGroup?.userRequestedLoopReset = false
                 }
-            }
+            )
         }
+    }
+    
+    private func resetLoop() {
+        deviceDataManager.pluginManager.availableSupports.enumerated().forEach { index, supportUI in
+            supportUI.loopWillReset()
+            
+            if index == deviceDataManager.pluginManager.availableSupports.count - 1 {
+                resetLoopDocuments()
+                resetLoopUserDefaults()
+            }
+            
+            supportUI.loopDidReset()
+        }
+    }
+    
+    private func resetLoopUserDefaults() {
+        // Store values to persist
+        let allowDebugFeatures = UserDefaults.appGroup?.allowDebugFeatures
+
+        // Wipe away whole domain
+        UserDefaults.appGroup?.removePersistentDomain(forName: Bundle.main.appGroupSuiteName)
+
+        // Restore values to persist
+        UserDefaults.appGroup?.allowDebugFeatures = allowDebugFeatures ?? false
+    }
+    
+    private func resetLoopDocuments() {
+        guard let directoryURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Bundle.main.appGroupSuiteName) else {
+            preconditionFailure("Could not get a container directory URL. Please ensure App Groups are set up correctly in entitlements.")
+        }
+        
+        let documents: URL = directoryURL.appendingPathComponent("com.loopkit.LoopKit", isDirectory: true)
+        try? FileManager.default.removeItem(at: documents)
+        
+        guard let localDocuments = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
+            preconditionFailure("Could not get a documents directory URL.")
+        }
+        try? FileManager.default.removeItem(at: localDocuments)
     }
 
     private var rootViewController: UIViewController? {
