@@ -21,6 +21,7 @@ extension UserDefaults {
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
         case LastMissedMealNotification = "com.loopkit.Loop.lastMissedMealNotification"
+        case userRequestedLoopReset = "com.loopkit.Loop.userRequestedLoopReset"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -149,6 +150,15 @@ extension UserDefaults {
 
     public var allowSimulators: Bool {
         return bool(forKey: Key.allowSimulators.rawValue)
+    }
+    
+    public var userRequestedLoopReset: Bool {
+        get {
+            bool(forKey: Key.userRequestedLoopReset.rawValue)
+        }
+        set {
+            setValue(newValue, forKey: Key.userRequestedLoopReset.rawValue)
+        }
     }
 
     public func removeLegacyLoopSettings() {

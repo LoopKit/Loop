@@ -40,10 +40,9 @@ class SupportManagerTests: XCTestCase {
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
         
-        var loopNeedsReset: Bool = false
-        var studyProductSelection: String? = nil
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
-        func resetLoop() {}
+        func loopWillReset() {}
+        func loopDidReset() {}
     }
     class AnotherMockSupport: Mixin, SupportUI {
         func configurationMenuItems() -> [AnyView] { return [] }
@@ -52,10 +51,9 @@ class SupportManagerTests: XCTestCase {
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
         
-        var loopNeedsReset: Bool = false
-        var studyProductSelection: String? = nil
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
-        func resetLoop() {}
+        func loopWillReset() {}
+        func loopDidReset() {}
     }
     
     class MockAlertIssuer: AlertIssuer {
