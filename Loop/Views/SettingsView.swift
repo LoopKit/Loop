@@ -88,9 +88,11 @@ public struct SettingsView: View {
                 if viewModel.servicesViewModel.showServices {
                     servicesSection
                 }
-                supportSection
-                if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
-                    profileExpirationSection(profileExpiration: profileExpiration)
+                Group {
+                    supportSection
+                    if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
+                        profileExpirationSection(profileExpiration: profileExpiration)
+                    }
                 }
             }
             .insetGroupedListStyle()

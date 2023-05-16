@@ -1547,10 +1547,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           isClosedLoopAllowed: automaticDosingStatus.$isAutomaticDosingAllowed,
                                           automaticDosingStrategy: deviceManager.loopManager.settings.automaticDosingStrategy,
+                                          retrospectiveCorrection: deviceManager.loopManager.settings.retrospectiveCorrection,
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
-                                          retrospectiveCorrection: deviceManager.loopManager.settings.retrospectiveCorrection,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
@@ -2135,7 +2135,9 @@ extension StatusTableViewController: SettingsViewModelDelegate {
     }
     
     func retrospectiveCorrectionChanged(_ retrospectiveCorrection: RetrospectiveCorrectionOptions) {
-        self.deviceManager.loopManager.settings.retrospectiveCorrection = retrospectiveCorrection
+        self.deviceManager.loopManager.mutateSettings { settings in
+            settings.retrospectiveCorrection = retrospectiveCorrection
+        }
     }
 
     func dosingEnabledChanged(_ value: Bool) {

@@ -188,6 +188,7 @@ extension SettingsViewModel {
                                  initialDosingEnabled: true,
                                  isClosedLoopAllowed: FakeClosedLoopAllowedPublisher().$mockIsClosedLoopAllowed,
                                  automaticDosingStrategy: .automaticBolus,
+                                 retrospectiveCorrection: .standardRetrospectiveCorrection,
                                  availableSupports: [],
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,
