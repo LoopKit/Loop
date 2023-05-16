@@ -75,9 +75,12 @@ public struct SettingsView: View {
                     }
                 if FeatureFlags.automaticBolusEnabled {
                     dosingStrategySection
+                    if FeatureFlags.automaticBolusEnabled {
+                        dosingStrategySection
+                    }
+                    alertManagementSection
+                    retrospectiveCorrectionSection
                 }
-                alertManagementSection
-                retrospectiveCorrectionSection
                 if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                     configurationSection
                 }
@@ -88,11 +91,9 @@ public struct SettingsView: View {
                 if viewModel.servicesViewModel.showServices {
                     servicesSection
                 }
-                Group {
-                    supportSection
-                    if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
-                        profileExpirationSection(profileExpiration: profileExpiration)
-                    }
+                supportSection
+                if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
+                    profileExpirationSection(profileExpiration: profileExpiration)
                 }
             }
             .insetGroupedListStyle()
