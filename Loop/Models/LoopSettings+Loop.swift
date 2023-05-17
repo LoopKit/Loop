@@ -20,4 +20,16 @@ extension LoopSettings {
 
     static let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
     
+    /// Creates an instance of the enabled retrospective correction implementation    
+    func enabledRetrospectiveCorrectionAlgorithm(retrospectiveCorrection: RetrospectiveCorrectionOptions) -> RetrospectiveCorrection {
+        var enabledRetrospectiveCorrectionAlgorithm: RetrospectiveCorrection
+        switch retrospectiveCorrection {
+        case .standardRetrospectiveCorrection:
+            enabledRetrospectiveCorrectionAlgorithm = StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+        case .integralRetrospectiveCorrection:
+            enabledRetrospectiveCorrectionAlgorithm = IntegralRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+        }
+        return enabledRetrospectiveCorrectionAlgorithm
+    }
+    
 }

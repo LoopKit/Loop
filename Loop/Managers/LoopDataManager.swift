@@ -124,14 +124,8 @@ final class LoopDataManager {
         self.trustedTimeOffset = trustedTimeOffset
 
         /// Creates an instance of the enabled retrospective correction implementation
-        // retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
-        switch settings.retrospectiveCorrection {
-        case .standardRetrospectiveCorrection:
-            retrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
-        case .integralRetrospectiveCorrection:
-            retrospectiveCorrection = IntegralRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
-        }
-
+        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm(retrospectiveCorrection: settings.retrospectiveCorrection)
+        
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
                 return
