@@ -57,7 +57,7 @@ extension RetrospectiveCorrectionOptions {
         case .standardRetrospectiveCorrection:
             return NSLocalizedString("Correcton to glucose forecast based on the most recent 30 min comparison of glucose prediction vs actual, continued with decay over 60 min.", comment: "Description string for standard retrospective correction")
         case .integralRetrospectiveCorrection:
-            return NSLocalizedString("Correction to glucose forecast based on the most recent and past 30 min discrepancies between glucose prediction vs actual. Compared to standard retrospective correction, integral retrospective correction results in increased insulin corrections when glucose persistently drops slower than expected, and in reduced insulin delivery when glucose persistently drops faster than expected.", comment: "Description string for integral retrospective correction")
+            return NSLocalizedString("Correction to glucose forecast based on the history of discrepancies between glucose prediction based on carb and insuln data vs actual. Results in increased insulin corrections when glucose is persistently higher than expected, and in reduced insulin delivery when glucose is persistently lower than expected.", comment: "Description string for integral retrospective correction")
         }
     }
 
