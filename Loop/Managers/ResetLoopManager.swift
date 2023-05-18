@@ -24,7 +24,7 @@ class ResetLoopManager {
     
     private weak var delegate: ResetLoopManagerDelegate?
     
-    private var loopHasReset: Bool = false
+    private var loopIsAlreadyReset: Bool = false
     private var resetAlertPresented: Bool = false
     
     init(delegate: ResetLoopManagerDelegate?) {
@@ -34,7 +34,7 @@ class ResetLoopManager {
     }
     
     func askUserToConfirmLoopReset() {
-        if loopHasReset {
+        if loopIsAlreadyReset {
             UserDefaults.appGroup?.userRequestedLoopReset = false
         }
         
@@ -81,7 +81,7 @@ class ResetLoopManager {
             return
         }
         
-        loopHasReset = hasReset
+        loopIsAlreadyReset = hasReset
     }
     
     private func resetLoop() {
