@@ -12,7 +12,11 @@ protocol ResetLoopManagerDelegate: AnyObject {
     func loopWillReset()
     func loopDidReset()
     
-    func presentConfirmationAlert(confirmAction: @escaping (_ pumpManager: PumpManager?, _ completion: @escaping () -> Void) -> Void, cancelAction: @escaping () -> Void)
+    func presentConfirmationAlert(
+        confirmAction: @escaping (_ pumpManager: PumpManager?, _ completion: @escaping () -> Void) -> Void,
+        cancelAction: @escaping () -> Void
+    )
+    
     func presentCouldNotResetLoopAlert(error: Error)
 }
 
