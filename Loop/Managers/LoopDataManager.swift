@@ -318,6 +318,10 @@ final class LoopDataManager {
                 self.insulinEffect = nil
             }
         }
+        
+        if newValue.retrospectiveCorrection != oldValue.retrospectiveCorrection {
+            retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm(retrospectiveCorrection: settings.retrospectiveCorrection)
+        }
 
         notify(forChange: .preferences)
         analyticsServicesManager.didChangeLoopSettings(from: oldValue, to: newValue)

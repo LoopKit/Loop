@@ -112,6 +112,7 @@ public struct LoopSettings: Equatable {
         maximumBolus: Double? = nil,
         suspendThreshold: GlucoseThreshold? = nil,
         automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
+        retrospectiveCorrection: RetrospectiveCorrectionOptions = .standardRetrospectiveCorrection,
         defaultRapidActingModel: ExponentialInsulinModelPreset? = nil
     ) {
         self.dosingEnabled = dosingEnabled
@@ -128,6 +129,7 @@ public struct LoopSettings: Equatable {
         self.maximumBolus = maximumBolus
         self.suspendThreshold = suspendThreshold
         self.automaticDosingStrategy = automaticDosingStrategy
+        self.retrospectiveCorrection = retrospectiveCorrection
         self.defaultRapidActingModel = defaultRapidActingModel
     }
 }
