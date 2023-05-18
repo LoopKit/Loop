@@ -91,7 +91,7 @@ public struct LoopSettings: Equatable {
 
     public var defaultRapidActingModel: ExponentialInsulinModelPreset?
     
-    public var retrospectiveCorrection: RetrospectiveCorrectionOptions = .standardRetrospectiveCorrection
+    public var retrospectiveCorrection: RetrospectiveCorrectionOptions = .integralRetrospectiveCorrection
 
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
@@ -112,7 +112,7 @@ public struct LoopSettings: Equatable {
         maximumBolus: Double? = nil,
         suspendThreshold: GlucoseThreshold? = nil,
         automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
-        retrospectiveCorrection: RetrospectiveCorrectionOptions = .standardRetrospectiveCorrection,
+        retrospectiveCorrection: RetrospectiveCorrectionOptions = .integralRetrospectiveCorrection,
         defaultRapidActingModel: ExponentialInsulinModelPreset? = nil
     ) {
         self.dosingEnabled = dosingEnabled
