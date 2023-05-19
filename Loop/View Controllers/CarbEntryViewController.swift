@@ -405,7 +405,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
                         cell.datePicker.preferredDatePickerStyle = .wheels
                     }
                 #endif
-                cell.datePicker.maximumDate = date.addingTimeInterval(.hours(1))
+                cell.datePicker.maximumDate = date.addingTimeInterval(.hours(maximumDateFutureInterval))
                 cell.datePicker.minimumDate = date.addingTimeInterval(.hours(-12))
                 cell.datePicker.minuteInterval = 1
                 cell.date = date
