@@ -14,6 +14,7 @@ import OSLog
 final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, DirectoryObserver {
     
     unowned let deviceManager: DeviceDataManager
+    unowned let supportManager: SupportManager
 
     let log = DiagnosticLog(category: "LocalTestingScenariosManager")
 
@@ -35,12 +36,13 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
         deviceManager.pluginManager
     }
 
-    init(deviceManager: DeviceDataManager) {
+    init(deviceManager: DeviceDataManager, supportManager: SupportManager) {
         guard FeatureFlags.scenariosEnabled else {
             fatalError("\(#function) should be invoked only when scenarios are enabled")
         }
 
         self.deviceManager = deviceManager
+        self.supportManager = supportManager
         self.scenariosSource = Bundle.main.bundleURL.appendingPathComponent("Scenarios")
 
         log.debug("Loading testing scenarios from %{public}@", scenariosSource.path)

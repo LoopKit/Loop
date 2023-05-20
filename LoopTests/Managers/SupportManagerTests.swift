@@ -34,7 +34,6 @@ class SupportManagerTests: XCTestCase {
         weak var delegate: SupportUIDelegate?
     }
     class MockSupport: Mixin, SupportUI {
-        func configurationMenuItems() -> [AnyView] { return [] }
         static var supportIdentifier: String { "SupportManagerTestsMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
@@ -43,9 +42,11 @@ class SupportManagerTests: XCTestCase {
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
         func loopWillReset() {}
         func loopDidReset() {}
+        func initializationComplete(for services: [LoopKit.Service]) {}
+        func configurationMenuItems() -> [LoopKitUI.CustomMenuItem] { return [] }
     }
+
     class AnotherMockSupport: Mixin, SupportUI {
-        func configurationMenuItems() -> [AnyView] { return [] }
         static var supportIdentifier: String { "SupportManagerTestsAnotherMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
@@ -54,6 +55,8 @@ class SupportManagerTests: XCTestCase {
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
         func loopWillReset() {}
         func loopDidReset() {}
+        func initializationComplete(for services: [LoopKit.Service]) {}
+        func configurationMenuItems() -> [LoopKitUI.CustomMenuItem] { return [] }
     }
     
     class MockAlertIssuer: AlertIssuer {
@@ -63,14 +66,29 @@ class SupportManagerTests: XCTestCase {
         func retractAlert(identifier: LoopKit.Alert.Identifier) {
         }
     }
+
+    class MockDeviceSupportDelegate: DeviceSupportDelegate {
+        var availableSupports: [LoopKitUI.SupportUI] = []
+
+        var pumpManagerStatus: LoopKit.PumpManagerStatus?
+
+        var cgmManagerStatus: LoopKit.CGMManagerStatus?
+
+        func generateDiagnosticReport(_ completion: @escaping (String) -> Void) {
+            completion("Mock Issue Report")
+        }
+    }
     
     var supportManager: SupportManager!
     var mockSupport: SupportManagerTests.MockSupport!
     var mockAlertIssuer: MockAlertIssuer!
+    var pluginManager = PluginManager()
+    var mocKDeviceSupportDelegate = MockDeviceSupportDelegate()
+
 
     override func setUp() {
         mockAlertIssuer = MockAlertIssuer()
-        supportManager = SupportManager(staticSupportTypes: [], alertIssuer: mockAlertIssuer)
+        supportManager = SupportManager(pluginManager: pluginManager, deviceSupportDelegate: mocKDeviceSupportDelegate,  staticSupportTypes: [], alertIssuer: mockAlertIssuer)
         mockSupport = SupportManagerTests.MockSupport()
         supportManager.addSupport(mockSupport)
     }

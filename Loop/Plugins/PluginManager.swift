@@ -12,15 +12,12 @@ import LoopKit
 import LoopKitUI
 
 class PluginManager {
-    private let pluginBundles: [Bundle]
-
-    public let availableSupports: [SupportUI]
+    let pluginBundles: [Bundle]
 
     private let log = OSLog(category: "PluginManager")
 
     public init(pluginsURL: URL? = Bundle.main.privateFrameworksURL) {
         var bundles = [Bundle]()
-        var availableSupports = [SupportUI]()
 
         if let pluginsURL = pluginsURL {
             do {
@@ -29,17 +26,6 @@ class PluginManager {
                         if bundle.isLoopPlugin && (!bundle.isSimulator || FeatureFlags.allowSimulators) {
                             log.debug("Found loop plugin: %{public}@", pluginURL.absoluteString)
                             bundles.append(bundle)
-                            if bundle.isSupportPlugin {
-                                if let support = try bundle.loadAndInstantiateSupport() {
-                                    availableSupports.append(support)
-                                }
-                            }
-                        }
-                        if bundle.isLoopExtension {
-                            log.debug("Found loop extension: %{public}@", pluginURL.absoluteString)
-                            if let support = try bundle.loadAndInstantiateSupport() {
-                                availableSupports.append(support)
-                            }
                         }
                     }
                 }
@@ -48,8 +34,9 @@ class PluginManager {
             }
         }
         self.pluginBundles = bundles
-        self.availableSupports = availableSupports
     }
+
+    
 
     func getPumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
         for bundle in pluginBundles {
@@ -230,15 +217,4 @@ extension Bundle {
     var isLoopExtension: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.extensionIdentifier.rawValue) as? String != nil }
 
     var isSimulator: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.pluginIsSimulator.rawValue) as? Bool == true }
-    
-    fileprivate func loadAndInstantiateSupport() throws -> SupportUI? {
-        try loadAndReturnError()
-
-        guard let principalClass = principalClass as? NSObject.Type,
-              let supportUIPlugin = principalClass.init() as? SupportUIPlugin else {
-            return nil
-        }
-        
-        return supportUIPlugin.support
-    }
 }
