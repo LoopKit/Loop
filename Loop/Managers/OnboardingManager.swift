@@ -17,6 +17,7 @@ class OnboardingManager {
     private let deviceDataManager: DeviceDataManager
     private let servicesManager: ServicesManager
     private let loopDataManager: LoopDataManager
+    private let supportManager: SupportManager
     private weak var windowProvider: WindowProvider?
     private let userDefaults: UserDefaults
 
@@ -38,12 +39,13 @@ class OnboardingManager {
 
     private var onboardingCompletion: (() -> Void)?
 
-    init(pluginManager: PluginManager, bluetoothProvider: BluetoothProvider, deviceDataManager: DeviceDataManager, servicesManager: ServicesManager, loopDataManager: LoopDataManager, windowProvider: WindowProvider?, userDefaults: UserDefaults = .standard) {
+    init(pluginManager: PluginManager, bluetoothProvider: BluetoothProvider, deviceDataManager: DeviceDataManager, servicesManager: ServicesManager, loopDataManager: LoopDataManager, supportManager: SupportManager, windowProvider: WindowProvider?, userDefaults: UserDefaults = .standard) {
         self.pluginManager = pluginManager
         self.bluetoothProvider = bluetoothProvider
         self.deviceDataManager = deviceDataManager
         self.servicesManager = servicesManager
         self.loopDataManager = loopDataManager
+        self.supportManager = supportManager
         self.windowProvider = windowProvider
         self.userDefaults = userDefaults
 
@@ -440,7 +442,7 @@ extension OnboardingManager: OnboardingProvider {
 // MARK: - SupportProvider
 
 extension OnboardingManager: SupportProvider {
-    var availableSupports: [SupportUI] { deviceDataManager.pluginManager.availableSupports }
+    var availableSupports: [SupportUI] { supportManager.availableSupports }
 }
 
 // MARK: - OnboardingUI

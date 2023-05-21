@@ -81,6 +81,8 @@ class LoopAppManager: NSObject {
     private var settingsManager: SettingsManager!
     private var loggingServicesManager = LoggingServicesManager()
     private var analyticsServicesManager = AnalyticsServicesManager()
+    private(set) var testingScenariosManager: TestingScenariosManager?
+    private var resetLoopManager: ResetLoopManager!
 
     private var overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
 
@@ -142,6 +144,8 @@ class LoopAppManager: NSObject {
         if state == .launchHomeScreen {
             launchHomeScreen()
         }
+        
+        askUserToConfirmLoopReset()
     }
 
     private func checkProtectedDataAvailable() {
@@ -164,16 +168,13 @@ class LoopAppManager: NSObject {
         OrientationLock.deviceOrientationController = self
         UNUserNotificationCenter.current().delegate = self
 
+        resetLoopManager = ResetLoopManager(delegate: self)
+
         let localCacheDuration = Bundle.main.localCacheDuration
         let cacheStore = PersistenceController.controllerInAppGroupDirectory()
 
         pluginManager = PluginManager()
 
-        for support in pluginManager.availableSupports {
-            if let analyticsService = support as? AnalyticsService {
-                analyticsServicesManager.addService(analyticsService)
-            }
-        }
 
         bluetoothStateManager = BluetoothStateManager()
         alertManager = AlertManager(alertPresenter: self,
@@ -214,13 +215,30 @@ class LoopAppManager: NSObject {
 
         scheduleBackgroundTasks()
 
+        supportManager = SupportManager(pluginManager: pluginManager,
+                                        deviceSupportDelegate: deviceDataManager,
+                                        servicesManager: deviceDataManager.servicesManager,
+                                        alertIssuer: alertManager)
+
         onboardingManager = OnboardingManager(pluginManager: pluginManager,
                                               bluetoothProvider: bluetoothStateManager,
                                               deviceDataManager: deviceDataManager,
                                               servicesManager: deviceDataManager.servicesManager,
                                               loopDataManager: deviceDataManager.loopManager,
+                                              supportManager: supportManager,
                                               windowProvider: windowProvider,
                                               userDefaults: UserDefaults.appGroup!)
+
+
+        for support in supportManager.availableSupports {
+            if let analyticsService = support as? AnalyticsService {
+                analyticsServicesManager.addService(analyticsService)
+            }
+        }
+        for support in supportManager.availableSupports {
+            support.initializationComplete(for: deviceDataManager.servicesManager.activeServices)
+        }
+
 
         deviceDataManager.onboardingManager = onboardingManager
 
@@ -230,12 +248,12 @@ class LoopAppManager: NSObject {
             analyticsServicesManager.identifyWorkspaceGitRevision(workspaceGitRevision)
         }
 
+        if FeatureFlags.scenariosEnabled {
+            testingScenariosManager = LocalTestingScenariosManager(deviceManager: deviceDataManager, supportManager: supportManager)
+        }
+
         analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
 
-        supportManager = SupportManager(pluginManager: pluginManager,
-                                        deviceDataManager: deviceDataManager,
-                                        servicesManager: deviceDataManager.servicesManager,
-                                        alertIssuer: alertManager)
 
         automaticDosingStatus.$isAutomaticDosingAllowed
             .combineLatest(deviceDataManager.loopManager.$dosingEnabled)
@@ -398,30 +416,6 @@ class LoopAppManager: NSObject {
         return false
     }
     
-    func askUserToConfirmCrashIfNecessary() {
-        deviceDataManager.pluginManager.availableSupports.forEach { supportUI in
-            if supportUI.loopNeedsReset {
-                supportUI.loopNeedsReset = false
-                alertManager.presentConfirmCrashAlert() { [weak self] completion in
-                    guard let pumpManager = self?.deviceDataManager.pumpManager else {
-                        supportUI.resetLoop()
-                        completion()
-                        return
-                    }
-                    
-                    pumpManager.prepareForDeactivation() { [weak self] error in
-                        guard let error = error else {
-                            supportUI.resetLoop()
-                            completion()
-                            return
-                        }
-                        self?.alertManager.presentCouldNotResetLoopAlert(error: error)
-                    }
-                }
-            }
-        }
-    }
-
     private var rootViewController: UIViewController? {
         get { windowProvider?.window?.rootViewController }
         set { windowProvider?.window?.rootViewController = newValue }
@@ -432,7 +426,9 @@ class LoopAppManager: NSObject {
 
 extension LoopAppManager: AlertPresenter {
     func present(_ viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) {
-        rootViewController?.topmostViewController.present(viewControllerToPresent, animated: animated, completion: completion)
+        DispatchQueue.main.async {
+            self.rootViewController?.topmostViewController.present(viewControllerToPresent, animated: animated, completion: completion)
+        }
     }
 
     func dismissTopMost(animated: Bool, completion: (() -> Void)?) {
@@ -583,3 +579,33 @@ extension LoopAppManager: TemporaryScheduleOverrideHistoryDelegate {
     }
 }
 
+extension LoopAppManager: ResetLoopManagerDelegate {
+    func askUserToConfirmLoopReset() {
+        resetLoopManager.askUserToConfirmLoopReset()
+    }
+    
+    func presentConfirmationAlert(confirmAction: @escaping (PumpManager?, @escaping () -> Void) -> Void, cancelAction: @escaping () -> Void) {
+        alertManager.presentLoopResetConfirmationAlert(
+            confirmAction: { [weak self] completion in
+                confirmAction(self?.deviceDataManager.pumpManager, completion)
+            },
+            cancelAction: cancelAction
+        )
+    }
+    
+    func loopWillReset() {
+        supportManager.availableSupports.forEach { supportUI in
+            supportUI.loopWillReset()
+        }
+    }
+    
+    func loopDidReset() {
+        supportManager.availableSupports.forEach { supportUI in
+            supportUI.loopDidReset()
+        }
+    }
+    
+    func presentCouldNotResetLoopAlert(error: Error) {
+        alertManager.presentCouldNotResetLoopAlert(error: error)
+    }
+}

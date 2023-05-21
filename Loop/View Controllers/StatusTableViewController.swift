@@ -33,6 +33,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     var onboardingManager: OnboardingManager!
 
+    var testingScenariosManager: TestingScenariosManager!
+
     var automaticDosingStatus: AutomaticDosingStatus!
     
     var alertPermissionsChecker: AlertPermissionsChecker!
@@ -1544,14 +1546,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           isClosedLoopAllowed: automaticDosingStatus.$isAutomaticDosingAllowed,
-                                          supportInfoProvider: deviceManager,
                                           automaticDosingStrategy: deviceManager.loopManager.settings.automaticDosingStrategy,
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
                                           delegate: self)
         let hostingController = DismissibleHostingController(
-            rootView: SettingsView(viewModel: viewModel)
+            rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucoseUnitObservable)
                 .environment(\.appName, Bundle.main.bundleDisplayName),
             isModalInPresentation: false)
@@ -1850,10 +1851,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             fatalError("\(#function) should be invoked only when scenarios are enabled")
         }
 
-        guard let testingScenariosManager = deviceManager.testingScenariosManager else {
-            return
-        }
-
         let vc = TestingScenariosTableViewController(scenariosManager: testingScenariosManager)
         present(UINavigationController(rootViewController: vc), animated: true)
     }
@@ -1956,11 +1953,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     @objc private func stepActiveScenarioForward() {
-        deviceManager.testingScenariosManager?.stepActiveScenarioForward { _ in }
+        testingScenariosManager.stepActiveScenarioForward { _ in }
     }
 
     @objc private func stepActiveScenarioBackward() {
-        deviceManager.testingScenariosManager?.stepActiveScenarioBackward { _ in }
+        testingScenariosManager.stepActiveScenarioBackward { _ in }
     }
 }
 
@@ -2148,12 +2145,12 @@ extension StatusTableViewController: SettingsViewModelDelegate {
         }
     }
 
-    func didTapIssueReport(title: String) {
+    func didTapIssueReport() {
         // TODO: this dismiss here is temporary, until we know exactly where
         // we want this screen to belong in the navigation flow
         dismiss(animated: true) {
             let vc = CommandResponseViewController.generateDiagnosticReport(deviceManager: self.deviceManager)
-            vc.title = title
+            vc.title = NSLocalizedString("Issue Report", comment: "The view controller title for the issue report screen")
             self.show(vc, sender: nil)
         }
     }
