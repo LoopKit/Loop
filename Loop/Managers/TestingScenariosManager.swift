@@ -18,7 +18,7 @@ protocol TestingScenariosManager: AnyObject {
     var delegate: TestingScenariosManagerDelegate? { get set }
     var activeScenarioURL: URL? { get }
     var scenarioURLs: [URL] { get }
-    var pluginManager: PluginManager { get }
+    var supportManager: SupportManager { get }
     func loadScenario(from url: URL, completion: @escaping (Error?) -> Void)
     func loadScenario(from url: URL, advancedByLoopIterations iterations: Int, completion: @escaping (Error?) -> Void)
     func loadScenario(from url: URL, rewoundByLoopIterations iterations: Int, completion: @escaping (Error?) -> Void)
