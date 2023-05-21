@@ -250,7 +250,7 @@ public class CriticalEventLogBaseExporter {
         }
     }
 
-    fileprivate func export(startDate: Date, endDate: Date, to url: URL, compression: ZipArchive.Compression, progress: Progress) -> Error? {
+    fileprivate func export(startDate: Date, endDate: Date, to url: URL, progress: Progress) -> Error? {
         guard !progress.isCancelled else {
             return CriticalEventLogError.cancelled
         }
@@ -261,7 +261,7 @@ public class CriticalEventLogBaseExporter {
         defer { archive.close() }
 
         for log in manager.logs {
-            if let error = export(startDate: startDate, endDate: endDate, from: log, to: archive, compression: compression, progress: progress) {
+            if let error = export(startDate: startDate, endDate: endDate, from: log, to: archive, progress: progress) {
                 return error
             }
         }
@@ -269,16 +269,24 @@ public class CriticalEventLogBaseExporter {
         return archive.close()
     }
 
-    private func export(startDate: Date, endDate: Date, from log: CriticalEventLog, to archive: ZipArchive, compression: ZipArchive.Compression, progress: Progress) -> Error? {
+    private func export(startDate: Date, endDate: Date, from log: CriticalEventLog, to archive: ZipArchive, progress: Progress) -> Error? {
         guard !progress.isCancelled else {
             return CriticalEventLogError.cancelled
         }
 
-        let stream = archive.createArchiveFile(withPath: log.exportName, compression: compression)
-        stream.open()
-        defer { stream.close() }
+        let stream = archive.createArchiveFile(withPath: log.exportName)
 
-        return log.export(startDate: startDate, endDate: endDate, to: stream, progress: progress)
+        if let error = log.export(startDate: startDate, endDate: endDate, to: stream, progress: progress) {
+            return error
+        }
+
+        do {
+            try stream.finish(sync: true)
+        } catch {
+            return error
+        }
+
+        return nil
     }
 
     fileprivate func historicalDate(from now: Date) -> Date { manager.exportDate(for: manager.date(byAddingDays: -Int(manager.historicalDuration.days), to: now)) }
@@ -334,7 +342,7 @@ public class CriticalEventLogHistoricalExporter: CriticalEventLogBaseExporter, C
                     let temporaryFileURL = manager.fileManager.temporaryFileURL
                     defer { try? manager.fileManager.removeItem(at: temporaryFileURL) }
 
-                    if let error = export(startDate: startDate, endDate: endDate, to: temporaryFileURL, compression: .bestCompression, progress: progress) {
+                    if let error = export(startDate: startDate, endDate: endDate, to: temporaryFileURL, progress: progress) {
                         return error
                     }
 
@@ -431,7 +439,7 @@ public class CriticalEventLogFullExporter: CriticalEventLogBaseExporter, Critica
 
         log.default("Exporting %{public}@...", recentFileURL.lastPathComponent)
 
-        if let error = export(startDate: manager.recentDate(from: now), endDate: now, to: recentTemporaryFileURL, compression: .bestSpeed, progress: progress) {
+        if let error = export(startDate: manager.recentDate(from: now), endDate: now, to: recentTemporaryFileURL, progress: progress) {
             return error
         }
 
@@ -460,7 +468,8 @@ public class CriticalEventLogFullExporter: CriticalEventLogBaseExporter, Critica
             date = manager.date(byAddingDays: 1, to: date)
 
             let exportFileURL = exportsFileURL(for: date)
-            if let error = archive.createArchiveFile(withPath: exportFileURL.lastPathComponent, contentsOf: exportFileURL) {
+            log.default("Bundling %{public}@", exportFileURL.lastPathComponent)
+            if let error = archive.createArchiveFile(withPath: exportFileURL.lastPathComponent, contentsOf: exportFileURL, compressionMethod: .none) {
                 return error
             }
 
@@ -471,7 +480,8 @@ public class CriticalEventLogFullExporter: CriticalEventLogBaseExporter, Critica
             return CriticalEventLogError.cancelled
         }
 
-        if let error = archive.createArchiveFile(withPath: recentFileURL.lastPathComponent, contentsOf: recentTemporaryFileURL) {
+        log.default("Bundling %{public}@", recentFileURL.lastPathComponent)
+        if let error = archive.createArchiveFile(withPath: recentFileURL.lastPathComponent, contentsOf: recentTemporaryFileURL, compressionMethod: .none) {
             return error
         }
 
