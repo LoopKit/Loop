@@ -51,6 +51,7 @@ public struct SettingsView: View {
                         dosingStrategySection
                     }
                     alertManagementSection
+                    retrospectiveCorrectionSection
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         configurationSection
                     }
@@ -73,27 +74,6 @@ public struct SettingsView: View {
                     if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
                         profileExpirationSection(profileExpiration: profileExpiration)
                     }
-                if FeatureFlags.automaticBolusEnabled {
-                    dosingStrategySection
-                    if FeatureFlags.automaticBolusEnabled {
-                        dosingStrategySection
-                    }
-                    alertManagementSection
-                    retrospectiveCorrectionSection
-                }
-                if viewModel.pumpManagerSettingsViewModel.isSetUp() {
-                    configurationSection
-                }
-                deviceSettingsSection
-                if viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice {
-                    deleteDataSection
-                }
-                if viewModel.servicesViewModel.showServices {
-                    servicesSection
-                }
-                supportSection
-                if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
-                    profileExpirationSection(profileExpiration: profileExpiration)
                 }
             }
             .insetGroupedListStyle()

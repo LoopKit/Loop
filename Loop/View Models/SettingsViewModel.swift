@@ -139,7 +139,6 @@ public class SettingsViewModel: ObservableObject {
         self.isClosedLoopAllowed = false
         self.automaticDosingStrategy = automaticDosingStrategy
         self.retrospectiveCorrection = retrospectiveCorrection
-        self.supportInfoProvider = supportInfoProvider
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
