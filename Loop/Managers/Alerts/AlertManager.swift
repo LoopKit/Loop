@@ -784,14 +784,16 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
 }
 
 extension AlertManager {
-    func presentConfirmCrashAlert(confirmAction: @escaping (@escaping () -> Void) -> Void) {
-        let alert = UIAlertController(title: "New Study Product Detected", message: "We've detected a new study product is selected. In order to show use this study product, Loop will need to restart.", preferredStyle: .alert)
+    func presentLoopResetConfirmationAlert(confirmAction: @escaping (@escaping () -> Void) -> Void, cancelAction: @escaping () -> Void) {
+        let alert = UIAlertController(title: "Loop Reset Requested", message: "We've detected a Loop reset may be needed. Tapping confirm will reset Loop and quit the app.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
             confirmAction() {
                 fatalError("DEBUG: Resetting Loop")
             }
         }))
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            cancelAction()
+        }))
         
         alertPresenter.present(alert, animated: true)
     }

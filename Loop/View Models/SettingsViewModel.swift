@@ -53,7 +53,7 @@ public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: AutomaticDosingStrategy)
     func applyLinearRampToBolusApplicationFactorChanged(_: Bool)
-    func didTapIssueReport(title: String)
+    func didTapIssueReport()
     var closedLoopDescriptiveText: String? { get }
 }
 
@@ -67,8 +67,8 @@ public class SettingsViewModel: ObservableObject {
     
     private weak var delegate: SettingsViewModelDelegate?
 
-    var didTapIssueReport: ((String) -> Void)? {
-        delegate?.didTapIssueReport
+    func didTapIssueReport() {
+        delegate?.didTapIssueReport()
     }
     
     var availableSupports: [SupportUI]
@@ -78,7 +78,6 @@ public class SettingsViewModel: ObservableObject {
     let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     let therapySettings: () -> TherapySettings
     let sensitivityOverridesEnabled: Bool
-    let supportInfoProvider: SupportInfoProvider
     let isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
 
@@ -120,7 +119,6 @@ public class SettingsViewModel: ObservableObject {
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
                 isClosedLoopAllowed: Published<Bool>.Publisher,
-                supportInfoProvider: SupportInfoProvider,
                 automaticDosingStrategy: AutomaticDosingStrategy,
                 applyLinearRampToBolusApplicationFactor: Bool,
                 availableSupports: [SupportUI],
@@ -141,7 +139,6 @@ public class SettingsViewModel: ObservableObject {
         self.isClosedLoopAllowed = false
         self.automaticDosingStrategy = automaticDosingStrategy
         self.applyLinearRampToBolusApplicationFactor = applyLinearRampToBolusApplicationFactor
-        self.supportInfoProvider = supportInfoProvider
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
@@ -173,22 +170,6 @@ public class SettingsViewModel: ObservableObject {
 
 // For previews only
 extension SettingsViewModel {
-    fileprivate class MockSupportInfoProvider: SupportInfoProvider {
-        var localizedAppNameAndVersion = "Loop v1.2"
-        
-        var pumpStatus: PumpManagerStatus? {
-            return nil
-        }
-        
-        var cgmStatus: CGMManagerStatus? {
-            return nil
-        }
-        
-        func generateIssueReport(completion: (String) -> Void) {
-            completion("Mock Issue Report")
-        }
-    }
-
     fileprivate class FakeClosedLoopAllowedPublisher {
         @Published var mockIsClosedLoopAllowed: Bool = false
     }
@@ -205,7 +186,6 @@ extension SettingsViewModel {
                                  sensitivityOverridesEnabled: false,
                                  initialDosingEnabled: true,
                                  isClosedLoopAllowed: FakeClosedLoopAllowedPublisher().$mockIsClosedLoopAllowed,
-                                 supportInfoProvider: MockSupportInfoProvider(),
                                  automaticDosingStrategy: .automaticBolus,
                                  applyLinearRampToBolusApplicationFactor: false,
                                  availableSupports: [],
