@@ -60,9 +60,9 @@ extension DosingStrategySelectionView {
         return AnyView(
             Toggle(isOn: $applyLinearRampToBolusApplicationFactor) {
                 VStack(alignment: .leading) {
-                    Text("Linear Bolus Ramp", comment: "The title text for the Apply Linear Ramp to Bolus Application Factor toggle")
+                    Text("Modify Bolus Percentage", comment: "The title text for the Apply Linear Ramp to Bolus Application Factor toggle")
                         .padding(.vertical, 0.5)
-                    Text("Loop will apply a linear ramp to the bolus application factor, gradually increasing the partial bolus factor as glucose levels rise. ", comment: "Description string for Apply Linear Ramp to Bolus Application Factor toggle")
+                    Text("Modify Automatic Bolus behavior: The percentage of recommended bolus delivered each cycle varies with glucose level: near correction range, use 20% (similar to Temp Basal). Gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).", comment: "Description string for Modify Bolus Percentage toggle")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -81,7 +81,7 @@ extension AutomaticDosingStrategy {
         case .tempBasalOnly:
             return NSLocalizedString("Loop will set temporary basal rates to increase and decrease insulin delivery.", comment: "Description string for temp basal only dosing strategy")
         case .automaticBolus:
-            return NSLocalizedString("Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal.", comment: "Description string for automatic bolus dosing strategy")
+            return NSLocalizedString("Loop will automatically bolus 40% of recommended bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal.", comment: "Description string for automatic bolus dosing strategy")
         }
     }
 
