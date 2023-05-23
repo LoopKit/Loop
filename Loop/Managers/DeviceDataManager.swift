@@ -163,13 +163,13 @@ final class DeviceDataManager {
         var readTypes: Set<HKSampleType> = []
 
         if FeatureFlags.observeHealthKitCarbSamplesFromOtherApps {
-            readTypes.insert(carbStore.sampleType)
+            readTypes.insert(HealthKitSampleStore.carbType)
         }
         if FeatureFlags.observeHealthKitDoseSamplesFromOtherApps {
-            readTypes.insert(doseStore.sampleType)
+            readTypes.insert(HealthKitSampleStore.insulinQuantityType)
         }
         if FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps {
-            readTypes.insert(glucoseStore.sampleType)
+            readTypes.insert(HealthKitSampleStore.glucoseType)
         }
 
         readTypes.insert(HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!)
@@ -180,35 +180,35 @@ final class DeviceDataManager {
     /// All the HealthKit types to be shared by stores
     private var shareTypes: Set<HKSampleType> {
         return Set([
-            glucoseStore.sampleType,
-            carbStore.sampleType,
-            doseStore.sampleType,
+            HealthKitSampleStore.glucoseType,
+            HealthKitSampleStore.carbType,
+            HealthKitSampleStore.insulinQuantityType,
         ])
     }
 
     var sleepDataAuthorizationRequired: Bool {
-        return carbStore.healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .notDetermined
+        return healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .notDetermined
     }
     
     var sleepDataSharingDenied: Bool {
-        return carbStore.healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .sharingDenied
+        return healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .sharingDenied
     }
 
     /// True if any stores require HealthKit authorization
     var authorizationRequired: Bool {
-        return glucoseStore.authorizationRequired ||
-        carbStore.authorizationRequired ||
-        doseStore.authorizationRequired ||
-        sleepDataAuthorizationRequired
+        return healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .notDetermined ||
+               healthStore.authorizationStatus(for: HealthKitSampleStore.carbType) == .notDetermined ||
+               healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .notDetermined ||
+               sleepDataAuthorizationRequired
     }
 
     /// True if the user has explicitly denied access to any stores' HealthKit types
-    private var sharingDenied: Bool {
-        return glucoseStore.sharingDenied ||
-        carbStore.sharingDenied ||
-        doseStore.sharingDenied ||
-        sleepDataSharingDenied
-    }
+//    private var sharingDenied: Bool {
+//        return healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .sharingDenied ||
+//        carbStore.sharingDenied ||
+//        doseStore.sharingDenied ||
+//        sleepDataSharingDenied
+//    }
 
     // MARK: Services
 
@@ -277,14 +277,19 @@ final class DeviceDataManager {
 
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
         let sensitivitySchedule = settingsManager.latestSettings.insulinSensitivitySchedule
-        
-        self.carbStore = CarbStore(
+
+        let carbHealthStore = HealthKitSampleStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitCarbSamplesFromOtherApps, // At some point we should let the user decide which apps they would like to import from.
+            type: HealthKitSampleStore.carbType,
+            observationStart: Date().addingTimeInterval(-absorptionTimes.slow * 2)
+        )
+        
+        self.carbStore = CarbStore(
+            healthKitSampleStore: carbHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             defaultAbsorptionTimes: absorptionTimes,
-            observationInterval: absorptionTimes.slow * 2,
             carbRatioSchedule: settingsManager.latestSettings.carbRatioSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
@@ -300,10 +305,16 @@ final class DeviceDataManager {
         }
 
         self.analyticsServicesManager = analyticsServicesManager
-        
-        self.doseStore = DoseStore(
+
+        let insulinHealthStore = HealthKitSampleStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
+            type: HealthKitSampleStore.insulinQuantityType,
+            observationStart: Date().addingTimeInterval(-absorptionTimes.slow * 2)
+        )
+
+        self.doseStore = DoseStore(
+            healthKitSampleStore: insulinHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             insulinModelProvider: insulinModelProvider,
@@ -314,13 +325,18 @@ final class DeviceDataManager {
             lastPumpEventsReconciliation: nil, // PumpManager is nil at this point. Will update this via addPumpEvents below
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
+
+        let glucoseHealthStore = HealthKitSampleStore(
+            healthStore: healthStore,
+            observeHealthKitSamplesFromOtherApps:  FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
+            type: HealthKitSampleStore.glucoseType,
+            observationStart: Date().addingTimeInterval(-.hours(24))
+        )
         
         self.glucoseStore = GlucoseStore(
-            healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
+            healthKitSampleStore: glucoseHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            observationInterval: .hours(24),
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
@@ -334,7 +350,7 @@ final class DeviceDataManager {
         self.automaticDosingStatus = automaticDosingStatus
 
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
-        displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
+        displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
 
         self.trustedTimeChecker = trustedTimeChecker
 
@@ -438,14 +454,16 @@ final class DeviceDataManager {
             .assign(to: \.automaticDosingStatus.isAutomaticDosingAllowed, on: self)
             .store(in: &cancellables)
 
-        NotificationCenter.default.addObserver(forName: .HealthStorePreferredGlucoseUnitDidChange, object: glucoseStore.healthStore, queue: nil) { [weak self] _ in
-            guard let strongSelf = self else {
+        NotificationCenter.default.addObserver(forName: .HealthStorePreferredGlucoseUnitDidChange, object: healthStore, queue: nil) { [weak self] _ in
+            guard let self else {
                 return
             }
 
-            if let preferredGlucoseUnit = strongSelf.glucoseStore.preferredUnit {
-                strongSelf.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: preferredGlucoseUnit)
-                strongSelf.notifyObserversOfDisplayGlucoseUnitChange(to: preferredGlucoseUnit)
+            Task {
+                if let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) {
+                    self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: unit)
+                    self.notifyObserversOfDisplayGlucoseUnitChange(to: unit)
+                }
             }
         }
     }
@@ -644,9 +662,9 @@ final class DeviceDataManager {
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
                 // Call the individual authorization methods to trigger query creation
-                self.carbStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitCarbSamplesFromOtherApps, { _ in })
-                self.doseStore.insulinDeliveryStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps, { _ in })
-                self.glucoseStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps, { _ in })
+                self.carbStore.hkSampleStore?.authorizationIsDetermined()
+                self.doseStore.hkSampleStore?.authorizationIsDetermined()
+                self.glucoseStore.hkSampleStore?.authorizationIsDetermined()
             }
 
             self.getHealthStoreAuthorization(completion)
@@ -1212,7 +1230,8 @@ extension DeviceDataManager {
                 return
             }
 
-            guard !self.doseStore.sharingDenied else {
+            let insulinSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .sharingDenied
+            guard !insulinSharingDenied else {
                 // only clear cache since access to health kit is denied
                 insulinDeliveryStore.purgeCachedInsulinDeliveryObjects() { error in
                     completion?(error)
@@ -1232,7 +1251,8 @@ extension DeviceDataManager {
             return
         }
         
-        guard !glucoseStore.sharingDenied else {
+        let glucoseSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .sharingDenied
+        guard !glucoseSharingDenied else {
             // only clear cache since access to health kit is denied
             glucoseStore.purgeCachedGlucoseObjects() { error in
                 completion?(error)
@@ -1673,10 +1693,8 @@ extension DeviceDataManager {
     func addDisplayGlucoseUnitObserver(_ observer: DisplayGlucoseUnitObserver) {
         let queue = DispatchQueue.main
         displayGlucoseUnitObservers.insert(observer, queue: queue)
-        if let displayGlucoseUnit = glucoseStore.preferredUnit {
-            queue.async {
-                observer.displayGlucoseUnitDidChange(to: displayGlucoseUnit)
-            }
+        queue.async {
+            observer.displayGlucoseUnitDidChange(to: self.displayGlucoseUnitObservable.displayGlucoseUnit)
         }
     }
 
