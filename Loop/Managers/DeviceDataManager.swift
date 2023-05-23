@@ -459,7 +459,7 @@ final class DeviceDataManager {
                 return
             }
 
-            Task {
+            Task { @MainActor in
                 if let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) {
                     self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: unit)
                     self.notifyObserversOfDisplayGlucoseUnitChange(to: unit)
