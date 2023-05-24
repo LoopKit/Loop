@@ -288,6 +288,7 @@ class LoopAppManager: NSObject {
         statusTableViewController.deviceManager = deviceDataManager
         statusTableViewController.onboardingManager = onboardingManager
         statusTableViewController.supportManager = supportManager
+        statusTableViewController.testingScenariosManager = testingScenariosManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
         var rootNavigationController = rootViewController as? RootNavigationController
