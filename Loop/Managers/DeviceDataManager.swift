@@ -202,14 +202,6 @@ final class DeviceDataManager {
                sleepDataAuthorizationRequired
     }
 
-    /// True if the user has explicitly denied access to any stores' HealthKit types
-//    private var sharingDenied: Bool {
-//        return healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .sharingDenied ||
-//        carbStore.sharingDenied ||
-//        doseStore.sharingDenied ||
-//        sleepDataSharingDenied
-//    }
-
     // MARK: Services
 
     private(set) var servicesManager: ServicesManager!
