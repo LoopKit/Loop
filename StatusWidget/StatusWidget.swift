@@ -136,10 +136,10 @@ class StatusWidgetProvider: TimelineProvider {
 
             var delta: HKQuantity?
 
-            // Making sure that previous glucose is within 5 mins of last glucose to avoid large deltas on sensor changes, missed readings, etc.
+            // Making sure that previous glucose is within 6 mins of last glucose to avoid large deltas on sensor changes, missed readings, etc.
             if let prevGlucose = previousGlucose,
                let currGlucose = currentGlucose,
-               abs((prevGlucose.startDate.addingTimeInterval(.minutes(5)) - currGlucose.startDate).minutes) > 1
+               currGlucose.startDate.timeIntervalSince(prevGlucose.startDate).minutes < 6
             {
                 let deltaMGDL = currGlucose.quantity.doubleValue(for: .milligramsPerDeciliter) - prevGlucose.quantity.doubleValue(for: .milligramsPerDeciliter)
                 delta = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: deltaMGDL)
