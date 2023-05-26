@@ -70,7 +70,7 @@ extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDel
     }
     
     var preferredGlucoseUnit: HKUnit {
-        return glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+        return displayGlucoseUnitObservable.displayGlucoseUnit
     }
     
     var pumpInsulinType: InsulinType? {

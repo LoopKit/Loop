@@ -180,13 +180,7 @@ class OnboardingManager {
     }
 
     private func ensureHealthStoreAuthorization(_ completion: @escaping () -> Void) {
-        getHealthStoreAuthorization { authorization in
-            guard authorization == .notDetermined else {
-                completion()
-                return
-            }
-            self.authorizeHealthStore { _ in completion() }
-        }
+        self.authorizeHealthStore { _ in completion() }
     }
 
     private func ensureBluetoothAuthorization(_ completion: @escaping () -> Void) {

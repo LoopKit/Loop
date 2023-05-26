@@ -19,10 +19,6 @@ class LoopDataManager {
 
     let glucoseStore: GlucoseStore
 
-    var healthStore: HKHealthStore {
-        return glucoseStore.healthStore
-    }
-
     @PersistedProperty(key: "Settings")
     private var rawSettings: LoopSettings.RawValue?
 
@@ -61,28 +57,22 @@ class LoopDataManager {
     /// Main queue only
     private var lastGlucoseBackfill = Date.distantPast
 
+    public let healthStore: HKHealthStore
+
     init() {
-        let healthStore = HKHealthStore()
+        healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInLocalDirectory()
 
         carbStore = CarbStore(
-            healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: false,
-            storeEntriesToHealthKit: false,
             cacheStore: cacheStore,
             cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
             defaultAbsorptionTimes: LoopCoreConstants.defaultCarbAbsorptionTimes,
-            observationInterval: 0,     // No longer use HealthKit as source of recent carbs
             syncVersion: 0,
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         glucoseStore = GlucoseStore(
-            healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: false,
-            storeSamplesToHealthKit: false,
             cacheStore: cacheStore,
             cacheLength: .hours(4),
-            observationInterval: 0,     // No longer use HealthKit as source of recent glucose
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
 

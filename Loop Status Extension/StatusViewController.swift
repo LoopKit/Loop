@@ -84,20 +84,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         expireAfter: localCacheDuration)
 
     lazy var glucoseStore = GlucoseStore(
-        healthStore: healthStore,
-        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
-        storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
-        observationEnabled: false,
         provenanceIdentifier: HKSource.default().bundleIdentifier
     )
 
     lazy var doseStore = DoseStore(
-        healthStore: healthStore,
-        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
-        storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
-        observationEnabled: false,
         insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsStore.latestSettings?.defaultRapidActingModel?.presetForRapidActingInsulin),
         longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
         basalProfile: settingsStore.latestSettings?.basalRateSchedule,

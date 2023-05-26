@@ -265,7 +265,7 @@ class MockCriticalEventLog: CriticalEventLog {
         return .success(Int64(days) * progressUnitCount)
     }
 
-    func export(startDate: Date, endDate: Date, to stream: OutputStream, progress: Progress) -> Error? {
+    func export(startDate: Date, endDate: Date, to stream: DataOutputStream, progress: Progress) -> Error? {
         exportExpectation?.fulfill()
 
         guard !progress.isCancelled else {

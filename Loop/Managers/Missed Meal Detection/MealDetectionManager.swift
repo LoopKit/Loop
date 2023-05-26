@@ -19,6 +19,8 @@ enum MissedMealStatus: Equatable {
 
 class MealDetectionManager {
     private let log = OSLog(category: "MealDetectionManager")
+    // All math for meal detection occurs in mg/dL, with settings being converted if in mmol/L
+    private let unit = HKUnit.milligramsPerDeciliter
     
     public var carbRatioScheduleApplyingOverrideHistory: CarbRatioSchedule?
     public var insulinSensitivityScheduleApplyingOverrideHistory: InsulinSensitivitySchedule?
@@ -76,7 +78,6 @@ class MealDetectionManager {
         /// Compute how much of the ICE effect we can't explain via our entered carbs
         /// Effect caching inspired by `LoopMath.predictGlucose`
         var effectValueCache: [Date: Double] = [:]
-        let unit = HKUnit.milligramsPerDeciliter
 
         /// Carb effects are cumulative, so we have to subtract the previous effect value
         var previousEffectValue: Double = filteredCarbEffects.first?.quantity.doubleValue(for: unit) ?? 0
@@ -195,7 +196,7 @@ class MealDetectionManager {
     private func effectThreshold(mealStart: Date, carbsInGrams: Double) -> Double? {
         guard
             let carbRatio = carbRatioScheduleApplyingOverrideHistory?.value(at: mealStart),
-            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory?.value(at: mealStart)
+            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory?.value(for: unit, at: mealStart)
         else {
             return nil
         }

@@ -9,17 +9,25 @@
 import Foundation
 import LoopKit
 
-class MockOutputStream: OutputStream {
-    var status: Status = .open
+class MockOutputStream: DataOutputStream {
     var error: Error? = nil
     var data: Data = Data()
+    var finished = false
 
-    override var streamStatus: Status { status }
-    override var streamError: Error? { error }
+    var streamError: Error? { return error }
 
-    override func write(_ buffer: UnsafePointer<UInt8>, maxLength len: Int) -> Int {
-        data.append(UnsafeBufferPointer(start: buffer, count: len))
-        return len
+    func write(_ data: Data) throws {
+        if let error = self.error {
+            throw error
+        }
+        self.data.append(data)
+    }
+
+    func finish(sync: Bool) throws {
+        if let error = self.error {
+            throw error
+        }
+        finished = true
     }
 
     var string: String { String(data: data, encoding: .utf8)! }
