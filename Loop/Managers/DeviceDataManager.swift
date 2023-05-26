@@ -135,7 +135,6 @@ final class DeviceDataManager {
 
             rawPumpManager = pumpManager?.rawValue
             UserDefaults.appGroup?.clearLegacyPumpManagerRawValue()
-
         }
     }
 
@@ -486,12 +485,19 @@ final class DeviceDataManager {
         }
 
         let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, prefersToSkipUserInteraction: prefersToSkipUserInteraction, allowedInsulinTypes: allowedInsulinTypes)
+        
         if case .createdAndOnboarded(let pumpManagerUI) = result {
             pumpManagerOnboarding(didCreatePumpManager: pumpManagerUI)
             pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI)
         }
 
         return .success(result)
+    }
+    
+    public func saveUpdatedBasalRateSchedule(_ basalRateSchedule: BasalRateSchedule) {
+        var therapySettings = self.loopManager.therapySettings
+        therapySettings.basalRateSchedule = basalRateSchedule
+        self.saveCompletion(therapySettings: therapySettings)
     }
 
     public func pumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
@@ -957,6 +963,11 @@ extension DeviceDataManager: PumpManagerDelegate {
         log.default("PumpManager:%{public}@ did update state", String(describing: type(of: pumpManager)))
 
         rawPumpManager = pumpManager.rawValue
+    }
+    
+    func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule, completion: @escaping (Error?) -> Void) {
+        saveUpdatedBasalRateSchedule(basalRateSchedule)
+        completion(nil)
     }
 
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {

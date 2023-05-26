@@ -910,6 +910,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private class MuteAlertsWarningCell: UITableViewCell {
         var formattedAlertMuteEndTime: String = NSLocalizedString("Unknown", comment: "label for when the alert mute end time is unknown")
 
+        fileprivate class GradientView: UIView {
+            override static var layerClass: AnyClass { CAGradientLayer.self }
+        }
+        
         override func updateConfiguration(using state: UICellConfigurationState) {
             super.updateConfiguration(using: state)
 
@@ -917,21 +921,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             var contentConfig = defaultContentConfiguration().updated(for: state)
             let title = NSMutableAttributedString(string: NSLocalizedString("All Alerts Muted", comment: "Warning text for when alerts are muted"))
-            contentConfig.image = UIImage(systemName: "speaker.slash.fill")
+            let image = UIImage(systemName: "speaker.slash.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 25, weight: .thin, scale: .large))
+            contentConfig.image = image
             contentConfig.imageProperties.tintColor = .white
             contentConfig.attributedText = title
             contentConfig.textProperties.color = .white
-            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
+            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .semibold)
             contentConfig.textProperties.adjustsFontSizeToFitWidth = true
             contentConfig.secondaryText = String(format: NSLocalizedString("Until %1$@", comment: "indication of when alerts will be unmuted (1: time when alerts unmute)"), formattedAlertMuteEndTime)
             contentConfig.secondaryTextProperties.color = .white
             contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
             contentConfiguration = contentConfig
 
+            let backgroundGradient = GradientView()
+            (backgroundGradient.layer as? CAGradientLayer)?.colors = [UIColor.warning.cgColor, UIColor.warning.withAlphaComponent(0.9).cgColor]
+            
             var backgroundConfig = backgroundConfiguration?.updated(for: state)
-            backgroundConfig?.backgroundColor = .warning.withAlphaComponent(0.8)
+            backgroundConfig?.customView = backgroundGradient
             backgroundConfiguration = backgroundConfig
-            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10)
+            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 5, trailing: 5)
             backgroundConfiguration?.cornerRadius = 10
 
             let unmuteIndicator = UIImage(systemName: "stop.circle")?.withTintColor(.white)
@@ -953,6 +961,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             } else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: MuteAlertsWarningCell.className, for: indexPath) as! MuteAlertsWarningCell
                 cell.formattedAlertMuteEndTime = alertMuter.formattedEndTime
+                cell.selectionStyle = .none
                 return cell
             }
         case .hud:
