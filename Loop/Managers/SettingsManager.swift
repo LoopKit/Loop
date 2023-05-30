@@ -32,7 +32,7 @@ class SettingsManager {
 
     var alertMuter: AlertMuter
 
-    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable?
+    var displayGlucosePreference: DisplayGlucosePreference?
 
     public var latestSettings: StoredSettings
 
@@ -139,7 +139,7 @@ class SettingsManager {
                               controllerDevice: UIDevice.current.controllerDevice,
                               cgmDevice: deviceStatusProvider?.cgmManagerStatus?.device,
                               pumpDevice: deviceStatusProvider?.pumpManagerStatus?.device,
-                              bloodGlucoseUnit: displayGlucoseUnitObservable?.displayGlucoseUnit,
+                              bloodGlucoseUnit: displayGlucosePreference?.unit,
                               automaticDosingStrategy: newLoopSettings.automaticDosingStrategy)
     }
 

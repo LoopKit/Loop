@@ -13,7 +13,7 @@ import SwiftUI
 import HealthKit
 
 public struct SettingsView: View {
-    @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismissAction) private var dismiss
     @Environment(\.appName) private var appName
     @Environment(\.guidanceColors) private var guidanceColors
@@ -211,7 +211,7 @@ extension SettingsView {
                                                                             sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                                                             adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
                                                                             delegate: self.viewModel.therapySettingsViewModelDelegate))
-                        .environmentObject(displayGlucoseUnitObservable)
+                        .environmentObject(displayGlucosePreference)
                         .environment(\.dismissAction, self.dismiss)
                         .environment(\.appName, self.appName)
                         .environment(\.chartColorPalette, .primary)
@@ -489,20 +489,20 @@ fileprivate struct LargeButton: View {
 public struct SettingsView_Previews: PreviewProvider {
         
     public static var previews: some View {
-        let displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
+        let displayGlucosePreference = DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
         let viewModel = SettingsViewModel.preview
         return Group {
             SettingsView(viewModel: viewModel, localizedAppNameAndVersion: "Loop Demo V1")
                 .colorScheme(.light)
                 .previewDevice(PreviewDevice(rawValue: "iPhone SE 2"))
                 .previewDisplayName("SE light")
-                .environmentObject(displayGlucoseUnitObservable)
+                .environmentObject(displayGlucosePreference)
             
             SettingsView(viewModel: viewModel, localizedAppNameAndVersion: "Loop Demo V1")
                 .colorScheme(.dark)
                 .previewDevice(PreviewDevice(rawValue: "iPhone 11 Pro Max"))
                 .previewDisplayName("11 Pro dark")
-                .environmentObject(displayGlucoseUnitObservable)
+                .environmentObject(displayGlucosePreference)
         }
     }
 }

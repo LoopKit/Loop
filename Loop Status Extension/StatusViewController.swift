@@ -267,11 +267,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             self.hudView.pumpStatusHUD.lifecycleProgress = context.pumpLifecycleProgressContext
 
             // Active carbs
-            let carbsFormatter = QuantityFormatter()
-            carbsFormatter.setPreferredNumberFormatter(for: carbUnit)
+            let carbsFormatter = QuantityFormatter(for: carbUnit)
 
             if let carbsOnBoard = context.carbsOnBoard,
-               let activeCarbsNumberString = carbsFormatter.string(from: HKQuantity(unit: carbUnit, doubleValue: carbsOnBoard), for: carbUnit)
+               let activeCarbsNumberString = carbsFormatter.string(from: HKQuantity(unit: carbUnit, doubleValue: carbsOnBoard))
             {
                 self.activeCarbsAmountLabel.text = String(format: NSLocalizedString("%1$@", comment: "The subtitle format describing the grams of active carbs.  (1: localized carb value description)"), activeCarbsNumberString)
             } else {
@@ -299,9 +298,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
 
             // Charts
-            let glucoseFormatter = QuantityFormatter()
-            glucoseFormatter.setPreferredNumberFormatter(for: unit)
-
             self.charts.predictedGlucose.glucoseUnit = unit
             self.charts.predictedGlucose.setGlucoseValues(glucose)
 

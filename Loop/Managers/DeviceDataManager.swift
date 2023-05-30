@@ -84,7 +84,7 @@ final class DeviceDataManager {
 
     private var displayGlucoseUnitObservers = WeakSynchronizedSet<DisplayGlucoseUnitObserver>()
 
-    public private(set) var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
+    public private(set) var displayGlucosePreference: DisplayGlucosePreference
 
     // MARK: - CGM
 
@@ -341,7 +341,7 @@ final class DeviceDataManager {
         self.automaticDosingStatus = automaticDosingStatus
 
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
-        displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
+        displayGlucosePreference = DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
 
         self.trustedTimeChecker = trustedTimeChecker
 
@@ -452,7 +452,7 @@ final class DeviceDataManager {
 
             Task { @MainActor in
                 if let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) {
-                    self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: unit)
+                    self.displayGlucosePreference.unitDidChange(to: unit)
                     self.notifyObserversOfDisplayGlucoseUnitChange(to: unit)
                 }
             }
@@ -599,7 +599,7 @@ final class DeviceDataManager {
             return .failure(UnknownCGMManagerIdentifierError())
         }
 
-        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, prefersToSkipUserInteraction: prefersToSkipUserInteraction)
+        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, displayGlucosePreference: displayGlucosePreference, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, prefersToSkipUserInteraction: prefersToSkipUserInteraction)
         if case .createdAndOnboarded(let cgmManagerUI) = result {
             cgmManagerOnboarding(didCreateCGMManager: cgmManagerUI)
             cgmManagerOnboarding(didOnboardCGMManager: cgmManagerUI)
@@ -1697,7 +1697,7 @@ extension DeviceDataManager {
         let queue = DispatchQueue.main
         displayGlucoseUnitObservers.insert(observer, queue: queue)
         queue.async {
-            observer.displayGlucoseUnitDidChange(to: self.displayGlucoseUnitObservable.displayGlucoseUnit)
+            observer.unitDidChange(to: self.displayGlucosePreference.unit)
         }
     }
 
@@ -1707,7 +1707,7 @@ extension DeviceDataManager {
 
     func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: HKUnit) {
         self.displayGlucoseUnitObservers.forEach {
-            $0.displayGlucoseUnitDidChange(to: displayGlucoseUnit)
+            $0.unitDidChange(to: displayGlucoseUnit)
         }
     }
 }

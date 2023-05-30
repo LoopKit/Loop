@@ -132,7 +132,7 @@ class OnboardingManager {
     }
 
     private func displayOnboarding(_ onboarding: OnboardingUI, resuming: Bool) -> Bool {
-        var onboardingViewController = onboarding.onboardingViewController(onboardingProvider: self, displayGlucoseUnitObservable: deviceDataManager.displayGlucoseUnitObservable, colorPalette: .default)
+        var onboardingViewController = onboarding.onboardingViewController(onboardingProvider: self, displayGlucosePreference: deviceDataManager.displayGlucosePreference, colorPalette: .default)
         onboardingViewController.cgmManagerOnboardingDelegate = deviceDataManager
         onboardingViewController.pumpManagerOnboardingDelegate = deviceDataManager
         onboardingViewController.serviceOnboardingDelegate = servicesManager
@@ -352,7 +352,7 @@ extension OnboardingManager: CGMManagerProvider {
             return .failure(OnboardingError.invalidState)
         }
 
-        return .success(.userInteractionRequired(cgmManagerUI.settingsViewController(bluetoothProvider: self, displayGlucoseUnitObservable: deviceDataManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)))
+        return .success(.userInteractionRequired(cgmManagerUI.settingsViewController(bluetoothProvider: self, displayGlucosePreference: deviceDataManager.displayGlucosePreference, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)))
     }
 }
 

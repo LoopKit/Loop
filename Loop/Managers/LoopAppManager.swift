@@ -206,7 +206,7 @@ class LoopAppManager: NSObject {
                                               trustedTimeChecker: trustedTimeChecker
         )
         settingsManager.deviceStatusProvider = deviceDataManager
-        settingsManager.displayGlucoseUnitObservable = deviceDataManager.displayGlucoseUnitObservable
+        settingsManager.displayGlucosePreference = deviceDataManager.displayGlucosePreference
 
 
         overrideHistory.delegate = self

@@ -29,7 +29,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private let log = OSLog(category: "StatusTableViewController")
 
-    lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
+    lazy var carbFormatter: QuantityFormatter = QuantityFormatter(for: .gram())
 
     var onboardingManager: OnboardingManager!
 
@@ -591,7 +591,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let index = charts.cob.cobPoints.closestIndex(priorTo: Date()) {
                 self.currentCOBDescription = String(describing: charts.cob.cobPoints[index].y)
             } else if let carbsOnBoard = carbsOnBoard {
-                self.currentCOBDescription = self.quantityFormatter.string(from: carbsOnBoard, for: .gram())
+                self.currentCOBDescription = self.carbFormatter.string(from: carbsOnBoard)
             } else {
                 self.currentCOBDescription = nil
             }
@@ -1072,7 +1072,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     progressCell.selectionStyle = .none
                     progressCell.totalUnits = dose.programmedUnits
                     progressCell.tintColor = .insulinTintColor
-                    progressCell.unit = HKUnit.internationalUnit()
                     progressCell.deliveredUnits = bolusProgressReporter?.progress.deliveredUnits
                     progressCell.backgroundColor = .secondarySystemBackground
                     return progressCell
@@ -1355,7 +1354,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let activity = activity {
                 viewModel.restoreUserActivityState(activity)
             }
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
             let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
             navigationWrapper = UINavigationController(rootViewController: hostingController)
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
@@ -1382,7 +1381,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let hostingController: DismissibleHostingController
         if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: false)
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         } else {
             let viewModel = BolusEntryViewModel(delegate: deviceManager, screenWidth: UIScreen.main.bounds.width, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
@@ -1390,7 +1389,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 await viewModel.generateRecommendationAndStartObserving()
             }
             viewModel.analyticsServicesManager = deviceManager.analyticsServicesManager
-            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         }
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
@@ -1562,7 +1561,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
-                .environmentObject(deviceManager.displayGlucoseUnitObservable)
+                .environmentObject(deviceManager.displayGlucosePreference)
                 .environment(\.appName, Bundle.main.bundleDisplayName),
             isModalInPresentation: false)
         present(hostingController, animated: true)
@@ -1584,7 +1583,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return
         }
 
-        var settings = cgmManager.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, displayGlucoseUnitObservable: deviceManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
+        var settings = cgmManager.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, displayGlucosePreference: deviceManager.displayGlucosePreference, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
         settings.cgmManagerOnboardingDelegate = deviceManager
         settings.completionDelegate = self
         show(settings, sender: self)
