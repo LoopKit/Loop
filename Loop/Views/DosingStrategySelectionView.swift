@@ -62,7 +62,8 @@ extension DosingStrategySelectionView {
                 VStack(alignment: .leading) {
                     Text("Modify Bolus Percentage", comment: "The title text for the Modify Bolus Percentage toggle")
                         .padding(.vertical, 0.5)
-                    Text("Modify Automatic Bolus behavior: The percentage of recommended bolus delivered each cycle varies with glucose level: near correction range, use 20% (similar to Temp Basal). Gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).", comment: "Description string for Modify Bolus Percentage toggle")
+                        .font(.subheadline)
+                    Text("Modify Automatic Bolus behavior: This experimental feature varies the percentage of recommended bolus delivered each cycle with glucose level. Near correction range, use 20% (similar to Temp Basal). Gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with Loop's velocity and retrospective correction effects, may result in a larger dose than your ISF would call for.", comment: "Description string for Modify Bolus Percentage toggle")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
