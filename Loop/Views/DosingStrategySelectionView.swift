@@ -14,11 +14,13 @@ import LoopKitUI
 public struct DosingStrategySelectionView: View {
     
     @Binding private var automaticDosingStrategy: AutomaticDosingStrategy
-    
+    @Binding private var applyLinearRampToBolusApplicationFactor: Bool
+
     @State private var internalDosingStrategy: AutomaticDosingStrategy
     
-    public init(automaticDosingStrategy: Binding<AutomaticDosingStrategy>) {
+    public init(automaticDosingStrategy: Binding<AutomaticDosingStrategy>, applyLinearRampToBolusApplicationFactor: Binding<Bool>) {
         self._automaticDosingStrategy = automaticDosingStrategy
+        self._applyLinearRampToBolusApplicationFactor = applyLinearRampToBolusApplicationFactor
         self._internalDosingStrategy = State(initialValue: automaticDosingStrategy.wrappedValue)
     }
     
@@ -45,10 +47,32 @@ public struct DosingStrategySelectionView: View {
                             self.internalDosingStrategy = strategy // Hack to force update. :(
                         }
                     }
-                )
+                ),
+                trailingView: strategy.isAutomaticBolus ? linearRampVolusApplicationFactorSection : nil
             )
             .padding(.vertical, 4)
         }
+    }
+}
+
+extension DosingStrategySelectionView {
+    var linearRampVolusApplicationFactorSection: AnyView {
+        return AnyView(
+            Toggle(isOn: $applyLinearRampToBolusApplicationFactor) {
+                VStack(alignment: .leading) {
+                    Text("Modify Bolus Percentage", comment: "The title text for the Modify Bolus Percentage toggle")
+                        .padding(.vertical, 0.5)
+                        .font(.subheadline)
+                    Text("Modify Automatic Bolus behavior: This experimental feature varies the percentage of recommended bolus delivered each cycle with glucose level. Near correction range, use 20% (similar to Temp Basal). Gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with Loop's velocity and retrospective correction effects, may result in a larger dose than your ISF would call for.", comment: "Description string for Modify Bolus Percentage toggle")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            .disabled(!automaticDosingStrategy.isAutomaticBolus)
+        )
     }
 }
 
@@ -58,14 +82,17 @@ extension AutomaticDosingStrategy {
         case .tempBasalOnly:
             return NSLocalizedString("Loop will set temporary basal rates to increase and decrease insulin delivery.", comment: "Description string for temp basal only dosing strategy")
         case .automaticBolus:
-            return NSLocalizedString("Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal.", comment: "Description string for automatic bolus dosing strategy")
+            return NSLocalizedString("Loop will automatically bolus 40% of recommended bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal.", comment: "Description string for automatic bolus dosing strategy")
         }
     }
 
+    var isAutomaticBolus: Bool {
+        return self == .automaticBolus
+    }
 }
 
 struct DosingStrategySelectionView_Previews: PreviewProvider {
     static var previews: some View {
-        DosingStrategySelectionView(automaticDosingStrategy: .constant(.automaticBolus))
+        DosingStrategySelectionView(automaticDosingStrategy: .constant(.automaticBolus), applyLinearRampToBolusApplicationFactor: .constant(false))
     }
 }
