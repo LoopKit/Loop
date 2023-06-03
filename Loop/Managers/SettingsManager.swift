@@ -109,7 +109,6 @@ class SettingsManager {
                 maximumBolus: latestSettings.maximumBolus,
                 suspendThreshold: latestSettings.suspendThreshold,
                 automaticDosingStrategy: latestSettings.automaticDosingStrategy,
-                applyLinearRampToBolusApplicationFactor: latestSettings.applyLinearRampToBolusApplicationFactor,
                 defaultRapidActingModel: latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin)
         }
     }
@@ -141,8 +140,7 @@ class SettingsManager {
                               cgmDevice: deviceStatusProvider?.cgmManagerStatus?.device,
                               pumpDevice: deviceStatusProvider?.pumpManagerStatus?.device,
                               bloodGlucoseUnit: displayGlucoseUnitObservable?.displayGlucoseUnit,
-                              automaticDosingStrategy: newLoopSettings.automaticDosingStrategy,
-                              applyLinearRampToBolusApplicationFactor: newLoopSettings.applyLinearRampToBolusApplicationFactor)
+                              automaticDosingStrategy: newLoopSettings.automaticDosingStrategy)
     }
 
     func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) {
