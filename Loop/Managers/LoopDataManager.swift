@@ -1699,8 +1699,8 @@ extension LoopDataManager {
                 }
 
                 // Create dosing strategy based on user setting
-                let applicationFactorStrategy: ApplicationFactorStrategy = UserDefaults.standard.bool(forKey: "applyExperimentalEnhancedAutoBolus")
-                    ? GlucoseBasedApplicationFactor()
+                let applicationFactorStrategy: ApplicationFactorStrategy = UserDefaults.standard.bool(forKey: "applyExperimentalGlucoseBasedApplicationFactor")
+                    ? GlucoseBasedApplicationFactorStrategy()
                     : ConstantDosingStrategy()
 
                 let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
@@ -1711,7 +1711,7 @@ extension LoopDataManager {
                     settings: settings
                 )
 
-                print(" *** Glucose, effectiveBolusApplicationFactor: ", glucose.quantity, Double(Int(100.0*effectiveBolusApplicationFactor))/100.0)
+                self.logger.debug(" *** Glucose, effectiveBolusApplicationFactor: ", glucose.quantity, Double(Int(100.0*effectiveBolusApplicationFactor))/100.0)
 
                 // If a user customizes maxPartialApplicationFactor > 1; this respects maxBolus
                 let maxAutomaticBolus = min(iobHeadroom, maxBolus! * min(effectiveBolusApplicationFactor, 1.0))
@@ -2144,7 +2144,7 @@ extension LoopDataManager {
                 "insulinOnBoard: \(String(describing: manager.insulinOnBoard))",
                 "error: \(String(describing: state.error))",
                 "overrideInUserDefaults: \(String(describing: UserDefaults.appGroup?.intentExtensionOverrideToSet))",
-                "applyExperimentalEnhancedAutoBolus: \(UserDefaults.standard.bool(forKey: "applyExperimentalEnhancedAutoBolus"))",
+                "applyExperimentalGlucoseBasedApplicationFactor: \(UserDefaults.standard.bool(forKey: "applyExperimentalGlucoseBasedApplicationFactor"))",
                 "",
                 String(reflecting: self.retrospectiveCorrection),
                 "",
