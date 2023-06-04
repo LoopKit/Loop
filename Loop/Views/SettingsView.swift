@@ -30,6 +30,8 @@ public struct SettingsView: View {
     @State private var therapySettingsIsPresented: Bool = false
     @State private var deletePumpDataAlertIsPresented = false
     @State private var deleteCGMDataAlertIsPresented = false
+    @State internal var enhancedAutoBolusIsPresented: Bool = false
+    @State internal var isEnhancedAutoBolusEnabled = UserDefaults.standard.bool(forKey: "applyExperimentalEnhancedAutoBolus")
 
     var localizedAppNameAndVersion: String
 
@@ -50,6 +52,9 @@ public struct SettingsView: View {
                     if FeatureFlags.automaticBolusEnabled {
                         dosingStrategySection
                     }
+                    // Note: Experimental Section
+                    algorithmExperimentsSection
+                    //
                     alertManagementSection
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         configurationSection
