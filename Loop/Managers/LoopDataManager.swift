@@ -1711,8 +1711,8 @@ extension LoopDataManager {
                     settings: settings
                 )
 
-                self.logger.debug(" *** Glucose, effectiveBolusApplicationFactor: ", glucose.quantity, Double(Int(100.0*effectiveBolusApplicationFactor))/100.0)
-
+                self.logger.debug(" *** Glucose: %{public}@, effectiveBolusApplicationFactor: %.2f", glucose.quantity.description, effectiveBolusApplicationFactor)
+                
                 // If a user customizes maxPartialApplicationFactor > 1; this respects maxBolus
                 let maxAutomaticBolus = min(iobHeadroom, maxBolus! * min(effectiveBolusApplicationFactor, 1.0))
 
