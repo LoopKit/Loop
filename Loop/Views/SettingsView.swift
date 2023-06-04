@@ -165,7 +165,7 @@ extension SettingsView {
     private var dosingStrategySection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Dosing Strategy", comment: "The title of the Dosing Strategy section in settings"))) {
             
-            NavigationLink(destination: DosingStrategySelectionView(automaticDosingStrategy: $viewModel.automaticDosingStrategy, applyLinearRampToBolusApplicationFactor: viewModel.applyLinearRampToBolusApplicationFactorBinding))
+            NavigationLink(destination: DosingStrategySelectionView(automaticDosingStrategy: $viewModel.automaticDosingStrategy))
             {
                 HStack {
                     Text(viewModel.automaticDosingStrategy.title)

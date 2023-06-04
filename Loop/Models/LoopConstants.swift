@@ -75,12 +75,4 @@ enum LoopConstants {
     static let simpleBolusCalculatorMinGlucoseBolusRecommendation = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 70)
     static let simpleBolusCalculatorMinGlucoseMealBolusRecommendation = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 55)
     static let simpleBolusCalculatorGlucoseWarningLimit = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 70)
-
-    // Dosing Stategy: Automatic Bolus: Sliding Scale
-    static let minPartialApplicationFactor = 0.20 // min fraction of correction when glucose > minGlucoseSlidingScale
-    static let maxPartialApplicationFactor = 0.80 // max fraction of correction when glucose > maxGlucoseSlidingScale
-    // set minGlucoseSlidingScale based on user setting for correction range
-    // use mg/dL for calculations
-    static let minGlucoseDeltaSlidingScale = 10.0 // mg/dL
-    static let maxGlucoseSlidingScale = 200.0 // mg/dL
 }

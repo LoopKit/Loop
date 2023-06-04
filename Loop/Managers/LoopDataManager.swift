@@ -67,8 +67,6 @@ final class LoopDataManager {
 
     private var insulinOnBoard: InsulinValue?
 
-    var dosingStrategy: DosingStrategy = OriginalDosingStrategy() // default to original strategy
-
     deinit {
         for observer in notificationObservers {
             NotificationCenter.default.removeObserver(observer)
@@ -1700,23 +1698,7 @@ extension LoopDataManager {
                     return self.delegate?.roundBolusVolume(units: units) ?? units
                 }
 
-                // Create dosing strategy based on user setting
-                let dosingStrategy: DosingStrategy = UserDefaults.standard.bool(forKey: "applyLinearRampToBolusApplicationFactor")
-                ? LinearRampDosingStrategy()
-                : OriginalDosingStrategy()
-
-                let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
-
-                let effectiveBolusApplicationFactor = dosingStrategy.calculateDosingFactor(
-                    for: glucose.quantity,
-                    correctionRangeSchedule: correctionRangeSchedule!,
-                    settings: settings
-                )
-
-                print(" *** Glucose, effectiveBolusApplicationFactor: ", glucose.quantity, Double(Int(100.0*effectiveBolusApplicationFactor))/100.0)
-
-                // If a user customizes maxPartialApplicationFactor > 1; this respects maxBolus
-                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * min(effectiveBolusApplicationFactor, 1.0))
+                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * LoopConstants.bolusPartialApplicationFactor)
 
                 dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
                     to: glucoseTargetRange!,
@@ -1726,7 +1708,7 @@ extension LoopDataManager {
                     model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
                     basalRates: basalRateSchedule!,
                     maxAutomaticBolus: maxAutomaticBolus,
-                    partialApplicationFactor: effectiveBolusApplicationFactor * self.timeBasedDoseApplicationFactor,
+                    partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor * self.timeBasedDoseApplicationFactor,
                     lastTempBasal: lastTempBasal,
                     volumeRounder: volumeRounder,
                     rateRounder: rateRounder,
