@@ -1,5 +1,5 @@
 //
-//  GlucoseBasedApplicationFactor.swift
+//  GlucoseBasedApplicationFactorStrategy.swift
 //  Loop
 //
 //  Created by Jonas Björkert on 2023-06-03.
@@ -11,7 +11,7 @@ import HealthKit
 import LoopKit
 import LoopCore
 
-struct GlucoseBasedApplicationFactor: ApplicationFactorStrategy {
+struct GlucoseBasedApplicationFactorStrategy: ApplicationFactorStrategy {
     static let minPartialApplicationFactor = 0.20 // min fraction of correction when glucose > minGlucoseSlidingScale
     static let maxPartialApplicationFactor = 0.80 // max fraction of correction when glucose > maxGlucoseSlidingScale
     // set minGlucoseSlidingScale based on user setting for correction range
@@ -30,12 +30,12 @@ struct GlucoseBasedApplicationFactor: ApplicationFactorStrategy {
         let lowerBoundTarget = correctionRange.lowerBound.doubleValue(for: .milligramsPerDeciliter)
 
         // Calculate minimum glucose sliding scale and scaling fraction
-        let minGlucoseSlidingScale = GlucoseBasedApplicationFactor.minGlucoseDeltaSlidingScale + lowerBoundTarget
-        let scalingFraction = (GlucoseBasedApplicationFactor.maxPartialApplicationFactor - GlucoseBasedApplicationFactor.minPartialApplicationFactor) / (GlucoseBasedApplicationFactor.maxGlucoseSlidingScale - minGlucoseSlidingScale)
+        let minGlucoseSlidingScale = GlucoseBasedApplicationFactorStrategy.minGlucoseDeltaSlidingScale + lowerBoundTarget
+        let scalingFraction = (GlucoseBasedApplicationFactorStrategy.maxPartialApplicationFactor - GlucoseBasedApplicationFactorStrategy.minPartialApplicationFactor) / (GlucoseBasedApplicationFactorStrategy.maxGlucoseSlidingScale - minGlucoseSlidingScale)
         let scalingGlucose = max(currentGlucose - minGlucoseSlidingScale, 0.0)
 
         // Calculate effectiveBolusApplicationFactor
-        let effectiveBolusApplicationFactor = min(GlucoseBasedApplicationFactor.minPartialApplicationFactor + scalingGlucose * scalingFraction, GlucoseBasedApplicationFactor.maxPartialApplicationFactor)
+        let effectiveBolusApplicationFactor = min(GlucoseBasedApplicationFactorStrategy.minPartialApplicationFactor + scalingGlucose * scalingFraction, GlucoseBasedApplicationFactorStrategy.maxPartialApplicationFactor)
 
         return effectiveBolusApplicationFactor
     }
