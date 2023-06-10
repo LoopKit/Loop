@@ -19,22 +19,6 @@ public extension AutomaticDosingStrategy {
     }
 }
 
-public enum RetrospectiveCorrectionOptions: Int, CaseIterable {
-    case standardRetrospectiveCorrection
-    case integralRetrospectiveCorrection
-}
-
-public extension RetrospectiveCorrectionOptions {
-    var title: String {
-        switch self {
-        case .standardRetrospectiveCorrection:
-            return NSLocalizedString("Standard Retrospective Correction", comment: "Title string for standard retrospective correction")
-        case .integralRetrospectiveCorrection:
-            return NSLocalizedString("Integral Retrospective Correction", comment: "Title string for integral retrospective correction")
-        }
-    }
-}
-
 public struct LoopSettings: Equatable {
     public var isScheduleOverrideInfiniteWorkout: Bool {
         guard let scheduleOverride = scheduleOverride else { return false }
@@ -90,8 +74,6 @@ public struct LoopSettings: Equatable {
     public var automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly
 
     public var defaultRapidActingModel: ExponentialInsulinModelPreset?
-    
-    public var retrospectiveCorrection: RetrospectiveCorrectionOptions = .integralRetrospectiveCorrection
 
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
@@ -112,7 +94,6 @@ public struct LoopSettings: Equatable {
         maximumBolus: Double? = nil,
         suspendThreshold: GlucoseThreshold? = nil,
         automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
-        retrospectiveCorrection: RetrospectiveCorrectionOptions = .integralRetrospectiveCorrection,
         defaultRapidActingModel: ExponentialInsulinModelPreset? = nil
     ) {
         self.dosingEnabled = dosingEnabled
@@ -129,7 +110,6 @@ public struct LoopSettings: Equatable {
         self.maximumBolus = maximumBolus
         self.suspendThreshold = suspendThreshold
         self.automaticDosingStrategy = automaticDosingStrategy
-        self.retrospectiveCorrection = retrospectiveCorrection
         self.defaultRapidActingModel = defaultRapidActingModel
     }
 }
@@ -297,11 +277,6 @@ extension LoopSettings: RawRepresentable {
         {
             self.automaticDosingStrategy = automaticDosingStrategy
         }
-        
-        if let rawRetrospectiveCorrection = rawValue["retrospectiveCorrection"] as? RetrospectiveCorrectionOptions.RawValue,
-            let retrospectiveCorrection = RetrospectiveCorrectionOptions(rawValue: rawRetrospectiveCorrection) {
-            self.retrospectiveCorrection = retrospectiveCorrection
-        }
     }
 
     public var rawValue: RawValue {
@@ -320,7 +295,6 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
         raw["dosingStrategy"] = automaticDosingStrategy.rawValue
-        raw["retrospectiveCorrection"] = retrospectiveCorrection.rawValue
 
         return raw
     }
