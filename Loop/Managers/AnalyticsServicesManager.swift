@@ -132,10 +132,6 @@ final class AnalyticsServicesManager {
         if newValue.dosingEnabled != oldValue.dosingEnabled {
             logEvent("Closed loop enabled change")
         }
-        
-        if newValue.retrospectiveCorrection != oldValue.retrospectiveCorrection {
-            logEvent("Retrospective correction change")
-        }
 
         if newValue.basalRateSchedule?.timeZone != oldValue.basalRateSchedule?.timeZone {
             logEvent("Therapy schedule time zone change")

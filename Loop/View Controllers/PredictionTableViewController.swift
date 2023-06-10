@@ -276,10 +276,9 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
                 format: NSLocalizedString("Predicted: %1$@\nActual: %2$@ (%3$@)", comment: "Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference)"),
                 values[0], values[1], values[2]
             )
-            switch deviceManager.settings.retrospectiveCorrection {
-            case .standardRetrospectiveCorrection:
-                subtitleText = String(format: "%@\n%@", subtitleText, retro)
-            case .integralRetrospectiveCorrection:
+            let isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.bool(forKey: "isExperimentalIntegralRetrospectiveCorrectionEnabled")
+            
+            if isIntegralRetrospectiveCorrectionEnabled {
                 var integralEffectDisplay = "?"
                 var totalEffectDisplay = "?"
                 if let totalEffect = self.totalRetrospectiveCorrection {
@@ -293,6 +292,8 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
                     integralEffectDisplay, totalEffectDisplay
                 )
                 subtitleText = String(format: "%@\n%@", retro, integralRetro)
+            } else {
+                subtitleText = String(format: "%@\n%@", subtitleText, retro)
             }
         
         }

@@ -72,7 +72,7 @@ final class LoopDataManager {
             NotificationCenter.default.removeObserver(observer)
         }
     }
-    
+
     init(
         lastLoopCompleted: Date?,
         basalDeliveryState: PumpManagerStatus.BasalDeliveryState?,
@@ -123,9 +123,8 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
 
-        /// Creates an instance of the enabled retrospective correction implementation
-        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm(retrospectiveCorrection: settings.retrospectiveCorrection)
-        
+        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm()
+
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
                 return
@@ -317,10 +316,6 @@ final class LoopDataManager {
                 self.carbsOnBoard = nil
                 self.insulinEffect = nil
             }
-        }
-        
-        if newValue.retrospectiveCorrection != oldValue.retrospectiveCorrection {
-            retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm(retrospectiveCorrection: settings.retrospectiveCorrection)
         }
 
         notify(forChange: .preferences)
@@ -2109,6 +2104,8 @@ extension LoopDataManager {
                 }),
                 "]",
 
+                "isExperimentalIntegralRetrospectiveCorrectionEnabled: \(UserDefaults.standard.bool(forKey: "isExperimentalIntegralRetrospectiveCorrectionEnabled"))",
+                
                 "retrospectiveGlucoseDiscrepancies: [",
                 "* GlucoseEffect(start, mg/dL)",
                 (manager.retrospectiveGlucoseDiscrepancies ?? []).reduce(into: "", { (entries, entry) in

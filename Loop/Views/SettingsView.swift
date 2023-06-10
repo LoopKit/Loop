@@ -30,7 +30,8 @@ public struct SettingsView: View {
     @State private var therapySettingsIsPresented: Bool = false
     @State private var deletePumpDataAlertIsPresented = false
     @State private var deleteCGMDataAlertIsPresented = false
-
+    @State internal var isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.bool(forKey: "isExperimentalIntegralRetrospectiveCorrectionEnabled")
+    
     var localizedAppNameAndVersion: String
 
     public init(viewModel: SettingsViewModel, localizedAppNameAndVersion: String) {
@@ -51,7 +52,9 @@ public struct SettingsView: View {
                         dosingStrategySection
                     }
                     alertManagementSection
-                    retrospectiveCorrectionSection
+                    // Note: Experimental Section
+                    algorithmExperimentsSection
+                    //
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         configurationSection
                     }
@@ -175,19 +178,6 @@ extension SettingsView {
         }
     }
 
-    private var retrospectiveCorrectionSection: some View {
-        Section(header: SectionHeader(label: NSLocalizedString("Retrospective Correction", comment: "The title of the Retrospective Correction section in settings"))) {
-            
-            NavigationLink(destination: RetrospectiveCorrectionSelectionView(retrospectiveCorrection: $viewModel.retrospectiveCorrection))
-            {
-                HStack {
-                    Text(viewModel.retrospectiveCorrection.title)
-                }
-            }
-        }
-    }
-
-    
     private var alertManagementSection: some View {
         Section {
             NavigationLink(destination: AlertManagementView(checker: viewModel.alertPermissionsChecker, alertMuter: viewModel.alertMuter))
@@ -505,24 +495,6 @@ public struct SettingsView_Previews: PreviewProvider {
     public static var previews: some View {
         let displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
         let viewModel = SettingsViewModel.preview
- /* DM check
-        let viewModel = SettingsViewModel(notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
-                                          pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
-                                          cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
-                                          servicesViewModel: servicesViewModel,
-                                          criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
-                                          therapySettings: { TherapySettings() },
-                                          pumpSupportedIncrements: nil,
-                                          syncPumpSchedule: nil,
-                                          sensitivityOverridesEnabled: false,
-                                          initialDosingEnabled: true,
-                                          isClosedLoopAllowed: fakeClosedLoopAllowedPublisher.$mockIsClosedLoopAllowed,
-                                          supportInfoProvider: MockSupportInfoProvider(),
-                                          dosingStrategy: .automaticBolus,
-                                          retrospectiveCorrection: .standardRetrospectiveCorrection,
-                                          availableSupports: [],
-                                          delegate: nil)
-*/
         return Group {
             SettingsView(viewModel: viewModel, localizedAppNameAndVersion: "Loop Demo V1")
                 .colorScheme(.light)

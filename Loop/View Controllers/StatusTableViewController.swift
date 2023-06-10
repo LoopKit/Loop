@@ -1547,7 +1547,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           isClosedLoopAllowed: automaticDosingStatus.$isAutomaticDosingAllowed,
                                           automaticDosingStrategy: deviceManager.loopManager.settings.automaticDosingStrategy,
-                                          retrospectiveCorrection: deviceManager.loopManager.settings.retrospectiveCorrection,
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
@@ -2132,12 +2131,6 @@ extension StatusTableViewController: BluetoothObserver {
 extension StatusTableViewController: SettingsViewModelDelegate {
     var closedLoopDescriptiveText: String? {
         return deviceManager.closedLoopDisallowedLocalizedDescription
-    }
-    
-    func retrospectiveCorrectionChanged(_ retrospectiveCorrection: RetrospectiveCorrectionOptions) {
-        self.deviceManager.loopManager.mutateSettings { settings in
-            settings.retrospectiveCorrection = retrospectiveCorrection
-        }
     }
 
     func dosingEnabledChanged(_ value: Bool) {
