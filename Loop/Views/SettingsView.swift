@@ -51,10 +51,10 @@ public struct SettingsView: View {
                     if FeatureFlags.automaticBolusEnabled {
                         dosingStrategySection
                     }
-                    alertManagementSection
                     // Note: Experimental Section
                     algorithmExperimentsSection
                     //
+                    alertManagementSection
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         configurationSection
                     }
