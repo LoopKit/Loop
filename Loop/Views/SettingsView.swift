@@ -30,7 +30,6 @@ public struct SettingsView: View {
     @State private var therapySettingsIsPresented: Bool = false
     @State private var deletePumpDataAlertIsPresented = false
     @State private var deleteCGMDataAlertIsPresented = false
-    @State internal var enhancedAutoBolusIsPresented: Bool = false
     @State internal var isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.bool(forKey: "applyExperimentalGlucoseBasedApplicationFactor")
 
     var localizedAppNameAndVersion: String
