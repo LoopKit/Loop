@@ -10,11 +10,16 @@ import os.log
 import Foundation
 import LoopKit
 import LoopKitUI
+import TidepoolSupport
 
 class PluginManager {
     let pluginBundles: [Bundle]
 
     private let log = OSLog(category: "PluginManager")
+    
+    private var selectedProduct: TidepoolSupport.Product {
+        TidepoolSupport.Product(rawValue: UserDefaults.appGroup?.productSelection ?? "none") ?? .none
+    }
 
     public init(pluginsURL: URL? = Bundle.main.privateFrameworksURL) {
         var bundles = [Bundle]()
@@ -64,14 +69,18 @@ class PluginManager {
     }
 
     var availablePumpManagers: [PumpManagerDescriptor] {
-        return pluginBundles.compactMap({ (bundle) -> PumpManagerDescriptor? in
-            guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerDisplayName.rawValue) as? String,
-                let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String else {
-                    return nil
-            }
-            
-            return PumpManagerDescriptor(identifier: identifier, localizedTitle: title)
-        })
+        if selectedProduct.maskDevices {
+            return []
+        } else {
+            return pluginBundles.compactMap({ (bundle) -> PumpManagerDescriptor? in
+                guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerDisplayName.rawValue) as? String,
+                    let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String else {
+                        return nil
+                }
+    
+                return PumpManagerDescriptor(identifier: identifier, localizedTitle: title)
+            })
+        }
     }
     
     func getCGMManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
@@ -100,14 +109,18 @@ class PluginManager {
     }
     
     var availableCGMManagers: [CGMManagerDescriptor] {
-        return pluginBundles.compactMap({ (bundle) -> CGMManagerDescriptor? in
-            guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerDisplayName.rawValue) as? String,
-                let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String else {
-                    return nil
-            }
-            
-            return CGMManagerDescriptor(identifier: identifier, localizedTitle: title)
-        })
+        if selectedProduct.maskDevices {
+            return []
+        } else {
+            return pluginBundles.compactMap({ (bundle) -> CGMManagerDescriptor? in
+                guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerDisplayName.rawValue) as? String,
+                    let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String else {
+                        return nil
+                }
+    
+                return CGMManagerDescriptor(identifier: identifier, localizedTitle: title)
+            })
+        }
     }
 
     func getServiceTypeByIdentifier(_ identifier: String) -> ServiceUI.Type? {

@@ -55,7 +55,7 @@ public struct SettingsView: View {
                         configurationSection
                     }
                     deviceSettingsSection
-                    if viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice {
+                    if (viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice) && !viewModel.hideDeleteDataSection {
                         deleteDataSection
                     }
                 }

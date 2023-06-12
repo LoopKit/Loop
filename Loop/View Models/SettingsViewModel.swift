@@ -12,6 +12,7 @@ import LoopKit
 import LoopKitUI
 import SwiftUI
 import HealthKit
+import TidepoolSupport
 
 public class DeviceViewModel<T>: ObservableObject {
     public typealias DeleteTestingDataFunc = () -> Void
@@ -99,6 +100,14 @@ public class SettingsViewModel: ObservableObject {
        }
     }
 
+    var hideDeleteDataSection: Bool {
+        guard let tidepoolSupport = availableSupports.first(where: { $0 is TidepoolSupport }) as? TidepoolSupport else {
+            return false
+        }
+        
+        return tidepoolSupport.selectedProduct.hideDeleteDataSection
+    }
+    
     lazy private var cancellables = Set<AnyCancellable>()
 
     public init(alertPermissionsChecker: AlertPermissionsChecker,
