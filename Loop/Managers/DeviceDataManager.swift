@@ -460,7 +460,15 @@ final class DeviceDataManager {
     }
 
     var availablePumpManagers: [PumpManagerDescriptor] {
-        return pluginManager.availablePumpManagers + availableStaticPumpManagers
+        var availablePumpManagers = pluginManager.availablePumpManagers + availableStaticPumpManagers
+        
+        availableSupports.forEach { supportUI in
+            if supportUI.onlyAllowSimulatorDevices {
+                availablePumpManagers = []
+            }
+        }
+        
+        return availablePumpManagers
     }
 
     func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings, prefersToSkipUserInteraction: Bool) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManager>, Error> {
@@ -571,6 +579,13 @@ final class DeviceDataManager {
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
             availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
         }
+        
+        availableSupports.forEach { supportUI in
+            if supportUI.onlyAllowSimulatorDevices {
+                availableCGMManagers = []
+            }
+        }
+        
         return availableCGMManagers
     }
 
