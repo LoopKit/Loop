@@ -48,7 +48,7 @@ public struct GlucoseBasedApplicationFactorSelectionView: View {
     }
 }
 
-struct EnhancedAutoBolusSelectionView_Previews: PreviewProvider {
+struct GlucoseBasedApplicationFactorSelectionView_Previews: PreviewProvider {
     static var previews: some View {
         GlucoseBasedApplicationFactorSelectionView(isGlucoseBasedApplicationFactorEnabled: .constant(true))
     }
