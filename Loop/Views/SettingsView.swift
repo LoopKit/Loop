@@ -70,7 +70,7 @@ public struct SettingsView: View {
 
                     supportSection
 
-                    if let profileExpiration = Bundle.main.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
+                    if let profileExpiration = BuildDetails.default.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
                         profileExpirationSection(profileExpiration: profileExpiration)
                     }
                 }

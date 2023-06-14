@@ -26,7 +26,7 @@ info() {
   echo "INFO: ${*}" >&2
 }
 
-info_plist_path="${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
+info_plist_path="${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/BuildDetails.plist"
 while [[ $# -gt 0 ]]
 do
   case $1 in

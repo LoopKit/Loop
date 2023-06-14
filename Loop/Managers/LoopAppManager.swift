@@ -244,7 +244,7 @@ class LoopAppManager: NSObject {
 
         analyticsServicesManager.identifyAppName(Bundle.main.bundleDisplayName)
 
-        if let workspaceGitRevision = Bundle.main.workspaceGitRevision {
+        if let workspaceGitRevision = BuildDetails.default.workspaceGitRevision {
             analyticsServicesManager.identifyWorkspaceGitRevision(workspaceGitRevision)
         }
 
