@@ -462,7 +462,17 @@ final class DeviceDataManager {
     }
 
     var availablePumpManagers: [PumpManagerDescriptor] {
-        onlyAllowSimulators ? availableStaticPumpManagers : pluginManager.availablePumpManagers + availableStaticPumpManagers
+        var pumpManagers = pluginManager.availablePumpManagers + availableStaticPumpManagers
+        
+        pumpManagers = pumpManagers.filter({ pumpManager in
+            if onlyAllowSimulators {
+                return pumpManager.identifier == "MockPumpManager"
+            } else {
+                return true
+            }
+        })
+        
+        return pumpManagers
     }
 
     func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings, prefersToSkipUserInteraction: Bool) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManager>, Error> {
@@ -569,14 +579,18 @@ final class DeviceDataManager {
     }
 
     var availableCGMManagers: [CGMManagerDescriptor] {
-        guard !onlyAllowSimulators else {
-            return availableStaticCGMManagers
-        }
-        
         var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
             availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
         }
+        
+        availableCGMManagers = availableCGMManagers.filter({ cgmManager in
+            if onlyAllowSimulators {
+                return cgmManager.identifier == "MockCGMManager"
+            } else {
+                return true
+            }
+        })
 
         return availableCGMManagers
     }
