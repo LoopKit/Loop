@@ -466,7 +466,7 @@ final class DeviceDataManager {
         
         pumpManagers = pumpManagers.filter({ pumpManager in
             guard !deviceWhitelist.pumpDevices.isEmpty else {
-                return false
+                return true
             }
             
             return deviceWhitelist.pumpDevices.contains(pumpManager.identifier)
@@ -586,7 +586,7 @@ final class DeviceDataManager {
         
         availableCGMManagers = availableCGMManagers.filter({ cgmManager in
             guard !deviceWhitelist.cgmDevices.isEmpty else {
-                return false
+                return true
             }
             
             return deviceWhitelist.cgmDevices.contains(cgmManager.identifier)
