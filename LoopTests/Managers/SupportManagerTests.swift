@@ -39,8 +39,6 @@ class SupportManagerTests: XCTestCase {
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
         
-        let showsDeleteTestDataUI: Bool = true
-        
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
         func loopWillReset() {}
         func loopDidReset() {}
@@ -53,8 +51,6 @@ class SupportManagerTests: XCTestCase {
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
-        
-        let showsDeleteTestDataUI: Bool = true
         
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
         func loopWillReset() {}
