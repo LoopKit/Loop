@@ -220,9 +220,7 @@ class LoopAppManager: NSObject {
                                         servicesManager: deviceDataManager.servicesManager,
                                         alertIssuer: alertManager)
         
-        if supportManager.availableSupports.contains(where: { $0.onlyAllowSimulatorDevices }) {
-            deviceDataManager.onlyAllowSimulators = true
-        }
+        setWhitelistedDevices()
 
         onboardingManager = OnboardingManager(pluginManager: pluginManager,
                                               bluetoothProvider: bluetoothStateManager,
@@ -401,6 +399,18 @@ class LoopAppManager: NSObject {
     }
 
     // MARK: - Private
+    
+    private func setWhitelistedDevices() {
+        var whitelistedCGMs: Set<String> = []
+        var whitelistedPumps: Set<String> = []
+        
+        supportManager.availableSupports.forEach {
+            $0.deviceIdentifierWhitelist.cgmDevices.forEach({ whitelistedCGMs.insert($0) })
+            $0.deviceIdentifierWhitelist.pumpDevices.forEach({ whitelistedPumps.insert($0) })
+        }
+        
+        deviceDataManager.deviceWhitelist = DeviceWhitelist(cgmDevices: Array(whitelistedCGMs), pumpDevices: Array(whitelistedPumps))
+    }
 
     private func isProtectedDataAvailable() -> Bool {
         let fileManager = FileManager.default

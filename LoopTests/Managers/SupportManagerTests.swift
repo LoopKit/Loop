@@ -39,7 +39,6 @@ class SupportManagerTests: XCTestCase {
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
         
-        let onlyAllowSimulatorDevices: Bool = false
         let showsDeleteTestDataUI: Bool = true
         
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
@@ -55,7 +54,6 @@ class SupportManagerTests: XCTestCase {
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
         
-        let onlyAllowSimulatorDevices: Bool = false
         let showsDeleteTestDataUI: Bool = true
         
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
