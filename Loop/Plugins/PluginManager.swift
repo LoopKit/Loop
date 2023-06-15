@@ -64,12 +64,12 @@ class PluginManager {
     }
 
     var availablePumpManagers: [PumpManagerDescriptor] {
-        return pluginBundles.compactMap({ (bundle) -> PumpManagerDescriptor? in
+        pluginBundles.compactMap({ (bundle) -> PumpManagerDescriptor? in
             guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerDisplayName.rawValue) as? String,
                 let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String else {
                     return nil
             }
-            
+
             return PumpManagerDescriptor(identifier: identifier, localizedTitle: title)
         })
     }
@@ -100,12 +100,12 @@ class PluginManager {
     }
     
     var availableCGMManagers: [CGMManagerDescriptor] {
-        return pluginBundles.compactMap({ (bundle) -> CGMManagerDescriptor? in
+        pluginBundles.compactMap({ (bundle) -> CGMManagerDescriptor? in
             guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerDisplayName.rawValue) as? String,
                 let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String else {
                     return nil
             }
-            
+
             return CGMManagerDescriptor(identifier: identifier, localizedTitle: title)
         })
     }

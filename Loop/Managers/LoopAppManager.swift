@@ -219,6 +219,10 @@ class LoopAppManager: NSObject {
                                         deviceSupportDelegate: deviceDataManager,
                                         servicesManager: deviceDataManager.servicesManager,
                                         alertIssuer: alertManager)
+        
+        if supportManager.availableSupports.contains(where: { $0.onlyAllowSimulatorDevices }) {
+            deviceDataManager.onlyAllowSimulators = true
+        }
 
         onboardingManager = OnboardingManager(pluginManager: pluginManager,
                                               bluetoothProvider: bluetoothStateManager,

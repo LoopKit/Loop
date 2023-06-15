@@ -85,6 +85,8 @@ final class DeviceDataManager {
     private var displayGlucoseUnitObservers = WeakSynchronizedSet<DisplayGlucoseUnitObserver>()
 
     public private(set) var displayGlucosePreference: DisplayGlucosePreference
+    
+    var onlyAllowSimulators: Bool = false
 
     // MARK: - CGM
 
@@ -460,7 +462,17 @@ final class DeviceDataManager {
     }
 
     var availablePumpManagers: [PumpManagerDescriptor] {
-        return pluginManager.availablePumpManagers + availableStaticPumpManagers
+        var pumpManagers = pluginManager.availablePumpManagers + availableStaticPumpManagers
+        
+        pumpManagers = pumpManagers.filter({ pumpManager in
+            if onlyAllowSimulators {
+                return pumpManager.identifier == "MockPumpManager"
+            } else {
+                return true
+            }
+        })
+        
+        return pumpManagers
     }
 
     func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings, prefersToSkipUserInteraction: Bool) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManager>, Error> {
@@ -571,6 +583,15 @@ final class DeviceDataManager {
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
             availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
         }
+        
+        availableCGMManagers = availableCGMManagers.filter({ cgmManager in
+            if onlyAllowSimulators {
+                return cgmManager.identifier == "MockCGMManager"
+            } else {
+                return true
+            }
+        })
+
         return availableCGMManagers
     }
 
