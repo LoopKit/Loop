@@ -86,7 +86,7 @@ final class DeviceDataManager {
 
     public private(set) var displayGlucosePreference: DisplayGlucosePreference
     
-    var onlyAllowSimulators: Bool = false
+    var deviceWhitelist = DeviceWhitelist()
 
     // MARK: - CGM
 
@@ -465,11 +465,11 @@ final class DeviceDataManager {
         var pumpManagers = pluginManager.availablePumpManagers + availableStaticPumpManagers
         
         pumpManagers = pumpManagers.filter({ pumpManager in
-            if onlyAllowSimulators {
-                return pumpManager.identifier == "MockPumpManager"
-            } else {
+            guard !deviceWhitelist.pumpDevices.isEmpty else {
                 return true
             }
+            
+            return deviceWhitelist.pumpDevices.contains(pumpManager.identifier)
         })
         
         return pumpManagers
@@ -585,11 +585,11 @@ final class DeviceDataManager {
         }
         
         availableCGMManagers = availableCGMManagers.filter({ cgmManager in
-            if onlyAllowSimulators {
-                return cgmManager.identifier == "MockCGMManager"
-            } else {
+            guard !deviceWhitelist.cgmDevices.isEmpty else {
                 return true
             }
+            
+            return deviceWhitelist.cgmDevices.contains(cgmManager.identifier)
         })
 
         return availableCGMManagers
