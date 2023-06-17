@@ -15,7 +15,7 @@ import LoopUI
 
 
 struct BolusEntryView: View {
-    @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismissAction) var dismiss
     @Environment(\.appName) var appName
     
@@ -160,7 +160,7 @@ struct BolusEntryView: View {
     private var predictedGlucoseChart: some View {
         PredictedGlucoseChartView(
             chartManager: viewModel.chartManager,
-            glucoseUnit: displayGlucoseUnitObservable.displayGlucoseUnit,
+            glucoseUnit: displayGlucosePreference.unit,
             glucoseValues: viewModel.glucoseValues,
             predictedGlucoseValues: viewModel.predictedGlucoseValues,
             targetGlucoseSchedule: viewModel.targetGlucoseSchedule,
@@ -205,7 +205,7 @@ struct BolusEntryView: View {
     }
 
     private var glucoseFormatter: NumberFormatter {
-        QuantityFormatter(for: displayGlucoseUnitObservable.displayGlucoseUnit).numberFormatter
+        QuantityFormatter(for: displayGlucosePreference.unit).numberFormatter
     }
 
 
@@ -272,7 +272,7 @@ struct BolusEntryView: View {
     }
 
     private var bolusUnitsLabel: some View {
-        Text(QuantityFormatter().string(from: .internationalUnit()))
+        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
             .foregroundColor(Color(.secondaryLabel))
     }
 
@@ -308,7 +308,7 @@ struct BolusEntryView: View {
     private func warning(for notice: BolusEntryViewModel.Notice) -> some View {
         switch notice {
         case .predictedGlucoseBelowSuspendThreshold(suspendThreshold: let suspendThreshold):
-            let suspendThresholdString = QuantityFormatter().string(from: suspendThreshold, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: suspendThreshold)
+            let suspendThresholdString = displayGlucosePreference.format(suspendThreshold)
             return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
                 caption: Text("Your glucose is below or predicted to go below your glucose safety limit, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit")
@@ -417,9 +417,8 @@ struct BolusEntryView: View {
                 message: Text("An error occurred while trying to save your carb entry.", comment: "Alert message for a carb entry persistence error")
             )
         case .manualGlucoseEntryOutOfAcceptableRange:
-            let formatter = QuantityFormatter(for: displayGlucoseUnitObservable.displayGlucoseUnit)
-            let acceptableLowerBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.lowerBound, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.lowerBound)
-            let acceptableUpperBound = formatter.string(from: LoopConstants.validManualGlucoseEntryRange.upperBound, for: displayGlucoseUnitObservable.displayGlucoseUnit) ?? String(describing: LoopConstants.validManualGlucoseEntryRange.upperBound)
+            let acceptableLowerBound = displayGlucosePreference.format(LoopConstants.validManualGlucoseEntryRange.lowerBound)
+            let acceptableUpperBound = displayGlucosePreference.format(LoopConstants.validManualGlucoseEntryRange.upperBound)
             return SwiftUI.Alert(
                 title: Text("Glucose Entry Out of Range", comment: "Alert title for a manual glucose entry out of range error"),
                 message: Text("A manual glucose entry must be between \(acceptableLowerBound) and \(acceptableUpperBound)", comment: "Alert message for a manual glucose entry out of range error")
@@ -467,14 +466,13 @@ struct LabeledQuantity: View {
             return Text("– –")
         }
         
-        let formatter = QuantityFormatter()
-        formatter.setPreferredNumberFormatter(for: unit)
+        let formatter = QuantityFormatter(for: unit)
 
         if let maxFractionDigits = maxFractionDigits {
             formatter.numberFormatter.maximumFractionDigits = maxFractionDigits
         }
 
-        guard let string = formatter.string(from: quantity, for: unit) else {
+        guard let string = formatter.string(from: quantity) else {
             assertionFailure("Unable to format \(String(describing: quantity)) \(unit)")
             return Text("")
         }

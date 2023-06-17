@@ -21,17 +21,10 @@ protocol DoseStoreProtocol: AnyObject {
     
     var basalProfileApplyingOverrideHistory: BasalRateSchedule? { get }
     
-    // MARK: authorization
-    var authorizationRequired: Bool { get }
-    
-    var sharingDenied: Bool { get }
-    
     // MARK: store information
     var lastReservoirValue: LoopKit.ReservoirValue? { get }
     
     var lastAddedPumpData: Date { get }
-    
-    var sampleType: HKSampleType { get }
     
     var delegate: DoseStoreDelegate? { get set }
     

@@ -31,7 +31,7 @@ protocol SimpleBolusViewModelDelegate: AnyObject {
 
     func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision?
 
-    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable { get }
+    var displayGlucosePreference: DisplayGlucosePreference { get }
     
     var maximumBolus: Double { get }
 
@@ -89,14 +89,11 @@ class SimpleBolusViewModel: ObservableObject {
         get  {
             if cachedDisplayGlucoseUnit != displayGlucoseUnit {
                 cachedDisplayGlucoseUnit = displayGlucoseUnit
-                glucoseQuantityFormatter.setPreferredNumberFormatter(for: displayGlucoseUnit)
-                guard let manualGlucoseQuantity = manualGlucoseQuantity,
-                      let manualGlucoseString = glucoseQuantityFormatter.string(from: manualGlucoseQuantity, for: displayGlucoseUnit, includeUnit: false)
-                else {
+                guard let manualGlucoseQuantity = manualGlucoseQuantity else {
                     _manualGlucoseString = ""
                     return _manualGlucoseString
                 }
-                self._manualGlucoseString = manualGlucoseString
+                self._manualGlucoseString = delegate.displayGlucosePreference.format(manualGlucoseQuantity, includeUnit: false)
             }
 
             return _manualGlucoseString
@@ -155,7 +152,7 @@ class SimpleBolusViewModel: ObservableObject {
 
     @Published private var _manualGlucoseString: String = "" {
         didSet {
-            guard let manualGlucoseValue = glucoseQuantityFormatter.numberFormatter.number(from: _manualGlucoseString)?.doubleValue
+            guard let manualGlucoseValue = delegate.displayGlucosePreference.formatter.numberFormatter.number(from: _manualGlucoseString)?.doubleValue
             else {
                 manualGlucoseQuantity = nil
                 return
@@ -163,7 +160,7 @@ class SimpleBolusViewModel: ObservableObject {
 
             // if needed update manualGlucoseQuantity and related activeNotice
             if manualGlucoseQuantity == nil ||
-                _manualGlucoseString != glucoseQuantityFormatter.string(from: manualGlucoseQuantity!, for: cachedDisplayGlucoseUnit, includeUnit: false)
+                _manualGlucoseString != delegate.displayGlucosePreference.format(manualGlucoseQuantity!, includeUnit: false)
             {
                 manualGlucoseQuantity = HKQuantity(unit: cachedDisplayGlucoseUnit, doubleValue: manualGlucoseValue)
                 updateNotice()
@@ -199,7 +196,7 @@ class SimpleBolusViewModel: ObservableObject {
         return false
     }
     
-    var displayGlucoseUnit: HKUnit { return delegate.displayGlucoseUnitObservable.displayGlucoseUnit }
+    var displayGlucoseUnit: HKUnit { return delegate.displayGlucosePreference.unit }
     
     var suspendThreshold: HKQuantity { return delegate.suspendThreshold }
 
@@ -227,8 +224,7 @@ class SimpleBolusViewModel: ObservableObject {
     }()
     
     private static let carbAmountFormatter: NumberFormatter = {
-        let quantityFormatter = QuantityFormatter()
-        quantityFormatter.setPreferredNumberFormatter(for: .gram())
+        let quantityFormatter = QuantityFormatter(for: .gram())
         return quantityFormatter.numberFormatter
     }()
 
@@ -269,7 +265,6 @@ class SimpleBolusViewModel: ObservableObject {
         Self.carbAmountFormatter.string(from: 0.0)!
     }
 
-    private let glucoseQuantityFormatter = QuantityFormatter()
     private let delegate: SimpleBolusViewModelDelegate
     private let log = OSLog(category: "SimpleBolusViewModel")
     
@@ -277,15 +272,13 @@ class SimpleBolusViewModel: ObservableObject {
 
     var maximumBolusAmountString: String {
         let maxBolusQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.maximumBolus)
-        return bolusVolumeFormatter.string(from: maxBolusQuantity, for: .internationalUnit())!
+        return bolusVolumeFormatter.string(from: maxBolusQuantity)!
     }
 
     init(delegate: SimpleBolusViewModelDelegate, displayMealEntry: Bool) {
         self.delegate = delegate
         self.displayMealEntry = displayMealEntry
-        let glucoseQuantityFormatter = QuantityFormatter()
-        glucoseQuantityFormatter.setPreferredNumberFormatter(for: delegate.displayGlucoseUnitObservable.displayGlucoseUnit)
-        cachedDisplayGlucoseUnit = delegate.displayGlucoseUnitObservable.displayGlucoseUnit
+        cachedDisplayGlucoseUnit = delegate.displayGlucosePreference.unit
         enteredBolusString = Self.doseAmountFormatter.string(from: 0.0)!
         updateRecommendation()
         dosingDecision = BolusDosingDecision(for: .simpleBolus)

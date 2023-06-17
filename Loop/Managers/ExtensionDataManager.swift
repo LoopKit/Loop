@@ -61,11 +61,7 @@ final class ExtensionDataManager {
     }
     
     private func update() {
-        guard let unit = (deviceManager.glucoseStore.preferredUnit ?? ExtensionDataManager.context?.predictedGlucose?.unit) else {
-            return
-        }
-
-        createStatusContext(glucoseUnit: unit) { (context) in
+        createStatusContext(glucoseUnit:  deviceManager.preferredGlucoseUnit) { (context) in
             if let context = context {
                 ExtensionDataManager.context = context
             }

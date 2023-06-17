@@ -429,6 +429,7 @@
 		C1004DF52981F5B700B8CF94 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1004DF32981F5B700B8CF94 /* Localizable.strings */; };
 		C1004DF82981F5B700B8CF94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1004DF62981F5B700B8CF94 /* InfoPlist.strings */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
+		C110888D2A3913C600BA4898 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
 		C11613492983096D00777E7C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C11613472983096D00777E7C /* InfoPlist.strings */; };
 		C116134C2983096D00777E7C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C116134A2983096D00777E7C /* Localizable.strings */; };
 		C11B9D5B286778A800500CF8 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C11B9D5A286778A800500CF8 /* SwiftCharts */; };
@@ -506,6 +507,7 @@
 		C1E3DC4728595FAA00CA19FF /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; };
 		C1E3DC4928595FAA00CA19FF /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C1E71723292E918F00DA646F /* SmallStatusWidgetEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E71721292E90CC00DA646F /* SmallStatusWidgetEntryView.swift */; };
+		C1EE9E812A38D0FB0064784A /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = C1EE9E802A38D0FB0064784A /* BuildDetails.plist */; };
 		C1EF747228D6A44A00C8C083 /* CrashRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */; };
 		C1F00C60285A802A006302C5 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; };
 		C1F00C78285A8256006302C5 /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -1468,6 +1470,7 @@
 		C101947127DD473C004E7EB8 /* MockKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1092BFD29F8116700AE3D1C /* apply-info-customizations.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "apply-info-customizations.sh"; sourceTree = "<group>"; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
+		C110888C2A3913C600BA4898 /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
 		C11613482983096D00777E7C /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C116134B2983096D00777E7C /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C116134D2983096D00777E7C /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/ckcomplication.strings; sourceTree = "<group>"; };
@@ -1646,6 +1649,7 @@
 		C1EB0D20299581D900628475 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1EB0D21299581D900628475 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1EB0D22299581D900628475 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/ckcomplication.strings; sourceTree = "<group>"; };
+		C1EE9E802A38D0FB0064784A /* BuildDetails.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = BuildDetails.plist; sourceTree = "<group>"; };
 		C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashRecoveryManager.swift; sourceTree = "<group>"; };
 		C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileExpirationAlerter.swift; sourceTree = "<group>"; };
 		C1F48FF62995821600C8BD69 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -2105,6 +2109,7 @@
 				7D7076511FE06EE1004AC8EA /* InfoPlist.strings */,
 				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
+				C1EE9E802A38D0FB0064784A /* BuildDetails.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
 				1D12D3B82548EFDD00B53E8B /* main.swift */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
@@ -2614,6 +2619,7 @@
 				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
 				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
 				E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */,
+				C110888C2A3913C600BA4898 /* BuildDetails.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3500,6 +3506,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
+				C1EE9E812A38D0FB0064784A /* BuildDetails.plist in Resources */,
 				43FCBBC21E51710B00343C1B /* LaunchScreen.storyboard in Resources */,
 				B405E35A24D2B1A400DD058D /* HUDAssets.xcassets in Resources */,
 				A966152623EA5A26005D8B29 /* DefaultAssets.xcassets in Resources */,
@@ -3745,7 +3752,6 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}",
 			);
 			name = "Capture Build Details";
 			outputFileListPaths = (
@@ -3912,6 +3918,7 @@
 				A98556852493F901000FD662 /* AlertStore+SimulatedCoreData.swift in Sources */,
 				899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */,
 				89D1503E24B506EB00EDE253 /* Dictionary.swift in Sources */,
+				C110888D2A3913C600BA4898 /* BuildDetails.swift in Sources */,
 				A96DAC2C2838F31200D94E38 /* SharedLogging.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				1D63DEA526E950D400F46FA5 /* SupportManager.swift in Sources */,

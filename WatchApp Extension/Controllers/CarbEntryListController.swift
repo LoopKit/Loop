@@ -25,7 +25,7 @@ class CarbEntryListController: WKInterfaceController, IdentifiableClass {
     private lazy var loopManager = ExtensionDelegate.shared().loopManager
 
     private lazy var carbFormatter: QuantityFormatter = {
-        let formatter = QuantityFormatter()
+        let formatter = QuantityFormatter(for: .gram())
         formatter.numberFormatter.numberStyle = .none
         return formatter
     }()
@@ -75,7 +75,7 @@ extension CarbEntryListController {
             return
         }
 
-        cobLabel.setText(carbFormatter.string(from: activeCarbohydrates, for: .gram()))
+        cobLabel.setText(carbFormatter.string(from: activeCarbohydrates))
     }
 
     private func reloadCarbEntries() {
@@ -114,9 +114,9 @@ extension CarbEntryListController {
             total += entry.quantity.doubleValue(for: unit)
 
             row.textLabel.setText(timeFormatter.string(from: entry.startDate))
-            row.detailTextLabel.setText(carbFormatter.string(from: entry.quantity, for: unit))
+            row.detailTextLabel.setText(carbFormatter.string(from: entry.quantity))
         }
 
-        totalLabel.setText(carbFormatter.string(from: HKQuantity(unit: unit, doubleValue: total), for: unit))
+        totalLabel.setText(carbFormatter.string(from: HKQuantity(unit: unit, doubleValue: total)))
     }
 }

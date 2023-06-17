@@ -206,7 +206,7 @@ class LoopAppManager: NSObject {
                                               trustedTimeChecker: trustedTimeChecker
         )
         settingsManager.deviceStatusProvider = deviceDataManager
-        settingsManager.displayGlucoseUnitObservable = deviceDataManager.displayGlucoseUnitObservable
+        settingsManager.displayGlucosePreference = deviceDataManager.displayGlucosePreference
 
 
         overrideHistory.delegate = self
@@ -219,6 +219,8 @@ class LoopAppManager: NSObject {
                                         deviceSupportDelegate: deviceDataManager,
                                         servicesManager: deviceDataManager.servicesManager,
                                         alertIssuer: alertManager)
+        
+        setWhitelistedDevices()
 
         onboardingManager = OnboardingManager(pluginManager: pluginManager,
                                               bluetoothProvider: bluetoothStateManager,
@@ -244,7 +246,7 @@ class LoopAppManager: NSObject {
 
         analyticsServicesManager.identifyAppName(Bundle.main.bundleDisplayName)
 
-        if let workspaceGitRevision = Bundle.main.workspaceGitRevision {
+        if let workspaceGitRevision = BuildDetails.default.workspaceGitRevision {
             analyticsServicesManager.identifyWorkspaceGitRevision(workspaceGitRevision)
         }
 
@@ -288,6 +290,7 @@ class LoopAppManager: NSObject {
         statusTableViewController.deviceManager = deviceDataManager
         statusTableViewController.onboardingManager = onboardingManager
         statusTableViewController.supportManager = supportManager
+        statusTableViewController.testingScenariosManager = testingScenariosManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
         var rootNavigationController = rootViewController as? RootNavigationController
@@ -396,6 +399,18 @@ class LoopAppManager: NSObject {
     }
 
     // MARK: - Private
+    
+    private func setWhitelistedDevices() {
+        var whitelistedCGMs: Set<String> = []
+        var whitelistedPumps: Set<String> = []
+        
+        supportManager.availableSupports.forEach {
+            $0.deviceIdentifierWhitelist.cgmDevices.forEach({ whitelistedCGMs.insert($0) })
+            $0.deviceIdentifierWhitelist.pumpDevices.forEach({ whitelistedPumps.insert($0) })
+        }
+        
+        deviceDataManager.deviceWhitelist = DeviceWhitelist(cgmDevices: Array(whitelistedCGMs), pumpDevices: Array(whitelistedPumps))
+    }
 
     private func isProtectedDataAvailable() -> Bool {
         let fileManager = FileManager.default

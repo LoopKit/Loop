@@ -11,8 +11,6 @@ import HealthKit
 
 protocol CarbStoreProtocol: AnyObject {
     
-    var sampleType: HKSampleType { get }
-    
     var preferredUnit: HKUnit! { get }
     
     var delegate: CarbStoreDelegate? { get set }
@@ -31,13 +29,6 @@ protocol CarbStoreProtocol: AnyObject {
     var delta: TimeInterval { get }
     
     var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes { get }
-    
-    // MARK: HealthKit
-    var authorizationRequired: Bool { get }
-    
-    var sharingDenied: Bool { get }
-    
-    func authorize(toShare: Bool, read: Bool, _ completion: @escaping (_ result: HealthKitSampleStoreResult<Bool>) -> Void)
     
     // MARK: Data Management
     func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: NewCarbEntry, completion: @escaping (_ result: CarbStoreResult<StoredCarbEntry>) -> Void)
