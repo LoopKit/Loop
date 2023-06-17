@@ -245,7 +245,7 @@ final class WatchDataManager: NSObject {
 
             let carbsOnBoard = state.carbsOnBoard
 
-            let context = WatchContext(glucose: glucose, glucoseUnit: self.deviceManager.glucoseStore.preferredUnit)
+            let context = WatchContext(glucose: glucose, glucoseUnit: self.deviceManager.preferredGlucoseUnit)
             context.reservoir = reservoir?.unitVolume
             context.loopLastRunDate = manager.lastLoopCompleted
             context.cob = carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())

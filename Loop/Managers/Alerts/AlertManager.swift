@@ -799,8 +799,10 @@ extension AlertManager {
     }
     
     func presentCouldNotResetLoopAlert(error: Error) {
-        let alert = UIAlertController(title: "Could Not Restart Loop", message: "While trying to restart Loop an error occured.\n\n\(error.localizedDescription)", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        let titleString = String(format: NSLocalizedString("Could Not Restart %1$@", comment: "Format string for title of reset loop alert. (1: App name)"), Bundle.main.bundleDisplayName)
+        let message = String(format: NSLocalizedString("While trying to restart %1$@ an error occured.\n\n%2$@", comment: "Format string for message of reset loop alert. (1: App name) (2: error description)"), Bundle.main.bundleDisplayName, error.localizedDescription)
+        let alert = UIAlertController(title: titleString, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel button for reset loop alert"), style: .cancel))
         
         alertPresenter.present(alert, animated: true)
     }

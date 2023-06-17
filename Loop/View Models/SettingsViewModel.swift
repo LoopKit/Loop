@@ -99,6 +99,10 @@ public class SettingsViewModel: ObservableObject {
        }
     }
 
+    var showDeleteTestData: Bool {
+        availableSupports.contains(where: { $0.showsDeleteTestDataUI })
+    }
+    
     lazy private var cancellables = Set<AnyCancellable>()
 
     public init(alertPermissionsChecker: AlertPermissionsChecker,

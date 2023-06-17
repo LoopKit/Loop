@@ -81,7 +81,7 @@ extension Set where Element == RefreshContext {
 open class LoopChartsTableViewController: ChartsTableViewController {
     weak var deviceManager: DeviceDataManager! {
         didSet {
-            self.displayGlucoseUnitObservable = deviceManager.displayGlucoseUnitObservable
+            self.displayGlucosePreference = deviceManager.displayGlucosePreference
         }
     }
 }

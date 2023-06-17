@@ -13,20 +13,9 @@ protocol GlucoseStoreProtocol: AnyObject {
     
     var latestGlucose: GlucoseSampleValue? { get }
     
-    var preferredUnit: HKUnit? { get }
-    
-    var sampleType: HKSampleType { get }
-    
     var delegate: GlucoseStoreDelegate? { get set }
     
     var managedDataInterval: TimeInterval? { get set }
-    
-    // MARK: HealthKit
-    var authorizationRequired: Bool { get }
-    
-    var sharingDenied: Bool { get }
-
-    func authorize(toShare: Bool, read: Bool, _ completion: @escaping (_ result: HealthKitSampleStoreResult<Bool>) -> Void)
     
     // MARK: Sample Management
     func addGlucoseSamples(_ samples: [NewGlucoseSample], completion: @escaping (_ result: Result<[StoredGlucoseSample], Error>) -> Void)

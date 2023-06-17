@@ -93,7 +93,7 @@ final class ActionHUDController: HUDInterfaceController {
             }
         }
 
-        glucoseFormatter.setPreferredNumberFormatter(for: loopManager.displayGlucoseUnit)
+        glucoseFormatter.updateUnit(to: loopManager.displayGlucoseUnit)
     }
     
     private var canEnableOverride: Bool {
@@ -130,7 +130,7 @@ final class ActionHUDController: HUDInterfaceController {
 
     private var pendingMessageResponses = 0
 
-    private let glucoseFormatter = QuantityFormatter()
+    private let glucoseFormatter = QuantityFormatter(for: .milligramsPerDeciliter)
 
     @IBAction func togglePreMealMode() {
         guard let range = loopManager.settings.preMealTargetRange else {
@@ -227,6 +227,7 @@ final class ActionHUDController: HUDInterfaceController {
 
     private func formattedGlucoseRangeString(from range: ClosedRange<HKQuantity>) -> String {
         let unit = loopManager.displayGlucoseUnit
+        glucoseFormatter.updateUnit(to: unit)
         let rangeDouble = range.doubleRange(for: unit)
         return String(
             format: NSLocalizedString(
@@ -235,7 +236,7 @@ final class ActionHUDController: HUDInterfaceController {
             ),
             glucoseFormatter.numberFormatter.string(from: rangeDouble.minValue) ?? String(rangeDouble.minValue),
             glucoseFormatter.numberFormatter.string(from: rangeDouble.maxValue) ?? String(rangeDouble.maxValue),
-            glucoseFormatter.string(from: unit)
+            glucoseFormatter.localizedUnitStringWithPlurality()
         )
     }
 

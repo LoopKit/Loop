@@ -43,14 +43,14 @@ extension HUDRowController {
         }
 
         let insulinFormatter: QuantityFormatter = {
-            let insulinFormatter = QuantityFormatter()
+            let insulinFormatter = QuantityFormatter(for: .internationalUnit())
             insulinFormatter.numberFormatter.minimumFractionDigits = 1
             insulinFormatter.numberFormatter.maximumFractionDigits = 1
 
             return insulinFormatter
         }()
 
-        setDetail(insulinFormatter.string(from: activeInsulin, for: .internationalUnit()))
+        setDetail(insulinFormatter.string(from: activeInsulin))
     }
 
     func setActiveCarbohydrates(_ activeCarbohydrates: HKQuantity?) {
@@ -59,10 +59,10 @@ extension HUDRowController {
             return
         }
 
-        let carbFormatter = QuantityFormatter()
+        let carbFormatter = QuantityFormatter(for: .gram())
         carbFormatter.numberFormatter.maximumFractionDigits = 0
 
-        setDetail(carbFormatter.string(from: activeCarbohydrates, for: .gram()))
+        setDetail(carbFormatter.string(from: activeCarbohydrates))
     }
 
     func setNetTempBasalDose(_ tempBasal: Double?) {
@@ -92,7 +92,7 @@ extension HUDRowController {
         }
 
         let insulinFormatter: QuantityFormatter = {
-            let insulinFormatter = QuantityFormatter()
+            let insulinFormatter = QuantityFormatter(for: .internationalUnit())
             insulinFormatter.unitStyle = .long
             insulinFormatter.numberFormatter.minimumFractionDigits = 0
             insulinFormatter.numberFormatter.maximumFractionDigits = 0
@@ -100,7 +100,7 @@ extension HUDRowController {
             return insulinFormatter
         }()
 
-        setDetail(insulinFormatter.string(from: reservoirVolume, for: .internationalUnit()))
+        setDetail(insulinFormatter.string(from: reservoirVolume))
     }
 }
 
