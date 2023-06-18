@@ -23,7 +23,7 @@
 "Predicted glucose of %1$@ is below your glucose safety limit setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unter der Sicherheitsgrenze.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unter dem Grenzwert für die Hypo-Abschaltung.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unter dem Grenzwert der Hypo-Abschaltung.";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";

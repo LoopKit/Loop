@@ -14,7 +14,7 @@
 "– – –" = "– – –";
 
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
-"%@ ago" = "%@ vor";
+"%@ ago" = "vor %@";
 
 /* The format string describing the basal rate. */
 "%@ U" = "%@ IE";

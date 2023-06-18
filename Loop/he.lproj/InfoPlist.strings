@@ -10,6 +10,9 @@
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
 
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "המצלמה משמשת לסריקת ברקוד.";
+
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID is used to authenticate insulin bolus and to save changes to therapy settings.";
 

@@ -581,7 +581,7 @@
 "Insulin adjustments have been disabled!" = "Ajustările de insulină au fost dezactivate!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Administrare insulină";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Efecte insulină";
