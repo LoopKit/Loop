@@ -25,10 +25,9 @@ final class GlucoseThresholdTableViewController: TextFieldTableViewController {
         keyboardType = .decimalPad
         contextHelp = NSLocalizedString("When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour.", comment: "Explanation of glucose safety limit")
 
-        let formatter = QuantityFormatter()
-        formatter.setPreferredNumberFormatter(for: glucoseUnit)
+        let formatter = QuantityFormatter(for: glucoseUnit)
 
-        unit = formatter.string(from: glucoseUnit)
+        unit = formatter.localizedUnitStringWithPlurality()
 
         if let threshold = threshold {
             value = formatter.numberFormatter.string(from: threshold)

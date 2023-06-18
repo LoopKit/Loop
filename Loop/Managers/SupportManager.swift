@@ -227,7 +227,7 @@ extension SupportManager: SupportUIDelegate {
     }
     
     private var branchNameIfNotReleaseBranch: String? {
-        return Bundle.main.gitBranch.filter { branch in
+        return BuildDetails.default.gitBranch.filter { branch in
             return branch != "" &&
                 branch != "main" &&
                 branch != "master" &&

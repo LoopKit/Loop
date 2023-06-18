@@ -42,16 +42,14 @@ public class BolusProgressTableViewCell: UITableViewCell {
         }
     }
 
-    public var unit: HKUnit?
-
     private lazy var gradient = CAGradientLayer()
 
     private var doseTotalUnits: Double?
 
     private var disableUpdates: Bool = false
 
-    lazy var quantityFormatter: QuantityFormatter = {
-        let formatter = QuantityFormatter()
+    lazy var insulinFormatter: QuantityFormatter = {
+        let formatter = QuantityFormatter(for: .internationalUnit())
         formatter.numberFormatter.minimumFractionDigits = 2
         return formatter
     }()
@@ -92,16 +90,16 @@ public class BolusProgressTableViewCell: UITableViewCell {
     }
 
     private func updateProgress() {
-        guard !disableUpdates, let totalUnits = totalUnits, let unit = unit else {
+        guard !disableUpdates, let totalUnits = totalUnits else {
             return
         }
 
-        let totalUnitsQuantity = HKQuantity(unit: unit, doubleValue: totalUnits)
-        let totalUnitsString = quantityFormatter.string(from: totalUnitsQuantity, for: unit) ?? ""
+        let totalUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: totalUnits)
+        let totalUnitsString = insulinFormatter.string(from: totalUnitsQuantity) ?? ""
 
         if let deliveredUnits = deliveredUnits {
-            let deliveredUnitsQuantity = HKQuantity(unit: unit, doubleValue: deliveredUnits)
-            let deliveredUnitsString = quantityFormatter.string(from: deliveredUnitsQuantity, for: unit, includeUnit: false) ?? ""
+            let deliveredUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: deliveredUnits)
+            let deliveredUnitsString = insulinFormatter.string(from: deliveredUnitsQuantity, includeUnit: false) ?? ""
 
             progressLabel.text = String(format: NSLocalizedString("Bolused %1$@ of %2$@", comment: "The format string for bolus progress. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)
 

@@ -12,6 +12,7 @@ import LoopKitUI
 struct HowMuteAlertWorkView: View {
     @Environment(\.dismissAction) private var dismiss
     @Environment(\.guidanceColors) private var guidanceColors
+    @Environment(\.appName) private var appName
 
     var body: some View {
         NavigationView {
@@ -32,7 +33,7 @@ When using Mute Alerts, also consider the impact of using iOS Focus Modes.
                                 .background(guidanceColors.warning)
                                 .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
                             
-                            Text(NSLocalizedString("Loop Mute Alerts", comment: "Section title for description that mute alerts is temporary"))
+                            Text(String(format: NSLocalizedString("%1$@ Mute Alerts", comment: "Format string for Section title for description that mute alerts is temporary (1: app name)"), appName))
                                 .bold()
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -52,7 +53,7 @@ After the mute period ends, your alert sounds will resume.
                             Text(NSLocalizedString("iOS Focus Mode", comment: "Section title for description of how mute alerts work with focus mode"))
                                 .bold()
                         }
-                        Text(NSLocalizedString("If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered, but non-Critical Alerts will be silenced until Loop is added to each Focus mode as an Allowed App.", comment: "Description of how mute alerts works with focus mode"))
+                        Text(String(format: NSLocalizedString("If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered, but non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App.", comment: "Format string for description of how mute alerts works with focus mode (1: app name)"), appName))
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding()

@@ -14,13 +14,11 @@ import Combine
 import HealthKit
 
 struct ManualGlucoseEntryRow: View {
-    @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
 
     @State private var valueText = ""
 
     @Binding var quantity: HKQuantity?
-
-    let glucoseQuantityFormatter = QuantityFormatter()
 
     @State private var isManualGlucoseEntryRowVisible = false
 
@@ -43,17 +41,17 @@ struct ManualGlucoseEntryRow: View {
                     doneButtonColor: .loopAccent
                 )
                 .onChange(of: valueText, perform: { value in
-                    if let manualGlucoseValue = glucoseQuantityFormatter.numberFormatter.number(from: valueText)?.doubleValue {
-                        quantity = HKQuantity(unit: displayGlucoseUnitObservable.displayGlucoseUnit, doubleValue: manualGlucoseValue)
+                    if let manualGlucoseValue = displayGlucosePreference.formatter.numberFormatter.number(from: valueText)?.doubleValue {
+                        quantity = HKQuantity(unit: displayGlucosePreference.unit, doubleValue: manualGlucoseValue)
                     } else {
                         quantity = nil
                     }
                 })
-                .onChange(of: displayGlucoseUnitObservable.displayGlucoseUnit, perform: { value in
+                .onChange(of: displayGlucosePreference.unit, perform: { value in
                     unitsChanged()
                 })
 
-                Text(QuantityFormatter().string(from: displayGlucoseUnitObservable.displayGlucoseUnit))
+                Text(displayGlucosePreference.formatter.localizedUnitStringWithPlurality())
                     .foregroundColor(Color(.secondaryLabel))
             }
         }
@@ -67,9 +65,8 @@ struct ManualGlucoseEntryRow: View {
     }
 
     func unitsChanged() {
-        glucoseQuantityFormatter.setPreferredNumberFormatter(for: displayGlucoseUnitObservable.displayGlucoseUnit)
         if let quantity = quantity {
-            valueText = glucoseQuantityFormatter.string(from: quantity, for: displayGlucoseUnitObservable.displayGlucoseUnit, includeUnit: false) ?? ""
+            valueText = displayGlucosePreference.format(quantity, includeUnit: false)
         }
     }
 }

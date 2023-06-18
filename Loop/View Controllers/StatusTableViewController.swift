@@ -29,7 +29,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private let log = OSLog(category: "StatusTableViewController")
 
-    lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
+    lazy var carbFormatter: QuantityFormatter = QuantityFormatter(for: .gram())
 
     var onboardingManager: OnboardingManager!
 
@@ -591,7 +591,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let index = charts.cob.cobPoints.closestIndex(priorTo: Date()) {
                 self.currentCOBDescription = String(describing: charts.cob.cobPoints[index].y)
             } else if let carbsOnBoard = carbsOnBoard {
-                self.currentCOBDescription = self.quantityFormatter.string(from: carbsOnBoard, for: .gram())
+                self.currentCOBDescription = self.carbFormatter.string(from: carbsOnBoard)
             } else {
                 self.currentCOBDescription = nil
             }
@@ -910,6 +910,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private class MuteAlertsWarningCell: UITableViewCell {
         var formattedAlertMuteEndTime: String = NSLocalizedString("Unknown", comment: "label for when the alert mute end time is unknown")
 
+        fileprivate class GradientView: UIView {
+            override static var layerClass: AnyClass { CAGradientLayer.self }
+        }
+        
         override func updateConfiguration(using state: UICellConfigurationState) {
             super.updateConfiguration(using: state)
 
@@ -917,21 +921,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             var contentConfig = defaultContentConfiguration().updated(for: state)
             let title = NSMutableAttributedString(string: NSLocalizedString("All Alerts Muted", comment: "Warning text for when alerts are muted"))
-            contentConfig.image = UIImage(systemName: "speaker.slash.fill")
+            let image = UIImage(systemName: "speaker.slash.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 25, weight: .thin, scale: .large))
+            contentConfig.image = image
             contentConfig.imageProperties.tintColor = .white
             contentConfig.attributedText = title
             contentConfig.textProperties.color = .white
-            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
+            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .semibold)
             contentConfig.textProperties.adjustsFontSizeToFitWidth = true
             contentConfig.secondaryText = String(format: NSLocalizedString("Until %1$@", comment: "indication of when alerts will be unmuted (1: time when alerts unmute)"), formattedAlertMuteEndTime)
             contentConfig.secondaryTextProperties.color = .white
             contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
             contentConfiguration = contentConfig
 
+            let backgroundGradient = GradientView()
+            (backgroundGradient.layer as? CAGradientLayer)?.colors = [UIColor.warning.cgColor, UIColor.warning.withAlphaComponent(0.9).cgColor]
+            
             var backgroundConfig = backgroundConfiguration?.updated(for: state)
-            backgroundConfig?.backgroundColor = .warning.withAlphaComponent(0.8)
+            backgroundConfig?.customView = backgroundGradient
             backgroundConfiguration = backgroundConfig
-            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10)
+            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 5, trailing: 5)
             backgroundConfiguration?.cornerRadius = 10
 
             let unmuteIndicator = UIImage(systemName: "stop.circle")?.withTintColor(.white)
@@ -953,6 +961,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             } else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: MuteAlertsWarningCell.className, for: indexPath) as! MuteAlertsWarningCell
                 cell.formattedAlertMuteEndTime = alertMuter.formattedEndTime
+                cell.selectionStyle = .none
                 return cell
             }
         case .hud:
@@ -1063,7 +1072,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     progressCell.selectionStyle = .none
                     progressCell.totalUnits = dose.programmedUnits
                     progressCell.tintColor = .insulinTintColor
-                    progressCell.unit = HKUnit.internationalUnit()
                     progressCell.deliveredUnits = bolusProgressReporter?.progress.deliveredUnits
                     progressCell.backgroundColor = .secondarySystemBackground
                     return progressCell
@@ -1346,7 +1354,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let activity = activity {
                 viewModel.restoreUserActivityState(activity)
             }
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
             let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
             navigationWrapper = UINavigationController(rootViewController: hostingController)
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
@@ -1373,7 +1381,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let hostingController: DismissibleHostingController
         if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: false)
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         } else {
             let viewModel = BolusEntryViewModel(delegate: deviceManager, screenWidth: UIScreen.main.bounds.width, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
@@ -1381,7 +1389,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 await viewModel.generateRecommendationAndStartObserving()
             }
             viewModel.analyticsServicesManager = deviceManager.analyticsServicesManager
-            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucoseUnitObservable)
+            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
             hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         }
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
@@ -1553,7 +1561,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
-                .environmentObject(deviceManager.displayGlucoseUnitObservable)
+                .environmentObject(deviceManager.displayGlucosePreference)
                 .environment(\.appName, Bundle.main.bundleDisplayName),
             isModalInPresentation: false)
         present(hostingController, animated: true)
@@ -1575,7 +1583,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return
         }
 
-        var settings = cgmManager.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, displayGlucoseUnitObservable: deviceManager.displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
+        var settings = cgmManager.settingsViewController(bluetoothProvider: deviceManager.bluetoothProvider, displayGlucosePreference: deviceManager.displayGlucosePreference, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
         settings.cgmManagerOnboardingDelegate = deviceManager
         settings.completionDelegate = self
         show(settings, sender: self)
