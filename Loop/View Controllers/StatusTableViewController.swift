@@ -164,7 +164,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         navigationController?.setToolbarHidden(false, animated: animated)
         
-        setupToolbarItems()
         updateToolbarItems()
 
         alertPermissionsChecker.checkNow()
