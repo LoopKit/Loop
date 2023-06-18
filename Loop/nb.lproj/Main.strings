@@ -20,13 +20,13 @@
 "bIL-Ub-qYp.text" = "Etikett";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Glukose endring";
+"bq4-98-cQU.text" = "Blodsukker endring";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
 "d3X-AN-tA5.text" = "g Totalt";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "Fremtidig glukose er spådd ved å kombinere effekten av flere inndata. Bruk dette verktøyet til å veksle mellom ulike inndata for å se hvordan de er sammenlignet med den endelige prediksjonen.";
+"D4C-I2-dhA.text" = "Fremtidig glukose er spådd ved å kombinere effekten av flere innganger. Bruk dette verktøyet til å veksle mellom ulike innganger for å se hvordan de er sammenlignet med den endelige prediksjonen.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Etikett";
@@ -62,7 +62,7 @@
 "OFA-qT-ZAg.text" = "Etikett";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Forventet Glukose";
+"PA3-sP-cWY.title" = "Forventet Blodsukker";
 
 /* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
 "Qe9-uc-vPR.normalTitle" = "🍽";
