@@ -415,6 +415,9 @@
    The default description to use when an entry has no dose description */
 "Unknown" = "Unknown";
 
+/* The error message displayed for unknown errors. (1: unknown error) */
+"Unknown Error: %1$@" = "خطأ غير معروف";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "حتى %@";
 

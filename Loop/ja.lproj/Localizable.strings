@@ -291,7 +291,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "吸収済インスリン(U) × インスリン効果値(%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "インスリン放出";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "インスリン効果";
