@@ -283,8 +283,8 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
                 if let totalEffect = self.totalRetrospectiveCorrection {
                     let integralEffectValue = totalEffect.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit)
                     let integralEffect = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: integralEffectValue)
-                    integralEffectDisplay = formatter.string(from: integralEffect, for: glucoseChart.glucoseUnit) ?? "?"
-                    totalEffectDisplay = formatter.string(from: totalEffect, for: glucoseChart.glucoseUnit) ?? "?"
+                    integralEffectDisplay = formatter.string(from: integralEffect) ?? "?"
+                    totalEffectDisplay = formatter.string(from: totalEffect) ?? "?"
                 }
                 let integralRetro = String(
                     format: NSLocalizedString("prediction-description-integral-retrospective-correction", comment: "Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect)"),
