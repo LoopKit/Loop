@@ -620,6 +620,14 @@ extension LoopAppManager: ResetLoopManagerDelegate {
         }
     }
     
+    func resetTestingData(completion: @escaping () -> Void) {
+        deviceDataManager.deleteTestingCGMData { [weak deviceDataManager] _ in
+            deviceDataManager?.deleteTestingPumpData { _ in
+                completion()
+            }
+        }
+    }
+    
     func presentCouldNotResetLoopAlert(error: Error) {
         alertManager.presentCouldNotResetLoopAlert(error: error)
     }
