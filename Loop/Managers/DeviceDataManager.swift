@@ -1339,14 +1339,6 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             self.crashRecoveryManager.dosingFinished()
         }
     }
-    
-    func loopDataManager(
-        _ manager: LoopDataManager,
-        loopDidFinishWithDosingDecision:
-        StoredDosingDecision, error: LoopError?
-    ) {
-        processPendingRemoteCommands()
-    }
 
 }
 
@@ -1359,39 +1351,6 @@ extension Notification.Name {
 // MARK: - Remote Notification Handling
 
 extension DeviceDataManager: RemoteActionDelegate {
-    
-    func handleRemoteNotification(_ notification: [String: AnyObject]) {
-        Task {
-            log.default("Remote Notification: Handling notification %{public}@", notification)
-            
-            guard FeatureFlags.remoteCommandsEnabled else {
-                log.error("Remote Notification: Remote Commands not enabled.")
-                return
-            }
-            
-            let backgroundTask = await beginBackgroundTask(name: "Handle Remote Notification")
-            do {
-                try await remoteDataServicesManager.handleRemoteNotification(notification)
-            } catch {
-                log.error("Remote Notification: Error: %{public}@", String(describing: error))
-            }
-            
-            await endBackgroundTask(backgroundTask)
-            log.default("Remote Notification: Finished handling")
-        }
-    }
-    
-    func processPendingRemoteCommands() {
-        Task {
-            guard FeatureFlags.remoteCommandsEnabled else {
-                return
-            }
-            
-            let backgroundTask = await beginBackgroundTask(name: "Handle Pending Remote Commands")
-            await remoteDataServicesManager.processPendingRemoteCommands()
-            await endBackgroundTask(backgroundTask)
-        }
-    }
     
     //Remote Overrides
     
@@ -1586,27 +1545,6 @@ extension DeviceDataManager: RemoteActionDelegate {
                 }
             }
         }
-    }
-    
-    //Background Uploads
-    
-    func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
-        var backgroundTask: UIBackgroundTaskIdentifier?
-        backgroundTask = await UIApplication.shared.beginBackgroundTask(withName: name) {
-            guard let backgroundTask = backgroundTask else {return}
-            Task {
-                await UIApplication.shared.endBackgroundTask(backgroundTask)
-            }
-            
-            self.log.error("Background Task Expired: %{public}@", name)
-        }
-        
-        return backgroundTask
-    }
-    
-    func endBackgroundTask(_ backgroundTask: UIBackgroundTaskIdentifier?) async {
-        guard let backgroundTask else {return}
-        await UIApplication.shared.endBackgroundTask(backgroundTask)
     }
 }
 

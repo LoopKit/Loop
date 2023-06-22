@@ -344,7 +344,7 @@ class LoopAppManager: NSObject {
         guard let notification = notification else {
             return false
         }
-        deviceDataManager?.handleRemoteNotification(notification)
+        deviceDataManager?.servicesManager.handleRemoteNotification(notification)
         return true
     }
 

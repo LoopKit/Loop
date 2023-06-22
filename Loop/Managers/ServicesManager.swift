@@ -10,6 +10,7 @@ import os.log
 import LoopKit
 import LoopKitUI
 import LoopCore
+import Combine
 
 class ServicesManager {
 
@@ -30,6 +31,8 @@ class ServicesManager {
     private let servicesLock = UnfairLock()
 
     private let log = OSLog(category: "ServicesManager")
+    
+    lazy private var cancellables = Set<AnyCancellable>()
 
     @PersistedProperty(key: "Services")
     var rawServices: [Service.RawValue]?
@@ -49,6 +52,14 @@ class ServicesManager {
         self.remoteDataServicesManager = remoteDataServicesManager
         self.remoteActionDelegate = remoteActionDelegate
         restoreState()
+        
+        NotificationCenter.default
+            .publisher(for: .LoopCompleted)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] note in
+                self?.processPendingRemoteCommands()
+            }
+            .store(in: &cancellables)
     }
 
     public var availableServices: [ServiceDescriptor] {
@@ -175,6 +186,58 @@ class ServicesManager {
                 }
             }
         }
+    }
+    
+    func handleRemoteNotification(_ notification: [String: AnyObject]) {
+        Task {
+            log.default("Remote Notification: Handling notification %{public}@", notification)
+            
+            guard FeatureFlags.remoteCommandsEnabled else {
+                log.error("Remote Notification: Remote Commands not enabled.")
+                return
+            }
+            
+            let backgroundTask = await beginBackgroundTask(name: "Handle Remote Notification")
+            do {
+                try await remoteDataServicesManager.handleRemoteNotification(notification)
+            } catch {
+                log.error("Remote Notification: Error: %{public}@", String(describing: error))
+            }
+            
+            await endBackgroundTask(backgroundTask)
+            log.default("Remote Notification: Finished handling")
+        }
+    }
+    
+    func processPendingRemoteCommands() {
+        Task {
+            guard FeatureFlags.remoteCommandsEnabled else {
+                return
+            }
+            
+            let backgroundTask = await beginBackgroundTask(name: "Handle Pending Remote Commands")
+            await remoteDataServicesManager.processPendingRemoteCommands()
+            await endBackgroundTask(backgroundTask)
+        }
+    }
+    
+    private func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
+        var backgroundTask: UIBackgroundTaskIdentifier?
+        backgroundTask = await UIApplication.shared.beginBackgroundTask(withName: name) {
+            guard let backgroundTask = backgroundTask else {return}
+            Task {
+                await UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
+            
+            self.log.error("Background Task Expired: %{public}@", name)
+        }
+        
+        return backgroundTask
+    }
+    
+    private func endBackgroundTask(_ backgroundTask: UIBackgroundTaskIdentifier?) async {
+        guard let backgroundTask else {return}
+        await UIApplication.shared.endBackgroundTask(backgroundTask)
     }
 }
 
