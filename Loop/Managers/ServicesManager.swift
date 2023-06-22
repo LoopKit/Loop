@@ -54,10 +54,16 @@ class ServicesManager {
         restoreState()
         
         NotificationCenter.default
-            .publisher(for: .LoopCompleted)
+            .publisher(for: .LoopDataUpdated)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] note in
-                self?.processPendingRemoteCommands()
+                guard let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue else {
+                    return
+                }
+                let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext)
+                if case context = LoopDataManager.LoopUpdateContext.loopFinished {
+                    self?.processPendingRemoteCommands()
+                }
             }
             .store(in: &cancellables)
     }
