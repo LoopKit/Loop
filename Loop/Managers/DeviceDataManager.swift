@@ -416,7 +416,7 @@ final class DeviceDataManager {
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
             remoteDataServicesManager: remoteDataServicesManager,
-            remoteActionDelegate: self
+            servicesManagerDelegate: self
         )
 
         let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
@@ -1350,7 +1350,7 @@ extension Notification.Name {
 
 // MARK: - Remote Notification Handling
 
-extension DeviceDataManager: RemoteActionDelegate {
+extension DeviceDataManager: ServicesManagerDelegate {
     
     //Remote Overrides
     

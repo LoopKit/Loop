@@ -24,7 +24,7 @@ class ServicesManager {
 
     let remoteDataServicesManager: RemoteDataServicesManager
     
-    weak var remoteActionDelegate: RemoteActionDelegate?
+    weak var servicesManagerDelegate: ServicesManagerDelegate?
     
     private var services = [Service]()
 
@@ -43,14 +43,14 @@ class ServicesManager {
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
         remoteDataServicesManager: RemoteDataServicesManager,
-        remoteActionDelegate: RemoteActionDelegate
+        servicesManagerDelegate: ServicesManagerDelegate
     ) {
         self.pluginManager = pluginManager
         self.alertManager = alertManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
-        self.remoteActionDelegate = remoteActionDelegate
+        self.servicesManagerDelegate = servicesManagerDelegate
         restoreState()
         
         NotificationCenter.default
@@ -241,6 +241,15 @@ class ServicesManager {
     }
 }
 
+public protocol ServicesManagerDelegate: AnyObject {
+    func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws
+    func handleRemoteOverrideCancel() async throws
+    func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws
+    func handleRemoteBolus(amountInUnits: Double) async throws
+    func handleRemoteClosedLoop(activate: Bool) async throws
+    func handleRemoteAutobolus(activate: Bool) async throws
+}
+
 // MARK: - ServiceDelegate
 
 extension ServicesManager: ServiceDelegate {
@@ -270,16 +279,16 @@ extension ServicesManager: ServiceDelegate {
     }
     
     func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
-        try await remoteActionDelegate?.handleRemoteOverride(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
+        try await servicesManagerDelegate?.handleRemoteOverride(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
     }
     
     func handleRemoteOverrideCancel() async throws {
-        try await remoteActionDelegate?.handleRemoteOverrideCancel()
+        try await servicesManagerDelegate?.handleRemoteOverrideCancel()
     }
     
     func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         do {
-            try await remoteActionDelegate?.handleRemoteCarb(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
+            try await servicesManagerDelegate?.handleRemoteCarb(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
             await NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
         } catch {
             await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
@@ -289,7 +298,7 @@ extension ServicesManager: ServiceDelegate {
     
     func handleRemoteBolus(amountInUnits: Double) async throws {
         do {
-            try await remoteActionDelegate?.handleRemoteBolus(amountInUnits: amountInUnits)
+            try await servicesManagerDelegate?.handleRemoteBolus(amountInUnits: amountInUnits)
             await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
         } catch {
             await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
@@ -298,11 +307,11 @@ extension ServicesManager: ServiceDelegate {
     }
     
     func handleRemoteClosedLoop(activate: Bool) async throws {
-        try await remoteActionDelegate?.handleRemoteClosedLoop(activate: activate)
+        try await servicesManagerDelegate?.handleRemoteClosedLoop(activate: activate)
     }
     
     func handleRemoteAutobolus(activate: Bool) async throws {
-        try await remoteActionDelegate?.handleRemoteAutobolus(activate: activate)
+        try await servicesManagerDelegate?.handleRemoteAutobolus(activate: activate)
     }
 }
 
