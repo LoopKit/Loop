@@ -242,12 +242,12 @@ class ServicesManager {
 }
 
 public protocol ServicesManagerDelegate: AnyObject {
-    func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws
-    func handleRemoteOverrideCancel() async throws
-    func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws
-    func handleRemoteBolus(amountInUnits: Double) async throws
-    func handleRemoteClosedLoop(activate: Bool) async throws
-    func handleRemoteAutobolus(activate: Bool) async throws
+    func updateOverrideSetting(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws
+    func cancelCurrentOverride() async throws
+    func deliverCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws
+    func deliverBolus(amountInUnits: Double) async throws
+    func updateClosedLoopSetting(activate: Bool) async throws
+    func updateAutobolusSetting(activate: Bool) async throws
 }
 
 // MARK: - ServiceDelegate
@@ -279,16 +279,16 @@ extension ServicesManager: ServiceDelegate {
     }
     
     func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
-        try await servicesManagerDelegate?.handleRemoteOverride(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
+        try await servicesManagerDelegate?.updateOverrideSetting(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
     }
     
     func handleRemoteOverrideCancel() async throws {
-        try await servicesManagerDelegate?.handleRemoteOverrideCancel()
+        try await servicesManagerDelegate?.cancelCurrentOverride()
     }
     
     func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         do {
-            try await servicesManagerDelegate?.handleRemoteCarb(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
+            try await servicesManagerDelegate?.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
             await NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
         } catch {
             await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
@@ -298,7 +298,7 @@ extension ServicesManager: ServiceDelegate {
     
     func handleRemoteBolus(amountInUnits: Double) async throws {
         do {
-            try await servicesManagerDelegate?.handleRemoteBolus(amountInUnits: amountInUnits)
+            try await servicesManagerDelegate?.deliverBolus(amountInUnits: amountInUnits)
             await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
         } catch {
             await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
@@ -307,11 +307,11 @@ extension ServicesManager: ServiceDelegate {
     }
     
     func handleRemoteClosedLoop(activate: Bool) async throws {
-        try await servicesManagerDelegate?.handleRemoteClosedLoop(activate: activate)
+        try await servicesManagerDelegate?.updateClosedLoopSetting(activate: activate)
     }
     
     func handleRemoteAutobolus(activate: Bool) async throws {
-        try await servicesManagerDelegate?.handleRemoteAutobolus(activate: activate)
+        try await servicesManagerDelegate?.updateAutobolusSetting(activate: activate)
     }
 }
 

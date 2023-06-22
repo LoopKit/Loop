@@ -1354,7 +1354,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
     
     //Overrides
     
-    func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
+    func updateOverrideSetting(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
         
         guard let preset = loopManager.settings.overridePresets.first(where: { $0.name == name }) else {
             throw OverrideActionError.unknownPreset(name)
@@ -1379,16 +1379,16 @@ extension DeviceDataManager: ServicesManagerDelegate {
             }
         }
         
-        await activateRemoteOverride(remoteOverride)
+        await updateOverrideSetting(remoteOverride)
     }
     
     
-    func handleRemoteOverrideCancel() async throws {
-        await activateRemoteOverride(nil)
+    func cancelCurrentOverride() async throws {
+        await updateOverrideSetting(nil)
     }
     
-    func activateRemoteOverride(_ remoteOverride: TemporaryScheduleOverride?) async {
-        loopManager.mutateSettings { settings in settings.scheduleOverride = remoteOverride }
+    func updateOverrideSetting(_ override: TemporaryScheduleOverride?) async {
+        loopManager.mutateSettings { settings in settings.scheduleOverride = override }
         await remoteDataServicesManager.triggerUpload(for: .overrides)
     }
     
@@ -1412,7 +1412,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
     
     //Bolus
     
-    func handleRemoteBolus(amountInUnits: Double) async throws {
+    func deliverBolus(amountInUnits: Double) async throws {
         
         guard amountInUnits > 0 else {
             throw BolusActionError.invalidBolus
@@ -1451,7 +1451,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
     
     //Carb Entry
     
-    func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
+    func deliverCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         
         let absorptionTime = absorptionTime ?? carbStore.defaultAbsorptionTimes.medium
         if absorptionTime < LoopConstants.minCarbAbsorptionTime || absorptionTime > LoopConstants.maxCarbAbsorptionTime {
@@ -1477,7 +1477,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
         let quantity = HKQuantity(unit: .gram(), doubleValue: amountInGrams)
         let candidateCarbEntry = NewCarbEntry(quantity: quantity, startDate: startDate ?? Date(), foodType: foodType, absorptionTime: absorptionTime)
         
-        let _ = try await addRemoteCarbEntry(candidateCarbEntry)
+        let _ = try await devliverCarbEntry(candidateCarbEntry)
         await remoteDataServicesManager.triggerUpload(for: .carb)
     }
     
@@ -1518,7 +1518,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
     
     //Remote Autobolus Update
     
-    func handleRemoteAutobolus(activate: Bool) async throws {
+    func updateAutobolusSetting(activate: Bool) async throws {
         loopManager.mutateSettings { settings in
             settings.automaticDosingStrategy = activate ? .automaticBolus : .tempBasalOnly
         }
@@ -1526,14 +1526,14 @@ extension DeviceDataManager: ServicesManagerDelegate {
     
     //Remote Closed Loop Update
     
-    func handleRemoteClosedLoop(activate: Bool) async throws {
+    func updateClosedLoopSetting(activate: Bool) async throws {
         loopManager.mutateSettings { settings in
             settings.dosingEnabled = activate
         }
     }
     
     //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
-    func addRemoteCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
+    func devliverCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
         return try await withCheckedThrowingContinuation { continuation in
             carbStore.addCarbEntry(carbEntry) { result in
                 switch result {
