@@ -1348,11 +1348,11 @@ extension Notification.Name {
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 
-// MARK: - Remote Notification Handling
+// MARK: - ServicesManagerDelegate
 
 extension DeviceDataManager: ServicesManagerDelegate {
     
-    //Remote Overrides
+    //Overrides
     
     func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
         
@@ -1401,16 +1401,16 @@ extension DeviceDataManager: ServicesManagerDelegate {
         var errorDescription: String? {
             switch self {
             case .unknownPreset(let presetName):
-                return String(format: NSLocalizedString("Unknown preset: %1$@", comment: "Remote command error description: unknown preset (1: preset name)."), presetName)
+                return String(format: NSLocalizedString("Unknown preset: %1$@", comment: "Override error description: unknown preset (1: preset name)."), presetName)
             case .durationExceedsMax(let maxDurationTime):
-                return String(format: NSLocalizedString("Duration exceeds: %1$.1f hours", comment: "Remote command error description: duration exceed max (1: max duration in hours)."), maxDurationTime.hours)
+                return String(format: NSLocalizedString("Duration exceeds: %1$.1f hours", comment: "Override error description: duration exceed max (1: max duration in hours)."), maxDurationTime.hours)
             case .negativeDuration:
-                return String(format: NSLocalizedString("Negative duration not allowed", comment: "Remote command error description: negative duration error."))
+                return String(format: NSLocalizedString("Negative duration not allowed", comment: "Override error description: negative duration error."))
             }
         }
     }
     
-    //Remote Bolus
+    //Bolus
     
     func handleRemoteBolus(amountInUnits: Double) async throws {
         
@@ -1440,16 +1440,16 @@ extension DeviceDataManager: ServicesManagerDelegate {
         var errorDescription: String? {
             switch self {
             case .invalidBolus:
-                return NSLocalizedString("Invalid Bolus Amount", comment: "Remote command error description: invalid bolus amount.")
+                return NSLocalizedString("Invalid Bolus Amount", comment: "Bolus error description: invalid bolus amount.")
             case .missingMaxBolus:
-                return NSLocalizedString("Missing maximum allowed bolus in settings", comment: "Remote command error description: missing maximum bolus in settings.")
+                return NSLocalizedString("Missing maximum allowed bolus in settings", comment: "Bolus error description: missing maximum bolus in settings.")
             case .exceedsMaxBolus:
-                return NSLocalizedString("Exceeds maximum allowed bolus in settings", comment: "Remote command error description: bolus exceeds maximum bolus in settings.")
+                return NSLocalizedString("Exceeds maximum allowed bolus in settings", comment: "Bolus error description: bolus exceeds maximum bolus in settings.")
             }
         }
     }
     
-    //Remote Carb Entry
+    //Carb Entry
     
     func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         
@@ -1491,15 +1491,15 @@ extension DeviceDataManager: ServicesManagerDelegate {
         var errorDescription: String? {
             switch  self {
             case .exceedsMaxCarbs:
-                return NSLocalizedString("Exceeds maximum allowed carbs", comment: "Remote command error description: carbs exceed maximum amount.")
+                return NSLocalizedString("Exceeds maximum allowed carbs", comment: "Carb error description: carbs exceed maximum amount.")
             case .invalidCarbs:
-                return NSLocalizedString("Invalid carb amount", comment: "Remote command error description: invalid carb amount.")
+                return NSLocalizedString("Invalid carb amount", comment: "Carb error description: invalid carb amount.")
             case .invalidAbsorptionTime(let absorptionTime):
                 let absorptionHoursFormatted = Self.numberFormatter.string(from: absorptionTime.hours) ?? ""
-                return String(format: NSLocalizedString("Invalid absorption time: %1$@ hours", comment: "Remote command error description: invalid absorption time. (1: Input duration in hours)."), absorptionHoursFormatted)
+                return String(format: NSLocalizedString("Invalid absorption time: %1$@ hours", comment: "Carb error description: invalid absorption time. (1: Input duration in hours)."), absorptionHoursFormatted)
             case .invalidStartDate(let startDate):
                 let startDateFormatted = Self.dateFormatter.string(from: startDate)
-                return String(format: NSLocalizedString("Start time is out of range: %@", comment: "Remote command error description: invalid start time is out of range."), startDateFormatted)
+                return String(format: NSLocalizedString("Start time is out of range: %@", comment: "Carb error description: invalid start time is out of range."), startDateFormatted)
             }
         }
         
