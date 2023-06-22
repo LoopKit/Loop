@@ -27,8 +27,6 @@ class MockDelegate: LoopDataManagerDelegate {
         self.recommendation = automaticDose.recommendation
         completion(error)
     }
-    func loopDataManager(_ manager: Loop.LoopDataManager, loopDidFinishWithDosingDecision: LoopKit.StoredDosingDecision, error: Loop.LoopError?) {
-    }
     func roundBasalRate(unitsPerHour: Double) -> Double { Double(Int(unitsPerHour / 0.05)) * 0.05 }
     func roundBolusVolume(units: Double) -> Double { Double(Int(units / 0.05)) * 0.05 }
     var pumpManagerStatus: PumpManagerStatus?
