@@ -640,9 +640,9 @@ extension RemoteDataServicesManager {
 //Remote Commands
 extension RemoteDataServicesManager {
     
-    public func handleRemoteNotification(_ notification: [String: AnyObject]) async throws {
+    public func remoteNotificationWasReceived(_ notification: [String: AnyObject]) async throws {
         let service = try serviceForPushNotification(notification)
-        return try await service.handleRemoteNotification(notification)
+        return try await service.remoteNotificationWasReceived(notification)
     }
     
     func processPendingRemoteCommands() async {

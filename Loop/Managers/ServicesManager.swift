@@ -205,7 +205,7 @@ class ServicesManager {
             
             let backgroundTask = await beginBackgroundTask(name: "Handle Remote Notification")
             do {
-                try await remoteDataServicesManager.handleRemoteNotification(notification)
+                try await remoteDataServicesManager.remoteNotificationWasReceived(notification)
             } catch {
                 log.error("Remote Notification: Error: %{public}@", String(describing: error))
             }
