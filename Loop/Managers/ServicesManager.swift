@@ -284,15 +284,15 @@ extension ServicesManager: ServiceDelegate {
         removeActiveService(service)
     }
     
-    func handleRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
+    func updateRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
         try await servicesManagerDelegate?.updateOverrideSetting(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
     }
     
-    func handleRemoteOverrideCancel() async throws {
+    func cancelRemoteOverride() async throws {
         try await servicesManagerDelegate?.cancelCurrentOverride()
     }
     
-    func handleRemoteCarb(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
+    func deliverRemoteCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         do {
             try await servicesManagerDelegate?.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
             await NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
@@ -302,7 +302,7 @@ extension ServicesManager: ServiceDelegate {
         }
     }
     
-    func handleRemoteBolus(amountInUnits: Double) async throws {
+    func deliverRemoteBolus(amountInUnits: Double) async throws {
         do {
             try await servicesManagerDelegate?.deliverBolus(amountInUnits: amountInUnits)
             await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
@@ -312,11 +312,11 @@ extension ServicesManager: ServiceDelegate {
         }
     }
     
-    func handleRemoteClosedLoop(activate: Bool) async throws {
+    func updateRemoteClosedLoop(activate: Bool) async throws {
         try await servicesManagerDelegate?.updateClosedLoopSetting(activate: activate)
     }
     
-    func handleRemoteAutobolus(activate: Bool) async throws {
+    func updateRemoteAutobolus(activate: Bool) async throws {
         try await servicesManagerDelegate?.updateAutobolusSetting(activate: activate)
     }
 }
