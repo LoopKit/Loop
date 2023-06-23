@@ -645,10 +645,10 @@ extension RemoteDataServicesManager {
         return try await service.remoteNotificationWasReceived(notification)
     }
     
-    func processPendingRemoteCommands() async {
+    func loopDidComplete() async {
         for service in remoteDataServices {
             do {
-                try await service.processPendingRemoteCommands()
+                try await service.loopDidComplete()
             } catch {
                 self.log.error("Error fetching pending commands: %{public}@", String(describing: error))
             }

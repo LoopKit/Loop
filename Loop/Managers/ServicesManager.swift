@@ -62,7 +62,7 @@ class ServicesManager {
                 }
                 let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext)
                 if case context = LoopDataManager.LoopUpdateContext.loopFinished {
-                    self?.processPendingRemoteCommands()
+                    self?.loopDidComplete()
                 }
             }
             .store(in: &cancellables)
@@ -215,14 +215,14 @@ class ServicesManager {
         }
     }
     
-    func processPendingRemoteCommands() {
+    func loopDidComplete() {
         Task {
             guard FeatureFlags.remoteCommandsEnabled else {
                 return
             }
             
             let backgroundTask = await beginBackgroundTask(name: "Handle Pending Remote Commands")
-            await remoteDataServicesManager.processPendingRemoteCommands()
+            await remoteDataServicesManager.loopDidComplete()
             await endBackgroundTask(backgroundTask)
         }
     }
