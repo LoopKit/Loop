@@ -52,20 +52,6 @@ class ServicesManager {
         self.remoteDataServicesManager = remoteDataServicesManager
         self.servicesManagerDelegate = servicesManagerDelegate
         restoreState()
-        
-        NotificationCenter.default
-            .publisher(for: .LoopDataUpdated)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] note in
-                guard let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue else {
-                    return
-                }
-                let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext)
-                if case context = LoopDataManager.LoopUpdateContext.loopFinished {
-                    self?.loopDidComplete()
-                }
-            }
-            .store(in: &cancellables)
     }
 
     public var availableServices: [ServiceDescriptor] {
@@ -215,18 +201,6 @@ class ServicesManager {
         }
     }
     
-    func loopDidComplete() {
-        Task {
-            guard FeatureFlags.remoteCommandsEnabled else {
-                return
-            }
-            
-            let backgroundTask = await beginBackgroundTask(name: "Handle Pending Remote Commands")
-            await remoteDataServicesManager.loopDidComplete()
-            await endBackgroundTask(backgroundTask)
-        }
-    }
-    
     private func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
         var backgroundTask: UIBackgroundTaskIdentifier?
         backgroundTask = await UIApplication.shared.beginBackgroundTask(withName: name) {
@@ -252,8 +226,6 @@ public protocol ServicesManagerDelegate: AnyObject {
     func cancelCurrentOverride() async throws
     func deliverCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws
     func deliverBolus(amountInUnits: Double) async throws
-    func updateClosedLoopSetting(activate: Bool) async throws
-    func updateAutobolusSetting(activate: Bool) async throws
 }
 
 // MARK: - ServiceDelegate
@@ -310,14 +282,6 @@ extension ServicesManager: ServiceDelegate {
             await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
             throw error
         }
-    }
-    
-    func updateRemoteClosedLoop(activate: Bool) async throws {
-        try await servicesManagerDelegate?.updateClosedLoopSetting(activate: activate)
-    }
-    
-    func updateRemoteAutobolus(activate: Bool) async throws {
-        try await servicesManagerDelegate?.updateAutobolusSetting(activate: activate)
     }
 }
 

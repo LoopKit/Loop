@@ -645,16 +645,6 @@ extension RemoteDataServicesManager {
         return try await service.remoteNotificationWasReceived(notification)
     }
     
-    func loopDidComplete() async {
-        for service in remoteDataServices {
-            do {
-                try await service.loopDidComplete()
-            } catch {
-                self.log.error("Error fetching pending commands: %{public}@", String(describing: error))
-            }
-        }
-    }
-    
     func serviceForPushNotification(_ notification: [String: AnyObject]) throws -> RemoteDataService {
         let defaultServiceIdentifier = "NightscoutService"
         let serviceIdentifier = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier

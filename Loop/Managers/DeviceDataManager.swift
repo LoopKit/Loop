@@ -1516,22 +1516,6 @@ extension DeviceDataManager: ServicesManagerDelegate {
         }()
     }
     
-    //Autobolus Update
-    
-    func updateAutobolusSetting(activate: Bool) async throws {
-        loopManager.mutateSettings { settings in
-            settings.automaticDosingStrategy = activate ? .automaticBolus : .tempBasalOnly
-        }
-    }
-    
-    //Closed Loop Update
-    
-    func updateClosedLoopSetting(activate: Bool) async throws {
-        loopManager.mutateSettings { settings in
-            settings.dosingEnabled = activate
-        }
-    }
-    
     //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
     func devliverCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
         return try await withCheckedThrowingContinuation { continuation in
