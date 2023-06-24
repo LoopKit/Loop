@@ -1354,7 +1354,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
     
     //Overrides
     
-    func updateOverrideSetting(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
+    func enactOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
         
         guard let preset = loopManager.settings.overridePresets.first(where: { $0.name == name }) else {
             throw OverrideActionError.unknownPreset(name)
@@ -1379,15 +1379,15 @@ extension DeviceDataManager: ServicesManagerDelegate {
             }
         }
         
-        await updateOverrideSetting(remoteOverride)
+        await enactOverride(remoteOverride)
     }
     
     
     func cancelCurrentOverride() async throws {
-        await updateOverrideSetting(nil)
+        await enactOverride(nil)
     }
     
-    func updateOverrideSetting(_ override: TemporaryScheduleOverride?) async {
+    func enactOverride(_ override: TemporaryScheduleOverride?) async {
         loopManager.mutateSettings { settings in settings.scheduleOverride = override }
         await remoteDataServicesManager.triggerUpload(for: .overrides)
     }

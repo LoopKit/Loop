@@ -222,7 +222,7 @@ class ServicesManager {
 }
 
 public protocol ServicesManagerDelegate: AnyObject {
-    func updateOverrideSetting(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws
+    func enactOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws
     func cancelCurrentOverride() async throws
     func deliverCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws
     func deliverBolus(amountInUnits: Double) async throws
@@ -256,8 +256,8 @@ extension ServicesManager: ServiceDelegate {
         removeActiveService(service)
     }
     
-    func updateRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
-        try await servicesManagerDelegate?.updateOverrideSetting(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
+    func enactRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
+        try await servicesManagerDelegate?.enactOverride(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
     }
     
     func cancelRemoteOverride() async throws {
