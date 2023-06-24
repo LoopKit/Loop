@@ -1516,7 +1516,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
         }()
     }
     
-    //Remote Autobolus Update
+    //Autobolus Update
     
     func updateAutobolusSetting(activate: Bool) async throws {
         loopManager.mutateSettings { settings in
@@ -1524,7 +1524,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
         }
     }
     
-    //Remote Closed Loop Update
+    //Closed Loop Update
     
     func updateClosedLoopSetting(activate: Bool) async throws {
         loopManager.mutateSettings { settings in
