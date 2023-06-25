@@ -40,3 +40,18 @@ struct GlucoseBasedApplicationFactorStrategy: ApplicationFactorStrategy {
         return effectiveBolusApplicationFactor
     }
 }
+
+extension UserDefaults {
+    private enum Key: String {
+        case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
+    }
+
+    var glucoseBasedApplicationFactorEnabled: Bool {
+        get {
+            bool(forKey: Key.GlucoseBasedApplicationFactorEnabled.rawValue) as Bool
+        }
+        set {
+            set(newValue, forKey: Key.GlucoseBasedApplicationFactorEnabled.rawValue)
+        }
+    }
+}

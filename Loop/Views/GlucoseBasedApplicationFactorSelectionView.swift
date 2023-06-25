@@ -13,43 +13,52 @@ import LoopKitUI
 
 public struct GlucoseBasedApplicationFactorSelectionView: View {
     @Binding var isGlucoseBasedApplicationFactorEnabled: Bool
+    var automaticDosingStrategy: AutomaticDosingStrategy
 
-    public init(isGlucoseBasedApplicationFactorEnabled: Binding<Bool>) {
+    public init(isGlucoseBasedApplicationFactorEnabled: Binding<Bool>, automaticDosingStrategy: AutomaticDosingStrategy) {
+        self.automaticDosingStrategy = automaticDosingStrategy
         self._isGlucoseBasedApplicationFactorEnabled = isGlucoseBasedApplicationFactorEnabled
     }
 
     public var body: some View {
-        List {
-            automaticBolusSection
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                VStack {
-                    Text("Glucose Based")
-                        .font(.headline)
-                    Text("Partial Application")
-                        .font(.subheadline)
-                }
+        automaticBolusSection
+            .onChange(of: isGlucoseBasedApplicationFactorEnabled) { newValue in
+                UserDefaults.standard.glucoseBasedApplicationFactorEnabled = newValue
             }
-        }
     }
 
     private var automaticBolusSection: some View {
-        VStack {
-            DescriptiveText(label: NSLocalizedString("Active only when Automatic Bolus is selected under Dosing Strategy.\n\nWhen Glucose Based Partial Application is disabled, Automatic Bolus Dosing Strategy uses a constant percentage of 40% when Loop recommends a bolus.\n\nWhen enabled, this experimental feature varies the percentage of recommended bolus delivered each cycle with glucose level. Near correction range, use 20% (similar to Temp Basal). Gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with Loop's velocity and retrospective correction effects, may result in a larger dose than your ISF would call for.", comment: "Description of Glucose Based Partial Application toggle."))
-            Section() {
-                Toggle(NSLocalizedString("Glucose Based Partial Application", comment: "Title for Glucose Based Partial Application toggle"), isOn: $isGlucoseBasedApplicationFactorEnabled)
-                    .onChange(of: isGlucoseBasedApplicationFactorEnabled) { newValue in
-                        UserDefaults.standard.set(newValue, forKey: "applyExperimentalGlucoseBasedApplicationFactor")
-                    }
+        VStack(spacing: 10) {
+            Text(NSLocalizedString("Glucose Based Partial Application", comment: "Title for glucose based partial application experiment description"))
+                .font(.headline)
+                .padding(.bottom, 20)
+
+            Divider()
+
+            if automaticDosingStrategy == .automaticBolus {
+                Text(NSLocalizedString("Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen Glucose Based Partial Application is enabled, this experimental feature varies the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with Loop's velocity and retrospective correction effects, may result in a larger dose than your ISF would call for.", comment: "Description of Glucose Based Partial Application toggle."))
+                    .foregroundColor(.secondary)
+                Divider()
+
+                HStack {
+                    Toggle(NSLocalizedString("Enable Glucose Based Partial Application", comment: "Title for Glucose Based Partial Application toggle"), isOn: $isGlucoseBasedApplicationFactorEnabled)
+                    Spacer()
+                }
+                .padding(.top, 20)
+            } else {
+                Text(NSLocalizedString("This option only applies when Loop's Dosing Strategy is set to Automatic Bolus.", comment: "String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus"))
             }
+
+            Spacer()
         }
+        .padding()
     }
 }
 
 struct GlucoseBasedApplicationFactorSelectionView_Previews: PreviewProvider {
     static var previews: some View {
-        GlucoseBasedApplicationFactorSelectionView(isGlucoseBasedApplicationFactorEnabled: .constant(true))
+        NavigationView {
+            GlucoseBasedApplicationFactorSelectionView(isGlucoseBasedApplicationFactorEnabled: .constant(true), automaticDosingStrategy: .automaticBolus)
+        }
     }
 }

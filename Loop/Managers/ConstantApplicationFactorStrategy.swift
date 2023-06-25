@@ -11,7 +11,7 @@ import HealthKit
 import LoopKit
 import LoopCore
 
-struct ConstantDosingStrategy: ApplicationFactorStrategy {
+struct ConstantApplicationFactorStrategy: ApplicationFactorStrategy {
     func calculateDosingFactor(
         for glucose: HKQuantity,
         correctionRangeSchedule: GlucoseRangeSchedule,

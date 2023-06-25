@@ -1699,9 +1699,9 @@ extension LoopDataManager {
                 }
 
                 // Create dosing strategy based on user setting
-                let applicationFactorStrategy: ApplicationFactorStrategy = UserDefaults.standard.bool(forKey: "applyExperimentalGlucoseBasedApplicationFactor")
+                let applicationFactorStrategy: ApplicationFactorStrategy = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
                     ? GlucoseBasedApplicationFactorStrategy()
-                    : ConstantDosingStrategy()
+                    : ConstantApplicationFactorStrategy()
 
                 let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
 
@@ -2144,7 +2144,7 @@ extension LoopDataManager {
                 "insulinOnBoard: \(String(describing: manager.insulinOnBoard))",
                 "error: \(String(describing: state.error))",
                 "overrideInUserDefaults: \(String(describing: UserDefaults.appGroup?.intentExtensionOverrideToSet))",
-                "applyExperimentalGlucoseBasedApplicationFactor: \(UserDefaults.standard.bool(forKey: "applyExperimentalGlucoseBasedApplicationFactor"))",
+                "glucoseBasedApplicationFactorEnabled: \(UserDefaults.standard.glucoseBasedApplicationFactorEnabled)",
                 "",
                 String(reflecting: self.retrospectiveCorrection),
                 "",

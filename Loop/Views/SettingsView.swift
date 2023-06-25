@@ -30,8 +30,7 @@ public struct SettingsView: View {
     @State private var therapySettingsIsPresented: Bool = false
     @State private var deletePumpDataAlertIsPresented = false
     @State private var deleteCGMDataAlertIsPresented = false
-    @State internal var isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.bool(forKey: "applyExperimentalGlucoseBasedApplicationFactor")
-
+    
     var localizedAppNameAndVersion: String
 
     public init(viewModel: SettingsViewModel, localizedAppNameAndVersion: String) {
@@ -51,9 +50,6 @@ public struct SettingsView: View {
                     if FeatureFlags.automaticBolusEnabled {
                         dosingStrategySection
                     }
-                    // Note: Experimental Section
-                    algorithmExperimentsSection
-                    //
                     alertManagementSection
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         configurationSection
@@ -228,6 +224,11 @@ extension SettingsView {
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
+
+            // Note: Experimental Section
+            algorithmExperimentsSection
+            //
+
         }
     }
 
