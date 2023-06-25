@@ -39,6 +39,7 @@ struct FeatureFlagConfiguration: Decodable {
     let adultChildInsulinModelSelectionEnabled: Bool
     let profileExpirationSettingsViewEnabled: Bool
     let missedMealNotifications: Bool
+    let allowAlgorithmExperiments: Bool
 
 
     fileprivate init() {
@@ -229,6 +230,11 @@ struct FeatureFlagConfiguration: Decodable {
         self.missedMealNotifications = true
         #endif
 
+        #if ALLOW_ALGORITHM_EXPERIMENTS
+        self.allowAlgorithmExperiments = true
+        #else
+        self.allowAlgorithmExperiments = false
+        #endif
     }
 }
 
@@ -263,7 +269,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* dynamicCarbAbsorptionEnabled: \(dynamicCarbAbsorptionEnabled)",
             "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)",
             "* profileExpirationSettingsViewEnabled: \(profileExpirationSettingsViewEnabled)",
-            "* missedMealNotifications: \(missedMealNotifications)"
+            "* missedMealNotifications: \(missedMealNotifications)",
+            "* allowAlgorithmExperiments: \(allowAlgorithmExperiments)"
         ].joined(separator: "\n")
     }
 }

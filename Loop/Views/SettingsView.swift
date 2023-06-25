@@ -225,10 +225,9 @@ extension SettingsView {
                 item.view
             }
 
-            // Note: Experimental Section
-            algorithmExperimentsSection
-            //
-
+            if FeatureFlags.allowAlgorithmExperiments {
+                algorithmExperimentsSection
+            }
         }
     }
 
