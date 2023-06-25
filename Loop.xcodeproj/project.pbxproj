@@ -2052,24 +2052,27 @@
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				A99A114029A581D6007919CE /* Remote */,
-				43511CDD21FD80AD00566C63 /* RetrospectiveCorrection */,
-				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
-				C17824A41E1AD4D100D9D25C /* ManualBolusRecommendation.swift */,
+				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */,
+				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
+				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
+				C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */,
+				DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */,
 				B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */,
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
+				C1C660D0252E4DD5009B5C32 /* LoopConstants.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
+				E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */,
 				A9B996EF27235191002DC09C /* LoopWarning.swift */,
+				C17824A41E1AD4D100D9D25C /* ManualBolusRecommendation.swift */,
 				4F526D601DF8D9A900A04910 /* NetBasal.swift */,
 				438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */,
-				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
-				E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */,
-				A987CD4824A58A0100439ADC /* ZipArchive.swift */,
+				A99A114029A581D6007919CE /* Remote */,
+				43511CDD21FD80AD00566C63 /* RetrospectiveCorrection */,
 				C19008FD25225D3900721625 /* SimpleBolusCalculator.swift */,
 				C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */,
-				C1C660D0252E4DD5009B5C32 /* LoopConstants.swift */,
-				C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */,
+				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
+				A987CD4824A58A0100439ADC /* ZipArchive.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2459,9 +2462,6 @@
 				C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */,
 				A96DAC2B2838F31200D94E38 /* SharedLogging.swift */,
 				7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */,
-				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
-				DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */,
-				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
