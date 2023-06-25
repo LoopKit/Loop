@@ -21,7 +21,7 @@ extension LoopSettings {
     static let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
     
     /// Creates an instance of the enabled retrospective correction implementation    
-    func enabledRetrospectiveCorrectionAlgorithm() -> RetrospectiveCorrection {
+    var enabledRetrospectiveCorrectionAlgorithm: RetrospectiveCorrection {
         var enabledRetrospectiveCorrectionAlgorithm: RetrospectiveCorrection
         
         let isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
