@@ -36,7 +36,7 @@ public struct GlucoseBasedApplicationFactorSelectionView: View {
             Divider()
 
             if automaticDosingStrategy == .automaticBolus {
-                Text(NSLocalizedString("Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen Glucose Based Partial Application is enabled, this experimental feature varies the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with Loop's velocity and retrospective correction effects, may result in a larger dose than your ISF would call for.", comment: "Description of Glucose Based Partial Application toggle."))
+                Text(NSLocalizedString("Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for.", comment: "Description of Glucose Based Partial Application toggle."))
                     .foregroundColor(.secondary)
                 Divider()
 
