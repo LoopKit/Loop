@@ -45,6 +45,8 @@ public struct ExperimentsSettingsView: View {
 
     public var body: some View {
         VStack(alignment: .center, spacing: 12) {
+            Text(NSLocalizedString("Algorithm Experiments", comment: "Navigation title for algorithms experiments screen"))
+                .font(.headline)
             VStack {
                 Text("⚠️").font(.largeTitle)
                 Text("Caution")
@@ -70,7 +72,7 @@ public struct ExperimentsSettingsView: View {
             Spacer()
         }
         .padding()
-        .navigationTitle(NSLocalizedString("Algorithm Experiments", comment: "Navigation title for algorithms experiments screen"))
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
