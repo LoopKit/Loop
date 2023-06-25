@@ -416,7 +416,8 @@ final class DeviceDataManager {
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
             remoteDataServicesManager: remoteDataServicesManager,
-            servicesManagerDelegate: self
+            servicesManagerDelegate: loopManager,
+            servicesManagerDosingDelegate: self
         )
 
         let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
@@ -1348,69 +1349,9 @@ extension Notification.Name {
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 
-// MARK: - ServicesManagerDelegate
+// MARK: - ServicesManagerDosingDelegate
 
-extension DeviceDataManager: ServicesManagerDelegate {
-    
-    //Overrides
-    
-    func enactOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
-        
-        guard let preset = loopManager.settings.overridePresets.first(where: { $0.name == name }) else {
-            throw OverrideActionError.unknownPreset(name)
-        }
-        
-        var remoteOverride = preset.createOverride(enactTrigger: .remote(remoteAddress))
-        
-        if let durationTime = durationTime {
-            
-            guard durationTime <= LoopConstants.maxOverrideDurationTime else {
-                throw OverrideActionError.durationExceedsMax(LoopConstants.maxOverrideDurationTime)
-            }
-            
-            guard durationTime >= 0 else {
-                throw OverrideActionError.negativeDuration
-            }
-            
-            if durationTime == 0 {
-                remoteOverride.duration = .indefinite
-            } else {
-                remoteOverride.duration = .finite(durationTime)
-            }
-        }
-        
-        await enactOverride(remoteOverride)
-    }
-    
-    
-    func cancelCurrentOverride() async throws {
-        await enactOverride(nil)
-    }
-    
-    func enactOverride(_ override: TemporaryScheduleOverride?) async {
-        loopManager.mutateSettings { settings in settings.scheduleOverride = override }
-        await remoteDataServicesManager.triggerUpload(for: .overrides)
-    }
-    
-    enum OverrideActionError: LocalizedError {
-        
-        case unknownPreset(String)
-        case durationExceedsMax(TimeInterval)
-        case negativeDuration
-        
-        var errorDescription: String? {
-            switch self {
-            case .unknownPreset(let presetName):
-                return String(format: NSLocalizedString("Unknown preset: %1$@", comment: "Override error description: unknown preset (1: preset name)."), presetName)
-            case .durationExceedsMax(let maxDurationTime):
-                return String(format: NSLocalizedString("Duration exceeds: %1$.1f hours", comment: "Override error description: duration exceed max (1: max duration in hours)."), maxDurationTime.hours)
-            case .negativeDuration:
-                return String(format: NSLocalizedString("Negative duration not allowed", comment: "Override error description: negative duration error."))
-            }
-        }
-    }
-    
-    //Bolus
+extension DeviceDataManager: ServicesManagerDosingDelegate {
     
     func deliverBolus(amountInUnits: Double) async throws {
         
@@ -1426,9 +1367,7 @@ extension DeviceDataManager: ServicesManagerDelegate {
             throw BolusActionError.exceedsMaxBolus
         }
         
-        try await self.enactBolus(units: amountInUnits, activationType: .manualNoRecommendation)
-        await remoteDataServicesManager.triggerUpload(for: .dose)
-        self.analyticsServicesManager.didBolus(source: "Remote", units: amountInUnits)
+        try await enactBolus(units: amountInUnits, activationType: .manualNoRecommendation)
     }
     
     enum BolusActionError: LocalizedError {
@@ -1445,88 +1384,6 @@ extension DeviceDataManager: ServicesManagerDelegate {
                 return NSLocalizedString("Missing maximum allowed bolus in settings", comment: "Bolus error description: missing maximum bolus in settings.")
             case .exceedsMaxBolus:
                 return NSLocalizedString("Exceeds maximum allowed bolus in settings", comment: "Bolus error description: bolus exceeds maximum bolus in settings.")
-            }
-        }
-    }
-    
-    //Carb Entry
-    
-    func deliverCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
-        
-        let absorptionTime = absorptionTime ?? carbStore.defaultAbsorptionTimes.medium
-        if absorptionTime < LoopConstants.minCarbAbsorptionTime || absorptionTime > LoopConstants.maxCarbAbsorptionTime {
-            throw CarbActionError.invalidAbsorptionTime(absorptionTime)
-        }
-        
-        guard amountInGrams > 0.0 else {
-            throw CarbActionError.invalidCarbs
-        }
-        
-        guard amountInGrams <= LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()) else {
-            throw CarbActionError.exceedsMaxCarbs
-        }
-        
-        if let startDate = startDate {
-            let maxStartDate = Date().addingTimeInterval(LoopConstants.maxCarbEntryFutureTime)
-            let minStartDate = Date().addingTimeInterval(LoopConstants.maxCarbEntryPastTime)
-            guard startDate <= maxStartDate  && startDate >= minStartDate else {
-                throw CarbActionError.invalidStartDate(startDate)
-            }
-        }
-        
-        let quantity = HKQuantity(unit: .gram(), doubleValue: amountInGrams)
-        let candidateCarbEntry = NewCarbEntry(quantity: quantity, startDate: startDate ?? Date(), foodType: foodType, absorptionTime: absorptionTime)
-        
-        let _ = try await devliverCarbEntry(candidateCarbEntry)
-        await remoteDataServicesManager.triggerUpload(for: .carb)
-    }
-    
-    enum CarbActionError: LocalizedError {
-        
-        case invalidAbsorptionTime(TimeInterval)
-        case invalidStartDate(Date)
-        case exceedsMaxCarbs
-        case invalidCarbs
-        
-        var errorDescription: String? {
-            switch  self {
-            case .exceedsMaxCarbs:
-                return NSLocalizedString("Exceeds maximum allowed carbs", comment: "Carb error description: carbs exceed maximum amount.")
-            case .invalidCarbs:
-                return NSLocalizedString("Invalid carb amount", comment: "Carb error description: invalid carb amount.")
-            case .invalidAbsorptionTime(let absorptionTime):
-                let absorptionHoursFormatted = Self.numberFormatter.string(from: absorptionTime.hours) ?? ""
-                return String(format: NSLocalizedString("Invalid absorption time: %1$@ hours", comment: "Carb error description: invalid absorption time. (1: Input duration in hours)."), absorptionHoursFormatted)
-            case .invalidStartDate(let startDate):
-                let startDateFormatted = Self.dateFormatter.string(from: startDate)
-                return String(format: NSLocalizedString("Start time is out of range: %@", comment: "Carb error description: invalid start time is out of range."), startDateFormatted)
-            }
-        }
-        
-        static var numberFormatter: NumberFormatter = {
-            let formatter = NumberFormatter()
-            formatter.numberStyle = .decimal
-            return formatter
-        }()
-        
-        static var dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.timeStyle = .medium
-            return formatter
-        }()
-    }
-    
-    //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
-    func devliverCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
-        return try await withCheckedThrowingContinuation { continuation in
-            carbStore.addCarbEntry(carbEntry) { result in
-                switch result {
-                case .success(let storedCarbEntry):
-                    self.analyticsServicesManager.didAddCarbs(source: "Remote", amount: carbEntry.quantity.doubleValue(for: .gram()))
-                    continuation.resume(returning: storedCarbEntry)
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
             }
         }
     }

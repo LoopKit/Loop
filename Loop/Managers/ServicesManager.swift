@@ -25,6 +25,7 @@ class ServicesManager {
     let remoteDataServicesManager: RemoteDataServicesManager
     
     weak var servicesManagerDelegate: ServicesManagerDelegate?
+    weak var servicesManagerDosingDelegate: ServicesManagerDosingDelegate?
     
     private var services = [Service]()
 
@@ -43,7 +44,8 @@ class ServicesManager {
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
         remoteDataServicesManager: RemoteDataServicesManager,
-        servicesManagerDelegate: ServicesManagerDelegate
+        servicesManagerDelegate: ServicesManagerDelegate,
+        servicesManagerDosingDelegate: ServicesManagerDosingDelegate
     ) {
         self.pluginManager = pluginManager
         self.alertManager = alertManager
@@ -51,6 +53,7 @@ class ServicesManager {
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
         self.servicesManagerDelegate = servicesManagerDelegate
+        self.servicesManagerDosingDelegate = servicesManagerDosingDelegate
         restoreState()
     }
 
@@ -221,11 +224,14 @@ class ServicesManager {
     }
 }
 
+public protocol ServicesManagerDosingDelegate: AnyObject {
+    func deliverBolus(amountInUnits: Double) async throws
+}
+
 public protocol ServicesManagerDelegate: AnyObject {
-    func enactOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws
+    func enactOverride(name: String, duration: TemporaryScheduleOverride.Duration?, remoteAddress: String) async throws
     func cancelCurrentOverride() async throws
     func deliverCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws
-    func deliverBolus(amountInUnits: Double) async throws
 }
 
 // MARK: - ServiceDelegate
@@ -257,17 +263,55 @@ extension ServicesManager: ServiceDelegate {
     }
     
     func enactRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
-        try await servicesManagerDelegate?.enactOverride(name: name, durationTime: durationTime, remoteAddress: remoteAddress)
+        
+        var duration: TemporaryScheduleOverride.Duration? = nil
+        if let durationTime = durationTime {
+            
+            guard durationTime <= LoopConstants.maxOverrideDurationTime else {
+                throw OverrideActionError.durationExceedsMax(LoopConstants.maxOverrideDurationTime)
+            }
+            
+            guard durationTime >= 0 else {
+                throw OverrideActionError.negativeDuration
+            }
+            
+            if durationTime == 0 {
+                duration = .indefinite
+            } else {
+                duration = .finite(durationTime)
+            }
+        }
+        
+        try await servicesManagerDelegate?.enactOverride(name: name, duration: duration, remoteAddress: remoteAddress)
+        await remoteDataServicesManager.triggerUpload(for: .overrides)
+    }
+    
+    enum OverrideActionError: LocalizedError {
+        
+        case durationExceedsMax(TimeInterval)
+        case negativeDuration
+        
+        var errorDescription: String? {
+            switch self {
+            case .durationExceedsMax(let maxDurationTime):
+                return String(format: NSLocalizedString("Duration exceeds: %1$.1f hours", comment: "Override error description: duration exceed max (1: max duration in hours)."), maxDurationTime.hours)
+            case .negativeDuration:
+                return String(format: NSLocalizedString("Negative duration not allowed", comment: "Override error description: negative duration error."))
+            }
+        }
     }
     
     func cancelRemoteOverride() async throws {
         try await servicesManagerDelegate?.cancelCurrentOverride()
+        await remoteDataServicesManager.triggerUpload(for: .overrides)
     }
     
     func deliverRemoteCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         do {
             try await servicesManagerDelegate?.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
             await NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
+            await remoteDataServicesManager.triggerUpload(for: .carb)
+            analyticsServicesManager.didAddCarbs(source: "Remote", amount: amountInGrams)
         } catch {
             await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
             throw error
@@ -276,8 +320,10 @@ extension ServicesManager: ServiceDelegate {
     
     func deliverRemoteBolus(amountInUnits: Double) async throws {
         do {
-            try await servicesManagerDelegate?.deliverBolus(amountInUnits: amountInUnits)
+            try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits)
             await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
+            await remoteDataServicesManager.triggerUpload(for: .dose)
+            analyticsServicesManager.didBolus(source: "Remote", units: amountInUnits)
         } catch {
             await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
             throw error
