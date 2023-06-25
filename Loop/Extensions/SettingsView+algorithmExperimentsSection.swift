@@ -31,11 +31,16 @@ public struct ExperimentRow: View {
             Text(enabled ? "On" : "Off")
                 .foregroundColor(enabled ? .red : .secondary)
         }
+        .padding()
+        .background(Color(UIColor.secondarySystemBackground))
+        .foregroundColor(.accentColor)
+        .cornerRadius(10)
     }
 }
 
 public struct ExperimentsSettingsView: View {
     @State private var isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
+    @State private var isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
     var automaticDosingStrategy: AutomaticDosingStrategy
 
     public var body: some View {
@@ -53,15 +58,45 @@ public struct ExperimentsSettingsView: View {
 
             Divider()
             NavigationLink(destination: GlucoseBasedApplicationFactorSelectionView(isGlucoseBasedApplicationFactorEnabled: $isGlucoseBasedApplicationFactorEnabled, automaticDosingStrategy: automaticDosingStrategy)) {
-                ExperimentRow(name: "Glucose Based Partial Application", enabled: isGlucoseBasedApplicationFactorEnabled && automaticDosingStrategy == .automaticBolus)
+                ExperimentRow(
+                    name: NSLocalizedString("Glucose Based Partial Application", comment: "Title of glucose based partial application experiment"),
+                    enabled: isGlucoseBasedApplicationFactorEnabled && automaticDosingStrategy == .automaticBolus)
             }
-            .padding()
-            .background(Color(UIColor.secondarySystemBackground))
-            .foregroundColor(.accentColor)
-            .cornerRadius(10)
+            NavigationLink(destination: IntegralRetrospectiveCorrectionSelectionView(isIntegralRetrospectiveCorrectionEnabled: $isIntegralRetrospectiveCorrectionEnabled)) {
+                ExperimentRow(
+                    name: NSLocalizedString("Integral Retrospective Correction", comment: "Title of integral retrospective correction experiment"),
+                    enabled: isIntegralRetrospectiveCorrectionEnabled)
+            }
             Spacer()
         }
         .padding()
         .navigationTitle(NSLocalizedString("Algorithm Experiments", comment: "Navigation title for algorithms experiments screen"))
     }
+}
+
+
+extension UserDefaults {
+    private enum Key: String {
+        case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
+        case IntegralRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.integralRetrospectiveCorrectionEnabled"
+    }
+
+    var glucoseBasedApplicationFactorEnabled: Bool {
+        get {
+            bool(forKey: Key.GlucoseBasedApplicationFactorEnabled.rawValue) as Bool
+        }
+        set {
+            set(newValue, forKey: Key.GlucoseBasedApplicationFactorEnabled.rawValue)
+        }
+    }
+
+    var integralRetrospectiveCorrectionEnabled: Bool {
+        get {
+            bool(forKey: Key.IntegralRetrospectiveCorrectionEnabled.rawValue) as Bool
+        }
+        set {
+            set(newValue, forKey: Key.IntegralRetrospectiveCorrectionEnabled.rawValue)
+        }
+    }
+
 }

@@ -123,7 +123,7 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
 
-        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
+        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm()
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
@@ -2120,9 +2120,11 @@ extension LoopDataManager {
                 }),
                 "]",
 
+                "integralRetrospectiveCorrectionEnabled: \(UserDefaults.standard.integralRetrospectiveCorrectionEnabled)",
+                
                 "retrospectiveGlucoseDiscrepancies: [",
                 "* GlucoseEffect(start, mg/dL)",
-                (state.retrospectiveGlucoseDiscrepancies ?? []).reduce(into: "", { (entries, entry) in
+                (manager.retrospectiveGlucoseDiscrepancies ?? []).reduce(into: "", { (entries, entry) in
                     entries.append("* \(entry.startDate), \(entry.quantity.doubleValue(for: .milligramsPerDeciliter))\n")
                 }),
                 "]",
