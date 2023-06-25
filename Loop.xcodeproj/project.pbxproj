@@ -518,6 +518,11 @@
 		C1FB428D21791D2500FAB378 /* PumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6F620BBCAA30026CAFA /* PumpManager.swift */; };
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
 		C1FB4290217922A100FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
+		DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */; };
+		DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */; };
+		DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
+		DDC389FC2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */; };
+		DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */; };
 		E90909D124E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E90909CC24E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json */; };
 		E90909D224E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E90909CD24E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json */; };
 		E90909D324E34AC500F963D2 /* high_and_rising_with_cob_predicted_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = E90909CE24E34AC500F963D2 /* high_and_rising_with_cob_predicted_glucose.json */; };
@@ -1687,6 +1692,11 @@
 		C1FF3D4B29C786A900BDC1EC /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1FF3D4C29C786A900BDC1EC /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1FF3D4D29C786A900BDC1EC /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationFactorStrategy.swift; sourceTree = "<group>"; };
+		DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorStrategy.swift; sourceTree = "<group>"; };
+		DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantApplicationFactorStrategy.swift; sourceTree = "<group>"; };
+		DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+algorithmExperimentsSection.swift"; sourceTree = "<group>"; };
+		DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorSelectionView.swift; sourceTree = "<group>"; };
 		E90909CC24E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_rising_with_cob_momentum_effect.json; sourceTree = "<group>"; };
 		E90909CD24E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_rising_with_cob_insulin_effect.json; sourceTree = "<group>"; };
 		E90909CE24E34AC500F963D2 /* high_and_rising_with_cob_predicted_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_rising_with_cob_predicted_glucose.json; sourceTree = "<group>"; };
@@ -2314,6 +2324,7 @@
 			isa = PBXGroup;
 			children = (
 				A98556842493F901000FD662 /* AlertStore+SimulatedCoreData.swift */,
+				DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */,
 				C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */,
 				A9F703722489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift */,
 				C17824991E1999FA00D9D25C /* CaseCountable.swift */,
@@ -2400,6 +2411,7 @@
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
 				C1AF062229426300002C1B19 /* ManualGlucoseEntryRow.swift */,
+				DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2441,6 +2453,9 @@
 				C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */,
 				A96DAC2B2838F31200D94E38 /* SharedLogging.swift */,
 				7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */,
+				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
+				DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */,
+				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -3872,6 +3887,7 @@
 				C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */,
 				1D49795824E7289700948F05 /* ServicesViewModel.swift in Sources */,
 				1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */,
+				DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */,
 				892D7C5123B54A15008A9656 /* CarbEntryViewController.swift in Sources */,
 				B4E202302661063E009421B5 /* AutomaticDosingStatus.swift in Sources */,
 				C191D2A125B3ACAA00C26C0B /* DosingStrategySelectionView.swift in Sources */,
@@ -3903,6 +3919,7 @@
 				1DB619AC270BAD3D006C9D07 /* VersionUpdateViewModel.swift in Sources */,
 				A9C62D882331703100535612 /* Service.swift in Sources */,
 				89CAB36324C8FE96009EE3CE /* PredictedGlucoseChartView.swift in Sources */,
+				DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */,
 				4F6663941E905FD2009E74FC /* ChartColorPalette+Loop.swift in Sources */,
 				A9F703732489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift in Sources */,
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
@@ -3933,6 +3950,7 @@
 				E9B080B1253BDA6300BAD8F8 /* UserDefaults+LoopIntents.swift in Sources */,
 				C1AF062329426300002C1B19 /* ManualGlucoseEntryRow.swift in Sources */,
 				C148CEE724FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift in Sources */,
+				DDC389FC2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift in Sources */,
 				1D12D3B92548EFDD00B53E8B /* main.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
 				A9DCF32A25B0FABF00C89088 /* LoopUIColorPalette+Default.swift in Sources */,
@@ -3967,6 +3985,7 @@
 				A97F250825E056D500F0EE19 /* OnboardingManager.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
+				DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */,
 				4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
 				A9FB75F1252BE320004C7D3F /* BolusDosingDecision.swift in Sources */,
@@ -3974,6 +3993,7 @@
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
 				1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsServicesManager.swift in Sources */,
+				DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */,
 				A9C62D842331700E00535612 /* DiagnosticLog+Subsystem.swift in Sources */,
 				895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */,
 				C1EF747228D6A44A00C8C083 /* CrashRecoveryManager.swift in Sources */,

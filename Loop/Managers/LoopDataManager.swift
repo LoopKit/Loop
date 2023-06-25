@@ -1698,7 +1698,23 @@ extension LoopDataManager {
                     return self.delegate?.roundBolusVolume(units: units) ?? units
                 }
 
-                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * LoopConstants.bolusPartialApplicationFactor)
+                // Create dosing strategy based on user setting
+                let applicationFactorStrategy: ApplicationFactorStrategy = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
+                    ? GlucoseBasedApplicationFactorStrategy()
+                    : ConstantApplicationFactorStrategy()
+
+                let correctionRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
+
+                let effectiveBolusApplicationFactor = applicationFactorStrategy.calculateDosingFactor(
+                    for: glucose.quantity,
+                    correctionRangeSchedule: correctionRangeSchedule!,
+                    settings: settings
+                )
+
+                self.logger.debug(" *** Glucose: %{public}@, effectiveBolusApplicationFactor: %.2f", glucose.quantity.description, effectiveBolusApplicationFactor)
+                
+                // If a user customizes maxPartialApplicationFactor > 1; this respects maxBolus
+                let maxAutomaticBolus = min(iobHeadroom, maxBolus! * min(effectiveBolusApplicationFactor, 1.0))
 
                 dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
                     to: glucoseTargetRange!,
@@ -1708,7 +1724,7 @@ extension LoopDataManager {
                     model: doseStore.insulinModelProvider.model(for: pumpInsulinType),
                     basalRates: basalRateSchedule!,
                     maxAutomaticBolus: maxAutomaticBolus,
-                    partialApplicationFactor: LoopConstants.bolusPartialApplicationFactor * self.timeBasedDoseApplicationFactor,
+                    partialApplicationFactor: effectiveBolusApplicationFactor * self.timeBasedDoseApplicationFactor,
                     lastTempBasal: lastTempBasal,
                     volumeRounder: volumeRounder,
                     rateRounder: rateRounder,
@@ -2128,6 +2144,7 @@ extension LoopDataManager {
                 "insulinOnBoard: \(String(describing: manager.insulinOnBoard))",
                 "error: \(String(describing: state.error))",
                 "overrideInUserDefaults: \(String(describing: UserDefaults.appGroup?.intentExtensionOverrideToSet))",
+                "glucoseBasedApplicationFactorEnabled: \(UserDefaults.standard.glucoseBasedApplicationFactorEnabled)",
                 "",
                 String(reflecting: self.retrospectiveCorrection),
                 "",
