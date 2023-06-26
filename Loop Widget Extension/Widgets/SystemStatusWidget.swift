@@ -40,20 +40,20 @@ struct SystemStatusWidgetEntryView : View {
                     )
             }
             
-            if widgetFamily == .systemMedium {
+            if widgetFamily != .systemSmall {
                 VStack(alignment: .center, spacing: 5) {
                     HStack(alignment: .center, spacing: 5) {
-                        SystemStatusActionView(for: .carbEntry)
+                        SystemActionLink(to: .carbEntry)
                         
-                        SystemStatusActionView(for: .bolus)
+                        SystemActionLink(to: .bolus)
                     }
                     
                     HStack(alignment: .center, spacing: 5) {
                         if entry.preMealPresetAllowed {
-                            SystemStatusActionView(for: .preMeal, active: entry.preMealPresetActive)
+                            SystemActionLink(to: .preMeal, active: entry.preMealPresetActive)
                         }
                         
-                        SystemStatusActionView(for: .customPreset, active: entry.customPresetActive)
+                        SystemActionLink(to: .customPreset, active: entry.customPresetActive)
                     }
                 }
                 .buttonStyle(.plain)

@@ -14,5 +14,9 @@ struct LoopWidgets: WidgetBundle {
     @WidgetBundleBuilder
     var body: some Widget {
         SystemStatusWidget()
+        
+        if #available(iOSApplicationExtension 16.0, *) {
+            LockscreenAccessoryWidget()
+        }
     }
 }
