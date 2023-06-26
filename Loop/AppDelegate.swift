@@ -81,6 +81,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
         completionHandler(loopAppManager.handleRemoteNotification(userInfo as? [String: AnyObject]) ? .noData : .failed)
     }
+    
+    // MARK: - UIApplicationDelegate - Deeplinking
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        loopAppManager.handle(url)
+    }
 
     // MARK: - UIApplicationDelegate - Continuity
 

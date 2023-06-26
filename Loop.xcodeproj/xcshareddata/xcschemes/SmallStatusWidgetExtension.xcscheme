@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "14B1735B28AED9EC006CCD7C"
-               BuildableName = "SmallStatusWidgetExtension.appex"
-               BlueprintName = "SmallStatusWidgetExtension"
+               BuildableName = "Loop Widget Extension.appex"
+               BlueprintName = "Loop Widget Extension"
                ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

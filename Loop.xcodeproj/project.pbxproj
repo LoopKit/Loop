@@ -14,9 +14,9 @@
 		14B1735E28AED9EC006CCD7C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735D28AED9EC006CCD7C /* WidgetKit.framework */; };
 		14B1736028AED9EC006CCD7C /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735F28AED9EC006CCD7C /* SwiftUI.framework */; };
 		14B1736528AED9EE006CCD7C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14B1736428AED9EE006CCD7C /* Assets.xcassets */; };
-		14B1736928AED9EE006CCD7C /* SmallStatusWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		14B1736928AED9EE006CCD7C /* Loop Widget Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736E28AEDBF6006CCD7C /* BasalView.swift */; };
-		14B1737328AEDBF6006CCD7C /* StatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736F28AEDBF6006CCD7C /* StatusWidget.swift */; };
+		14B1737328AEDBF6006CCD7C /* SystemStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */; };
 		14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1737028AEDBF6006CCD7C /* GlucoseView.swift */; };
 		14B1737528AEDBF6006CCD7C /* LoopCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */; };
 		14B1737628AEDC6C006CCD7C /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
@@ -270,6 +270,15 @@
 		7D70765E1FE06EE3004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076601FE06EE3004AC8EA /* Localizable.strings */; };
 		7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076651FE06EE4004AC8EA /* Localizable.strings */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
+		84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D22A4A27A3000B658B /* LoopWidgets.swift */; };
+		84AA81D62A4A28AF000B658B /* WidgetBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D52A4A28AF000B658B /* WidgetBackground.swift */; };
+		84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */; };
+		84AA81DB2A4A2973000B658B /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81DA2A4A2973000B658B /* Date.swift */; };
+		84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */; };
+		84AA81E12A4A2D3C000B658B /* ContentMargin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E02A4A2D3C000B658B /* ContentMargin.swift */; };
+		84AA81E32A4A36FB000B658B /* SystemStatusActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E22A4A36FB000B658B /* SystemStatusActionView.swift */; };
+		84AA81E52A4A3981000B658B /* DeeplinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E42A4A3981000B658B /* DeeplinkManager.swift */; };
+		84AA81E72A4A4DEF000B658B /* PumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E62A4A4DEF000B658B /* PumpView.swift */; };
 		891B508524342BE1005DA578 /* CarbAndBolusFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 891B508424342BE1005DA578 /* CarbAndBolusFlowViewModel.swift */; };
 		892A5D59222F0A27008961AB /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
 		892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */; };
@@ -507,7 +516,6 @@
 		C1E3862628247C6100F561A4 /* StoredLoopNotRunningNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */; };
 		C1E3DC4728595FAA00CA19FF /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; };
 		C1E3DC4928595FAA00CA19FF /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C1E71723292E918F00DA646F /* SmallStatusWidgetEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E71721292E90CC00DA646F /* SmallStatusWidgetEntryView.swift */; };
 		C1EE9E812A38D0FB0064784A /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = C1EE9E802A38D0FB0064784A /* BuildDetails.plist */; };
 		C1EF747228D6A44A00C8C083 /* CrashRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */; };
 		C1F00C60285A802A006302C5 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; };
@@ -771,7 +779,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				14B1736928AED9EE006CCD7C /* SmallStatusWidgetExtension.appex in Embed App Extensions */,
+				14B1736928AED9EE006CCD7C /* Loop Widget Extension.appex in Embed App Extensions */,
 				E9B07F94253BBA6500BAD8F8 /* Loop Intent Extension.appex in Embed App Extensions */,
 				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
@@ -792,14 +800,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SmallStatusWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Widget Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		14B1735D28AED9EC006CCD7C /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		14B1735F28AED9EC006CCD7C /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		14B1736428AED9EE006CCD7C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		14B1736628AED9EE006CCD7C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		14B1736D28AEDA63006CCD7C /* StatusWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StatusWidgetExtension.entitlements; sourceTree = "<group>"; };
+		14B1736D28AEDA63006CCD7C /* LoopWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LoopWidgetExtension.entitlements; sourceTree = "<group>"; };
 		14B1736E28AEDBF6006CCD7C /* BasalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalView.swift; sourceTree = "<group>"; };
-		14B1736F28AEDBF6006CCD7C /* StatusWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusWidget.swift; sourceTree = "<group>"; };
+		14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SystemStatusWidget.swift; sourceTree = "<group>"; };
 		14B1737028AEDBF6006CCD7C /* GlucoseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseView.swift; sourceTree = "<group>"; };
 		14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopCircleView.swift; sourceTree = "<group>"; };
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
@@ -1260,6 +1268,15 @@
 		7DD382791F8DBFC60071272B /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Interface.strings; sourceTree = "<group>"; };
 		7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetLoopManager.swift; sourceTree = "<group>"; };
 		80F864E52433BF5D0026EC26 /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		84AA81D22A4A27A3000B658B /* LoopWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopWidgets.swift; sourceTree = "<group>"; };
+		84AA81D52A4A28AF000B658B /* WidgetBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBackground.swift; sourceTree = "<group>"; };
+		84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelimeEntry.swift; sourceTree = "<group>"; };
+		84AA81DA2A4A2973000B658B /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
+		84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelineProvider.swift; sourceTree = "<group>"; };
+		84AA81E02A4A2D3C000B658B /* ContentMargin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentMargin.swift; sourceTree = "<group>"; };
+		84AA81E22A4A36FB000B658B /* SystemStatusActionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemStatusActionView.swift; sourceTree = "<group>"; };
+		84AA81E42A4A3981000B658B /* DeeplinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkManager.swift; sourceTree = "<group>"; };
+		84AA81E62A4A4DEF000B658B /* PumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpView.swift; sourceTree = "<group>"; };
 		891B508424342BE1005DA578 /* CarbAndBolusFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAndBolusFlowViewModel.swift; sourceTree = "<group>"; };
 		892A5D29222EF60A008961AB /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = MockKit.framework; path = Carthage/Build/iOS/MockKit.framework; sourceTree = SOURCE_ROOT; };
 		892A5D2B222EF60A008961AB /* MockKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = MockKitUI.framework; path = Carthage/Build/iOS/MockKitUI.framework; sourceTree = SOURCE_ROOT; };
@@ -1649,7 +1666,6 @@
 		C1E693CE29C786E200410918 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C1E693CF29C786E200410918 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		C1E693D029C786E200410918 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		C1E71721292E90CC00DA646F /* SmallStatusWidgetEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallStatusWidgetEntryView.swift; sourceTree = "<group>"; };
 		C1E9CB5A295101570022387B /* install-scenarios.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "install-scenarios.sh"; sourceTree = "<group>"; };
 		C1EB0D1D299581D900628475 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1EB0D1E299581D900628475 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1927,21 +1943,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		14B1736128AED9EC006CCD7C /* StatusWidget */ = {
+		14B1736128AED9EC006CCD7C /* Loop Widget Extension */ = {
 			isa = PBXGroup;
 			children = (
-				14B1736428AED9EE006CCD7C /* Assets.xcassets */,
-				14B1736E28AEDBF6006CCD7C /* BasalView.swift */,
-				14B1737028AEDBF6006CCD7C /* GlucoseView.swift */,
-				14B1736628AED9EE006CCD7C /* Info.plist */,
-				C116134A2983096D00777E7C /* Localizable.strings */,
-				C11613472983096D00777E7C /* InfoPlist.strings */,
-				14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */,
-				C1E71721292E90CC00DA646F /* SmallStatusWidgetEntryView.swift */,
-				14B1736F28AEDBF6006CCD7C /* StatusWidget.swift */,
-				14B1736D28AEDA63006CCD7C /* StatusWidgetExtension.entitlements */,
+				84AA81D42A4A2813000B658B /* Bootstrap */,
+				84AA81D12A4A2778000B658B /* Components */,
+				84AA81D92A4A2966000B658B /* Helpers */,
+				84AA81DE2A4A2B3D000B658B /* Timeline */,
+				84AA81DF2A4A2B7A000B658B /* Widgets */,
+				84AA81D22A4A27A3000B658B /* LoopWidgets.swift */,
 			);
-			path = StatusWidget;
+			path = "Loop Widget Extension";
 			sourceTree = "<group>";
 		};
 		1DA6499D2441266400F61E75 /* Alerts */ = {
@@ -2092,7 +2104,7 @@
 				43E2D8D21D20BF42004DA55F /* DoseMathTests */,
 				43D9FFA321EA9A0C00AF44BF /* Learn */,
 				E9B07F7D253BBA6500BAD8F8 /* Loop Intent Extension */,
-				14B1736128AED9EC006CCD7C /* StatusWidget */,
+				14B1736128AED9EC006CCD7C /* Loop Widget Extension */,
 				A900531928D60852000BC15B /* Shortcuts */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
@@ -2114,7 +2126,7 @@
 				43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */,
 				43D9002A21EB209400AF44BF /* LoopCore.framework */,
 				E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */,
-				14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */,
+				14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2462,6 +2474,7 @@
 				C1F2075B26D6F9B0007AB7EB /* ProfileExpirationAlerter.swift */,
 				A96DAC2B2838F31200D94E38 /* SharedLogging.swift */,
 				7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */,
+				84AA81E42A4A3981000B658B /* DeeplinkManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2672,6 +2685,57 @@
 				7D23667C21250C7E0028B67D /* LocalizedString.swift */,
 			);
 			path = Common;
+			sourceTree = "<group>";
+		};
+		84AA81D12A4A2778000B658B /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				14B1736E28AEDBF6006CCD7C /* BasalView.swift */,
+				14B1737028AEDBF6006CCD7C /* GlucoseView.swift */,
+				14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */,
+				84AA81E22A4A36FB000B658B /* SystemStatusActionView.swift */,
+				84AA81E62A4A4DEF000B658B /* PumpView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		84AA81D42A4A2813000B658B /* Bootstrap */ = {
+			isa = PBXGroup;
+			children = (
+				C116134A2983096D00777E7C /* Localizable.strings */,
+				C11613472983096D00777E7C /* InfoPlist.strings */,
+				14B1736D28AEDA63006CCD7C /* LoopWidgetExtension.entitlements */,
+				14B1736428AED9EE006CCD7C /* Assets.xcassets */,
+				14B1736628AED9EE006CCD7C /* Info.plist */,
+			);
+			path = Bootstrap;
+			sourceTree = "<group>";
+		};
+		84AA81D92A4A2966000B658B /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				84AA81DA2A4A2973000B658B /* Date.swift */,
+				84AA81D52A4A28AF000B658B /* WidgetBackground.swift */,
+				84AA81E02A4A2D3C000B658B /* ContentMargin.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		84AA81DE2A4A2B3D000B658B /* Timeline */ = {
+			isa = PBXGroup;
+			children = (
+				84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */,
+				84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */,
+			);
+			path = Timeline;
+			sourceTree = "<group>";
+		};
+		84AA81DF2A4A2B7A000B658B /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */,
+			);
+			path = Widgets;
 			sourceTree = "<group>";
 		};
 		891B508324342BCA005DA578 /* View Models */ = {
@@ -3117,9 +3181,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		14B1735B28AED9EC006CCD7C /* SmallStatusWidgetExtension */ = {
+		14B1735B28AED9EC006CCD7C /* Loop Widget Extension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 14B1736C28AED9EE006CCD7C /* Build configuration list for PBXNativeTarget "SmallStatusWidgetExtension" */;
+			buildConfigurationList = 14B1736C28AED9EE006CCD7C /* Build configuration list for PBXNativeTarget "Loop Widget Extension" */;
 			buildPhases = (
 				14B1735828AED9EC006CCD7C /* Sources */,
 				14B1735928AED9EC006CCD7C /* Frameworks */,
@@ -3130,9 +3194,9 @@
 			dependencies = (
 				1481F9BE28DA26F4004C5AEB /* PBXTargetDependency */,
 			);
-			name = SmallStatusWidgetExtension;
+			name = "Loop Widget Extension";
 			productName = SmallStatusWidgetExtension;
-			productReference = 14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */;
+			productReference = 14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		43776F8B1B8022E90074EA36 /* Loop */ = {
@@ -3500,7 +3564,7 @@
 				4F70C1DB1DE8DCA7006380B7 /* Loop Status Extension */,
 				43A943711B926B7B0051FA24 /* WatchApp */,
 				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
-				14B1735B28AED9EC006CCD7C /* SmallStatusWidgetExtension */,
+				14B1735B28AED9EC006CCD7C /* Loop Widget Extension */,
 				E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */,
 				43D9FFCE21EAE05D00AF44BF /* LoopCore */,
 				43D9001A21EB209400AF44BF /* LoopCore-watchOS */,
@@ -3811,7 +3875,10 @@
 				14B1738128AEDC70006CCD7C /* StatusExtensionContext.swift in Sources */,
 				14B1737628AEDC6C006CCD7C /* HKUnit.swift in Sources */,
 				14B1737728AEDC6C006CCD7C /* NSBundle.swift in Sources */,
-				C1E71723292E918F00DA646F /* SmallStatusWidgetEntryView.swift in Sources */,
+				84AA81D62A4A28AF000B658B /* WidgetBackground.swift in Sources */,
+				84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */,
+				84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */,
+				84AA81E32A4A36FB000B658B /* SystemStatusActionView.swift in Sources */,
 				14B1737828AEDC6C006CCD7C /* NSTimeInterval.swift in Sources */,
 				14B1737928AEDC6C006CCD7C /* NSUserDefaults+StatusExtension.swift in Sources */,
 				14B1737A28AEDC6C006CCD7C /* NumberFormatter.swift in Sources */,
@@ -3819,11 +3886,15 @@
 				14B1737C28AEDC6C006CCD7C /* PumpManager.swift in Sources */,
 				14B1737D28AEDC6C006CCD7C /* PumpManagerUI.swift in Sources */,
 				14B1737E28AEDC6C006CCD7C /* FeatureFlags.swift in Sources */,
+				84AA81E72A4A4DEF000B658B /* PumpView.swift in Sources */,
 				14B1737F28AEDC6C006CCD7C /* PluginManager.swift in Sources */,
 				14B1738028AEDC6C006CCD7C /* Debug.swift in Sources */,
+				84AA81DB2A4A2973000B658B /* Date.swift in Sources */,
 				14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */,
 				14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */,
-				14B1737328AEDBF6006CCD7C /* StatusWidget.swift in Sources */,
+				14B1737328AEDBF6006CCD7C /* SystemStatusWidget.swift in Sources */,
+				84AA81E12A4A2D3C000B658B /* ContentMargin.swift in Sources */,
+				84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */,
 				14B1737528AEDBF6006CCD7C /* LoopCircleView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3951,6 +4022,7 @@
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
 				B43CF07E29434EC4008A520B /* HowMuteAlertWorkView.swift in Sources */,
+				84AA81E52A4A3981000B658B /* DeeplinkManager.swift in Sources */,
 				1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */,
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
@@ -4326,7 +4398,7 @@
 		};
 		14B1736828AED9EE006CCD7C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 14B1735B28AED9EC006CCD7C /* SmallStatusWidgetExtension */;
+			target = 14B1735B28AED9EC006CCD7C /* Loop Widget Extension */;
 			targetProxy = 14B1736728AED9EE006CCD7C /* PBXContainerItemProxy */;
 		};
 		43A943811B926B7B0051FA24 /* PBXTargetDependency */ = {
@@ -5060,7 +5132,7 @@
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_ENTITLEMENTS = StatusWidget/StatusWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "Loop Widget Extension/Bootstrap/LoopWidgetExtension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				CURRENT_PROJECT_VERSION = 101;
@@ -5068,8 +5140,8 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = StatusWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SmallStatusWidget;
+				INFOPLIST_FILE = "Loop Widget Extension/Bootstrap/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Loop Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -5077,7 +5149,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).SmallStatusWidget";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWidgetExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WIDGET_EXTENSION_DEBUG)";
 				SKIP_INSTALL = YES;
@@ -5105,7 +5177,7 @@
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_ENTITLEMENTS = StatusWidget/StatusWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "Loop Widget Extension/Bootstrap/LoopWidgetExtension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				CURRENT_PROJECT_VERSION = 101;
@@ -5113,8 +5185,8 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = StatusWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SmallStatusWidget;
+				INFOPLIST_FILE = "Loop Widget Extension/Bootstrap/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Loop Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -5122,7 +5194,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).SmallStatusWidget";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWidgetExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WIDGET_EXTENSION_RELEASE)";
 				SKIP_INSTALL = YES;
@@ -5807,7 +5879,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		14B1736C28AED9EE006CCD7C /* Build configuration list for PBXNativeTarget "SmallStatusWidgetExtension" */ = {
+		14B1736C28AED9EE006CCD7C /* Build configuration list for PBXNativeTarget "Loop Widget Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				14B1736A28AED9EE006CCD7C /* Debug */,

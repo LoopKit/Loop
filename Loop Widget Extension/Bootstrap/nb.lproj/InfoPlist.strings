@@ -1,0 +1,9 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop Widgets";
+
+/* Bundle name */
+"CFBundleName" = "LoopWidgetExtension";
+
+/* Copyright (human-readable) */
+"NSHumanReadableCopyright" = "Copyright © 2022 LoopKit Authors. Alle rettigheter forbeholdt.";
+
