@@ -433,15 +433,15 @@ final class LoopDataManager {
     }
 
     // Confined to dataAccessQueue
-    private var lastRetrospectiveCorrectionEnabled: Bool?
+    private var lastIntegralRetrospectiveCorrectionEnabled: Bool?
     private var cachedRetrospectiveCorrection: RetrospectiveCorrection?
-    
+
     var retrospectiveCorrection: RetrospectiveCorrection {
-        let currentRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+        let currentIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
         
-        if lastRetrospectiveCorrectionEnabled != currentRetrospectiveCorrectionEnabled || cachedRetrospectiveCorrection == nil {
-            lastRetrospectiveCorrectionEnabled = currentRetrospectiveCorrectionEnabled
-            if currentRetrospectiveCorrectionEnabled {
+        if lastIntegralRetrospectiveCorrectionEnabled != currentIntegralRetrospectiveCorrectionEnabled || cachedRetrospectiveCorrection == nil {
+            lastIntegralRetrospectiveCorrectionEnabled = currentIntegralRetrospectiveCorrectionEnabled
+            if currentIntegralRetrospectiveCorrectionEnabled {
                 cachedRetrospectiveCorrection = IntegralRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
             } else {
                 cachedRetrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
