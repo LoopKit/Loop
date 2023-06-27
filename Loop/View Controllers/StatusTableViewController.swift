@@ -240,9 +240,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private var bolusState: PumpManagerStatus.BolusState = .noBolus {
         didSet {
             if oldValue != bolusState {
-                // Bolus starting
-                if case .inProgress = bolusState {
-                    bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
+                switch bolusState {
+                case .inProgress(_):
+                    guard case .inProgress = oldValue else {
+                        // Bolus starting
+                        bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
+                        break
+                    }
+                default:
+                    break
                 }
                 refreshContext.update(with: .status)
                 reloadData(animated: true)
@@ -785,7 +791,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case (.enactingBolus, .enactingBolus):
                 break
             case (.bolusing(let oldDose), .bolusing(let newDose)):
-                if oldDose != newDose {
+                if oldDose.syncIdentifier != newDose.syncIdentifier {
                     tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
                 }
             case (.pumpSuspended(resuming: let wasResuming), .pumpSuspended(resuming: let isResuming)):
