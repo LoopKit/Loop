@@ -123,8 +123,6 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
 
-        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
-
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
                 return
@@ -435,7 +433,23 @@ final class LoopDataManager {
     }
 
     // Confined to dataAccessQueue
-    private var retrospectiveCorrection: RetrospectiveCorrection
+    private var lastIntegralRetrospectiveCorrectionEnabled: Bool?
+    private var cachedRetrospectiveCorrection: RetrospectiveCorrection?
+
+    var retrospectiveCorrection: RetrospectiveCorrection {
+        let currentIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+        
+        if lastIntegralRetrospectiveCorrectionEnabled != currentIntegralRetrospectiveCorrectionEnabled || cachedRetrospectiveCorrection == nil {
+            lastIntegralRetrospectiveCorrectionEnabled = currentIntegralRetrospectiveCorrectionEnabled
+            if currentIntegralRetrospectiveCorrectionEnabled {
+                cachedRetrospectiveCorrection = IntegralRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+            } else {
+                cachedRetrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+            }
+        }
+        
+        return cachedRetrospectiveCorrection!
+    }
 
     // MARK: - Background task management
 
