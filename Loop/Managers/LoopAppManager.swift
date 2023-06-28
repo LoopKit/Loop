@@ -251,7 +251,7 @@ class LoopAppManager: NSObject {
             analyticsServicesManager.identifyWorkspaceGitRevision(workspaceGitRevision)
         }
 
-        analyticsServicesManager.identify("Dosing Strategy", value: settingsManager.loopSettings.automaticDosingStrategy.title)
+        analyticsServicesManager.identify("Dosing Strategy", value: settingsManager.loopSettings.automaticDosingStrategy.analyticsValue)
         let serviceNames = deviceDataManager.servicesManager.activeServices.map { $0.serviceIdentifier }
         analyticsServicesManager.identify("Services", array: serviceNames)
 

@@ -259,3 +259,14 @@ extension AnalyticsServicesManager: PresetActivationObserver {
     }
 }
 
+extension AutomaticDosingStrategy {
+    var analyticsValue: String {
+        switch self {
+        case .automaticBolus:
+            return "Automatic Bolus"
+        case .tempBasalOnly:
+            return "Temp Basal"
+        }
+    }
+}
+
