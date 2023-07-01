@@ -416,6 +416,7 @@ final class DeviceDataManager {
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
             remoteDataServicesManager: remoteDataServicesManager,
+            settingsManager: settingsManager,
             servicesManagerDelegate: loopManager,
             servicesManagerDosingDelegate: self
         )
@@ -1354,39 +1355,9 @@ extension Notification.Name {
 extension DeviceDataManager: ServicesManagerDosingDelegate {
     
     func deliverBolus(amountInUnits: Double) async throws {
-        
-        guard amountInUnits > 0 else {
-            throw BolusActionError.invalidBolus
-        }
-        
-        guard let maxBolusAmount = loopManager.settings.maximumBolus else {
-            throw BolusActionError.missingMaxBolus
-        }
-        
-        guard amountInUnits <= maxBolusAmount else {
-            throw BolusActionError.exceedsMaxBolus
-        }
-        
         try await enactBolus(units: amountInUnits, activationType: .manualNoRecommendation)
     }
     
-    enum BolusActionError: LocalizedError {
-        
-        case invalidBolus
-        case missingMaxBolus
-        case exceedsMaxBolus
-        
-        var errorDescription: String? {
-            switch self {
-            case .invalidBolus:
-                return NSLocalizedString("Invalid Bolus Amount", comment: "Bolus error description: invalid bolus amount.")
-            case .missingMaxBolus:
-                return NSLocalizedString("Missing maximum allowed bolus in settings", comment: "Bolus error description: missing maximum bolus in settings.")
-            case .exceedsMaxBolus:
-                return NSLocalizedString("Exceeds maximum allowed bolus in settings", comment: "Bolus error description: bolus exceeds maximum bolus in settings.")
-            }
-        }
-    }
 }
 
 // MARK: - Critical Event Log Export

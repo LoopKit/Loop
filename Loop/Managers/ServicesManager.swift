@@ -24,6 +24,8 @@ class ServicesManager {
 
     let remoteDataServicesManager: RemoteDataServicesManager
     
+    let settingsManager: SettingsManager
+    
     weak var servicesManagerDelegate: ServicesManagerDelegate?
     weak var servicesManagerDosingDelegate: ServicesManagerDosingDelegate?
     
@@ -44,6 +46,7 @@ class ServicesManager {
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
         remoteDataServicesManager: RemoteDataServicesManager,
+        settingsManager: SettingsManager,
         servicesManagerDelegate: ServicesManagerDelegate,
         servicesManagerDosingDelegate: ServicesManagerDosingDelegate
     ) {
@@ -52,6 +55,7 @@ class ServicesManager {
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
+        self.settingsManager = settingsManager
         self.servicesManagerDelegate = servicesManagerDelegate
         self.servicesManagerDosingDelegate = servicesManagerDosingDelegate
         restoreState()
@@ -320,6 +324,19 @@ extension ServicesManager: ServiceDelegate {
     
     func deliverRemoteBolus(amountInUnits: Double) async throws {
         do {
+            
+            guard amountInUnits > 0 else {
+                throw BolusActionError.invalidBolus
+            }
+            
+            guard let maxBolusAmount = settingsManager.loopSettings.maximumBolus else {
+                throw BolusActionError.missingMaxBolus
+            }
+            
+            guard amountInUnits <= maxBolusAmount else {
+                throw BolusActionError.exceedsMaxBolus
+            }
+            
             try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits)
             await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
             await remoteDataServicesManager.triggerUpload(for: .dose)
@@ -327,6 +344,24 @@ extension ServicesManager: ServiceDelegate {
         } catch {
             await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
             throw error
+        }
+    }
+    
+    enum BolusActionError: LocalizedError {
+        
+        case invalidBolus
+        case missingMaxBolus
+        case exceedsMaxBolus
+        
+        var errorDescription: String? {
+            switch self {
+            case .invalidBolus:
+                return NSLocalizedString("Invalid Bolus Amount", comment: "Bolus error description: invalid bolus amount.")
+            case .missingMaxBolus:
+                return NSLocalizedString("Missing maximum allowed bolus in settings", comment: "Bolus error description: missing maximum bolus in settings.")
+            case .exceedsMaxBolus:
+                return NSLocalizedString("Exceeds maximum allowed bolus in settings", comment: "Bolus error description: bolus exceeds maximum bolus in settings.")
+            }
         }
     }
 }
