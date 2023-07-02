@@ -596,26 +596,6 @@ extension RemoteDataServicesManager {
 }
 
 extension RemoteDataServicesManager {
-
-    func serviceForPushNotification(_ notification: [String: AnyObject]) -> RemoteDataService? {
-        
-        let defaultServiceIdentifier = "NightscoutService"
-        let serviceIdentifier = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
-        return remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier})
-    }
-    
-    func commandFromPushNotification(_ notification: [String : AnyObject]) async throws -> RemoteCommand {
-        
-        enum RemoteDataServicesManagerCommandError: LocalizedError {
-            case missingNotificationService
-        }
-        
-        guard let service = serviceForPushNotification(notification) else {
-            throw RemoteDataServicesManagerCommandError.missingNotificationService
-        }
-        
-        return try await service.commandFromPushNotification(notification)
-    }
     
     public func temporaryScheduleOverrideHistoryDidUpdate() {
         triggerUpload(for: .overrides)
@@ -653,6 +633,35 @@ extension RemoteDataServicesManager {
     private func clearTemporaryOverrideQueryAnchor(for remoteDataService: RemoteDataService) {
         dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
             UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides)
+        }
+    }
+}
+
+//Remote Commands
+extension RemoteDataServicesManager {
+    
+    public func remoteNotificationWasReceived(_ notification: [String: AnyObject]) async throws {
+        let service = try serviceForPushNotification(notification)
+        return try await service.remoteNotificationWasReceived(notification)
+    }
+    
+    func serviceForPushNotification(_ notification: [String: AnyObject]) throws -> RemoteDataService {
+        let defaultServiceIdentifier = "NightscoutService"
+        let serviceIdentifier = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
+        guard let service = remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier}) else {
+            throw RemoteDataServicesManagerCommandError.unsupportedServiceIdentifier(serviceIdentifier)
+        }
+        return service
+    }
+    
+    enum RemoteDataServicesManagerCommandError: LocalizedError {
+        case unsupportedServiceIdentifier(String)
+        
+        var errorDescription: String? {
+            switch self {
+            case .unsupportedServiceIdentifier(let serviceIdentifier):
+                return String(format: NSLocalizedString("Unsupported Notification Service: %1$@", comment: "Error message when a service can't be found to handle a push notification. (1: Service Identifier)"), serviceIdentifier)
+            }
         }
     }
 }
