@@ -1273,7 +1273,7 @@ extension DeviceDataManager {
 
     func deleteTestingCGMData(completion: ((Error?) -> Void)? = nil) {
         guard let testingCGMManager = cgmManager as? TestingCGMManager else {
-            assertionFailure("\(#function) should be invoked only when a testing CGM manager is in use")
+            completion?(nil)
             return
         }
         

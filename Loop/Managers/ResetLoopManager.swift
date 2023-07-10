@@ -12,6 +12,8 @@ protocol ResetLoopManagerDelegate: AnyObject {
     func loopWillReset()
     func loopDidReset()
     
+    func resetTestingData(completion: @escaping () -> Void)
+    
     func presentConfirmationAlert(
         confirmAction: @escaping (_ pumpManager: PumpManager?, _ completion: @escaping () -> Void) -> Void,
         cancelAction: @escaping () -> Void
@@ -46,15 +48,17 @@ class ResetLoopManager {
                     self?.resetAlertPresented = false
                     
                     guard let pumpManager else {
-                        self?.resetLoop()
-                        completion()
+                        self?.resetLoop {
+                            completion()
+                        }
                         return
                     }
                     
                     pumpManager.prepareForDeactivation() { [weak self] error in
                         guard let error = error else {
-                            self?.resetLoop()
-                            completion()
+                            self?.resetLoop() {
+                                completion()
+                            }
                             return
                         }
                         
@@ -84,13 +88,15 @@ class ResetLoopManager {
         loopIsAlreadyReset = hasReset
     }
     
-    private func resetLoop() {
+    private func resetLoop(completion: @escaping () -> Void) {
         delegate?.loopWillReset()
-        
-        resetLoopDocuments()
-        resetLoopUserDefaults()
-        
-        delegate?.loopDidReset()
+
+        delegate?.resetTestingData { [weak self] in
+            self?.resetLoopDocuments()
+            self?.resetLoopUserDefaults()
+            self?.delegate?.loopDidReset()
+            completion()
+        }
     }
     
     private func resetLoopUserDefaults() {
