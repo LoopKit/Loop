@@ -79,27 +79,6 @@ extension NotificationManager {
 
     // MARK: - Notifications
     
-    @MainActor
-    static func sendRemoteCommandExpiredNotification(timeExpired: TimeInterval) {
-        let notification = UNMutableNotificationContent()
-
-        notification.title = NSLocalizedString("Remote Command Expired", comment: "The notification title for the remote command expiration error")
-
-        notification.body = String(format: NSLocalizedString("The remote command expired %.0f minutes ago.", comment: "The notification body for a remote command expiration. (1: Expiration in minutes)"), fabs(timeExpired / 60.0))
-        notification.sound = .default
-         
-        notification.categoryIdentifier = LoopNotificationCategory.remoteCommandExpired.rawValue
-
-        let request = UNNotificationRequest(
-            // Only support 1 expiration notification at once
-            identifier: LoopNotificationCategory.remoteCommandExpired.rawValue,
-            content: notification,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-
     static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date, activationType: BolusActivationType) {
         let notification = UNMutableNotificationContent()
 
@@ -160,10 +139,10 @@ extension NotificationManager {
     }
     
     @MainActor
-    static func sendRemoteBolusFailureNotification(for error: Error, amount: Double) {
+    static func sendRemoteBolusFailureNotification(for error: Error, amountInUnits: Double) {
         let notification = UNMutableNotificationContent()
         let quantityFormatter = QuantityFormatter(for: .internationalUnit())
-        guard let amountDescription = quantityFormatter.numberFormatter.string(from: amount) else {
+        guard let amountDescription = quantityFormatter.numberFormatter.string(from: amountInUnits) else {
             return
         }
 

@@ -30,7 +30,7 @@ public struct SettingsView: View {
     @State private var therapySettingsIsPresented: Bool = false
     @State private var deletePumpDataAlertIsPresented = false
     @State private var deleteCGMDataAlertIsPresented = false
-
+    
     var localizedAppNameAndVersion: String
 
     public init(viewModel: SettingsViewModel, localizedAppNameAndVersion: String) {
@@ -223,6 +223,10 @@ extension SettingsView {
             
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
+            }
+
+            if FeatureFlags.allowAlgorithmExperiments {
+                algorithmExperimentsSection
             }
         }
     }

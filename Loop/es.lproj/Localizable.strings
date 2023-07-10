@@ -578,7 +578,7 @@
 "Insulin adjustments have been disabled!" = "¡Se han deshabilitado los ajustes de insulina!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Administración de Insulina";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Efectos de la insulina";

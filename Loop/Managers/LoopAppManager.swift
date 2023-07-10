@@ -244,11 +244,16 @@ class LoopAppManager: NSObject {
 
         deviceDataManager.onboardingManager = onboardingManager
 
+        // Analytics: user properties
         analyticsServicesManager.identifyAppName(Bundle.main.bundleDisplayName)
 
         if let workspaceGitRevision = BuildDetails.default.workspaceGitRevision {
             analyticsServicesManager.identifyWorkspaceGitRevision(workspaceGitRevision)
         }
+
+        analyticsServicesManager.identify("Dosing Strategy", value: settingsManager.loopSettings.automaticDosingStrategy.analyticsValue)
+        let serviceNames = deviceDataManager.servicesManager.activeServices.map { $0.serviceIdentifier }
+        analyticsServicesManager.identify("Services", array: serviceNames)
 
         if FeatureFlags.scenariosEnabled {
             testingScenariosManager = LocalTestingScenariosManager(deviceManager: deviceDataManager, supportManager: supportManager)
@@ -344,7 +349,7 @@ class LoopAppManager: NSObject {
         guard let notification = notification else {
             return false
         }
-        deviceDataManager?.handleRemoteNotification(notification)
+        deviceDataManager?.servicesManager.handleRemoteNotification(notification)
         return true
     }
 

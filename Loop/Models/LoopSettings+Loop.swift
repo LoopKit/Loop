@@ -19,9 +19,5 @@ extension LoopSettings {
     }
 
     static let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
-
-    /// Creates an instance of the enabled retrospective correction implementation
-    var enabledRetrospectiveCorrectionAlgorithm: RetrospectiveCorrection {
-        return StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
-    }
+    
 }

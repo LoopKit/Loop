@@ -466,7 +466,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Imeytynyt insuliini (U) × Insuliiniherkkyys (%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Insuliinin annostelu";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Insuliinivaikutus";

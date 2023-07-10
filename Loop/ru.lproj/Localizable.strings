@@ -581,7 +581,7 @@
 "Insulin adjustments have been disabled!" = "Регулировка инсулина была отключена!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Подача инсулина";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Влияние инсулина";
@@ -608,6 +608,9 @@
 
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Прервано %1$@: <b>%2$@</b> из %3$@ %4$@";
+
+/* Remote command error description: invalid absorption time. */
+"Invalid absorption time: %d hours" = "Неверное время усвоения: %d часов";
 
 /* Remote command error description: invalid bolus amount. */
 "Invalid Bolus Amount" = "Неверный объем болюса";
@@ -703,6 +706,9 @@
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "мг/дл";
+
+/* Title for missed meal notifications toggle */
+"Missed Meal Notifications" = "Уведомления о пропущенных приемах пищи";
 
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Пропущены данные: %1$@";
