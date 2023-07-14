@@ -17,5 +17,3 @@ extension GlucoseRangeSchedule {
         return HKQuantity(unit: unit, doubleValue: value(at: date).maxValue)
     }
 }
-
-

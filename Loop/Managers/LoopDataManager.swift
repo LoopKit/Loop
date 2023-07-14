@@ -1550,27 +1550,36 @@ extension LoopDataManager {
         retrospectiveGlucoseDiscrepancies = insulinCounteractionEffects.subtracting(carbEffects, withUniformInterval: carbStore.delta)
 
         // Calculate retrospective correction
+        let insulinSensitivity = settings.insulinSensitivitySchedule!.quantity(at: glucose.startDate)
+        let basalRate = settings.basalRateSchedule!.value(at: glucose.startDate)
+        let correctionRange = settings.glucoseTargetRangeSchedule!.quantityRange(at: glucose.startDate)
+
         retrospectiveGlucoseEffect = retrospectiveCorrection.computeEffect(
             startingAt: glucose,
             retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,
             recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
-            insulinSensitivitySchedule: settings.insulinSensitivitySchedule,
-            basalRateSchedule: settings.basalRateSchedule,
-            glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
+            insulinSensitivity: insulinSensitivity,
+            basalRate: basalRate,
+            correctionRange: correctionRange,
             retrospectiveCorrectionGroupingInterval: LoopConstants.retrospectiveCorrectionGroupingInterval
         )
     }
 
     private func computeRetrospectiveGlucoseEffect(startingAt glucose: GlucoseValue, carbEffects: [GlucoseEffect]) -> [GlucoseEffect] {
+
+        let insulinSensitivity = settings.insulinSensitivitySchedule!.quantity(at: glucose.startDate)
+        let basalRate = settings.basalRateSchedule!.value(at: glucose.startDate)
+        let correctionRange = settings.glucoseTargetRangeSchedule!.quantityRange(at: glucose.startDate)
+
         let retrospectiveGlucoseDiscrepancies = insulinCounteractionEffects.subtracting(carbEffects, withUniformInterval: carbStore.delta)
         let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: LoopConstants.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
         return retrospectiveCorrection.computeEffect(
             startingAt: glucose,
             retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,
             recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
-            insulinSensitivitySchedule: settings.insulinSensitivitySchedule,
-            basalRateSchedule: settings.basalRateSchedule,
-            glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
+            insulinSensitivity: insulinSensitivity,
+            basalRate: basalRate,
+            correctionRange: correctionRange,
             retrospectiveCorrectionGroupingInterval: LoopConstants.retrospectiveCorrectionGroupingInterval
         )
     }
