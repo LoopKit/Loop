@@ -75,8 +75,8 @@ final class WatchContext: RawRepresentable {
         if let rawGlucoseTrend = rawValue["gt"] as? GlucoseTrend.RawValue {
             glucoseTrend = GlucoseTrend(rawValue: rawGlucoseTrend)
         }
-        if let glucoseTrendRateUnitString = rawValue["gtru"] as? String, let glucoseTrendRateValue = rawValue["gtrv"] as? Double {
-            glucoseTrendRate = HKQuantity(unit: HKUnit(from: glucoseTrendRateUnitString), doubleValue: glucoseTrendRateValue)
+        if let glucoseTrendRateValue = rawValue["gtrv"] as? Double {
+            glucoseTrendRate = HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: glucoseTrendRateValue)
         }
         glucoseDate = rawValue["gd"] as? Date
         glucoseIsDisplayOnly = rawValue["gdo"] as? Bool

@@ -160,8 +160,8 @@ extension GlucoseDisplayableContext: RawRepresentable {
             trendType = nil
         }
         
-        if let trendRateUnit = rawValue["trendRateUnit"] as? String, let trendRateValue = rawValue["trendRateValue"] as? Double {
-            trendRate = HKQuantity(unit: HKUnit(from: trendRateUnit), doubleValue: trendRateValue)
+        if let trendRateValue = rawValue["trendRateValue"] as? Double {
+            trendRate = HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: trendRateValue)
         } else {
             trendRate = nil
         }
@@ -181,7 +181,6 @@ extension GlucoseDisplayableContext: RawRepresentable {
         ]
         raw["trendType"] = trendType?.rawValue
         if let trendRate = trendRate {
-            raw["trendRateUnit"] = HKUnit.milligramsPerDeciliterPerMinute.unitString
             raw["trendRateValue"] = trendRate.doubleValue(for: HKUnit.milligramsPerDeciliterPerMinute)
         }
         raw["glucoseRangeCategory"] = glucoseRangeCategory?.rawValue
