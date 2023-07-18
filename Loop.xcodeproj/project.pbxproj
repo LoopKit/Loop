@@ -270,13 +270,11 @@
 		7D70765E1FE06EE3004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076601FE06EE3004AC8EA /* Localizable.strings */; };
 		7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076651FE06EE4004AC8EA /* Localizable.strings */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
-		8463E4012A4A541700098542 /* LockscreenAccessoryWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8463E4002A4A541700098542 /* LockscreenAccessoryWidget.swift */; };
 		84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D22A4A27A3000B658B /* LoopWidgets.swift */; };
 		84AA81D62A4A28AF000B658B /* WidgetBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D52A4A28AF000B658B /* WidgetBackground.swift */; };
 		84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */; };
 		84AA81DB2A4A2973000B658B /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81DA2A4A2973000B658B /* Date.swift */; };
 		84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */; };
-		84AA81E12A4A2D3C000B658B /* ContentMargin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E02A4A2D3C000B658B /* ContentMargin.swift */; };
 		84AA81E32A4A36FB000B658B /* SystemActionLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E22A4A36FB000B658B /* SystemActionLink.swift */; };
 		84AA81E52A4A3981000B658B /* DeeplinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E42A4A3981000B658B /* DeeplinkManager.swift */; };
 		84AA81E72A4A4DEF000B658B /* PumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E62A4A4DEF000B658B /* PumpView.swift */; };
@@ -1263,13 +1261,11 @@
 		7DD382791F8DBFC60071272B /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Interface.strings; sourceTree = "<group>"; };
 		7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetLoopManager.swift; sourceTree = "<group>"; };
 		80F864E52433BF5D0026EC26 /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		8463E4002A4A541700098542 /* LockscreenAccessoryWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockscreenAccessoryWidget.swift; sourceTree = "<group>"; };
 		84AA81D22A4A27A3000B658B /* LoopWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopWidgets.swift; sourceTree = "<group>"; };
 		84AA81D52A4A28AF000B658B /* WidgetBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBackground.swift; sourceTree = "<group>"; };
 		84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelimeEntry.swift; sourceTree = "<group>"; };
 		84AA81DA2A4A2973000B658B /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 		84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelineProvider.swift; sourceTree = "<group>"; };
-		84AA81E02A4A2D3C000B658B /* ContentMargin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentMargin.swift; sourceTree = "<group>"; };
 		84AA81E22A4A36FB000B658B /* SystemActionLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemActionLink.swift; sourceTree = "<group>"; };
 		84AA81E42A4A3981000B658B /* DeeplinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkManager.swift; sourceTree = "<group>"; };
 		84AA81E62A4A4DEF000B658B /* PumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpView.swift; sourceTree = "<group>"; };
@@ -2706,7 +2702,6 @@
 			children = (
 				84AA81DA2A4A2973000B658B /* Date.swift */,
 				84AA81D52A4A28AF000B658B /* WidgetBackground.swift */,
-				84AA81E02A4A2D3C000B658B /* ContentMargin.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -2724,7 +2719,6 @@
 			isa = PBXGroup;
 			children = (
 				14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */,
-				8463E4002A4A541700098542 /* LockscreenAccessoryWidget.swift */,
 			);
 			path = Widgets;
 			sourceTree = "<group>";
@@ -3854,7 +3848,6 @@
 				14B1737728AEDC6C006CCD7C /* NSBundle.swift in Sources */,
 				84AA81D62A4A28AF000B658B /* WidgetBackground.swift in Sources */,
 				84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */,
-				8463E4012A4A541700098542 /* LockscreenAccessoryWidget.swift in Sources */,
 				84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */,
 				84AA81E32A4A36FB000B658B /* SystemActionLink.swift in Sources */,
 				14B1737828AEDC6C006CCD7C /* NSTimeInterval.swift in Sources */,
@@ -3871,7 +3864,6 @@
 				14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */,
 				14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */,
 				14B1737328AEDBF6006CCD7C /* SystemStatusWidget.swift in Sources */,
-				84AA81E12A4A2D3C000B658B /* ContentMargin.swift in Sources */,
 				84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */,
 				14B1737528AEDBF6006CCD7C /* LoopCircleView.swift in Sources */,
 			);
