@@ -36,10 +36,16 @@ final class AnalyticsServicesManager {
         analyticsServices.forEach { $0.recordAnalyticsEvent(name, withProperties: properties, outOfSession: outOfSession) }
     }
 
-    private func identify(_ property: String, value: String) {
+    func identify(_ property: String, value: String) {
         log.debug("Identify %{public}@: %{public}@", property, value)
         analyticsServices.forEach { $0.recordIdentify(property, value: value) }
     }
+
+    func identify(_ property: String, array: [String]) {
+        log.debug("Identify %{public}@: %{public}@", property, array)
+        analyticsServices.forEach { $0.recordIdentify(property, array: array) }
+    }
+
 
     // MARK: - UIApplicationDelegate
 
@@ -249,6 +255,17 @@ extension AnalyticsServicesManager: PresetActivationObserver {
             break
         default:
             break
+        }
+    }
+}
+
+extension AutomaticDosingStrategy {
+    var analyticsValue: String {
+        switch self {
+        case .automaticBolus:
+            return "Automatic Bolus"
+        case .tempBasalOnly:
+            return "Temp Basal"
         }
     }
 }

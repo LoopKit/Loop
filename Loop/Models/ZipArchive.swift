@@ -32,6 +32,12 @@ public class ZipArchive {
 
     public class Stream: NSObject, DataOutputStream {
 
+        enum StreamState: Int {
+            case open
+            case closing
+            case closed
+        }
+
         private let archive: Archive
         private let compressionMethod: CompressionMethod
 
@@ -40,7 +46,7 @@ public class ZipArchive {
 
         private let chunks = Locked<[Data]>([])
         private let error = Locked<Error?>(nil)
-        private let finished = Locked<Bool>(false)
+        private let state = Locked<StreamState>(.open)
 
         fileprivate init(archive: Archive, path: String, compressionMethod: CompressionMethod) {
             self.archive = archive
@@ -58,13 +64,18 @@ public class ZipArchive {
             processingQueue.async {
                 do {
                     try self.archive.addEntry(with: path, type: .file, compressionMethod: self.compressionMethod.zfMethod) { position, size in
+
+                        if self.state.value == .closed {
+                            return Data()
+                        }
                         self.semaphore.wait()
                         var chunk: Data!
                         self.chunks.mutate { (value) in
                             if value.count > 0 {
                                 chunk = value.removeFirst()
-                            } else if self.finished.value {
+                            } else if self.state.value == .closing {
                                 chunk = Data()
+                                self.state.value = .closed
                             }
                         }
                         return chunk
@@ -82,7 +93,7 @@ public class ZipArchive {
             if let error = error.value {
                 throw error
             }
-            if finished.value {
+            if self.state.value != .open {
                 throw ZipArchiveError.streamFinished
             }
             chunks.mutate { value in
@@ -94,7 +105,7 @@ public class ZipArchive {
         public func finish(sync: Bool) throws {
             // An empty Data() is the sigil for the ZipFoundation read callback
             // to detect end of stream.
-            finished.value = true
+            state.value = .closing
             semaphore.signal()
             if sync {
                 // Block until processingQueue is finished, and then check error state

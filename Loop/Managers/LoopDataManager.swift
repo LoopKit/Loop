@@ -123,8 +123,6 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
 
-        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
-
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
                 return
@@ -435,7 +433,23 @@ final class LoopDataManager {
     }
 
     // Confined to dataAccessQueue
-    private var retrospectiveCorrection: RetrospectiveCorrection
+    private var lastIntegralRetrospectiveCorrectionEnabled: Bool?
+    private var cachedRetrospectiveCorrection: RetrospectiveCorrection?
+
+    var retrospectiveCorrection: RetrospectiveCorrection {
+        let currentIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+        
+        if lastIntegralRetrospectiveCorrectionEnabled != currentIntegralRetrospectiveCorrectionEnabled || cachedRetrospectiveCorrection == nil {
+            lastIntegralRetrospectiveCorrectionEnabled = currentIntegralRetrospectiveCorrectionEnabled
+            if currentIntegralRetrospectiveCorrectionEnabled {
+                cachedRetrospectiveCorrection = IntegralRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+            } else {
+                cachedRetrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+            }
+        }
+        
+        return cachedRetrospectiveCorrection!
+    }
 
     // MARK: - Background task management
 
@@ -2368,4 +2382,126 @@ extension LoopDataManager {
             }
         }
     }
+}
+
+extension LoopDataManager: ServicesManagerDelegate {
+    
+    //Overrides
+    
+    func enactOverride(name: String, duration: TemporaryScheduleOverride.Duration?, remoteAddress: String) async throws {
+        
+        guard let preset = settings.overridePresets.first(where: { $0.name == name }) else {
+            throw EnactOverrideError.unknownPreset(name)
+        }
+        
+        var remoteOverride = preset.createOverride(enactTrigger: .remote(remoteAddress))
+        
+        if let duration {
+            remoteOverride.duration = duration
+        }
+        
+        await enactOverride(remoteOverride)
+    }
+    
+    
+    func cancelCurrentOverride() async throws {
+        await enactOverride(nil)
+    }
+    
+    func enactOverride(_ override: TemporaryScheduleOverride?) async {
+        mutateSettings { settings in settings.scheduleOverride = override }
+    }
+    
+    enum EnactOverrideError: LocalizedError {
+        
+        case unknownPreset(String)
+        
+        var errorDescription: String? {
+            switch self {
+            case .unknownPreset(let presetName):
+                return String(format: NSLocalizedString("Unknown preset: %1$@", comment: "Override error description: unknown preset (1: preset name)."), presetName)
+            }
+        }
+    }
+    
+    //Carb Entry
+    
+    func deliverCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
+        
+        let absorptionTime = absorptionTime ?? carbStore.defaultAbsorptionTimes.medium
+        if absorptionTime < LoopConstants.minCarbAbsorptionTime || absorptionTime > LoopConstants.maxCarbAbsorptionTime {
+            throw CarbActionError.invalidAbsorptionTime(absorptionTime)
+        }
+        
+        guard amountInGrams > 0.0 else {
+            throw CarbActionError.invalidCarbs
+        }
+        
+        guard amountInGrams <= LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()) else {
+            throw CarbActionError.exceedsMaxCarbs
+        }
+        
+        if let startDate = startDate {
+            let maxStartDate = Date().addingTimeInterval(LoopConstants.maxCarbEntryFutureTime)
+            let minStartDate = Date().addingTimeInterval(LoopConstants.maxCarbEntryPastTime)
+            guard startDate <= maxStartDate  && startDate >= minStartDate else {
+                throw CarbActionError.invalidStartDate(startDate)
+            }
+        }
+        
+        let quantity = HKQuantity(unit: .gram(), doubleValue: amountInGrams)
+        let candidateCarbEntry = NewCarbEntry(quantity: quantity, startDate: startDate ?? Date(), foodType: foodType, absorptionTime: absorptionTime)
+        
+        let _ = try await devliverCarbEntry(candidateCarbEntry)
+    }
+    
+    enum CarbActionError: LocalizedError {
+        
+        case invalidAbsorptionTime(TimeInterval)
+        case invalidStartDate(Date)
+        case exceedsMaxCarbs
+        case invalidCarbs
+        
+        var errorDescription: String? {
+            switch  self {
+            case .exceedsMaxCarbs:
+                return NSLocalizedString("Exceeds maximum allowed carbs", comment: "Carb error description: carbs exceed maximum amount.")
+            case .invalidCarbs:
+                return NSLocalizedString("Invalid carb amount", comment: "Carb error description: invalid carb amount.")
+            case .invalidAbsorptionTime(let absorptionTime):
+                let absorptionHoursFormatted = Self.numberFormatter.string(from: absorptionTime.hours) ?? ""
+                return String(format: NSLocalizedString("Invalid absorption time: %1$@ hours", comment: "Carb error description: invalid absorption time. (1: Input duration in hours)."), absorptionHoursFormatted)
+            case .invalidStartDate(let startDate):
+                let startDateFormatted = Self.dateFormatter.string(from: startDate)
+                return String(format: NSLocalizedString("Start time is out of range: %@", comment: "Carb error description: invalid start time is out of range."), startDateFormatted)
+            }
+        }
+        
+        static var numberFormatter: NumberFormatter = {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            return formatter
+        }()
+        
+        static var dateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .medium
+            return formatter
+        }()
+    }
+    
+    //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
+    func devliverCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
+        return try await withCheckedThrowingContinuation { continuation in
+            carbStore.addCarbEntry(carbEntry) { result in
+                switch result {
+                case .success(let storedCarbEntry):
+                    continuation.resume(returning: storedCarbEntry)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
 }
