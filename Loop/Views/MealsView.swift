@@ -36,7 +36,7 @@ struct MealsView: View {
                 VStack(spacing: 16) {
                     VStack(spacing: 10) {
                         HStack {
-                            Text("All Meals")
+                            Text("All Favorites")
                                 .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
@@ -61,18 +61,18 @@ struct MealsView: View {
                     dismissButton
                 }
             }
-            .navigationBarTitle(Text(NSLocalizedString("Meals", comment: "Meals screen title")))
+            .navigationBarTitle(Text(NSLocalizedString("Favorite Foods", comment: "Favorite Foods screen title")))
             .navigationViewStyle(.stack)
             
-            NavigationLink(destination: Text("Coming later: bolus screen for \(selectedMeal?.name ?? "")"), isActive: $isBolusViewActive) {
+            NavigationLink(destination: Text("Coming later:\nprepopulated carb entry screen").multilineTextAlignment(.center), isActive: $isBolusViewActive) {
                 EmptyView()
             }
             
-            NavigationLink(destination: Text("Coming later: edit meal screen for \(selectedMeal?.name ?? "")"), isActive: $isEditViewActive) {
+            NavigationLink(destination: Text("Coming later:\nedit favorite food screen").multilineTextAlignment(.center), isActive: $isEditViewActive) {
                 EmptyView()
             }
             
-            NavigationLink(destination: Text("Coming later: add meal screen"), isActive: $isAddViewActive) {
+            NavigationLink(destination: Text("Coming later:\nadd favorite food screen").multilineTextAlignment(.center), isActive: $isAddViewActive) {
                 EmptyView()
             }
         }
@@ -164,7 +164,7 @@ extension MealsView {
             HStack {
                 Image(systemName: "plus.circle.fill")
                 
-                Text("Add a new meal")
+                Text("Add a new favorite food")
             }
         }
         .buttonStyle(ActionButtonStyle())
