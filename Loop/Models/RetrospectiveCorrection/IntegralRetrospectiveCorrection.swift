@@ -179,7 +179,7 @@ class IntegralRetrospectiveCorrection: RetrospectiveCorrection {
             
             // Overall glucose effect calculated as a sum of propotional, integral and differential effects
             proportionalCorrection = IntegralRetrospectiveCorrection.proportionalGain * currentDiscrepancyValue
-            // Differential effect added only when negative, to avoid upward stacking with momentum, while still mitigating slugeshness of retrospective correction when discrepancies start decreasing
+            // Differential effect added only when negative, to avoid upward stacking with momentum, while still mitigating sluggishness of retrospective correction when discrepancies start decreasing
             if differentialDiscrepancy < 0 {
                 differentialCorrection = IntegralRetrospectiveCorrection.differentialGain * differentialDiscrepancy
             }
