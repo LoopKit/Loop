@@ -179,7 +179,12 @@ class IntegralRetrospectiveCorrection: RetrospectiveCorrection {
             
             // Overall glucose effect calculated as a sum of propotional, integral and differential effects
             proportionalCorrection = IntegralRetrospectiveCorrection.proportionalGain * currentDiscrepancyValue
-            differentialCorrection = IntegralRetrospectiveCorrection.differentialGain * differentialDiscrepancy
+            // Differential effect added only when negative, to avoid upward stacking with momentum, while still mitigating sluggishness of retrospective correction when discrepancies start decreasing
+            if differentialDiscrepancy < 0.0 {
+                differentialCorrection = IntegralRetrospectiveCorrection.differentialGain * differentialDiscrepancy
+            } else {
+                differentialCorrection = 0.0
+            }
             let totalCorrection = proportionalCorrection + integralCorrection + differentialCorrection
             totalGlucoseCorrectionEffect = HKQuantity(unit: unit, doubleValue: totalCorrection)
             integralCorrectionEffectDuration = TimeInterval(minutes: integralCorrectionEffectMinutes)
