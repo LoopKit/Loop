@@ -110,7 +110,7 @@ public extension IOBChart {
         iobPoints = iobValues.map {
             return ChartPoint(
                 x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                y: ChartAxisValueDoubleUnit($0.value, unitString: Self.chartUnit.localizedShortUnitString, formatter: doseFormatter)
+                y: ChartAxisValueDoubleUnit($0.value, unitString: Self.chartUnit.shortLocalizedUnitString(), formatter: doseFormatter)
             )
         }
     }

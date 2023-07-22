@@ -187,7 +187,7 @@ extension CarbEffectChart {
     /// - Parameter effects: A timeline of glucose velocity values
     public func setInsulinCounteractionEffects(_ effects: [GlucoseEffectVelocity]) {
         let unit = glucoseUnit.unitDivided(by: .minute())
-        let unitString = String(format: NSLocalizedString("%1$@/min", comment: "Format string describing glucose units per minute (1: glucose unit string)"), glucoseUnit.localizedShortUnitString)
+        let unitString = String(format: NSLocalizedString("%1$@/min", comment: "Format string describing glucose units per minute (1: glucose unit string)"), glucoseUnit.shortLocalizedUnitString())
 
         var insulinCounteractionEffectPoints: [ChartPoint] = []
         var allCarbEffectPoints: [ChartPoint] = []
