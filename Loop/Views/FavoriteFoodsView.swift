@@ -1,5 +1,5 @@
 //
-//  MealsView.swift
+//  FavoriteFoodsView.swift
 //  Loop
 //
 //  Created by Noah Brauner on 7/12/23.
@@ -11,23 +11,23 @@ import LoopKit
 import LoopKitUI
 import HealthKit
 
-struct MealsView: View {
+struct FavoriteFoodsView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismissAction) private var dismiss
     @Environment(\.carbTintColor) private var carbTintColor
 
-    @State private var mealToConfirmDeleteId: String? = nil
+    @State private var foodToConfirmDeleteId: String? = nil
     @State private var editMode: EditMode = .inactive
     
-    @State private var meals = allMeals
+    @State private var foods = allFoods
     
     @State var isBolusViewActive = false
     @State var isEditViewActive = false
     @State var isAddViewActive = false
 
-    @State var selectedMeal: Meal? = nil
+    @State var selectedFood: FavoriteFood? = nil
     
-    @State private var draggingMeal: Meal?
+    @State private var draggingFood: FavoriteFood?
     @State private var hasChangedLocation: Bool = false
 
     var body: some View {
@@ -46,13 +46,13 @@ struct MealsView: View {
                             editButton
                         }
                         
-                        ForEach(meals) { meal in
-                            draggableMealCardView(meal: meal)
+                        ForEach(foods) { food in
+                            draggableFoodCardView(food: food)
                         }
                     }
                     .environment(\.editMode, self.$editMode)
                     
-                    newMealButton
+                    newFoodButton
                 }
                 .padding()
             }
@@ -78,17 +78,17 @@ struct MealsView: View {
         }
         .onChange(of: editMode) { newValue in
             if !newValue.isEditing {
-                mealToConfirmDeleteId = nil
+                foodToConfirmDeleteId = nil
             }
         }
     }
     
-    private func addMeal() {
+    private func addFood() {
         isAddViewActive = true
     }
     
-    private func onMealTap(_ meal: Meal) {
-        selectedMeal = meal
+    private func onFoodTap(_ food: FavoriteFood) {
+        selectedFood = food
         if editMode.isEditing {
             isEditViewActive = true
         }
@@ -96,40 +96,40 @@ struct MealsView: View {
             isBolusViewActive = true
         }
     }
-    private func onMealDelete(_ meal: Meal) {
+    private func onFoodDelete(_ food: FavoriteFood) {
         withAnimation(.easeInOut(duration: 0.3)) {
-            _ = meals.remove(meal)
+            _ = foods.remove(food)
         }
     }
 
-    private func onMealReorder(from: IndexSet, to: Int) {
+    private func onFoodReorder(from: IndexSet, to: Int) {
         withAnimation {
-            meals.move(fromOffsets: from, toOffset: to)
+            foods.move(fromOffsets: from, toOffset: to)
         }
     }
 }
 
-extension MealsView {
-    @ViewBuilder func draggableMealCardView(meal: Meal) -> some View {
+extension FavoriteFoodsView {
+    @ViewBuilder func draggableFoodCardView(food: FavoriteFood) -> some View {
         Button(action: {
-            onMealTap(meal)
+            onFoodTap(food)
         }) {
-            MealCardView(meal: meal, mealToConfirmDeleteId: $mealToConfirmDeleteId, onMealTap: onMealTap(_:), onMealDelete: onMealDelete(_:))
+            FavoriteFoodCardView(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: onFoodDelete(_:))
                 .onDrag {
-                    draggingMeal = meal
-                    return NSItemProvider(object: "\(meal.id)" as NSString)
+                    draggingFood = food
+                    return NSItemProvider(object: "\(food.id)" as NSString)
                 } preview: {
-                    MealCardView(meal: meal, mealToConfirmDeleteId: $mealToConfirmDeleteId, onMealTap: onMealTap(_:), onMealDelete: onMealDelete(_:))
+                    FavoriteFoodCardView(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: onFoodDelete(_:))
                 }
                 .onDrop(
                     of: [UTType.text],
                     delegate: DragRelocateDelegate(
-                        item: meal,
-                        listData: meals,
-                        current: $draggingMeal,
+                        item: food,
+                        listData: foods,
+                        current: $draggingFood,
                         hasChangedLocation: $hasChangedLocation
                     ) { from, to in
-                        onMealReorder(from: from, to: to)
+                        onFoodReorder(from: from, to: to)
                     }
                 )
                 .disabled(!editMode.isEditing)
@@ -144,7 +144,7 @@ extension MealsView {
     }
     
 //    private var plusButton: some View {
-//        Button(action: addMeal) {
+//        Button(action: addFood) {
 //            Image(systemName: "plus")
 //        }
 //    }
@@ -159,8 +159,8 @@ extension MealsView {
         }
     }
     
-    private var newMealButton: some View {
-        Button(action: addMeal) {
+    private var newFoodButton: some View {
+        Button(action: addFood) {
             HStack {
                 Image(systemName: "plus.circle.fill")
                 
@@ -221,12 +221,12 @@ fileprivate struct DragRelocateDelegate<Item: Equatable>: DropDelegate {
     }
 }
 
-fileprivate let allMeals = [
+fileprivate let allFoods = [
     // Some really yummy foods...
-    Meal(carbsQuantity: carbs(55), foodType: "🥞🥚", absorptionTime: .hours(3), name: "Pancakes and Eggs"),
-    Meal(carbsQuantity: carbs(35), foodType: "🍌🍞", absorptionTime: .hours(2), name: "Banana Bread"),
-    Meal(carbsQuantity: carbs(63), foodType: "🍞🥜🍫🥛", absorptionTime: .hours(3), name: "The Best Lunch"),
-    Meal(carbsQuantity: carbs(120), foodType: "🍕", absorptionTime: .hours(5), name: "Dad's Pizza"),
+    FavoriteFood(carbsQuantity: carbs(55), foodType: "🥞🥚", absorptionTime: .hours(3), name: "Pancakes and Eggs"),
+    FavoriteFood(carbsQuantity: carbs(35), foodType: "🍌🍞", absorptionTime: .hours(2), name: "Banana Bread"),
+    FavoriteFood(carbsQuantity: carbs(63), foodType: "🍞🥜🍫🥛", absorptionTime: .hours(3), name: "The Best Lunch"),
+    FavoriteFood(carbsQuantity: carbs(120), foodType: "🍕", absorptionTime: .hours(5), name: "Dad's Pizza"),
 ]
 
 fileprivate func carbs(_ value: Double) -> HKQuantity {

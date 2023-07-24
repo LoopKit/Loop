@@ -75,8 +75,6 @@ public struct LoopSettings: Equatable {
 
     public var defaultRapidActingModel: ExponentialInsulinModelPreset?
     
-    public var favoriteFoodsEnabled = false
-
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
@@ -96,8 +94,7 @@ public struct LoopSettings: Equatable {
         maximumBolus: Double? = nil,
         suspendThreshold: GlucoseThreshold? = nil,
         automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
-        defaultRapidActingModel: ExponentialInsulinModelPreset? = nil,
-        favoriteFoodsEnabled: Bool = false
+        defaultRapidActingModel: ExponentialInsulinModelPreset? = nil
     ) {
         self.dosingEnabled = dosingEnabled
         self.glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
@@ -114,7 +111,6 @@ public struct LoopSettings: Equatable {
         self.suspendThreshold = suspendThreshold
         self.automaticDosingStrategy = automaticDosingStrategy
         self.defaultRapidActingModel = defaultRapidActingModel
-        self.favoriteFoodsEnabled = favoriteFoodsEnabled
     }
 }
 
@@ -281,10 +277,6 @@ extension LoopSettings: RawRepresentable {
         {
             self.automaticDosingStrategy = automaticDosingStrategy
         }
-        
-        if let favoriteFoodsEnabled = rawValue["favoriteFoodsEnabled"] as? Bool {
-            self.favoriteFoodsEnabled = favoriteFoodsEnabled
-        }
     }
 
     public var rawValue: RawValue {
@@ -303,7 +295,6 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
         raw["dosingStrategy"] = automaticDosingStrategy.rawValue
-        raw["favoriteFoodsEnabled"] = favoriteFoodsEnabled
         
         return raw
     }

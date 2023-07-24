@@ -274,14 +274,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let bolus = UIBarButtonItem(image: UIImage(named: "bolus"), style: .plain, target: self, action: #selector(presentBolusScreen))
         let settings = UIBarButtonItem(image: UIImage(named: "settings"), style: .plain, target: self, action: #selector(onSettingsTapped))
         
-        let favoriteFoodsEnabled = deviceManager.loopManager.settings.favoriteFoodsEnabled
-        if favoriteFoodsEnabled {
-            let meals = UIBarButtonItem(image: UIImage(named: "meals"), style: .plain, target: self, action: #selector(presentMealsScreen))
+        let favoriteFoodsEnabled = UserDefaults.appGroup?.favoriteFoodsEnabled
+        if favoriteFoodsEnabled == true {
+            let favoriteFoods = UIBarButtonItem(image: UIImage(named: "favorite-foods"), style: .plain, target: self, action: #selector(presentFavoriteFoodsScreen))
             let presets = createPresetsButtonItem(selected: false, isEnabled: true)
             toolbarItems = [
                 carbs,
                 space,
-                meals,
+                favoriteFoods,
                 space,
                 bolus,
                 space,
@@ -319,8 +319,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
         toolbarItems![8].tintColor = UIColor.secondaryLabel
         
-        let favoriteFoodsEnabled = deviceManager.loopManager.settings.favoriteFoodsEnabled
-        if favoriteFoodsEnabled {
+        let favoriteFoodsEnabled = UserDefaults.appGroup?.favoriteFoodsEnabled
+        if favoriteFoodsEnabled == true {
             toolbarItems![2] = createFavoriteFoodsButtonItem()
             
             let selected = (preMealMode == true && preMealModeAllowed) || (workoutMode == true && workoutModeAllowed)
@@ -551,7 +551,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         }
 
-//        updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
+        updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
 
         if deviceManager.loopManager.settings.preMealTargetRange == nil {
             preMealMode = nil
@@ -1414,11 +1414,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         presentBolusEntryView()
     }
     
-    @objc func presentMealsScreen() {
+    @objc func presentFavoriteFoodsScreen() {
         let hostingController: DismissibleHostingController
         
-        let mealsView = MealsView().environmentObject(deviceManager.displayGlucosePreference)
-        hostingController = DismissibleHostingController(rootView: mealsView, isModalInPresentation: false)
+        let favoriteFoodsView = FavoriteFoodsView().environmentObject(deviceManager.displayGlucosePreference)
+        hostingController = DismissibleHostingController(rootView: favoriteFoodsView, isModalInPresentation: false)
         present(hostingController, animated: true)
     }
 
@@ -1444,7 +1444,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
     
     private func createFavoriteFoodsButtonItem() -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage(named: "favorite-foods")!, style: .plain, target: self, action: #selector(presentMealsScreen))
+        let item = UIBarButtonItem(image: UIImage(named: "favorite-foods")!, style: .plain, target: self, action: #selector(presentFavoriteFoodsScreen))
         item.accessibilityLabel = NSLocalizedString("Favorite Foods", comment: "The label of the favorite foods button")
 
         item.tintColor = UIColor.carbTintColor
@@ -2323,9 +2323,7 @@ extension StatusTableViewController: ServicesViewModelDelegate {
 
 extension StatusTableViewController: FavoriteFoodsFeatureUnlockDelegate {
     func featureAvailabilityChanged() {
-        deviceManager.loopManager.mutateSettings { settings in
-            settings.favoriteFoodsEnabled.toggle()
-        }
+        UserDefaults.appGroup?.favoriteFoodsEnabled.toggle()
         self.updateToolbarItems()
     }
 }

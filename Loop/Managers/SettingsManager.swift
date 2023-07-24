@@ -109,8 +109,7 @@ class SettingsManager {
                 maximumBolus: latestSettings.maximumBolus,
                 suspendThreshold: latestSettings.suspendThreshold,
                 automaticDosingStrategy: latestSettings.automaticDosingStrategy,
-                defaultRapidActingModel: latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin,
-                favoriteFoodsEnabled: latestSettings.favoriteFoodsEnabled)
+                defaultRapidActingModel: latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin)
         }
     }
 
@@ -133,7 +132,6 @@ class SettingsManager {
                               deviceToken: deviceToken,
                               insulinType: deviceStatusProvider?.pumpManagerStatus?.insulinType,
                               defaultRapidActingModel: newLoopSettings.defaultRapidActingModel.map(StoredInsulinModel.init),
-                              favoriteFoodsEnabled: newLoopSettings.favoriteFoodsEnabled,
                               basalRateSchedule: newLoopSettings.basalRateSchedule,
                               insulinSensitivitySchedule: newLoopSettings.insulinSensitivitySchedule,
                               carbRatioSchedule: newLoopSettings.carbRatioSchedule,
