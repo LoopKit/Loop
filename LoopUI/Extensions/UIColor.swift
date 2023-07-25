@@ -18,6 +18,8 @@ extension UIColor {
     
     @nonobjc static let insulin = UIColor(named: "insulin") ?? systemOrange
 
+    @nonobjc static let preset = UIColor(named: "presets") ?? systemBlue
+
     // The loopAccent color is intended to be use as the app accent color.
     @nonobjc public static let loopAccent = UIColor(named: "accent") ?? systemBlue
     
@@ -50,6 +52,8 @@ extension UIColor {
 
     @nonobjc public static let insulinTintColor = insulin
     
+    @nonobjc public static let presetTintColor = preset
+
     @nonobjc public static let pumpStatusNormal = insulin
     
     @nonobjc public static let staleColor = critical

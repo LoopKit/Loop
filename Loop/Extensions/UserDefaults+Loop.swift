@@ -16,6 +16,7 @@ extension UserDefaults {
         case legacyServicesState = "com.loopkit.Loop.ServicesState"
         case loopNotRunningNotifications = "com.loopkit.Loop.loopNotRunningNotifications"
         case inFlightAutomaticDose = "com.loopkit.Loop.inFlightAutomaticDose"
+        case favoriteFoodsEnabled = "com.loopkit.Loop.favoriteFoodsEnabled"
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {
@@ -87,6 +88,15 @@ extension UserDefaults {
             } catch {
                 assertionFailure("Unable to encode Loop not running notification")
             }
+        }
+    }
+    
+    var favoriteFoodsEnabled: Bool {
+        get {
+            bool(forKey: Key.favoriteFoodsEnabled.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.favoriteFoodsEnabled.rawValue)
         }
     }
 }
