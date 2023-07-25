@@ -1,9 +1,0 @@
-/* Bundle display name */
-"CFBundleDisplayName" = "SmallStatusWidget";
-
-/* Bundle name */
-"CFBundleName" = "SmallStatusWidgetExtension";
-
-/* Copyright (human-readable) */
-"NSHumanReadableCopyright" = "Copyright © 2022 LoopKit-Autoren. Alle Rechte vorbehalten.";
-
