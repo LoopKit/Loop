@@ -43,7 +43,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 axisLabel: .axisLabelColor,
                 grid: .gridColor,
                 glucoseTint: .glucoseTintColor,
-                insulinTint: .insulinTintColor
+                insulinTint: .insulinTintColor,
+                carbTint: .carbTintColor
             ),
             settings: {
                 var settings = ChartSettings()

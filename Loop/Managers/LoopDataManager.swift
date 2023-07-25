@@ -372,6 +372,8 @@ final class LoopDataManager {
     }
 
     private var retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?
+    
+    private var suspendInsulinDeliveryEffect: [GlucoseEffect] = []
 
     fileprivate var predictedGlucose: [PredictedGlucoseValue]? {
         didSet {
@@ -1112,6 +1114,12 @@ extension LoopDataManager {
                 warnings.append(.fetchDataWarning(.retrospectiveGlucoseEffect(error: error)))
             }
         }
+        
+        do {
+            try updateSuspendInsulinDeliveryEffect()
+        } catch let error {
+            logger.error("%{public}@", String(describing: error))
+        }
 
         dosingDecision.appendWarnings(warnings.value)
 
@@ -1309,6 +1317,11 @@ extension LoopDataManager {
             } else {
                 effects.append(retrospectiveGlucoseEffect)
             }
+        }
+        
+        // Append effect of suspending insulin delivery when selected by the user on the Predicted Glucose screen (for information purposes only)
+        if inputs.contains(.suspend) {
+            effects.append(suspendInsulinDeliveryEffect)
         }
 
         var prediction = LoopMath.predictGlucose(startingAt: glucose, momentum: momentum, effects: effects)
@@ -1582,6 +1595,61 @@ extension LoopDataManager {
             correctionRange: correctionRange,
             retrospectiveCorrectionGroupingInterval: LoopConstants.retrospectiveCorrectionGroupingInterval
         )
+    }
+
+    /// Generates a glucose prediction effect of suspending insulin delivery over duration of insulin action starting at current date
+    ///
+    /// - Throws: LoopError.configurationError
+    private func updateSuspendInsulinDeliveryEffect() throws {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
+        // Get settings, otherwise clear effect and throw error
+        guard
+            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory
+        else {
+            suspendInsulinDeliveryEffect = []
+            throw LoopError.configurationError(.insulinSensitivitySchedule)
+        }
+        guard
+            let basalRateSchedule = basalRateScheduleApplyingOverrideHistory
+        else {
+            suspendInsulinDeliveryEffect = []
+            throw LoopError.configurationError(.basalRateSchedule)
+        }
+        
+        let insulinModel = doseStore.insulinModelProvider.model(for: pumpInsulinType)
+        let insulinActionDuration = insulinModel.effectDuration
+
+        let startSuspend = now()
+        let endSuspend = startSuspend.addingTimeInterval(insulinActionDuration)
+        
+        var suspendDoses: [DoseEntry] = []
+        let basalItems = basalRateSchedule.between(start: startSuspend, end: endSuspend)
+        
+        // Iterate over basal entries during suspension of insulin delivery
+        for (index, basalItem) in basalItems.enumerated() {
+            var startSuspendDoseDate: Date
+            var endSuspendDoseDate: Date
+
+            if index == 0 {
+                startSuspendDoseDate = startSuspend
+            } else {
+                startSuspendDoseDate = basalItem.startDate
+            }
+
+            if index == basalItems.count - 1 {
+                endSuspendDoseDate = endSuspend
+            } else {
+                endSuspendDoseDate = basalItems[index + 1].startDate
+            }
+
+            let suspendDose = DoseEntry(type: .tempBasal, startDate: startSuspendDoseDate, endDate: endSuspendDoseDate, value: -basalItem.value, unit: DoseUnit.unitsPerHour)
+            
+            suspendDoses.append(suspendDose)
+        }
+        
+        // Calculate predicted glucose effect of suspending insulin delivery
+        suspendInsulinDeliveryEffect = suspendDoses.glucoseEffects(insulinModelProvider: doseStore.insulinModelProvider, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: insulinSensitivity).filterDateRange(startSuspend, endSuspend)
     }
 
     /// Runs the glucose prediction on the latest effect data.

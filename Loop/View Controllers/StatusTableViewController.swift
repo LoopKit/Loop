@@ -1436,11 +1436,22 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         return item
     }
-
-    @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
+    
+    func presentPreMealMode(confirm: Bool = true) {
         if preMealMode == true {
-            deviceManager.loopManager.mutateSettings { settings in
-                settings.clearOverride(matching: .preMeal)
+            if confirm {
+                let alert = UIAlertController(title: "Disable Pre-Meal Preset?", message: "This will remove any currently applied pre-meal preset.", preferredStyle: .alert)
+                alert.addCancelAction()
+                alert.addAction(UIAlertAction(title: "Disable", style: .destructive, handler: { [weak self] _ in
+                    self?.deviceManager.loopManager.mutateSettings { settings in
+                        settings.clearOverride(matching: .preMeal)
+                    }
+                }))
+                present(alert, animated: true)
+            } else {
+                deviceManager.loopManager.mutateSettings { settings in
+                    settings.clearOverride(matching: .preMeal)
+                }
             }
         } else {
             let vc = UIAlertController(premealDurationSelectionHandler: { duration in
@@ -1468,10 +1479,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
-    @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
+    @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
+        presentPreMealMode(confirm: false)
+    }
+    
+    func presentCustomPresets(confirm: Bool = true) {
         if workoutMode == true {
-            deviceManager.loopManager.mutateSettings { settings in
-                settings.clearOverride()
+            if confirm {
+                let alert = UIAlertController(title: "Disable Preset?", message: "This will remove any currently applied preset.", preferredStyle: .alert)
+                alert.addCancelAction()
+                alert.addAction(UIAlertAction(title: "Disable", style: .destructive, handler: { [weak self] _ in
+                    self?.deviceManager.loopManager.mutateSettings { settings in
+                        settings.clearOverride()
+                    }
+                }))
+                present(alert, animated: true)
+            } else {
+                deviceManager.loopManager.mutateSettings { settings in
+                    settings.clearOverride()
+                }
             }
         } else {
             if FeatureFlags.sensitivityOverridesEnabled {
@@ -1503,6 +1529,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
+    @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
+        presentCustomPresets(confirm: false)
+    }
+    
     @IBAction func onSettingsTapped(_ sender: UIBarButtonItem) {
         presentSettings()
     }
