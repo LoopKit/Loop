@@ -30,6 +30,10 @@ extension UIImage {
 
         return suffix
     }
+    
+    static func presetsImage(selected: Bool) -> UIImage? {
+        return UIImage(named: selected ? "presets-selected" : "presets")
+    }
 
     static func preMealImage(selected: Bool) -> UIImage? {
         return UIImage(named: selected ? "Pre-Meal Selected" : "Pre-Meal")
