@@ -56,7 +56,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     // MARK: Tests
     func testForecastFromLiveCaptureInputData() {
         setUp(for: .liveCapture)
-        let predictedGlucoseOutput = loadPredictedGlucoseFixture("live_capture_predicted_glucose")
+        let expectedPredictedGlucose = loadPredictedGlucoseFixture("live_capture_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -71,14 +71,14 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         updateGroup.wait()
 
         XCTAssertNotNil(predictedGlucose)
-        XCTAssertEqual(predictedGlucoseOutput.count, predictedGlucose!.count)
+        XCTAssertEqual(expectedPredictedGlucose.count, predictedGlucose!.count)
 
-        for (expected, calculated) in zip(predictedGlucoseOutput, predictedGlucose!) {
+        for (expected, calculated) in zip(expectedPredictedGlucose, predictedGlucose!) {
             XCTAssertEqual(expected.startDate, calculated.startDate)
             XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
         }
 
-        XCTAssertEqual(2.27, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
+        XCTAssertEqual(1.99, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
 
 

@@ -133,8 +133,11 @@ class LoopDataManagerTests: XCTestCase {
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(
             unit: .milligramsPerDeciliter,
             dailyItems: [
-                RepeatingScheduleValue(startTime: 0, value: 50)
-            ])
+                RepeatingScheduleValue(startTime: 0, value: 45),
+                RepeatingScheduleValue(startTime: 32400, value: 55)
+            ],
+            timeZone: .utcTimeZone
+        )!
         let carbRatioSchedule = CarbRatioSchedule(
             unit: .gram(),
             dailyItems: [
