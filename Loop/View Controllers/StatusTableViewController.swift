@@ -1469,7 +1469,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(togglePreMealMode(_:)))
+        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
         item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
 
         if selected {
@@ -1545,8 +1545,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         present(vc, animated: true, completion: nil)
     }
+
+    @IBAction func premealButtonTapped(_ sender: UIBarButtonItem) {
+        togglePreMealMode(confirm: false)
+    }
     
-    @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
+    func togglePreMealMode(confirm: Bool = true) {
         if preMealMode == true {
             if confirm {
                 let alert = UIAlertController(title: "Disable Pre-Meal Preset?", message: "This will remove any currently applied pre-meal preset.", preferredStyle: .alert)
@@ -1592,10 +1596,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         present(vc, animated: true, completion: nil)
     }
 
-    @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
-        presentPreMealMode(confirm: false)
-    }
-    
     func presentCustomPresets(confirm: Bool = true) {
         if workoutMode == true {
             if confirm {

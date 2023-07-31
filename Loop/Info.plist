@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NFCReaderUsageDescription</key>
-	<string>The app uses NFC to pair with diabetes devices.</string>
 	<key>AppGroupIdentifier</key>
 	<string>$(APP_GROUP_IDENTIFIER)</string>
 	<key>AppStoreURL</key>
@@ -57,6 +55,8 @@
 	<true/>
 	<key>LoopLocalCacheDurationDays</key>
 	<string>$(LOOP_LOCAL_CACHE_DURATION_DAYS)</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>The app uses NFC to pair with diabetes devices.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
