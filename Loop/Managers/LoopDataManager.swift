@@ -846,7 +846,7 @@ extension LoopDataManager {
     func loop() {
 
         if let lastLoopCompleted, Date().timeIntervalSince(lastLoopCompleted) < .minutes(2) {
-            fatalError("Looping too fast!")
+            print("Looping too fast!")
         }
 
         let available = loopLock.withLockIfAvailable {
@@ -854,7 +854,7 @@ extension LoopDataManager {
             return true
         }
         if available == nil {
-            fatalError("Loop attempted while already looping!")
+            print("Loop attempted while already looping!")
         }
     }
 
