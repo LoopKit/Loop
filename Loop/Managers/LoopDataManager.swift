@@ -27,6 +27,8 @@ final class LoopDataManager {
         case loopFinished
     }
 
+    let loopLock = UnfairLock()
+
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
     private let carbStore: CarbStoreProtocol
@@ -840,7 +842,23 @@ extension LoopDataManager {
     ///
     /// Executes an analysis of the current data, and recommends an adjustment to the current
     /// temporary basal rate.
+    ///
     func loop() {
+
+        if let lastLoopCompleted, Date().timeIntervalSince(lastLoopCompleted) < .minutes(2) {
+            fatalError("Looping too fast!")
+        }
+
+        let available = loopLock.withLockIfAvailable {
+            loopInternal()
+            return true
+        }
+        if available == nil {
+            fatalError("Loop attempted while already looping!")
+        }
+    }
+
+    func loopInternal() {
         
         dataAccessQueue.async {
 
