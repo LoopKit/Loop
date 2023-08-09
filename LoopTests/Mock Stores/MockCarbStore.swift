@@ -77,7 +77,7 @@ class MockCarbStore: CarbStoreProtocol {
         completion("")
     }
     
-    func glucoseEffects<Sample>(of samples: [Sample], startingAt start: Date, endingAt end: Date?, effectVelocities: [GlucoseEffectVelocity]?) throws -> [GlucoseEffect] where Sample : CarbEntry {
+    func glucoseEffects<Sample>(of samples: [Sample], startingAt start: Date, endingAt end: Date?, effectVelocities: [LoopKit.GlucoseEffectVelocity]) throws -> [LoopKit.GlucoseEffect] where Sample : LoopKit.CarbEntry {
         return []
     }
     
@@ -96,8 +96,9 @@ class MockCarbStore: CarbStoreProtocol {
     func deleteCarbEntry(_ entry: StoredCarbEntry, completion: @escaping (CarbStoreResult<Bool>) -> Void) {
         completion(.failure(.notConfigured))
     }
-    
-    func getGlucoseEffects(start: Date, end: Date? = nil, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping(_ result: CarbStoreResult<(entries: [StoredCarbEntry], effects: [GlucoseEffect])>) -> Void) {
+
+    func getGlucoseEffects(start: Date, end: Date?, effectVelocities: [LoopKit.GlucoseEffectVelocity], completion: @escaping (LoopKit.CarbStoreResult<(entries: [LoopKit.StoredCarbEntry], effects: [LoopKit.GlucoseEffect])>) -> Void)
+    {
         let fixture: [JSONDictionary] = loadFixture(fixtureToLoad)
 
         let dateFormatter = ISO8601DateFormatter.localTimeDate()

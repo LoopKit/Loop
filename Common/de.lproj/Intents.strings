@@ -2,13 +2,13 @@
 "9KhaIS" = "Voreinstellung gesetzt";
 
 /* (No Comment) */
-"80eo5o" = "Kohlenhydrate hinzufügen";
+"80eo5o" = "KH-Eintrag hinzufügen";
 
 /* (No Comment) */
 "b085BW" = "Voreinstellung konnte nicht gesetzt werden.";
 
 /* (No Comment) */
-"I4OZy8" = "Enable Override Preset";
+"I4OZy8" = "Aktiviere Voreinstellung";
 
 /* (No Comment) */
 "lYMuWV" = "Voreinstellungs-Name";
@@ -17,7 +17,7 @@
 "nDKAmn" = "Welche Voreinstellung möchten Sie aktivieren?";
 
 /* (No Comment) */
-"OcNxIj" = "Kohlenhydrate hinzufügen";
+"OcNxIj" = "KH hinzufügen";
 
 /* (No Comment) */
 "oLQSsJ" = "Aktiviere '${overrideName}' Voreinstellung";

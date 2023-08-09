@@ -81,6 +81,11 @@ class LoopDataManagerTests: XCTestCase {
                dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly)
     {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
+        let insulinSensitivitySchedule = InsulinSensitivitySchedule(
+            unit: .milligramsPerDeciliter,
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0, value: 50)
+            ])
         let carbRatioSchedule = CarbRatioSchedule(
             unit: .gram(),
             dailyItems: [
@@ -92,6 +97,7 @@ class LoopDataManagerTests: XCTestCase {
         let settings = LoopSettings(
             dosingEnabled: false,
             glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
             carbRatioSchedule: carbRatioSchedule,
             maximumBasalRatePerHour: maxBasalRate,

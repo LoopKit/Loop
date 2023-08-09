@@ -35,10 +35,10 @@ struct FeatureFlagConfiguration: Decodable {
     let siriEnabled: Bool
     let simpleBolusCalculatorEnabled: Bool
     let usePositiveMomentumAndRCForManualBoluses: Bool
-    let dynamicCarbAbsorptionEnabled: Bool
     let adultChildInsulinModelSelectionEnabled: Bool
     let profileExpirationSettingsViewEnabled: Bool
     let missedMealNotifications: Bool
+    let allowAlgorithmExperiments: Bool
 
 
     fileprivate init() {
@@ -213,8 +213,6 @@ struct FeatureFlagConfiguration: Decodable {
         self.adultChildInsulinModelSelectionEnabled = false
         #endif
 
-        self.dynamicCarbAbsorptionEnabled = true
-
         // ProfileExpirationSettingsView is inverse, since the default state is enabled.
         #if PROFILE_EXPIRATION_SETTINGS_VIEW_DISABLED
         self.profileExpirationSettingsViewEnabled = false
@@ -229,6 +227,11 @@ struct FeatureFlagConfiguration: Decodable {
         self.missedMealNotifications = true
         #endif
 
+        #if ALLOW_ALGORITHM_EXPERIMENTS
+        self.allowAlgorithmExperiments = true
+        #else
+        self.allowAlgorithmExperiments = false
+        #endif
     }
 }
 
@@ -260,10 +263,10 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* allowDebugFeatures: \(allowDebugFeatures)",
             "* simpleBolusCalculatorEnabled: \(simpleBolusCalculatorEnabled)",
             "* usePositiveMomentumAndRCForManualBoluses: \(usePositiveMomentumAndRCForManualBoluses)",
-            "* dynamicCarbAbsorptionEnabled: \(dynamicCarbAbsorptionEnabled)",
             "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)",
             "* profileExpirationSettingsViewEnabled: \(profileExpirationSettingsViewEnabled)",
-            "* missedMealNotifications: \(missedMealNotifications)"
+            "* missedMealNotifications: \(missedMealNotifications)",
+            "* allowAlgorithmExperiments: \(allowAlgorithmExperiments)"
         ].joined(separator: "\n")
     }
 }

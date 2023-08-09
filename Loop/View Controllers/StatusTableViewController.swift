@@ -164,7 +164,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         navigationController?.setToolbarHidden(false, animated: animated)
         
-        setupToolbarItems()
         updateToolbarItems()
 
         alertPermissionsChecker.checkNow()
@@ -478,7 +477,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             if currentContext.contains(.carbs) {
                 reloadGroup.enter()
-                self.deviceManager.carbStore.getCarbsOnBoardValues(start: startDate, end: nil, effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? state.insulinCounteractionEffects : nil) { (result) in
+                self.deviceManager.carbStore.getCarbsOnBoardValues(start: startDate, end: nil, effectVelocities: state.insulinCounteractionEffects) { (result) in
                     switch result {
                     case .failure(let error):
                         self.log.error("CarbStore failed to get carbs on board values: %{public}@", String(describing: error))
@@ -1470,7 +1469,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(togglePreMealMode(_:)))
+        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
         item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
 
         if selected {
@@ -1546,11 +1545,26 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         present(vc, animated: true, completion: nil)
     }
+
+    @IBAction func premealButtonTapped(_ sender: UIBarButtonItem) {
+        togglePreMealMode(confirm: false)
+    }
     
-    @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
+    func togglePreMealMode(confirm: Bool = true) {
         if preMealMode == true {
-            deviceManager.loopManager.mutateSettings { settings in
-                settings.clearOverride(matching: .preMeal)
+            if confirm {
+                let alert = UIAlertController(title: "Disable Pre-Meal Preset?", message: "This will remove any currently applied pre-meal preset.", preferredStyle: .alert)
+                alert.addCancelAction()
+                alert.addAction(UIAlertAction(title: "Disable", style: .destructive, handler: { [weak self] _ in
+                    self?.deviceManager.loopManager.mutateSettings { settings in
+                        settings.clearOverride(matching: .preMeal)
+                    }
+                }))
+                present(alert, animated: true)
+            } else {
+                deviceManager.loopManager.mutateSettings { settings in
+                    settings.clearOverride(matching: .preMeal)
+                }
             }
         } else {
             presentPreMealModeAlertController()
@@ -1582,10 +1596,21 @@ final class StatusTableViewController: LoopChartsTableViewController {
         present(vc, animated: true, completion: nil)
     }
 
-    @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
+    func presentCustomPresets(confirm: Bool = true) {
         if workoutMode == true {
-            deviceManager.loopManager.mutateSettings { settings in
-                settings.clearOverride()
+            if confirm {
+                let alert = UIAlertController(title: "Disable Preset?", message: "This will remove any currently applied preset.", preferredStyle: .alert)
+                alert.addCancelAction()
+                alert.addAction(UIAlertAction(title: "Disable", style: .destructive, handler: { [weak self] _ in
+                    self?.deviceManager.loopManager.mutateSettings { settings in
+                        settings.clearOverride()
+                    }
+                }))
+                present(alert, animated: true)
+            } else {
+                deviceManager.loopManager.mutateSettings { settings in
+                    settings.clearOverride()
+                }
             }
         } else {
             if FeatureFlags.sensitivityOverridesEnabled {
@@ -1621,6 +1646,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
         present(vc, animated: true, completion: nil)
     }
 
+    @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
+        presentCustomPresets(confirm: false)
+    }
+    
     @IBAction func onSettingsTapped(_ sender: UIBarButtonItem) {
         presentSettings()
     }

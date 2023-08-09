@@ -83,6 +83,7 @@ class LoopAppManager: NSObject {
     private var analyticsServicesManager = AnalyticsServicesManager()
     private(set) var testingScenariosManager: TestingScenariosManager?
     private var resetLoopManager: ResetLoopManager!
+    private var deeplinkManager: DeeplinkManager!
 
     private var overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
 
@@ -231,6 +232,7 @@ class LoopAppManager: NSObject {
                                               windowProvider: windowProvider,
                                               userDefaults: UserDefaults.appGroup!)
 
+        deeplinkManager = DeeplinkManager(rootViewController: rootViewController)
 
         for support in supportManager.availableSupports {
             if let analyticsService = support as? AnalyticsService {
@@ -244,11 +246,16 @@ class LoopAppManager: NSObject {
 
         deviceDataManager.onboardingManager = onboardingManager
 
+        // Analytics: user properties
         analyticsServicesManager.identifyAppName(Bundle.main.bundleDisplayName)
 
         if let workspaceGitRevision = BuildDetails.default.workspaceGitRevision {
             analyticsServicesManager.identifyWorkspaceGitRevision(workspaceGitRevision)
         }
+
+        analyticsServicesManager.identify("Dosing Strategy", value: settingsManager.loopSettings.automaticDosingStrategy.analyticsValue)
+        let serviceNames = deviceDataManager.servicesManager.activeServices.map { $0.serviceIdentifier }
+        analyticsServicesManager.identify("Services", array: serviceNames)
 
         if FeatureFlags.scenariosEnabled {
             testingScenariosManager = LocalTestingScenariosManager(deviceManager: deviceDataManager, supportManager: supportManager)
@@ -344,8 +351,14 @@ class LoopAppManager: NSObject {
         guard let notification = notification else {
             return false
         }
-        deviceDataManager?.handleRemoteNotification(notification)
+        deviceDataManager?.servicesManager.handleRemoteNotification(notification)
         return true
+    }
+    
+    // MARK: - Deeplinking
+    
+    func handle(_ url: URL) -> Bool {
+        deeplinkManager.handle(url)
     }
 
     // MARK: - Continuity

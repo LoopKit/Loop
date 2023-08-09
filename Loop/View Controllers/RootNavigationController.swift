@@ -16,6 +16,19 @@ class RootNavigationController: UINavigationController {
     var statusTableViewController: StatusTableViewController! {
         return viewControllers.first as? StatusTableViewController
     }
+    
+    func navigate(to deeplink: Deeplink) {
+        switch deeplink {
+        case .carbEntry:
+            statusTableViewController.presentCarbEntryScreen(nil)
+        case .preMeal:
+            statusTableViewController.togglePreMealMode()
+        case .bolus:
+            statusTableViewController.presentBolusScreen()
+        case .customPresets:
+            statusTableViewController.presentCustomPresets()
+        }
+    }
 
     override func restoreUserActivityState(_ activity: NSUserActivity) {
         switch activity.activityType {
