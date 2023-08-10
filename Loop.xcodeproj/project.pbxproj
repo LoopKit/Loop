@@ -33,6 +33,7 @@
 		14B1737F28AEDC6C006CCD7C /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		14B1738028AEDC6C006CCD7C /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
 		14B1738128AEDC70006CCD7C /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
+		14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */; };
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
 		1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */; };
@@ -742,6 +743,7 @@
 		14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SystemStatusWidget.swift; sourceTree = "<group>"; };
 		14B1737028AEDBF6006CCD7C /* GlucoseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseView.swift; sourceTree = "<group>"; };
 		14B1737128AEDBF6006CCD7C /* LoopCircleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopCircleView.swift; sourceTree = "<group>"; };
+		14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsViewModel.swift; sourceTree = "<group>"; };
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
 		1D05219C2469F1F5000EBBDE /* AlertStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStore.swift; sourceTree = "<group>"; };
 		1D080CBC2473214A00356610 /* AlertStore.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AlertStore.xcdatamodel; sourceTree = "<group>"; };
@@ -2583,6 +2585,7 @@
 			children = (
 				897A5A9824C22DE800C4E71D /* BolusEntryViewModel.swift */,
 				A9A056B424B94123007CF06D /* CriticalEventLogExportViewModel.swift */,
+				14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */,
 				C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */,
 				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
 				1D49795724E7289700948F05 /* ServicesViewModel.swift */,
@@ -3769,6 +3772,7 @@
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
 				1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsServicesManager.swift in Sources */,
+				14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */,
 				DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */,
 				A9C62D842331700E00535612 /* DiagnosticLog+Subsystem.swift in Sources */,
 				895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */,

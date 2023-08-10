@@ -1370,7 +1370,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
         } else {
             let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
-            carbEntryViewController.favoriteFoodsDelegate = self
             carbEntryViewController.deviceManager = deviceManager
             carbEntryViewController.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
             carbEntryViewController.preferredCarbUnit = deviceManager.carbStore.preferredUnit
@@ -2243,12 +2242,5 @@ extension StatusTableViewController: ServicesViewModelDelegate {
         settingsViewController.serviceOnboardingDelegate = deviceManager.servicesManager
         settingsViewController.completionDelegate = self
         show(settingsViewController, sender: self)
-    }
-}
-
-extension StatusTableViewController: FavoriteFoodsFeatureUnlockDelegate {
-    func featureAvailabilityChanged() {
-        UserDefaults.appGroup?.favoriteFoodsEnabled.toggle()
-        self.updateToolbarItems()
     }
 }

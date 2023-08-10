@@ -173,8 +173,6 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     }()
 
     private var lastContentHeight: CGFloat = 0
-    
-    public weak var favoriteFoodsDelegate: FavoriteFoodsFeatureUnlockDelegate?
 
     override func createChartsManager() -> ChartsManager {
         // Consider including a chart on this screen to demonstrate how absorption time affects prediction
@@ -554,10 +552,6 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         guard let updatedEntry = updatedCarbEntry else {
             return
         }
-        
-        if foodType == "🍞🥜🍫🥛" && quantity?.doubleValue(for: .gram()) == 63 {
-            favoriteFoodsDelegate?.featureAvailabilityChanged()
-        }
 
         let viewModel = BolusEntryViewModel(
             delegate: deviceManager,
@@ -790,7 +784,3 @@ extension CarbEntryViewController: EmojiInputControllerDelegate {
 extension DateAndDurationTableViewCell: NibLoadable {}
 
 extension DateAndDurationSteppableTableViewCell: NibLoadable {}
-
-protocol FavoriteFoodsFeatureUnlockDelegate: AnyObject {
-    func featureAvailabilityChanged()
-}
