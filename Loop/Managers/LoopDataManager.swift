@@ -27,6 +27,8 @@ final class LoopDataManager {
         case loopFinished
     }
 
+    let loopLock = UnfairLock()
+
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
     private let carbStore: CarbStoreProtocol
@@ -840,7 +842,23 @@ extension LoopDataManager {
     ///
     /// Executes an analysis of the current data, and recommends an adjustment to the current
     /// temporary basal rate.
+    ///
     func loop() {
+
+        if let lastLoopCompleted, Date().timeIntervalSince(lastLoopCompleted) < .minutes(2) {
+            print("Looping too fast!")
+        }
+
+        let available = loopLock.withLockIfAvailable {
+            loopInternal()
+            return true
+        }
+        if available == nil {
+            print("Loop attempted while already looping!")
+        }
+    }
+
+    func loopInternal() {
         
         dataAccessQueue.async {
 
@@ -1347,6 +1365,7 @@ extension LoopDataManager {
         let retrospectiveStart = glucose.date.addingTimeInterval(-type(of: retrospectiveCorrection).retrospectionInterval)
         let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
         let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+        let insulinEffectStartDate = nextEffectDate.addingTimeInterval(.minutes(-5))
 
         let updateGroup = DispatchGroup()
         let effectCalculationError = Locked<Error?>(nil)
@@ -1354,7 +1373,7 @@ extension LoopDataManager {
         var insulinEffect: [GlucoseEffect]?
         let basalDosingEnd = includingPendingInsulin ? nil : now()
         updateGroup.enter()
-        doseStore.getGlucoseEffects(start: nextEffectDate, end: nil, basalDosingEnd: basalDosingEnd) { result in
+        doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: basalDosingEnd) { result in
             switch result {
             case .failure(let error):
                 effectCalculationError.mutate { $0 = error }
