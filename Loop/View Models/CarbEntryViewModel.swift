@@ -50,6 +50,7 @@ final class CarbEntryViewModel: ObservableObject {
     @Published var selectedDefaultAbsorptionTimeEmoji: String = ""
     @Published var usesCustomFoodType = false
     @Published var absorptionTimeWasEdited = false // if true, selecting an emoji will not alter the absorption time
+    private var absorptionEditIsProgrammatic = false // needed for when absorption time is changed due to favorite food selection, so that absorptionTimeWasEdited does not get set to true
 
     @Published var absorptionTime: TimeInterval
     let defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes
@@ -58,6 +59,9 @@ final class CarbEntryViewModel: ObservableObject {
     var absorptionRimesRange: ClosedRange<TimeInterval> {
         return minAbsorptionTime...maxAbsorptionTime
     }
+    
+    @Published var favoriteFoods = UserDefaults.standard.favoriteFoods
+    @Published var selectedFavoriteFoodIndex = -1
     
     weak var delegate: CarbEntryViewModelDelegate?
     
@@ -71,6 +75,8 @@ final class CarbEntryViewModel: ObservableObject {
         self.shouldBeginEditingQuantity = true
         
         observeAbsorptionTimeChange()
+        observeFavoriteFoodChange()
+        observeFavoriteFoodIndexChange()
     }
     
     /// Initalizer for when`CarbEntryView` has an entry to edit
@@ -89,6 +95,7 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     var originalCarbEntry: StoredCarbEntry? = nil
+    private var favoriteFood: FavoriteFood? = nil
     
     private var updatedCarbEntry: NewCarbEntry? {
         if let quantity = carbsQuantity, quantity != 0 {
@@ -111,7 +118,7 @@ final class CarbEntryViewModel: ObservableObject {
     
     var saveFavoriteFoodButtonDisabled: Bool {
         get {
-            if let carbsQuantity, 0...maxCarbEntryQuantity.doubleValue(for: preferredCarbUnit) ~= carbsQuantity, foodType != "" {
+            if let carbsQuantity, 0...maxCarbEntryQuantity.doubleValue(for: preferredCarbUnit) ~= carbsQuantity, foodType != "", selectedFavoriteFoodIndex == -1 {
                 return false
             }
             return true
@@ -142,7 +149,7 @@ final class CarbEntryViewModel: ObservableObject {
             self.alert = .maxQuantityExceded
             return
         }
-        else if quantity.compare(warningCarbEntryQuantity) == .orderedDescending {
+        else if quantity.compare(warningCarbEntryQuantity) == .orderedDescending, selectedFavoriteFoodIndex == -1 {
             self.alert = .warningQuantityValidation
             return
         }
@@ -181,13 +188,64 @@ final class CarbEntryViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Favorite Foods
+    func onFavoriteFoodSave(_ food: NewFavoriteFood) {
+        let newStoredFood = StoredFavoriteFood(name: food.name, carbsQuantity: food.carbsQuantity, foodType: food.foodType, absorptionTime: food.absorptionTime)
+        favoriteFoods.append(newStoredFood)
+        selectedFavoriteFoodIndex = favoriteFoods.count - 1
+    }
+    
+    private func observeFavoriteFoodIndexChange() {
+        $selectedFavoriteFoodIndex
+            .receive(on: RunLoop.main)
+            .dropFirst()
+            .sink { [weak self] index in
+                self?.favoriteFoodSelected(at: index)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func observeFavoriteFoodChange() {
+        $favoriteFoods
+            .dropFirst()
+            .removeDuplicates()
+            .sink { newValue in
+                UserDefaults.standard.favoriteFoods = newValue
+            }
+            .store(in: &cancellables)
+    }
+
+    private func favoriteFoodSelected(at index: Int) {
+        self.absorptionEditIsProgrammatic = true
+        if index == -1 {
+            self.carbsQuantity = 0
+            self.foodType = ""
+            self.absorptionTime = defaultAbsorptionTimes.medium
+            self.absorptionTimeWasEdited = false
+            self.usesCustomFoodType = false
+        }
+        else {
+            let food = favoriteFoods[index]
+            self.carbsQuantity = food.carbsQuantity.doubleValue(for: preferredCarbUnit)
+            self.foodType = food.foodType
+            self.absorptionTime = food.absorptionTime
+            self.absorptionTimeWasEdited = true
+            self.usesCustomFoodType = true
+        }
+    }
+    
     // MARK: - Utility
     private func observeAbsorptionTimeChange() {
         $absorptionTime
             .receive(on: RunLoop.main)
             .dropFirst()
             .sink { [weak self] _ in
-                self?.absorptionTimeWasEdited = true
+                if self?.absorptionEditIsProgrammatic == true {
+                    self?.absorptionEditIsProgrammatic = false
+                }
+                else {
+                    self?.absorptionTimeWasEdited = true
+                }
             }
             .store(in: &cancellables)
     }
