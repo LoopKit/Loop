@@ -1368,17 +1368,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
             navigationWrapper = UINavigationController(rootViewController: hostingController)
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+            present(navigationWrapper, animated: true)
         } else {
-            let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
-            carbEntryViewController.deviceManager = deviceManager
-            carbEntryViewController.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
-            carbEntryViewController.preferredCarbUnit = deviceManager.carbStore.preferredUnit
-            if let activity = activity {
-                carbEntryViewController.restoreUserActivityState(activity)
-            }
-            navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
+            let viewModel = CarbEntryViewModel(delegate: deviceManager)
+            let carbEntryView = CarbEntryView(viewModel: viewModel)
+                .environmentObject(deviceManager.displayGlucosePreference)
+            let hostingController = DismissibleHostingController(rootView: carbEntryView, isModalInPresentation: false)
+            present(hostingController, animated: true)
         }
-        present(navigationWrapper, animated: true)
         deviceManager.analyticsServicesManager.didDisplayCarbEntryScreen()
     }
 

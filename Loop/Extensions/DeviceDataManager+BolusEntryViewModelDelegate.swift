@@ -10,6 +10,12 @@ import HealthKit
 import LoopCore
 import LoopKit
 
+extension DeviceDataManager: CarbEntryViewModelDelegate {
+    var defaultAbsorptionTimes: LoopKit.CarbStore.DefaultAbsorptionTimes {
+        return carbStore.defaultAbsorptionTimes
+    }
+}
+
 extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDelegate {
     
     func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) {
