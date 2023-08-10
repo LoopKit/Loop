@@ -71,7 +71,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                 
                 continueActionButton
                 
-                if isNewEntry {
+                if isNewEntry, FeatureFlags.allowExperimentalFeatures {
                     favoriteFoodsCard
                 }
                 

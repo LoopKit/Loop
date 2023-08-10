@@ -56,7 +56,9 @@ public struct SettingsView: View {
                         configurationSection
                     }
                     deviceSettingsSection
-                    favoriteFoodsSection
+                    if FeatureFlags.allowExperimentalFeatures {
+                        favoriteFoodsSection
+                    }
                     if (viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice) && viewModel.showDeleteTestData {
                         deleteDataSection
                     }

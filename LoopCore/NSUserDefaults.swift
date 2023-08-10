@@ -19,6 +19,7 @@ extension UserDefaults {
         case bedtime = "com.loopkit.Loop.bedtime"
         case lastProfileExpirationAlertDate = "com.loopkit.Loop.lastProfileExpirationAlertDate"
         case allowDebugFeatures = "com.loopkit.Loop.allowDebugFeatures"
+        case allowExperimentalFeatures = "com.loopkit.Loop.allowExperimentalFeatures"
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
         case LastMissedMealNotification = "com.loopkit.Loop.lastMissedMealNotification"
         case userRequestedLoopReset = "com.loopkit.Loop.userRequestedLoopReset"
@@ -148,6 +149,10 @@ extension UserDefaults {
         }
     }
 
+    public var allowExperimentalFeatures: Bool {
+        return bool(forKey: Key.allowExperimentalFeatures.rawValue)
+    }
+    
     public var allowSimulators: Bool {
         return bool(forKey: Key.allowSimulators.rawValue)
     }
