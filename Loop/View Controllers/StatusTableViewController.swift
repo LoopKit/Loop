@@ -1371,6 +1371,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             present(navigationWrapper, animated: true)
         } else {
             let viewModel = CarbEntryViewModel(delegate: deviceManager)
+            if let activity {
+                viewModel.restoreUserActivityState(activity)
+            }
             let carbEntryView = CarbEntryView(viewModel: viewModel)
                 .environmentObject(deviceManager.displayGlucosePreference)
             let hostingController = DismissibleHostingController(rootView: carbEntryView, isModalInPresentation: false)

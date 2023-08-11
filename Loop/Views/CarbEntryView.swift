@@ -66,6 +66,8 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                 .edgesIgnoringSafeArea(.all)
             
             ScrollView {
+                warningsCard
+
                 mainCard
                     .padding(.top, 8)
                 
@@ -95,10 +97,10 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     
     private var mainCard: some View {
         VStack(spacing: 10) {
-            var amountConsumedFocused: Binding<Bool> = Binding(get: { expandedRow == .amountConsumed }, set: { expandedRow = $0 ? .amountConsumed : nil })
-            var timeFocused: Binding<Bool> = Binding(get: { expandedRow == .time }, set: { expandedRow = $0 ? .time : nil })
-            var foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
-            var absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
+            let amountConsumedFocused: Binding<Bool> = Binding(get: { expandedRow == .amountConsumed }, set: { expandedRow = $0 ? .amountConsumed : nil })
+            let timeFocused: Binding<Bool> = Binding(get: { expandedRow == .time }, set: { expandedRow = $0 ? .time : nil })
+            let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
+            let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
             
             CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
 
@@ -133,6 +135,49 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     private func clearExpandedRow() {
         self.expandedRow = nil
     }
+}
+
+// MARK: - Warnings & Alerts
+extension CarbEntryView {
+    private var warningsCard: some View {
+        ForEach(Array(viewModel.warnings).sorted(by: { $0.priority < $1.priority })) { warning in
+            warningView(for: warning)
+                .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(CardBackground())
+                .padding(.horizontal)
+                .padding(.top, 8)
+        }
+    }
+    
+    private func warningView(for warning: CarbEntryViewModel.Warning) -> some View {
+        HStack {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(triangleColor(for: warning))
+            
+            Text(warningText(for: warning))
+                .font(.caption)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func triangleColor(for warning: CarbEntryViewModel.Warning) -> Color {
+        switch warning {
+        case .entryIsMissedMeal:
+            return .critical
+        case .overrideInProgress:
+            return .warning
+        }
+    }
+    
+    private func warningText(for warning: CarbEntryViewModel.Warning) -> String {
+        switch warning {
+        case .entryIsMissedMeal:
+            return NSLocalizedString("Loop has detected an missed meal and estimated its size. Edit the carb amount to match the amount of any carbs you may have eaten.", comment: "Warning displayed when user is adding a meal from an missed meal notification")
+        case .overrideInProgress:
+            return NSLocalizedString("An active override is modifying your carb ratio and insulin sensitivity. If you don't want this to affect your bolus calculation and projected glucose, consider turning off the override.", comment: "Warning to ensure the carb entry is accurate during an override")
+        }
+    }
     
     private func alert(for alert: CarbEntryViewModel.Alert) -> SwiftUI.Alert {
         switch alert {
@@ -162,29 +207,8 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     }
 }
 
+// MARK: - Favorite Foods Card
 extension CarbEntryView {
-    private var dismissButton: some View {
-        Button(action: dismiss) {
-            Text("Cancel")
-        }
-    }
-    
-    private var continueButton: some View {
-        Button(action: viewModel.continueToBolus) {
-            Text("Continue")
-        }
-        .disabled(viewModel.continueButtonDisabled)
-    }
-    
-    private var continueActionButton: some View {
-        Button(action: viewModel.continueToBolus) {
-            Text("Continue")
-        }
-        .buttonStyle(ActionButtonStyle())
-        .padding()
-        .disabled(viewModel.continueButtonDisabled)
-    }
-    
     private var favoriteFoodsCard: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("FAVORITE FOODS")
@@ -260,6 +284,32 @@ extension CarbEntryView {
         self.showAddFavoriteFood = false
         viewModel.onFavoriteFoodSave(food)
     }
+}
+
+// MARK: - Other UI Elements
+extension CarbEntryView {
+    private var dismissButton: some View {
+        Button(action: dismiss) {
+            Text("Cancel")
+        }
+    }
+    
+    private var continueButton: some View {
+        Button(action: viewModel.continueToBolus) {
+            Text("Continue")
+        }
+        .disabled(viewModel.continueButtonDisabled)
+    }
+    
+    private var continueActionButton: some View {
+        Button(action: viewModel.continueToBolus) {
+            Text("Continue")
+        }
+        .buttonStyle(ActionButtonStyle())
+        .padding()
+        .disabled(viewModel.continueButtonDisabled)
+    }
+    
 }
 
 extension CarbEntryView {

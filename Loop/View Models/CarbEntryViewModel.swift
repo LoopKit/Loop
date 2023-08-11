@@ -26,8 +26,27 @@ final class CarbEntryViewModel: ObservableObject {
         case warningQuantityValidation
     }
     
-    @Published var alert: CarbEntryViewModel.Alert?
+    enum Warning: Identifiable {
+        var id: Self {
+            return self
+        }
+        
+        var priority: Int {
+            switch self {
+            case .entryIsMissedMeal:
+                return 1
+            case .overrideInProgress:
+                return 2
+            }
+        }
+        
+        case entryIsMissedMeal
+        case overrideInProgress
+    }
     
+    @Published var alert: CarbEntryViewModel.Alert?
+    @Published var warnings: Set<Warning> = []
+
     @Published var bolusViewModel: BolusEntryViewModel?
     
     let shouldBeginEditingQuantity: Bool
@@ -77,6 +96,7 @@ final class CarbEntryViewModel: ObservableObject {
         observeAbsorptionTimeChange()
         observeFavoriteFoodChange()
         observeFavoriteFoodIndexChange()
+        observeLoopUpdates()
     }
     
     /// Initalizer for when`CarbEntryView` has an entry to edit
@@ -92,6 +112,8 @@ final class CarbEntryViewModel: ObservableObject {
         self.absorptionTimeWasEdited = true
         self.usesCustomFoodType = true
         self.shouldBeginEditingQuantity = false
+        
+        observeLoopUpdates()
     }
     
     var originalCarbEntry: StoredCarbEntry? = nil
@@ -235,6 +257,49 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     // MARK: - Utility
+    func restoreUserActivityState(_ activity: NSUserActivity) {
+        if let entry = activity.newCarbEntry {
+            time = entry.date
+            carbsQuantity = entry.quantity.doubleValue(for: preferredCarbUnit)
+
+            if let foodType = entry.foodType {
+                self.foodType = foodType
+                usesCustomFoodType = true
+            }
+
+            if let absorptionTime = entry.absorptionTime {
+                self.absorptionTime = absorptionTime
+                absorptionTimeWasEdited = true
+            }
+            
+            if activity.entryisMissedMeal {
+                warnings.insert(.entryIsMissedMeal)
+            }
+        }
+    }
+    
+    private func observeLoopUpdates() {
+        self.checkIfOverrideEnabled()
+        NotificationCenter.default
+            .publisher(for: .LoopDataUpdated)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.checkIfOverrideEnabled()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func checkIfOverrideEnabled() {
+        if let managerSettings = delegate?.settings {
+            if let overrideSettings = managerSettings.scheduleOverride?.settings, overrideSettings.effectiveInsulinNeedsScaleFactor != 1.0 {
+                self.warnings.insert(.overrideInProgress)
+            }
+            else {
+                self.warnings.remove(.overrideInProgress)
+            }
+        }
+    }
+    
     private func observeAbsorptionTimeChange() {
         $absorptionTime
             .receive(on: RunLoop.main)
