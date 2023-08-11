@@ -95,19 +95,24 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     
     private var mainCard: some View {
         VStack(spacing: 10) {
-            CarbQuantityRow(quantity: $viewModel.carbsQuantity, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit, expandedRow: $expandedRow, row: Row.amountConsumed)
+            var amountConsumedFocused: Binding<Bool> = Binding(get: { expandedRow == .amountConsumed }, set: { expandedRow = $0 ? .amountConsumed : nil })
+            var timeFocused: Binding<Bool> = Binding(get: { expandedRow == .time }, set: { expandedRow = $0 ? .time : nil })
+            var foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
+            var absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
+            
+            CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
 
             CardSectionDivider()
             
-            DatePickerRow(date: $viewModel.time, minimumDate: viewModel.minimumDate, maximumDate: viewModel.maximumDate, expandedRow: $expandedRow, row: Row.time)
+            DatePickerRow(date: $viewModel.time, isFocused: timeFocused, minimumDate: viewModel.minimumDate, maximumDate: viewModel.maximumDate)
             
             CardSectionDivider()
             
-            FoodTypeRow(foodType: $viewModel.foodType, absorptionTime: $viewModel.absorptionTime, selectedDefaultAbsorptionTimeEmoji: $viewModel.selectedDefaultAbsorptionTimeEmoji, usesCustomFoodType: $viewModel.usesCustomFoodType, absorptionTimeWasEdited: $viewModel.absorptionTimeWasEdited, defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes, expandedRow: $expandedRow, row: .foodType)
+            FoodTypeRow(foodType: $viewModel.foodType, absorptionTime: $viewModel.absorptionTime, selectedDefaultAbsorptionTimeEmoji: $viewModel.selectedDefaultAbsorptionTimeEmoji, usesCustomFoodType: $viewModel.usesCustomFoodType, absorptionTimeWasEdited: $viewModel.absorptionTimeWasEdited, isFocused: foodTypeFocused, defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes)
             
             CardSectionDivider()
             
-            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, validDurationRange: viewModel.absorptionRimesRange, expandedRow: $expandedRow, row: Row.absorptionTime, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
+            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
                 .padding(.bottom, 2)
         }
         .padding(.vertical, 12)

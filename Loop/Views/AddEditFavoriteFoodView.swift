@@ -88,19 +88,24 @@ struct AddEditFavoriteFoodView: View {
     
     private var card: some View {
         VStack(spacing: 10) {
-            TextFieldRow(text: $viewModel.name, title: "Name", placeholder: "Apple", expandedRow: $expandedRow, row: .name)
+            var nameFocused: Binding<Bool> = Binding(get: { expandedRow == .name }, set: { expandedRow = $0 ? .name : nil })
+            var carbQuantityFocused: Binding<Bool> = Binding(get: { expandedRow == .carbQuantity }, set: { expandedRow = $0 ? .carbQuantity : nil })
+            var foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
+            var absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
+            
+            TextFieldRow(text: $viewModel.name, isFocused: nameFocused, title: "Name", placeholder: "Apple")
             
             CardSectionDivider()
 
-            CarbQuantityRow(quantity: $viewModel.carbsQuantity, title: "Carb Quantity", preferredCarbUnit: viewModel.preferredCarbUnit, expandedRow: $expandedRow, row: Row.amountConsumed)
+            CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: carbQuantityFocused, title: "Carb Quantity", preferredCarbUnit: viewModel.preferredCarbUnit)
             
             CardSectionDivider()
             
-            EmojiRow(emojiType: .food, text: $viewModel.foodType, title: "Food Type", expandedRow: $expandedRow, row: .foodType)
+            EmojiRow(text: $viewModel.foodType, isFocused: foodTypeFocused, emojiType: .food, title: "Food Type")
             
             CardSectionDivider()
 
-            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, validDurationRange: viewModel.absorptionRimesRange, expandedRow: $expandedRow, row: Row.absorptionTime, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
+            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
                 .padding(.bottom, 2)
         }
         .padding(.vertical, 12)
@@ -163,6 +168,6 @@ extension AddEditFavoriteFoodView {
 
 extension AddEditFavoriteFoodView {
     enum Row {
-        case name, amountConsumed, foodType, absorptionTime
+        case name, carbQuantity, foodType, absorptionTime
     }
 }
