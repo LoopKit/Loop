@@ -30,7 +30,7 @@ struct FavoriteFoodsView: View {
                     else {
                         Section(header: listHeader) {
                             ForEach(viewModel.favoriteFoods) { food in
-                                FavoriteFoodListRow(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: viewModel.onFoodDelete(_:))
+                                FavoriteFoodListRow(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit)
                                     .environment(\.editMode, self.$editMode)
                                     .listRowInsets(EdgeInsets())
                             }
@@ -52,7 +52,7 @@ struct FavoriteFoodsView: View {
                     EmptyView()
                 }
                 
-                NavigationLink(destination: FavoriteFoodDetailView(food: viewModel.selectedFood, onFoodDelete: viewModel.onFoodDelete(_:)), isActive: $viewModel.isDetailViewActive) {
+                NavigationLink(destination: FavoriteFoodDetailView(food: viewModel.selectedFood, onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit), isActive: $viewModel.isDetailViewActive) {
                     EmptyView()
                 }
             }

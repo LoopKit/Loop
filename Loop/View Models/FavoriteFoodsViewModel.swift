@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import HealthKit
 import LoopKit
 import Combine
 
@@ -17,6 +18,15 @@ final class FavoriteFoodsViewModel: ObservableObject {
     @Published var isDetailViewActive = false
     @Published var isEditViewActive = false
     @Published var isAddViewActive = false
+    
+    var preferredCarbUnit = HKUnit.gram()
+    lazy var carbFormatter = QuantityFormatter(for: preferredCarbUnit)
+    lazy var absorptionTimeFormatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute]
+        formatter.unitsStyle = .abbreviated
+        return formatter
+    }()
     
     private lazy var cancellables = Set<AnyCancellable>()
     
