@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="OJt-dE-GaA">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="OJt-dE-GaA">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -447,7 +447,6 @@
                                     <outlet property="observedProgressView" destination="Mxi-br-Hti" id="s2h-xc-g1R"/>
                                     <outlet property="observedValueLabel" destination="Krd-Aa-ret" id="EPT-7Q-6O8"/>
                                     <outlet property="valueLabel" destination="ufi-Kj-33k" id="6kh-tP-B8R"/>
-                                    <segue destination="uaV-yr-cIp" kind="show" id="urz-4S-c6I"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -693,206 +692,11 @@
             </objects>
             <point key="canvasLocation" x="838" y="79"/>
         </scene>
-        <!--Add/Edit Carb Entry-->
-        <scene sceneID="ie7-1g-0ay">
-            <objects>
-                <tableViewController storyboardIdentifier="CarbEntryViewController" id="uaV-yr-cIp" customClass="CarbEntryViewController" customModule="Loop" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" keyboardDismissMode="onDrag" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="jax-JK-7ji">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="DecimalTextFieldTableViewCell" id="zy0-gK-nts" customClass="DecimalTextFieldTableViewCell" customModule="LoopKitUI">
-                                <rect key="frame" x="16" y="55.5" width="343" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zy0-gK-nts" id="xJK-Hq-Xwl">
-                                    <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Yf6-fw-Gex">
-                                            <rect key="frame" x="171" y="15" width="144" height="14"/>
-                                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <textInputTraits key="textInputTraits" keyboardType="decimalPad" returnKeyType="next"/>
-                                        </textField>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="g" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0RV-d5-muE">
-                                            <rect key="frame" x="317" y="4" width="10" height="20.5"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Amount Consumed" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wx8-Tf-FnG">
-                                            <rect key="frame" x="16" y="12" width="147" height="20.5"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstAttribute="trailingMargin" secondItem="0RV-d5-muE" secondAttribute="trailing" id="5ig-eI-Qp4"/>
-                                        <constraint firstItem="Yf6-fw-Gex" firstAttribute="centerY" secondItem="xJK-Hq-Xwl" secondAttribute="centerY" id="Iur-dR-8j7"/>
-                                        <constraint firstItem="Wx8-Tf-FnG" firstAttribute="centerY" secondItem="xJK-Hq-Xwl" secondAttribute="centerY" id="J8n-Rd-ZSV"/>
-                                        <constraint firstItem="0RV-d5-muE" firstAttribute="baseline" secondItem="Yf6-fw-Gex" secondAttribute="baseline" id="PTB-M8-Rxd"/>
-                                        <constraint firstItem="Wx8-Tf-FnG" firstAttribute="leading" secondItem="xJK-Hq-Xwl" secondAttribute="leadingMargin" id="Z4I-Tc-FfW"/>
-                                        <constraint firstItem="Yf6-fw-Gex" firstAttribute="leading" secondItem="Wx8-Tf-FnG" secondAttribute="trailing" constant="8" symbolic="YES" id="c86-ff-8K1"/>
-                                        <constraint firstItem="0RV-d5-muE" firstAttribute="leading" secondItem="Yf6-fw-Gex" secondAttribute="trailing" constant="2" id="gQs-8p-S42"/>
-                                        <constraint firstItem="Yf6-fw-Gex" firstAttribute="top" secondItem="xJK-Hq-Xwl" secondAttribute="topMargin" constant="4" id="qX6-8d-uzN"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="Yf6-fw-Gex" secondAttribute="bottom" priority="750" constant="4" id="zcr-8m-ilQ"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="textField" destination="Yf6-fw-Gex" id="2s1-dP-bWM"/>
-                                    <outlet property="unitLabel" destination="0RV-d5-muE" id="MDY-Mq-CIs"/>
-                                </connections>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TextFieldTableViewCell" id="vYF-Gy-b4w" customClass="TextFieldTableViewCell" customModule="LoopKitUI">
-                                <rect key="frame" x="16" y="99.5" width="343" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="vYF-Gy-b4w" id="8uH-nf-jdg">
-                                    <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <textField opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="751" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="right" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="bSR-8J-y14" customClass="CustomInputTextField" customModule="LoopKitUI">
-                                            <rect key="frame" x="104.5" y="8" width="222.5" height="25.5"/>
-                                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
-                                            <textInputTraits key="textInputTraits" returnKeyType="next"/>
-                                        </textField>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Food Type" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qPH-vU-xlu">
-                                            <rect key="frame" x="16" y="12" width="80.5" height="20.5"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="bSR-8J-y14" firstAttribute="leading" secondItem="qPH-vU-xlu" secondAttribute="trailing" constant="8" symbolic="YES" id="7Hp-IW-sLr"/>
-                                        <constraint firstItem="bSR-8J-y14" firstAttribute="firstBaseline" secondItem="qPH-vU-xlu" secondAttribute="firstBaseline" id="Htv-Rc-pgk"/>
-                                        <constraint firstItem="qPH-vU-xlu" firstAttribute="leading" secondItem="8uH-nf-jdg" secondAttribute="leadingMargin" id="Sj1-j0-4xl"/>
-                                        <constraint firstItem="qPH-vU-xlu" firstAttribute="centerY" secondItem="8uH-nf-jdg" secondAttribute="centerY" id="j11-9d-0gD"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="bSR-8J-y14" secondAttribute="trailing" id="yMl-eg-rV9"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="textField" destination="bSR-8J-y14" id="fEa-ir-ztr"/>
-                                </connections>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="FoodTypeShortcutCell" id="82i-wy-6Rq" customClass="FoodTypeShortcutCell" customModule="LoopKitUI">
-                                <rect key="frame" x="16" y="143.5" width="343" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="82i-wy-6Rq" id="qXY-LI-Wdv">
-                                    <rect key="frame" x="0.0" y="0.0" width="343" height="44"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="JU9-mF-bfZ">
-                                            <rect key="frame" x="152" y="4" width="175" height="40"/>
-                                            <subviews>
-                                                <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Fal-Vf-lfh">
-                                                    <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" secondItem="Fal-Vf-lfh" secondAttribute="height" multiplier="1:1" id="CHS-xR-VB3"/>
-                                                    </constraints>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
-                                                    <inset key="contentEdgeInsets" minX="2" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                                    <state key="normal" title="🍭"/>
-                                                    <state key="selected" backgroundImage="Oval Selection"/>
-                                                    <state key="highlighted" backgroundImage="Oval Selection"/>
-                                                    <connections>
-                                                        <action selector="buttonTapped:" destination="82i-wy-6Rq" eventType="touchUpInside" id="CFp-H5-UEx"/>
-                                                    </connections>
-                                                </button>
-                                                <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QhO-Yi-AqQ">
-                                                    <rect key="frame" x="45" y="0.0" width="40" height="40"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" secondItem="QhO-Yi-AqQ" secondAttribute="height" multiplier="1:1" id="aXD-oi-7FU"/>
-                                                    </constraints>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
-                                                    <inset key="contentEdgeInsets" minX="3" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                                    <state key="normal" title="🌮"/>
-                                                    <state key="selected" backgroundImage="Oval Selection"/>
-                                                    <state key="highlighted" backgroundImage="Oval Selection"/>
-                                                    <connections>
-                                                        <action selector="buttonTapped:" destination="82i-wy-6Rq" eventType="touchUpInside" id="pam-bO-qBW"/>
-                                                    </connections>
-                                                </button>
-                                                <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xl9-Wc-Pdu">
-                                                    <rect key="frame" x="90" y="0.0" width="40" height="40"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" secondItem="xl9-Wc-Pdu" secondAttribute="height" multiplier="1:1" id="N7U-jg-hZs"/>
-                                                    </constraints>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
-                                                    <inset key="contentEdgeInsets" minX="3" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                                    <state key="normal" title="🍕"/>
-                                                    <state key="selected" backgroundImage="Oval Selection"/>
-                                                    <state key="highlighted" backgroundImage="Oval Selection"/>
-                                                    <connections>
-                                                        <action selector="buttonTapped:" destination="82i-wy-6Rq" eventType="touchUpInside" id="94s-hT-7Li"/>
-                                                    </connections>
-                                                </button>
-                                                <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qe9-uc-vPR">
-                                                    <rect key="frame" x="135" y="0.0" width="40" height="40"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" secondItem="Qe9-uc-vPR" secondAttribute="height" multiplier="1:1" id="cPG-uR-FzN"/>
-                                                    </constraints>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
-                                                    <inset key="contentEdgeInsets" minX="3" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                                    <state key="normal" title="🍽"/>
-                                                    <state key="selected" backgroundImage="Oval Selection"/>
-                                                    <state key="highlighted" backgroundImage="Oval Selection"/>
-                                                    <connections>
-                                                        <action selector="buttonTapped:" destination="82i-wy-6Rq" eventType="touchUpInside" id="jsn-tL-464"/>
-                                                    </connections>
-                                                </button>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="dYB-lS-aaa"/>
-                                            </constraints>
-                                        </stackView>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Food Type" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ap1-M6-naG">
-                                            <rect key="frame" x="16" y="12" width="80.5" height="20.5"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="JU9-mF-bfZ" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="ap1-M6-naG" secondAttribute="trailing" constant="8" symbolic="YES" id="2cN-Qi-yGU"/>
-                                        <constraint firstItem="ap1-M6-naG" firstAttribute="leading" secondItem="qXY-LI-Wdv" secondAttribute="leadingMargin" id="EIC-Gp-eek"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="JU9-mF-bfZ" secondAttribute="trailing" id="QCo-Uf-hgG"/>
-                                        <constraint firstAttribute="bottom" secondItem="JU9-mF-bfZ" secondAttribute="bottom" priority="750" constant="4" id="RFt-7s-GHS"/>
-                                        <constraint firstItem="ap1-M6-naG" firstAttribute="centerY" secondItem="qXY-LI-Wdv" secondAttribute="centerY" id="lrN-vH-HKD"/>
-                                        <constraint firstItem="JU9-mF-bfZ" firstAttribute="top" secondItem="qXY-LI-Wdv" secondAttribute="top" constant="4" id="uy5-mY-naT"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="buttonStack" destination="JU9-mF-bfZ" id="LwI-Sm-WkS"/>
-                                </connections>
-                            </tableViewCell>
-                        </prototypes>
-                        <sections/>
-                        <connections>
-                            <outlet property="dataSource" destination="uaV-yr-cIp" id="2aW-WO-jMF"/>
-                            <outlet property="delegate" destination="uaV-yr-cIp" id="Gjn-hI-GtC"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Add/Edit Carb Entry" id="Tz7-80-bJ7">
-                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="H1B-Fq-1uQ">
-                            <connections>
-                                <segue destination="nyZ-TQ-UTt" kind="unwind" identifier="" unwindAction="unwindFromEditing:" id="KCN-zs-bMh"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="eFw-Mb-HwK" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="nyZ-TQ-UTt" userLabel="Exit" sceneMemberID="exit"/>
-            </objects>
-            <point key="canvasLocation" x="2458" y="733"/>
-        </scene>
     </scenes>
     <resources>
-        <image name="Oval Selection" width="21" height="21"/>
         <image name="chevron.right" catalog="system" width="97" height="128"/>
         <namedColor name="carbs">
-            <color red="0.3880000114440918" green="0.85500001907348633" blue="0.2199999988079071" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.66699999570846558" blue="0.22400000691413879" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>

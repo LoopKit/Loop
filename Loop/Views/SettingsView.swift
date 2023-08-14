@@ -26,6 +26,7 @@ public struct SettingsView: View {
 
     @State private var pumpChooserIsPresented: Bool = false
     @State private var cgmChooserIsPresented: Bool = false
+    @State private var favoriteFoodsIsPresented: Bool = false
     @State private var serviceChooserIsPresented: Bool = false
     @State private var therapySettingsIsPresented: Bool = false
     @State private var deletePumpDataAlertIsPresented = false
@@ -55,6 +56,9 @@ public struct SettingsView: View {
                         configurationSection
                     }
                     deviceSettingsSection
+                    if FeatureFlags.allowExperimentalFeatures {
+                        favoriteFoodsSection
+                    }
                     if (viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice) && viewModel.showDeleteTestData {
                         deleteDataSection
                     }
@@ -295,6 +299,19 @@ extension SettingsView {
                 .actionSheet(isPresented: $cgmChooserIsPresented) {
                     ActionSheet(title: Text("Add CGM", comment: "The title of the CGM chooser in settings"), buttons: cgmChoices)
             }
+        }
+    }
+    
+    private var favoriteFoodsSection: some View {
+        Section {
+            LargeButton(action: { self.favoriteFoodsIsPresented = true },
+                        includeArrow: true,
+                        imageView: AnyView(Image("Favorite Foods Icon").renderingMode(.template).foregroundColor(carbTintColor)),
+                        label: "Favorite Foods",
+                        descriptiveText: "Simplify Carb Entry")
+        }
+        .sheet(isPresented: $favoriteFoodsIsPresented) {
+            FavoriteFoodsView()
         }
     }
     

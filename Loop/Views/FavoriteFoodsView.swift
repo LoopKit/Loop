@@ -9,72 +9,62 @@
 import SwiftUI
 import LoopKit
 import LoopKitUI
-import HealthKit
 
 struct FavoriteFoodsView: View {
-    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismissAction) private var dismiss
-    @Environment(\.carbTintColor) private var carbTintColor
+    
+    @StateObject private var viewModel = FavoriteFoodsViewModel()
 
     @State private var foodToConfirmDeleteId: String? = nil
     @State private var editMode: EditMode = .inactive
-    
-    @State private var foods = allFoods
-    
-    @State var isBolusViewActive = false
-    @State var isEditViewActive = false
-    @State var isAddViewActive = false
-
-    @State var selectedFood: FavoriteFood? = nil
-    
-    @State private var draggingFood: FavoriteFood?
-    @State private var hasChangedLocation: Bool = false
 
     var body: some View {
-        NavigationViewWrappedContent {
-            ScrollView {
-                VStack(spacing: 16) {
-                    VStack(spacing: 10) {
-                        HStack {
-                            Text("All Favorites")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                            
-                            Spacer()
-                            
-                            editButton
-                        }
-                        
-                        ForEach(foods) { food in
-                            draggableFoodCardView(food: food)
+        NavigationView {
+            VStack {
+                List {
+                    if viewModel.favoriteFoods.isEmpty {
+                        Section {
+                            Text("Selecting a favorite food in the carb entry screen automatically fills in the carb quantity, food type, and absorption time fields! Tap the add button below to create your first favorite food!")
                         }
                     }
-                    .environment(\.editMode, self.$editMode)
+                    else {
+                        Section(header: listHeader) {
+                            ForEach(viewModel.favoriteFoods) { food in
+                                FavoriteFoodListRow(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit)
+                                    .environment(\.editMode, self.$editMode)
+                                    .listRowInsets(EdgeInsets())
+                            }
+                            .onMove(perform: viewModel.onFoodReorder(from:to:))
+                            .moveDisabled(!editMode.isEditing)
+                            .deleteDisabled(true)
+                        }
+                    }
                     
-                    newFoodButton
+                    Section {
+                        addFoodButton
+                            .listRowInsets(EdgeInsets())
+                    }
                 }
-                .padding()
+                .insetGroupedListStyle()
+                
+                
+                NavigationLink(destination: AddEditFavoriteFoodView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: $viewModel.isEditViewActive) {
+                    EmptyView()
+                }
+                
+                NavigationLink(destination: FavoriteFoodDetailView(food: viewModel.selectedFood, onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit), isActive: $viewModel.isDetailViewActive) {
+                    EmptyView()
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     dismissButton
                 }
             }
-            .navigationBarTitle(Text(NSLocalizedString("Favorite Foods", comment: "Favorite Foods screen title")))
-            .navigationViewStyle(.stack)
-            
-            NavigationLink(destination: Text("Coming later:\nprepopulated carb entry screen").multilineTextAlignment(.center), isActive: $isBolusViewActive) {
-                EmptyView()
-            }
-            
-            NavigationLink(destination: Text("Coming later:\nedit favorite food screen").multilineTextAlignment(.center), isActive: $isEditViewActive) {
-                EmptyView()
-            }
-            
-            NavigationLink(destination: Text("Coming later:\nadd favorite food screen").multilineTextAlignment(.center), isActive: $isAddViewActive) {
-                EmptyView()
-            }
+            .navigationBarTitle("Favorite Foods", displayMode: .large)
+        }
+        .sheet(isPresented: $viewModel.isAddViewActive) {
+            AddEditFavoriteFoodView(onSave: viewModel.onFoodSave(_:))
         }
         .onChange(of: editMode) { newValue in
             if !newValue.isEditing {
@@ -83,71 +73,38 @@ struct FavoriteFoodsView: View {
         }
     }
     
-    private func addFood() {
-        isAddViewActive = true
-    }
-    
-    private func onFoodTap(_ food: FavoriteFood) {
-        selectedFood = food
+    private func onFoodTap(_ food: StoredFavoriteFood) {
+        viewModel.selectedFood = food
         if editMode.isEditing {
-            isEditViewActive = true
+            viewModel.isEditViewActive = true
         }
         else {
-            isBolusViewActive = true
-        }
-    }
-    private func onFoodDelete(_ food: FavoriteFood) {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            _ = foods.remove(food)
-        }
-    }
-
-    private func onFoodReorder(from: IndexSet, to: Int) {
-        withAnimation {
-            foods.move(fromOffsets: from, toOffset: to)
+            viewModel.isDetailViewActive = true
         }
     }
 }
 
 extension FavoriteFoodsView {
-    @ViewBuilder func draggableFoodCardView(food: FavoriteFood) -> some View {
-        Button(action: {
-            onFoodTap(food)
-        }) {
-            FavoriteFoodCardView(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: onFoodDelete(_:))
-                .onDrag {
-                    draggingFood = food
-                    return NSItemProvider(object: "\(food.id)" as NSString)
-                } preview: {
-                    FavoriteFoodCardView(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: onFoodDelete(_:))
-                }
-                .onDrop(
-                    of: [UTType.text],
-                    delegate: DragRelocateDelegate(
-                        item: food,
-                        listData: foods,
-                        current: $draggingFood,
-                        hasChangedLocation: $hasChangedLocation
-                    ) { from, to in
-                        onFoodReorder(from: from, to: to)
-                    }
-                )
-                .disabled(!editMode.isEditing)
-                .buttonStyle(ListButtonStyle())
+    private var listHeader: some View {
+        HStack {
+            Text("All Favorites")
+                .font(.title3)
+                .fontWeight(.semibold)
+                .textCase(nil)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            editButton
         }
+        .listRowInsets(EdgeInsets(top: 20, leading: 4, bottom: 10, trailing: 4))
     }
     
     private var dismissButton: some View {
         Button(action: dismiss) {
-            Text("Cancel")
+            Text("Done")
         }
     }
-    
-//    private var plusButton: some View {
-//        Button(action: addFood) {
-//            Image(systemName: "plus")
-//        }
-//    }
         
     private var editButton: some View {
         Button(action: {
@@ -156,11 +113,12 @@ extension FavoriteFoodsView {
             }
         }) {
             Text(editMode.title)
+                .textCase(nil)
         }
     }
     
-    private var newFoodButton: some View {
-        Button(action: addFood) {
+    private var addFoodButton: some View {
+        Button(action: viewModel.addFoodTapped) {
             HStack {
                 Image(systemName: "plus.circle.fill")
                 
@@ -168,67 +126,5 @@ extension FavoriteFoodsView {
             }
         }
         .buttonStyle(ActionButtonStyle())
-        .padding(.top)
     }
-}
-
-fileprivate struct NavigationViewWrappedContent<Content: View>: View {
-    var content: Content
-    
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-    
-    var body: some View {
-        NavigationView {
-            ZStack {
-                Color(.systemGroupedBackground)
-                    .edgesIgnoringSafeArea(.all)
-                
-                content
-            }
-        }
-    }
-}
-
-fileprivate struct DragRelocateDelegate<Item: Equatable>: DropDelegate {
-    let item: Item
-    var listData: [Item]
-    @Binding var current: Item?
-    @Binding var hasChangedLocation: Bool
-
-    var moveAction: (IndexSet, Int) -> Void
-
-    func dropEntered(info: DropInfo) {
-        guard item != current, let current = current else { return }
-        guard let from = listData.firstIndex(of: current), let to = listData.firstIndex(of: item) else { return }
-        
-        hasChangedLocation = true
-
-        if listData[to] != current {
-            moveAction(IndexSet(integer: from), to > from ? to + 1 : to)
-        }
-    }
-    
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
-    }
-    
-    func performDrop(info: DropInfo) -> Bool {
-        hasChangedLocation = false
-        current = nil
-        return true
-    }
-}
-
-fileprivate let allFoods = [
-    // Some really yummy foods...
-    FavoriteFood(carbsQuantity: carbs(55), foodType: "🥞🥚", absorptionTime: .hours(3), name: "Pancakes and Eggs"),
-    FavoriteFood(carbsQuantity: carbs(35), foodType: "🍌🍞", absorptionTime: .hours(2), name: "Banana Bread"),
-    FavoriteFood(carbsQuantity: carbs(63), foodType: "🍞🥜🍫🥛", absorptionTime: .hours(3), name: "The Best Lunch"),
-    FavoriteFood(carbsQuantity: carbs(120), foodType: "🍕", absorptionTime: .hours(5), name: "Dad's Pizza"),
-]
-
-fileprivate func carbs(_ value: Double) -> HKQuantity {
-    return HKQuantity(unit: .gram(), doubleValue: value)
 }
