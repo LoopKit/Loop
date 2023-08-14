@@ -162,7 +162,7 @@ final class BolusEntryViewModel: ObservableObject {
     // MARK: - Initialization
 
     init(
-        delegate: BolusEntryViewModelDelegate,
+        delegate: BolusEntryViewModelDelegate?,
         now: @escaping () -> Date = { Date() },
         screenWidth: CGFloat,
         debounceIntervalMilliseconds: Int = 400,

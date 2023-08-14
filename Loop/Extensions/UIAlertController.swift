@@ -13,30 +13,6 @@ import LoopKitUI
 
 extension UIAlertController {
     /**
-     Initializes an ActionSheet-styled controller for selecting a preset type
-     
-     - parameter handler: A closure to execute when the sheet is dismissed after selection. The closure has a single argument:
-        - duration: The duration for which the workout is to be enabled
-     */
-    internal convenience init(presetTypeSelectionHandler handler: @escaping (_ selection: TemporaryScheduleOverride.Context) -> Void) {
-        self.init(
-            title: NSLocalizedString("Choose a Preset", comment: "The title of the alert controller used to select a preset"),
-            message: nil,
-            preferredStyle: .actionSheet
-        )
-        
-        addAction(UIAlertAction(title: "Workout Preset", style: .default) { _ in
-            handler(.legacyWorkout)
-        })
-
-        addAction(UIAlertAction(title: "Pre-Meal Preset", style: .default) { _ in
-            handler(.preMeal)
-        })
-
-        addCancelAction()
-    }
-    
-    /**
      Initializes an ActionSheet-styled controller for selecting a workout duration
      
      - parameter handler: A closure to execute when the sheet is dismissed after selection. The closure has a single argument:
