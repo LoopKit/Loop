@@ -36,19 +36,55 @@ class MockDelegate: LoopDataManagerDelegate {
 
 class LoopDataManagerDosingTests: LoopDataManagerTests {
     // MARK: Functions to load fixtures
-    func loadGlucoseEffect(_ name: String) -> [GlucoseEffect] {
+    func loadLocalDateGlucoseEffect(_ name: String) -> [GlucoseEffect] {
         let fixture: [JSONDictionary] = loadFixture(name)
-        let dateFormatter = ISO8601DateFormatter.localTimeDate()
+        let localDateFormatter = ISO8601DateFormatter.localTimeDate()
 
         return fixture.map {
-            return GlucoseEffect(startDate: dateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
+            return GlucoseEffect(startDate: localDateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
         }
     }
-    
+
+    func loadPredictedGlucoseFixture(_ name: String) -> [PredictedGlucoseValue] {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        let url = bundle.url(forResource: name, withExtension: "json")!
+        return try! decoder.decode([PredictedGlucoseValue].self, from: try! Data(contentsOf: url))
+    }
+
     // MARK: Tests
+    func testForecastFromLiveCaptureInputData() {
+        setUp(for: .liveCapture)
+        let expectedPredictedGlucose = loadPredictedGlucoseFixture("live_capture_predicted_glucose")
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var predictedGlucose: [PredictedGlucoseValue]?
+        var recommendedBasal: TempBasalRecommendation?
+        self.loopDataManager.getLoopState { _, state in
+            predictedGlucose = state.predictedGlucose
+            recommendedBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
+            updateGroup.leave()
+        }
+        // We need to wait until the task completes to get outputs
+        updateGroup.wait()
+
+        XCTAssertNotNil(predictedGlucose)
+        XCTAssertEqual(expectedPredictedGlucose.count, predictedGlucose!.count)
+
+        for (expected, calculated) in zip(expectedPredictedGlucose, predictedGlucose!) {
+            XCTAssertEqual(expected.startDate, calculated.startDate)
+            XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
+        }
+
+        XCTAssertEqual(1.99, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
+    }
+
+
     func testFlatAndStable() {
         setUp(for: .flatAndStable)
-        let predictedGlucoseOutput = loadGlucoseEffect("flat_and_stable_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("flat_and_stable_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -77,7 +113,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testHighAndStable() {
         setUp(for: .highAndStable)
-        let predictedGlucoseOutput = loadGlucoseEffect("high_and_stable_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_stable_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -104,7 +140,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testHighAndFalling() {
         setUp(for: .highAndFalling)
-        let predictedGlucoseOutput = loadGlucoseEffect("high_and_falling_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_falling_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -131,7 +167,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testHighAndRisingWithCOB() {
         setUp(for: .highAndRisingWithCOB)
-        let predictedGlucoseOutput = loadGlucoseEffect("high_and_rising_with_cob_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_rising_with_cob_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -158,7 +194,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testLowAndFallingWithCOB() {
         setUp(for: .lowAndFallingWithCOB)
-        let predictedGlucoseOutput = loadGlucoseEffect("low_and_falling_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("low_and_falling_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -185,7 +221,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testLowWithLowTreatment() {
         setUp(for: .lowWithLowTreatment)
-        let predictedGlucoseOutput = loadGlucoseEffect("low_with_low_treatment_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("low_with_low_treatment_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -411,7 +447,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         )
 
         let doseStore = MockDoseStore()
-        let glucoseStore = MockGlucoseStore()
+        let glucoseStore = MockGlucoseStore(for: .flatAndStable)
         let carbStore = MockCarbStore()
 
         let currentDate = Date()

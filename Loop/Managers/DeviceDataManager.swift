@@ -45,6 +45,8 @@ final class DeviceDataManager {
 
     @Published var pumpIsAllowingAutomation: Bool
 
+    private var lastCGMLoopTrigger: Date = .distantPast
+
     private let automaticDosingStatus: AutomaticDosingStatus
 
     var closedLoopDisallowedLocalizedDescription: String? {
@@ -557,7 +559,6 @@ final class DeviceDataManager {
     private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult, completion: @escaping () -> Void) {
         switch readingResult {
         case .newData(let values):
-            log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
             loopManager.addGlucoseSamples(values) { result in
                 if !values.isEmpty {
                     DispatchQueue.main.async {
@@ -570,10 +571,8 @@ final class DeviceDataManager {
             loopManager.receivedUnreliableCGMReading()
             completion()
         case .noData:
-            log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
             completion()
         case .error(let error):
-            log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
             self.setLastError(error: error)
             completion()
         }
@@ -924,8 +923,14 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
         dispatchPrecondition(condition: .onQueue(queue))
+        log.default("CGMManager:%{public}@ did update with %{public}@", String(describing: type(of: manager)), String(describing: readingResult))
         processCGMReadingResult(manager, readingResult: readingResult) {
-            self.checkPumpDataAndLoop()
+            let now = Date()
+            if case .newData = readingResult, now.timeIntervalSince(self.lastCGMLoopTrigger) > .minutes(4.2) {
+                self.log.default("Triggering loop from new CGM data at %{public}@", String(describing: now))
+                self.lastCGMLoopTrigger = now
+                self.checkPumpDataAndLoop()
+            }
         }
     }
 
@@ -1012,7 +1017,8 @@ extension DeviceDataManager: PumpManagerDelegate {
 
             self.queue.async {
                 self.processCGMReadingResult(cgmManager, readingResult: result) {
-                    if self.loopManager.lastLoopCompleted == nil || self.loopManager.lastLoopCompleted!.timeIntervalSinceNow < -.minutes(6) {
+                    if self.loopManager.lastLoopCompleted == nil || self.loopManager.lastLoopCompleted!.timeIntervalSinceNow < -.minutes(4.2) {
+                        self.log.default("Triggering Loop from refreshCGM()")
                         self.checkPumpDataAndLoop()
                     }
                     completion?()
