@@ -22,7 +22,7 @@ class RootNavigationController: UINavigationController {
         case .carbEntry:
             statusTableViewController.presentCarbEntryScreen(nil)
         case .preMeal:
-            statusTableViewController.presentPreMealMode()
+            statusTableViewController.togglePreMealMode()
         case .bolus:
             statusTableViewController.presentBolusScreen()
         case .customPresets:
@@ -40,24 +40,6 @@ class RootNavigationController: UINavigationController {
             if viewControllers.count > 1 {
                 popToRootViewController(animated: false)
             }
-        case NSUserActivity.newCarbEntryActivityType:
-            if let navVC = presentedViewController as? UINavigationController {
-                if let carbVC = navVC.topViewController as? CarbEntryViewController {
-                    carbVC.restoreUserActivityState(activity)
-                    return
-                } else {
-                    dismiss(animated: false, completion: nil)
-                }
-            }
-
-            if let carbVC = topViewController as? CarbAbsorptionViewController {
-                carbVC.restoreUserActivityState(activity)
-                return
-            } else if viewControllers.count > 1 {
-                popToRootViewController(animated: false)
-            }
-
-            fallthrough
         default:
             statusTableViewController.restoreUserActivityState(activity)
         }

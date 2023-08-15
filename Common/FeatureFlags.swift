@@ -266,7 +266,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* adultChildInsulinModelSelectionEnabled: \(adultChildInsulinModelSelectionEnabled)",
             "* profileExpirationSettingsViewEnabled: \(profileExpirationSettingsViewEnabled)",
             "* missedMealNotifications: \(missedMealNotifications)",
-            "* allowAlgorithmExperiments: \(allowAlgorithmExperiments)"
+            "* allowAlgorithmExperiments: \(allowAlgorithmExperiments)",
+            "* allowExperimentalFeatures: \(allowExperimentalFeatures)"
         ].joined(separator: "\n")
     }
 }
@@ -284,6 +285,20 @@ extension FeatureFlagConfiguration {
             } else {
                 return false
             }
+        }
+        #else
+        return false
+        #endif
+    }
+    
+    var allowExperimentalFeatures: Bool {
+        #if EXPERIMENTAL_FEATURES_ENABLED
+        return true
+        #elseif EXPERIMENTAL_FEATURES_ENABLED_CONDITIONALLY
+        if debugEnabled {
+            return true
+        } else {
+            return UserDefaults.appGroup?.allowExperimentalFeatures ?? false
         }
         #else
         return false

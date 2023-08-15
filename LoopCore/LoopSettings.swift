@@ -74,7 +74,7 @@ public struct LoopSettings: Equatable {
     public var automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly
 
     public var defaultRapidActingModel: ExponentialInsulinModelPreset?
-
+    
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
@@ -295,7 +295,7 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
         raw["dosingStrategy"] = automaticDosingStrategy.rawValue
-
+        
         return raw
     }
 }

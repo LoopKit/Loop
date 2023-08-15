@@ -270,11 +270,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private func setupToolbarItems() {
         let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
         let carbs = UIBarButtonItem(image: UIImage(named: "carbs"), style: .plain, target: self, action: #selector(userTappedAddCarbs))
-        let preMeal = createPreMealButtonItem(selected: false, isEnabled: true)
         let bolus = UIBarButtonItem(image: UIImage(named: "bolus"), style: .plain, target: self, action: #selector(presentBolusScreen))
-        let workout = createWorkoutButtonItem(selected: false, isEnabled: true)
         let settings = UIBarButtonItem(image: UIImage(named: "settings"), style: .plain, target: self, action: #selector(onSettingsTapped))
         
+        let preMeal = createPreMealButtonItem(selected: false, isEnabled: true)
+        let workout = createWorkoutButtonItem(selected: false, isEnabled: true)
         toolbarItems = [
             carbs,
             space,
@@ -287,20 +287,21 @@ final class StatusTableViewController: LoopChartsTableViewController {
             settings
         ]
     }
-    
+        
     private func updateToolbarItems() {
         let isPumpOnboarded = onboardingManager.isComplete || deviceManager.pumpManager?.isOnboarded == true
 
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
         toolbarItems![0].isEnabled = isPumpOnboarded
         toolbarItems![0].tintColor = UIColor.carbTintColor
-        toolbarItems![2].isEnabled = isPumpOnboarded && (automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
         toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
         toolbarItems![4].isEnabled = isPumpOnboarded
         toolbarItems![4].tintColor = UIColor.insulinTintColor
-        toolbarItems![6].isEnabled = isPumpOnboarded
         toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
         toolbarItems![8].tintColor = UIColor.secondaryLabel
+        
+        toolbarItems![2] = createPreMealButtonItem(selected: preMealMode == true && preMealModeAllowed, isEnabled: preMealModeAllowed)
+        toolbarItems![6] = createWorkoutButtonItem(selected: workoutMode == true && workoutModeAllowed, isEnabled: workoutModeAllowed)
     }
 
     public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil {
@@ -522,7 +523,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         }
 
-        updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
+        updatePresetModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
 
         if deviceManager.loopManager.settings.preMealTargetRange == nil {
             preMealMode = nil
@@ -831,15 +832,21 @@ final class StatusTableViewController: LoopChartsTableViewController {
             guard oldValue != preMealMode else {
                 return
             }
-            updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingStatus.automaticDosingEnabled)
+            updatePresetModeAvailability(automaticDosingEnabled: automaticDosingStatus.automaticDosingEnabled)
         }
     }
+    private lazy var preMealModeAllowed: Bool = {
+        onboardingManager.isComplete &&
+                (automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
+                && deviceManager.loopManager.settings.preMealTargetRange != nil
+    }()
 
-    private func updatePreMealModeAvailability(automaticDosingEnabled: Bool) {
-        let allowed = onboardingManager.isComplete &&
+    private func updatePresetModeAvailability(automaticDosingEnabled: Bool) {
+        preMealModeAllowed = onboardingManager.isComplete &&
                 (automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
                 && deviceManager.loopManager.settings.preMealTargetRange != nil
-        toolbarItems![2] = createPreMealButtonItem(selected: preMealMode ?? false && allowed, isEnabled: allowed)
+        workoutModeAllowed = onboardingManager.isComplete && workoutMode != nil
+        updateToolbarItems()
     }
 
     private var workoutMode: Bool? = nil {
@@ -847,15 +854,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
             guard oldValue != workoutMode else {
                 return
             }
-
-            if let workoutMode = workoutMode {
-                let allowed = onboardingManager.isComplete
-                toolbarItems![6] = createWorkoutButtonItem(selected: workoutMode, isEnabled: allowed)
-            } else {
-                toolbarItems![6].isEnabled = false
-            }
+            workoutModeAllowed = workoutMode != nil && onboardingManager.isComplete
+            updateToolbarItems()
         }
     }
+    private lazy var workoutModeAllowed: Bool = {
+        workoutMode != nil && onboardingManager.isComplete
+    }()
 
     // MARK: - Table view data source
 
@@ -1363,18 +1368,17 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
             navigationWrapper = UINavigationController(rootViewController: hostingController)
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+            present(navigationWrapper, animated: true)
         } else {
-            let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
-
-            carbEntryViewController.deviceManager = deviceManager
-            carbEntryViewController.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
-            carbEntryViewController.preferredCarbUnit = deviceManager.carbStore.preferredUnit
-            if let activity = activity {
-                carbEntryViewController.restoreUserActivityState(activity)
+            let viewModel = CarbEntryViewModel(delegate: deviceManager)
+            if let activity {
+                viewModel.restoreUserActivityState(activity)
             }
-            navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
+            let carbEntryView = CarbEntryView(viewModel: viewModel)
+                .environmentObject(deviceManager.displayGlucosePreference)
+            let hostingController = DismissibleHostingController(rootView: carbEntryView, isModalInPresentation: false)
+            present(hostingController, animated: true)
         }
-        present(navigationWrapper, animated: true)
         deviceManager.analyticsServicesManager.didDisplayCarbEntryScreen()
     }
 
@@ -1404,7 +1408,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(togglePreMealMode(_:)))
+        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
         item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
 
         if selected {
@@ -1419,7 +1423,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         return item
     }
-
+    
     private func createWorkoutButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
         let item = UIBarButtonItem(image: UIImage.workoutImage(selected: selected), style: .plain, target: self, action: #selector(toggleWorkoutMode(_:)))
         item.accessibilityLabel = NSLocalizedString("Workout Targets", comment: "The label of the workout mode toggle button")
@@ -1436,8 +1440,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         return item
     }
+
+    @IBAction func premealButtonTapped(_ sender: UIBarButtonItem) {
+        togglePreMealMode(confirm: false)
+    }
     
-    func presentPreMealMode(confirm: Bool = true) {
+    func togglePreMealMode(confirm: Bool = true) {
         if preMealMode == true {
             if confirm {
                 let alert = UIAlertController(title: "Disable Pre-Meal Preset?", message: "This will remove any currently applied pre-meal preset.", preferredStyle: .alert)
@@ -1454,35 +1462,35 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
             }
         } else {
-            let vc = UIAlertController(premealDurationSelectionHandler: { duration in
-                let startDate = Date()
-
-                guard self.workoutMode != true else {
-                    // allow cell animation when switching between presets
-                    self.deviceManager.loopManager.mutateSettings { settings in
-                        settings.clearOverride()
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        self.deviceManager.loopManager.mutateSettings { settings in
-                            settings.enablePreMealOverride(at: startDate, for: duration)
-                        }
-                    }
-                    return
-                }
-
-                self.deviceManager.loopManager.mutateSettings { settings in
-                    settings.enablePreMealOverride(at: startDate, for: duration)
-                }
-            })
-
-            present(vc, animated: true, completion: nil)
+            presentPreMealModeAlertController()
         }
     }
-
-    @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
-        presentPreMealMode(confirm: false)
-    }
     
+    func presentPreMealModeAlertController() {
+        let vc = UIAlertController(premealDurationSelectionHandler: { duration in
+            let startDate = Date()
+
+            guard self.workoutMode != true else {
+                // allow cell animation when switching between presets
+                self.deviceManager.loopManager.mutateSettings { settings in
+                    settings.clearOverride()
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    self.deviceManager.loopManager.mutateSettings { settings in
+                        settings.enablePreMealOverride(at: startDate, for: duration)
+                    }
+                }
+                return
+            }
+
+            self.deviceManager.loopManager.mutateSettings { settings in
+                settings.enablePreMealOverride(at: startDate, for: duration)
+            }
+        })
+
+        present(vc, animated: true, completion: nil)
+    }
+
     func presentCustomPresets(confirm: Bool = true) {
         if workoutMode == true {
             if confirm {
@@ -1503,30 +1511,34 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if FeatureFlags.sensitivityOverridesEnabled {
                 performSegue(withIdentifier: OverrideSelectionViewController.className, sender: toolbarItems![6])
             } else {
-                let vc = UIAlertController(workoutDurationSelectionHandler: { duration in
-                    let startDate = Date()
+                presentWorkoutModeAlertController()
+            }
+        }
+    }
+    
+    func presentWorkoutModeAlertController() {
+        let vc = UIAlertController(workoutDurationSelectionHandler: { duration in
+            let startDate = Date()
 
-                    guard self.preMealMode != true else {
-                        // allow cell animation when switching between presets
-                        self.deviceManager.loopManager.mutateSettings { settings in
-                            settings.clearOverride(matching: .preMeal)
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            self.deviceManager.loopManager.mutateSettings { settings in
-                                settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
-                            }
-                        }
-                        return
-                    }
-
+            guard self.preMealMode != true else {
+                // allow cell animation when switching between presets
+                self.deviceManager.loopManager.mutateSettings { settings in
+                    settings.clearOverride(matching: .preMeal)
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     self.deviceManager.loopManager.mutateSettings { settings in
                         settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
                     }
-                })
-
-                present(vc, animated: true, completion: nil)
+                }
+                return
             }
-        }
+
+            self.deviceManager.loopManager.mutateSettings { settings in
+                settings.enableLegacyWorkoutOverride(at: startDate, for: duration)
+            }
+        })
+
+        present(vc, animated: true, completion: nil)
     }
 
     @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
@@ -1625,7 +1637,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func automaticDosingStatusChanged(_ automaticDosingEnabled: Bool) {
-        updatePreMealModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
+        updatePresetModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
         hudView?.loopCompletionHUD.loopIconClosed = automaticDosingEnabled
         hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
     }
