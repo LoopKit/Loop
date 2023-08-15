@@ -15,13 +15,15 @@
 		1452F4A92A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */; };
 		1452F4AB2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AA2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift */; };
 		1452F4AD2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */; };
+		147EFE8E2A8BCC5500272438 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE8D2A8BCC5500272438 /* DefaultAssets.xcassets */; };
+		147EFE902A8BCD8000272438 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE8F2A8BCD8000272438 /* DerivedAssets.xcassets */; };
+		147EFE922A8BCD8A00272438 /* DerivedAssetsBase.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE912A8BCD8A00272438 /* DerivedAssetsBase.xcassets */; };
 		1481F9BB28DA26F4004C5AEB /* LoopUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; };
 		149A28BB2A853E5100052EDF /* CarbEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149A28BA2A853E5100052EDF /* CarbEntryViewModel.swift */; };
 		149A28BD2A853E6C00052EDF /* CarbEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149A28BC2A853E6C00052EDF /* CarbEntryView.swift */; };
 		149A28E42A8A63A700052EDF /* FavoriteFoodDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149A28E32A8A63A700052EDF /* FavoriteFoodDetailView.swift */; };
 		14B1735E28AED9EC006CCD7C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735D28AED9EC006CCD7C /* WidgetKit.framework */; };
 		14B1736028AED9EC006CCD7C /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735F28AED9EC006CCD7C /* SwiftUI.framework */; };
-		14B1736528AED9EE006CCD7C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14B1736428AED9EE006CCD7C /* Assets.xcassets */; };
 		14B1736928AED9EE006CCD7C /* Loop Widget Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736E28AEDBF6006CCD7C /* BasalView.swift */; };
 		14B1737328AEDBF6006CCD7C /* SystemStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */; };
@@ -751,7 +753,9 @@
         149A28BC2A853E6C00052EDF /* CarbEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryView.swift; sourceTree = "<group>"; };
         149A28E32A8A63A700052EDF /* FavoriteFoodDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodDetailView.swift; sourceTree = "<group>"; };
 		14B1735F28AED9EC006CCD7C /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		14B1736428AED9EE006CCD7C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+          147EFE8D2A8BCC5500272438 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
+        147EFE8F2A8BCD8000272438 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
+        147EFE912A8BCD8A00272438 /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
 		14B1736628AED9EE006CCD7C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		14B1736D28AEDA63006CCD7C /* LoopWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LoopWidgetExtension.entitlements; sourceTree = "<group>"; };
 		14B1736E28AEDBF6006CCD7C /* BasalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalView.swift; sourceTree = "<group>"; };
@@ -1820,6 +1824,9 @@
 		14B1736128AED9EC006CCD7C /* Loop Widget Extension */ = {
 			isa = PBXGroup;
 			children = (
+				147EFE8D2A8BCC5500272438 /* DefaultAssets.xcassets */,
+				147EFE8F2A8BCD8000272438 /* DerivedAssets.xcassets */,
+				147EFE912A8BCD8A00272438 /* DerivedAssetsBase.xcassets */,
 				84AA81D42A4A2813000B658B /* Bootstrap */,
 				84AA81D12A4A2778000B658B /* Components */,
 				84AA81D92A4A2966000B658B /* Helpers */,
@@ -2509,7 +2516,6 @@
 				C116134A2983096D00777E7C /* Localizable.strings */,
 				C11613472983096D00777E7C /* InfoPlist.strings */,
 				14B1736D28AEDA63006CCD7C /* LoopWidgetExtension.entitlements */,
-				14B1736428AED9EE006CCD7C /* Assets.xcassets */,
 				14B1736628AED9EE006CCD7C /* Info.plist */,
 			);
 			path = Bootstrap;
@@ -3336,9 +3342,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14B1736528AED9EE006CCD7C /* Assets.xcassets in Resources */,
 				C116134C2983096D00777E7C /* Localizable.strings in Resources */,
+				147EFE8E2A8BCC5500272438 /* DefaultAssets.xcassets in Resources */,
 				C11613492983096D00777E7C /* InfoPlist.strings in Resources */,
+				147EFE902A8BCD8000272438 /* DerivedAssets.xcassets in Resources */,
+				147EFE922A8BCD8A00272438 /* DerivedAssetsBase.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
