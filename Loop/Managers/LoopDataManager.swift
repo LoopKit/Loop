@@ -197,7 +197,7 @@ final class LoopDataManager {
                 self.dataAccessQueue.async {
                     self.logger.default("Received notification of dosing changing")
 
-                    self.insulinEffect = nil
+                    self.clearCachedInsulinEffects()
                     self.remoteRecommendationNeedsUpdating = true
 
                     self.notify(forChange: .insulin)
@@ -314,7 +314,7 @@ final class LoopDataManager {
                 // Invalidate cached effects based on this schedule
                 self.carbEffect = nil
                 self.carbsOnBoard = nil
-                self.insulinEffect = nil
+                self.clearCachedInsulinEffects()
             }
         }
 
@@ -339,12 +339,7 @@ final class LoopDataManager {
         }
     }
 
-    private var insulinEffect: [GlucoseEffect]? {
-        didSet {
-            insulinEffectIncludingPendingInsulin = nil
-            predictedGlucose = nil
-        }
-    }
+    private var insulinEffect: [GlucoseEffect]?
 
     private var insulinEffectIncludingPendingInsulin: [GlucoseEffect]? {
         didSet {
@@ -453,6 +448,12 @@ final class LoopDataManager {
         }
         
         return cachedRetrospectiveCorrection!
+    }
+    
+    func clearCachedInsulinEffects() {
+        insulinEffect = nil
+        insulinEffectIncludingPendingInsulin = nil
+        predictedGlucose = nil
     }
 
     // MARK: - Background task management
@@ -717,7 +718,7 @@ extension LoopDataManager {
             self.logger.debug("bolusConfirmed")
             self.lastRequestedBolus = nil
             self.recommendedAutomaticDose = nil
-            self.insulinEffect = nil
+            self.clearCachedInsulinEffects()
             self.notify(forChange: .insulin)
 
             completion?()
@@ -733,7 +734,7 @@ extension LoopDataManager {
         self.dataAccessQueue.async {
             self.logger.debug("bolusRequestFailed")
             self.lastRequestedBolus = nil
-            self.insulinEffect = nil
+            self.clearCachedInsulinEffects()
             self.notify(forChange: .insulin)
 
             completion?()
@@ -754,7 +755,7 @@ extension LoopDataManager {
             
             self.dataAccessQueue.async {
                 if error == nil {
-                    self.insulinEffect = nil
+                    self.clearCachedInsulinEffects()
                 }
             }
         }
@@ -773,7 +774,7 @@ extension LoopDataManager {
         doseStore.addDoses([dose], from: nil) { (error) in
             if error == nil {
                 self.recommendedAutomaticDose = nil
-                self.insulinEffect = nil
+                self.clearCachedInsulinEffects()
                 self.notify(forChange: .insulin)
             }
         }
@@ -795,7 +796,7 @@ extension LoopDataManager {
                 completion(.failure(error))
             } else if let newValue = newValue {
                 self.dataAccessQueue.async {
-                    self.insulinEffect = nil
+                    self.clearCachedInsulinEffects()
 
                     if let newDoseStartDate = previousValue?.startDate {
                         // Prune back any counteraction effects for recomputation, after the effect delay
