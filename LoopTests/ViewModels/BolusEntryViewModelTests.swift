@@ -58,9 +58,31 @@ class BolusEntryViewModelTests: XCTestCase {
     fileprivate var delegate: MockBolusEntryViewModelDelegate!
     var now: Date = BolusEntryViewModelTests.now
     
-    let mockOriginalCarbEntry = StoredCarbEntry(uuid: UUID(), provenanceIdentifier: "provenanceIdentifier", syncIdentifier: "syncIdentifier", syncVersion: 0, startDate: BolusEntryViewModelTests.exampleStartDate, quantity: BolusEntryViewModelTests.exampleCarbQuantity, foodType: "foodType", absorptionTime: 1, createdByCurrentApp: true, userCreatedDate: BolusEntryViewModelTests.now, userUpdatedDate: BolusEntryViewModelTests.now)
+    let mockOriginalCarbEntry = StoredCarbEntry(
+        startDate: BolusEntryViewModelTests.exampleStartDate,
+        quantity: BolusEntryViewModelTests.exampleCarbQuantity,
+        uuid: UUID(),
+        provenanceIdentifier: "provenanceIdentifier",
+        syncIdentifier: "syncIdentifier",
+        syncVersion: 0,
+        foodType: "foodType",
+        absorptionTime: 1,
+        createdByCurrentApp: true,
+        userCreatedDate: BolusEntryViewModelTests.now,
+        userUpdatedDate: BolusEntryViewModelTests.now)
     let mockPotentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: BolusEntryViewModelTests.exampleStartDate, foodType: "foodType", absorptionTime: 1)
-    let mockFinalCarbEntry = StoredCarbEntry(uuid: UUID(), provenanceIdentifier: "provenanceIdentifier", syncIdentifier: "syncIdentifier", syncVersion: 1, startDate: BolusEntryViewModelTests.exampleStartDate, quantity: BolusEntryViewModelTests.exampleCarbQuantity, foodType: "foodType", absorptionTime: 1, createdByCurrentApp: true, userCreatedDate: BolusEntryViewModelTests.now, userUpdatedDate: BolusEntryViewModelTests.now)
+    let mockFinalCarbEntry = StoredCarbEntry(
+        startDate: BolusEntryViewModelTests.exampleStartDate,
+        quantity: BolusEntryViewModelTests.exampleCarbQuantity,
+        uuid: UUID(),
+        provenanceIdentifier: "provenanceIdentifier",
+        syncIdentifier: "syncIdentifier",
+        syncVersion: 1,
+        foodType: "foodType",
+        absorptionTime: 1, 
+        createdByCurrentApp: true,
+        userCreatedDate: BolusEntryViewModelTests.now,
+        userUpdatedDate: BolusEntryViewModelTests.now)
     let mockUUID = BolusEntryViewModelTests.mockUUID.uuidString
     let queue = DispatchQueue(label: "BolusEntryViewModelTests")
     var saveAndDeliverSuccess = false
