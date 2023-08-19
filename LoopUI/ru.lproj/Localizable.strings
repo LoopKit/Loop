@@ -32,7 +32,7 @@
 "%1$@ units per hour at %2$@" = "%1$@ ед/час в %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ против %2$@";
+"%1$@ v%2$@" = "%1$@ версии %2$@";
 
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/минут";
@@ -77,7 +77,7 @@
 "mg/dL" = "мг/дл";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
+"mmol/L" = "ммоль/л";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Требует внимания";
@@ -92,7 +92,7 @@
 "Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Нажмите \"Настройки\", чтобы включить \"Замкнутый цикл\", если вы хотите, чтобы приложение автоматизировало подачу инсулина.";
 
 /* The short unit display string for international units of insulin */
-"U" = "ед";
+"U" = "Ед";
 
 /* Accessibility value for an unknown value */
 "Unknown" = "Неизвестно";
