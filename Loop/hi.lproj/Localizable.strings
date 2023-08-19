@@ -13,6 +13,3 @@
 /* The title of the glucose and prediction graph */
 "Glucose" = "शुगर";
 
-/* Title of the carb entry date picker cell */
-"Time" = "समय";
-
