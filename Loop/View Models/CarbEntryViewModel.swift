@@ -59,10 +59,10 @@ final class CarbEntryViewModel: ObservableObject {
     @Published var time = Date()
     private var date = Date()
     var minimumDate: Date {
-        get { date.addingTimeInterval(.hours(-12)) }
+        get { date.addingTimeInterval(LoopConstants.maxCarbEntryPastTime) }
     }
     var maximumDate: Date {
-        get { date.addingTimeInterval(.hours(1)) }
+        get { date.addingTimeInterval(LoopConstants.maxCarbEntryFutureTime) }
     }
     
     @Published var foodType = ""
