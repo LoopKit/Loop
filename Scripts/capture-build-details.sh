@@ -89,5 +89,14 @@ then
     if [ -n "$branch" ]; then
         plutil -replace com-loopkit-LoopWorkspace-git-branch -string "${branch}" "${info_plist_path}"
     fi
+    # determine if this is a GitHub Action build (with 90 day expiration)
+    folderName=$(pwd)
+    runnerString="/Users/runner"
+    if [ "${folderName:0:13}" == "$runnerString" ]; then
+        # overwrite profile_expire_date
+        profile_expire_date=$(date -j -v+90d +"%Y-%m-%dT%H:%M:%SZ")
+        echo "runnerString detected, update profile_expire_date to ${profile_expire_date}"
+        plutil -replace com-loopkit-Loop-profile-expiration -date "${profile_expire_date}" "${info_plist_path}"
+    fi
     popd . > /dev/null
 fi
