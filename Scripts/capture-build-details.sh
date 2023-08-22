@@ -72,6 +72,17 @@ if [ -e "${provisioning_profile_path}" ]; then
   profile_expire_date=$(security cms -D -i "${provisioning_profile_path}" | plutil -p - | grep ExpirationDate | cut -b 23-)
   # Convert to plutil format
   profile_expire_date=$(date -j -f "%Y-%m-%d %H:%M:%S" "${profile_expire_date}" +"%Y-%m-%dT%H:%M:%SZ")
+  # Handle github action, testflight builds that expire <= 90 days
+  if [ -n "$GITHUB_ACTIONS" ]; then
+    github_expire_date=$(date -j -v+90d +"%Y-%m-%dT%H:%M:%SZ")
+
+    if [ "$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "${github_expire_date}" +%s)" -lt "$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "${profile_expire_date}" +%s)" ]; then
+        profile_expire_date=$github_expire_date
+    else
+        echo "GitHub Actions detected, expiration date is not more than 90 days in the future."
+    fi
+  fi
+
   plutil -replace com-loopkit-Loop-profile-expiration -date "${profile_expire_date}" "${info_plist_path}"
 else
   warn "Invalid provisioning profile path ${provisioning_profile_path}"
@@ -88,15 +99,6 @@ then
     branch=$(git branch --show-current)
     if [ -n "$branch" ]; then
         plutil -replace com-loopkit-LoopWorkspace-git-branch -string "${branch}" "${info_plist_path}"
-    fi
-    # determine if this is a GitHub Action build (with 90 day expiration)
-    folderName=$(pwd)
-    runnerString="/Users/runner"
-    if [ "${folderName:0:13}" == "$runnerString" ]; then
-        # overwrite profile_expire_date
-        profile_expire_date=$(date -j -v+90d +"%Y-%m-%dT%H:%M:%SZ")
-        echo "runnerString detected, update profile_expire_date to ${profile_expire_date}"
-        plutil -replace com-loopkit-Loop-profile-expiration -date "${profile_expire_date}" "${info_plist_path}"
     fi
     popd . > /dev/null
 fi
