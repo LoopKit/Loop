@@ -16,9 +16,9 @@ class SupportManagerTests: XCTestCase {
     enum MockError: Error { case nothing }
 
     class Mixin {
-        func supportMenuItem(supportInfoProvider: SupportInfoProvider, urlHandler: @escaping (URL) -> Void) -> AnyView? {
-            nil
-        }
+        @ViewBuilder
+        func supportMenuItem(supportInfoProvider: SupportInfoProvider, urlHandler: @escaping (URL) -> Void) -> some View {}
+        
         func softwareUpdateView(bundleIdentifier: String, currentVersion: String, guidanceColors: GuidanceColors, openAppStore: (() -> Void)?) -> AnyView? {
             nil
         }
