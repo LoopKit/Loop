@@ -290,13 +290,14 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     private func checkIfOverrideEnabled() {
-        if let managerSettings = delegate?.settings {
-            if let overrideSettings = managerSettings.scheduleOverride?.settings, overrideSettings.effectiveInsulinNeedsScaleFactor != 1.0 {
-                self.warnings.insert(.overrideInProgress)
-            }
-            else {
-                self.warnings.remove(.overrideInProgress)
-            }
+        if let managerSettings = delegate?.settings,
+           managerSettings.scheduleOverrideEnabled(at: Date()),
+           let overrideSettings = managerSettings.scheduleOverride?.settings,
+           overrideSettings.effectiveInsulinNeedsScaleFactor != 1.0 {
+            self.warnings.insert(.overrideInProgress)
+        }
+        else {
+            self.warnings.remove(.overrideInProgress)
         }
     }
     
