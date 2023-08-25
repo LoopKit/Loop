@@ -122,9 +122,6 @@
 /* Alert message for a missing pump error */
 "A pump must be configured before a bolus can be delivered." = "Prima di poter erogare un bolo, è necessario configurare un microinfusore.";
 
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "Tempo di assorbimento";
-
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
 
@@ -278,8 +275,7 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Effetto carboidrati";
 
-/* Back button text for bolus screen to return to carb entry screen
-   Label for carb entry row on bolus screen */
+/* Label for carb entry row on bolus screen */
 "Carb Entry" = "Carboidrati Assunti";
 
 /* Details for configuration error when carb ratio schedule is missing */
@@ -291,9 +287,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Agg. Carb. Assunti";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Mod. Carb Assunti";
 
 /* Title for bolus screen warning when carbohydrate entry is too large */
 "Carbohydrate Entry Too Large" = "Le voci dei Carboidrati inseriti sono troppo grandi";
@@ -325,7 +318,8 @@
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Scegli un tempo di assorbimento piu lungo per i pasti piu grandi o quelli contenenti grassi e proteine. Questa e solo una guida all’algoritmo e non e necessario che sia esatta.";
 
-/* The button label of the action used to dismiss the unsafe notification permission alert */
+/* Button title to close view
+   The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Chiudi";
 
 /* The title text for the looping enabled switch cell */
@@ -486,10 +480,10 @@
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Probabile Glic. %@";
 
-/* Remote command error description: bolus exceeds maximum bolus in settings. */
+/* Bolus error description: bolus exceeds maximum bolus in settings. */
 "Exceeds maximum allowed bolus in settings" = "Supera il bolo massimo consentito nelle impostazioni";
 
-/* Remote command error description: carbs exceed maximum amount. */
+/* Carb error description: carbs exceed maximum amount. */
 "Exceeds maximum allowed carbs" = "Supera i carboidrati massimi consentiti";
 
 /* The title of the alert describing a maximum bolus validation error */
@@ -553,9 +547,6 @@
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "A tempo indeterminato";
 
-/* Title of the alert when carb input maximum was exceeded. */
-"Input Maximum Exceeded" = "Superato il numero massimo di input";
-
 /* Title of the prediction input effect for insulin */
 "Insulin" = "Insulina";
 
@@ -594,7 +585,7 @@
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Interrotto %1$@ : <b> %2$@ </b> di %3$@ %4$@";
 
-/* Remote command error description: invalid carb amount. */
+/* Carb error description: invalid carb amount. */
 "Invalid carb amount" = "Quantità di carboidrati non valida";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
@@ -671,9 +662,6 @@
 /* Title for bolus screen warning when max bolus is exceeded */
 "Maximum Bolus Exceeded" = "Bolo Massimo Superato";
 
-/* Alert title when maximum duration exceeded. */
-"Maximum Duration Exceeded" = "Durata massima superata";
-
 /* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Bolo pasto";
 
@@ -683,7 +671,7 @@
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Dati mancanti: %1$@";
 
-/* Remote command error description: missing maximum bolus in settings. */
+/* Bolus error description: missing maximum bolus in settings. */
 "Missing maximum allowed bolus in settings" = "Manca il bolo massimo consentito nelle impostazioni";
 
 /* The short unit display string for millimoles of glucose per liter */
@@ -695,7 +683,7 @@
 /* Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Piu info";
 
-/* Label for toggle to mute all alerts */
+/* Label for button to mute all alerts */
 "Mute All Alerts" = "Disattiva tutti gli avvisi";
 
 /* Sensor state description for the non-valid state */
@@ -703,9 +691,6 @@
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
-
-/* Description of temporary mute alerts */
-"No alerts will sound while muted. Once this period ends, your alerts and alarms will resume as normal." = "Nessun avviso suonerà mentre è disattivato. Al termine di questo periodo, gli avvisi e gli allarmi riprenderanno normalmente.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -857,9 +842,6 @@
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
 "Remote Carbs Entry: %d grams" = "Inserimento remoto di carboidrati: %d grammi";
 
-/* The notification title for the remote command expiration error */
-"Remote Command Expired" = "Il comando remoto è scaduto.";
-
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Serbatoio";
 
@@ -877,9 +859,6 @@
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Programmato";
-
-/* List header for mute all alerts period */
-"Select Mute Period" = "Scegliere il periodo muto";
 
 /* The title of the services section in settings */
 "Services" = "Servizi";
@@ -915,8 +894,6 @@
 "Starting Bolus" = "Avvio Bolo";
 
 /* Section title for Support
-   Support screen title
-   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Supporto";
 
@@ -941,9 +918,6 @@
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Interrompi";
 
-/* The title of the cell indicating alerts are temporarily muted */
-"Temp Mute Alerts" = "Disattiva gli avvisi";
-
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "La quantità di bolo immessa è inferiore alla quantità minima erogabile.";
 
@@ -955,9 +929,6 @@
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "ll modello antecedente usato da Loop, che consente la personalizzazione della durata dell'azione.";
-
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "Il tempo di assorbimento massimo e %@";
 
 /* Alert body displayed for quantity greater than max (1: maximum quantity in grams) */
 "The maximum allowed amount is %@ grams." = "La quantità massima consentita è %@ grammi.";
@@ -974,14 +945,8 @@
 /* Alert message for a missing maximum bolus setting error */
 "The maximum bolus setting must be configured before a bolus can be delivered." = "L'impostazione del bolo massimo deve essere configurata prima di poter erogare un bolo.";
 
-/* The notification body for a remote command expiration. (1: Expiration in minutes) */
-"The remote command expired %.0f minutes ago." = "Il comando remoto è scaduto %.0f minuti fa.";
-
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Impostazioni Terapia";
-
-/* Title of the carb entry date picker cell */
-"Time" = "Tempo";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Notifiche a tempo";
@@ -1011,6 +976,8 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Impossibile interrompere il bolo in corso. Avvicinare l'iPhone al microinfusore e riprovare. Controllare nella cronologia delle somministrazioni l'insulina e monitorare attentamente la glicemia.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Sconosciuto";
 

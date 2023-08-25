@@ -85,6 +85,9 @@
 /* The title of the nightscout site URL credential */
 "Site URL" = "URL adresa webu";
 
+/* The error message displayed for unknown errors. (1: unknown error) */
+"Unknown Error: %1$@" = "Neznámá chyba: %1$@";
+
 /* Unknown amount of time in settings' profile expiration section */
 "Unknown time" = "Neznámý čas";
 

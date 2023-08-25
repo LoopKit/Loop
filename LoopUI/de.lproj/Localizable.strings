@@ -2,13 +2,13 @@
 "\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n%2$@ wird mit Closed Loop in der Position EIN betrieben.";
 
 /* Red loop message (1: last loop  string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippen Sie auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, einen Loop abzuschließen, aber achten Sie auf mögliche Kommunikationsprobleme mit Ihrer Pumpe und CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippe auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, einen Loop abzuschließen, aber achte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und CGM.";
 
 /* Yellow loop message (1: last loop string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippen Sie auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, einen Loop abzuschließen, aber achten Sie auf mögliche Kommunikationsprobleme mit Ihrer Pumpe und CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTippe auf die Statussymbole für das CGM oder die Insulinpumpe, um weitere Informationen zu erhalten. %2$@ wird weiterhin versuchen, einen Loop abzuschließen, aber achte auf mögliche Kommunikationsprobleme mit Deiner Pumpe und CGM.";
 
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
-"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ arbeitet mit geschlossenem Regelkreis in der AUS-Position. Ihre Pumpe und CGM funktionieren weiter, aber die App passt die Dosierung nicht automatisch an.\n\n%2$@";
+"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ arbeitet mit geschlossenem Regelkreis in der AUS-Position. Deine Pumpe und CGM funktionieren weiter, aber die App passt die Dosierung nicht automatisch an.\n\n%2$@";
 
 /* No glucose value representation (3 dashes for mg/dL) */
 "– – –" = "– – –";
@@ -89,7 +89,7 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* Instructions for user to close loop if it is allowed. */
-"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Tippen Sie auf Einstellungen, um Closed Loop einzuschalten, wenn Sie möchten, dass die App Ihr Insulin automatisiert.";
+"Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin." = "Tippe auf Einstellungen, um Closed Loop einzuschalten, wenn Du möchtest, dass die App Dein Insulin automatisiert.";
 
 /* The short unit display string for international units of insulin */
 "U" = "IE";
