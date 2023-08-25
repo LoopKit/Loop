@@ -470,6 +470,7 @@
 		C1D0B6302986D4D90098D215 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D0B62F2986D4D90098D215 /* LocalizedString.swift */; };
 		C1D0B6312986D4D90098D215 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D0B62F2986D4D90098D215 /* LocalizedString.swift */; };
 		C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */; };
+		C1D476B42A8ED179002C1C87 /* LoopAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D476B32A8ED179002C1C87 /* LoopAlgorithmTests.swift */; };
 		C1D6EEA02A06C7270047DE5C /* MKRingProgressView in Frameworks */ = {isa = PBXBuildFile; productRef = C1D6EE9F2A06C7270047DE5C /* MKRingProgressView */; };
 		C1DE5D23251BFC4D00439E49 /* SimpleBolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */; };
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -1543,6 +1544,7 @@
 		C1D197FE232CF92D0096D646 /* capture-build-details.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "capture-build-details.sh"; sourceTree = "<group>"; };
 		C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalDeliveryState.swift; sourceTree = "<group>"; };
 		C1D70F7A2A914F71009FE129 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C1D476B32A8ED179002C1C87 /* LoopAlgorithmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAlgorithmTests.swift; sourceTree = "<group>"; };
 		C1DA986B2843B6F9001D04CC /* PersistedProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedProperty.swift; sourceTree = "<group>"; };
 		C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleBolusView.swift; sourceTree = "<group>"; };
 		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -1864,6 +1866,7 @@
 				E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */,
 				1D70C40026EC0F9D00C62570 /* SupportManagerTests.swift */,
 				A9F5F1F4251050EC00E7C8A4 /* ZipArchiveTests.swift */,
+				C1D476B32A8ED179002C1C87 /* LoopAlgorithmTests.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -3991,6 +3994,7 @@
 				E93E86A824DDCC4400FF40C8 /* MockDoseStore.swift in Sources */,
 				B4D4534128E5CA7900F1A8D9 /* AlertMuterTests.swift in Sources */,
 				E98A55F124EDD85E0008715D /* MockDosingDecisionStore.swift in Sources */,
+				C1D476B42A8ED179002C1C87 /* LoopAlgorithmTests.swift in Sources */,
 				8968B114240C55F10074BB48 /* LoopSettingsTests.swift in Sources */,
 				A9BD28E7272226B40071DF15 /* TestLocalizedError.swift in Sources */,
 				A9F5F1F5251050EC00E7C8A4 /* ZipArchiveTests.swift in Sources */,
