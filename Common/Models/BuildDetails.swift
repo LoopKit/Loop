@@ -65,5 +65,9 @@ class BuildDetails {
     var workspaceGitBranch: String? {
        return dict["com-loopkit-LoopWorkspace-git-branch"] as? String
    }
+    
+    var isGitHubBuild: Bool? {
+        return dict["com-loopkit-GitHub-build"] as? Bool
+    }
 }
 

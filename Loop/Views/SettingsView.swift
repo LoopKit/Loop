@@ -417,25 +417,48 @@ extension SettingsView {
      DIY loop specific component to show users the amount of time remaining on their build before a rebuild is necessary.
      */
     private func profileExpirationSection(profileExpiration:Date) -> some View {
-        let nearExpiration : Bool = ProfileExpirationAlerter.isNearProfileExpiration(profileExpiration: profileExpiration)
-        let profileExpirationMsg = ProfileExpirationAlerter.createProfileExpirationSettingsMessage(profileExpiration: profileExpiration)
-        let readableExpirationTime = Self.dateFormatter.string(from: profileExpiration)
+        let expirationDate = AppExpirationAlerter.calculateExpirationDate(profileExpiration: profileExpiration)
+        let isTestFlight = AppExpirationAlerter.isTestFlightBuild()
         
-        return Section(header: SectionHeader(label: NSLocalizedString("App Profile", comment: "Settings app profile section")),
-                       footer: Text(NSLocalizedString("Profile expires ", comment: "Time that profile expires") + readableExpirationTime)) {
-            if(nearExpiration) {
-                Text(profileExpirationMsg).foregroundColor(.red)
-            } else {
-                HStack {
-                    Text("Profile Expiration", comment: "Settings App Profile expiration view")
-                    Spacer()
-                    Text(profileExpirationMsg).foregroundColor(Color.secondary)
+        let nearExpiration : Bool = AppExpirationAlerter.isNearExpiration(expirationDate: expirationDate)
+        let profileExpirationMsg = AppExpirationAlerter.createProfileExpirationSettingsMessage(expirationDate: expirationDate)
+        let readableExpirationTime = Self.dateFormatter.string(from: expirationDate)
+        
+        if isTestFlight {
+            return Section(header: SectionHeader(label: NSLocalizedString("TestFlight", comment: "Settings app TestFlight section")),
+                           footer: Text(NSLocalizedString("TestFlight expires ", comment: "Time that build expires") + readableExpirationTime)) {
+                if(nearExpiration) {
+                    Text(profileExpirationMsg).foregroundColor(.red)
+                } else {
+                    HStack {
+                        Text("TestFlight Expiration", comment: "Settings TestFlight expiration view")
+                        Spacer()
+                        Text(profileExpirationMsg).foregroundColor(Color.secondary)
+                    }
+                }
+                Button(action: {
+                    UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/gh-actions/gh-update/")!)
+                }) {
+                    Text(NSLocalizedString("How to update (LoopDocs)", comment: "The title text for how to update"))
                 }
             }
-            Button(action: {
-                UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/build/updating/")!)
-            }) {
-                Text(NSLocalizedString("How to update (LoopDocs)", comment: "The title text for how to update"))
+        } else {
+            return Section(header: SectionHeader(label: NSLocalizedString("App Profile", comment: "Settings app profile section")),
+                           footer: Text(NSLocalizedString("Profile expires ", comment: "Time that profile expires") + readableExpirationTime)) {
+                if(nearExpiration) {
+                    Text(profileExpirationMsg).foregroundColor(.red)
+                } else {
+                    HStack {
+                        Text("Profile Expiration", comment: "Settings App Profile expiration view")
+                        Spacer()
+                        Text(profileExpirationMsg).foregroundColor(Color.secondary)
+                    }
+                }
+                Button(action: {
+                    UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/build/updating/")!)
+                }) {
+                    Text(NSLocalizedString("How to update (LoopDocs)", comment: "The title text for how to update"))
+                }
             }
         }
     }
