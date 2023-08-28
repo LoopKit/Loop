@@ -107,6 +107,7 @@ class AppExpirationAlerter {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "EEE MMM d HH:mm:ss 'UTC' yyyy"
         dateFormatter.locale = Locale(identifier: "en_US_POSIX") // Set locale to ensure parsing works
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
         
         guard let dateString = BuildDetails.default.buildDateString,
               let date = dateFormatter.date(from: dateString) else {
