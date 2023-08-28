@@ -72,7 +72,6 @@ if [ -e "${provisioning_profile_path}" ]; then
   profile_expire_date=$(security cms -D -i "${provisioning_profile_path}" | plutil -p - | grep ExpirationDate | cut -b 23-)
   # Convert to plutil format
   profile_expire_date=$(date -j -f "%Y-%m-%d %H:%M:%S" "${profile_expire_date}" +"%Y-%m-%dT%H:%M:%SZ")
-
   plutil -replace com-loopkit-Loop-profile-expiration -date "${profile_expire_date}" "${info_plist_path}"
 else
   warn "Invalid provisioning profile path ${provisioning_profile_path}"
@@ -91,9 +90,4 @@ then
         plutil -replace com-loopkit-LoopWorkspace-git-branch -string "${branch}" "${info_plist_path}"
     fi
     popd . > /dev/null
-fi
-
-# Handle github action
-if [ -n "$GITHUB_ACTIONS" ]; then
-    plutil -replace com-loopkit-GitHub-build -bool true "${info_plist_path}"
 fi
