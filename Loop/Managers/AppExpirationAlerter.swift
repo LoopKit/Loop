@@ -51,7 +51,7 @@ class AppExpirationAlerter {
                 title: NSLocalizedString("TestFlight Expires Soon", comment: "The title for notification of upcoming TestFlight expiration"),
                 message: alertMessage,
                 preferredStyle: .alert)
-            dialog.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Text for ok action on notification of upcoming profile expiration"), style: .default, handler: nil))
+            dialog.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Text for ok action on notification of upcoming TestFlight expiration"), style: .default, handler: nil))
             dialog.addAction(UIAlertAction(title: NSLocalizedString("More Info", comment: "Text for more info action on notification of upcoming TestFlight expiration"), style: .default, handler: { (_) in
                 UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/gh-actions/gh-update/")!)
             }))
@@ -73,9 +73,9 @@ class AppExpirationAlerter {
     
     static func createVerboseAlertMessage(timeUntilExpirationStr:String) -> String {
         if isTestFlightBuild() {
-            return String(format: NSLocalizedString("%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile.", comment: "Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration"), Bundle.main.bundleDisplayName, timeUntilExpirationStr)
+            return String(format: NSLocalizedString("%1$@ will stop working in %2$@. You will need to rebuild before that.", comment: "Format string for body for notification of upcoming expiration. (1: app name) (2: amount of time until expiration"), Bundle.main.bundleDisplayName, timeUntilExpirationStr)
         } else {
-            return String(format: NSLocalizedString("%1$@ will stop working in %2$@. You will need to rebuild before that.", comment: "Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration"), Bundle.main.bundleDisplayName, timeUntilExpirationStr)
+            return String(format: NSLocalizedString("%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile.", comment: "Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration"), Bundle.main.bundleDisplayName, timeUntilExpirationStr)
         }
     }
     
