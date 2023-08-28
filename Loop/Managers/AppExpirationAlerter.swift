@@ -104,7 +104,7 @@ class AppExpirationAlerter {
         formatter.unitsStyle = .full
         formatter.zeroFormattingBehavior = .dropLeading
         formatter.maximumUnitCount = maxUnitCount
-        return formatter;
+        return formatter
     }
     
     static func buildDate() -> Date? {
@@ -122,9 +122,23 @@ class AppExpirationAlerter {
     }
     
     static func isTestFlightBuild() -> Bool {
-        return BuildDetails.default.isGitHubBuild ?? false
+        // If an "embedded.mobileprovision" is present in the main bundle, then
+        // this is an Xcode, Ad-Hoc, or Enterprise distribution. Return false.
+        if Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision") != nil {
+            return false
+        }
+
+        // If an app store receipt is not present in the main bundle, then we cannot
+        // say whether this is a TestFlight or App Store distribution. Return false.
+        guard let receiptName = Bundle.main.appStoreReceiptURL?.lastPathComponent else {
+            return false
+        }
+
+        // A TestFlight distribution presents a "sandboxReceipt", while an App Store
+        // distribution presents a "receipt". Return true if we have a TestFlight receipt.
+        return "sandboxReceipt".caseInsensitiveCompare(receiptName) == .orderedSame
     }
-    
+
     static func calculateExpirationDate(profileExpiration: Date) -> Date {
         let isTestFlight = isTestFlightBuild()
         
