@@ -19,8 +19,8 @@ class AppExpirationAlerter {
     static func alertIfNeeded(viewControllerToPresentFrom: UIViewController) {
         
         let now = Date()
-        
-        guard let profileExpiration = BuildDetails.default.profileExpiration, now > profileExpiration - expirationAlertWindow else {
+
+        guard let profileExpiration = BuildDetails.default.profileExpiration else {
             return
         }
         
@@ -28,6 +28,10 @@ class AppExpirationAlerter {
         
         let timeUntilExpiration = expirationDate.timeIntervalSince(now)
         
+        if timeUntilExpiration > expirationAlertWindow {
+            return
+        }
+
         let minimumTimeBetweenAlerts: TimeInterval = timeUntilExpiration > .hours(24) ? .days(2) : .hours(1)
         
         if let lastAlertDate = UserDefaults.appGroup?.lastProfileExpirationAlertDate {
