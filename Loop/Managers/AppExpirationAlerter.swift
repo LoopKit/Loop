@@ -122,6 +122,12 @@ class AppExpirationAlerter {
     }
     
     static func isTestFlightBuild() -> Bool {
+        // If the target environment is a simulator, then
+        // this is not a TestFlight distribution. Return false.
+        #if targetEnvironment(simulator)
+            return false
+        #endif
+
         // If an "embedded.mobileprovision" is present in the main bundle, then
         // this is an Xcode, Ad-Hoc, or Enterprise distribution. Return false.
         if Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision") != nil {
