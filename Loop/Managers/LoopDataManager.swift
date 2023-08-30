@@ -910,8 +910,8 @@ extension LoopDataManager {
         notify(forChange: .loopFinished)
 
         if FeatureFlags.missedMealNotifications {
-            let carbEffectStart = now().addingTimeInterval(-MissedMealSettings.maxRecency)
-            carbStore.getGlucoseEffects(start: carbEffectStart, end: now(), effectVelocities: insulinCounteractionEffects) {[weak self] result in
+            let samplesStart = now().addingTimeInterval(-MissedMealSettings.maxRecency)
+            carbStore.getGlucoseEffects(start: samplesStart, end: now(), effectVelocities: insulinCounteractionEffects) {[weak self] result in
                 guard
                     let self = self,
                     case .success((_, let carbEffects)) = result
@@ -921,15 +921,28 @@ extension LoopDataManager {
                     }
                     return
                 }
-                
-                self.mealDetectionManager.generateMissedMealNotificationIfNeeded(
-                    insulinCounteractionEffects: self.insulinCounteractionEffects,
-                    carbEffects: carbEffects,
-                    pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
-                    bolusDurationEstimator: { [unowned self] bolusAmount in
-                        return self.delegate?.loopDataManager(self, estimateBolusDuration: bolusAmount)
+
+                glucoseStore.getGlucoseSamples(start: samplesStart, end: now()) {[weak self] result in
+                    guard
+                        let self = self,
+                        case .success(let glucoseSamples) = result
+                    else {
+                        if case .failure(let error) = result {
+                            self?.logger.error("Failed to fetch glucose samples to check for missed meal: %{public}@", String(describing: error))
+                        }
+                        return
                     }
-                )
+
+                    self.mealDetectionManager.generateMissedMealNotificationIfNeeded(
+                        glucoseSamples: glucoseSamples,
+                        insulinCounteractionEffects: self.insulinCounteractionEffects,
+                        carbEffects: carbEffects,
+                        pendingAutobolusUnits: self.recommendedAutomaticDose?.recommendation.bolusUnits,
+                        bolusDurationEstimator: { [unowned self] bolusAmount in
+                            return self.delegate?.loopDataManager(self, estimateBolusDuration: bolusAmount)
+                        }
+                    )
+                }                
             }
         }
 
