@@ -75,7 +75,7 @@ public struct SettingsView: View {
                     supportSection
 
                     if let profileExpiration = BuildDetails.default.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
-                        profileExpirationSection(profileExpiration: profileExpiration)
+                        appExpirationSection(profileExpiration: profileExpiration)
                     }
                 }
             }
