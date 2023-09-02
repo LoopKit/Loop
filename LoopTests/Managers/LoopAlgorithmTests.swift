@@ -70,8 +70,6 @@ final class LoopAlgorithmTests: XCTestCase {
             XCTAssertEqual(expected.startDate, calculated.startDate)
             XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
         }
-
-        //XCTAssertEqual(1.99, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
 
 }
