@@ -29,31 +29,31 @@ public struct SettingsView: View {
             var id: String {
                 rawValue
             }
-            
+
             case deleteCGMData
             case deletePumpData
         }
-        
+
         enum ActionSheet: String, Identifiable {
             var id: String {
                 rawValue
             }
-            
+
             case cgmPicker
             case pumpPicker
             case servicePicker
         }
-        
+
         enum Sheet: String, Identifiable {
             var id: String {
                 rawValue
             }
-            
+
             case favoriteFoods
             case therapySettings
         }
     }
-    
+
     @State private var actionSheet: Destination.ActionSheet?
     @State private var alert: Destination.Alert?
     @State private var sheet: Destination.Sheet?
@@ -254,7 +254,7 @@ extension SettingsView {
             }
         }
     }
-    
+
     @ViewBuilder
     private var alertWarning: some View {
         if viewModel.alertPermissionsChecker.showWarning || viewModel.alertPermissionsChecker.notificationCenterSettings.scheduledDeliveryEnabled {
@@ -369,8 +369,8 @@ extension SettingsView {
             LargeButton(action: { sheet = .favoriteFoods },
                         includeArrow: true,
                         imageView: Image("Favorite Foods Icon").renderingMode(.template).foregroundColor(carbTintColor),
-                        label: "Favorite Foods",
-                        descriptiveText: "Simplify Carb Entry")
+                        label: NSLocalizedString("Favorite Foods", comment: "Label for favorite foods in settings view"),
+                        descriptiveText: NSLocalizedString("Simplify Carb Entry", comment: "subheadline of favorite foods in settings view"))
         }
     }
     
@@ -493,7 +493,7 @@ extension SettingsView {
             )
         }
     }
-    
+
     private func createAppExpirationSection(headerLabel: String, footerLabel: String, expirationLabel: String, updateURL: String, nearExpiration: Bool, expirationMessage: String) -> some View {
         return Section(
             header: SectionHeader(label: headerLabel),
@@ -557,7 +557,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
     let secondaryImageView: SecondaryContent
     let label: String
     let descriptiveText: String
-    
+
     init(
         action: @escaping () -> Void,
         includeArrow: Bool = true,
@@ -593,15 +593,15 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
                         DescriptiveText(label: descriptiveText)
                     }
                 }
-                
+
                 if !(secondaryImageView is EmptyView) || includeArrow {
                     Spacer()
                 }
-                
+
                 if !(secondaryImageView is EmptyView) {
                     secondaryImageView.frame(width: secondaryImageWidth, height: secondaryImageHeight)
                 }
-                
+
                 if includeArrow {
                     // TODO: Ick. I can't use a NavigationLink because we're not Navigating, but this seems worse somehow.
                     Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)

@@ -125,6 +125,9 @@
 /* Alert message for a missing pump error */
 "A pump must be configured before a bolus can be delivered." = "Eine Pumpe muss konfiguriert werden, bevor ein Bolus abgegeben werden kann.";
 
+/* Label for absorption time in favorite food entry */
+"Absorption Time" = "Resorptionsdauer";
+
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "Akzeptiere empfohlenen Bolus";
 
@@ -142,6 +145,9 @@
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktives Insulin: %@";
+
+/* No comment provided by engineer. */
+"Add a new favorite food" = "Erstelle einen neuen Favoriten";
 
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "KH hinzufügen";
@@ -171,17 +177,24 @@
    Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Benachrichtigungsberechtigungen";
 
+/* Navigation title for algorithms experiments screen
+   The title of the Algorithm Experiments section in settings */
+"Algorithm Experiments" = "Algorithmusexperimente";
+
+/* Algorithm Experiments description. */
+"Algorithm Experiments are optional modifications to the Loop Algorithm. These modifications are less tested than the standard Loop Algorithm, so please use carefully." = "Algorithmusexperimente sind optionale Modifikationen des Schleifenalgorithmus. Diese Modifikationen sind weniger getestet als der Standard-Loop-Algorithmus. Gehe daher bitte vorsichtig vor!";
+
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algorithmus-Einstellungen";
-
-/* Label for when mute alert will end */
-"All alerts muted until" = "Alle Alarme stummgeschaltet bis";
 
 /* No comment provided by engineer. */
 "All Favorites" = "Alle Favoriten";
 
 /* Label for carb quantity entry row on carb entry screen */
-"Amount Consumed" = "KH-Menge gegessen";
+"Amount Consumed" = "Menge gegessen";
+
+/* Label for when mute alert will end */
+"All alerts muted until" = "Alle Alarme stummgeschaltet bis";
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
@@ -209,6 +222,9 @@
 
 /* Settings app profile section */
 "App Profile" = "App-Profil";
+
+/* Placeholder for name in favorite food entry screen */
+"Apple" = "Apfel";
 
 /* Action sheet confirmation message for pump history deletion */
 "Are you sure you want to delete all history entries?" = "Möchtest Du wirklich alle Verlaufseinträge löschen?";
@@ -295,6 +311,10 @@
 
 /* Label for carb entry row on bolus screen */
 "Carb Entry" = "KH-Eintrag";
+
+/* Label for carb quantity entry row on favorite food entry screen
+   Label for carb quantity in favorite food entry */
+"Carb Quantity" = "KH-Menge";
 
 /* Details for configuration error when carb ratio schedule is missing */
 "Carb Ratio Schedule" = "Zeitplan für das Kohlenhydratverhältnis";
@@ -477,6 +497,9 @@
 /* Override error description: duration exceed max (1: max duration in hours). */
 "Duration exceeds: %1$.1f hours" = "Dauer überschritten: %1$.1f Stunden";
 
+/* No comment provided by engineer. */
+"Edit" = "Bearbeiten";
+
 /* Message to the user to enable bluetooth */
 "Enable\nBluetooth" = "Bluetooth einschalten";
 
@@ -540,6 +563,9 @@
 /* No comment provided by engineer. */
 "FAVORITE FOODS" = "Favorisiertes Essen";
 
+/* No comment provided by engineer. */
+"Favorite Foods" = "Favorisiertes Essen";
+
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
 
@@ -548,6 +574,10 @@
 
 /* Secondary text for alerts disabled warning, which appears on the main status screen. */
 "Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Behebe dies jetzt, indem Du Benachrichtigungen, kritische Alarme und zeitkritische Benachrichtigungen einschaltest.";
+
+/* label for food type in favorite entry screen
+   Label for food type in favorite food entry */
+"Food Type" = "Essensart";
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Für %1$@";
@@ -566,6 +596,10 @@
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Blutzucker";
+
+/* Title for glucose based partial application experiment description
+   Title of glucose based partial application experiment */
+"Glucose Based Partial Application" = "Glucose Based Partial Application";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "Blutzuckerdaten sind %1$@ alt";
@@ -760,6 +794,10 @@
 /* Label for button to mute all alerts */
 "Mute All Alerts" = "Alle Alarme stummschalten";
 
+/* Label for name in favorite food entry
+   Label for name in favorite food entry screen */
+"Name" = "Name";
+
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Erfordert Aufmerksamkeit";
 
@@ -938,14 +976,23 @@
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Wiederholen";
 
+/* No comment provided by engineer. */
+"Save" = "Speichern";
+
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Speichern und Bolus abgeben";
+
+/* No comment provided by engineer. */
+"Save as favorite food" = "Als Favorit speichern";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Speichern ohne Bolusgabe";
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Geplant";
+
+/* No comment provided by engineer. */
+"Selecting a favorite food in the carb entry screen automatically fills in the carb quantity, food type, and absorption time fields! Tap the add button below to create your first favorite food!" = "Wenn Du auf dem Kohlenhydrat-Eingabebildschirm ein Lieblingslebensmittel auswählst, werden automatisch die Felder Kohlenhydratmenge, Lebensmittelart und Absorptionszeit ausgefüllt! Tippe unten auf die Schaltfläche „Hinzufügen“, um Dein erstes Lieblingsessen zu erstellen!";
 
 /* The title of the services section in settings */
 "Services" = "Dienste";
@@ -964,6 +1011,9 @@
 
 /* Title of simple bolus view when displaying meal entry */
 "Simple Meal Calculator" = "Einfacher Mahlzeitenrechner";
+
+/* subheadline of Favorite Foods */
+"Simplify Carb Entry" = "Vereinfachte KH Eingabe";
 
 /* Format fragment for a start time */
 "since %@" = "seit %@";
