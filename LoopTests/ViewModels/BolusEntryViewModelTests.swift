@@ -283,7 +283,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
     
     func testUpdateCarbsOnBoard() async throws {
-        delegate.carbsOnBoardResult = .success(CarbValue(startDate: Self.exampleStartDate, endDate: Self.exampleEndDate, quantity: Self.exampleCarbQuantity))
+        delegate.carbsOnBoardResult = .success(CarbValue(startDate: Self.exampleStartDate, endDate: Self.exampleEndDate, value: Self.exampleCarbQuantity.doubleValue(for: .gram())))
         XCTAssertNil(bolusEntryViewModel.activeCarbs)
         await bolusEntryViewModel.update()
         XCTAssertEqual(Self.exampleCarbQuantity, bolusEntryViewModel.activeCarbs)

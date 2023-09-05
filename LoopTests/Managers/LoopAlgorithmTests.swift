@@ -71,5 +71,4 @@ final class LoopAlgorithmTests: XCTestCase {
             XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
         }
     }
-
 }

@@ -147,7 +147,7 @@ fileprivate extension StoredDosingDecision {
                                                       healthKitEligibleDate: nil)
         let carbsOnBoard = CarbValue(startDate: date,
                                      endDate: date.addingTimeInterval(.minutes(5)),
-                                     quantity: HKQuantity(unit: .gram(), doubleValue: 45.5))
+                                     value: 45.5)
         let insulinOnBoard = InsulinValue(startDate: date, value: 1.5)
         let glucoseTargetRangeSchedule = GlucoseRangeSchedule(rangeSchedule: DailyQuantitySchedule(unit: .milligramsPerDeciliter,
                                                                                                    dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: DoubleRange(minValue: 100.0, maxValue: 110.0)),

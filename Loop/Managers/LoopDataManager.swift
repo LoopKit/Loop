@@ -1101,7 +1101,7 @@ extension LoopDataManager {
                     switch error {
                     case .noData:
                         // when there is no data, carbs on board is set to 0
-                        self.carbsOnBoard = CarbValue(startDate: Date(), quantity: HKQuantity(unit: .gram(), doubleValue: 0))
+                        self.carbsOnBoard = CarbValue(startDate: Date(), value: 0)
                     default:
                         self.carbsOnBoard = nil
                         warnings.append(.fetchDataWarning(.carbsOnBoard(error: error)))
