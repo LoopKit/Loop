@@ -22,7 +22,7 @@ public struct IntegralRetrospectiveCorrectionSelectionView: View {
 
                 Divider()
 
-                Text(NSLocalizedString("Integral Retrospective Correction (IRC) is an extension of the standard Retrospective Correction (RC) algorithm component in Loop, which adjusts the forecast based on the history of discrepancies between predicted and actual glucose levels.\n\nIn contrast to RC, which looks at discrepancies over the last 30 minute, with IRC, the history of discrepancies adds up over time. So continued positive discrepencies over time will result in increased dosing. If the discrepancies are negative over time, Loop will reduce dosing further.", comment: "Description of Integral Retrospective Correction toggle."))
+                Text(NSLocalizedString("Integral Retrospective Correction (IRC) is an extension of the standard Retrospective Correction (RC) algorithm component in Loop, which adjusts the forecast based on the history of discrepancies between predicted and actual glucose levels.\n\nIn contrast to RC, which looks at discrepancies over the last 30 minutes, with IRC, the history of discrepancies adds up over time. So continued positive discrepancies over time will result in increased dosing. If the discrepancies are negative over time, Loop will reduce dosing further.", comment: "Description of Integral Retrospective Correction toggle."))
                     .foregroundColor(.secondary)
                 Divider()
 

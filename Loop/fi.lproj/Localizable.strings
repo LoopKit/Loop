@@ -89,9 +89,6 @@
 /* Alert message for a missing pump error */
 "A pump must be configured before a bolus can be delivered." = "Pumppu on määritettävä, ennen kuin bolus voidaan annostella.";
 
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "Imeytymisaika";
-
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "HyväksySuositeltuBolus";
 
@@ -226,8 +223,7 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Hiilihydraattivaikutus";
 
-/* Back button text for bolus screen to return to carb entry screen
-   Label for carb entry row on bolus screen */
+/* Label for carb entry row on bolus screen */
 "Carb Entry" = "Hiilihydraatit";
 
 /* The title of the carb ratios schedule screen
@@ -236,9 +232,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Lisää hiilihydraatteja";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Muokkaa hiilihydraatteja";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Hiilihydraatit";
@@ -264,7 +257,8 @@
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Valitse pidempi imeytymisaika isoille tai paljon rasvaa ja proteiineja sisältäville aterioille. Tämä on suuntaa antava ohje, eikä sen tarvitse olla tarkka.";
 
-/* The button label of the action used to dismiss the unsafe notification permission alert */
+/* Button title to close view
+   The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Sulje";
 
 /* The title text for the looping enabled switch cell */
@@ -708,8 +702,6 @@
 "Starting Bolus" = "Aloitetaan bolus";
 
 /* Section title for Support
-   Support screen title
-   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Tuki";
 
@@ -740,9 +732,6 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Loopin vanha insuliinimalli, jossa voi muokata insuliinin vaikutusaikaa.";
 
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "Pisin sallittu imeytymisaika on %@";
-
 /* Alert message for a maximum bolus validation error (1: max bolus value) */
 "The maximum bolus amount is %@ U." = "Suurin sallittu bolus on %@ U.";
 
@@ -754,9 +743,6 @@
 
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Hoitoasetukset";
-
-/* Title of the carb entry date picker cell */
-"Time" = "Aika";
 
 /* Critical event log export error alert try again button */
 "Try Again" = "Yritä uudelleen";
@@ -780,6 +766,8 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Käynnissä olevaa bolusta ei voitu pysäyttää. Siirrä iPhone lähemmäksi pumppua ja yritä uudelleen. Tarkista tiedot insuliinin annosteluhistoriasta ja seuraa glukoosia tarkasti.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Tuntematon";
 

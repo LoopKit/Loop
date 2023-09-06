@@ -294,12 +294,12 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         
         addedCarbEntry = carbEntry
         let storedCarbEntry = StoredCarbEntry(
+            startDate: carbEntry.startDate,
+            quantity: carbEntry.quantity,
             uuid: UUID(),
             provenanceIdentifier: UUID().uuidString,
             syncIdentifier: UUID().uuidString,
             syncVersion: 1,
-            startDate: carbEntry.startDate,
-            quantity: carbEntry.quantity,
             foodType: carbEntry.foodType,
             absorptionTime: carbEntry.absorptionTime,
             createdByCurrentApp: true,
