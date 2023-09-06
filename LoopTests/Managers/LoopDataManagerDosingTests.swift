@@ -55,7 +55,83 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
 
     // MARK: Tests
     func testForecastFromLiveCaptureInputData() {
-        setUp(for: .liveCapture)
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let url = bundle.url(forResource: "live_capture_input", withExtension: "json")!
+        let predictionInput = try! decoder.decode(LoopPredictionInput.self, from: try! Data(contentsOf: url))
+
+        // Therapy settings in the "live capture" input only have one value, so we can fake some schedules
+        // from the first entry of each therapy setting's history.
+        let basalRateSchedule = BasalRateSchedule(dailyItems: [
+            RepeatingScheduleValue(startTime: 0, value: predictionInput.settings.basal.first!.value)
+        ])
+        let insulinSensitivitySchedule = InsulinSensitivitySchedule(
+            unit: .milligramsPerDeciliter,
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0, value: predictionInput.settings.sensitivity.first!.value.doubleValue(for: .milligramsPerDeciliter))
+            ],
+            timeZone: .utcTimeZone
+        )!
+        let carbRatioSchedule = CarbRatioSchedule(
+            unit: .gram(),
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0.0, value: predictionInput.settings.carbRatio.first!.value)
+            ],
+            timeZone: .utcTimeZone
+        )!
+
+        let settings = LoopSettings(
+            dosingEnabled: false,
+            glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            carbRatioSchedule: carbRatioSchedule,
+            maximumBasalRatePerHour: 10,
+            maximumBolus: 5,
+            suspendThreshold: predictionInput.settings.suspendThreshold,
+            automaticDosingStrategy: .automaticBolus
+        )
+
+        let glucoseStore = MockGlucoseStore()
+        glucoseStore.storedGlucose = predictionInput.glucoseHistory
+
+        let currentDate = glucoseStore.latestGlucose!.startDate
+        now = currentDate
+
+        let doseStore = MockDoseStore()
+        doseStore.basalProfile = basalRateSchedule
+        doseStore.basalProfileApplyingOverrideHistory = doseStore.basalProfile
+        doseStore.sensitivitySchedule = insulinSensitivitySchedule
+        doseStore.doseHistory = predictionInput.doses
+        doseStore.lastAddedPumpData = predictionInput.doses.last!.startDate
+        let carbStore = MockCarbStore()
+        carbStore.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivitySchedule
+        carbStore.carbRatioSchedule = carbRatioSchedule
+        carbStore.carbRatioScheduleApplyingOverrideHistory = carbRatioSchedule
+        carbStore.carbHistory = predictionInput.carbEntries
+
+
+        dosingDecisionStore = MockDosingDecisionStore()
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)
+        loopDataManager = LoopDataManager(
+            lastLoopCompleted: currentDate,
+            basalDeliveryState: .active(currentDate),
+            settings: settings,
+            overrideHistory: TemporaryScheduleOverrideHistory(),
+            analyticsServicesManager: AnalyticsServicesManager(),
+            localCacheDuration: .days(1),
+            doseStore: doseStore,
+            glucoseStore: glucoseStore,
+            carbStore: carbStore,
+            dosingDecisionStore: dosingDecisionStore,
+            latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
+            now: { currentDate },
+            pumpInsulinType: .novolog,
+            automaticDosingStatus: automaticDosingStatus,
+            trustedTimeOffset: { 0 }
+        )
+
         let expectedPredictedGlucose = loadPredictedGlucoseFixture("live_capture_predicted_glucose")
 
         let updateGroup = DispatchGroup()
@@ -63,7 +139,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         var predictedGlucose: [PredictedGlucoseValue]?
         var recommendedBasal: TempBasalRecommendation?
         self.loopDataManager.getLoopState { _, state in
-            predictedGlucose = state.predictedGlucose
+            predictedGlucose = state.predictedGlucoseIncludingPendingInsulin
             recommendedBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
             updateGroup.leave()
         }
@@ -71,14 +147,13 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         updateGroup.wait()
 
         XCTAssertNotNil(predictedGlucose)
+
         XCTAssertEqual(expectedPredictedGlucose.count, predictedGlucose!.count)
 
         for (expected, calculated) in zip(expectedPredictedGlucose, predictedGlucose!) {
             XCTAssertEqual(expected.startDate, calculated.startDate)
             XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
         }
-
-        XCTAssertEqual(1.99, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
 
 

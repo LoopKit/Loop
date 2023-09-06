@@ -364,7 +364,7 @@ final class LoopDataManager {
 
     private var retrospectiveGlucoseDiscrepancies: [GlucoseEffect]? {
         didSet {
-            retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies?.combinedSums(of: LoopConstants.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
+            retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies?.combinedSums(of: LoopMath.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
         }
     }
 
@@ -441,9 +441,9 @@ final class LoopDataManager {
         if lastIntegralRetrospectiveCorrectionEnabled != currentIntegralRetrospectiveCorrectionEnabled || cachedRetrospectiveCorrection == nil {
             lastIntegralRetrospectiveCorrectionEnabled = currentIntegralRetrospectiveCorrectionEnabled
             if currentIntegralRetrospectiveCorrectionEnabled {
-                cachedRetrospectiveCorrection = IntegralRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+                cachedRetrospectiveCorrection = IntegralRetrospectiveCorrection(effectDuration: LoopMath.retrospectiveCorrectionEffectDuration)
             } else {
-                cachedRetrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: LoopSettings.retrospectiveCorrectionEffectDuration)
+                cachedRetrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: LoopMath.retrospectiveCorrectionEffectDuration)
             }
         }
         
@@ -1018,7 +1018,7 @@ extension LoopDataManager {
 
         if glucoseMomentumEffect == nil {
             updateGroup.enter()
-            glucoseStore.getRecentMomentumEffect { (result) -> Void in
+            glucoseStore.getRecentMomentumEffect(for: now()) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Failure getting recent momentum effect: %{public}@", String(describing: error))
@@ -1114,7 +1114,7 @@ extension LoopDataManager {
                     switch error {
                     case .noData:
                         // when there is no data, carbs on board is set to 0
-                        self.carbsOnBoard = CarbValue(startDate: Date(), quantity: HKQuantity(unit: .gram(), doubleValue: 0))
+                        self.carbsOnBoard = CarbValue(startDate: Date(), value: 0)
                     default:
                         self.carbsOnBoard = nil
                         warnings.append(.fetchDataWarning(.carbsOnBoard(error: error)))
@@ -1607,7 +1607,7 @@ extension LoopDataManager {
             insulinSensitivity: insulinSensitivity,
             basalRate: basalRate,
             correctionRange: correctionRange,
-            retrospectiveCorrectionGroupingInterval: LoopConstants.retrospectiveCorrectionGroupingInterval
+            retrospectiveCorrectionGroupingInterval: LoopMath.retrospectiveCorrectionGroupingInterval
         )
     }
 
@@ -1618,7 +1618,7 @@ extension LoopDataManager {
         let correctionRange = settings.glucoseTargetRangeSchedule!.quantityRange(at: glucose.startDate)
 
         let retrospectiveGlucoseDiscrepancies = insulinCounteractionEffects.subtracting(carbEffects, withUniformInterval: carbStore.delta)
-        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: LoopConstants.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
+        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: LoopMath.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
         return retrospectiveCorrection.computeEffect(
             startingAt: glucose,
             retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,
@@ -1626,7 +1626,7 @@ extension LoopDataManager {
             insulinSensitivity: insulinSensitivity,
             basalRate: basalRate,
             correctionRange: correctionRange,
-            retrospectiveCorrectionGroupingInterval: LoopConstants.retrospectiveCorrectionGroupingInterval
+            retrospectiveCorrectionGroupingInterval: LoopMath.retrospectiveCorrectionGroupingInterval
         )
     }
 
