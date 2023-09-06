@@ -51,7 +51,8 @@ final class LoopAlgorithmTests: XCTestCase {
 
     func testLiveCaptureWithFunctionalAlgorithm() throws {
         // This matches the "testForecastFromLiveCaptureInputData" test of LoopDataManagerDosingTests,
-        // Using the same input data, but generating the forecast using LoopPrediction
+        // Using the same input data, but generating the forecast using the LoopAlgorithm.generatePrediction()
+        // function.
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601

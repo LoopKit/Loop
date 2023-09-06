@@ -2,1476 +2,1003 @@
   "carbEntries" : [
     {
       "absorptionTime" : 10800,
-      "quantity" : 20,
-      "startDate" : "2023-08-17T20:05:47Z"
+      "quantity" : 22,
+      "startDate" : "2023-06-22T19:20:53Z"
     },
     {
       "absorptionTime" : 10800,
-      "quantity" : 10,
-      "startDate" : "2023-08-18T18:01:14Z"
+      "quantity" : 75,
+      "startDate" : "2023-06-22T21:04:45Z"
+    },
+    {
+      "absorptionTime" : 10800,
+      "quantity" : 47,
+      "startDate" : "2023-06-23T02:10:13Z"
     }
   ],
   "doses" : [
     {
-      "endDate" : "2023-08-17T18:21:55Z",
-      "startDate" : "2023-08-17T18:01:54Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-17T18:42:08Z",
-      "startDate" : "2023-08-17T18:21:55Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-17T18:47:09Z",
-      "startDate" : "2023-08-17T18:42:08Z",
+      "endDate" : "2023-06-22T16:22:40Z",
+      "startDate" : "2023-06-22T16:12:40Z",
       "type" : "basal",
       "unit" : "U",
-      "value" : 0.1
+      "value" : 0.050000000000000003
     },
     {
-      "endDate" : "2023-08-17T19:07:04Z",
-      "startDate" : "2023-08-17T18:47:09Z",
+      "endDate" : "2023-06-22T16:17:54Z",
+      "startDate" : "2023-06-22T16:17:46Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.20000000000000001
+    },
+    {
+      "endDate" : "2023-06-22T16:32:40Z",
+      "startDate" : "2023-06-22T16:22:40Z",
       "type" : "tempBasal",
       "unit" : "U\/hour",
       "value" : 0
     },
     {
-      "endDate" : "2023-08-17T19:11:53Z",
-      "startDate" : "2023-08-17T19:07:04Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-17T19:26:55Z",
-      "startDate" : "2023-08-17T19:11:53Z",
+      "endDate" : "2023-06-22T16:47:39Z",
+      "startDate" : "2023-06-22T16:32:40Z",
       "type" : "basal",
       "unit" : "U",
-      "value" : 0.3
+      "value" : 0.10000000000000001
     },
     {
-      "endDate" : "2023-08-17T19:47:02Z",
-      "startDate" : "2023-08-17T19:26:55Z",
+      "endDate" : "2023-06-22T16:57:41Z",
+      "startDate" : "2023-06-22T16:47:39Z",
       "type" : "tempBasal",
       "unit" : "U\/hour",
       "value" : 0
     },
     {
-      "endDate" : "2023-08-17T20:06:54Z",
-      "startDate" : "2023-08-17T19:47:02Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-17T20:26:51Z",
-      "startDate" : "2023-08-17T20:06:54Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-17T20:46:53Z",
-      "startDate" : "2023-08-17T20:26:51Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-17T21:06:52Z",
-      "startDate" : "2023-08-17T20:46:53Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-17T21:46:54Z",
-      "startDate" : "2023-08-17T21:06:52Z",
+      "endDate" : "2023-06-22T17:02:38Z",
+      "startDate" : "2023-06-22T16:57:41Z",
       "type" : "basal",
       "unit" : "U",
-      "value" : 0.75
+      "value" : 0.050000000000000003
     },
     {
-      "endDate" : "2023-08-17T21:51:52Z",
-      "startDate" : "2023-08-17T21:46:54Z",
+      "endDate" : "2023-06-22T17:07:38Z",
+      "startDate" : "2023-06-22T17:02:38Z",
       "type" : "tempBasal",
       "unit" : "U\/hour",
-      "value" : 0
+      "value" : 0.050000000000000003
     },
     {
-      "endDate" : "2023-08-17T21:56:54Z",
-      "startDate" : "2023-08-17T21:51:52Z",
+      "endDate" : "2023-06-22T17:22:45Z",
+      "startDate" : "2023-06-22T17:07:38Z",
       "type" : "basal",
       "unit" : "U",
-      "value" : 0.1
+      "value" : 0.10000000000000001
     },
     {
-      "endDate" : "2023-08-17T22:11:51Z",
-      "startDate" : "2023-08-17T21:56:54Z",
+      "endDate" : "2023-06-22T17:12:46Z",
+      "startDate" : "2023-06-22T17:12:42Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.10000000000000001
+    },
+    {
+      "endDate" : "2023-06-22T17:27:39Z",
+      "startDate" : "2023-06-22T17:22:45Z",
       "type" : "tempBasal",
       "unit" : "U\/hour",
       "value" : 0
     },
     {
-      "endDate" : "2023-08-17T23:07:00Z",
-      "startDate" : "2023-08-17T22:11:51Z",
+      "endDate" : "2023-06-22T17:27:39Z",
+      "startDate" : "2023-06-22T17:27:39Z",
       "type" : "basal",
       "unit" : "U",
-      "value" : 1
-    },
-    {
-      "endDate" : "2023-08-17T23:11:53Z",
-      "startDate" : "2023-08-17T23:07:00Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
       "value" : 0
     },
     {
-      "endDate" : "2023-08-17T23:42:02Z",
-      "startDate" : "2023-08-17T23:11:53Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.55
-    },
-    {
-      "endDate" : "2023-08-18T00:02:07Z",
-      "startDate" : "2023-08-17T23:42:02Z",
+      "endDate" : "2023-06-22T17:32:39Z",
+      "startDate" : "2023-06-22T17:27:39Z",
       "type" : "tempBasal",
       "unit" : "U\/hour",
-      "value" : 0
+      "value" : 0.050000000000000003
     },
     {
-      "endDate" : "2023-08-18T00:16:52Z",
-      "startDate" : "2023-08-18T00:02:07Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T01:26:52Z",
-      "startDate" : "2023-08-18T00:16:52Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 1.3
-    },
-    {
-      "endDate" : "2023-08-18T01:46:54Z",
-      "startDate" : "2023-08-18T01:26:52Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T01:56:52Z",
-      "startDate" : "2023-08-18T01:46:54Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.2
-    },
-    {
-      "endDate" : "2023-08-18T02:11:53Z",
-      "startDate" : "2023-08-18T01:56:52Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T02:41:53Z",
-      "startDate" : "2023-08-18T02:11:53Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.55
-    },
-    {
-      "endDate" : "2023-08-18T02:47:02Z",
-      "startDate" : "2023-08-18T02:41:53Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T03:01:55Z",
-      "startDate" : "2023-08-18T02:47:02Z",
+      "endDate" : "2023-06-22T18:07:38Z",
+      "startDate" : "2023-06-22T17:32:39Z",
       "type" : "basal",
       "unit" : "U",
       "value" : 0.25
     },
     {
-      "endDate" : "2023-08-18T03:06:52Z",
-      "startDate" : "2023-08-18T03:01:55Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T04:06:54Z",
-      "startDate" : "2023-08-18T03:06:52Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 1.1
-    },
-    {
-      "endDate" : "2023-08-18T03:22:02Z",
-      "startDate" : "2023-08-18T03:21:50Z",
+      "endDate" : "2023-06-22T17:32:45Z",
+      "startDate" : "2023-06-22T17:32:41Z",
       "type" : "bolus",
       "unit" : "U",
-      "value" : 0.3
+      "value" : 0.10000000000000001
     },
     {
-      "endDate" : "2023-08-18T03:27:09Z",
-      "startDate" : "2023-08-18T03:27:05Z",
+      "endDate" : "2023-06-22T17:42:40Z",
+      "startDate" : "2023-06-22T17:42:38Z",
       "type" : "bolus",
       "unit" : "U",
-      "value" : 0.1
+      "value" : 0.050000000000000003
     },
     {
-      "endDate" : "2023-08-18T03:31:54Z",
-      "startDate" : "2023-08-18T03:31:50Z",
+      "endDate" : "2023-06-22T17:47:43Z",
+      "startDate" : "2023-06-22T17:47:39Z",
       "type" : "bolus",
       "unit" : "U",
-      "value" : 0.1
+      "value" : 0.10000000000000001
     },
     {
-      "endDate" : "2023-08-18T03:41:53Z",
-      "startDate" : "2023-08-18T03:41:49Z",
+      "endDate" : "2023-06-22T18:12:38Z",
+      "startDate" : "2023-06-22T18:07:38Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-22T19:17:40Z",
+      "startDate" : "2023-06-22T18:12:38Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.45000000000000001
+    },
+    {
+      "endDate" : "2023-06-22T19:02:43Z",
+      "startDate" : "2023-06-22T19:02:39Z",
       "type" : "bolus",
       "unit" : "U",
-      "value" : 0.1
+      "value" : 0.10000000000000001
     },
     {
-      "endDate" : "2023-08-18T04:11:52Z",
-      "startDate" : "2023-08-18T04:06:54Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0.75
-    },
-    {
-      "endDate" : "2023-08-18T04:21:54Z",
-      "startDate" : "2023-08-18T04:11:52Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0.65
-    },
-    {
-      "endDate" : "2023-08-18T04:26:54Z",
-      "startDate" : "2023-08-18T04:21:54Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0.45
-    },
-    {
-      "endDate" : "2023-08-18T04:41:56Z",
-      "startDate" : "2023-08-18T04:26:54Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.3
-    },
-    {
-      "endDate" : "2023-08-18T04:46:57Z",
-      "startDate" : "2023-08-18T04:41:56Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0.4
-    },
-    {
-      "endDate" : "2023-08-18T04:51:52Z",
-      "startDate" : "2023-08-18T04:46:57Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0.1
-    },
-    {
-      "endDate" : "2023-08-18T05:00:00Z",
-      "startDate" : "2023-08-18T04:51:52Z",
+      "endDate" : "2023-06-22T19:22:43Z",
+      "startDate" : "2023-06-22T19:17:40Z",
       "type" : "tempBasal",
       "unit" : "U\/hour",
       "value" : 0
     },
     {
-      "endDate" : "2023-08-18T05:01:54Z",
-      "startDate" : "2023-08-18T05:00:00Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T05:11:52Z",
-      "startDate" : "2023-08-18T05:01:54Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.2
-    },
-    {
-      "endDate" : "2023-08-18T05:16:57Z",
-      "startDate" : "2023-08-18T05:11:52Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T05:27:01Z",
-      "startDate" : "2023-08-18T05:16:57Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.2
-    },
-    {
-      "endDate" : "2023-08-18T05:46:52Z",
-      "startDate" : "2023-08-18T05:27:01Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T06:01:53Z",
-      "startDate" : "2023-08-18T05:46:52Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T06:06:56Z",
-      "startDate" : "2023-08-18T06:01:53Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.1
-    },
-    {
-      "endDate" : "2023-08-18T06:22:05Z",
-      "startDate" : "2023-08-18T06:06:56Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T07:16:55Z",
-      "startDate" : "2023-08-18T06:22:05Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 1
-    },
-    {
-      "endDate" : "2023-08-18T07:26:58Z",
-      "startDate" : "2023-08-18T07:16:55Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T08:36:59Z",
-      "startDate" : "2023-08-18T07:26:58Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 1.3
-    },
-    {
-      "endDate" : "2023-08-18T08:41:52Z",
-      "startDate" : "2023-08-18T08:36:59Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T08:51:52Z",
-      "startDate" : "2023-08-18T08:41:52Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.2
-    },
-    {
-      "endDate" : "2023-08-18T08:56:58Z",
-      "startDate" : "2023-08-18T08:51:52Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T09:12:01Z",
-      "startDate" : "2023-08-18T08:56:58Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.3
-    },
-    {
-      "endDate" : "2023-08-18T09:42:01Z",
-      "startDate" : "2023-08-18T09:12:01Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T09:51:54Z",
-      "startDate" : "2023-08-18T09:42:01Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.2
-    },
-    {
-      "endDate" : "2023-08-18T09:56:52Z",
-      "startDate" : "2023-08-18T09:51:54Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T10:06:56Z",
-      "startDate" : "2023-08-18T09:56:52Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.2
-    },
-    {
-      "endDate" : "2023-08-18T10:11:54Z",
-      "startDate" : "2023-08-18T10:06:56Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T10:37:02Z",
-      "startDate" : "2023-08-18T10:11:54Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.45
-    },
-    {
-      "endDate" : "2023-08-18T10:41:54Z",
-      "startDate" : "2023-08-18T10:37:02Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T11:36:58Z",
-      "startDate" : "2023-08-18T10:41:54Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 1
-    },
-    {
-      "endDate" : "2023-08-18T11:51:54Z",
-      "startDate" : "2023-08-18T11:36:58Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T12:41:54Z",
-      "startDate" : "2023-08-18T11:51:54Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.9
-    },
-    {
-      "endDate" : "2023-08-18T12:57:00Z",
-      "startDate" : "2023-08-18T12:41:54Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T14:11:45Z",
-      "startDate" : "2023-08-18T12:57:00Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 1.35
-    },
-    {
-      "endDate" : "2023-08-18T14:17:00Z",
-      "startDate" : "2023-08-18T14:11:45Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T14:56:55Z",
-      "startDate" : "2023-08-18T14:17:00Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 0.75
-    },
-    {
-      "endDate" : "2023-08-18T15:17:08Z",
-      "startDate" : "2023-08-18T14:56:55Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0
-    },
-    {
-      "endDate" : "2023-08-18T17:22:08Z",
-      "startDate" : "2023-08-18T15:17:08Z",
-      "type" : "basal",
-      "unit" : "U",
-      "value" : 2.3
-    },
-    {
-      "endDate" : "2023-08-18T16:12:07Z",
-      "startDate" : "2023-08-18T16:12:03Z",
+      "endDate" : "2023-06-22T19:21:49Z",
+      "startDate" : "2023-06-22T19:21:01Z",
       "type" : "bolus",
       "unit" : "U",
-      "value" : 0.1
+      "value" : 1.2
     },
     {
-      "endDate" : "2023-08-18T16:37:09Z",
-      "startDate" : "2023-08-18T16:37:05Z",
-      "type" : "bolus",
-      "unit" : "U",
-      "value" : 0.1
-    },
-    {
-      "endDate" : "2023-08-18T16:42:09Z",
-      "startDate" : "2023-08-18T16:42:05Z",
-      "type" : "bolus",
-      "unit" : "U",
-      "value" : 0.1
-    },
-    {
-      "endDate" : "2023-08-18T16:47:14Z",
-      "startDate" : "2023-08-18T16:47:10Z",
-      "type" : "bolus",
-      "unit" : "U",
-      "value" : 0.1
-    },
-    {
-      "endDate" : "2023-08-18T17:22:10Z",
-      "startDate" : "2023-08-18T17:22:08Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0.7
-    },
-    {
-      "endDate" : "2023-08-18T17:27:08Z",
-      "startDate" : "2023-08-18T17:22:10Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0.75
-    },
-    {
-      "endDate" : "2023-08-18T17:57:10Z",
-      "startDate" : "2023-08-18T17:27:08Z",
+      "endDate" : "2023-06-22T19:37:37Z",
+      "startDate" : "2023-06-22T19:22:43Z",
       "type" : "basal",
       "unit" : "U",
-      "value" : 0.55
+      "value" : 0.10000000000000001
     },
     {
-      "endDate" : "2023-08-18T18:02:05Z",
-      "startDate" : "2023-08-18T17:57:10Z",
-      "type" : "tempBasal",
-      "unit" : "U\/hour",
-      "value" : 0.55
-    },
-    {
-      "endDate" : "2023-08-18T18:01:46Z",
-      "startDate" : "2023-08-18T18:01:30Z",
+      "endDate" : "2023-06-22T19:27:43Z",
+      "startDate" : "2023-06-22T19:27:39Z",
       "type" : "bolus",
       "unit" : "U",
-      "value" : 0.4
+      "value" : 0.10000000000000001
+    },
+    {
+      "endDate" : "2023-06-22T19:57:48Z",
+      "startDate" : "2023-06-22T19:37:37Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-22T19:57:48Z",
+      "startDate" : "2023-06-22T19:57:48Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-22T20:02:39Z",
+      "startDate" : "2023-06-22T19:57:48Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-22T20:07:40Z",
+      "startDate" : "2023-06-22T20:02:39Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.050000000000000003
+    },
+    {
+      "endDate" : "2023-06-22T20:12:40Z",
+      "startDate" : "2023-06-22T20:07:40Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0.10000000000000001
+    },
+    {
+      "endDate" : "2023-06-22T20:52:45Z",
+      "startDate" : "2023-06-22T20:12:40Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.25
+    },
+    {
+      "endDate" : "2023-06-22T21:07:43Z",
+      "startDate" : "2023-06-22T20:52:45Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-22T21:07:49Z",
+      "startDate" : "2023-06-22T21:04:51Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 4.4500000000000002
+    },
+    {
+      "endDate" : "2023-06-22T21:47:38Z",
+      "startDate" : "2023-06-22T21:07:43Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.25
+    },
+    {
+      "endDate" : "2023-06-22T21:12:42Z",
+      "startDate" : "2023-06-22T21:12:40Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.050000000000000003
+    },
+    {
+      "endDate" : "2023-06-22T22:07:39Z",
+      "startDate" : "2023-06-22T21:47:38Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-22T23:42:40Z",
+      "startDate" : "2023-06-22T22:07:39Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.65000000000000002
+    },
+    {
+      "endDate" : "2023-06-22T22:27:46Z",
+      "startDate" : "2023-06-22T22:27:38Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.20000000000000001
+    },
+    {
+      "endDate" : "2023-06-22T22:37:44Z",
+      "startDate" : "2023-06-22T22:37:40Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.10000000000000001
+    },
+    {
+      "endDate" : "2023-06-22T22:42:42Z",
+      "startDate" : "2023-06-22T22:42:40Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.050000000000000003
+    },
+    {
+      "endDate" : "2023-06-22T23:52:44Z",
+      "startDate" : "2023-06-22T23:42:40Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-22T23:57:46Z",
+      "startDate" : "2023-06-22T23:52:44Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.050000000000000003
+    },
+    {
+      "endDate" : "2023-06-23T00:02:37Z",
+      "startDate" : "2023-06-22T23:57:46Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0.050000000000000003
+    },
+    {
+      "endDate" : "2023-06-23T01:02:52Z",
+      "startDate" : "2023-06-23T00:02:37Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.40000000000000002
+    },
+    {
+      "endDate" : "2023-06-23T00:07:42Z",
+      "startDate" : "2023-06-23T00:07:40Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.050000000000000003
+    },
+    {
+      "endDate" : "2023-06-23T00:12:44Z",
+      "startDate" : "2023-06-23T00:12:38Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.14999999999999999
+    },
+    {
+      "endDate" : "2023-06-23T00:22:43Z",
+      "startDate" : "2023-06-23T00:22:39Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.10000000000000001
+    },
+    {
+      "endDate" : "2023-06-23T00:27:49Z",
+      "startDate" : "2023-06-23T00:27:41Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.20000000000000001
+    },
+    {
+      "endDate" : "2023-06-23T00:32:43Z",
+      "startDate" : "2023-06-23T00:32:39Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.10000000000000001
+    },
+    {
+      "endDate" : "2023-06-23T00:37:58Z",
+      "startDate" : "2023-06-23T00:37:48Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.25
+    },
+    {
+      "endDate" : "2023-06-23T00:42:47Z",
+      "startDate" : "2023-06-23T00:42:39Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.20000000000000001
+    },
+    {
+      "endDate" : "2023-06-23T00:47:44Z",
+      "startDate" : "2023-06-23T00:47:40Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.10000000000000001
+    },
+    {
+      "endDate" : "2023-06-23T00:52:51Z",
+      "startDate" : "2023-06-23T00:52:45Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.14999999999999999
+    },
+    {
+      "endDate" : "2023-06-23T01:12:49Z",
+      "startDate" : "2023-06-23T01:02:52Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-23T01:17:41Z",
+      "startDate" : "2023-06-23T01:12:49Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.050000000000000003
+    },
+    {
+      "endDate" : "2023-06-23T01:12:54Z",
+      "startDate" : "2023-06-23T01:12:50Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.10000000000000001
+    },
+    {
+      "endDate" : "2023-06-23T01:37:39Z",
+      "startDate" : "2023-06-23T01:17:41Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-23T01:37:39Z",
+      "startDate" : "2023-06-23T01:37:39Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-23T01:42:38Z",
+      "startDate" : "2023-06-23T01:37:39Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-23T02:07:42Z",
+      "startDate" : "2023-06-23T01:42:38Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0.14999999999999999
+    },
+    {
+      "endDate" : "2023-06-23T01:47:46Z",
+      "startDate" : "2023-06-23T01:47:38Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.20000000000000001
+    },
+    {
+      "endDate" : "2023-06-23T01:52:47Z",
+      "startDate" : "2023-06-23T01:52:39Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.20000000000000001
+    },
+    {
+      "endDate" : "2023-06-23T01:57:50Z",
+      "startDate" : "2023-06-23T01:57:40Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.25
+    },
+    {
+      "endDate" : "2023-06-23T02:02:49Z",
+      "startDate" : "2023-06-23T02:02:39Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 0.25
+    },
+    {
+      "endDate" : "2023-06-23T02:07:36Z",
+      "startDate" : "2023-06-23T02:04:30Z",
+      "type" : "bolus",
+      "unit" : "U",
+      "value" : 4.6500000000000004
+    },
+    {
+      "endDate" : "2023-06-23T02:27:44Z",
+      "startDate" : "2023-06-23T02:07:42Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-23T02:27:44Z",
+      "startDate" : "2023-06-23T02:27:44Z",
+      "type" : "basal",
+      "unit" : "U",
+      "value" : 0
+    },
+    {
+      "endDate" : "2023-06-23T02:47:39Z",
+      "startDate" : "2023-06-23T02:27:44Z",
+      "type" : "tempBasal",
+      "unit" : "U\/hour",
+      "value" : 0
     }
   ],
   "glucoseHistory" : [
     {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T00:16:23Z"
+      "quantity" : 120,
+      "startDate" : "2023-06-22T16:42:33Z"
     },
     {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T00:21:25Z"
+      "quantity" : 119,
+      "startDate" : "2023-06-22T16:47:33Z"
     },
     {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T00:26:30Z"
+      "quantity" : 120,
+      "startDate" : "2023-06-22T16:52:34Z"
     },
     {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T00:31:24Z"
+      "quantity" : 118,
+      "startDate" : "2023-06-22T16:57:34Z"
     },
     {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T00:36:23Z"
+      "quantity" : 115,
+      "startDate" : "2023-06-22T17:02:34Z"
     },
     {
-      "quantity" : 89,
-      "startDate" : "2023-08-18T00:41:22Z"
+      "quantity" : 120,
+      "startDate" : "2023-06-22T17:07:34Z"
     },
     {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T00:46:22Z"
+      "quantity" : 121,
+      "startDate" : "2023-06-22T17:12:34Z"
     },
     {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T00:51:23Z"
+      "quantity" : 119,
+      "startDate" : "2023-06-22T17:17:34Z"
     },
     {
-      "quantity" : 91,
-      "startDate" : "2023-08-18T00:56:23Z"
+      "quantity" : 116,
+      "startDate" : "2023-06-22T17:22:34Z"
     },
     {
-      "quantity" : 91,
-      "startDate" : "2023-08-18T01:01:24Z"
+      "quantity" : 115,
+      "startDate" : "2023-06-22T17:27:34Z"
     },
     {
-      "quantity" : 89,
-      "startDate" : "2023-08-18T01:06:25Z"
+      "quantity" : 124,
+      "startDate" : "2023-06-22T17:32:34Z"
     },
     {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T01:11:22Z"
+      "quantity" : 114,
+      "startDate" : "2023-06-22T17:37:34Z"
     },
     {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T01:16:23Z"
+      "quantity" : 124,
+      "startDate" : "2023-06-22T17:42:34Z"
     },
     {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T01:21:23Z"
+      "quantity" : 124,
+      "startDate" : "2023-06-22T17:47:33Z"
     },
     {
-      "quantity" : 78,
-      "startDate" : "2023-08-18T01:26:22Z"
+      "quantity" : 124,
+      "startDate" : "2023-06-22T17:52:34Z"
     },
     {
-      "quantity" : 80,
-      "startDate" : "2023-08-18T01:31:24Z"
+      "quantity" : 126,
+      "startDate" : "2023-06-22T17:57:33Z"
     },
     {
-      "quantity" : 79,
-      "startDate" : "2023-08-18T01:36:25Z"
+      "quantity" : 125,
+      "startDate" : "2023-06-22T18:02:34Z"
     },
     {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T01:41:22Z"
+      "quantity" : 118,
+      "startDate" : "2023-06-22T18:07:34Z"
     },
     {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T01:46:23Z"
+      "quantity" : 122,
+      "startDate" : "2023-06-22T18:12:33Z"
     },
     {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T01:51:23Z"
+      "quantity" : 123,
+      "startDate" : "2023-06-22T18:17:34Z"
     },
     {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T01:56:23Z"
+      "quantity" : 123,
+      "startDate" : "2023-06-22T18:22:34Z"
     },
     {
-      "quantity" : 80,
-      "startDate" : "2023-08-18T02:01:25Z"
+      "quantity" : 121,
+      "startDate" : "2023-06-22T18:27:34Z"
     },
     {
-      "quantity" : 79,
-      "startDate" : "2023-08-18T02:06:29Z"
+      "quantity" : 118,
+      "startDate" : "2023-06-22T18:32:34Z"
     },
     {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T02:11:23Z"
+      "quantity" : 116,
+      "startDate" : "2023-06-22T18:37:34Z"
     },
     {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T02:16:25Z"
+      "quantity" : 118,
+      "startDate" : "2023-06-22T18:42:34Z"
     },
     {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T02:21:27Z"
+      "quantity" : 115,
+      "startDate" : "2023-06-22T18:47:34Z"
     },
     {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T02:26:24Z"
+      "quantity" : 117,
+      "startDate" : "2023-06-22T18:52:34Z"
     },
     {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T02:31:26Z"
+      "quantity" : 125,
+      "startDate" : "2023-06-22T18:57:34Z"
     },
     {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T02:36:25Z"
+      "quantity" : 122,
+      "startDate" : "2023-06-22T19:02:34Z"
     },
     {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T02:41:23Z"
+      "quantity" : 119,
+      "startDate" : "2023-06-22T19:07:34Z"
     },
     {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T02:46:31Z"
+      "quantity" : 120,
+      "startDate" : "2023-06-22T19:12:34Z"
     },
     {
-      "quantity" : 99,
-      "startDate" : "2023-08-18T02:51:29Z"
+      "quantity" : 112,
+      "startDate" : "2023-06-22T19:17:34Z"
     },
     {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T02:56:25Z"
+      "quantity" : 111,
+      "startDate" : "2023-06-22T19:22:34Z"
     },
     {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T03:01:27Z"
+      "quantity" : 114,
+      "startDate" : "2023-06-22T19:27:34Z"
     },
     {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T03:06:23Z"
+      "quantity" : 117,
+      "startDate" : "2023-06-22T19:32:34Z"
     },
     {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T03:11:25Z"
+      "quantity" : 107,
+      "startDate" : "2023-06-22T19:37:34Z"
     },
     {
-      "quantity" : 94,
-      "startDate" : "2023-08-18T03:16:29Z"
+      "quantity" : 113,
+      "startDate" : "2023-06-22T19:42:34Z"
     },
     {
-      "quantity" : 101,
-      "startDate" : "2023-08-18T03:21:22Z"
-    },
-    {
-      "quantity" : 103,
-      "startDate" : "2023-08-18T03:26:39Z"
-    },
-    {
-      "quantity" : 104,
-      "startDate" : "2023-08-18T03:31:22Z"
-    },
-    {
-      "quantity" : 106,
-      "startDate" : "2023-08-18T03:36:22Z"
-    },
-    {
-      "quantity" : 108,
-      "startDate" : "2023-08-18T03:41:22Z"
-    },
-    {
-      "quantity" : 108,
-      "startDate" : "2023-08-18T03:46:25Z"
+      "quantity" : 117,
+      "startDate" : "2023-06-22T19:47:34Z"
     },
     {
       "quantity" : 109,
-      "startDate" : "2023-08-18T03:51:24Z"
+      "startDate" : "2023-06-22T19:52:34Z"
     },
     {
-      "quantity" : 110,
-      "startDate" : "2023-08-18T03:56:25Z"
+      "quantity" : 117,
+      "startDate" : "2023-06-22T19:57:34Z"
     },
     {
-      "quantity" : 110,
-      "startDate" : "2023-08-18T04:01:27Z"
+      "quantity" : 121,
+      "startDate" : "2023-06-22T20:02:34Z"
     },
     {
-      "quantity" : 109,
-      "startDate" : "2023-08-18T04:06:24Z"
+      "quantity" : 121,
+      "startDate" : "2023-06-22T20:07:34Z"
     },
     {
-      "quantity" : 108,
-      "startDate" : "2023-08-18T04:11:23Z"
+      "quantity" : 127,
+      "startDate" : "2023-06-22T20:12:34Z"
     },
     {
-      "quantity" : 106,
-      "startDate" : "2023-08-18T04:16:23Z"
+      "quantity" : 133,
+      "startDate" : "2023-06-22T20:17:34Z"
     },
     {
-      "quantity" : 105,
-      "startDate" : "2023-08-18T04:21:24Z"
+      "quantity" : 131,
+      "startDate" : "2023-06-22T20:22:34Z"
     },
     {
-      "quantity" : 105,
-      "startDate" : "2023-08-18T04:26:23Z"
+      "quantity" : 132,
+      "startDate" : "2023-06-22T20:27:34Z"
     },
     {
-      "quantity" : 106,
-      "startDate" : "2023-08-18T04:31:26Z"
+      "quantity" : 134,
+      "startDate" : "2023-06-22T20:32:34Z"
     },
     {
-      "quantity" : 106,
-      "startDate" : "2023-08-18T04:36:24Z"
+      "quantity" : 134,
+      "startDate" : "2023-06-22T20:37:34Z"
+    },
+    {
+      "quantity" : 139,
+      "startDate" : "2023-06-22T20:42:34Z"
+    },
+    {
+      "quantity" : 139,
+      "startDate" : "2023-06-22T20:47:34Z"
+    },
+    {
+      "quantity" : 132,
+      "startDate" : "2023-06-22T20:52:34Z"
+    },
+    {
+      "quantity" : 118,
+      "startDate" : "2023-06-22T20:57:34Z"
+    },
+    {
+      "quantity" : 123,
+      "startDate" : "2023-06-22T21:02:34Z"
+    },
+    {
+      "quantity" : 122,
+      "startDate" : "2023-06-22T21:07:34Z"
+    },
+    {
+      "quantity" : 119,
+      "startDate" : "2023-06-22T21:12:34Z"
+    },
+    {
+      "quantity" : 116,
+      "startDate" : "2023-06-22T21:17:34Z"
+    },
+    {
+      "quantity" : 113,
+      "startDate" : "2023-06-22T21:22:34Z"
+    },
+    {
+      "quantity" : 111,
+      "startDate" : "2023-06-22T21:27:34Z"
+    },
+    {
+      "quantity" : 112,
+      "startDate" : "2023-06-22T21:32:34Z"
+    },
+    {
+      "quantity" : 107,
+      "startDate" : "2023-06-22T21:37:34Z"
     },
     {
       "quantity" : 102,
-      "startDate" : "2023-08-18T04:41:25Z"
-    },
-    {
-      "quantity" : 99,
-      "startDate" : "2023-08-18T04:46:27Z"
-    },
-    {
-      "quantity" : 99,
-      "startDate" : "2023-08-18T04:51:22Z"
-    },
-    {
-      "quantity" : 97,
-      "startDate" : "2023-08-18T04:56:24Z"
-    },
-    {
-      "quantity" : 96,
-      "startDate" : "2023-08-18T05:01:23Z"
-    },
-    {
-      "quantity" : 97,
-      "startDate" : "2023-08-18T05:06:24Z"
+      "startDate" : "2023-06-22T21:42:34Z"
     },
     {
       "quantity" : 95,
-      "startDate" : "2023-08-18T05:11:22Z"
+      "startDate" : "2023-06-22T21:47:34Z"
+    },
+    {
+      "quantity" : 96,
+      "startDate" : "2023-06-22T21:52:34Z"
+    },
+    {
+      "quantity" : 89,
+      "startDate" : "2023-06-22T21:57:34Z"
+    },
+    {
+      "quantity" : 95,
+      "startDate" : "2023-06-22T22:02:34Z"
+    },
+    {
+      "quantity" : 95,
+      "startDate" : "2023-06-22T22:07:34Z"
     },
     {
       "quantity" : 93,
-      "startDate" : "2023-08-18T05:16:26Z"
+      "startDate" : "2023-06-22T22:12:34Z"
     },
     {
-      "quantity" : 92,
-      "startDate" : "2023-08-18T05:21:22Z"
-    },
-    {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T05:26:33Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T05:31:22Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T05:36:23Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T05:41:36Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T05:46:22Z"
-    },
-    {
-      "quantity" : 78,
-      "startDate" : "2023-08-18T05:51:23Z"
-    },
-    {
-      "quantity" : 79,
-      "startDate" : "2023-08-18T05:56:25Z"
-    },
-    {
-      "quantity" : 80,
-      "startDate" : "2023-08-18T06:01:24Z"
-    },
-    {
-      "quantity" : 79,
-      "startDate" : "2023-08-18T06:06:26Z"
-    },
-    {
-      "quantity" : 78,
-      "startDate" : "2023-08-18T06:11:29Z"
-    },
-    {
-      "quantity" : 79,
-      "startDate" : "2023-08-18T06:16:24Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T06:21:35Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T06:26:31Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T06:31:25Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T06:36:30Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T06:41:22Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T06:46:22Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T06:51:31Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T06:56:35Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T07:01:25Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T07:06:29Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T07:11:22Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T07:16:24Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T07:21:31Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T07:26:27Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T07:31:22Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T07:36:24Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T07:41:23Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T07:46:23Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T07:51:25Z"
-    },
-    {
-      "quantity" : 89,
-      "startDate" : "2023-08-18T07:56:24Z"
-    },
-    {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T08:01:26Z"
-    },
-    {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T08:06:33Z"
-    },
-    {
-      "quantity" : 91,
-      "startDate" : "2023-08-18T08:11:22Z"
-    },
-    {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T08:16:23Z"
-    },
-    {
-      "quantity" : 89,
-      "startDate" : "2023-08-18T08:21:26Z"
-    },
-    {
-      "quantity" : 89,
-      "startDate" : "2023-08-18T08:26:29Z"
-    },
-    {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T08:31:25Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T08:36:30Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T08:41:22Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T08:46:28Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T08:51:23Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T08:56:28Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T09:01:26Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T09:06:23Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T09:11:30Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T09:16:25Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T09:21:25Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T09:26:25Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T09:31:25Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T09:36:25Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T09:41:25Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T09:46:25Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T09:51:25Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T09:56:22Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T10:01:27Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T10:06:27Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T10:11:25Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T10:16:23Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T10:21:24Z"
-    },
-    {
-      "quantity" : 83,
-      "startDate" : "2023-08-18T10:26:23Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T10:31:34Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T10:36:31Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T10:41:24Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T10:46:28Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T10:51:23Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T10:56:26Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T11:01:23Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T11:06:26Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T11:11:26Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T11:16:24Z"
-    },
-    {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T11:21:24Z"
-    },
-    {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T11:26:27Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T11:31:23Z"
-    },
-    {
-      "quantity" : 82,
-      "startDate" : "2023-08-18T11:36:27Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T11:41:26Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T11:46:23Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T11:51:24Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T11:56:23Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T12:01:24Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T12:06:25Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T12:11:24Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T12:16:24Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T12:21:25Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T12:26:23Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T12:31:25Z"
-    },
-    {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T12:36:32Z"
-    },
-    {
-      "quantity" : 81,
-      "startDate" : "2023-08-18T12:41:23Z"
-    },
-    {
-      "quantity" : 78,
-      "startDate" : "2023-08-18T12:46:23Z"
-    },
-    {
-      "quantity" : 77,
-      "startDate" : "2023-08-18T12:51:23Z"
-    },
-    {
-      "quantity" : 84,
-      "startDate" : "2023-08-18T12:56:28Z"
-    },
-    {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T13:01:24Z"
-    },
-    {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T13:06:23Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T13:11:23Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T13:16:23Z"
-    },
-    {
-      "quantity" : 89,
-      "startDate" : "2023-08-18T13:21:24Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T13:26:28Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T13:31:24Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T13:36:29Z"
-    },
-    {
-      "quantity" : 90,
-      "startDate" : "2023-08-18T13:41:23Z"
-    },
-    {
-      "quantity" : 89,
-      "startDate" : "2023-08-18T13:46:31Z"
-    },
-    {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T13:51:29Z"
-    },
-    {
-      "quantity" : 92,
-      "startDate" : "2023-08-18T13:56:33Z"
+      "quantity" : 98,
+      "startDate" : "2023-06-22T22:17:35Z"
     },
     {
       "quantity" : 95,
-      "startDate" : "2023-08-18T14:01:37Z"
-    },
-    {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T14:06:23Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T14:11:26Z"
-    },
-    {
-      "quantity" : 92,
-      "startDate" : "2023-08-18T14:16:30Z"
-    },
-    {
-      "quantity" : 94,
-      "startDate" : "2023-08-18T14:21:29Z"
-    },
-    {
-      "quantity" : 96,
-      "startDate" : "2023-08-18T14:26:23Z"
-    },
-    {
-      "quantity" : 96,
-      "startDate" : "2023-08-18T14:31:23Z"
-    },
-    {
-      "quantity" : 98,
-      "startDate" : "2023-08-18T14:36:32Z"
-    },
-    {
-      "quantity" : 98,
-      "startDate" : "2023-08-18T14:41:25Z"
-    },
-    {
-      "quantity" : 99,
-      "startDate" : "2023-08-18T14:46:24Z"
-    },
-    {
-      "quantity" : 98,
-      "startDate" : "2023-08-18T14:51:26Z"
-    },
-    {
-      "quantity" : 94,
-      "startDate" : "2023-08-18T14:56:25Z"
-    },
-    {
-      "quantity" : 87,
-      "startDate" : "2023-08-18T15:01:24Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T15:06:24Z"
-    },
-    {
-      "quantity" : 85,
-      "startDate" : "2023-08-18T15:11:23Z"
-    },
-    {
-      "quantity" : 86,
-      "startDate" : "2023-08-18T15:16:24Z"
-    },
-    {
-      "quantity" : 88,
-      "startDate" : "2023-08-18T15:21:23Z"
-    },
-    {
-      "quantity" : 89,
-      "startDate" : "2023-08-18T15:26:26Z"
-    },
-    {
-      "quantity" : 91,
-      "startDate" : "2023-08-18T15:31:24Z"
-    },
-    {
-      "quantity" : 92,
-      "startDate" : "2023-08-18T15:36:24Z"
-    },
-    {
-      "quantity" : 94,
-      "startDate" : "2023-08-18T15:41:25Z"
-    },
-    {
-      "quantity" : 96,
-      "startDate" : "2023-08-18T15:46:25Z"
-    },
-    {
-      "quantity" : 96,
-      "startDate" : "2023-08-18T15:51:28Z"
-    },
-    {
-      "quantity" : 98,
-      "startDate" : "2023-08-18T15:56:26Z"
-    },
-    {
-      "quantity" : 97,
-      "startDate" : "2023-08-18T16:01:23Z"
-    },
-    {
-      "quantity" : 99,
-      "startDate" : "2023-08-18T16:06:23Z"
+      "startDate" : "2023-06-22T22:22:35Z"
     },
     {
       "quantity" : 101,
-      "startDate" : "2023-08-18T16:11:25Z"
+      "startDate" : "2023-06-22T22:27:34Z"
     },
     {
-      "quantity" : 102,
-      "startDate" : "2023-08-18T16:16:25Z"
+      "quantity" : 97,
+      "startDate" : "2023-06-22T22:32:34Z"
     },
     {
-      "quantity" : 103,
-      "startDate" : "2023-08-18T16:21:23Z"
-    },
-    {
-      "quantity" : 98,
-      "startDate" : "2023-08-18T16:26:23Z"
-    },
-    {
-      "quantity" : 102,
-      "startDate" : "2023-08-18T16:31:28Z"
-    },
-    {
-      "quantity" : 105,
-      "startDate" : "2023-08-18T16:36:23Z"
-    },
-    {
-      "quantity" : 112,
-      "startDate" : "2023-08-18T16:41:23Z"
-    },
-    {
-      "quantity" : 112,
-      "startDate" : "2023-08-18T16:46:23Z"
-    },
-    {
-      "quantity" : 111,
-      "startDate" : "2023-08-18T16:51:26Z"
-    },
-    {
-      "quantity" : 111,
-      "startDate" : "2023-08-18T16:56:24Z"
-    },
-    {
-      "quantity" : 111,
-      "startDate" : "2023-08-18T17:01:23Z"
+      "quantity" : 108,
+      "startDate" : "2023-06-22T22:37:35Z"
     },
     {
       "quantity" : 109,
-      "startDate" : "2023-08-18T17:06:24Z"
+      "startDate" : "2023-06-22T22:42:34Z"
     },
     {
-      "quantity" : 111,
-      "startDate" : "2023-08-18T17:11:23Z"
+      "quantity" : 109,
+      "startDate" : "2023-06-22T22:47:34Z"
     },
     {
-      "quantity" : 111,
-      "startDate" : "2023-08-18T17:16:23Z"
+      "quantity" : 114,
+      "startDate" : "2023-06-22T22:52:34Z"
     },
     {
-      "quantity" : 110,
-      "startDate" : "2023-08-18T17:21:23Z"
+      "quantity" : 115,
+      "startDate" : "2023-06-22T22:57:34Z"
     },
     {
-      "quantity" : 111,
-      "startDate" : "2023-08-18T17:26:23Z"
+      "quantity" : 114,
+      "startDate" : "2023-06-22T23:02:34Z"
     },
     {
-      "quantity" : 110,
-      "startDate" : "2023-08-18T17:31:25Z"
+      "quantity" : 121,
+      "startDate" : "2023-06-22T23:07:34Z"
     },
     {
-      "quantity" : 110,
-      "startDate" : "2023-08-18T17:36:23Z"
+      "quantity" : 119,
+      "startDate" : "2023-06-22T23:12:34Z"
     },
     {
-      "quantity" : 110,
-      "startDate" : "2023-08-18T17:41:26Z"
+      "quantity" : 117,
+      "startDate" : "2023-06-22T23:17:34Z"
     },
     {
-      "quantity" : 110,
-      "startDate" : "2023-08-18T17:46:30Z"
+      "quantity" : 120,
+      "startDate" : "2023-06-22T23:22:35Z"
     },
     {
-      "quantity" : 111,
-      "startDate" : "2023-08-18T17:51:28Z"
+      "quantity" : 122,
+      "startDate" : "2023-06-22T23:27:34Z"
     },
     {
-      "quantity" : 106,
-      "startDate" : "2023-08-18T17:56:24Z"
+      "quantity" : 123,
+      "startDate" : "2023-06-22T23:32:34Z"
     },
     {
-      "quantity" : 102,
-      "startDate" : "2023-08-18T18:01:24Z"
+      "quantity" : 127,
+      "startDate" : "2023-06-22T23:37:34Z"
+    },
+    {
+      "quantity" : 118,
+      "startDate" : "2023-06-22T23:42:35Z"
+    },
+    {
+      "quantity" : 120,
+      "startDate" : "2023-06-22T23:47:34Z"
+    },
+    {
+      "quantity" : 119,
+      "startDate" : "2023-06-22T23:52:35Z"
+    },
+    {
+      "quantity" : 115,
+      "startDate" : "2023-06-22T23:57:34Z"
+    },
+    {
+      "quantity" : 116,
+      "startDate" : "2023-06-23T00:02:34Z"
+    },
+    {
+      "quantity" : 133,
+      "startDate" : "2023-06-23T00:07:34Z"
+    },
+    {
+      "quantity" : 145,
+      "startDate" : "2023-06-23T00:12:34Z"
+    },
+    {
+      "quantity" : 140,
+      "startDate" : "2023-06-23T00:17:34Z"
+    },
+    {
+      "quantity" : 161,
+      "startDate" : "2023-06-23T00:22:35Z"
+    },
+    {
+      "quantity" : 166,
+      "startDate" : "2023-06-23T00:27:34Z"
+    },
+    {
+      "quantity" : 172,
+      "startDate" : "2023-06-23T00:32:35Z"
+    },
+    {
+      "quantity" : 182,
+      "startDate" : "2023-06-23T00:37:35Z"
+    },
+    {
+      "quantity" : 184,
+      "startDate" : "2023-06-23T00:42:35Z"
+    },
+    {
+      "quantity" : 185,
+      "startDate" : "2023-06-23T00:47:34Z"
+    },
+    {
+      "quantity" : 190,
+      "startDate" : "2023-06-23T00:52:35Z"
+    },
+    {
+      "quantity" : 182,
+      "startDate" : "2023-06-23T00:57:34Z"
+    },
+    {
+      "quantity" : 166,
+      "startDate" : "2023-06-23T01:02:35Z"
+    },
+    {
+      "quantity" : 174,
+      "startDate" : "2023-06-23T01:07:34Z"
+    },
+    {
+      "quantity" : 179,
+      "startDate" : "2023-06-23T01:12:34Z"
+    },
+    {
+      "quantity" : 166,
+      "startDate" : "2023-06-23T01:17:35Z"
+    },
+    {
+      "quantity" : 134,
+      "startDate" : "2023-06-23T01:22:34Z"
+    },
+    {
+      "quantity" : 131,
+      "startDate" : "2023-06-23T01:27:35Z"
+    },
+    {
+      "quantity" : 129,
+      "startDate" : "2023-06-23T01:32:34Z"
+    },
+    {
+      "quantity" : 136,
+      "startDate" : "2023-06-23T01:37:34Z"
+    },
+    {
+      "quantity" : 152,
+      "startDate" : "2023-06-23T01:42:34Z"
+    },
+    {
+      "quantity" : 162,
+      "startDate" : "2023-06-23T01:47:35Z"
+    },
+    {
+      "quantity" : 165,
+      "startDate" : "2023-06-23T01:52:34Z"
+    },
+    {
+      "quantity" : 172,
+      "startDate" : "2023-06-23T01:57:34Z"
+    },
+    {
+      "quantity" : 176,
+      "startDate" : "2023-06-23T02:02:35Z"
+    },
+    {
+      "quantity" : 165,
+      "startDate" : "2023-06-23T02:07:35Z"
+    },
+    {
+      "quantity" : 172,
+      "startDate" : "2023-06-23T02:12:34Z"
+    },
+    {
+      "quantity" : 170,
+      "startDate" : "2023-06-23T02:17:35Z"
+    },
+    {
+      "quantity" : 177,
+      "startDate" : "2023-06-23T02:22:35Z"
+    },
+    {
+      "quantity" : 176,
+      "startDate" : "2023-06-23T02:27:35Z"
+    },
+    {
+      "quantity" : 173,
+      "startDate" : "2023-06-23T02:32:34Z"
+    },
+    {
+      "quantity" : 180,
+      "startDate" : "2023-06-23T02:37:35Z"
     }
   ],
   "settings" : {
     "basal" : [
       {
-        "endDate" : "2023-08-18T05:00:00Z",
-        "startDate" : "2023-08-17T05:00:00Z",
-        "value" : 1.1
-      },
-      {
-        "endDate" : "2023-08-19T05:00:00Z",
-        "startDate" : "2023-08-18T05:00:00Z",
-        "value" : 1.1
+        "endDate" : "2023-06-23T05:00:00Z",
+        "startDate" : "2023-06-22T10:00:00Z",
+        "value" : 0.45000000000000001
       }
     ],
     "carbRatio" : [
       {
-        "endDate" : "2023-08-18T05:00:00Z",
-        "startDate" : "2023-08-17T05:00:00Z",
-        "value" : 15
-      },
-      {
-        "endDate" : "2023-08-19T05:00:00Z",
-        "startDate" : "2023-08-18T05:00:00Z",
-        "value" : 15
+        "endDate" : "2023-06-23T07:00:00Z",
+        "startDate" : "2023-06-22T07:00:00Z",
+        "value" : 11
       }
     ],
+    "maximumBasalRatePerHour" : null,
+    "maximumBolus" : null,
     "sensitivity" : [
       {
-        "endDate" : "2023-08-18T05:00:00Z",
-        "startDate" : "2023-08-17T05:00:00Z",
-        "value" : 50
-      },
-      {
-        "endDate" : "2023-08-19T05:00:00Z",
-        "startDate" : "2023-08-18T05:00:00Z",
-        "value" : 50
+        "endDate" : "2023-06-23T05:00:00Z",
+        "startDate" : "2023-06-22T10:00:00Z",
+        "value" : 60
       }
     ],
+    "suspendThreshold" : null,
     "target" : [
       {
-        "endDate" : "2023-08-19T00:15:00Z",
-        "startDate" : "2023-08-18T11:50:00Z",
+        "endDate" : "2023-06-23T07:00:00Z",
+        "startDate" : "2023-06-22T20:25:00Z",
+        "value" : {
+          "maxValue" : 115,
+          "minValue" : 100
+        }
+      },
+      {
+        "endDate" : "2023-06-23T08:50:00Z",
+        "startDate" : "2023-06-23T07:00:00Z",
         "value" : {
           "maxValue" : 115,
           "minValue" : 100
