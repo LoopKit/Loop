@@ -205,6 +205,8 @@ final class DeviceDataManager {
                sleepDataAuthorizationRequired
     }
 
+    private(set) var securitiesManager: SecuritiesManager!
+    
     // MARK: Services
 
     private(set) var servicesManager: ServicesManager!
@@ -422,6 +424,8 @@ final class DeviceDataManager {
             servicesManagerDelegate: loopManager,
             servicesManagerDosingDelegate: self
         )
+        
+        securitiesManager = SecuritiesManager(pluginManager: pluginManager, servicesManager: servicesManager)
 
         let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,

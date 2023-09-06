@@ -15,6 +15,7 @@ class OnboardingManager {
     private let pluginManager: PluginManager
     private let bluetoothProvider: BluetoothProvider
     private let deviceDataManager: DeviceDataManager
+    private let securitiesManager: SecuritiesManager
     private let servicesManager: ServicesManager
     private let loopDataManager: LoopDataManager
     private let supportManager: SupportManager
@@ -39,10 +40,20 @@ class OnboardingManager {
 
     private var onboardingCompletion: (() -> Void)?
 
-    init(pluginManager: PluginManager, bluetoothProvider: BluetoothProvider, deviceDataManager: DeviceDataManager, servicesManager: ServicesManager, loopDataManager: LoopDataManager, supportManager: SupportManager, windowProvider: WindowProvider?, userDefaults: UserDefaults = .standard) {
+    init(pluginManager: PluginManager,
+         bluetoothProvider: BluetoothProvider,
+         deviceDataManager: DeviceDataManager,
+         securitiesManager: SecuritiesManager,
+         servicesManager: ServicesManager,
+         loopDataManager: LoopDataManager,
+         supportManager: SupportManager,
+         windowProvider: WindowProvider?,
+         userDefaults: UserDefaults = .standard)
+    {
         self.pluginManager = pluginManager
         self.bluetoothProvider = bluetoothProvider
         self.deviceDataManager = deviceDataManager
+        self.securitiesManager = securitiesManager
         self.servicesManager = servicesManager
         self.loopDataManager = loopDataManager
         self.supportManager = supportManager
@@ -396,9 +407,16 @@ extension OnboardingManager: PumpManagerProvider {
     }
 }
 
+// MARK: - SecurityProvider
+
+extension OnboardingManager: SecurityProvider {
+    func security(withIdentifier identifier: String) -> Security? {
+        securitiesManager.setupSecurity(withIdentifier: identifier) }
+}
+
 // MARK: - ServiceProvider
 
-extension OnboardingManager: ServiceProvider {
+extension OnboardingManager: ServiceProvider {    
     var activeServices: [Service] { servicesManager.activeServices }
 
     var availableServices: [ServiceDescriptor] { servicesManager.availableServices }
@@ -421,6 +439,7 @@ extension OnboardingManager: ServiceProvider {
 }
 
 // MARK: - TherapySettingsProvider
+
 extension OnboardingManager: TherapySettingsProvider {
     var onboardingTherapySettings: TherapySettings {
         return loopDataManager.therapySettings

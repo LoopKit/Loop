@@ -226,6 +226,7 @@ class LoopAppManager: NSObject {
         onboardingManager = OnboardingManager(pluginManager: pluginManager,
                                               bluetoothProvider: bluetoothStateManager,
                                               deviceDataManager: deviceDataManager,
+                                              securitiesManager: deviceDataManager.securitiesManager,
                                               servicesManager: deviceDataManager.servicesManager,
                                               loopDataManager: deviceDataManager.loopManager,
                                               supportManager: supportManager,
