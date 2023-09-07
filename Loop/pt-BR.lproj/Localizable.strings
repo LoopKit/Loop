@@ -58,9 +58,6 @@
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Um modelo baseado na absorção publicada das insulinas Humalog, Novolog e Apidra em adultos.";
 
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "Tempo de Absorção";
-
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AceitarBolusRecomendado";
 
@@ -149,9 +146,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Adicionar Carb";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Editar Carb";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Carboidratos";
@@ -456,9 +450,6 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "O modelo antigo utilizado pelo Loop permitindo personalização da duração da ação.";
 
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "O tempo máximo de absorção é %@";
-
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "O bolus máximo é %@ Unidades";
 
@@ -466,6 +457,8 @@
 "U" = "U";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Desconhecido";
 

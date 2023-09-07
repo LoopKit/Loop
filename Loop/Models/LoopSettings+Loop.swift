@@ -16,8 +16,5 @@ extension LoopSettings {
             inputs.remove(.retrospection)
         }
         return inputs
-    }
-
-    static let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
-    
+    }    
 }

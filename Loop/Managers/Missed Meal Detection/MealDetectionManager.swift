@@ -66,13 +66,22 @@ class MealDetectionManager {
     }
     
     // MARK: Meal Detection
-    func hasMissedMeal(insulinCounteractionEffects: [GlucoseEffectVelocity], carbEffects: [GlucoseEffect], completion: @escaping (MissedMealStatus) -> Void) {
+    func hasMissedMeal(glucoseSamples: [some GlucoseSampleValue], insulinCounteractionEffects: [GlucoseEffectVelocity], carbEffects: [GlucoseEffect], completion: @escaping (MissedMealStatus) -> Void) {
         let delta = TimeInterval(minutes: 5)
 
         let intervalStart = currentDate(timeIntervalSinceNow: -MissedMealSettings.maxRecency)
         let intervalEnd = currentDate(timeIntervalSinceNow: -MissedMealSettings.minRecency)
         let now = self.currentDate
-
+        
+        let filteredGlucoseValues = glucoseSamples.filter { intervalStart <= $0.startDate && $0.startDate <= now }
+        
+        /// Only try to detect if there's a missed meal if there are no calibration/user-entered BGs,
+        /// since these can cause large jumps
+        guard !filteredGlucoseValues.containsUserEntered() else {
+            completion(.noMissedMeal)
+            return
+        }
+        
         let filteredCarbEffects = carbEffects.filterDateRange(intervalStart, now)
             
         /// Compute how much of the ICE effect we can't explain via our entered carbs
@@ -214,12 +223,13 @@ class MealDetectionManager {
     ///    - pendingAutobolusUnits: any autobolus units that are still being delivered. Used to delay the missed meal notification to avoid notifying during an autobolus.
     ///    - bolusDurationEstimator: estimator of bolus duration that takes the units of the bolus as an input. Used to delay the missed meal notification to avoid notifying during an autobolus.
     func generateMissedMealNotificationIfNeeded(
+        glucoseSamples: [some GlucoseSampleValue],
         insulinCounteractionEffects: [GlucoseEffectVelocity],
         carbEffects: [GlucoseEffect],
         pendingAutobolusUnits: Double? = nil,
         bolusDurationEstimator: @escaping (Double) -> TimeInterval?
     ) {
-        hasMissedMeal(insulinCounteractionEffects: insulinCounteractionEffects, carbEffects: carbEffects) {[weak self] status in
+        hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: insulinCounteractionEffects, carbEffects: carbEffects) {[weak self] status in
             self?.manageMealNotifications(for: status, pendingAutobolusUnits: pendingAutobolusUnits, bolusDurationEstimator: bolusDurationEstimator)
         }
     }
@@ -293,5 +303,13 @@ class MealDetectionManager {
         ]
         
         completionHandler(report.joined(separator: "\n"))
+    }
+}
+
+fileprivate extension BidirectionalCollection where Element: GlucoseSampleValue, Index == Int {
+    /// Returns whether there are any user-entered or calibration points
+    /// Runtime: O(n)
+    func containsUserEntered() -> Bool {
+        return containsCalibrations() || filter({ $0.wasUserEntered }).count != 0
     }
 }

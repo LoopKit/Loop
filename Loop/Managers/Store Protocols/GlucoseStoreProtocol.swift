@@ -29,7 +29,7 @@ protocol GlucoseStoreProtocol: AnyObject {
     func executeGlucoseQuery(fromQueryAnchor queryAnchor: GlucoseStore.QueryAnchor?, limit: Int, completion: @escaping (GlucoseStore.GlucoseQueryResult) -> Void)
     
     // MARK: Effect Calculation
-    func getRecentMomentumEffect(_ completion: @escaping (_ result: Result<[GlucoseEffect], Error>) -> Void)
+    func getRecentMomentumEffect(for date: Date?, _ completion: @escaping (_ result: Result<[GlucoseEffect], Error>) -> Void)
     
     func getCounteractionEffects(start: Date, end: Date?, to effects: [GlucoseEffect], _ completion: @escaping (_ effects: Result<[GlucoseEffectVelocity], Error>) -> Void)
     

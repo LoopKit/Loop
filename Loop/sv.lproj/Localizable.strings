@@ -89,9 +89,6 @@
 /* Alert message for a missing pump error */
 "A pump must be configured before a bolus can be delivered." = "En pump måste ha lagts till och konfigurerats innan en bolus ge ges.";
 
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "Absorptionstid";
-
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
 
@@ -226,8 +223,7 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Kolhydrateffekter";
 
-/* Back button text for bolus screen to return to carb entry screen
-   Label for carb entry row on bolus screen */
+/* Label for carb entry row on bolus screen */
 "Carb Entry" = "Kolhydrater";
 
 /* The title of the carb ratios schedule screen
@@ -236,9 +232,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Lägg till kolhydrater";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Ändra kolhydrater";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Kolhydrater";
@@ -264,7 +257,8 @@
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Välj en längre absorptionstid för måltid med mycket fett eller protein. Ofta är det bäst att dela upp måltiden i snabba och långsamma kolhydrater och mata in dessa var för sig.";
 
-/* The button label of the action used to dismiss the unsafe notification permission alert */
+/* Button title to close view
+   The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Stäng";
 
 /* The title text for the looping enabled switch cell */
@@ -708,8 +702,6 @@
 "Starting Bolus" = "Påbörjar bolus";
 
 /* Section title for Support
-   Support screen title
-   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Support";
 
@@ -740,9 +732,6 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Äldre modell använd av Loop, vilken tillåter anpassning av insulinets verkningstid.";
 
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "Maximala absorptionstiden är %@";
-
 /* Alert message for a maximum bolus validation error (1: max bolus value) */
 "The maximum bolus amount is %@ U." = "Den högst tillåtna bolusmängden är %@ E.";
 
@@ -754,9 +743,6 @@
 
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Behandlingsinställningar";
-
-/* Title of the carb entry date picker cell */
-"Time" = "Tid";
 
 /* Critical event log export error alert try again button */
 "Try Again" = "Försök igen";
@@ -780,6 +766,8 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Det går inte att stoppa pågående bolus. Flytta din iPhone närmare din pump och försök igen. Kontrollera händelsehistorik för insulin för mer detaljerad information och var vaksam på sjunkande blodsocker.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Okänd";
 

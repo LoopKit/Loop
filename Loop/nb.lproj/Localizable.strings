@@ -125,9 +125,6 @@
 /* Alert message for a missing pump error */
 "A pump must be configured before a bolus can be delivered." = "En pumpe må konfigureres før en bolus kan tilføres.";
 
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "Absorbsjonstid";
-
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AksepterAnbefaltBolus";
 
@@ -284,8 +281,7 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Karb effekter";
 
-/* Back button text for bolus screen to return to carb entry screen
-   Label for carb entry row on bolus screen */
+/* Label for carb entry row on bolus screen */
 "Carb Entry" = "Legg til karbohydrater";
 
 /* Details for configuration error when carb ratio schedule is missing */
@@ -297,9 +293,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Legg til karbohydrater";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Rediger Karb oppføring";
 
 /* Title for bolus screen warning when carbohydrate entry is too large */
 "Carbohydrate Entry Too Large" = "Karbohydratinntaket er for stort";
@@ -331,7 +324,8 @@
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Velg lengre absorpsjonstid for større måltider, eller de som inneholder fett og proteiner. Dette er kun veiledning til algoritmen og trenger ikke være nøyaktig.";
 
-/* The button label of the action used to dismiss the unsafe notification permission alert */
+/* Button title to close view
+   The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Lukk";
 
 /* The title text for the looping enabled switch cell */
@@ -456,7 +450,7 @@
 /* The title of the Dosing Strategy section in settings */
 "Dosing Strategy" = "Doseringsstrategi";
 
-/* Remote command error description: duration exceed max (1: max duration in hours). */
+/* Override error description: duration exceed max (1: max duration in hours). */
 "Duration exceeds: %1$.1f hours" = "Varigheten overskrider: %1$.1f timer";
 
 /* Message to the user to enable bluetooth */
@@ -495,10 +489,10 @@
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Til slutt %@";
 
-/* Remote command error description: bolus exceeds maximum bolus in settings. */
+/* Bolus error description: bolus exceeds maximum bolus in settings. */
 "Exceeds maximum allowed bolus in settings" = "Overskrider maksimalt tillatt bolus i innstillingene";
 
-/* Remote command error description: carbs exceed maximum amount. */
+/* Carb error description: carbs exceed maximum amount. */
 "Exceeds maximum allowed carbs" = "Overskrider maksimalt tillatte karbohydrater";
 
 /* The title of the alert describing a maximum bolus validation error */
@@ -568,9 +562,6 @@
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "På ubestemt tid";
 
-/* Title of the alert when carb input maximum was exceeded. */
-"Input Maximum Exceeded" = "Maksimalt antall er overskredet";
-
 /* Title of the prediction input effect for insulin */
 "Insulin" = "Insulin";
 
@@ -609,13 +600,10 @@
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Avbrutt %1$@: <b>%2$@</b> av %3$@ %4$@";
 
-/* Remote command error description: invalid absorption time. */
-"Invalid absorption time: %d hours" = "Ugyldig absorpsjonstid: %d timer";
-
-/* Remote command error description: invalid bolus amount. */
+/* Bolus error description: invalid bolus amount. */
 "Invalid Bolus Amount" = "Ugyldig bolusmengde";
 
-/* Remote command error description: invalid carb amount. */
+/* Carb error description: invalid carb amount. */
 "Invalid carb amount" = "Ugyldig karbohydratmengde";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
@@ -698,9 +686,6 @@
 /* Title for bolus screen warning when max bolus is exceeded */
 "Maximum Bolus Exceeded" = "Maksimal bolus overskredet";
 
-/* Alert title when maximum duration exceeded. */
-"Maximum Duration Exceeded" = "Maksimal varighet overskredet";
-
 /* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Måltidsbolus";
 
@@ -713,7 +698,7 @@
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Manglende data: %1$@";
 
-/* Remote command error description: missing maximum bolus in settings. */
+/* Bolus error description: missing maximum bolus in settings. */
 "Missing maximum allowed bolus in settings" = "Mangler maksimalt tillatt bolus i innstillingene";
 
 /* The short unit display string for millimoles of glucose per liter */
@@ -725,20 +710,17 @@
 /* Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Mer info";
 
-/* Label for toggle to mute all alerts */
+/* Label for button to mute all alerts */
 "Mute All Alerts" = "Demp alle varsler";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Trenger tilsyn";
 
-/* Remote command error description: negative duration error. */
+/* Override error description: negative duration error. */
 "Negative duration not allowed" = "Negativ varighet ikke tillatt";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
-
-/* Description of temporary mute alerts */
-"No alerts will sound while muted. Once this period ends, your alerts and alarms will resume as normal." = "Ingen varsler høres når de er dempet. Når denne perioden er over, vil varslene og alarmene gjenopptas som normalt.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -899,9 +881,6 @@
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
 "Remote Carbs Entry: %d grams" = "Ekstern karbohydratregistrering: %d gram";
 
-/* The notification title for the remote command expiration error */
-"Remote Command Expired" = "Ekstern kommando utløpt";
-
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Reservoar";
 
@@ -919,9 +898,6 @@
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Planlagt";
-
-/* List header for mute all alerts period */
-"Select Mute Period" = "Velg tidsrom for Mute";
 
 /* The title of the services section in settings */
 "Services" = "Tjenester";
@@ -950,7 +926,7 @@
 /* Software update button link text */
 "Software Update" = "Programvare oppdatering";
 
-/* Remote command error description: invalid start time is out of range. */
+/* Carb error description: invalid start time is out of range. */
 "Start time is out of range: %@" = "Starttiden er utenfor området: %@";
 
 /* The format for the description of a temporary override start date */
@@ -960,8 +936,6 @@
 "Starting Bolus" = "Starter Bolus";
 
 /* Section title for Support
-   Support screen title
-   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Brukerstøtte";
 
@@ -986,9 +960,6 @@
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Trykk for å stoppe";
 
-/* The title of the cell indicating alerts are temporarily muted */
-"Temp Mute Alerts" = "Midlertidig demping av varsler";
-
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "Den angitte bolusmengden er mindre enn minimumsleveransen.";
 
@@ -1000,9 +971,6 @@
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Den eldre modellen brukt av Loop, som tillater tilpasning av handlingsvarigheten.";
-
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "Maksimal absorpsjonstid er %@";
 
 /* Alert body displayed for quantity greater than max (1: maximum quantity in grams) */
 "The maximum allowed amount is %@ grams." = "Maksimalt tillatt mengde er %@ gram.";
@@ -1019,14 +987,8 @@
 /* Alert message for a missing maximum bolus setting error */
 "The maximum bolus setting must be configured before a bolus can be delivered." = "Innstillingen for maksimal bolus må konfigureres før bolus kan leveres.";
 
-/* The notification body for a remote command expiration. (1: Expiration in minutes) */
-"The remote command expired %.0f minutes ago." = "Den eksterne kommandoen utløp for %.0f minutter siden.";
-
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Behandlingsinnstillinger";
-
-/* Title of the carb entry date picker cell */
-"Time" = "Tid";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Tidssensitive varsler";
@@ -1056,13 +1018,15 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Kan ikke stoppe bolusen som pågår. Flytt iPhone nærmere pumpen og prøv igjen. Sjekk insulinleveringshistorikken for detaljer, og overvåk glukosen nøye.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Ukjent";
 
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Ukjent feil: %1$@";
 
-/* Remote command error description: unknown preset (1: preset name). */
+/* Override error description: unknown preset (1: preset name). */
 "Unknown preset: %1$@" = "Ukjent forhåndsinnstilling: %1$@";
 
 /* Unknown amount of time in settings' profile expiration section */

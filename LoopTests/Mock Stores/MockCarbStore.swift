@@ -108,8 +108,8 @@ class MockCarbStore: CarbStoreProtocol {
             let carbDates = samples.map { $0.startDate }
             let maxCarbDate = carbDates.max()!
             let minCarbDate = carbDates.min()!
-            let carbRatio = carbRatioScheduleApplyingOverrideHistory.between(start: maxCarbDate, end: minCarbDate)
-            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory.quantitiesBetween(start: maxCarbDate, end: minCarbDate)
+            let carbRatio = carbRatioScheduleApplyingOverrideHistory.between(start: minCarbDate, end: maxCarbDate)
+            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory.quantitiesBetween(start: minCarbDate, end: maxCarbDate)
             let effects = samples.map(
                 to: effectVelocities,
                 carbRatio: carbRatio,
@@ -174,5 +174,4 @@ extension MockCarbStore {
             return nil
         }
     }
-
 }

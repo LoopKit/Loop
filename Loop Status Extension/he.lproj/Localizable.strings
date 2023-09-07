@@ -1,3 +1,15 @@
+/* Displayed in the widget when the amount of active carbs cannot be determined. */
+"? g" = "? g";
+
+/* Displayed in the widget when the amount of active insulin cannot be determined. */
+"? U" = "? U";
+
+/* The subtitle format describing the grams of active carbs.  (1: localized carb value description) */
+"%1$@" = "%1$@";
+
+/* The subtitle format describing units of active insulin. (1: localized insulin value description) */
+"%1$@ U" = "U %1$@";
+
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
@@ -11,7 +23,7 @@
 "dB" = "dB";
 
 /* The subtitle format describing eventual glucose.  (1: localized glucose value description) */
-"Eventually %1$@" = "Eventually %1$@";
+"Eventually %1$@" = "בדרך ל-%1$@";
 
 /* The short unit display string for grams */
 "g" = "g";
