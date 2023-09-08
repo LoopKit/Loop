@@ -75,7 +75,7 @@ public struct SettingsView: View {
                     supportSection
 
                     if let profileExpiration = BuildDetails.default.profileExpiration, FeatureFlags.profileExpirationSettingsViewEnabled {
-                        profileExpirationSection(profileExpiration: profileExpiration)
+                        appExpirationSection(profileExpiration: profileExpiration)
                     }
                 }
             }
@@ -416,24 +416,50 @@ extension SettingsView {
     /*
      DIY loop specific component to show users the amount of time remaining on their build before a rebuild is necessary.
      */
-    private func profileExpirationSection(profileExpiration:Date) -> some View {
-        let nearExpiration : Bool = ProfileExpirationAlerter.isNearProfileExpiration(profileExpiration: profileExpiration)
-        let profileExpirationMsg = ProfileExpirationAlerter.createProfileExpirationSettingsMessage(profileExpiration: profileExpiration)
-        let readableExpirationTime = Self.dateFormatter.string(from: profileExpiration)
+    private func appExpirationSection(profileExpiration: Date) -> some View {
+        let expirationDate = AppExpirationAlerter.calculateExpirationDate(profileExpiration: profileExpiration)
+        let isTestFlight = AppExpirationAlerter.isTestFlightBuild()
+        let nearExpiration = AppExpirationAlerter.isNearExpiration(expirationDate: expirationDate)
+        let profileExpirationMsg = AppExpirationAlerter.createProfileExpirationSettingsMessage(expirationDate: expirationDate)
+        let readableExpirationTime = Self.dateFormatter.string(from: expirationDate)
         
-        return Section(header: SectionHeader(label: NSLocalizedString("App Profile", comment: "Settings app profile section")),
-                       footer: Text(NSLocalizedString("Profile expires ", comment: "Time that profile expires") + readableExpirationTime)) {
-            if(nearExpiration) {
-                Text(profileExpirationMsg).foregroundColor(.red)
+        if isTestFlight {
+            return createAppExpirationSection(
+                headerLabel: NSLocalizedString("TestFlight", comment: "Settings app TestFlight section"),
+                footerLabel: NSLocalizedString("TestFlight expires ", comment: "Time that build expires") + readableExpirationTime,
+                expirationLabel: NSLocalizedString("TestFlight Expiration", comment: "Settings TestFlight expiration view"),
+                updateURL: "https://loopkit.github.io/loopdocs/gh-actions/gh-update/",
+                nearExpiration: nearExpiration,
+                expirationMessage: profileExpirationMsg
+            )
+        } else {
+            return createAppExpirationSection(
+                headerLabel: NSLocalizedString("App Profile", comment: "Settings app profile section"),
+                footerLabel: NSLocalizedString("Profile expires ", comment: "Time that profile expires") + readableExpirationTime,
+                expirationLabel: NSLocalizedString("Profile Expiration", comment: "Settings App Profile expiration view"),
+                updateURL: "https://loopkit.github.io/loopdocs/build/updating/",
+                nearExpiration: nearExpiration,
+                expirationMessage: profileExpirationMsg
+            )
+        }
+    }
+    
+    private func createAppExpirationSection(headerLabel: String, footerLabel: String, expirationLabel: String, updateURL: String, nearExpiration: Bool, expirationMessage: String) -> some View {
+        return Section(
+            header: SectionHeader(label: headerLabel),
+            footer: Text(footerLabel)
+        ) {
+            if nearExpiration {
+                Text(expirationMessage).foregroundColor(.red)
             } else {
                 HStack {
-                    Text("Profile Expiration", comment: "Settings App Profile expiration view")
+                    Text(expirationLabel)
                     Spacer()
-                    Text(profileExpirationMsg).foregroundColor(Color.secondary)
+                    Text(expirationMessage).foregroundColor(Color.secondary)
                 }
             }
             Button(action: {
-                UIApplication.shared.open(URL(string: "https://loopkit.github.io/loopdocs/build/updating/")!)
+                UIApplication.shared.open(URL(string: updateURL)!)
             }) {
                 Text(NSLocalizedString("How to update (LoopDocs)", comment: "The title text for how to update"))
             }
