@@ -22,11 +22,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
         setenv("CFNETWORK_DIAGNOSTICS", "3", 1)
 
-        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
-            // Code only executes when not running tests
-            loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
-            loopAppManager.launch()
-        }
+        loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
+        loopAppManager.launch()
         return loopAppManager.isLaunchComplete
     }
 
@@ -35,10 +32,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     func applicationDidBecomeActive(_ application: UIApplication) {
         log.default(#function)
 
-        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
-            // Code only executes when not running tests
-            loopAppManager.didBecomeActive()
-        }
+        loopAppManager.didBecomeActive()
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
