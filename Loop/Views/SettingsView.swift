@@ -119,13 +119,13 @@ extension String: Identifiable {
     }
 }
 
-struct PluginMenuItem: Identifiable {
+struct PluginMenuItem<Content: View>: Identifiable {
     var id: String {
         return pluginIdentifier + String(describing: offset)
     }
 
     let section: SettingsMenuSection
-    let view: AnyView
+    let view: Content
     let pluginIdentifier: String
     let offset: Int
 }
@@ -206,7 +206,7 @@ extension SettingsView {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
             LargeButton(action: { self.therapySettingsIsPresented = true },
                             includeArrow: true,
-                            imageView: AnyView(Image("Therapy Icon")),
+                            imageView: Image("Therapy Icon"),
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
                 .sheet(isPresented: $therapySettingsIsPresented) {
@@ -235,7 +235,7 @@ extension SettingsView {
         }
     }
 
-    private var pluginMenuItems: [PluginMenuItem] {
+    private var pluginMenuItems: [PluginMenuItem<some View>] {
         self.viewModel.availableSupports.flatMap { plugin in
             plugin.configurationMenuItems().enumerated().map { index, item in
                 PluginMenuItem(section: item.section, view: item.view, pluginIdentifier: plugin.identifier, offset: index)
@@ -261,7 +261,7 @@ extension SettingsView {
         } else if viewModel.isOnboardingComplete {
             LargeButton(action: { self.pumpChooserIsPresented = true },
                         includeArrow: false,
-                        imageView: AnyView(plusImage),
+                        imageView: plusImage,
                         label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
                 .actionSheet(isPresented: $pumpChooserIsPresented) {
@@ -293,7 +293,7 @@ extension SettingsView {
         } else {
             LargeButton(action: { self.cgmChooserIsPresented = true },
                         includeArrow: false,
-                        imageView: AnyView(plusImage),
+                        imageView: plusImage,
                         label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
                 .actionSheet(isPresented: $cgmChooserIsPresented) {
@@ -306,7 +306,7 @@ extension SettingsView {
         Section {
             LargeButton(action: { self.favoriteFoodsIsPresented = true },
                         includeArrow: true,
-                        imageView: AnyView(Image("Favorite Foods Icon").renderingMode(.template).foregroundColor(carbTintColor)),
+                        imageView: Image("Favorite Foods Icon").renderingMode(.template).foregroundColor(carbTintColor),
                         label: "Favorite Foods",
                         descriptiveText: "Simplify Carb Entry")
         }
@@ -339,7 +339,7 @@ extension SettingsView {
             if viewModel.servicesViewModel.inactiveServices().count > 0 {
                 LargeButton(action: { self.serviceChooserIsPresented = true },
                             includeArrow: false,
-                            imageView: AnyView(plusImage),
+                            imageView: plusImage,
                             label: NSLocalizedString("Add Service", comment: "The title of the add service button in settings"),
                             descriptiveText: NSLocalizedString("Tap here to set up a Service", comment: "The descriptive text of the add service button in settings"))
                     .actionSheet(isPresented: $serviceChooserIsPresented) {
@@ -481,41 +481,43 @@ extension SettingsView {
             .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
     }
     
-    private func deviceImage(uiImage: UIImage?) -> AnyView {
+    @ViewBuilder
+    private func deviceImage(uiImage: UIImage?) -> some View {
         if let uiImage = uiImage {
-            return AnyView(Image(uiImage: uiImage)
+            Image(uiImage: uiImage)
                 .renderingMode(.original)
                 .resizable()
-                .scaledToFit())
+                .scaledToFit()
         } else {
-            return AnyView(Spacer())
+            Spacer()
         }
     }
     
-    private func serviceImage(uiImage: UIImage?) -> AnyView {
-        return deviceImage(uiImage: uiImage)
+    @ViewBuilder
+    private func serviceImage(uiImage: UIImage?) -> some View {
+        deviceImage(uiImage: uiImage)
     }
 }
 
-fileprivate struct LargeButton: View {
+fileprivate struct LargeButton<Content: View>: View {
     
     let action: () -> Void
     var includeArrow: Bool = true
-    let imageView: AnyView
+    let imageView: Content
     let label: String
     let descriptiveText: String
 
     // TODO: The design doesn't show this, but do we need to consider different values here for different size classes?
-    static let spacing: CGFloat = 15
-    static let imageWidth: CGFloat = 60
-    static let imageHeight: CGFloat = 60
-    static let topBottomPadding: CGFloat = 10
+    private let spacing: CGFloat = 15
+    private let imageWidth: CGFloat = 60
+    private let imageHeight: CGFloat = 60
+    private let topBottomPadding: CGFloat = 10
     
     public var body: some View {
         Button(action: action) {
             HStack {
-                HStack(spacing: Self.spacing) {
-                    imageView.frame(width: Self.imageWidth, height: Self.imageHeight)
+                HStack(spacing: spacing) {
+                    imageView.frame(width: imageWidth, height: imageHeight)
                     VStack(alignment: .leading) {
                         Text(label)
                             .foregroundColor(.primary)
@@ -528,7 +530,7 @@ fileprivate struct LargeButton: View {
                     Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
                 }
             }
-            .padding(EdgeInsets(top: Self.topBottomPadding, leading: 0, bottom: Self.topBottomPadding, trailing: 0))
+            .padding(EdgeInsets(top: topBottomPadding, leading: 0, bottom: topBottomPadding, trailing: 0))
         }
     }
 }
