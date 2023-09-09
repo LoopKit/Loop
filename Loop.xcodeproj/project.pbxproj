@@ -787,6 +787,7 @@
 		1DC63E7325351BDF004605DA /* TrueTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TrueTime.framework; path = Carthage/Build/iOS/TrueTime.framework; sourceTree = "<group>"; };
 		1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1DFE9E162447B6270082C280 /* UserNotificationAlertSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNotificationAlertSchedulerTests.swift; sourceTree = "<group>"; };
+		3D03C6DA2AACE6AC00FDE5D2 /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = hi.lproj/Intents.strings; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		430B29892041F54A00BA9F93 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
@@ -4224,6 +4225,7 @@
 				C1C3127F297E4C0400296DA4 /* ar */,
 				C1C247882995823200371B88 /* sk */,
 				C1C5357529C6346A00E32DF9 /* cs */,
+				3D03C6DA2AACE6AC00FDE5D2 /* hi */,
 			);
 			name = Intents.intentdefinition;
 			sourceTree = "<group>";
