@@ -24,7 +24,7 @@
 		149A28E42A8A63A700052EDF /* FavoriteFoodDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149A28E32A8A63A700052EDF /* FavoriteFoodDetailView.swift */; };
 		14B1735E28AED9EC006CCD7C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735D28AED9EC006CCD7C /* WidgetKit.framework */; };
 		14B1736028AED9EC006CCD7C /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B1735F28AED9EC006CCD7C /* SwiftUI.framework */; };
-		14B1736928AED9EE006CCD7C /* SmallStatusWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		14B1736928AED9EE006CCD7C /* Loop Widget Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736E28AEDBF6006CCD7C /* BasalView.swift */; };
 		14B1737328AEDBF6006CCD7C /* SystemStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */; };
 		14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1737028AEDBF6006CCD7C /* GlucoseView.swift */; };
@@ -719,7 +719,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				14B1736928AED9EE006CCD7C /* SmallStatusWidgetExtension.appex in Embed App Extensions */,
+				14B1736928AED9EE006CCD7C /* Loop Widget Extension.appex in Embed App Extensions */,
 				E9B07F94253BBA6500BAD8F8 /* Loop Intent Extension.appex in Embed App Extensions */,
 				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
@@ -751,7 +751,7 @@
 		149A28BA2A853E5100052EDF /* CarbEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryViewModel.swift; sourceTree = "<group>"; };
 		149A28BC2A853E6C00052EDF /* CarbEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryView.swift; sourceTree = "<group>"; };
 		149A28E32A8A63A700052EDF /* FavoriteFoodDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodDetailView.swift; sourceTree = "<group>"; };
-		14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; name = SmallStatusWidgetExtension.appex; path = "Loop Widget Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Widget Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		14B1735D28AED9EC006CCD7C /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		14B1735F28AED9EC006CCD7C /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		14B1736628AED9EE006CCD7C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1993,7 +1993,7 @@
 				43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */,
 				43D9002A21EB209400AF44BF /* LoopCore.framework */,
 				E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */,
-				14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */,
+				14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2981,7 +2981,7 @@
 			);
 			name = "Loop Widget Extension";
 			productName = SmallStatusWidgetExtension;
-			productReference = 14B1735C28AED9EC006CCD7C /* SmallStatusWidgetExtension.appex */;
+			productReference = 14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		43776F8B1B8022E90074EA36 /* Loop */ = {
@@ -4827,6 +4827,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WIDGET_EXTENSION_DEBUG)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -4871,6 +4875,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WIDGET_EXTENSION_RELEASE)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -5128,6 +5136,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -5154,6 +5163,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
@@ -5407,6 +5417,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION_DEBUG)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -5429,6 +5443,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION_RELEASE)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
@@ -5492,6 +5510,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_INTENT_EXTENSION_DEBUG)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -5515,6 +5537,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_INTENT_EXTENSION_RELEASE)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
