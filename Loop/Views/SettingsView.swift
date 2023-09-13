@@ -111,17 +111,17 @@ public struct SettingsView: View {
             .actionSheet(item: $actionSheet) { actionSheet in
                 switch actionSheet {
                 case .cgmPicker:
-                    ActionSheet(
+                    return ActionSheet(
                         title: Text("Add CGM", comment: "The title of the CGM chooser in settings"),
                         buttons: cgmChoices
                     )
                 case .pumpPicker:
-                    ActionSheet(
+                    return ActionSheet(
                         title: Text("Add Pump", comment: "The title of the pump chooser in settings"),
                         buttons: pumpChoices
                     )
                 case .servicePicker:
-                    ActionSheet(
+                    return ActionSheet(
                         title: Text("Add Service", comment: "The title of the add service action sheet in settings"),
                         buttons: serviceChoices
                     )
@@ -130,9 +130,9 @@ public struct SettingsView: View {
             .alert(item: $alert) { alert in
                 switch alert {
                 case .deleteCGMData:
-                    makeDeleteAlert(for: self.viewModel.cgmManagerSettingsViewModel)
+                    return makeDeleteAlert(for: self.viewModel.cgmManagerSettingsViewModel)
                 case .deletePumpData:
-                    makeDeleteAlert(for: self.viewModel.pumpManagerSettingsViewModel)
+                    return makeDeleteAlert(for: self.viewModel.pumpManagerSettingsViewModel)
                 }
             }
             .sheet(item: $sheet) { sheet in
