@@ -138,7 +138,7 @@ public struct SettingsView: View {
             .sheet(item: $sheet) { sheet in
                 switch sheet {
                 case .therapySettings:
-                    return TherapySettingsView(
+                    TherapySettingsView(
                         mode: .settings,
                         viewModel: TherapySettingsViewModel(
                             therapySettings: viewModel.therapySettings(),
@@ -156,7 +156,7 @@ public struct SettingsView: View {
                     .environment(\.guidanceColors, self.guidanceColors)
                     .environment(\.insulinTintColor, self.insulinTintColor)
                 case .favoriteFoods:
-                    return FavoriteFoodsView()
+                    FavoriteFoodsView()
                 }
             }
         }
