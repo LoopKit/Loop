@@ -24,6 +24,7 @@ public struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var versionUpdateViewModel: VersionUpdateViewModel
 
+    @State private var profilesIsPresented: Bool = false
     @State private var pumpChooserIsPresented: Bool = false
     @State private var cgmChooserIsPresented: Bool = false
     @State private var favoriteFoodsIsPresented: Bool = false
@@ -201,7 +202,11 @@ extension SettingsView {
             }
         }
     }
-        
+
+    private var isAnySheetPresented: Bool {
+        therapySettingsIsPresented || profilesIsPresented
+    }
+
     private var configurationSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
             LargeButton(action: { self.therapySettingsIsPresented = true },
@@ -224,7 +229,26 @@ extension SettingsView {
                         .environment(\.guidanceColors, self.guidanceColors)
                         .environment(\.insulinTintColor, self.insulinTintColor)
             }
-            
+            LargeButton(action: { self.profilesIsPresented = true },
+                        includeArrow: true,
+                        imageView: AnyView(Image(systemName: "arrow.triangle.2.circlepath").font(.system(size: 30, weight: .bold))),
+                        label: NSLocalizedString("Profiles", comment: "Title text for button to Profiles"),
+                        descriptiveText: NSLocalizedString("Switch between profiles for different scenarios", comment: "Descriptive text for Profiles"))
+            .sheet(isPresented: $profilesIsPresented) {
+                ProfileView(viewModel: ProfileViewModel(therapySettings: self.viewModel.therapySettings(),
+                                                        sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
+                                                        adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
+                                                        delegate: self.viewModel.therapySettingsViewModelDelegate))
+                .environmentObject(displayGlucosePreference)
+                .environment(\.dismissAction, self.dismiss)
+                .environment(\.appName, self.appName)
+                .environment(\.chartColorPalette, .primary)
+                .environment(\.carbTintColor, self.carbTintColor)
+                .environment(\.glucoseTintColor, self.glucoseTintColor)
+                .environment(\.guidanceColors, self.guidanceColors)
+                .environment(\.insulinTintColor, self.insulinTintColor)
+            }
+
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
