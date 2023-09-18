@@ -126,7 +126,7 @@
 "A pump must be configured before a bolus can be delivered." = "En pumpe må konfigureres før en bolus kan tilføres.";
 
 /* Title of the carb entry absorption time cell */
-"Absorption Time" = "Absorbsjonstid";
+"Absorption Time" = "Absorpsjonstid";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AksepterAnbefaltBolus";
@@ -493,7 +493,7 @@
 "Event History" = "Hendelseshistorie";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
-"Eventually %@" = "Til slutt %@";
+"Eventually %@" = "Omsider %@";
 
 /* Remote command error description: bolus exceeds maximum bolus in settings. */
 "Exceeds maximum allowed bolus in settings" = "Overskrider maksimalt tillatt bolus i innstillingene";
@@ -581,7 +581,7 @@
 "Insulin adjustments have been disabled!" = "Insulinjusteringer er deaktivert!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Insulinlevering";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Insulin effekt";
@@ -749,7 +749,7 @@
 "No Pump Configured" = "Ingen pumpe er konfigurert";
 
 /* The title of the cell indicating that there is no recent glucose */
-"No Recent Glucose" = "Ingen ny blodsukkermåling";
+"No Recent Glucose" = "Ingen ny måling";
 
 /* Title for bolus screen notice when glucose data is missing or stale */
 "No Recent Glucose Data" = "Ingen nye blodsukkerdata";
