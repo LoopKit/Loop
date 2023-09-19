@@ -677,14 +677,14 @@ final class DeviceDataManager {
                     let report = [
                         "## Build Details",
                         "* appNameAndVersion: \(Bundle.main.localizedNameAndVersion)",
-                        "* profileExpiration: \(Bundle.main.profileExpirationString)",
-                        "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
-                        "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
-                        "* workspaceGitRevision: \(Bundle.main.workspaceGitRevision ?? "N/A")",
-                        "* workspaceGitBranch: \(Bundle.main.workspaceGitBranch ?? "N/A")",
-                        "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
-                        "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
-                        "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
+                        "* profileExpiration: \(BuildDetails.default.profileExpirationString)",
+                        "* gitRevision: \(BuildDetails.default.gitRevision ?? "N/A")",
+                        "* gitBranch: \(BuildDetails.default.gitBranch ?? "N/A")",
+                        "* workspaceGitRevision: \(BuildDetails.default.workspaceGitRevision ?? "N/A")",
+                        "* workspaceGitBranch: \(BuildDetails.default.workspaceGitBranch ?? "N/A")",
+                        "* sourceRoot: \(BuildDetails.default.sourceRoot ?? "N/A")",
+                        "* buildDateString: \(BuildDetails.default.buildDateString ?? "N/A")",
+                        "* xcodeVersion: \(BuildDetails.default.xcodeVersion ?? "N/A")",
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
@@ -1673,7 +1673,7 @@ extension GlucoseStore : CGMStalenessMonitorDelegate { }
 extension DeviceDataManager: SupportInfoProvider {
 
     private var branchNameIfNotReleaseBranch: String? {
-        return Bundle.main.gitBranch.filter { branch in
+        return BuildDetails.default.gitBranch.filter { branch in
             return branch != "" &&
                 branch != "main" &&
                 branch != "master" &&

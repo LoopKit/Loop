@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -438,6 +438,8 @@
 		C11B9D64286779C000500CF8 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D61286779C000500CF8 /* MockKitUI.framework */; };
 		C11B9D65286779C000500CF8 /* MockKitUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D61286779C000500CF8 /* MockKitUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C11BD0552523CFED00236B08 /* SimpleBolusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */; };
+		C11C5D152ABA0B38004BD0B5 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11C5D142ABA0B38004BD0B5 /* BuildDetails.swift */; };
+		C11C5D172ABA2988004BD0B5 /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = C11C5D162ABA2988004BD0B5 /* BuildDetails.plist */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */; };
 		C1201E2D23ECDF3D002DA84A /* WatchContextRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */; };
@@ -1482,6 +1484,8 @@
 		C11B9D60286779C000500CF8 /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C11B9D61286779C000500CF8 /* MockKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBolusViewModel.swift; sourceTree = "<group>"; };
+		C11C5D142ABA0B38004BD0B5 /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
+		C11C5D162ABA2988004BD0B5 /* BuildDetails.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = BuildDetails.plist; sourceTree = "<group>"; };
 		C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContextRequestUserInfo.swift; sourceTree = "<group>"; };
 		C121D8CF29C7866D00DA0520 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Main.strings; sourceTree = "<group>"; };
 		C121D8D029C7866D00DA0520 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -2110,6 +2114,7 @@
 				7D7076511FE06EE1004AC8EA /* InfoPlist.strings */,
 				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
+				C11C5D162ABA2988004BD0B5 /* BuildDetails.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
 				1D12D3B82548EFDD00B53E8B /* main.swift */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
@@ -2618,6 +2623,7 @@
 				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
 				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
 				E9B08020253BBDE900BAD8F8 /* IntentExtensionInfo.swift */,
+				C11C5D142ABA0B38004BD0B5 /* BuildDetails.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3497,6 +3503,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
+				C11C5D172ABA2988004BD0B5 /* BuildDetails.plist in Resources */,
 				43FCBBC21E51710B00343C1B /* LaunchScreen.storyboard in Resources */,
 				B405E35A24D2B1A400DD058D /* HUDAssets.xcassets in Resources */,
 				A966152623EA5A26005D8B29 /* DefaultAssets.xcassets in Resources */,
@@ -3703,7 +3710,6 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}",
 			);
 			name = "Capture Build Details";
 			outputFileListPaths = (
@@ -3870,6 +3876,7 @@
 				1D82E6A025377C6B009131FB /* TrustedTimeChecker.swift in Sources */,
 				A98556852493F901000FD662 /* AlertStore+SimulatedCoreData.swift in Sources */,
 				899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */,
+				C11C5D152ABA0B38004BD0B5 /* BuildDetails.swift in Sources */,
 				89D1503E24B506EB00EDE253 /* Dictionary.swift in Sources */,
 				A96DAC2C2838F31200D94E38 /* SharedLogging.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,

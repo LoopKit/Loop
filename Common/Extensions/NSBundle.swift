@@ -53,47 +53,6 @@ extension Bundle {
         }
     }
     
-    var gitRevision: String? {
-        return object(forInfoDictionaryKey: "com-loopkit-Loop-git-revision") as? String
-    }
-    
-    var gitBranch: String? {
-        return object(forInfoDictionaryKey: "com-loopkit-Loop-git-branch") as? String
-    }
-    
-    var sourceRoot: String? {
-        return object(forInfoDictionaryKey: "com-loopkit-Loop-srcroot") as? String
-    }
-    
-    var buildDateString: String? {
-        return object(forInfoDictionaryKey: "com-loopkit-Loop-build-date") as? String
-    }
-
-    var xcodeVersion: String? {
-        return object(forInfoDictionaryKey: "com-loopkit-Loop-xcode-version") as? String
-    }
-    
-    var profileExpiration: Date? {
-        return object(forInfoDictionaryKey: "com-loopkit-Loop-profile-expiration") as? Date
-    }
-
-    var profileExpirationString: String {
-        if let profileExpiration = profileExpiration {
-            return "\(profileExpiration)"
-        } else {
-            return "N/A"
-        }
-    }
-
-    // These strings are only configured if it is a workspace build
-    var workspaceGitRevision: String? {
-        return object(forInfoDictionaryKey: "com-loopkit-LoopWorkspace-git-revision") as? String
-    }
-
-    var workspaceGitBranch: String? {
-       return object(forInfoDictionaryKey: "com-loopkit-LoopWorkspace-git-branch") as? String
-   }
-
     var localCacheDuration: TimeInterval {
         guard let localCacheDurationDaysString = object(forInfoDictionaryKey: "LoopLocalCacheDurationDays") as? String,
             let localCacheDurationDays = Double(localCacheDurationDaysString) else {
