@@ -54,7 +54,7 @@ public final class SupportManager {
         self.pluginManager = pluginManager
         self.staticSupportTypes = []
         staticSupportTypesByIdentifier = self.staticSupportTypes.reduce(into: [:]) { (map, type) in
-            map[type.supportIdentifier] = type
+            map[type.pluginIdentifier] = type
         }
 
         restoreState()
@@ -75,7 +75,7 @@ public final class SupportManager {
         for bundle in remainingSupportBundles {
             do {
                 if let support = try bundle.loadAndInstantiateSupport() {
-                    log.debug("Loaded support plugin: %{public}@", support.identifier)
+                    log.debug("Loaded support plugin: %{public}@", support.pluginIdentifier)
                     addSupport(support)
                 }
             } catch {
@@ -111,8 +111,8 @@ public final class SupportManager {
 extension SupportManager {
     func addSupport(_ support: SupportUI) {
         supports.mutate {
-            if $0[support.identifier] == nil {
-                $0[support.identifier] = support
+            if $0[support.pluginIdentifier] == nil {
+                $0[support.pluginIdentifier] = support
                 support.delegate = self
             }
         }
@@ -124,7 +124,7 @@ extension SupportManager {
 
     func removeSupport(_ support: SupportUI) {
         supports.mutate {
-            $0[support.identifier] = nil
+            $0[support.pluginIdentifier] = nil
             support.delegate = self
         }
     }
@@ -156,7 +156,7 @@ extension SupportManager {
 
             supports.value.values.forEach { support in
                 group.addTask {
-                    return (await support.checkVersion(bundleIdentifier: Bundle.main.bundleIdentifier!, currentVersion: Bundle.main.shortVersionString), support.identifier)
+                    return (await support.checkVersion(bundleIdentifier: Bundle.main.bundleIdentifier!, currentVersion: Bundle.main.shortVersionString), support.pluginIdentifier)
                 }
             }
 
@@ -331,7 +331,7 @@ fileprivate extension UserDefaults {
 extension SupportUI {
     var rawValue: RawStateValue {
         return [
-            "supportIdentifier": Self.supportIdentifier,
+            "supportIdentifier": Self.pluginIdentifier,
             "state": rawState
         ]
     }

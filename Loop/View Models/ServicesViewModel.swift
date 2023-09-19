@@ -24,7 +24,7 @@ public class ServicesViewModel: ObservableObject {
     var inactiveServices: () -> [ServiceDescriptor] {
         return {
             return self.availableServices().filter { availableService in
-                !self.activeServices().contains { $0.serviceIdentifier == availableService.identifier }
+                !self.activeServices().contains { $0.pluginIdentifier == availableService.identifier }
             }
         }
     }
@@ -42,7 +42,7 @@ public class ServicesViewModel: ObservableObject {
     }
     
     func didTapService(_ index: Int) {
-        delegate?.gotoService(withIdentifier: activeServices()[index].serviceIdentifier)
+        delegate?.gotoService(withIdentifier: activeServices()[index].pluginIdentifier)
     }
     
     func didTapAddService(_ availableService: ServiceDescriptor) {
@@ -54,23 +54,25 @@ public class ServicesViewModel: ObservableObject {
 extension ServicesViewModel {
     fileprivate class FakeService1: Service {
         static var localizedTitle: String = "Service 1"
-        static var serviceIdentifier: String = "FakeService1"
+        static var pluginIdentifier: String = "FakeService1"
+        var stateDelegate: StatefulPluggableDelegate?
         var serviceDelegate: ServiceDelegate?
         var rawState: RawStateValue = [:]
         required init() {}
         required init?(rawState: RawStateValue) {}
         let isOnboarded = true
-        var available: ServiceDescriptor { ServiceDescriptor(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+        var available: ServiceDescriptor { ServiceDescriptor(identifier: pluginIdentifier, localizedTitle: localizedTitle) }
     }
     fileprivate class FakeService2: Service {
         static var localizedTitle: String = "Service 2"
-        static var serviceIdentifier: String = "FakeService2"
+        static var pluginIdentifier: String = "FakeService2"
+        var stateDelegate: StatefulPluggableDelegate?
         var serviceDelegate: ServiceDelegate?
         var rawState: RawStateValue = [:]
         required init() {}
         required init?(rawState: RawStateValue) {}
         let isOnboarded = true
-        var available: ServiceDescriptor { ServiceDescriptor(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+        var available: ServiceDescriptor { ServiceDescriptor(identifier: pluginIdentifier, localizedTitle: localizedTitle) }
     }
 
     static var preview: ServicesViewModel {

@@ -308,7 +308,7 @@ extension SettingsView {
     private var pluginMenuItems: [PluginMenuItem<some View>] {
         self.viewModel.availableSupports.flatMap { plugin in
             plugin.configurationMenuItems().enumerated().map { index, item in
-                PluginMenuItem(section: item.section, view: item.view, pluginIdentifier: plugin.identifier, offset: index)
+                PluginMenuItem(section: item.section, view: item.view, pluginIdentifier: plugin.pluginIdentifier, offset: index)
             }
         }
     }
