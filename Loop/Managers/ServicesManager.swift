@@ -100,7 +100,7 @@ class ServicesManager {
     }
 
     private func serviceTypeFromRawValue(_ rawValue: Service.RawStateValue) -> Service.Type? {
-        guard let identifier = rawValue["serviceIdentifier"] as? String else {
+        guard let identifier = rawValue["statefulPluginIdentifier"] as? String else {
             return nil
         }
 
