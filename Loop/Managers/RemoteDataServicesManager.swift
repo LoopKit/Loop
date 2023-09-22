@@ -65,7 +65,7 @@ final class RemoteDataServicesManager {
 
     func removeService(_ remoteDataService: RemoteDataService) {
         lock.withLock {
-            unlockedRemoteDataServices.removeAll { $0.serviceIdentifier == remoteDataService.serviceIdentifier }
+            unlockedRemoteDataServices.removeAll { $0.pluginIdentifier == remoteDataService.pluginIdentifier }
         }
         clearQueryAnchors(for: remoteDataService)
     }
@@ -81,7 +81,7 @@ final class RemoteDataServicesManager {
 
 
     private func dispatchQueue(for remoteDataService: RemoteDataService, withRemoteDataType remoteDataType: RemoteDataType) -> DispatchQueue {
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: remoteDataType)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: remoteDataType)
         return dispatchQueue(key)
     }
 
@@ -228,7 +228,7 @@ extension RemoteDataServicesManager {
     private func uploadAlertData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .alert)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .alert)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -263,7 +263,7 @@ extension RemoteDataServicesManager {
     private func uploadCarbData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .carb)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .carb)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -305,7 +305,7 @@ extension RemoteDataServicesManager {
     private func uploadDoseData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .dose)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .dose)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -347,7 +347,7 @@ extension RemoteDataServicesManager {
     private func uploadDosingDecisionData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .dosingDecision)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .dosingDecision)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -394,7 +394,7 @@ extension RemoteDataServicesManager {
         
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .glucose)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .glucose)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -436,7 +436,7 @@ extension RemoteDataServicesManager {
     private func uploadPumpEventData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .pumpEvent)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .pumpEvent)
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .pumpEvent).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -478,7 +478,7 @@ extension RemoteDataServicesManager {
     private func uploadSettingsData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .settings)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .settings)
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .settings).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -520,7 +520,7 @@ extension RemoteDataServicesManager {
     private func uploadTemporaryOverrideData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .overrides)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .overrides)
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -600,7 +600,7 @@ extension RemoteDataServicesManager {
     func serviceForPushNotification(_ notification: [String: AnyObject]) throws -> RemoteDataService {
         let defaultServiceIdentifier = "NightscoutService"
         let serviceIdentifier = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
-        guard let service = remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier}) else {
+        guard let service = remoteDataServices.first(where: {$0.pluginIdentifier == serviceIdentifier}) else {
             throw RemoteDataServicesManagerCommandError.unsupportedServiceIdentifier(serviceIdentifier)
         }
         return service
@@ -626,7 +626,7 @@ protocol RemoteDataServicesManagerDelegate: AnyObject {
 fileprivate extension UserDefaults {
 
     private func queryAnchorKey(for remoteDataService: RemoteDataService, withRemoteDataType remoteDataType: RemoteDataType) -> String {
-        return "com.loopkit.Loop.RemoteDataServicesManager.\(remoteDataService.serviceIdentifier).\(remoteDataType.rawValue)QueryAnchor"
+        return "com.loopkit.Loop.RemoteDataServicesManager.\(remoteDataService.pluginIdentifier).\(remoteDataType.rawValue)QueryAnchor"
     }
 
     func getQueryAnchor<T>(for remoteDataService: RemoteDataService, withRemoteDataType remoteDataType: RemoteDataType) -> T? where T: RawRepresentable, T.RawValue == [String: Any] {

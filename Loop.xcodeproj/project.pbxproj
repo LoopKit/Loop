@@ -374,6 +374,7 @@
 		B42D124328D371C400E43D22 /* AlertMuter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42D124228D371C400E43D22 /* AlertMuter.swift */; };
 		B43CF07E29434EC4008A520B /* HowMuteAlertWorkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43CF07D29434EC4008A520B /* HowMuteAlertWorkView.swift */; };
 		B43DA44124D9C12100CAFF4E /* DismissibleHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */; };
+		B470F5842AB22B5100049695 /* StatefulPluggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B470F5832AB22B5100049695 /* StatefulPluggable.swift */; };
 		B48B0BAC24900093009A48DE /* PumpStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */; };
 		B490A03F24D0550F00F509FA /* GlucoseRangeCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B490A03E24D0550F00F509FA /* GlucoseRangeCategory.swift */; };
 		B490A04124D0559D00F509FA /* DeviceLifecycleProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B490A04024D0559D00F509FA /* DeviceLifecycleProgressState.swift */; };
@@ -387,6 +388,7 @@
 		B4CAD8792549D2540057946B /* LoopCompletionFreshnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4CAD8782549D2540057946B /* LoopCompletionFreshnessTests.swift */; };
 		B4D4534128E5CA7900F1A8D9 /* AlertMuterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D4534028E5CA7900F1A8D9 /* AlertMuterTests.swift */; };
 		B4D620D424D9EDB900043B3C /* GuidanceColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D620D324D9EDB900043B3C /* GuidanceColors.swift */; };
+		B4D904412AA8989100CBD826 /* StatefulPluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D904402AA8989100CBD826 /* StatefulPluginManager.swift */; };
 		B4E202302661063E009421B5 /* AutomaticDosingStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */; };
 		B4E96D4B248A6B6E002DABAD /* DeviceStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */; };
 		B4E96D4F248A6E20002DABAD /* CGMStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4E248A6E20002DABAD /* CGMStatusHUDView.swift */; };
@@ -1298,6 +1300,7 @@
 		B42D124228D371C400E43D22 /* AlertMuter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertMuter.swift; sourceTree = "<group>"; };
 		B43CF07D29434EC4008A520B /* HowMuteAlertWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowMuteAlertWorkView.swift; sourceTree = "<group>"; };
 		B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissibleHostingController.swift; sourceTree = "<group>"; };
+		B470F5832AB22B5100049695 /* StatefulPluggable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatefulPluggable.swift; sourceTree = "<group>"; };
 		B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpStatusHUDView.swift; sourceTree = "<group>"; };
 		B490A03C24D04F9400F509FA /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		B490A03E24D0550F00F509FA /* GlucoseRangeCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseRangeCategory.swift; sourceTree = "<group>"; };
@@ -1308,6 +1311,7 @@
 		B4CAD8782549D2540057946B /* LoopCompletionFreshnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCompletionFreshnessTests.swift; sourceTree = "<group>"; };
 		B4D4534028E5CA7900F1A8D9 /* AlertMuterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertMuterTests.swift; sourceTree = "<group>"; };
 		B4D620D324D9EDB900043B3C /* GuidanceColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidanceColors.swift; sourceTree = "<group>"; };
+		B4D904402AA8989100CBD826 /* StatefulPluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatefulPluginManager.swift; sourceTree = "<group>"; };
 		B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticDosingStatus.swift; sourceTree = "<group>"; };
 		B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusHUDView.swift; sourceTree = "<group>"; };
 		B4E96D4E248A6E20002DABAD /* CGMStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMStatusHUDView.swift; sourceTree = "<group>"; };
@@ -2294,10 +2298,12 @@
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				A97F250725E056D500F0EE19 /* OnboardingManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataServicesManager.swift */,
+				B4D904402AA8989100CBD826 /* StatefulPluginManager.swift */,
 				A9C62D852331703000535612 /* Service.swift */,
 				A9C62D872331703000535612 /* ServicesManager.swift */,
 				C1F7822527CC056900C0919A /* SettingsManager.swift */,
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
+				B470F5832AB22B5100049695 /* StatefulPluggable.swift */,
 				43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */,
 				1D63DEA426E950D400F46FA5 /* SupportManager.swift */,
 				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
@@ -3654,10 +3660,12 @@
 				B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */,
 				142CB7592A60BF2E0075748A /* EditMode.swift in Sources */,
 				E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */,
+				B470F5842AB22B5100049695 /* StatefulPluggable.swift in Sources */,
 				E98A55ED24EDD6380008715D /* LatestStoredSettingsProvider.swift in Sources */,
 				C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */,
 				A9B996F227238705002DC09C /* DosingDecisionStore.swift in Sources */,
 				43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */,
+				B4D904412AA8989100CBD826 /* StatefulPluginManager.swift in Sources */,
 				E9B355292935919E0076AB04 /* MissedMealSettings.swift in Sources */,
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,

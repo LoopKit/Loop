@@ -17,52 +17,109 @@ struct HowMuteAlertWorkView: View {
     var body: some View {
         NavigationView {
             List {
-                VStack(alignment: .leading) {
-                    Text(NSLocalizedString("""
-Mute Alerts allows you to temporarily silence your alerts and alarms.
-
-When using Mute Alerts, also consider the impact of using iOS Focus Modes.
-""", comment: "Description of how mute alerts work"))
-                    .fixedSize(horizontal: false, vertical: true)
-                    
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "speaker.slash.fill")
-                                .foregroundColor(.white)
-                                .padding(5)
-                                .background(guidanceColors.warning)
-                                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
-                            
-                            Text(String(format: NSLocalizedString("%1$@ Mute Alerts", comment: "Format string for Section title for description that mute alerts is temporary (1: app name)"), appName))
-                                .bold()
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("What are examples of Critical and Time Sensitive alerts?")
+                            .bold()
                         
-                        Text(NSLocalizedString("""
-All Tidepool Loop alerts, including Critical Alerts, will be silenced for up to 4 hours.
-
-After the mute period ends, your alert sounds will resume.
-""", comment: "Description that mute alerts is temporary"))
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.bottom)
-                        
-                        HStack(spacing: 10) {
-                            Image(systemName: "moon.fill")
-                                .foregroundColor(.accentColor)
-                            
-                            Text(NSLocalizedString("iOS Focus Mode", comment: "Section title for description of how mute alerts work with focus mode"))
-                                .bold()
-                        }
-                        Text(String(format: NSLocalizedString("If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered, but non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App.", comment: "Format string for description of how mute alerts works with focus mode (1: app name)"), appName))
-                            .fixedSize(horizontal: false, vertical: true)
+                        Text("iOS Critical Alerts and Time Sensitive Alerts are types of Apple notifications. They are used for high-priority events. Some examples include:")
                     }
+                    
+                    HStack {
+                        VStack(alignment: .leading, spacing: 16) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Critical Alerts")
+                                    .bold()
+                                
+                                Text("Urgent Low")
+                                    .bulleted()
+                                Text("Sensor Failed")
+                                    .bulleted()
+                                Text("Reservoir Empty")
+                                    .bulleted()
+                                Text("Pump Expired")
+                                    .bulleted()
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Time Sensitive Alerts")
+                                    .bold()
+                                
+                                Text("High Glucose")
+                                    .bulleted()
+                                Text("Transmitter Low Battery")
+                                    .bulleted()
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                    .font(.footnote)
+                    .foregroundColor(.black.opacity(0.6))
                     .padding()
-                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Color(.systemFill), lineWidth: 1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Color(.systemFill), lineWidth: 1)
+                    )
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(
+                            String(
+                                format: NSLocalizedString(
+                                    "How can I temporarily silence all %1$@ app sounds?",
+                                    comment: "Title text for temporarily silencing all sounds (1: app name)"
+                                ),
+                                appName
+                            )
+                        )
+                        .bold()
+                        
+                        Text(
+                            String(
+                                format: NSLocalizedString(
+                                    "Use the Mute Alerts feature. It allows you to temporarily silence all of your alerts and alarms via the %1$@ app, including Critical Alerts and Time Sensitive Alerts.",
+                                    comment: "Description text for temporarily silencing all sounds (1: app name)"
+                                ),
+                                appName
+                            )
+                        )
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("How can I silence non-Critical Alerts?")
+                            .bold()
+                        
+                        Text(
+                            String(
+                                format: NSLocalizedString(
+                                    "Turn off the volume on your iOS device or add %1$@ as an allowed app to each Focus Mode. Time Sensitive and Critical Alerts will still sound, but non-Critical Alerts will be silenced.",
+                                    comment: "Description text for temporarily silencing non-critical alerts (1: app name)"
+                                ),
+                                appName
+                            )
+                        )
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("How can I silence only Time Sensitive and Non-Critical alerts?")
+                            .bold()
+                        
+                        Text(
+                            String(
+                                format: NSLocalizedString(
+                                    "For safety purposes, you should allow Critical Alerts, Time Sensitive and Notification Permissions (non-critical alerts) on your device to continue using %1$@ and cannot turn off individual alarms.",
+                                    comment: "Description text for silencing time sensitive and non-critical alerts (1: app name)"
+                                ),
+                                appName
+                            )
+                        )
+                    }
                 }
+                .padding(.vertical, 8)
             }
             .insetGroupedListStyle()
-            .navigationTitle(NSLocalizedString("Using Mute Alerts", comment: "View title for how mute alerts work"))
+            .navigationTitle(NSLocalizedString("Managing Alerts", comment: "View title for how mute alerts work"))
             .navigationBarItems(trailing: closeButton)
         }
     }
@@ -70,6 +127,19 @@ After the mute period ends, your alert sounds will resume.
     private var closeButton: some View {
         Button(action: dismiss) {
             Text(NSLocalizedString("Close", comment: "Button title to close view"))
+        }
+    }
+}
+
+private extension Text {
+    func bulleted(color: Color = .accentColor.opacity(0.5)) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: "circle.fill")
+                .resizable()
+                .frame(width: 8, height: 8)
+                .foregroundColor(color)
+            
+            self
         }
     }
 }

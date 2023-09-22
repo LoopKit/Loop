@@ -199,7 +199,7 @@ extension TestingScenariosManagerRequirements {
         if instance.hasCGMData {
             if let cgmManager = deviceManager.cgmManager as? TestingCGMManager {
                 if instance.shouldReloadManager?.cgm == true {
-                    testingCGMManager = reloadCGMManager(withIdentifier: cgmManager.managerIdentifier)
+                    testingCGMManager = reloadCGMManager(withIdentifier: cgmManager.pluginIdentifier)
                 } else {
                     testingCGMManager = cgmManager
                 }
@@ -212,7 +212,7 @@ extension TestingScenariosManagerRequirements {
         if instance.hasPumpData {
             if let pumpManager = deviceManager.pumpManager as? TestingPumpManager {
                 if instance.shouldReloadManager?.pump == true {
-                    testingPumpManager = reloadPumpManager(withIdentifier: pumpManager.managerIdentifier)
+                    testingPumpManager = reloadPumpManager(withIdentifier: pumpManager.pluginIdentifier)
                 } else {
                     testingPumpManager = pumpManager
                 }
@@ -243,9 +243,9 @@ extension TestingScenariosManagerRequirements {
         }
         
         instance.deviceActions.forEach { [testingCGMManager, testingPumpManager] action in
-            if testingCGMManager?.managerIdentifier == action.managerIdentifier {
+            if testingCGMManager?.pluginIdentifier == action.managerIdentifier {
                 testingCGMManager?.trigger(action: action)
-            } else if testingPumpManager?.managerIdentifier == action.managerIdentifier {
+            } else if testingPumpManager?.pluginIdentifier == action.managerIdentifier {
                 testingPumpManager?.trigger(action: action)
             }
         }
