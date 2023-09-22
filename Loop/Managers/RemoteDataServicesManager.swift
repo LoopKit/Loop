@@ -551,7 +551,7 @@ extension RemoteDataServicesManager {
     private func uploadCgmEventData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .pumpEvent)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .pumpEvent)
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .cgmEvent).async {
             let semaphore = DispatchSemaphore(value: 0)
