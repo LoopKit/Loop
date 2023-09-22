@@ -603,7 +603,7 @@ extension LoopAppManager: TemporaryScheduleOverrideHistoryDelegate {
     func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
         UserDefaults.appGroup?.overrideHistory = history
 
-        deviceDataManager.remoteDataServicesManager.temporaryScheduleOverrideHistoryDidUpdate()
+        deviceDataManager.remoteDataServicesManager.triggerUpload(for: .overrides)
     }
 }
 
