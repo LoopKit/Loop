@@ -28,7 +28,7 @@ final class AnalyticsServicesManager {
     }
 
     func removeService(_ analyticsService: AnalyticsService) {
-        analyticsServices.removeAll { $0.serviceIdentifier == analyticsService.serviceIdentifier }
+        analyticsServices.removeAll { $0.pluginIdentifier == analyticsService.pluginIdentifier }
     }
 
     private func logEvent(_ name: String, withProperties properties: [AnyHashable: Any]? = nil, outOfSession: Bool = false) {

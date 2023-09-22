@@ -97,9 +97,9 @@ final class DeviceDataManager {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
 
-            if cgmManager?.managerIdentifier != oldValue?.managerIdentifier {
+            if cgmManager?.pluginIdentifier != oldValue?.pluginIdentifier {
                 if let cgmManager = cgmManager {
-                    analyticsServicesManager.cgmWasAdded(identifier: cgmManager.managerIdentifier)
+                    analyticsServicesManager.cgmWasAdded(identifier: cgmManager.pluginIdentifier)
                 } else {
                     analyticsServicesManager.cgmWasRemoved()
                 }
@@ -125,9 +125,9 @@ final class DeviceDataManager {
                 cgmManager = nil
             }
 
-            if pumpManager?.managerIdentifier != oldValue?.managerIdentifier {
+            if pumpManager?.pluginIdentifier != oldValue?.pluginIdentifier {
                 if let pumpManager = pumpManager {
-                    analyticsServicesManager.pumpWasAdded(identifier: pumpManager.managerIdentifier)
+                    analyticsServicesManager.pumpWasAdded(identifier: pumpManager.pluginIdentifier)
                 } else {
                     analyticsServicesManager.pumpWasRemoved()
                 }
@@ -207,6 +207,8 @@ final class DeviceDataManager {
                sleepDataAuthorizationRequired
     }
 
+    private(set) var statefulPluginManager: StatefulPluginManager!
+    
     // MARK: Services
 
     private(set) var servicesManager: ServicesManager!
@@ -427,7 +429,9 @@ final class DeviceDataManager {
             servicesManagerDelegate: loopManager,
             servicesManagerDosingDelegate: self
         )
-
+        
+        statefulPluginManager = StatefulPluginManager(pluginManager: pluginManager, servicesManager: servicesManager)
+        
         let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
                                                                       directory: FileManager.default.exportsDirectoryURL,
@@ -588,7 +592,7 @@ final class DeviceDataManager {
     var availableCGMManagers: [CGMManagerDescriptor] {
         var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
-            availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
+            availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.pluginIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
         }
         
         availableCGMManagers = availableCGMManagers.filter({ cgmManager in
@@ -641,7 +645,7 @@ final class DeviceDataManager {
     }
     
     public func setupCGMManagerFromPumpManager(withIdentifier identifier: String) -> CGMManager? {
-        guard identifier == pumpManager?.managerIdentifier, let cgmManager = pumpManager as? CGMManager else {
+        guard identifier == pumpManager?.pluginIdentifier, let cgmManager = pumpManager as? CGMManager else {
             return nil
         }
 
@@ -704,19 +708,20 @@ private extension DeviceDataManager {
 
         cgmManager?.cgmManagerDelegate = self
         cgmManager?.delegateQueue = queue
+        reportPluginInitializationComplete()
 
         glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
         glucoseStore.healthKitStorageDelay = cgmManager.map{ type(of: $0).healthKitStorageDelay } ?? 0
 
         updatePumpManagerBLEHeartbeatPreference()
         if let cgmManager = cgmManager {
-            alertManager?.addAlertResponder(managerIdentifier: cgmManager.managerIdentifier,
+            alertManager?.addAlertResponder(managerIdentifier: cgmManager.pluginIdentifier,
                                             alertResponder: cgmManager)
-            alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
+            alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.pluginIdentifier,
                                               soundVendor: cgmManager)            
             cgmHasValidSensorSession = cgmManager.cgmManagerStatus.hasValidSensorSession
 
-            analyticsServicesManager.identifyCGMType(cgmManager.managerIdentifier)
+            analyticsServicesManager.identifyCGMType(cgmManager.pluginIdentifier)
         }
 
         if let cgmManagerUI = cgmManager as? CGMManagerUI {
@@ -729,6 +734,7 @@ private extension DeviceDataManager {
 
         pumpManager?.pumpManagerDelegate = self
         pumpManager?.delegateQueue = queue
+        reportPluginInitializationComplete()
 
         doseStore.device = pumpManager?.status.device
         pumpManagerHUDProvider = pumpManager?.hudProvider(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowedInsulinTypes: allowedInsulinTypes)
@@ -738,14 +744,14 @@ private extension DeviceDataManager {
             doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
         }
         if let pumpManager = pumpManager {
-            alertManager?.addAlertResponder(managerIdentifier: pumpManager.managerIdentifier,
+            alertManager?.addAlertResponder(managerIdentifier: pumpManager.pluginIdentifier,
                                                   alertResponder: pumpManager)
-            alertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.managerIdentifier,
+            alertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.pluginIdentifier,
                                                     soundVendor: pumpManager)
             
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
 
-            analyticsServicesManager.identifyPumpType(pumpManager.managerIdentifier)
+            analyticsServicesManager.identifyPumpType(pumpManager.pluginIdentifier)
         }
     }
 
@@ -753,6 +759,58 @@ private extension DeviceDataManager {
         DispatchQueue.main.async {
             self.lastError = (date: Date(), error: error)
         }
+    }
+}
+
+// MARK: - Plugins
+extension DeviceDataManager {
+    func reportPluginInitializationComplete() {
+        let allActivePlugins = self.allActivePlugins
+        
+        for plugin in servicesManager.activeServices {
+            plugin.initializationComplete(for: allActivePlugins)
+        }
+        
+        for plugin in statefulPluginManager.activeStatefulPlugins {
+            plugin.initializationComplete(for: allActivePlugins)
+        }
+        
+        for plugin in availableSupports {
+            plugin.initializationComplete(for: allActivePlugins)
+        }
+        
+        cgmManager?.initializationComplete(for: allActivePlugins)
+        pumpManager?.initializationComplete(for: allActivePlugins)
+    }
+    
+    var allActivePlugins: [Pluggable] {
+        var allActivePlugins: [Pluggable] = servicesManager.activeServices
+        
+        for plugin in statefulPluginManager.activeStatefulPlugins {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == plugin.pluginIdentifier }) {
+                allActivePlugins.append(plugin)
+            }
+        }
+        
+        for plugin in availableSupports {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == plugin.pluginIdentifier }) {
+                allActivePlugins.append(plugin)
+            }
+        }
+        
+        if let cgmManager = cgmManager {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == cgmManager.pluginIdentifier }) {
+                allActivePlugins.append(cgmManager)
+            }
+        }
+        
+        if let pumpManager = pumpManager {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == pumpManager.pluginIdentifier }) {
+                allActivePlugins.append(pumpManager)
+            }
+        }
+        
+        return allActivePlugins
     }
 }
 
@@ -867,7 +925,7 @@ extension DeviceDataManager {
 extension DeviceDataManager: DeviceManagerDelegate {
 
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
-        deviceLog.log(managerIdentifier: manager.managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
+        deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
     }
     
     var allowDebugFeatures: Bool {
@@ -915,7 +973,7 @@ extension DeviceDataManager: CGMManagerDelegate {
     func cgmManagerWantsDeletion(_ manager: CGMManager) {
         dispatchPrecondition(condition: .onQueue(queue))
 
-        log.default("CGM manager with identifier '%{public}@' wants deletion", manager.managerIdentifier)
+        log.default("CGM manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
 
         DispatchQueue.main.async {
             if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
@@ -978,13 +1036,13 @@ extension DeviceDataManager: CGMManagerDelegate {
 
 extension DeviceDataManager: CGMManagerOnboardingDelegate {
     func cgmManagerOnboarding(didCreateCGMManager cgmManager: CGMManagerUI) {
-        log.default("CGM manager with identifier '%{public}@' created", cgmManager.managerIdentifier)
+        log.default("CGM manager with identifier '%{public}@' created", cgmManager.pluginIdentifier)
         self.cgmManager = cgmManager
     }
 
     func cgmManagerOnboarding(didOnboardCGMManager cgmManager: CGMManagerUI) {
         precondition(cgmManager.isOnboarded)
-        log.default("CGM manager with identifier '%{public}@' onboarded", cgmManager.managerIdentifier)
+        log.default("CGM manager with identifier '%{public}@' onboarded", cgmManager.pluginIdentifier)
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
@@ -1117,7 +1175,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
 
-        log.default("Pump manager with identifier '%{public}@' will deactivate", pumpManager.managerIdentifier)
+        log.default("Pump manager with identifier '%{public}@' will deactivate", pumpManager.pluginIdentifier)
 
         DispatchQueue.main.async {
             self.pumpManager = nil
@@ -1186,13 +1244,13 @@ extension DeviceDataManager: PumpManagerDelegate {
 
 extension DeviceDataManager: PumpManagerOnboardingDelegate {
     func pumpManagerOnboarding(didCreatePumpManager pumpManager: PumpManagerUI) {
-        log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
+        log.default("Pump manager with identifier '%{public}@' created", pumpManager.pluginIdentifier)
         self.pumpManager = pumpManager
     }
 
     func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI) {
         precondition(pumpManager.isOnboarded)
-        log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.managerIdentifier)
+        log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.pluginIdentifier)
 
         DispatchQueue.main.async {
             self.refreshDeviceData()

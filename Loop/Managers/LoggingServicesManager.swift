@@ -24,7 +24,7 @@ final class LoggingServicesManager: Logging {
     }
 
     func removeService(_ loggingService: LoggingService) {
-        loggingServices.removeAll { $0.serviceIdentifier == loggingService.serviceIdentifier }
+        loggingServices.removeAll { $0.pluginIdentifier == loggingService.pluginIdentifier }
     }
 
     func log (_ message: StaticString, subsystem: String, category: String, type: OSLogType, _ args: [CVarArg]) {
