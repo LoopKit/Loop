@@ -10,10 +10,9 @@ SCRIPT_DIRECTORY="$(dirname "${0}")"
 
 error() {
   echo "ERROR: ${*}" >&2
-  echo "Usage: ${SCRIPT} [-r|--git-source-root git-source-root] [-p|--provisioning-profile-path provisioning-profile-path] [-i|--info-plist-path info-plist-path]" >&2
+  echo "Usage: ${SCRIPT} [-r|--git-source-root git-source-root] [-p|--provisioning-profile-path provisioning-profile-path]" >&2
   echo "Parameters:" >&2
   echo "  -p|--provisioning-profile-path <provisioning-profile-path> path to the .mobileprovision provisioning profile file to check for expiration; optional, defaults to \${HOME}/Library/MobileDevice/Provisioning Profiles/\${EXPANDED_PROVISIONING_PROFILE}.mobileprovision" >&2
-  echo "  -i|--info-plist-path <info-plist-path>                     path to the Info.plist file to modify; optional, defaults to \${BUILT_PRODUCTS_DIR}/\${INFOPLIST_PATH}" >&2
   exit 1
 }
 

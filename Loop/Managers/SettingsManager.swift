@@ -211,7 +211,7 @@ class SettingsManager {
 // MARK: - SettingsStoreDelegate
 extension SettingsManager: SettingsStoreDelegate {
     func settingsStoreHasUpdatedSettingsData(_ settingsStore: SettingsStore) {
-        remoteDataServicesManager?.settingsStoreHasUpdatedSettingsData(settingsStore)
+        remoteDataServicesManager?.triggerUpload(for: .settings)
     }
 }
 
