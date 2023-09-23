@@ -100,7 +100,7 @@ class ServicesManager {
     }
 
     private func serviceTypeFromRawValue(_ rawValue: Service.RawStateValue) -> Service.Type? {
-        guard let identifier = rawValue["statefulPluginIdentifier"] as? String else {
+        guard let identifier = rawValue["serviceIdentifier"] as? String else {
             return nil
         }
 
@@ -399,4 +399,16 @@ extension ServicesManager: ServiceOnboardingDelegate {
 
 extension ServicesManager {
     var availableSupports: [SupportUI] { activeServices.compactMap { $0 as? SupportUI } }
+}
+
+// Service extension for rawValue
+extension Service {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "serviceIdentifier": pluginIdentifier,
+            "state": rawState
+        ]
+    }
 }
