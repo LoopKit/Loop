@@ -741,26 +741,6 @@ extension LoopDataManager {
         }
     }
 
-
-    /// Adds and stores new pump events
-    ///
-    /// - Parameters:
-    ///   - events: The pump events to add
-    ///   - completion: A closure called once upon completion
-    ///   - lastReconciliation: The date that pump events were most recently reconciled against recorded pump history. Pump events are assumed to be reflective of delivery up until this point in time. If reservoir values are recorded after this time, they may be used to supplement event based delivery.
-    ///   - error: An error explaining why the events could not be saved.
-    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
-        doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
-            completion(error)
-            
-            self.dataAccessQueue.async {
-                if error == nil {
-                    self.clearCachedInsulinEffects()
-                }
-            }
-        }
-    }
-    
     /// Logs a new external bolus insulin dose in the DoseStore and HealthKit
     ///
     /// - Parameters:
