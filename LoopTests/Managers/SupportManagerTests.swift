@@ -16,9 +16,9 @@ class SupportManagerTests: XCTestCase {
     enum MockError: Error { case nothing }
 
     class Mixin {
-        func supportMenuItem(supportInfoProvider: SupportInfoProvider, urlHandler: @escaping (URL) -> Void) -> AnyView? {
-            nil
-        }
+        @ViewBuilder
+        func supportMenuItem(supportInfoProvider: SupportInfoProvider, urlHandler: @escaping (URL) -> Void) -> some View {}
+        
         func softwareUpdateView(bundleIdentifier: String, currentVersion: String, guidanceColors: GuidanceColors, openAppStore: (() -> Void)?) -> AnyView? {
             nil
         }
@@ -34,7 +34,7 @@ class SupportManagerTests: XCTestCase {
         weak var delegate: SupportUIDelegate?
     }
     class MockSupport: Mixin, SupportUI {
-        static var supportIdentifier: String { "SupportManagerTestsMockSupport" }
+        static var pluginIdentifier: String { "SupportManagerTestsMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
@@ -42,12 +42,11 @@ class SupportManagerTests: XCTestCase {
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
         func loopWillReset() {}
         func loopDidReset() {}
-        func initializationComplete(for services: [LoopKit.Service]) {}
         func configurationMenuItems() -> [LoopKitUI.CustomMenuItem] { return [] }
     }
 
     class AnotherMockSupport: Mixin, SupportUI {
-        static var supportIdentifier: String { "SupportManagerTestsAnotherMockSupport" }
+        static var pluginIdentifier: String { "SupportManagerTestsAnotherMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
@@ -55,7 +54,6 @@ class SupportManagerTests: XCTestCase {
         func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
         func loopWillReset() {}
         func loopDidReset() {}
-        func initializationComplete(for services: [LoopKit.Service]) {}
         func configurationMenuItems() -> [LoopKitUI.CustomMenuItem] { return [] }
     }
     

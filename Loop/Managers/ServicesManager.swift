@@ -124,6 +124,7 @@ class ServicesManager {
     public func addActiveService(_ service: Service) {
         servicesLock.withLock {
             service.serviceDelegate = self
+            service.stateDelegate = self
 
             services.append(service)
 
@@ -153,9 +154,10 @@ class ServicesManager {
                 analyticsServicesManager.removeService(analyticsService)
             }
 
-            services.removeAll { $0.serviceIdentifier == service.serviceIdentifier }
+            services.removeAll { $0.pluginIdentifier == service.pluginIdentifier }
 
             service.serviceDelegate = nil
+            service.stateDelegate = nil
 
             saveState()
         }
@@ -171,6 +173,7 @@ class ServicesManager {
         rawServices.forEach { rawValue in
             if let service = serviceFromRawValue(rawValue) {
                 service.serviceDelegate = self
+                service.stateDelegate = self
 
                 services.append(service)
 
@@ -238,6 +241,19 @@ public protocol ServicesManagerDelegate: AnyObject {
     func deliverCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws
 }
 
+// MARK: - StatefulPluggableDelegate
+extension ServicesManager: StatefulPluggableDelegate {
+    func pluginDidUpdateState(_ plugin: StatefulPluggable) {
+        saveState()
+    }
+
+    func pluginWantsDeletion(_ plugin: StatefulPluggable) {
+        guard let service = plugin as? Service else { return }
+        log.default("Service with identifier '%{public}@' deleted", service.pluginIdentifier)
+        removeActiveService(service)
+    }
+}
+
 // MARK: - ServiceDelegate
 
 extension ServicesManager: ServiceDelegate {
@@ -255,15 +271,6 @@ extension ServicesManager: ServiceDelegate {
         semanticVersion += "+\(Bundle.main.version)"
 
         return semanticVersion
-    }
-
-    func serviceDidUpdateState(_ service: Service) {
-        saveState()
-    }
-
-    func serviceWantsDeletion(_ service: Service) {
-        log.default("Service with identifier '%{public}@' deleted", service.serviceIdentifier)
-        removeActiveService(service)
     }
     
     func enactRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
@@ -380,16 +387,28 @@ extension ServicesManager: AlertIssuer {
 
 extension ServicesManager: ServiceOnboardingDelegate {
     func serviceOnboarding(didCreateService service: Service) {
-        log.default("Service with identifier '%{public}@' created", service.serviceIdentifier)
+        log.default("Service with identifier '%{public}@' created", service.pluginIdentifier)
         addActiveService(service)
     }
 
     func serviceOnboarding(didOnboardService service: Service) {
         precondition(service.isOnboarded)
-        log.default("Service with identifier '%{public}@' onboarded", service.serviceIdentifier)
+        log.default("Service with identifier '%{public}@' onboarded", service.pluginIdentifier)
     }
 }
 
 extension ServicesManager {
     var availableSupports: [SupportUI] { activeServices.compactMap { $0 as? SupportUI } }
+}
+
+// Service extension for rawValue
+extension Service {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "serviceIdentifier": pluginIdentifier,
+            "state": rawState
+        ]
+    }
 }

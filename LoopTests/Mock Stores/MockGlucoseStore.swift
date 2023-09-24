@@ -12,7 +12,7 @@ import LoopKit
 
 class MockGlucoseStore: GlucoseStoreProtocol {
     
-    init(for scenario: DosingTestScenario) {
+    init(for scenario: DosingTestScenario = .flatAndStable) {
         self.scenario = scenario // The store returns different effect values based on the scenario
         storedGlucose = loadHistoricGlucose(scenario: scenario)
     }
@@ -80,12 +80,12 @@ class MockGlucoseStore: GlucoseStoreProtocol {
     }
     
     func counteractionEffects<Sample>(for samples: [Sample], to effects: [GlucoseEffect]) -> [GlucoseEffectVelocity] where Sample : GlucoseSampleValue {
-        return [] // TODO: check if we'll ever want to test this
+        samples.counteractionEffects(to: effects)
     }
     
-    func getRecentMomentumEffect(_ completion: @escaping (_ effects: Result<[GlucoseEffect], Error>) -> Void) {
+    func getRecentMomentumEffect(for date: Date? = nil, _ completion: @escaping (_ effects: Result<[GlucoseEffect], Error>) -> Void) {
         if let storedGlucose {
-            let samples = storedGlucose.filterDateRange(scenario.currentDate.addingTimeInterval(-GlucoseMath.momentumDataInterval), nil)
+            let samples = storedGlucose.filterDateRange((date ?? Date()).addingTimeInterval(-GlucoseMath.momentumDataInterval), nil)
             completion(.success(samples.linearMomentumEffect()))
         } else {
             let fixture: [JSONDictionary] = loadFixture(momentumEffectToLoad)

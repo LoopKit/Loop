@@ -1385,22 +1385,46 @@ final class StatusTableViewController: LoopChartsTableViewController {
     @IBAction func presentBolusScreen() {
         presentBolusEntryView()
     }
+    
+    @ViewBuilder
+    func bolusEntryView(enableManualGlucoseEntry: Bool = false) -> some View {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
+            SimpleBolusView(
+                viewModel: SimpleBolusViewModel(
+                    delegate: deviceManager,
+                    displayMealEntry: false
+                )
+            )
+            .environmentObject(deviceManager.displayGlucosePreference)
+        } else {
+            let viewModel: BolusEntryViewModel = {
+                let viewModel = BolusEntryViewModel(
+                    delegate: deviceManager,
+                    screenWidth: UIScreen.main.bounds.width,
+                    isManualGlucoseEntryEnabled: enableManualGlucoseEntry
+                )
+                
+                Task { @MainActor in
+                    await viewModel.generateRecommendationAndStartObserving()
+                }
+                
+                viewModel.analyticsServicesManager = deviceManager.analyticsServicesManager
+                
+                return viewModel
+            }()
+            
+            BolusEntryView(viewModel: viewModel)
+                .environmentObject(deviceManager.displayGlucosePreference)
+        }
+    }
 
     func presentBolusEntryView(enableManualGlucoseEntry: Bool = false) {
-        let hostingController: DismissibleHostingController
-        if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
-            let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: false)
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
-            hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
-        } else {
-            let viewModel = BolusEntryViewModel(delegate: deviceManager, screenWidth: UIScreen.main.bounds.width, isManualGlucoseEntryEnabled: enableManualGlucoseEntry)
-            Task { @MainActor in
-                await viewModel.generateRecommendationAndStartObserving()
-            }
-            viewModel.analyticsServicesManager = deviceManager.analyticsServicesManager
-            let bolusEntryView = BolusEntryView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
-            hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
-        }
+        let hostingController = DismissibleHostingController(
+            content: bolusEntryView(
+                enableManualGlucoseEntry: enableManualGlucoseEntry
+            )
+        )
+        
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
         hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
         present(navigationWrapper, animated: true)
@@ -2231,7 +2255,7 @@ extension StatusTableViewController: ServicesViewModelDelegate {
     }
 
     func gotoService(withIdentifier identifier: String) {
-        guard let serviceUI = deviceManager.servicesManager.activeServices.first(where: { $0.serviceIdentifier == identifier }) as? ServiceUI else {
+        guard let serviceUI = deviceManager.servicesManager.activeServices.first(where: { $0.pluginIdentifier == identifier }) as? ServiceUI else {
             return
         }
         showServiceSettings(serviceUI)

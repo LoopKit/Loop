@@ -11,7 +11,6 @@ import LoopKit
 @testable import Loop
 
 class MockDoseStore: DoseStoreProtocol {
-
     var doseHistory: [DoseEntry]?
     var sensitivitySchedule: InsulinSensitivitySchedule?
     
@@ -41,7 +40,7 @@ class MockDoseStore: DoseStoreProtocol {
     // Default to the adult exponential insulin model
     var insulinModelProvider: InsulinModelProvider = StaticInsulinModelProvider(ExponentialInsulinModelPreset.rapidActingAdult)
 
-    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.rapidActingAdult.actionDuration
+    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.rapidActingAdult.effectDuration
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule?
     
@@ -55,7 +54,7 @@ class MockDoseStore: DoseStoreProtocol {
     
     var lastAddedPumpData: Date
 
-    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (DoseStore.DoseStoreError?) -> Void) {
+    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool, completion: @escaping (DoseStore.DoseStoreError?) -> Void) {
         completion(nil)
     }
     
@@ -92,7 +91,7 @@ class MockDoseStore: DoseStoreProtocol {
     }
     
     func getGlucoseEffects(start: Date, end: Date? = nil, basalDosingEnd: Date? = Date(), completion: @escaping (_ result: DoseStoreResult<[GlucoseEffect]>) -> Void) {
-        if let doseHistory, let sensitivitySchedule {
+        if let doseHistory, let sensitivitySchedule, let basalProfile = basalProfileApplyingOverrideHistory {
             // To properly know glucose effects at startDate, we need to go back another DIA hours
             let doseStart = start.addingTimeInterval(-longestEffectDuration)
             let doses = doseHistory.filterDateRange(doseStart, end)
@@ -103,7 +102,9 @@ class MockDoseStore: DoseStoreProtocol {
                 return dose.trimmed(to: basalDosingEnd)
             }
 
-            let glucoseEffects = trimmedDoses.glucoseEffects(insulinModelProvider: self.insulinModelProvider, longestEffectDuration: self.longestEffectDuration, insulinSensitivity: sensitivitySchedule, from: start, to: end)
+            let annotatedDoses = trimmedDoses.annotated(with: basalProfile)
+
+            let glucoseEffects = annotatedDoses.glucoseEffects(insulinModelProvider: self.insulinModelProvider, longestEffectDuration: self.longestEffectDuration, insulinSensitivity: sensitivitySchedule, from: start, to: end)
             completion(.success(glucoseEffects.filterDateRange(start, end)))
         } else {
             return completion(.success(getCannedGlucoseEffects()))

@@ -13,11 +13,14 @@ import LoopKit
 @testable import Loop
 
 fileprivate class MockGlucoseSample: GlucoseSampleValue {
+
     let provenanceIdentifier = ""
     let isDisplayOnly: Bool
     let wasUserEntered: Bool
     let condition: LoopKit.GlucoseCondition? = nil
     let trendRate: HKQuantity? = nil
+    var trend: LoopKit.GlucoseTrend?
+    var syncIdentifier: String?
     let quantity: HKQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)
     let startDate: Date
     
@@ -372,7 +375,7 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 25))
             updateGroup.leave()
         }

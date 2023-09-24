@@ -32,8 +32,8 @@ public struct NotificationsCriticalAlertPermissionsView: View {
     
     public var body: some View {
         switch mode {
-        case .flow: return AnyView(content())
-        case .topLevel: return AnyView(navigationContent())
+        case .flow: content()
+        case .topLevel: navigationContent()
         }
     }
     

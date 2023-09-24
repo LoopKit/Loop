@@ -226,6 +226,7 @@ class LoopAppManager: NSObject {
         onboardingManager = OnboardingManager(pluginManager: pluginManager,
                                               bluetoothProvider: bluetoothStateManager,
                                               deviceDataManager: deviceDataManager,
+                                              statefulPluginManager: deviceDataManager.statefulPluginManager,
                                               servicesManager: deviceDataManager.servicesManager,
                                               loopDataManager: deviceDataManager.loopManager,
                                               supportManager: supportManager,
@@ -238,11 +239,8 @@ class LoopAppManager: NSObject {
             if let analyticsService = support as? AnalyticsService {
                 analyticsServicesManager.addService(analyticsService)
             }
+            support.initializationComplete(for: deviceDataManager.allActivePlugins)
         }
-        for support in supportManager.availableSupports {
-            support.initializationComplete(for: deviceDataManager.servicesManager.activeServices)
-        }
-
 
         deviceDataManager.onboardingManager = onboardingManager
 
@@ -254,7 +252,7 @@ class LoopAppManager: NSObject {
         }
 
         analyticsServicesManager.identify("Dosing Strategy", value: settingsManager.loopSettings.automaticDosingStrategy.analyticsValue)
-        let serviceNames = deviceDataManager.servicesManager.activeServices.map { $0.serviceIdentifier }
+        let serviceNames = deviceDataManager.servicesManager.activeServices.map { $0.pluginIdentifier }
         analyticsServicesManager.identify("Services", array: serviceNames)
 
         if FeatureFlags.scenariosEnabled {
@@ -323,7 +321,7 @@ class LoopAppManager: NSObject {
 
     func didBecomeActive() {
         if let rootViewController = rootViewController {
-            ProfileExpirationAlerter.alertIfNeeded(viewControllerToPresentFrom: rootViewController)
+            AppExpirationAlerter.alertIfNeeded(viewControllerToPresentFrom: rootViewController)
         }
         settingsManager?.didBecomeActive()
         deviceDataManager?.didBecomeActive()
@@ -603,7 +601,7 @@ extension LoopAppManager: TemporaryScheduleOverrideHistoryDelegate {
     func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
         UserDefaults.appGroup?.overrideHistory = history
 
-        deviceDataManager.remoteDataServicesManager.temporaryScheduleOverrideHistoryDidUpdate()
+        deviceDataManager.remoteDataServicesManager.triggerUpload(for: .overrides)
     }
 }
 
