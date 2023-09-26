@@ -126,7 +126,7 @@ extension TestingScenariosManagerRequirements {
                 load(scenario) { error in
                     if error == nil {
                         self.activeScenarioURL = url
-                        self.log.debug("@{public}%", successLogMessage)
+                        self.log.debug("%{public}@", successLogMessage)
                     }
                     completion(error)
                 }

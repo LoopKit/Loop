@@ -10,13 +10,13 @@ import LoopKitUI
 import MockKit
 
 let staticCGMManagersByIdentifier: [String: CGMManager.Type] = [
-    MockCGMManager.pluginIdentifier: MockCGMManager.self
+    MockCGMManager.managerIdentifier: MockCGMManager.self
 ]
 
 var availableStaticCGMManagers: [CGMManagerDescriptor] {
     if FeatureFlags.allowSimulators {
         return [
-            CGMManagerDescriptor(identifier: MockCGMManager.pluginIdentifier, localizedTitle: MockCGMManager.localizedTitle)
+            CGMManagerDescriptor(identifier: MockCGMManager.managerIdentifier, localizedTitle: MockCGMManager.localizedTitle)
         ]
     } else {
         return []
