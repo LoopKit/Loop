@@ -157,6 +157,8 @@ final class DeviceDataManager {
     
     let glucoseStore: GlucoseStore
 
+    let cgmEventStore: CgmEventStore
+
     private let cacheStore: PersistenceController
 
     let dosingDecisionStore: DosingDecisionStore
@@ -339,11 +341,13 @@ final class DeviceDataManager {
         
         cgmStalenessMonitor = CGMStalenessMonitor()
         cgmStalenessMonitor.delegate = glucoseStore
+
+        cgmEventStore = CgmEventStore(cacheStore: cacheStore, cacheLength: localCacheDuration)
+
+        dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
         
-        self.dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
-        
-        self.cgmHasValidSensorSession = false
-        self.pumpIsAllowingAutomation = true
+        cgmHasValidSensorSession = false
+        pumpIsAllowingAutomation = true
         self.automaticDosingStatus = automaticDosingStatus
 
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
@@ -407,6 +411,7 @@ final class DeviceDataManager {
             doseStore: doseStore,
             dosingDecisionStore: dosingDecisionStore,
             glucoseStore: glucoseStore,
+            cgmEventStore: cgmEventStore,
             settingsStore: settingsManager.settingsStore,
             overrideHistory: overrideHistory,
             insulinDeliveryStore: doseStore.insulinDeliveryStore
@@ -439,6 +444,7 @@ final class DeviceDataManager {
         doseStore.delegate = self
         dosingDecisionStore.delegate = self
         glucoseStore.delegate = self
+        cgmEventStore.delegate = self
         doseStore.insulinDeliveryStore.delegate = self
         remoteDataServicesManager.delegate = self
         
@@ -992,6 +998,16 @@ extension DeviceDataManager: CGMManagerDelegate {
         }
     }
 
+    func cgmManager(_ manager: LoopKit.CGMManager, hasNew events: [PersistedCgmEvent]) {
+        Task {
+            do {
+                try await cgmEventStore.add(events: events)
+            } catch {
+                self.log.error("Error storing cgm events: %{public}@", error.localizedDescription)
+            }
+        }
+    }
+
     func startDateToFilterNewData(for manager: CGMManager) -> Date? {
         dispatchPrecondition(condition: .onQueue(queue))
         return glucoseStore.latestGlucose?.startDate
@@ -1182,11 +1198,17 @@ extension DeviceDataManager: PumpManagerDelegate {
         setLastError(error: error)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
+    func pumpManager(
+        _ pumpManager: PumpManager,
+        hasNewPumpEvents events: [NewPumpEvent],
+        lastReconciliation: Date?,
+        replacePendingEvents: Bool,
+        completion: @escaping (_ error: Error?) -> Void)
+    {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
 
-        loopManager.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
+        doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
             }
@@ -1249,59 +1271,55 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
 
 // MARK: - AlertStoreDelegate
 extension DeviceDataManager: AlertStoreDelegate {
-
     func alertStoreHasUpdatedAlertData(_ alertStore: AlertStore) {
-        remoteDataServicesManager.alertStoreHasUpdatedAlertData(alertStore)
+        remoteDataServicesManager.triggerUpload(for: .alert)
     }
-
 }
 
 // MARK: - CarbStoreDelegate
 extension DeviceDataManager: CarbStoreDelegate {
-
     func carbStoreHasUpdatedCarbData(_ carbStore: CarbStore) {
-        remoteDataServicesManager.carbStoreHasUpdatedCarbData(carbStore)
+        remoteDataServicesManager.triggerUpload(for: .carb)
     }
 
     func carbStore(_ carbStore: CarbStore, didError error: CarbStore.CarbStoreError) {}
-
 }
 
 // MARK: - DoseStoreDelegate
 extension DeviceDataManager: DoseStoreDelegate {
-
     func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
-        remoteDataServicesManager.doseStoreHasUpdatedPumpEventData(doseStore)
+        remoteDataServicesManager.triggerUpload(for: .pumpEvent)
     }
-
 }
 
 // MARK: - DosingDecisionStoreDelegate
 extension DeviceDataManager: DosingDecisionStoreDelegate {
-
     func dosingDecisionStoreHasUpdatedDosingDecisionData(_ dosingDecisionStore: DosingDecisionStore) {
-        remoteDataServicesManager.dosingDecisionStoreHasUpdatedDosingDecisionData(dosingDecisionStore)
+        remoteDataServicesManager.triggerUpload(for: .dosingDecision)
     }
-
 }
 
 // MARK: - GlucoseStoreDelegate
 extension DeviceDataManager: GlucoseStoreDelegate {
-
     func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
-        remoteDataServicesManager.glucoseStoreHasUpdatedGlucoseData(glucoseStore)
+        remoteDataServicesManager.triggerUpload(for: .glucose)
     }
-
 }
 
 // MARK: - InsulinDeliveryStoreDelegate
 extension DeviceDataManager: InsulinDeliveryStoreDelegate {
-
     func insulinDeliveryStoreHasUpdatedDoseData(_ insulinDeliveryStore: InsulinDeliveryStore) {
-        remoteDataServicesManager.insulinDeliveryStoreHasUpdatedDoseData(insulinDeliveryStore)
+        remoteDataServicesManager.triggerUpload(for: .dose)
     }
-
 }
+
+// MARK: - CgmEventStoreDelegate
+extension DeviceDataManager: CgmEventStoreDelegate {
+    func cgmEventStoreHasUpdatedData(_ cgmEventStore: LoopKit.CgmEventStore) {
+        remoteDataServicesManager.triggerUpload(for: .cgmEvent)
+    }
+}
+
 
 // MARK: - TestingPumpManager
 extension DeviceDataManager {

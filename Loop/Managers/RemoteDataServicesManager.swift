@@ -10,13 +10,14 @@ import os.log
 import Foundation
 import LoopKit
 
-enum RemoteDataType: String {
+enum RemoteDataType: String, CaseIterable {
     case alert = "Alert"
     case carb = "Carb"
     case dose = "Dose"
     case dosingDecision = "DosingDecision"
     case glucose = "Glucose"
     case pumpEvent = "PumpEvent"
+    case cgmEvent = "CgmEvent"
     case settings = "Settings"
     case overrides = "Overrides"
 
@@ -129,6 +130,8 @@ final class RemoteDataServicesManager {
 
     private let glucoseStore: GlucoseStore
 
+    private let cgmEventStore: CgmEventStore
+
     private let insulinDeliveryStore: InsulinDeliveryStore
 
     private let settingsStore: SettingsStore
@@ -141,6 +144,7 @@ final class RemoteDataServicesManager {
         doseStore: DoseStore,
         dosingDecisionStore: DosingDecisionStore,
         glucoseStore: GlucoseStore,
+        cgmEventStore: CgmEventStore,
         settingsStore: SettingsStore,
         overrideHistory: TemporaryScheduleOverrideHistory,
         insulinDeliveryStore: InsulinDeliveryStore
@@ -150,6 +154,7 @@ final class RemoteDataServicesManager {
         self.doseStore = doseStore
         self.dosingDecisionStore = dosingDecisionStore
         self.glucoseStore = glucoseStore
+        self.cgmEventStore = cgmEventStore
         self.insulinDeliveryStore = insulinDeliveryStore
         self.settingsStore = settingsStore
         self.overrideHistory = overrideHistory
@@ -167,13 +172,11 @@ final class RemoteDataServicesManager {
     }
 
     private func clearQueryAnchors(for remoteDataService: RemoteDataService) {
-        clearAlertQueryAnchor(for: remoteDataService)
-        clearCarbQueryAnchor(for: remoteDataService)
-        clearDoseQueryAnchor(for: remoteDataService)
-        clearDosingDecisionQueryAnchor(for: remoteDataService)
-        clearGlucoseQueryAnchor(for: remoteDataService)
-        clearPumpEventQueryAnchor(for: remoteDataService)
-        clearSettingsQueryAnchor(for: remoteDataService)
+        for remoteDataType in RemoteDataType.allCases {
+            dispatchQueue(for: remoteDataService, withRemoteDataType: remoteDataType).async {
+                UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: remoteDataType)
+            }
+        }
     }
 
     func triggerUpload(for triggeringType: RemoteDataType) {
@@ -195,6 +198,8 @@ final class RemoteDataServicesManager {
                 remoteDataServices.forEach { self.uploadGlucoseData(to: $0) }
             case .pumpEvent:
                 remoteDataServices.forEach { self.uploadPumpEventData(to: $0) }
+            case .cgmEvent:
+                remoteDataServices.forEach { self.uploadCgmEventData(to: $0) }
             case .settings:
                 remoteDataServices.forEach { self.uploadSettingsData(to: $0) }
             case .overrides:
@@ -220,11 +225,6 @@ final class RemoteDataServicesManager {
 }
 
 extension RemoteDataServicesManager {
-
-    public func alertStoreHasUpdatedAlertData(_ alertStore: AlertStore) {
-        triggerUpload(for: .alert)
-    }
-
     private func uploadAlertData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
@@ -257,21 +257,9 @@ extension RemoteDataServicesManager {
             self.uploadGroup.leave()
         }
     }
-
-    private func clearAlertQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .alert).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .alert)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func carbStoreHasUpdatedCarbData(_ carbStore: CarbStore) {
-        triggerUpload(for: .carb)
-    }
-
     private func uploadCarbData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
@@ -311,21 +299,9 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearCarbQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .carb).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .carb)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func insulinDeliveryStoreHasUpdatedDoseData(_ insulinDeliveryStore: InsulinDeliveryStore) {
-        triggerUpload(for: .dose)
-    }
-
     private func uploadDoseData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
@@ -365,21 +341,9 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearDoseQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .dose).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .dose)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func dosingDecisionStoreHasUpdatedDosingDecisionData(_ dosingDecisionStore: DosingDecisionStore) {
-        triggerUpload(for: .dosingDecision)
-    }
-
     private func uploadDosingDecisionData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
@@ -419,21 +383,9 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearDosingDecisionQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .dosingDecision).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .dosingDecision)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
-        triggerUpload(for: .glucose)
-    }
-
     private func uploadGlucoseData(to remoteDataService: RemoteDataService) {
         
         if delegate?.shouldSyncToRemoteService == false {
@@ -478,21 +430,9 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearGlucoseQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .glucose).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
-        triggerUpload(for: .pumpEvent)
-    }
-
     private func uploadPumpEventData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
@@ -532,21 +472,9 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearPumpEventQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .pumpEvent).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func settingsStoreHasUpdatedSettingsData(_ settingsStore: SettingsStore) {
-        triggerUpload(for: .settings)
-    }
-
     private func uploadSettingsData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
@@ -586,21 +514,9 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearSettingsQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .settings).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .settings)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-    
-    public func temporaryScheduleOverrideHistoryDidUpdate() {
-        triggerUpload(for: .overrides)
-    }
-
     private func uploadTemporaryOverrideData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
@@ -629,10 +545,46 @@ extension RemoteDataServicesManager {
             self.uploadGroup.leave()
         }
     }
+}
 
-    private func clearTemporaryOverrideQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides)
+extension RemoteDataServicesManager {
+    private func uploadCgmEventData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
+
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .pumpEvent)
+
+        dispatchQueue(for: remoteDataService, withRemoteDataType: .cgmEvent).async {
+            let semaphore = DispatchSemaphore(value: 0)
+            let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .cgmEvent) ?? CgmEventStore.QueryAnchor()
+            var continueUpload = false
+
+            self.cgmEventStore.executeCgmEventQuery(fromQueryAnchor: previousQueryAnchor) { result in
+                switch result {
+                case .failure(let error):
+                    self.log.error("Error querying pump event data: %{public}@", String(describing: error))
+                    semaphore.signal()
+                case .success(let queryAnchor, let data):
+                    remoteDataService.uploadCgmEventData(data) { result in
+                        switch result {
+                        case .failure(let error):
+                            self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
+                            self.uploadFailed(key)
+                        case .success:
+                            UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .cgmEvent, queryAnchor)
+                            continueUpload = queryAnchor != previousQueryAnchor
+                            self.uploadSucceeded(key)
+                        }
+                        semaphore.signal()
+                    }
+                }
+            }
+
+            semaphore.wait()
+            self.uploadGroup.leave()
+
+            if continueUpload {
+                self.uploadPumpEventData(to: remoteDataService)
+            }
         }
     }
 }

@@ -11,7 +11,6 @@ import LoopKit
 @testable import Loop
 
 class MockDoseStore: DoseStoreProtocol {
-
     var doseHistory: [DoseEntry]?
     var sensitivitySchedule: InsulinSensitivitySchedule?
     
@@ -55,7 +54,7 @@ class MockDoseStore: DoseStoreProtocol {
     
     var lastAddedPumpData: Date
 
-    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (DoseStore.DoseStoreError?) -> Void) {
+    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool, completion: @escaping (DoseStore.DoseStoreError?) -> Void) {
         completion(nil)
     }
     

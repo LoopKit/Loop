@@ -321,7 +321,7 @@ class LoopAppManager: NSObject {
 
     func didBecomeActive() {
         if let rootViewController = rootViewController {
-            ProfileExpirationAlerter.alertIfNeeded(viewControllerToPresentFrom: rootViewController)
+            AppExpirationAlerter.alertIfNeeded(viewControllerToPresentFrom: rootViewController)
         }
         settingsManager?.didBecomeActive()
         deviceDataManager?.didBecomeActive()
@@ -601,7 +601,7 @@ extension LoopAppManager: TemporaryScheduleOverrideHistoryDelegate {
     func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
         UserDefaults.appGroup?.overrideHistory = history
 
-        deviceDataManager.remoteDataServicesManager.temporaryScheduleOverrideHistoryDidUpdate()
+        deviceDataManager.remoteDataServicesManager.triggerUpload(for: .overrides)
     }
 }
 
