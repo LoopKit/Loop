@@ -11,6 +11,12 @@ import SwiftUI
 extension View {
     @ViewBuilder
     func widgetBackground() -> some View {
-        self.background { Color("WidgetBackground") }
+        if #available(iOSApplicationExtension 17.0, *) {
+            self.containerBackground(for: .widget) {
+                Color("WidgetBackground")
+            }
+        } else {
+            self.background { Color("WidgetBackground") }
+        }
     }
 }
