@@ -1142,7 +1142,7 @@ extension LoopDataManager {
         dosingDecision.glucoseTargetRangeSchedule = settings.effectiveGlucoseTargetRangeSchedule()
 
         // These will be updated by updatePredictedGlucoseAndRecommendedDose, if possible
-        dosingDecision.predictedGlucose = predictedGlucose
+        dosingDecision.predictedGlucose = predictedGlucoseIncludingPendingInsulin
         dosingDecision.automaticDoseRecommendation = recommendedAutomaticDose?.recommendation
 
         // If the glucose prediction hasn't changed, then nothing has changed, so just use pre-existing recommendations
