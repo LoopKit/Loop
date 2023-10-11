@@ -5499,6 +5499,388 @@
 			};
 			name = Release;
 		};
+		B4E7CF912AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 437D9BA11D7B5203007245E8 /* Loop.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				APP_GROUP_IDENTIFIER = "group.$(MAIN_APP_BUNDLE_IDENTIFIER)Group";
+				CLANG_ANALYZER_GCD_PERFORMANCE = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
+				CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND = YES;
+				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_ASSIGN_ENUM = YES;
+				CLANG_WARN_ATOMIC_IMPLICIT_SEQ_CST = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES_ERROR;
+				CLANG_WARN_BOOL_CONVERSION = YES_ERROR;
+				CLANG_WARN_COMMA = YES_ERROR;
+				CLANG_WARN_CONSTANT_CONVERSION = YES_ERROR;
+				CLANG_WARN_CXX0X_EXTENSIONS = YES;
+				CLANG_WARN_DELETE_NON_VIRTUAL_DTOR = YES_ERROR;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES_ERROR;
+				CLANG_WARN_FLOAT_CONVERSION = YES_ERROR;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES_ERROR;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES_ERROR;
+				CLANG_WARN_MISSING_NOESCAPE = YES_ERROR;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES_ERROR;
+				CLANG_WARN_OBJC_EXPLICIT_OWNERSHIP_TYPE = YES;
+				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_INTERFACE_IVARS = YES_ERROR;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES_ERROR;
+				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = YES;
+				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = YES_AGGRESSIVE;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_PRAGMA_PACK = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_SEMICOLON_BEFORE_METHOD_BODY = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES_AGGRESSIVE;
+				CLANG_WARN_VEXING_PARSE = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
+				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES_ERROR;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNKNOWN_PRAGMAS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LOCALIZED_STRING_MACRO_NAMES = (
+					NSLocalizedString,
+					CFLocalizedString,
+					LocalizedString,
+				);
+				MAIN_APP_BUNDLE_IDENTIFIER = "$(inherited).Loop";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				WARNING_CFLAGS = "-Wall";
+				WATCHOS_DEPLOYMENT_TARGET = 7.1;
+			};
+			name = Testflight;
+		};
+		B4E7CF922AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
+				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = Loop/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = "";
+				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
+				"OTHER_SWIFT_FLAGS[sdk=iphonesimulator*]" = "-D IOS_SIMULATOR -D DEBUG";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_RELEASE)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Testflight;
+		};
+		B4E7CF932AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION_RELEASE)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Testflight;
+		};
+		B4E7CF942AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				FRAMEWORK_SEARCH_PATHS = "";
+				IBSC_MODULE = WatchApp_Extension;
+				INFOPLIST_FILE = WatchApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_RELEASE)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Testflight;
+		};
+		B4E7CF952AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
+				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				FRAMEWORK_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.watchkitextension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION_RELEASE)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "WatchApp Extension/Extensions/WatchApp Extension-Bridging-Header.h";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Testflight;
+		};
+		B4E7CF962AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_ENTITLEMENTS = "Loop Widget Extension/Bootstrap/LoopWidgetExtension.entitlements";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Loop Widget Extension/Bootstrap/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Loop Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWidgetExtension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WIDGET_EXTENSION_RELEASE)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Testflight;
+		};
+		B4E7CF972AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Loop Intent Extension/Loop Intent Extension.entitlements";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).Loop-Intent-Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_INTENT_EXTENSION_RELEASE)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Testflight;
+		};
+		B4E7CF982AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = LoopCore/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopCore;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+			};
+			name = Testflight;
+		};
+		B4E7CF992AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "";
+				INFOPLIST_FILE = LoopCore/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_NO_PIE = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopCore;
+				PRODUCT_NAME = LoopCore;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Testflight;
+		};
+		B4E7CF9A2AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = LoopUI/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+			};
+			name = Testflight;
+		};
+		B4E7CF9B2AD00A39009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				INFOPLIST_FILE = LoopTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop.app/Loop";
+			};
+			name = Testflight;
+		};
 		E9B07F95253BBA6500BAD8F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -5560,6 +5942,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				14B1736A28AED9EE006CCD7C /* Debug */,
+				B4E7CF962AD00A39009B4DF2 /* Testflight */,
 				14B1736B28AED9EE006CCD7C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5569,6 +5952,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43776FB41B8022E90074EA36 /* Debug */,
+				B4E7CF912AD00A39009B4DF2 /* Testflight */,
 				43776FB51B8022E90074EA36 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5578,6 +5962,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43776FB71B8022E90074EA36 /* Debug */,
+				B4E7CF922AD00A39009B4DF2 /* Testflight */,
 				43776FB81B8022E90074EA36 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5587,6 +5972,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43A943961B926B7B0051FA24 /* Debug */,
+				B4E7CF952AD00A39009B4DF2 /* Testflight */,
 				43A943971B926B7B0051FA24 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5596,6 +5982,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43A9439A1B926B7B0051FA24 /* Debug */,
+				B4E7CF942AD00A39009B4DF2 /* Testflight */,
 				43A9439B1B926B7B0051FA24 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5605,6 +5992,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43D9002821EB209400AF44BF /* Debug */,
+				B4E7CF992AD00A39009B4DF2 /* Testflight */,
 				43D9002921EB209400AF44BF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5614,6 +6002,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43D9FFD921EAE05D00AF44BF /* Debug */,
+				B4E7CF982AD00A39009B4DF2 /* Testflight */,
 				43D9FFDA21EAE05D00AF44BF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5623,6 +6012,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43E2D9131D20C581004DA55F /* Debug */,
+				B4E7CF9B2AD00A39009B4DF2 /* Testflight */,
 				43E2D9141D20C581004DA55F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5632,6 +6022,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4F70C1E91DE8DCA8006380B7 /* Debug */,
+				B4E7CF932AD00A39009B4DF2 /* Testflight */,
 				4F70C1EA1DE8DCA8006380B7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5641,6 +6032,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4F7528901DFE1DC600C322D6 /* Debug */,
+				B4E7CF9A2AD00A39009B4DF2 /* Testflight */,
 				4F7528911DFE1DC600C322D6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -5650,6 +6042,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E9B07F95253BBA6500BAD8F8 /* Debug */,
+				B4E7CF972AD00A39009B4DF2 /* Testflight */,
 				E9B07F96253BBA6500BAD8F8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
