@@ -49,7 +49,7 @@ enum LoopConstants {
    
     static let retrospectiveCorrectionEnabled = true
     
-    // Percentage of recommended dose to apply as bolus when using automatic bolus dosing strategy
+    // Percentage of recommended dose to apply as bolus when using automatic bolus dosing strategy?
     static let bolusPartialApplicationFactor = 0.4
 
     /// Loop completion aging category limits
