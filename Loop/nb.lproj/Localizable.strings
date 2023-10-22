@@ -2,7 +2,7 @@
 " (pending: %@)" = "(venter: %@ )";
 
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
-" Pre-meal Preset" = " Forhåndsinnstilling før måltid";
+" Pre-meal Preset" = "Forhåndsinnstilling før måltid";
 
 /* remaining time in setting's profile expiration section */
 " remaining" = "gjenstående";
@@ -95,6 +95,9 @@
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@ : <b> %2$@ </b> %3$@";
 
+/* No comment provided by engineer. */
+"⚠️" = "⚠️";
+
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 minutters glukose-regresjonskoeffisient (b1), fortsatt med nedbrytning over 30 minutter.";
 
@@ -143,6 +146,9 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktivt insulin: %@";
 
+/* No comment provided by engineer. */
+"Add a new favorite food" = "Legg til en ny favorittmat";
+
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Legg til karbohydrater";
 
@@ -171,8 +177,27 @@
    Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Varslingsinnstillinger";
 
+/* Navigation title for algorithms experiments screen
+   The title of the Algorithm Experiments section in settings */
+"Algorithm Experiments" = "Algoritmeeksperimenter";
+
+/* Algorithm Experiments description. */
+"Algorithm Experiments are optional modifications to the Loop Algorithm. These modifications are less tested than the standard Loop Algorithm, so please use carefully." = "Algoritmeeksperimenter er valgfrie modifikasjoner til Loop-algoritmen. Disse modifikasjonene er mindre testet enn standard Loop-algoritmen, så vær vennlig å bruke dem med forsiktighet.";
+
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algoritmeinnstillinger";
+
+/* Warning text for when alerts are muted */
+"All Alerts Muted" = "Alle varsler er dempet";
+
+/* Label for when mute alert will end */
+"All alerts muted until" = "Alle varsler er dempet inntil";
+
+/* No comment provided by engineer. */
+"All Favorites" = "Alle favoritter";
+
+/* Label for carb quantity entry row on carb entry screen */
+"Amount Consumed" = "Mengde karbohydrater\n(Mengde inntatt)";
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
@@ -215,6 +240,9 @@
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Er du sikker på at du vil slette denne CGM?";
+
+/* No comment provided by engineer. */
+"Are you sure you want to delete this food?" = "Er du sikker på at du vil slette denne maten?";
 
 /* Confirmation message for deleting a service */
 "Are you sure you want to delete this service?" = "Er du sikker på at du vil slette denne tjenesten?";
@@ -303,6 +331,9 @@
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Absorberte karbohydrater (g) ÷ Karbforhold (g/E) × insulinfølsomhet ( %1$@ /E)";
 
+/* No comment provided by engineer. */
+"Caution" = "Forsiktig";
+
 /* The notification alert describing a low pump battery */
 "Change the pump battery immediately" = "Skift pumpebatteriet umiddelbart";
 
@@ -323,6 +354,9 @@
 
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Velg lengre absorpsjonstid for større måltider, eller de som inneholder fett og proteiner. Dette er kun veiledning til algoritmen og trenger ikke være nøyaktig.";
+
+/* No comment provided by engineer. */
+"Choose Favorite:" = "Velg favoritt:";
 
 /* Button title to close view
    The button label of the action used to dismiss the unsafe notification permission alert */
@@ -368,6 +402,9 @@
    The title text for the glucose target range schedule */
 "Correction Range" = "Korreksjonsområde";
 
+/* Format string for title of reset loop alert. (1: App name) */
+"Could Not Restart %1$@" = "Kunne ikke starte %1$@ på nytt";
+
 /* Critical Alerts Status text */
 "Critical Alerts" = "Kritiske varsler";
 
@@ -401,6 +438,9 @@
 /* No comment provided by engineer. */
 "Delete" = "Slett";
 
+/* No comment provided by engineer. */
+"Delete “%@”?" = "Slette \"%@\"?";
+
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Slett Konto";
 
@@ -409,6 +449,9 @@
 
 /* Button title to delete CGM */
 "Delete CGM" = "Slett CGM";
+
+/* No comment provided by engineer. */
+"Delete Food" = "Slett mat";
 
 /* Button title to delete a service */
 "Delete Service" = "Slett tjeneste";
@@ -456,6 +499,12 @@
 /* Message to the user to enable bluetooth */
 "Enable\nBluetooth" = "Aktiver blåtann";
 
+/* Title for Glucose Based Partial Application toggle */
+"Enable Glucose Based Partial Application" = "Aktiver delvis anvendelse basert på glukose";
+
+/* Title for Integral Retrospective Correction toggle */
+"Enable Integral Retrospective Correction" = "Aktivere integrert retrospektiv korrigering";
+
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Aktiverer";
 
@@ -487,7 +536,7 @@
 "Event History" = "Hendelseshistorie";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
-"Eventually %@" = "Til slutt %@";
+"Eventually %@" = "Omsider %@";
 
 /* Bolus error description: bolus exceeds maximum bolus in settings. */
 "Exceeds maximum allowed bolus in settings" = "Overskrider maksimalt tillatt bolus i innstillingene";
@@ -506,6 +555,9 @@
 
 /* The alert title for a resume error */
 "Failed to Resume Insulin Delivery" = "Kunne ikke gjenoppta insulinlevering";
+
+/* No comment provided by engineer. */
+"FAVORITE FOODS" = "FAVORITTMAT";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
@@ -534,6 +586,10 @@
 /* The title of the glucose and prediction graph */
 "Glucose" = "Blodsukker";
 
+/* Title for glucose based partial application experiment description
+   Title of glucose based partial application experiment */
+"Glucose Based Partial Application" = "Partiell anvendelse basert på glukosenivå";
+
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "Blodsukkerdata er %1$@ gammel";
 
@@ -542,6 +598,9 @@
 
 /* Alert title when glucose data returns while on bolus screen */
 "Glucose Data Now Available" = "Blodsukkerdata er utilgjengelig";
+
+/* Description of the prediction input effect for suspension of insulin delivery */
+"Glucose effect of suspending insulin delivery" = "Glukoseeffekt av å suspendere insulintilførsel";
 
 /* Alert title for a manual glucose entry out of range error
    Title for bolus screen warning when glucose entry is out of range */
@@ -558,6 +617,9 @@
 
 /* Immediate Delivery status text */
 "Immediate" = "Umiddelbar";
+
+/* Algorithm Experiments description second paragraph. */
+"In future versions of Loop these experiments may change, end up as standard parts of the Loop Algorithm, or be removed from Loop entirely. Please follow along in the Loop Zulip chat to stay informed of possible changes to these features." = "I fremtidige versjoner av Loop kan disse eksperimentene endres, ende opp som standarddeler av Loop-algoritmen eller fjernes helt fra Loop. Følg med i Loop Zulip-chatten for å holde deg informert om eventuelle endringer i disse funksjonene.";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "På ubestemt tid";
@@ -597,8 +659,18 @@
 /* Insulin type label */
 "Insulin Type" = "Insulintype";
 
+/* Title for integral retrospective correction experiment description
+   Title of integral retrospective correction experiment */
+"Integral Retrospective Correction" = "Integrert retrospektiv korreksjon";
+
+/* Description of Integral Retrospective Correction toggle. */
+"Integral Retrospective Correction (IRC) is an extension of the standard Retrospective Correction (RC) algorithm component in Loop, which adjusts the forecast based on the history of discrepancies between predicted and actual glucose levels.\n\nIn contrast to RC, which looks at discrepancies over the last 30 minutes, with IRC, the history of discrepancies adds up over time. So continued positive discrepancies over time will result in increased dosing. If the discrepancies are negative over time, Loop will reduce dosing further." = "Integral Retrospective Correction (IRC) er en utvidelse av standardalgoritmekomponenten Retrospective Correction (RC) i Loop, som justerer prognosen basert på historikken for avvik mellom forventede og faktiske glukosenivåer.\n\nI motsetning til RC, som ser på avvik i løpet av de siste 30 minuttene, summerer IRC avvikene over tid. Fortsatte positive avvik over tid vil derfor føre til økt dosering. Hvis avvikene er negative over tid, vil Loop redusere doseringen ytterligere.";
+
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Avbrutt %1$@: <b>%2$@</b> av %3$@ %4$@";
+
+/* Carb error description: invalid absorption time. (1: Input duration in hours). */
+"Invalid absorption time: %1$@ hours" = "Ugyldig absorpsjonstid: %1$@ timer";
 
 /* Bolus error description: invalid bolus amount. */
 "Invalid Bolus Amount" = "Ugyldig bolusmengde";
@@ -658,6 +730,9 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop har ikke fullført i %@";
 
+/* Description of Glucose Based Partial Application toggle. */
+"Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for." = "Loop gir normalt 40 %1$ av det forventede insulinbehovet i hver doseringssyklus.\n\nNår eksperimentet Glukosebasert delvis tilførsel er aktivert, vil Loop variere prosentandelen av anbefalt bolus som tilføres hver syklus med glukosenivået.\n\nI nærheten av korreksjonsområdet bruker den 20 %2$ (i likhet med Temp Basal), og øker gradvis til maksimalt 80 %3$ ved høyt glukosenivå (200 mg/dL, 11,1 mmol/L).\n\nVær oppmerksom på at når glukosenivået stiger raskt, f.eks. etter et uanmeldt måltid, kan denne funksjonen, kombinert med hastighets- og retrospektive korreksjonseffekter, resultere i en større dose enn det ISF skulle tilsi.";
+
 /* Description string for automatic bolus dosing strategy */
 "Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." = "Lopp vil sette bolus når insulinbehovet er over planlagt basal, og vil bruke midlertidige basale rater når det er nødvendig for å redusere insulintilførselen under planlagt basal";
 
@@ -707,11 +782,15 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum effekter";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Mer info";
 
 /* Label for button to mute all alerts */
 "Mute All Alerts" = "Demp alle varsler";
+
+/* Title for mute alert duration selection action sheet */
+"Mute All Alerts Temporarily" = "Slå av alle varsler midlertidig";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Trenger tilsyn";
@@ -721,6 +800,9 @@
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
+
+/* Message for mute alert duration selection action sheet */
+"No alerts or alarms will sound while muted. Select how long you would you like to mute for." = "Ingen varsler eller alarmer vil høres mens de er dempet. Velg hvor lenge du ønsker å dempe lyden.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -777,6 +859,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -806,6 +889,9 @@
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Forventet: %1$@\nFaktisk: %2$@ ( %3$@ )";
+
+/* Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect) */
+"prediction-description-integral-retrospective-correction" = "prediksjon-beskrivelse-integral-retrospektiv-korreksjon";
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Forbereder logg av kritiske hendelser";
@@ -890,14 +976,23 @@
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Prøv på nytt";
 
+/* No comment provided by engineer. */
+"Save" = "Lagre";
+
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Lagre og gi bolus";
+
+/* No comment provided by engineer. */
+"Save as favorite food" = "Lagre som favorittmat";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Lagre uten å sette bolus";
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Planlagt";
+
+/* No comment provided by engineer. */
+"Selecting a favorite food in the carb entry screen automatically fills in the carb quantity, food type, and absorption time fields! Tap the add button below to create your first favorite food!" = "Når du velger en favorittmat i skjermbildet for innlegging av karbohydrater, fylles feltene for karbohydratmengde, matvaretype og opptakstid automatisk ut! Trykk på knappen Legg til nedenfor for å opprette din første favorittmat!";
 
 /* The title of the services section in settings */
 "Services" = "Tjenester";
@@ -942,6 +1037,9 @@
 /* The title text in settings */
 "Suspend Threshold" = "Terskel for utsettelse";
 
+/* Title of the prediction input effect for suspension of insulin delivery */
+"Suspension of Insulin Delivery" = "Suspensjon av insulintilførsel";
+
 /* Descriptive text for button to add CGM device */
 "Tap here to set up a CGM" = "Trykk her for å sette opp en CGM";
 
@@ -959,6 +1057,12 @@
 
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Trykk for å stoppe";
+
+/* Label for button to unmute all alerts */
+"Tap to Unmute Alerts" = "Trykk for å dempe varsler";
+
+/* The alert body for unmute alert confirmation */
+"Tap Unmute to resume sound for your alerts and alarms." = "Trykk på Slå av lyd for å gjenoppta lyden for varsler og alarmer.";
 
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "Den angitte bolusmengden er mindre enn minimumsleveransen.";
@@ -989,6 +1093,9 @@
 
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Behandlingsinnstillinger";
+
+/* String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus */
+"This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." = "Dette alternativet gjelder bare når Loops doseringsstrategi er satt til Automatisk bolus.";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Tidssensitive varsler";
@@ -1032,8 +1139,20 @@
 /* Unknown amount of time in settings' profile expiration section */
 "Unknown time" = "Ukjent tid";
 
+/* The title of the action used to unmute alerts */
+"Unmute" = "Oppheve demping";
+
+/* The alert title for unmute alert confirmation */
+"Unmute Alerts?" = "Oppheve demping av varsler?";
+
+/* Error message when a service can't be found to handle a push notification. (1: Service Identifier) */
+"Unsupported Notification Service: %1$@" = "Varslingstjeneste som ikke støttes: %1$@";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "til %@";
+
+/* indication of when alerts will be unmuted (1: time when alerts unmute) */
+"Until %1$@" = "Inntil %1$@";
 
 /* The title of a target alert action specifying pre-meal targets duration for 1 hour or until the user enters carbs (whichever comes first). */
 "Until I enter carbs" = "Frem til jeg legger inn karbohydrater";
@@ -1067,6 +1186,9 @@
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Når den er ute av lukket Loop-modus, bruker appen en forenklet boluskalkulator som en vanlig pumpe.";
+
+/* Format string for message of reset loop alert. (1: App name) (2: error description) */
+"While trying to restart %1$@ an error occured.\n\n%2$@" = "Det oppstod en feil da du prøvde å starte %1$@ på nytt.\n\n%2$@";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Målområder for trening";

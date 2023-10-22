@@ -4,6 +4,9 @@
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
+/* Privacy - NFC Scan Usage Description */
+"NFCReaderUsageDescription" = "L'app utilizza NFC per l'accoppiamento con i dispositivi per il diabete.";
+
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Il Bluetooth è utilizzato per comunicare con il microinfusore ed il sensore glicemico";
 

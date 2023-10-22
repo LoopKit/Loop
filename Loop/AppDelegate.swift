@@ -22,6 +22,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
         setenv("CFNETWORK_DIAGNOSTICS", "3", 1)
 
+        log.default("lastPathComponent = %{public}@", String(describing: Bundle.main.appStoreReceiptURL?.lastPathComponent))
+
         loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
         loopAppManager.launch()
         return loopAppManager.isLaunchComplete

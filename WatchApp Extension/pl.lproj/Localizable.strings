@@ -69,7 +69,7 @@
 "On" = "Włącz";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Pominięcie";
+"Override" = "Cel Tymczasowy";
 
 /* Alert message for updated bolus recommendation on Apple Watch */
 "Please reconfirm the bolus amount." = "Potwierdź ponownie wielkość bolusa.";

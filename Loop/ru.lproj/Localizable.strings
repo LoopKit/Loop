@@ -95,6 +95,9 @@
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
+/* No comment provided by engineer. */
+"⚠️" = "⚠️";
+
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15-мин коэффициент регрессии гликемии (b1), продолжен с угасанием 30 мин";
 
@@ -707,7 +710,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Влияние динамики СК";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Доп. инфо";
 
 /* Label for button to mute all alerts */
@@ -777,6 +781,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -806,6 +811,9 @@
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Прогноз: %1$@\nФакт: %2$@ (%3$@)";
+
+/* Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect) */
+"prediction-description-integral-retrospective-correction" = "описание прогнозирования с помощью интегральной ретроспективной коррекции";
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Подготовка логов критических событий";
@@ -990,6 +998,9 @@
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Настройки терапии";
 
+/* String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus */
+"This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." = "Эта опция применима только в том случае, если для стратегии дозирования петли установлено значение «Автоматический болюс».";
+
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Уведомления, чувствительные к времени";
 
@@ -1032,8 +1043,20 @@
 /* Unknown amount of time in settings' profile expiration section */
 "Unknown time" = "Неизвестное время";
 
+/* The title of the action used to unmute alerts */
+"Unmute" = "Включить звук";
+
+/* The alert title for unmute alert confirmation */
+"Unmute Alerts?" = "Включить звук оповещений?";
+
+/* Error message when a service can't be found to handle a push notification. (1: Service Identifier) */
+"Unsupported Notification Service: %1$@" = "Неподдерживаемая служба уведомлений: %1$@";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "до %@";
+
+/* indication of when alerts will be unmuted (1: time when alerts unmute) */
+"Until %1$@" = "До %1$@";
 
 /* The title of a target alert action specifying pre-meal targets duration for 1 hour or until the user enters carbs (whichever comes first). */
 "Until I enter carbs" = "Пока я не введу углеводы";
@@ -1067,6 +1090,9 @@
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Когда приложение выходит из режима замкнутого цикла, оно использует упрощенный калькулятор болюса, как в обычной помпе.";
+
+/* Format string for message of reset loop alert. (1: App name) (2: error description) */
+"While trying to restart %1$@ an error occured.\n\n%2$@" = "При попытке перезапустить %1$@ произошла ошибка. \n\n %2$@";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Целевые значения при физической нагрузке";

@@ -1,14 +1,14 @@
 /* Green closed loop ON message (1: last loop string) (2: app name) */
-"\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "\n%1$@\n\n%2$@ opererer med Closed Loop i ON-posisjon.";
+"\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position." = "%1$@\n\n%2$@ opererer med Closed Loop i ON-posisjon.";
 
 /* Red loop message (1: last loop  string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "\n%1$@\n\n Trykk på statusikonene for CGM og insulinpumpe for mer informasjon. %2$@ vil fortsette å prøve å fullføre en sløyfe, men se etter potensielle kommunikasjonsproblemer med pumpen og CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM." = "%1$@\n\n Trykk på statusikonene for CGM og insulinpumpe for mer informasjon. %2$@ vil fortsette å prøve å fullføre en sløyfe, men se etter potensielle kommunikasjonsproblemer med pumpen og CGM.";
 
 /* Yellow loop message (1: last loop string) (2: app name) */
-"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "\n%1$@\n\nTrykk på statusikonene for CGM og insulinpumpe for mer informasjon. %2$@ vil fortsette å prøve å fullføre en loop, men se etter potensielle kommunikasjonsproblemer med pumpen og CGM.";
+"\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "%1$@\n\nTrykk på statusikonene for CGM og insulinpumpe for mer informasjon. %2$@ vil fortsette å prøve å fullføre en loop, men se etter potensielle kommunikasjonsproblemer med pumpen og CGM.";
 
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
-"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "\n%1$@ opererer med Closed Loop i OFF posisjon. Pumpen og CGM vil fortsette å fungere, men appen vil ikke justere doseringen automatisk.\n\n%2$@";
+"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "%1$@ opererer med Closed Loop i OFF posisjon. Pumpen og CGM vil fortsette å fungere, men appen vil ikke justere doseringen automatisk.\n\n%2$@";
 
 /* No glucose value representation (3 dashes for mg/dL) */
 "– – –" = "– – –";

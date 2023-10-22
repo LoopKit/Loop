@@ -11,7 +11,7 @@
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
 /* HUD row title for COB */
-"Active Carbs" = "Carb Attivi";
+"Active Carbs" = "Carboidrati Attivi";
 
 /* HUD row title for IOB */
 "Active Insulin" = "Insulina attiva";
@@ -118,5 +118,5 @@
 "Unable to Reach iPhone" = "Impossibile raggiungere iPhone";
 
 /* The text for the Watch button for enabling workout mode */
-"Workout" = "Allenarsi";
+"Workout" = "Allenamento";
 
