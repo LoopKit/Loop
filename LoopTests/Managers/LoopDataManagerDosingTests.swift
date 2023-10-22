@@ -64,19 +64,19 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         // Therapy settings in the "live capture" input only have one value, so we can fake some schedules
         // from the first entry of each therapy setting's history.
         let basalRateSchedule = BasalRateSchedule(dailyItems: [
-            RepeatingScheduleValue(startTime: 0, value: predictionInput.settings.basal.first!.value)
+            RepeatingScheduleValue(startTime: 0, value: predictionInput.basal.first!.value)
         ])
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(
             unit: .milligramsPerDeciliter,
             dailyItems: [
-                RepeatingScheduleValue(startTime: 0, value: predictionInput.settings.sensitivity.first!.value.doubleValue(for: .milligramsPerDeciliter))
+                RepeatingScheduleValue(startTime: 0, value: predictionInput.sensitivity.first!.value.doubleValue(for: .milligramsPerDeciliter))
             ],
             timeZone: .utcTimeZone
         )!
         let carbRatioSchedule = CarbRatioSchedule(
             unit: .gram(),
             dailyItems: [
-                RepeatingScheduleValue(startTime: 0.0, value: predictionInput.settings.carbRatio.first!.value)
+                RepeatingScheduleValue(startTime: 0.0, value: predictionInput.carbRatio.first!.value)
             ],
             timeZone: .utcTimeZone
         )!
@@ -89,7 +89,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
             carbRatioSchedule: carbRatioSchedule,
             maximumBasalRatePerHour: 10,
             maximumBolus: 5,
-            suspendThreshold: predictionInput.settings.suspendThreshold,
+            suspendThreshold: GlucoseThreshold(unit: .milligramsPerDeciliter, value: 65),
             automaticDosingStrategy: .automaticBolus
         )
 

@@ -67,7 +67,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
 
             // Date glucose staleness changes
             if let lastBGTime = newEntry.currentGlucose?.startDate {
-                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval+1)
+                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval+1)
                 datesToRefreshWidget.append(staleBgRefreshTime)
             }
 
@@ -93,7 +93,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
 
         var glucose: [StoredGlucoseSample] = []
 
-        let startDate = Date(timeIntervalSinceNow: -LoopCoreConstants.inputDataRecencyInterval)
+        let startDate = Date(timeIntervalSinceNow: -LoopAlgorithm.inputDataRecencyInterval)
 
         group.enter()
         glucoseStore.getGlucoseSamples(start: startDate) { (result) in

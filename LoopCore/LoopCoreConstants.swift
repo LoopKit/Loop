@@ -10,9 +10,6 @@ import Foundation
 import LoopKit
 
 public enum LoopCoreConstants {
-    /// The amount of time since a given date that input data should be considered valid
-    public static let inputDataRecencyInterval = TimeInterval(minutes: 15)
-    
     /// The amount of time in the future a glucose value should be considered valid
     public static let futureGlucoseDataInterval = TimeInterval(minutes: 5)
 

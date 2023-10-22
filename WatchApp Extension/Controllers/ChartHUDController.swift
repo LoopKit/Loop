@@ -162,7 +162,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             cell.setIsLastRow(row.isLast)
             cell.setContentInset(systemMinimumLayoutMargins)
 
-            let isActiveContextStale = Date().timeIntervalSince(activeContext.creationDate) > LoopCoreConstants.inputDataRecencyInterval
+            let isActiveContextStale = Date().timeIntervalSince(activeContext.creationDate) > LoopAlgorithm.inputDataRecencyInterval
 
             switch row {
             case .iob:

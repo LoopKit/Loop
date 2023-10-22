@@ -114,7 +114,7 @@ extension DeviceDataManager {
     var isGlucoseValueStale: Bool {
         guard let latestGlucoseDataDate = glucoseStore.latestGlucose?.startDate else { return true }
 
-        return Date().timeIntervalSince(latestGlucoseDataDate) > LoopCoreConstants.inputDataRecencyInterval
+        return Date().timeIntervalSince(latestGlucoseDataDate) > LoopAlgorithm.inputDataRecencyInterval
     }
 }
 

@@ -962,48 +962,25 @@
       "startDate" : "2023-06-23T02:37:35Z"
     }
   ],
-  "settings" : {
-    "basal" : [
-      {
-        "endDate" : "2023-06-23T05:00:00Z",
-        "startDate" : "2023-06-22T10:00:00Z",
-        "value" : 0.45000000000000001
-      }
-    ],
-    "carbRatio" : [
-      {
-        "endDate" : "2023-06-23T07:00:00Z",
-        "startDate" : "2023-06-22T07:00:00Z",
-        "value" : 11
-      }
-    ],
-    "maximumBasalRatePerHour" : null,
-    "maximumBolus" : null,
-    "sensitivity" : [
-      {
-        "endDate" : "2023-06-23T05:00:00Z",
-        "startDate" : "2023-06-22T10:00:00Z",
-        "value" : 60
-      }
-    ],
-    "suspendThreshold" : null,
-    "target" : [
-      {
-        "endDate" : "2023-06-23T07:00:00Z",
-        "startDate" : "2023-06-22T20:25:00Z",
-        "value" : {
-          "maxValue" : 115,
-          "minValue" : 100
-        }
-      },
-      {
-        "endDate" : "2023-06-23T08:50:00Z",
-        "startDate" : "2023-06-23T07:00:00Z",
-        "value" : {
-          "maxValue" : 115,
-          "minValue" : 100
-        }
-      }
-    ]
-  }
+  "basal" : [
+    {
+      "endDate" : "2023-06-23T05:00:00Z",
+      "startDate" : "2023-06-22T10:00:00Z",
+      "value" : 0.45000000000000001
+    }
+  ],
+  "carbRatio" : [
+    {
+      "endDate" : "2023-06-23T07:00:00Z",
+      "startDate" : "2023-06-22T07:00:00Z",
+      "value" : 11
+    }
+  ],
+  "sensitivity" : [
+    {
+      "endDate" : "2023-06-23T05:00:00Z",
+      "startDate" : "2023-06-22T10:00:00Z",
+      "value" : 60
+    }
+  ],
 }

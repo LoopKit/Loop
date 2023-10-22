@@ -818,12 +818,12 @@ extension BolusEntryViewModel {
     
     var isGlucoseDataStale: Bool {
         guard let latestGlucoseDataDate = delegate?.mostRecentGlucoseDataDate else { return true }
-        return now().timeIntervalSince(latestGlucoseDataDate) > LoopCoreConstants.inputDataRecencyInterval
+        return now().timeIntervalSince(latestGlucoseDataDate) > LoopAlgorithm.inputDataRecencyInterval
     }
     
     var isPumpDataStale: Bool {
         guard let latestPumpDataDate = delegate?.mostRecentPumpDataDate else { return true }
-        return now().timeIntervalSince(latestPumpDataDate) > LoopCoreConstants.inputDataRecencyInterval
+        return now().timeIntervalSince(latestPumpDataDate) > LoopAlgorithm.inputDataRecencyInterval
     }
 
     var isManualGlucosePromptVisible: Bool {

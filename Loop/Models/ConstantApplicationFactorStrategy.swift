@@ -18,6 +18,6 @@ struct ConstantApplicationFactorStrategy: ApplicationFactorStrategy {
         settings: LoopSettings
     ) -> Double {
         // The original strategy uses a constant dosing factor.
-        return LoopConstants.bolusPartialApplicationFactor
+        return LoopAlgorithm.bolusPartialApplicationFactor
     }
 }

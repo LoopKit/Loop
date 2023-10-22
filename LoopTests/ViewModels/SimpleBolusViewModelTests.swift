@@ -319,7 +319,7 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
     func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
         
         var decision = BolusDosingDecision(for: .simpleBolus)
-        decision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: currentRecommendation, pendingInsulin: 0, notice: .none),
+        decision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: currentRecommendation, notice: .none),
                                                                                date: date)
         decision.insulinOnBoard = currentIOB
         return decision

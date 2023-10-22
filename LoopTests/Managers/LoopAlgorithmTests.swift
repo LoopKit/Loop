@@ -49,7 +49,7 @@ final class LoopAlgorithmTests: XCTestCase {
     }
 
 
-    func testLiveCaptureWithFunctionalAlgorithm() throws {
+    func testLiveCaptureWithFunctionalAlgorithm() {
         // This matches the "testForecastFromLiveCaptureInputData" test of LoopDataManagerDosingTests,
         // Using the same input data, but generating the forecast using the LoopAlgorithm.generatePrediction()
         // function.
@@ -57,9 +57,17 @@ final class LoopAlgorithmTests: XCTestCase {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let url = bundle.url(forResource: "live_capture_input", withExtension: "json")!
-        let predictionInput = try! decoder.decode(LoopPredictionInput.self, from: try! Data(contentsOf: url))
+        let input = try! decoder.decode(LoopPredictionInput.self, from: try! Data(contentsOf: url))
 
-        let prediction = try LoopAlgorithm.generatePrediction(input: predictionInput)
+        let prediction = LoopAlgorithm.generatePrediction(
+            glucoseHistory: input.glucoseHistory,
+            doses: input.doses,
+            carbEntries: input.carbEntries,
+            basal: input.basal,
+            sensitivity: input.sensitivity,
+            carbRatio: input.carbRatio,
+            useIntegralRetrospectiveCorrection: input.useIntegralRetrospectiveCorrection
+        )
 
         let expectedPredictedGlucose = loadPredictedGlucoseFixture("live_capture_predicted_glucose")
 

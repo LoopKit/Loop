@@ -53,6 +53,6 @@ struct StatusWidgetTimelimeEntry: TimelineEntry {
         }
         let glucoseAge = date - glucoseDate
 
-        return glucoseAge >= LoopCoreConstants.inputDataRecencyInterval
+        return glucoseAge >= LoopAlgorithm.inputDataRecencyInterval
     }
 }

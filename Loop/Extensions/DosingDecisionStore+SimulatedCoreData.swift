@@ -168,7 +168,6 @@ fileprivate extension StoredDosingDecision {
                                                                                                                duration: .minutes(30)),
                                                                       bolusUnits: 1.25)
         let manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 0.2,
-                                                                                                                    pendingInsulin: 0.75,
                                                                                                                     notice: .predictedGlucoseBelowTarget(minGlucose: PredictedGlucoseValue(startDate: date.addingTimeInterval(.minutes(30)),
                                                                                                                                                                                            quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 95.0)))),
                                                                           date: date.addingTimeInterval(-.minutes(1)))

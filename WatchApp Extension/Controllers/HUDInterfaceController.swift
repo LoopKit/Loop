@@ -79,7 +79,7 @@ class HUDInterfaceController: WKInterfaceController {
                 eventualGlucoseLabel.setHidden(true)
             }
                 
-            if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.displayGlucoseUnit, glucoseDate.timeIntervalSinceNow > -LoopCoreConstants.inputDataRecencyInterval {
+            if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.displayGlucoseUnit, glucoseDate.timeIntervalSinceNow > -LoopAlgorithm.inputDataRecencyInterval {
                 let formatter = NumberFormatter.glucoseFormatter(for: unit)
                 
                 if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {
