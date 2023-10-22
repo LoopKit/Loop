@@ -752,6 +752,8 @@ private extension DeviceDataManager {
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
 
             analyticsServicesManager.identifyPumpType(pumpManager.pluginIdentifier)
+
+            updatePumpManagerBLEHeartbeatPreference()
         }
     }
 
