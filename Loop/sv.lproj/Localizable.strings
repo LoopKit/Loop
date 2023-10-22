@@ -543,7 +543,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentumeffekter";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Mer info";
 
 /* Sensor state description for the non-valid state */
@@ -583,6 +584,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 

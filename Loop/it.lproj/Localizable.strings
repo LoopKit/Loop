@@ -4,6 +4,9 @@
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
 " Pre-meal Preset" = "Preimpostazioni del Pre-Pasto";
 
+/* remaining time in setting's profile expiration section */
+" remaining" = "Rimanente";
+
 /* Warning text for when Notifications or Critical Alerts Permissions is disabled */
 " Safety Notifications are OFF" = "Le notifiche di sicurezza risultano spente";
 
@@ -92,11 +95,14 @@
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@ : <b> %2$@ </b> %3$@";
 
+/* No comment provided by engineer. */
+"⚠️" = "⚠️";
+
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "Coefficiente di regressione del glucosio a 15 min (b₁), interpolato con il decadimento a 30 min.";
 
 /* Description of the prediction input effect for retrospective correction */
-"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min di confronto tra la previsione glicemica e quella attuale, proseguita con il degrado sino a 60 minuti";
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "Confronto di 30 minuti tra la previsione del glucosio e quella effettiva, continuato con decadimento per 60 minuti";
 
 /* Estimated remaining duration with a few seconds */
 "A few seconds remaining" = "Pochi secondi rimanenti";
@@ -132,13 +138,16 @@
 "Active Carbohydrates: %@" = "Carboidrati attivi: %@";
 
 /* Title describing quantity of still-absorbing carbohydrates */
-"Active Carbs" = "Carb Attivi";
+"Active Carbs" = "Carboidrati Attivi";
 
 /* The title of the Insulin On-Board graph */
 "Active Insulin" = "Insulina attiva";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Insulina attiva: %@";
+
+/* No comment provided by engineer. */
+"Add a new favorite food" = "Aggiungi un nuovo cibo preferito";
 
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Agg. Carb. Assunti";
@@ -168,8 +177,27 @@
    Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Avvisi";
 
+/* Navigation title for algorithms experiments screen
+   The title of the Algorithm Experiments section in settings */
+"Algorithm Experiments" = "Esperimenti sugli algoritmi";
+
+/* Algorithm Experiments description. */
+"Algorithm Experiments are optional modifications to the Loop Algorithm. These modifications are less tested than the standard Loop Algorithm, so please use carefully." = "Gli esperimenti sull'algoritmo sono modifiche opzionali all'algoritmo del loop. Queste modifiche sono meno testate rispetto all'algoritmo Loop standard, quindi utilizzale con Attenzione.";
+
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Impostazioni Algoritmo";
+
+/* Warning text for when alerts are muted */
+"All Alerts Muted" = "Tutti gli avvisi silenziati";
+
+/* Label for when mute alert will end */
+"All alerts muted until" = "silenzia tutti gli avvisi fino";
+
+/* No comment provided by engineer. */
+"All Favorites" = "Tutti i preferiti";
+
+/* Label for carb quantity entry row on carb entry screen */
+"Amount Consumed" = "Quantità consumata";
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
@@ -195,6 +223,9 @@
 /* The title of the nightscout API secret credential */
 "API Secret" = "Chiave personale API";
 
+/* Settings app profile section */
+"App Profile" = "Profilo App";
+
 /* Action sheet confirmation message for pump history deletion */
 "Are you sure you want to delete all history entries?" = "Sei sicuro di voler eliminare tutte le voci della cronologia?";
 
@@ -209,6 +240,9 @@
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Sei sicuro di voler eliminare questo CGM?";
+
+/* No comment provided by engineer. */
+"Are you sure you want to delete this food?" = "Sei sicuro di voler cancellare questo cibo?";
 
 /* Confirmation message for deleting a service */
 "Are you sure you want to delete this service?" = "Sei sicuro di voler eliminare questo servizio?";
@@ -297,6 +331,9 @@
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Carboidrati Assorbiti ÷ Rapporto Carboidrati (gr/U) × Sensibilità Insulinica (%1$@/U)";
 
+/* No comment provided by engineer. */
+"Caution" = "Attenzione";
+
 /* The notification alert describing a low pump battery */
 "Change the pump battery immediately" = "Cambiare immediatamente la batteria del microinfusore";
 
@@ -307,7 +344,7 @@
 "Check settings" = "Controllare le impostazioni";
 
 /* Recovery suggestion when reservoir data is missing */
-"Check that your pump is in range" = "Controlllare che il microinfusore si trovi vicino";
+"Check that your pump is in range" = "Controllare che il microinfusore si trovi vicino";
 
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Controllare la sorgente dati del sensore";
@@ -317,6 +354,9 @@
 
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Scegli un tempo di assorbimento piu lungo per i pasti piu grandi o quelli contenenti grassi e proteine. Questa e solo una guida all’algoritmo e non e necessario che sia esatta.";
+
+/* No comment provided by engineer. */
+"Choose Favorite:" = "Scegli il preferito:";
 
 /* Button title to close view
    The button label of the action used to dismiss the unsafe notification permission alert */
@@ -362,6 +402,9 @@
    The title text for the glucose target range schedule */
 "Correction Range" = "Intervallo Glicemico";
 
+/* Format string for title of reset loop alert. (1: App name) */
+"Could Not Restart %1$@" = "Impossibile riavviare %1$@";
+
 /* Critical Alerts Status text */
 "Critical Alerts" = "Avvisi critici";
 
@@ -395,6 +438,9 @@
 /* No comment provided by engineer. */
 "Delete" = "Cancella";
 
+/* No comment provided by engineer. */
+"Delete “%@”?" = "Cancellare \"%@\" ?";
+
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Cancella Account";
 
@@ -403,6 +449,9 @@
 
 /* Button title to delete CGM */
 "Delete CGM" = "Elimina CGM";
+
+/* No comment provided by engineer. */
+"Delete Food" = "Cancella cibo";
 
 /* Button title to delete a service */
 "Delete Service" = "Elimina Servizio";
@@ -444,8 +493,17 @@
 /* The title of the Dosing Strategy section in settings */
 "Dosing Strategy" = "Strategia di dosaggio";
 
+/* Override error description: duration exceed max (1: max duration in hours). */
+"Duration exceeds: %1$.1f hours" = "La durata supera: %1$.1f ore";
+
 /* Message to the user to enable bluetooth */
 "Enable\nBluetooth" = "Abilita\n Bluetooth";
+
+/* Title for Glucose Based Partial Application toggle */
+"Enable Glucose Based Partial Application" = "Abilita l'applicazione parziale basata sul glucosio";
+
+/* Title for Integral Retrospective Correction toggle */
+"Enable Integral Retrospective Correction" = "Abilita Correzione Retrospettiva Integrale";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Abilita";
@@ -498,11 +556,17 @@
 /* The alert title for a resume error */
 "Failed to Resume Insulin Delivery" = "Impossibile riprendere l'erogazione dell'insulina";
 
+/* No comment provided by engineer. */
+"FAVORITE FOODS" = "CIBI SALVATI";
+
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
 
 /* Label for manual glucose entry row on bolus screen */
 "Fingerstick Glucose" = "Glicemia da dito";
+
+/* Secondary text for alerts disabled warning, which appears on the main status screen. */
+"Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON." = "Risolvilo ora attivando Notifiche, Avvisi critici e Notifiche urgenti.";
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Per %1$@";
@@ -522,6 +586,10 @@
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glicemia";
 
+/* Title for glucose based partial application experiment description
+   Title of glucose based partial application experiment */
+"Glucose Based Partial Application" = "Glucose Based Partial Application (GBPA)";
+
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "I dati sulla glicemia sono %1$@ vecchi";
 
@@ -530,6 +598,9 @@
 
 /* Alert title when glucose data returns while on bolus screen */
 "Glucose Data Now Available" = "Dati Glicemie ora disponibili";
+
+/* Description of the prediction input effect for suspension of insulin delivery */
+"Glucose effect of suspending insulin delivery" = "Effetto sulla glicemia della sospensione della somministrazione di insulina";
 
 /* Alert title for a manual glucose entry out of range error
    Title for bolus screen warning when glucose entry is out of range */
@@ -541,8 +612,14 @@
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "Programma degli intervalli degli obiettivi glicemici";
 
+/* The title text for how to update */
+"How to update (LoopDocs)" = "Come Aggiornare (LoopDocs)";
+
 /* Immediate Delivery status text */
 "Immediate" = "Immediato";
+
+/* Algorithm Experiments description second paragraph. */
+"In future versions of Loop these experiments may change, end up as standard parts of the Loop Algorithm, or be removed from Loop entirely. Please follow along in the Loop Zulip chat to stay informed of possible changes to these features." = "Nelle versioni future di Loop questi esperimenti potrebbero cambiare, diventare parti standard dell'algoritmo Loop o essere rimossi completamente da Loop. Segui la chat di Loop Zulip per rimanere informato su possibili modifiche a queste funzionalità.";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "A tempo indeterminato";
@@ -582,8 +659,21 @@
 /* Insulin type label */
 "Insulin Type" = "Tipo d'insulina";
 
+/* Title for integral retrospective correction experiment description
+   Title of integral retrospective correction experiment */
+"Integral Retrospective Correction" = "Correzione retrospettiva Integrale";
+
+/* Description of Integral Retrospective Correction toggle. */
+"Integral Retrospective Correction (IRC) is an extension of the standard Retrospective Correction (RC) algorithm component in Loop, which adjusts the forecast based on the history of discrepancies between predicted and actual glucose levels.\n\nIn contrast to RC, which looks at discrepancies over the last 30 minutes, with IRC, the history of discrepancies adds up over time. So continued positive discrepancies over time will result in increased dosing. If the discrepancies are negative over time, Loop will reduce dosing further." = "La Correzione Retrospettiva Integrale (IRC) è un'estensione del componente standard dell'algoritmo di correzione retrospettiva (RC) in Loop, che regola la previsione in base alla cronologia delle discrepanze tra i livelli di glucosio previsti e quelli effettivi. \n\nA differenza di RC, che esamina le discrepanze negli ultimi 30 minuti, con IRC la cronologia delle discrepanze si accumula nel tempo. Pertanto, continue discrepanze positive nel tempo comporteranno un aumento del dosaggio. Se le discrepanze diventano negative nel tempo, Loop ridurrà ulteriormente il dosaggio.";
+
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Interrotto %1$@ : <b> %2$@ </b> di %3$@ %4$@";
+
+/* Carb error description: invalid absorption time. (1: Input duration in hours). */
+"Invalid absorption time: %1$@ hours" = "Tempo di assorbimento non valido: %d ore";
+
+/* Bolus error description: invalid bolus amount. */
+"Invalid Bolus Amount" = "Quantità di bolo non valida";
 
 /* Carb error description: invalid carb amount. */
 "Invalid carb amount" = "Quantità di carboidrati non valida";
@@ -599,6 +689,9 @@
 
 /* The title text for the issue report cell */
 "Issue Report" = "Report dei problemi";
+
+/* The notification description for a meal that was possibly not logged in Loop. */
+"It looks like you may not have logged a meal you ate. Tap to log it now." = "Sembra che non sia stato registrato un pasto consumato. Toccare per registrarlo ora.";
 
 /* Title of the warning shown when a large meal was entered */
 "Large Meal Entered" = "Pasto abbondante inserito";
@@ -631,8 +724,14 @@
 /* Bluetooth unavailable alert body. */
 "Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop ha rilevato un problema con le tue impostazioni Bluetooth e non funzionerà correttamente finché il Bluetooth non sarà abilitato. Non riceverai letture glicemiche né potrai eseguire il bolo.";
 
+/* Warning displayed when user is adding a meal from an missed meal notification */
+"Loop has detected an missed meal and estimated its size. Edit the carb amount to match the amount of any carbs you may have eaten." = "Loop ha rilevato un pasto saltato e ne ha stimato le dimensioni. Modifica la quantità di carboidrati in modo che corrisponda alla quantità di carboidrati che potresti aver mangiato.";
+
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop non ha funzionato correttamente per %@";
+
+/* Description of Glucose Based Partial Application toggle. */
+"Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for." = "Loop normalmente fornisce il 40%1$ del fabbisogno di insulina previsto per ogni ciclo di dosaggio. \n\n Quando l'esperimento di Applicazione Parziale Basata sul Glucosio (GBPA) è abilitato, il Loop varierà la percentuale del bolo consigliato erogato ad ogni ciclo con il livello di glucosio. \n\nVicino all'intervallo di correzione, utilizzerà il 20%2$ (simile alla basale temporanea) e aumenterà gradualmente fino a un massimo dell'80%3$ in caso di glicemia elevata (200 mg/dl, 11,1 mmol/l). \n\nTieni presente che durante un rapido aumento della glicemia, ad esempio dopo un pasto imprevisto, questa caratteristica, combinata con la velocità e gli effetti di correzione retrospettiva, può comportare una dose maggiore di quella richiesta dall'FSI.";
 
 /* Description string for automatic bolus dosing strategy */
 "Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." = "Loop eseguirà automaticamente il bolo quando il fabbisogno d'insulina è superiore alla basale programmata e utilizzerà velocità basali temporanee quando necessario per ridurre l'erogazione d'insulina al di sotto della basale programmata.";
@@ -668,6 +767,9 @@
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
 
+/* Title for missed meal notifications toggle */
+"Missed Meal Notifications" = "Notifiche di pasti mancati";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Dati mancanti: %1$@";
 
@@ -680,17 +782,27 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Effetto glicemico attuale";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Piu info";
 
 /* Label for button to mute all alerts */
 "Mute All Alerts" = "Disattiva tutti gli avvisi";
 
+/* Title for mute alert duration selection action sheet */
+"Mute All Alerts Temporarily" = "silenzia tutti gli avvisi temporaneamente";
+
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Esige Attenzione";
 
+/* Override error description: negative duration error. */
+"Negative duration not allowed" = "Durata negativa non consentita";
+
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
+
+/* Message for mute alert duration selection action sheet */
+"No alerts or alarms will sound while muted. Select how long you would you like to mute for." = "Nessun avviso o allarme suonerà quando l'audio è disattivato. Seleziona per quanto tempo desideri disattivare l'audio.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -747,6 +859,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -755,6 +868,9 @@
 
 /* The title text for the override presets */
 "Override Presets" = "Programma Alternativo";
+
+/* The notification title for a meal that was possibly not logged in Loop. */
+"Possible Missed Meal" = "Possibile pasto saltato";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Obiettivo Pre-Pasto";
@@ -774,8 +890,17 @@
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Previsto: %1$@\nEffettivo: %2$@ (%3$@)";
 
+/* Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect) */
+"prediction-description-integral-retrospective-correction" = "previsione-descrizione-integrale-retrospettiva-correzione";
+
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Lista degli eventi critici in preparazione";
+
+/* Settings App Profile expiration view */
+"Profile Expiration" = "Scadenza Profilo";
+
+/* Time that profile expires */
+"Profile expires " = "Profilo scaduto";
 
 /* The title for notification of upcoming profile expiration */
 "Profile Expires Soon" = "Il profilo scadra' presto";
@@ -851,14 +976,23 @@
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Riprova";
 
+/* No comment provided by engineer. */
+"Save" = "Salva";
+
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Salva e Invia";
+
+/* No comment provided by engineer. */
+"Save as favorite food" = "Salva come cibo preferito";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Salva senza bolo";
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Programmato";
+
+/* No comment provided by engineer. */
+"Selecting a favorite food in the carb entry screen automatically fills in the carb quantity, food type, and absorption time fields! Tap the add button below to create your first favorite food!" = "Selezionando un alimento preferito nella schermata di immissione dei carboidrati si riempiono automaticamente i campi relativi alla quantità di carboidrati, al tipo di alimento e al tempo di assorbimento! Tocca il pulsante Aggiungi qui sotto per creare il tuo primo cibo preferito!";
 
 /* The title of the services section in settings */
 "Services" = "Servizi";
@@ -887,6 +1021,9 @@
 /* Software update button link text */
 "Software Update" = "Aggiornamento software";
 
+/* Carb error description: invalid start time is out of range. */
+"Start time is out of range: %@" = "L'ora di inizio non rientra nell'intervallo: %@";
+
 /* The format for the description of a temporary override start date */
 "starting at %@" = "inizia a %@";
 
@@ -899,6 +1036,9 @@
 
 /* The title text in settings */
 "Suspend Threshold" = "Sospendi Soglia";
+
+/* Title of the prediction input effect for suspension of insulin delivery */
+"Suspension of Insulin Delivery" = "Sospensione della somministrazione di insulina";
 
 /* Descriptive text for button to add CGM device */
 "Tap here to set up a CGM" = "Premi per impostare un CGM";
@@ -917,6 +1057,12 @@
 
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Interrompi";
+
+/* Label for button to unmute all alerts */
+"Tap to Unmute Alerts" = "Clicca per riattivare gli avvisi";
+
+/* The alert body for unmute alert confirmation */
+"Tap Unmute to resume sound for your alerts and alarms." = "Tocca Riattiva per ripristinare l'audio per gli avvisi e le sveglie.";
 
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "La quantità di bolo immessa è inferiore alla quantità minima erogabile.";
@@ -947,6 +1093,9 @@
 
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Impostazioni Terapia";
+
+/* String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus */
+"This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." = "Questa opzione si applica solo quando la strategia di dosaggio di Loop è impostata su Bolo automatico.";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Notifiche a tempo";
@@ -984,8 +1133,26 @@
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Errore sconosciuto: %1$@";
 
+/* Override error description: unknown preset (1: preset name). */
+"Unknown preset: %1$@" = "Preimpostazione sconosciuta: %1$@";
+
+/* Unknown amount of time in settings' profile expiration section */
+"Unknown time" = "Ora sconosciuta";
+
+/* The title of the action used to unmute alerts */
+"Unmute" = "Riattiva";
+
+/* The alert title for unmute alert confirmation */
+"Unmute Alerts?" = "Attivare gli avvisi?";
+
+/* Error message when a service can't be found to handle a push notification. (1: Service Identifier) */
+"Unsupported Notification Service: %1$@" = "Servizio di notifica non supportato: %1$@";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "fino a %@";
+
+/* indication of when alerts will be unmuted (1: time when alerts unmute) */
+"Until %1$@" = "Fino al %1$@";
 
 /* The title of a target alert action specifying pre-meal targets duration for 1 hour or until the user enters carbs (whichever comes first). */
 "Until I enter carbs" = "Fino a quando non inserisco carboidrati";
@@ -1014,8 +1181,14 @@
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Quando la glicemia attuale o prevista è sotto la soglia di sospensione, Loop non consiglia un bolo, e raccomanda una velocità basale temporanea  di 0 unità per ora.";
 
+/* Description of missed meal notifications. */
+"When enabled, Loop can notify you when it detects a meal that wasn't logged." = "Se abilitato, Loop può avvisarti quando rileva un pasto che non è stato registrato.";
+
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Quando non è in modalità ciclo chiuso, l'applicazione utilizza un calcolatore di bolo semplificato come un tipico microinfusore.";
+
+/* Format string for message of reset loop alert. (1: App name) (2: error description) */
+"While trying to restart %1$@ an error occured.\n\n%2$@" = "Durante il tentativo di riavviare %1$@ si è verificato un errore.\n\n%2$@";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Obiettivi di allenamento";

@@ -95,6 +95,9 @@
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
+/* No comment provided by engineer. */
+"⚠️" = "⚠️";
+
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 min glucose regressiecoëficiënt (b₁), gevolgd door afbouw over 30 min";
 
@@ -143,6 +146,9 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Actieve Insuline: %@";
 
+/* No comment provided by engineer. */
+"Add a new favorite food" = "Voeg een nieuw favoriet eten toe";
+
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Kh. Inv. Toevoegen";
 
@@ -170,6 +176,13 @@
 /* Alert Permissions button text
    Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Toestemming Meldingen";
+
+/* Navigation title for algorithms experiments screen
+   The title of the Algorithm Experiments section in settings */
+"Algorithm Experiments" = "Algoritme Experimenten";
+
+/* Algorithm Experiments description. */
+"Algorithm Experiments are optional modifications to the Loop Algorithm. These modifications are less tested than the standard Loop Algorithm, so please use carefully." = "Algoritme Experimenten zijn optionele aanpassingen aan het Loop Algoritme. Deze aanpassingen zijn minder grondig getest dan het standaard Loop Algoritme, dus gebruik het voorzichtig.";
 
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algoritme-instellingen";
@@ -302,6 +315,9 @@
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Opgenomen Koolhydraten (g) ÷ Koolhydraatratio (g/E) × Insulinegevoeligheid (%1$@/E)";
+
+/* No comment provided by engineer. */
+"Caution" = "Voorzichtig";
 
 /* The notification alert describing a low pump battery */
 "Change the pump battery immediately" = "Vervang direct de batterij van de pomp";
@@ -507,6 +523,9 @@
 /* The alert title for a resume error */
 "Failed to Resume Insulin Delivery" = "Insulinetoediening Hervatten Mislukt";
 
+/* No comment provided by engineer. */
+"FAVORITE FOODS" = "FAVORIETE ETEN";
+
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
 
@@ -707,7 +726,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Trendlijneffecten";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Meer Informatie";
 
 /* Label for button to mute all alerts */
@@ -777,6 +797,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "Ok";
 
@@ -893,11 +914,17 @@
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Opslaan en Toedienen";
 
+/* No comment provided by engineer. */
+"Save as favorite food" = "Opslaan als favoriet voedsel";
+
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Opslaan zonder Bolussen";
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Gepland";
+
+/* No comment provided by engineer. */
+"Selecting a favorite food in the carb entry screen automatically fills in the carb quantity, food type, and absorption time fields! Tap the add button below to create your first favorite food!" = "Het selecteren van een favoriet voedsel in het koolhydraat invoerscherm vult automatisch de velden voor de hoeveelheid koolhydraten, het type voedsel en de absorptietijd in! Tik op de toevoegknop hieronder om je eerste favoriete voedsel te maken!";
 
 /* The title of the services section in settings */
 "Services" = "Services";

@@ -95,6 +95,9 @@
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
+/* No comment provided by engineer. */
+"⚠️" = "⚠️";
+
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15-minutowy współczynnik regresji glukozy (b₁), kontynuowany z rozkładem przez 30 min.";
 
@@ -143,6 +146,9 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktywna Insulina: %@";
 
+/* No comment provided by engineer. */
+"Add a new favorite food" = "Dodaj nowe ulubione jedzenie";
+
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Wprowadź węglowodany";
 
@@ -171,8 +177,27 @@
    Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Uprawnienia alertów";
 
+/* Navigation title for algorithms experiments screen
+   The title of the Algorithm Experiments section in settings */
+"Algorithm Experiments" = "Algorytmy Eksperymentalne";
+
+/* Algorithm Experiments description. */
+"Algorithm Experiments are optional modifications to the Loop Algorithm. These modifications are less tested than the standard Loop Algorithm, so please use carefully." = "Eksperymenty algorytmiczne to opcjonalne modyfikacje algorytmu pętli. Te modyfikacje są mniej przetestowane niż standardowy algorytm pętli, więc używaj ich ostrożnie.";
+
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Ustawienia algorytmu";
+
+/* Warning text for when alerts are muted */
+"All Alerts Muted" = "Wszystkie alerty wyciszone";
+
+/* Label for when mute alert will end */
+"All alerts muted until" = "Wszystkie alerty wyciszono do";
+
+/* No comment provided by engineer. */
+"All Favorites" = "Wszystkie ulubione";
+
+/* Label for carb quantity entry row on carb entry screen */
+"Amount Consumed" = "Ilość węglowodanów";
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplituda";
@@ -215,6 +240,9 @@
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Czy na pewno chcesz usunąć ten CGM?";
+
+/* No comment provided by engineer. */
+"Are you sure you want to delete this food?" = "Czy na pewno chcesz usunąć to jedzenie?";
 
 /* Confirmation message for deleting a service */
 "Are you sure you want to delete this service?" = "Czy na pewno chcesz usunąć tę usługę?";
@@ -303,6 +331,9 @@
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Ilość węglowodanów (g) ÷ stosunek węglowodanów (g/J) × czułość insuliny (%1$@/J)";
 
+/* No comment provided by engineer. */
+"Caution" = "Uwaga";
+
 /* The notification alert describing a low pump battery */
 "Change the pump battery immediately" = "Natychmiast wymienić baterię pompy";
 
@@ -323,6 +354,9 @@
 
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Wybierz dłuższy czas absorpcji dla większych, bogatobiałkowych lub wysokotłuszczowych posiłków. To tylko wskazówka dla algorytmu i nie musi być bardzo dokładna.";
+
+/* No comment provided by engineer. */
+"Choose Favorite:" = "Wybierz ulubione:";
 
 /* Button title to close view
    The button label of the action used to dismiss the unsafe notification permission alert */
@@ -368,6 +402,9 @@
    The title text for the glucose target range schedule */
 "Correction Range" = "Zakres docelowy";
 
+/* Format string for title of reset loop alert. (1: App name) */
+"Could Not Restart %1$@" = "Nie można ponownie uruchomić %1$@";
+
 /* Critical Alerts Status text */
 "Critical Alerts" = "Alerty krytyczne";
 
@@ -401,6 +438,9 @@
 /* No comment provided by engineer. */
 "Delete" = "Usunąć";
 
+/* No comment provided by engineer. */
+"Delete “%@”?" = "Usunąć „ %@ ”?";
+
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Usuń konto";
 
@@ -409,6 +449,9 @@
 
 /* Button title to delete CGM */
 "Delete CGM" = "Usuń CGM";
+
+/* No comment provided by engineer. */
+"Delete Food" = "Usuń jedzenie";
 
 /* Button title to delete a service */
 "Delete Service" = "Usuń usługę";
@@ -455,6 +498,12 @@
 
 /* Message to the user to enable bluetooth */
 "Enable\nBluetooth" = "Włączać\nBluetooth";
+
+/* Title for Glucose Based Partial Application toggle */
+"Enable Glucose Based Partial Application" = "Włącz Algorytm adaptacyjny";
+
+/* Title for Integral Retrospective Correction toggle */
+"Enable Integral Retrospective Correction" = "Włącz Integralną Korektę Retrospektywną (IRC)";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Włącza";
@@ -507,6 +556,9 @@
 /* The alert title for a resume error */
 "Failed to Resume Insulin Delivery" = "Nie udało się wznowić podawania insuliny";
 
+/* No comment provided by engineer. */
+"FAVORITE FOODS" = "ULUBIONE JEDZENIE";
+
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
 
@@ -534,6 +586,10 @@
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glukoza";
 
+/* Title for glucose based partial application experiment description
+   Title of glucose based partial application experiment */
+"Glucose Based Partial Application" = "Algorytm adaptacyjny";
+
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "Dane o glukozie są nieaktualne od %1$@";
 
@@ -542,6 +598,9 @@
 
 /* Alert title when glucose data returns while on bolus screen */
 "Glucose Data Now Available" = "Dane dotyczące glukozy są już dostępne";
+
+/* Description of the prediction input effect for suspension of insulin delivery */
+"Glucose effect of suspending insulin delivery" = "Wpływ wstrzymania podawania insuliny na poziom glukozy";
 
 /* Alert title for a manual glucose entry out of range error
    Title for bolus screen warning when glucose entry is out of range */
@@ -558,6 +617,9 @@
 
 /* Immediate Delivery status text */
 "Immediate" = "Natychmiastowy";
+
+/* Algorithm Experiments description second paragraph. */
+"In future versions of Loop these experiments may change, end up as standard parts of the Loop Algorithm, or be removed from Loop entirely. Please follow along in the Loop Zulip chat to stay informed of possible changes to these features." = "W przyszłych wersjach Loop te eksperymenty mogą się zmienić, stać się standardowymi częściami algorytmu Loop lub zostać całkowicie usunięte z Loop. Śledź czat Loop Zulip, aby być na bieżąco z możliwymi zmianami w tych funkcjach.";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Niemożliwy do określenia";
@@ -597,8 +659,18 @@
 /* Insulin type label */
 "Insulin Type" = "Rodzaj insuliny";
 
+/* Title for integral retrospective correction experiment description
+   Title of integral retrospective correction experiment */
+"Integral Retrospective Correction" = "Integralna korekta retrospektywna";
+
+/* Description of Integral Retrospective Correction toggle. */
+"Integral Retrospective Correction (IRC) is an extension of the standard Retrospective Correction (RC) algorithm component in Loop, which adjusts the forecast based on the history of discrepancies between predicted and actual glucose levels.\n\nIn contrast to RC, which looks at discrepancies over the last 30 minutes, with IRC, the history of discrepancies adds up over time. So continued positive discrepancies over time will result in increased dosing. If the discrepancies are negative over time, Loop will reduce dosing further." = "Integralna korekta retrospektywna (IRC) jest rozszerzeniem standardowego komponentu algorytmu Korekta retrospektywna (RC) w Loop, który koryguje prognozę na podstawie historii rozbieżności między przewidywanymi a rzeczywistymi poziomami glukozy. \n\n W przeciwieństwie do RC, który analizuje rozbieżności w ciągu ostatnich 30 minut, w przypadku IRC historia rozbieżności sumuje się w czasie. Tak więc utrzymujące się dodatnie rozbieżności w czasie spowodują zwiększenie dawki. Jeśli rozbieżności są ujemne w czasie, Loop jeszcze bardziej zmniejszy podawanie insuliny.";
+
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Przerwane %1$@ : <b> %2$@ </b> z %3$@ %4$@";
+
+/* Carb error description: invalid absorption time. (1: Input duration in hours). */
+"Invalid absorption time: %1$@ hours" = "Nieprawidłowy czas absorpcji: %1$@ godz";
 
 /* Bolus error description: invalid bolus amount. */
 "Invalid Bolus Amount" = "Nieprawidłowa wielkość bolusa";
@@ -658,6 +730,9 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop nie działał poprawnie przez %@";
 
+/* Description of Glucose Based Partial Application toggle. */
+"Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for." = "Pętla zwykle daje 40%1$ przewidywanego zapotrzebowania na insulinę w każdym cyklu dawkowania. \n\nPo włączeniu eksperymentu częściowego podania insuliny w oparciu o glukozę, Loop będzie zmieniać procent zalecanego bolusa podawanego w każdym cyklu w zależności od poziomu glukozy. \n\nW pobliżu zakresu korekcji będzie zużywać 20%2$ (podobnie jak Baza Tymczasowa) i stopniowo zwiększać do maksimum 80%3$ przy wysokim stężeniu glukozy (200 mg/dl, 11,1 mmol/l). \n\nNależy pamiętać, że podczas szybkiego wzrostu stężenia glukozy, na przykład po niezapowiedzianym posiłku, ta funkcja w połączeniu z szybkością i retrospektywnymi efektami korekcyjnymi może skutkować większą dawką, niż wymagałby ISF.";
+
 /* Description string for automatic bolus dosing strategy */
 "Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." = "Pętla automatycznie poda bolusa, kiedy zapotrzebowanie na insulinę przekroczy zaplanowaną dawkę podstawową, a w razie potrzeby zredukuje zaplanowaną dawkę podstawową (bazę).";
 
@@ -707,11 +782,15 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "wpływ pędu";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Więcej informacji";
 
 /* Label for button to mute all alerts */
 "Mute All Alerts" = "Wycisz wszystkie alerty";
+
+/* Title for mute alert duration selection action sheet */
+"Mute All Alerts Temporarily" = "Tymczasowo wycisz wszystkie alerty";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Potrzebuje uwagi";
@@ -721,6 +800,9 @@
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
+
+/* Message for mute alert duration selection action sheet */
+"No alerts or alarms will sound while muted. Select how long you would you like to mute for." = "Po wyciszeniu nie będą emitowane żadne alerty ani alarmy. Wybierz, jak długo chcesz wyciszyć.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -777,6 +859,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -806,6 +889,9 @@
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Przewidywana: %1$@Rzeczywista: %2$@ (%3$@)";
+
+/* Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect) */
+"prediction-description-integral-retrospective-correction" = "predykcja-opis-całka-retrospektywna-korekta";
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Przygotowywanie dzienników zdarzeń krytycznych";
@@ -890,14 +976,23 @@
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Spróbuj ponownie";
 
+/* No comment provided by engineer. */
+"Save" = "Zapisz";
+
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
 "Save and Deliver" = "Zapisz i podaj";
+
+/* No comment provided by engineer. */
+"Save as favorite food" = "Zapisz jako ulubione jedzenie";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Zapisz bez podania Bolusa";
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Zaplanowane";
+
+/* No comment provided by engineer. */
+"Selecting a favorite food in the carb entry screen automatically fills in the carb quantity, food type, and absorption time fields! Tap the add button below to create your first favorite food!" = "Wybór ulubionego jedzenia na ekranie wprowadzania węglowodanów powoduje automatyczne wypełnienie pól ilości węglowodanów, rodzaju jedzenia i czasu wchłaniania! Dotknij przycisku dodawania poniżej, aby stworzyć swoje pierwsze ulubione jedzenie!";
 
 /* The title of the services section in settings */
 "Services" = "Usługi";
@@ -942,6 +1037,9 @@
 /* The title text in settings */
 "Suspend Threshold" = "Próg zawieszenia pompy";
 
+/* Title of the prediction input effect for suspension of insulin delivery */
+"Suspension of Insulin Delivery" = "Wstrzymanie podawania insuliny";
+
 /* Descriptive text for button to add CGM device */
 "Tap here to set up a CGM" = "Stuknij tutaj, aby skonfigurować CGM";
 
@@ -959,6 +1057,12 @@
 
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Bolus STOP!";
+
+/* Label for button to unmute all alerts */
+"Tap to Unmute Alerts" = "Stuknij, aby wyłączyć wyciszenie alertów";
+
+/* The alert body for unmute alert confirmation */
+"Tap Unmute to resume sound for your alerts and alarms." = "Stuknij opcję Wyłącz wyciszenie, aby wznowić dźwięk alertów i alarmów.";
 
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "Wprowadzona wielkość bolusa jest mniejsza niż minimalna możliwa do podania.";
@@ -989,6 +1093,9 @@
 
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Ustawienia terapii";
+
+/* String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus */
+"This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." = "Ta opcja ma zastosowanie tylko wtedy, gdy Strategia dawkowania pętli jest ustawiona na Automatyczny bolus.";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Powiadomienia zależne od czasu";
@@ -1032,8 +1139,20 @@
 /* Unknown amount of time in settings' profile expiration section */
 "Unknown time" = "Nieznany czas";
 
+/* The title of the action used to unmute alerts */
+"Unmute" = "Wyłącz wyciszenie";
+
+/* The alert title for unmute alert confirmation */
+"Unmute Alerts?" = "Wyciszyć Alerty?";
+
+/* Error message when a service can't be found to handle a push notification. (1: Service Identifier) */
+"Unsupported Notification Service: %1$@" = "Nieobsługiwana usługa powiadomień: %1$@";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "do %@";
+
+/* indication of when alerts will be unmuted (1: time when alerts unmute) */
+"Until %1$@" = "Do %1$@";
 
 /* The title of a target alert action specifying pre-meal targets duration for 1 hour or until the user enters carbs (whichever comes first). */
 "Until I enter carbs" = "Dopóki nie wprowadzę węglowodanów";
@@ -1067,6 +1186,9 @@
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Poza trybem pętli zamkniętej aplikacja korzysta z uproszczonego kalkulatora bolusa, takiego jak typowa pompa.";
+
+/* Format string for message of reset loop alert. (1: App name) (2: error description) */
+"While trying to restart %1$@ an error occured.\n\n%2$@" = "Podczas próby ponownego uruchomienia %1$@ wystąpił błąd. \n\n %2$@";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Zakres w czasie wysiłku fizycznego";

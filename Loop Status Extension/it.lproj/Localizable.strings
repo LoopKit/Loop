@@ -14,7 +14,7 @@
 "%1$@ v%2$@" = "%1$@ contro %2$@";
 
 /* Widget label title describing the active carbs */
-"Active Carbs" = "Carb Attivi";
+"Active Carbs" = "Carboidrati Attivi";
 
 /* Widget label title describing the active insulin */
 "Active Insulin" = "Insulina attiva";
