@@ -62,7 +62,7 @@ class StatefulPluginManager: StatefulPluggableProvider {
     }
         
     private func statefulPluginTypeFromRawValue(_ rawValue: StatefulPluggable.RawStateValue) -> StatefulPluggable.Type? {
-        guard let identifier = rawValue["serviceIdentifier"] as? String else {
+        guard let identifier = rawValue["statefulPluginIdentifier"] as? String else {
             return nil
         }
 
