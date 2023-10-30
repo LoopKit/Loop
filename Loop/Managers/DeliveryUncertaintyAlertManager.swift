@@ -30,7 +30,7 @@ class DeliveryUncertaintyAlertManager {
         if self.uncertainDeliveryAlert == nil {
             let alert = UIAlertController(
                 title: NSLocalizedString("Unable To Reach Pump", comment: "Title for alert shown when delivery status is uncertain"),
-                message: String(format: NSLocalizedString("%1$@ is unable to communicate with your insulin pump. The app will continue trying to reach your pump, but insulin delivery information cannot be updated and no automation can continue.\nYou can wait several minutes to see if the issue resolves or tap the button below to learn more about other options.", comment: "Message for alert shown when delivery status is uncertain. (1: app name)"), Bundle.main.bundleDisplayName),
+                message: String(format: NSLocalizedString("%1$@ stopped communicating with your insulin pump during a critical time. Bring your loop hardware close together and wait to see if it resolves (this window will disappear).\n\nIf this window remains unchanged after several minutes, try the usual red loop correction methods.\n\nThe app will continue trying to reach your pump. Insulin delivery information cannot be updated and no automation can continue.\n\nTap on the button below to learn more about other options only if you cannot resolve the problem.", comment: "Message for alert shown when delivery status is uncertain. (1: app name)"), Bundle.main.bundleDisplayName),
                 preferredStyle: .alert)
             
             let actionTitle = NSLocalizedString("Learn More", comment: "OK button title for alert shown when delivery status is uncertain")
