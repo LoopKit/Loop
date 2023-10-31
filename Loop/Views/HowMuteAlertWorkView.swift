@@ -54,7 +54,7 @@ struct HowMuteAlertWorkView: View {
                         
                         Spacer()
                     }
-                    .font(.footnote)
+                    .font(.subheadline)
                     .foregroundColor(.black.opacity(0.6))
                     .padding()
                     .overlay(
