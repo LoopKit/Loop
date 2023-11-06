@@ -55,7 +55,7 @@ struct HowMuteAlertWorkView: View {
                         Spacer()
                     }
                     .font(.subheadline)
-                    .foregroundColor(.black.opacity(0.6))
+                    .foregroundColor(.primary.opacity(0.6))
                     .padding()
                     .overlay(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
