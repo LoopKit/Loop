@@ -43,7 +43,7 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
     }
 
     override public func presentStatusHighlight() {
-        guard !statusStackView.arrangedSubviews.contains(statusHighlightView) else {
+        guard !isStatusHighlightDisplayed else {
             return
         }
         
@@ -86,7 +86,14 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
     
     public func addPumpManagerProvidedHUDView(_ pumpManagerProvidedHUD: BaseHUDView) {
         self.pumpManagerProvidedHUD = pumpManagerProvidedHUD
+        guard !isStatusHighlightDisplayed else {
+            self.pumpManagerProvidedHUD.isHidden = true
+            return
+        }
         statusStackView.addArrangedSubview(self.pumpManagerProvidedHUD)
     }
     
+    private var isStatusHighlightDisplayed: Bool {
+        statusStackView.arrangedSubviews.contains(statusHighlightView)
+    }
 }
