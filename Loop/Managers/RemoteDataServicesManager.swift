@@ -561,13 +561,13 @@ extension RemoteDataServicesManager {
             self.cgmEventStore.executeCgmEventQuery(fromQueryAnchor: previousQueryAnchor) { result in
                 switch result {
                 case .failure(let error):
-                    self.log.error("Error querying pump event data: %{public}@", String(describing: error))
+                    self.log.error("Error querying cgm event data: %{public}@", String(describing: error))
                     semaphore.signal()
                 case .success(let queryAnchor, let data):
                     remoteDataService.uploadCgmEventData(data) { result in
                         switch result {
                         case .failure(let error):
-                            self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
+                            self.log.error("Error synchronizing cgm event data: %{public}@", String(describing: error))
                             self.uploadFailed(key)
                         case .success:
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .cgmEvent, queryAnchor)
