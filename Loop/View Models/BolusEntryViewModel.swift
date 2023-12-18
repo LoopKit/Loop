@@ -340,6 +340,16 @@ final class BolusEntryViewModel: ObservableObject {
             assertionFailure("Missing BolusEntryViewModelDelegate")
             return false
         }
+        
+        guard let maximumBolus = maximumBolus else {
+            presentAlert(.noMaxBolusConfigured)
+            return false
+        }
+
+        guard enteredBolusAmount <= maximumBolus.doubleValue(for: .internationalUnit()) else {
+            presentAlert(.maxBolusExceeded)
+            return false
+        }
 
         let amountToDeliver = delegate.roundBolusVolume(units: enteredBolusAmount)
         guard enteredBolusAmount == 0 || amountToDeliver > 0 else {
@@ -351,16 +361,6 @@ final class BolusEntryViewModel: ObservableObject {
 
         let manualGlucoseSample = manualGlucoseSample
         let potentialCarbEntry = potentialCarbEntry
-
-        guard let maximumBolus = maximumBolus else {
-            presentAlert(.noMaxBolusConfigured)
-            return false
-        }
-
-        guard amountToDeliver <= maximumBolus.doubleValue(for: .internationalUnit()) else {
-            presentAlert(.maxBolusExceeded)
-            return false
-        }
 
         if let manualGlucoseSample = manualGlucoseSample {
             guard LoopConstants.validManualGlucoseEntryRange.contains(manualGlucoseSample.quantity) else {
