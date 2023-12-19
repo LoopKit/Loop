@@ -1,5 +1,5 @@
 //
-//  LoopDataManager.swift
+//  LoopDosingManager.swift
 //  WatchApp Extension
 //
 //  Created by Bharat Mediratta on 6/21/18.
@@ -20,14 +20,14 @@ class LoopDataManager {
     let glucoseStore: GlucoseStore
 
     @PersistedProperty(key: "Settings")
-    private var rawSettings: LoopSettings.RawValue?
+    private var rawWatchInfo: LoopSettingsUserInfo.RawValue?
 
     // Main queue only
-    var settings: LoopSettings {
+    var watchInfo: LoopSettingsUserInfo {
         didSet {
             needsDidUpdateContextNotification = true
             sendDidUpdateContextNotificationIfNecessary()
-            rawSettings = settings.rawValue
+            rawWatchInfo = watchInfo.rawValue
         }
     }
 
@@ -40,7 +40,7 @@ class LoopDataManager {
         }
     }
 
-    private let log = OSLog(category: "LoopDataManager")
+    private let log = OSLog(category: "LoopDosingManager")
 
     // Main queue only
     private(set) var activeContext: WatchContext? {
@@ -67,19 +67,21 @@ class LoopDataManager {
             cacheStore: cacheStore,
             cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
             defaultAbsorptionTimes: LoopCoreConstants.defaultCarbAbsorptionTimes,
-            syncVersion: 0,
-            provenanceIdentifier: HKSource.default().bundleIdentifier
+            syncVersion: 0
         )
         glucoseStore = GlucoseStore(
             cacheStore: cacheStore,
-            cacheLength: .hours(4),
-            provenanceIdentifier: HKSource.default().bundleIdentifier
+            cacheLength: .hours(4)
         )
 
-        settings = LoopSettings()
+        self.watchInfo = LoopSettingsUserInfo(
+            loopSettings: LoopSettings(),
+            scheduleOverride: nil,
+            preMealOverride: nil
+        )
 
-        if let rawSettings = rawSettings, let storedSettings = LoopSettings(rawValue: rawSettings) {
-            self.settings = storedSettings
+        if let rawWatchInfo = rawWatchInfo, let watchInfo = LoopSettingsUserInfo(rawValue: rawWatchInfo) {
+            self.watchInfo = watchInfo
         }
     }
 }
@@ -207,9 +209,9 @@ extension LoopDataManager {
             }
             let chartData = GlucoseChartData(
                 unit: activeContext.displayGlucoseUnit,
-                correctionRange: self.settings.glucoseTargetRangeSchedule,
-                preMealOverride: self.settings.preMealOverride,
-                scheduleOverride: self.settings.scheduleOverride,
+                correctionRange: self.watchInfo.loopSettings.glucoseTargetRangeSchedule,
+                preMealOverride: self.watchInfo.preMealOverride,
+                scheduleOverride: self.watchInfo.scheduleOverride,
                 historicalGlucose: historicalGlucose,
                 predictedGlucose: (activeContext.isClosedLoop ?? false) ? activeContext.predictedGlucose?.values : nil
             )

@@ -14,30 +14,83 @@ protocol TestingScenariosManagerDelegate: AnyObject {
     func testingScenariosManager(_ manager: TestingScenariosManager, didUpdateScenarioURLs scenarioURLs: [URL])
 }
 
-protocol TestingScenariosManager: AnyObject {
-    var delegate: TestingScenariosManagerDelegate? { get set }
-    var activeScenarioURL: URL? { get }
-    var scenarioURLs: [URL] { get }
-    var supportManager: SupportManager { get }
-    func loadScenario(from url: URL, completion: @escaping (Error?) -> Void)
-    func loadScenario(from url: URL, advancedByLoopIterations iterations: Int, completion: @escaping (Error?) -> Void)
-    func loadScenario(from url: URL, rewoundByLoopIterations iterations: Int, completion: @escaping (Error?) -> Void)
-    func stepActiveScenarioBackward(completion: @escaping (Error?) -> Void)
-    func stepActiveScenarioForward(completion: @escaping (Error?) -> Void)
+@MainActor
+final class TestingScenariosManager: DirectoryObserver {
+
+    unowned let deviceManager: DeviceDataManager
+    unowned let supportManager: SupportManager
+    unowned let pluginManager: PluginManager
+    unowned let carbStore: CarbStore
+    unowned let settingsManager: SettingsManager
+
+    let log = DiagnosticLog(category: "LocalTestingScenariosManager")
+
+    private let fileManager = FileManager.default
+    private let scenariosSource: URL
+    private var directoryObservationToken: DirectoryObservationToken?
+
+    private(set) var scenarioURLs: [URL] = []
+    var activeScenarioURL: URL?
+    var activeScenario: TestingScenario?
+
+    weak var delegate: TestingScenariosManagerDelegate? {
+        didSet {
+            delegate?.testingScenariosManager(self, didUpdateScenarioURLs: scenarioURLs)
+        }
+    }
+
+    init(
+        deviceManager: DeviceDataManager,
+        supportManager: SupportManager,
+        pluginManager: PluginManager,
+        carbStore: CarbStore,
+        settingsManager: SettingsManager
+    ) {
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
+
+        self.deviceManager = deviceManager
+        self.supportManager = supportManager
+        self.pluginManager = pluginManager
+        self.carbStore = carbStore
+        self.settingsManager = settingsManager
+        self.scenariosSource = Bundle.main.bundleURL.appendingPathComponent("Scenarios")
+
+        log.debug("Loading testing scenarios from %{public}@", scenariosSource.path)
+        if !fileManager.fileExists(atPath: scenariosSource.path) {
+            do {
+                try fileManager.createDirectory(at: scenariosSource, withIntermediateDirectories: false)
+            } catch {
+                log.error("%{public}@", String(describing: error))
+            }
+        }
+
+        directoryObservationToken = observeDirectory(at: scenariosSource) { [weak self] in
+            self?.reloadScenarioURLs()
+        }
+        reloadScenarioURLs()
+    }
+
+    func fetchScenario(from url: URL, completion: (Result<TestingScenario, Error>) -> Void) {
+        let result = Result(catching: { try TestingScenario(source: url) })
+        completion(result)
+    }
+
+    private func reloadScenarioURLs() {
+        do {
+            let scenarioURLs = try fileManager.contentsOfDirectory(at: scenariosSource, includingPropertiesForKeys: nil)
+                .filter { $0.pathExtension == "json" }
+            self.scenarioURLs = scenarioURLs
+            delegate?.testingScenariosManager(self, didUpdateScenarioURLs: scenarioURLs)
+            log.debug("Reloaded scenario URLs")
+        } catch {
+            log.error("%{public}@", String(describing: error))
+        }
+    }
 }
 
-/// Describes the requirements necessary to implement TestingScenariosManager
-protocol TestingScenariosManagerRequirements: TestingScenariosManager {
-    var deviceManager: DeviceDataManager { get }
-    var activeScenarioURL: URL? { get set }
-    var activeScenario: TestingScenario? { get set }
-    var log: DiagnosticLog { get }
-    func fetchScenario(from url: URL, completion: @escaping (Result<TestingScenario, Error>) -> Void)
-}
-
-// MARK: - TestingScenarioManager requirement implementations
-
-extension TestingScenariosManagerRequirements {
+extension TestingScenariosManager {
     func loadScenario(from url: URL, completion: @escaping (Error?) -> Void) {
         loadScenario(
             from: url,
@@ -110,7 +163,7 @@ private enum ScenarioLoadingError: LocalizedError {
     }
 }
 
-extension TestingScenariosManagerRequirements {
+extension TestingScenariosManager {
     private func loadScenario(
         from url: URL,
         loadingVia load: @escaping (
@@ -156,19 +209,9 @@ extension TestingScenariosManagerRequirements {
     }
 
     private func stepForward(_ scenario: TestingScenario, completion: @escaping (TestingScenario) -> Void) {
-        deviceManager.loopManager.getLoopState { _, state in
-            var scenario = scenario
-            guard let recommendedDose = state.recommendedAutomaticDose?.recommendation else {
-                scenario.stepForward(by: .minutes(5))
-                completion(scenario)
-                return
-            }
-            
-            if let basalAdjustment = recommendedDose.basalAdjustment {
-                scenario.stepForward(unitsPerHour: basalAdjustment.unitsPerHour, duration: basalAdjustment.duration)
-            }
-            completion(scenario)
-        }
+        var scenario = scenario
+        scenario.stepForward(by: .minutes(5))
+        completion(scenario)
     }
 
     private func loadScenario(_ scenario: TestingScenario, rewoundByLoopIterations iterations: Int, completion: @escaping (Error?) -> Void) {
@@ -228,16 +271,15 @@ extension TestingScenariosManagerRequirements {
                 return
             }
 
-            self.deviceManager.carbStore.addCarbEntries(instance.carbEntries) { result in
-                switch result {
-                case .success(_):
+            self.carbStore.addNewCarbEntries(entries: instance.carbEntries) { error in
+                if let error {
+                    bail(with: error)
+                } else {
                     testingPumpManager?.reservoirFillFraction = 1.0
                     testingPumpManager?.injectPumpEvents(instance.pumpEvents)
                     testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
                     self.activeScenario = scenario
                     completion(nil)
-                case .failure(let error):
-                    bail(with: error)
                 }
             }
         }
@@ -253,9 +295,9 @@ extension TestingScenariosManagerRequirements {
     
     private func reloadPumpManager(withIdentifier pumpManagerIdentifier: String) -> TestingPumpManager {
         deviceManager.pumpManager = nil
-        guard let maximumBasalRate = deviceManager.loopManager.settings.maximumBasalRatePerHour,
-              let maxBolus = deviceManager.loopManager.settings.maximumBolus,
-              let basalSchedule = deviceManager.loopManager.settings.basalRateSchedule else
+        guard let maximumBasalRate = settingsManager.settings.maximumBasalRatePerHour,
+              let maxBolus = settingsManager.settings.maximumBolus,
+              let basalSchedule = settingsManager.settings.basalRateSchedule else
         {
             fatalError("Failed to reload pump manager. Missing initial settings")
         }
@@ -311,7 +353,7 @@ extension TestingScenariosManagerRequirements {
                     return
                 }
 
-                self.deviceManager.carbStore.deleteAllCarbEntries() { error in
+                self.carbStore.deleteAllCarbEntries() { error in
                     guard error == nil else {
                         completion(error!)
                         return
@@ -326,37 +368,9 @@ extension TestingScenariosManagerRequirements {
 
 
 private extension CarbStore {
-    /// Errors if adding any individual entry errors.
-    func addCarbEntries(_ entries: [NewCarbEntry], completion: @escaping (CarbStoreResult<[StoredCarbEntry]>) -> Void) {
-        addCarbEntries(entries[...], completion: completion)
-    }
-
-    private func addCarbEntries(_ entries: ArraySlice<NewCarbEntry>, completion: @escaping (CarbStoreResult<[StoredCarbEntry]>) -> Void) {
-        guard let entry = entries.first else {
-            completion(.success([]))
-            return
-        }
-
-        addCarbEntry(entry) { individualResult in
-            switch individualResult {
-            case .success(let entry):
-                let remainder = entries.dropFirst()
-                self.addCarbEntries(remainder) { collectiveResult in
-                    switch collectiveResult {
-                    case .success(let entries):
-                        completion(.success([entry] + entries))
-                    case .failure(let error):
-                        completion(.failure(error))
-                    }
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
 
     /// Errors if getting carb entries errors, or if deleting any individual entry errors.
-    func deleteAllCarbEntries(completion: @escaping (CarbStoreError?) -> Void) {
+    func deleteAllCarbEntries(completion: @escaping (Error?) -> Void) {
         getCarbEntries() { result in
             switch result {
             case .success(let entries):
@@ -367,7 +381,7 @@ private extension CarbStore {
         }
     }
 
-    private func deleteCarbEntries(_ entries: ArraySlice<StoredCarbEntry>, completion: @escaping (CarbStoreError?) -> Void) {
+    private func deleteCarbEntries(_ entries: ArraySlice<StoredCarbEntry>, completion: @escaping (Error?) -> Void) {
         guard let entry = entries.first else {
             completion(nil)
             return

@@ -239,7 +239,13 @@ struct ManualEntryDoseView: View {
     private var actionButton: some View {
         Button<Text>(
             action: {
-                self.viewModel.saveManualDose(onSuccess: self.dismiss)
+                Task {
+                    do {
+                        try await self.viewModel.saveManualDose()
+                        self.dismiss()
+                    } catch {
+                    }
+                }
             },
             label: {
                 return Text("Log Dose", comment: "Button text to log a dose")

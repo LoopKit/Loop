@@ -22,9 +22,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
         setenv("CFNETWORK_DIAGNOSTICS", "3", 1)
 
-        loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
-        loopAppManager.launch()
-        return loopAppManager.isLaunchComplete
+        // Avoid doing full initialization when running tests
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
+            loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
+            loopAppManager.launch()
+            return loopAppManager.isLaunchComplete
+        } else {
+            return true
+        }
     }
 
     // MARK: - UIApplicationDelegate - Life Cycle

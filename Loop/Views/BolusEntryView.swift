@@ -73,6 +73,9 @@ struct BolusEntryView: View {
                     enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                 }
             }
+            .task {
+                await self.viewModel.generateRecommendationAndStartObserving()
+            }
         }
     }
     

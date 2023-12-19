@@ -14,6 +14,7 @@ import LoopCore
 
 @testable import Loop
 
+@MainActor
 class SimpleBolusViewModelTests: XCTestCase {
     
     enum MockError: Error {
@@ -37,44 +38,31 @@ class SimpleBolusViewModelTests: XCTestCase {
         enactedBolus = nil
         currentRecommendation = 0
     }
-    
-    func testFailedAuthenticationShouldNotSaveDataOrBolus() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
-        viewModel.authenticate = { (description, completion) in
+
+    func testFailedAuthenticationShouldNotSaveDataOrBolus() async {
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
+        viewModel.setAuthenticationMethdod { description, completion in
             completion(.failure(MockError.authentication))
         }
-        
+
         viewModel.enteredBolusString = "3"
         
-        let saveExpectation = expectation(description: "Save completion callback")
-        
-        viewModel.saveAndDeliver { (success) in
-            saveExpectation.fulfill()
-        }
-        
-        waitForExpectations(timeout: 2)
-        
+        let _ = await viewModel.saveAndDeliver()
+
         XCTAssertNil(enactedBolus)
         XCTAssertNil(addedCarbEntry)
         XCTAssert(addedGlucose.isEmpty)
-
     }
     
-    func testIssuingBolus() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
+    func testIssuingBolus() async {
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
         
         viewModel.enteredBolusString = "3"
         
-        let saveExpectation = expectation(description: "Save completion callback")
-        
-        viewModel.saveAndDeliver { (success) in
-            saveExpectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 2)
+        let _ = await viewModel.saveAndDeliver()
 
         XCTAssertNil(addedCarbEntry)
         XCTAssert(addedGlucose.isEmpty)
@@ -83,8 +71,8 @@ class SimpleBolusViewModelTests: XCTestCase {
 
     }
     
-    func testMealCarbsAndManualGlucoseWithRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
+    func testMealCarbsAndManualGlucoseWithRecommendation() async {
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -94,13 +82,7 @@ class SimpleBolusViewModelTests: XCTestCase {
         viewModel.enteredCarbString = "20"
         viewModel.manualGlucoseString = "180"
         
-        let saveExpectation = expectation(description: "Save completion callback")
-
-        viewModel.saveAndDeliver { (success) in
-            saveExpectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 2)
+        let _ = await viewModel.saveAndDeliver()
 
         XCTAssertEqual(20, addedCarbEntry?.quantity.doubleValue(for: .gram()))
         XCTAssertEqual(180, addedGlucose.first?.quantity.doubleValue(for: .milligramsPerDeciliter))
@@ -111,8 +93,8 @@ class SimpleBolusViewModelTests: XCTestCase {
         XCTAssertEqual(storedBolusDecision?.carbEntry?.quantity, addedCarbEntry?.quantity)
     }
     
-    func testMealCarbsWithUserOverridingRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
+    func testMealCarbsWithUserOverridingRecommendation() async {
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -127,13 +109,7 @@ class SimpleBolusViewModelTests: XCTestCase {
         
         viewModel.enteredBolusString = "0.1"
 
-        let saveExpectation = expectation(description: "Save completion callback")
-
-        viewModel.saveAndDeliver { (success) in
-            saveExpectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 2)
+        let _ = await viewModel.saveAndDeliver()
 
         XCTAssertEqual(20, addedCarbEntry?.quantity.doubleValue(for: .gram()))
         
@@ -145,7 +121,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
 
     func testDeleteCarbsRemovesRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -164,7 +140,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
 
     func testDeleteCurrentGlucoseRemovesRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -183,7 +159,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
 
     func testDeleteCurrentGlucoseRemovesActiveInsulin() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
         viewModel.authenticate = { (description, completion) in
             completion(.success)
         }
@@ -201,7 +177,7 @@ class SimpleBolusViewModelTests: XCTestCase {
 
     func testManualGlucoseStringMatchesDisplayGlucoseUnit() {
         // used "260" mg/dL ("14.4" mmol/L) since 14.40 mmol/L -> 259 mg/dL and 14.43 mmol/L -> 260 mg/dL
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
         XCTAssertEqual(viewModel.manualGlucoseString, "")
         viewModel.manualGlucoseString = "260"
         XCTAssertEqual(viewModel.manualGlucoseString, "260")
@@ -221,8 +197,8 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
     
     func testGlucoseEntryWarnings() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
-        
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
+
         currentRecommendation = 2
         viewModel.manualGlucoseString = "180"
         XCTAssertNil(viewModel.activeNotice)
@@ -252,26 +228,26 @@ class SimpleBolusViewModelTests: XCTestCase {
     }
     
     func testGlucoseEntryWarningsForMealBolus() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: true)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: true, displayGlucosePreference: displayGlucosePreference)
         viewModel.manualGlucoseString = "69"
         viewModel.enteredCarbString = "25"
         XCTAssertEqual(viewModel.activeNotice, .glucoseWarning)
     }
     
     func testOutOfBoundsGlucoseShowsNoRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: true)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: true, displayGlucosePreference: displayGlucosePreference)
         viewModel.manualGlucoseString = "699"
         XCTAssert(!viewModel.bolusRecommended)
     }
     
     func testOutOfBoundsCarbsShowsNoRecommendation() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: true)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: true, displayGlucosePreference: displayGlucosePreference)
         viewModel.enteredCarbString = "400"
         XCTAssert(!viewModel.bolusRecommended)
     }
     
     func testMaxBolusWarnings() {
-        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false)
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
         viewModel.enteredBolusString = "20"
         XCTAssertEqual(viewModel.activeNotice, .maxBolusExceeded)
         
@@ -285,13 +261,12 @@ class SimpleBolusViewModelTests: XCTestCase {
 }
 
 extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
-    func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
-        addedGlucose = samples
-        completion(.success([]))
+    func saveGlucose(sample: LoopKit.NewGlucoseSample) async throws -> StoredGlucoseSample {
+        addedGlucose.append(sample)
+        return sample.asStoredGlucoseStample
     }
-    
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
-        
+
+    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry {
         addedCarbEntry = carbEntry
         let storedCarbEntry = StoredCarbEntry(
             startDate: carbEntry.startDate,
@@ -305,35 +280,38 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
             createdByCurrentApp: true,
             userCreatedDate: Date(),
             userUpdatedDate: nil)
-        completion(.success(storedCarbEntry))
+        return storedCarbEntry
     }
 
-    func enactBolus(units: Double, activationType: BolusActivationType) {
+    func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) async {
+        storedBolusDecision = bolusDosingDecision
+    }
+
+
+    func enactBolus(units: Double, activationType: BolusActivationType) async throws {
         enactedBolus = (units: units, activationType: activationType)
     }
-    
-    func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
-        completion(.success(currentIOB))
+
+
+    func insulinOnBoard(at date: Date) async -> InsulinValue? {
+        return currentIOB
     }
-    
+
+
     func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
-        
         var decision = BolusDosingDecision(for: .simpleBolus)
         decision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: currentRecommendation, notice: .none),
                                                                                date: date)
         decision.insulinOnBoard = currentIOB
         return decision
     }
-    
-    func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
-        storedBolusDecision = bolusDosingDecision
-    }
 
-    var maximumBolus: Double {
+
+    var maximumBolus: Double? {
         return 3.0
     }
     
-    var suspendThreshold: HKQuantity {
+    var suspendThreshold: HKQuantity? {
         return HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80)
     }
 }

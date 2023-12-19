@@ -34,7 +34,7 @@ public class AlertPermissionsChecker: ObservableObject {
 
     init() {
         // Check on loop complete, but only while in the background.
-        NotificationCenter.default.publisher(for: .LoopCompleted)
+        NotificationCenter.default.publisher(for: .LoopCycleCompleted)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }

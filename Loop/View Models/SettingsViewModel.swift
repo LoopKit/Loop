@@ -164,6 +164,7 @@ public class SettingsViewModel: ObservableObject {
 }
 
 // For previews only
+@MainActor
 extension SettingsViewModel {
     fileprivate class FakeClosedLoopAllowedPublisher {
         @Published var mockIsClosedLoopAllowed: Bool = false

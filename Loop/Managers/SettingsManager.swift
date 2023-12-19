@@ -22,11 +22,14 @@ protocol DeviceStatusProvider {
     var cgmManagerStatus: CGMManagerStatus? { get }
 }
 
+@MainActor
 class SettingsManager {
 
     let settingsStore: SettingsStore
 
     var remoteDataServicesManager: RemoteDataServicesManager?
+
+    var analyticsServicesManager: AnalyticsServicesManager?
 
     var deviceStatusProvider: DeviceStatusProvider?
 
@@ -34,7 +37,7 @@ class SettingsManager {
 
     var displayGlucosePreference: DisplayGlucosePreference?
 
-    public var latestSettings: StoredSettings
+    public var settings: StoredSettings
 
     private var remoteNotificationRegistrationResult: Swift.Result<Data,Error>?
 
@@ -42,17 +45,25 @@ class SettingsManager {
 
     private let log = OSLog(category: "SettingsManager")
 
-    init(cacheStore: PersistenceController, expireAfter: TimeInterval, alertMuter: AlertMuter)
+    private var loopSettingsLock = UnfairLock()
+
+    @Published private(set) var dosingEnabled: Bool
+
+    init(cacheStore: PersistenceController, expireAfter: TimeInterval, alertMuter: AlertMuter, analyticsServicesManager: AnalyticsServicesManager? = nil)
     {
+        self.analyticsServicesManager = analyticsServicesManager
+
         settingsStore = SettingsStore(store: cacheStore, expireAfter: expireAfter)
         self.alertMuter = alertMuter
 
         if let storedSettings = settingsStore.latestSettings {
-            latestSettings = storedSettings
+            settings = storedSettings
         } else {
-            log.default("SettingsStore has no latestSettings: initializing empty StoredSettings.")
-            latestSettings = StoredSettings()
+            log.default("SettingsStore has no settings: initializing empty StoredSettings.")
+            settings = StoredSettings()
         }
+
+        dosingEnabled = settings.dosingEnabled
 
         settingsStore.delegate = self
 
@@ -69,20 +80,9 @@ class SettingsManager {
             UserDefaults.appGroup?.removeLegacyLoopSettings()
         }
 
-        NotificationCenter.default
-            .publisher(for: .LoopDataUpdated)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] note in
-                let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
-                if case .preferences = LoopDataManager.LoopUpdateContext(rawValue: context), let loopDataManager = note.object as? LoopDataManager {
-                    self?.storeSettings(newLoopSettings: loopDataManager.settings)
-                }
-            }
-            .store(in: &cancellables)
-
         self.alertMuter.$configuration
             .sink { [weak self] alertMuterConfiguration in
-                guard var notificationSettings = self?.latestSettings.notificationSettings else { return }
+                guard var notificationSettings = self?.settings.notificationSettings else { return }
                 let newTemporaryMuteAlertsSetting = NotificationSettings.TemporaryMuteAlertSetting(enabled: alertMuterConfiguration.shouldMute, duration: alertMuterConfiguration.duration)
                 if notificationSettings.temporaryMuteAlertsSetting != newTemporaryMuteAlertsSetting {
                     notificationSettings.temporaryMuteAlertsSetting = newTemporaryMuteAlertsSetting
@@ -95,21 +95,19 @@ class SettingsManager {
     var loopSettings: LoopSettings {
         get {
             return LoopSettings(
-                dosingEnabled: latestSettings.dosingEnabled,
-                glucoseTargetRangeSchedule: latestSettings.glucoseTargetRangeSchedule,
-                insulinSensitivitySchedule: latestSettings.insulinSensitivitySchedule,
-                basalRateSchedule: latestSettings.basalRateSchedule,
-                carbRatioSchedule: latestSettings.carbRatioSchedule,
-                preMealTargetRange: latestSettings.preMealTargetRange,
-                legacyWorkoutTargetRange: latestSettings.workoutTargetRange,
-                overridePresets: latestSettings.overridePresets,
-                scheduleOverride: latestSettings.scheduleOverride,
-                preMealOverride: latestSettings.preMealOverride,
-                maximumBasalRatePerHour: latestSettings.maximumBasalRatePerHour,
-                maximumBolus: latestSettings.maximumBolus,
-                suspendThreshold: latestSettings.suspendThreshold,
-                automaticDosingStrategy: latestSettings.automaticDosingStrategy,
-                defaultRapidActingModel: latestSettings.defaultRapidActingModel?.presetForRapidActingInsulin)
+                dosingEnabled: settings.dosingEnabled,
+                glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
+                insulinSensitivitySchedule: settings.insulinSensitivitySchedule,
+                basalRateSchedule: settings.basalRateSchedule,
+                carbRatioSchedule: settings.carbRatioSchedule,
+                preMealTargetRange: settings.preMealTargetRange,
+                legacyWorkoutTargetRange: settings.workoutTargetRange,
+                overridePresets: settings.overridePresets,
+                maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
+                maximumBolus: settings.maximumBolus,
+                suspendThreshold: settings.suspendThreshold,
+                automaticDosingStrategy: settings.automaticDosingStrategy,
+                defaultRapidActingModel: settings.defaultRapidActingModel?.presetForRapidActingInsulin)
         }
     }
 
@@ -124,8 +122,6 @@ class SettingsManager {
                               preMealTargetRange: newLoopSettings.preMealTargetRange,
                               workoutTargetRange: newLoopSettings.legacyWorkoutTargetRange,
                               overridePresets: newLoopSettings.overridePresets,
-                              scheduleOverride: newLoopSettings.scheduleOverride,
-                              preMealOverride: newLoopSettings.preMealOverride,
                               maximumBasalRatePerHour: newLoopSettings.maximumBasalRatePerHour,
                               maximumBolus: newLoopSettings.maximumBolus,
                               suspendThreshold: newLoopSettings.suspendThreshold,
@@ -153,40 +149,98 @@ class SettingsManager {
 
         let mergedSettings = mergeSettings(newLoopSettings: newLoopSettings, notificationSettings: notificationSettings, deviceToken: deviceTokenStr)
 
-        if latestSettings == mergedSettings {
+        guard settings != mergedSettings else {
             // Skipping unchanged settings store
             return
         }
 
-        latestSettings = mergedSettings
+        settings = mergedSettings
 
         if remoteNotificationRegistrationResult == nil && FeatureFlags.remoteCommandsEnabled {
             // remote notification registration not finished
             return
         }
 
-        if latestSettings.insulinSensitivitySchedule == nil {
+        if settings.insulinSensitivitySchedule == nil {
             log.default("Saving settings with no ISF schedule.")
         }
 
-        settingsStore.storeSettings(latestSettings) { error in
+        settingsStore.storeSettings(settings) { error in
             if let error = error {
                 self.log.error("Error storing settings: %{public}@", error.localizedDescription)
             }
         }
     }
 
+    /// Sets a new time zone for a the schedule-based settings
+    ///
+    /// - Parameter timeZone: The time zone
+    func setScheduleTimeZone(_ timeZone: TimeZone) {
+        self.mutateLoopSettings { settings in
+            settings.basalRateSchedule?.timeZone = timeZone
+            settings.carbRatioSchedule?.timeZone = timeZone
+            settings.insulinSensitivitySchedule?.timeZone = timeZone
+            settings.glucoseTargetRangeSchedule?.timeZone = timeZone
+        }
+    }
+
+    private func notify(forChange context: LoopUpdateContext) {
+        NotificationCenter.default.post(name: .LoopDataUpdated,
+            object: self,
+            userInfo: [
+                LoopDataManager.LoopUpdateContextKey: context.rawValue
+            ]
+        )
+    }
+
+    func mutateLoopSettings(_ changes: (_ settings: inout LoopSettings) -> Void) {
+        loopSettingsLock.withLock {
+            let oldValue = loopSettings
+            var newValue = oldValue
+            changes(&newValue)
+
+            guard oldValue != newValue else {
+                return
+            }
+
+            storeSettings(newLoopSettings: newValue)
+
+            if newValue.insulinSensitivitySchedule != oldValue.insulinSensitivitySchedule {
+                analyticsServicesManager?.didChangeInsulinSensitivitySchedule()
+            }
+
+            if newValue.basalRateSchedule != oldValue.basalRateSchedule {
+                if let newValue = newValue.basalRateSchedule, let oldValue = oldValue.basalRateSchedule, newValue.items != oldValue.items {
+                    analyticsServicesManager?.didChangeBasalRateSchedule()
+                }
+            }
+
+            if newValue.carbRatioSchedule != oldValue.carbRatioSchedule {
+                analyticsServicesManager?.didChangeCarbRatioSchedule()
+            }
+
+            if newValue.defaultRapidActingModel != oldValue.defaultRapidActingModel {
+                analyticsServicesManager?.didChangeInsulinModel()
+            }
+
+            if newValue.dosingEnabled != oldValue.dosingEnabled {
+                self.dosingEnabled = newValue.dosingEnabled
+            }
+        }
+        notify(forChange: .preferences)
+    }
+
     func storeSettingsCheckingNotificationPermissions() {
         UNUserNotificationCenter.current().getNotificationSettings() { notificationSettings in
             DispatchQueue.main.async {
-                guard let latestSettings = self.settingsStore.latestSettings else {
+                guard let settings = self.settingsStore.latestSettings else {
                     return
                 }
 
                 let temporaryMuteAlertSetting = NotificationSettings.TemporaryMuteAlertSetting(enabled: self.alertMuter.configuration.shouldMute, duration: self.alertMuter.configuration.duration)
                 let notificationSettings = NotificationSettings(notificationSettings, temporaryMuteAlertsSetting: temporaryMuteAlertSetting)
 
-                if notificationSettings != latestSettings.notificationSettings
+                if notificationSettings != settings.notificationSettings
                 {
                     self.storeSettings(notificationSettings: notificationSettings)
                 }
@@ -206,7 +260,76 @@ class SettingsManager {
     func purgeHistoricalSettingsObjects(completion: @escaping (Error?) -> Void) {
         settingsStore.purgeHistoricalSettingsObjects(completion: completion)
     }
+
+    // MARK: Historical queries
+
+    func getBasalHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
+        try await settingsStore.getBasalHistory(startDate: startDate, endDate: endDate)
+    }
+
+    func getCarbRatioHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
+        try await settingsStore.getCarbRatioHistory(startDate: startDate, endDate: endDate)
+    }
+
+    func getInsulinSensitivityHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<HKQuantity>] {
+        try await settingsStore.getInsulinSensitivityHistory(startDate: startDate, endDate: endDate)
+    }
+
+    func getTargetRangeHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<ClosedRange<HKQuantity>>] {
+        try await settingsStore.getTargetRangeHistory(startDate: startDate, endDate: endDate)
+    }
+
+    func getDosingLimits(at date: Date) async throws -> DosingLimits {
+        try await settingsStore.getDosingLimits(at: date)
+    }
+
 }
+
+extension SettingsManager {
+    public var therapySettings: TherapySettings {
+        get {
+            let settings = self.settings
+            return TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
+                            correctionRangeOverrides: CorrectionRangeOverrides(preMeal: settings.preMealTargetRange, workout: settings.workoutTargetRange),
+                            overridePresets: settings.overridePresets,
+                            maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
+                            maximumBolus: settings.maximumBolus,
+                            suspendThreshold: settings.suspendThreshold,
+                            insulinSensitivitySchedule: settings.insulinSensitivitySchedule,
+                            carbRatioSchedule: settings.carbRatioSchedule,
+                            basalRateSchedule: settings.basalRateSchedule,
+                            defaultRapidActingModel: settings.defaultRapidActingModel?.presetForRapidActingInsulin)
+        }
+
+        set {
+            mutateLoopSettings { settings in
+                settings.defaultRapidActingModel = newValue.defaultRapidActingModel
+                settings.insulinSensitivitySchedule = newValue.insulinSensitivitySchedule
+                settings.carbRatioSchedule = newValue.carbRatioSchedule
+                settings.basalRateSchedule = newValue.basalRateSchedule
+                settings.glucoseTargetRangeSchedule = newValue.glucoseTargetRangeSchedule
+                settings.preMealTargetRange = newValue.correctionRangeOverrides?.preMeal
+                settings.legacyWorkoutTargetRange = newValue.correctionRangeOverrides?.workout
+                settings.suspendThreshold = newValue.suspendThreshold
+                settings.maximumBolus = newValue.maximumBolus
+                settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
+                settings.overridePresets = newValue.overridePresets ?? []
+            }
+        }
+    }
+}
+
+protocol SettingsProvider {
+    var settings: StoredSettings { get }
+
+    func getBasalHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>]
+    func getCarbRatioHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>]
+    func getInsulinSensitivityHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<HKQuantity>]
+    func getTargetRangeHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<ClosedRange<HKQuantity>>]
+    func getDosingLimits(at date: Date) async throws -> DosingLimits
+}
+
+extension SettingsManager: SettingsProvider {}
 
 // MARK: - SettingsStoreDelegate
 extension SettingsManager: SettingsStoreDelegate {
@@ -247,3 +370,5 @@ private extension NotificationSettings {
         )
     }
 }
+
+

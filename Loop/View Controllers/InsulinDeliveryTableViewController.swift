@@ -47,13 +47,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     
     public var enableEntryDeletion: Bool = true
     
-    var deviceManager: DeviceDataManager? {
-        didSet {
-            doseStore = deviceManager?.doseStore
-        }
-    }
-
-    public var doseStore: DoseStore? {
+    var loopDataManager: LoopDataManager!
+    var doseStore: DoseStore! {
         didSet {
             if let doseStore = doseStore {
                 doseStoreObserver = NotificationCenter.default.addObserver(forName: nil, object: doseStore, queue: OperationQueue.main, using: { [weak self] (note) -> Void in
@@ -61,7 +56,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     switch note.name {
                     case DoseStore.valuesDidChange:
                         if self?.isViewLoaded == true {
-                            self?.reloadData()
+                            Task { @MainActor in
+                                await self?.reloadData()
+                            }
                         }
                     default:
                         break
@@ -159,13 +156,13 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     }
     
     @objc func didTapEnterDoseButton(sender: AnyObject){
-        guard let deviceManager = deviceManager else {
+        guard let loopDataManager = loopDataManager else {
             return
         }
 
         tableView.endEditing(true)
 
-        let viewModel = ManualEntryDoseViewModel(delegate: deviceManager)
+        let viewModel = ManualEntryDoseViewModel(delegate: loopDataManager)
         let bolusEntryView = ManualEntryDoseView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
@@ -185,7 +182,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private var state = State.unknown {
         didSet {
             if isViewLoaded {
-                reloadData()
+                Task { @MainActor in
+                    await reloadData()
+                }
             }
         }
     }
@@ -222,7 +221,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         }
     }
 
-    private func reloadData() {
+    private func reloadData() async {
         let sinceDate = Date().addingTimeInterval(-InsulinDeliveryTableViewController.historicDataDisplayTimeInterval)
         switch state {
         case .unknown:
@@ -240,52 +239,24 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             self.tableView.tableHeaderView?.isHidden = false
             self.tableView.tableFooterView = nil
 
-            switch DataSourceSegment(rawValue: dataSourceSegmentedControl.selectedSegmentIndex)! {
-            case .reservoir:
-                doseStore?.getReservoirValues(since: sinceDate) { (result) in
-                    DispatchQueue.main.async { () -> Void in
-                        switch result {
-                        case .failure(let error):
-                            self.state = .unavailable(error)
-                        case .success(let reservoirValues):
-                            self.values = .reservoir(reservoirValues)
-                            self.tableView.reloadData()
-                        }
-                    }
+            guard let doseStore else {
+                return
+            }
 
-                    self.updateTimelyStats(nil)
-                    self.updateTotal()
+            do {
+                switch DataSourceSegment(rawValue: dataSourceSegmentedControl.selectedSegmentIndex)! {
+                case .reservoir:
+                    self.values = .reservoir(try await doseStore.getReservoirValues(since: sinceDate, limit: nil))
+                case .history:
+                    self.values = .history(try await doseStore.getPumpEventValues(since: sinceDate))
+                case .manualEntryDose:
+                    self.values = .manualEntryDoses(try await doseStore.getManuallyEnteredDoses(since: sinceDate))
                 }
-            case .history:
-                doseStore?.getPumpEventValues(since: sinceDate) { (result) in
-                    DispatchQueue.main.async { () -> Void in
-                        switch result {
-                        case .failure(let error):
-                            self.state = .unavailable(error)
-                        case .success(let pumpEventValues):
-                            self.values = .history(pumpEventValues)
-                            self.tableView.reloadData()
-                        }
-                    }
-
-                    self.updateTimelyStats(nil)
-                    self.updateTotal()
-                }
-            case .manualEntryDose:
-                doseStore?.getManuallyEnteredDoses(since: sinceDate) { (result) in
-                    DispatchQueue.main.async { () -> Void in
-                        switch result {
-                        case .failure(let error):
-                            self.state = .unavailable(error)
-                        case .success(let values):
-                            self.values = .manualEntryDoses(values)
-                            self.tableView.reloadData()
-                        }
-                    }
-                }
-
+                self.tableView.reloadData()
                 self.updateTimelyStats(nil)
                 self.updateTotal()
+            } catch {
+                self.state = .unavailable(error)
             }
         }
     }
@@ -314,35 +285,27 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
     private func updateIOB() {
         if case .display = state {
-            doseStore?.insulinOnBoard(at: Date()) { (result) -> Void in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .failure:
-                        self.iobValueLabel.text = "…"
-                        self.iobDateLabel.text = nil
-                    case .success(let iob):
-                        self.iobValueLabel.text = self.iobNumberFormatter.string(from: iob.value)
-                        self.iobDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.IOBDateLabel", value: "at %1$@", comment: "The format string describing the date of an IOB value. The first format argument is the localized date."), self.timeFormatter.string(from: iob.startDate))
-                    }
-                }
+            if let activeInsulin = loopDataManager.activeInsulin {
+                self.iobValueLabel.text = self.iobNumberFormatter.string(from: activeInsulin.value)
+                self.iobDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.IOBDateLabel", value: "at %1$@", comment: "The format string describing the date of an IOB value. The first format argument is the localized date."), self.timeFormatter.string(from: activeInsulin.startDate))
+            } else {
+                self.iobValueLabel.text = "…"
+                self.iobDateLabel.text = nil
             }
         }
     }
 
     private func updateTotal() {
-        if case .display = state {
-            let midnight = Calendar.current.startOfDay(for: Date())
+        Task { @MainActor in
+            if case .display = state {
+                let midnight = Calendar.current.startOfDay(for: Date())
 
-            doseStore?.getTotalUnitsDelivered(since: midnight) { (result) in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .failure:
-                        self.totalValueLabel.text = "…"
-                        self.totalDateLabel.text = nil
-                    case .success(let result):
-                        self.totalValueLabel.text = NumberFormatter.localizedString(from: NSNumber(value: result.value), number: .none)
-                        self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), DateFormatter.localizedString(from: result.startDate, dateStyle: .none, timeStyle: .short))
-                    }
+                if let result = try? await doseStore?.getTotalUnitsDelivered(since: midnight) {
+                    self.totalValueLabel.text = NumberFormatter.localizedString(from: NSNumber(value: result.value), number: .none)
+                    self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), DateFormatter.localizedString(from: result.startDate, dateStyle: .none, timeStyle: .short))
+                } else {
+                    self.totalValueLabel.text = "…"
+                    self.totalDateLabel.text = nil
                 }
             }
         }
@@ -357,7 +320,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     }
 
     @IBAction func selectedSegmentChanged(_ sender: Any) {
-        reloadData()
+        Task { @MainActor in
+            await reloadData()
+        }
     }
 
     @IBAction func confirmDeletion(_ sender: Any) {
@@ -495,7 +460,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
-                            self.reloadData()
+                            Task { @MainActor in
+                                await self.reloadData()
+                            }
                         }
                     }
                 }
@@ -510,7 +477,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
-                            self.reloadData()
+                            Task { @MainActor in
+                                await self.reloadData()
+                            }
                         }
                     }
                 }
@@ -524,7 +493,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
-                            self.reloadData()
+                            Task { @MainActor in
+                                await self.reloadData()
+                            }
                         }
                     }
                 }

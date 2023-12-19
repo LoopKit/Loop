@@ -9,26 +9,25 @@
 import UserNotifications
 
 extension UNUserNotificationCenter {
-    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
-        getNotificationSettings() { notificationSettings in
-            let report: [String] = [
-                "## NotificationSettings",
-                "",
-                "* authorizationStatus: \(String(describing: notificationSettings.authorizationStatus))",
-                "* soundSetting: \(String(describing: notificationSettings.soundSetting))",
-                "* badgeSetting: \(String(describing: notificationSettings.badgeSetting))",
-                "* alertSetting: \(String(describing: notificationSettings.alertSetting))",
-                "* notificationCenterSetting: \(String(describing: notificationSettings.notificationCenterSetting))",
-                "* lockScreenSetting: \(String(describing: notificationSettings.lockScreenSetting))",
-                "* carPlaySetting: \(String(describing: notificationSettings.carPlaySetting))",
-                "* alertStyle: \(String(describing: notificationSettings.alertStyle))",
-                "* showPreviewsSetting: \(String(describing: notificationSettings.showPreviewsSetting))",
-                "* criticalAlertSetting: \(String(describing: notificationSettings.criticalAlertSetting))",
-                "* providesAppNotificationSettings: \(String(describing: notificationSettings.providesAppNotificationSettings))",
-                "* announcementSetting: \(String(describing: notificationSettings.announcementSetting))",
-            ]
-            completion(report.joined(separator: "\n"))
-        }
+    func generateDiagnosticReport() async -> String {
+        let notificationSettings = await notificationSettings()
+        let report: [String] = [
+            "## NotificationSettings",
+            "",
+            "* authorizationStatus: \(String(describing: notificationSettings.authorizationStatus))",
+            "* soundSetting: \(String(describing: notificationSettings.soundSetting))",
+            "* badgeSetting: \(String(describing: notificationSettings.badgeSetting))",
+            "* alertSetting: \(String(describing: notificationSettings.alertSetting))",
+            "* notificationCenterSetting: \(String(describing: notificationSettings.notificationCenterSetting))",
+            "* lockScreenSetting: \(String(describing: notificationSettings.lockScreenSetting))",
+            "* carPlaySetting: \(String(describing: notificationSettings.carPlaySetting))",
+            "* alertStyle: \(String(describing: notificationSettings.alertStyle))",
+            "* showPreviewsSetting: \(String(describing: notificationSettings.showPreviewsSetting))",
+            "* criticalAlertSetting: \(String(describing: notificationSettings.criticalAlertSetting))",
+            "* providesAppNotificationSettings: \(String(describing: notificationSettings.providesAppNotificationSettings))",
+            "* announcementSetting: \(String(describing: notificationSettings.announcementSetting))",
+        ]
+        return report.joined(separator: "\n")
     }
 }
 

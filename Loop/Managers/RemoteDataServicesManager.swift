@@ -9,6 +9,7 @@
 import os.log
 import Foundation
 import LoopKit
+import UIKit
 
 enum RemoteDataType: String, CaseIterable {
     case alert = "Alert"
@@ -37,6 +38,7 @@ struct UploadTaskKey: Hashable {
     }
 }
 
+@MainActor
 final class RemoteDataServicesManager {
 
     public typealias RawState = [String: Any]
@@ -126,7 +128,7 @@ final class RemoteDataServicesManager {
 
     private let doseStore: DoseStore
 
-    private let dosingDecisionStore: DosingDecisionStore
+    private let dosingDecisionStore: DosingDecisionStoreProtocol
 
     private let glucoseStore: GlucoseStore
 
@@ -142,7 +144,7 @@ final class RemoteDataServicesManager {
         alertStore: AlertStore,
         carbStore: CarbStore,
         doseStore: DoseStore,
-        dosingDecisionStore: DosingDecisionStore,
+        dosingDecisionStore: DosingDecisionStoreProtocol,
         glucoseStore: GlucoseStore,
         cgmEventStore: CgmEventStore,
         settingsStore: SettingsStore,
@@ -618,8 +620,10 @@ extension RemoteDataServicesManager {
     }
 }
 
+extension RemoteDataServicesManager: UploadEventListener { }
+
 protocol RemoteDataServicesManagerDelegate: AnyObject {
-    var shouldSyncToRemoteService: Bool {get}
+    var shouldSyncToRemoteService: Bool { get }
 }
 
 

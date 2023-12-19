@@ -12,6 +12,7 @@ import LoopKitUI
 import LoopCore
 import Combine
 
+@MainActor
 class ServicesManager {
 
     private let pluginManager: PluginManager
@@ -121,6 +122,10 @@ class ServicesManager {
         return servicesLock.withLock { services }
     }
 
+    public func getServices() -> [Service] {
+        return servicesLock.withLock { services }
+    }
+
     public func addActiveService(_ service: Service) {
         servicesLock.withLock {
             service.serviceDelegate = self
@@ -213,10 +218,10 @@ class ServicesManager {
     
     private func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
         var backgroundTask: UIBackgroundTaskIdentifier?
-        backgroundTask = await UIApplication.shared.beginBackgroundTask(withName: name) {
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: name) {
             guard let backgroundTask = backgroundTask else {return}
             Task {
-                await UIApplication.shared.endBackgroundTask(backgroundTask)
+                UIApplication.shared.endBackgroundTask(backgroundTask)
             }
             
             self.log.error("Background Task Expired: %{public}@", name)
@@ -227,7 +232,7 @@ class ServicesManager {
     
     private func endBackgroundTask(_ backgroundTask: UIBackgroundTaskIdentifier?) async {
         guard let backgroundTask else {return}
-        await UIApplication.shared.endBackgroundTask(backgroundTask)
+        UIApplication.shared.endBackgroundTask(backgroundTask)
     }
 }
 
@@ -320,11 +325,11 @@ extension ServicesManager: ServiceDelegate {
     func deliverRemoteCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         do {
             try await servicesManagerDelegate?.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
-            await NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
+            NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
             await remoteDataServicesManager.triggerUpload(for: .carb)
             analyticsServicesManager.didAddCarbs(source: "Remote", amount: amountInGrams)
         } catch {
-            await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
+            NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
             throw error
         }
     }
@@ -345,11 +350,11 @@ extension ServicesManager: ServiceDelegate {
             }
             
             try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits)
-            await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
+            NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
             await remoteDataServicesManager.triggerUpload(for: .dose)
             analyticsServicesManager.didBolus(source: "Remote", units: amountInUnits)
         } catch {
-            await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
+            NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
             throw error
         }
     }
@@ -375,13 +380,19 @@ extension ServicesManager: ServiceDelegate {
 
 extension ServicesManager: AlertIssuer {
     func issueAlert(_ alert: Alert) {
-        alertManager.issueAlert(alert)
+        Task { @MainActor in
+            alertManager.issueAlert(alert)
+        }
     }
 
     func retractAlert(identifier: Alert.Identifier) {
-        alertManager.retractAlert(identifier: identifier)
+        Task { @MainActor in
+            alertManager.retractAlert(identifier: identifier)
+        }
     }
 }
+
+extension ServicesManager: ActiveServicesProvider { }
 
 // MARK: - ServiceOnboardingDelegate
 

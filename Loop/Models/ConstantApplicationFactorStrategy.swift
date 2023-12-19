@@ -14,10 +14,9 @@ import LoopCore
 struct ConstantApplicationFactorStrategy: ApplicationFactorStrategy {
     func calculateDosingFactor(
         for glucose: HKQuantity,
-        correctionRangeSchedule: GlucoseRangeSchedule,
-        settings: LoopSettings
+        correctionRange: ClosedRange<HKQuantity>
     ) -> Double {
         // The original strategy uses a constant dosing factor.
-        return LoopAlgorithm.bolusPartialApplicationFactor
+        return LoopAlgorithm.defaultBolusPartialApplicationFactor
     }
 }

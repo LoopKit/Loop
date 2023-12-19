@@ -143,10 +143,6 @@ final class AnalyticsServicesManager {
             logEvent("Therapy schedule time zone change")
         }
 
-        if newValue.scheduleOverride != oldValue.scheduleOverride {
-            logEvent("Temporary schedule override change")
-        }
-
         if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
             logEvent("Glucose target range change")
         }

@@ -17,9 +17,10 @@ public protocol DeviceSupportDelegate {
     var pumpManagerStatus: LoopKit.PumpManagerStatus? { get }
     var cgmManagerStatus: LoopKit.CGMManagerStatus? { get }
 
-    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
+    func generateDiagnosticReport() async -> String
 }
 
+@MainActor
 public final class SupportManager {
     
     private lazy var log = DiagnosticLog(category: "SupportManager")
@@ -91,7 +92,7 @@ public final class SupportManager {
             }
             .store(in: &cancellables)
         
-        NotificationCenter.default.publisher(for: .LoopCompleted)
+        NotificationCenter.default.publisher(for: .LoopCycleCompleted)
             .sink { [weak self] _ in
                 self?.performCheck()
             }
@@ -234,8 +235,8 @@ extension SupportManager: SupportUIDelegate {
         return Bundle.main.localizedNameAndVersion
     }
 
-    public func generateIssueReport(completion: @escaping (String) -> Void) {
-        deviceSupportDelegate.generateDiagnosticReport(completion)
+    public func generateIssueReport() async -> String {
+        await deviceSupportDelegate.generateDiagnosticReport()
     }
     
     public func issueAlert(_ alert: LoopKit.Alert) {

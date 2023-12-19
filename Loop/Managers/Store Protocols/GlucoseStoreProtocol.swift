@@ -10,30 +10,8 @@ import LoopKit
 import HealthKit
 
 protocol GlucoseStoreProtocol: AnyObject {
-    
-    var latestGlucose: GlucoseSampleValue? { get }
-    
-    var delegate: GlucoseStoreDelegate? { get set }
-    
-    var managedDataInterval: TimeInterval? { get set }
-    
-    // MARK: Sample Management
-    func addGlucoseSamples(_ samples: [NewGlucoseSample], completion: @escaping (_ result: Result<[StoredGlucoseSample], Error>) -> Void)
-    
-    func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ result: Result<[StoredGlucoseSample], Error>) -> Void)
-    
-    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
-    
-    func purgeAllGlucoseSamples(healthKitPredicate: NSPredicate, completion: @escaping (Error?) -> Void)
-    
-    func executeGlucoseQuery(fromQueryAnchor queryAnchor: GlucoseStore.QueryAnchor?, limit: Int, completion: @escaping (GlucoseStore.GlucoseQueryResult) -> Void)
-    
-    // MARK: Effect Calculation
-    func getRecentMomentumEffect(for date: Date?, _ completion: @escaping (_ result: Result<[GlucoseEffect], Error>) -> Void)
-    
-    func getCounteractionEffects(start: Date, end: Date?, to effects: [GlucoseEffect], _ completion: @escaping (_ effects: Result<[GlucoseEffectVelocity], Error>) -> Void)
-    
-    func counteractionEffects<Sample: GlucoseSampleValue>(for samples: [Sample], to effects: [GlucoseEffect]) -> [GlucoseEffectVelocity]
+    func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample]
+    func addGlucoseSamples(_ samples: [NewGlucoseSample]) async throws -> [StoredGlucoseSample]
 }
 
 extension GlucoseStore: GlucoseStoreProtocol { }

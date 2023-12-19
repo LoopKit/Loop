@@ -11,6 +11,7 @@ import HealthKit
 import LoopKit
 import LoopKitUI
 
+@MainActor
 class OnboardingManager {
     private let pluginManager: PluginManager
     private let bluetoothProvider: BluetoothProvider
@@ -18,6 +19,7 @@ class OnboardingManager {
     private let statefulPluginManager: StatefulPluginManager
     private let servicesManager: ServicesManager
     private let loopDataManager: LoopDataManager
+    private let settingsManager: SettingsManager
     private let supportManager: SupportManager
     private weak var windowProvider: WindowProvider?
     private let userDefaults: UserDefaults
@@ -43,6 +45,7 @@ class OnboardingManager {
     init(pluginManager: PluginManager,
          bluetoothProvider: BluetoothProvider,
          deviceDataManager: DeviceDataManager,
+         settingsManager: SettingsManager,
          statefulPluginManager: StatefulPluginManager,
          servicesManager: ServicesManager,
          loopDataManager: LoopDataManager,
@@ -53,6 +56,7 @@ class OnboardingManager {
         self.pluginManager = pluginManager
         self.bluetoothProvider = bluetoothProvider
         self.deviceDataManager = deviceDataManager
+        self.settingsManager = settingsManager
         self.statefulPluginManager = statefulPluginManager
         self.servicesManager = servicesManager
         self.loopDataManager = loopDataManager
@@ -62,9 +66,9 @@ class OnboardingManager {
 
         self.isSuspended = userDefaults.onboardingManagerIsSuspended
 
-        self.isComplete = userDefaults.onboardingManagerIsComplete && loopDataManager.therapySettings.isComplete
+        self.isComplete = userDefaults.onboardingManagerIsComplete && settingsManager.therapySettings.isComplete
         if !isComplete {
-            if loopDataManager.therapySettings.isComplete {
+            if settingsManager.therapySettings.isComplete {
                 self.completedOnboardingIdentifiers = userDefaults.onboardingManagerCompletedOnboardingIdentifiers
             }
             if let activeOnboardingRawValue = userDefaults.onboardingManagerActiveOnboardingRawValue {
@@ -255,12 +259,12 @@ extension OnboardingManager: OnboardingDelegate {
 
     func onboarding(_ onboarding: OnboardingUI, hasNewTherapySettings therapySettings: TherapySettings) {
         guard onboarding.pluginIdentifier == activeOnboarding?.pluginIdentifier else { return }
-        loopDataManager.therapySettings = therapySettings
+        settingsManager.therapySettings = therapySettings
     }
 
     func onboarding(_ onboarding: OnboardingUI, hasNewDosingEnabled dosingEnabled: Bool) {
         guard onboarding.pluginIdentifier == activeOnboarding?.pluginIdentifier else { return }
-        loopDataManager.mutateSettings { settings in
+        settingsManager.mutateLoopSettings { settings in
             settings.dosingEnabled = dosingEnabled
         }
     }
@@ -395,6 +399,11 @@ extension OnboardingManager: PumpManagerProvider {
         guard let pumpManager = deviceDataManager.pumpManager else {
             return deviceDataManager.setupPumpManager(withIdentifier: identifier, initialSettings: settings, prefersToSkipUserInteraction: prefersToSkipUserInteraction)
         }
+
+        guard let pumpManager = pumpManager as? PumpManagerUI else {
+            return .failure(OnboardingError.invalidState)
+        }
+
         guard pumpManager.pluginIdentifier == identifier else {
             return .failure(OnboardingError.invalidState)
         }
@@ -442,7 +451,7 @@ extension OnboardingManager: ServiceProvider {
 
 extension OnboardingManager: TherapySettingsProvider {
     var onboardingTherapySettings: TherapySettings {
-        return loopDataManager.therapySettings
+        return settingsManager.therapySettings
     }
 }
 

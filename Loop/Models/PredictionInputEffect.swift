@@ -8,7 +8,7 @@
 
 import Foundation
 import HealthKit
-
+import LoopKit
 
 struct PredictionInputEffect: OptionSet {
     let rawValue: Int
@@ -53,5 +53,24 @@ struct PredictionInputEffect: OptionSet {
         default:
             return nil
         }
+    }
+}
+
+extension PredictionInputEffect {
+    var algorithmEffectOptions: AlgorithmEffectsOptions {
+        var rval = [AlgorithmEffectsOptions]()
+        if self.contains(.carbs) {
+            rval.append(.carbs)
+        }
+        if self.contains(.insulin) {
+            rval.append(.insulin)
+        }
+        if self.contains(.momentum) {
+            rval.append(.momentum)
+        }
+        if self.contains(.retrospection) {
+            rval.append(.retrospection)
+        }
+        return AlgorithmEffectsOptions(rval)
     }
 }

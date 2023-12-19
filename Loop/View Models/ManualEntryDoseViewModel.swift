@@ -17,37 +17,22 @@ import LoopKitUI
 import LoopUI
 import SwiftUI
 
-protocol ManualDoseViewModelDelegate: AnyObject {
-    
-    func withLoopState(do block: @escaping (LoopState) -> Void)
-
-    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?)
-
-    func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
-
-    func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)
-    
-    func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ result: CarbStoreResult<CarbValue>) -> Void)
-    
-    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
-
-    var mostRecentGlucoseDataDate: Date? { get }
-    
-    var mostRecentPumpDataDate: Date? { get }
-    
-    var isPumpConfigured: Bool { get }
-    
-    var preferredGlucoseUnit: HKUnit { get }
-    
-    var pumpInsulinType: InsulinType? { get }
-
-    var settings: LoopSettings { get }
+enum ManualEntryDoseViewModelError: Error {
+    case notAuthenticated
 }
 
+protocol ManualDoseViewModelDelegate: AnyObject {
+    var algorithmDisplayState: AlgorithmDisplayState { get async }
+    var pumpInsulinType: InsulinType? { get }
+    var settings: StoredSettings { get }
+    var scheduleOverride: TemporaryScheduleOverride? { get }
+
+    func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) async
+    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
+}
+
+@MainActor
 final class ManualEntryDoseViewModel: ObservableObject {
-
-    var authenticate: AuthenticationChallenge = LocalAuthentication.deviceOwnerCheck
-
     // MARK: - State
 
     @Published var glucoseValues: [GlucoseValue] = [] // stored glucose values
@@ -83,27 +68,40 @@ final class ManualEntryDoseViewModel: ObservableObject {
     @Published var selectedDoseDate: Date = Date()
     
     var insulinTypePickerOptions: [InsulinType]
-    
+
     // MARK: - Seams
     private weak var delegate: ManualDoseViewModelDelegate?
     private let now: () -> Date
     private let screenWidth: CGFloat
     private let debounceIntervalMilliseconds: Int
     private let uuidProvider: () -> String
-    
+
+    var authenticationHandler: (String) async -> Bool = { message in
+        return await withCheckedContinuation { continuation in
+            LocalAuthentication.deviceOwnerCheck(message) { result in
+                switch result {
+                case .success:
+                    continuation.resume(returning: true)
+                case .failure:
+                    continuation.resume(returning: false)
+                }
+            }
+        }
+    }
+
+
     // MARK: - Initialization
 
     init(
         delegate: ManualDoseViewModelDelegate,
         now: @escaping () -> Date = { Date() },
-        screenWidth: CGFloat = UIScreen.main.bounds.width,
         debounceIntervalMilliseconds: Int = 400,
         uuidProvider: @escaping () -> String = { UUID().uuidString },
         timeZone: TimeZone? = nil
     ) {
         self.delegate = delegate
         self.now = now
-        self.screenWidth = screenWidth
+        self.screenWidth = UIScreen.main.bounds.width
         self.debounceIntervalMilliseconds = debounceIntervalMilliseconds
         self.uuidProvider = uuidProvider
         
@@ -138,9 +136,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .milliseconds(debounceIntervalMilliseconds), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updatePredictedGlucoseValues(from: state)
-                }
+                self?.updateTriggered()
             }
             .store(in: &cancellables)
     }
@@ -150,9 +146,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updatePredictedGlucoseValues(from: state)
-                }
+                self?.updateTriggered()
             }
             .store(in: &cancellables)
     }
@@ -162,41 +156,41 @@ final class ManualEntryDoseViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updatePredictedGlucoseValues(from: state)
-                }
+                self?.updateTriggered()
             }
             .store(in: &cancellables)
     }
 
-    // MARK: - View API
-
-    func saveManualDose(onSuccess completion: @escaping () -> Void) {
-        // Authenticate before saving anything
-        if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
-            let message = String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt to log an insulin dose"), enteredBolusAmountString)
-            authenticate(message) {
-                switch $0 {
-                case .success:
-                    self.continueSaving(onSuccess: completion)
-                case .failure:
-                    break
-                }
-            }
-        } else {
-            completion()
+    private func updateTriggered() {
+        Task { @MainActor in
+            await updateFromLoopState()
         }
     }
-    
-    private func continueSaving(onSuccess completion: @escaping () -> Void) {
-        let doseVolume = enteredBolus.doubleValue(for: .internationalUnit())
-        guard doseVolume > 0 else {
-            completion()
+
+
+    // MARK: - View API
+
+    func saveManualDose() async throws {
+        guard enteredBolus.doubleValue(for: .internationalUnit()) > 0 else {
             return
         }
 
-        delegate?.addManuallyEnteredDose(startDate: selectedDoseDate, units: doseVolume, insulinType: selectedInsulinType)
-        completion()
+        // Authenticate before saving anything
+        let message = String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt to log an insulin dose"), enteredBolusAmountString)
+
+        if !(await authenticationHandler(message)) {
+            throw ManualEntryDoseViewModelError.notAuthenticated
+        }
+        await self.continueSaving()
+    }
+    
+    private func continueSaving() async {
+        let doseVolume = enteredBolus.doubleValue(for: .internationalUnit())
+        guard doseVolume > 0 else {
+            return
+        }
+
+        await delegate?.addManuallyEnteredDose(startDate: selectedDoseDate, units: doseVolume, insulinType: selectedInsulinType)
     }
 
     private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit())
@@ -218,117 +212,53 @@ final class ManualEntryDoseViewModel: ObservableObject {
     // MARK: - Data upkeep
 
     private func update() {
-        dispatchPrecondition(condition: .onQueue(.main))
 
         // Prevent any UI updates after a bolus has been initiated.
         guard !isInitiatingSaveOrBolus else { return }
 
         updateChartDateInterval()
-        updateStoredGlucoseValues()
-        updateFromLoopState()
-        updateActiveInsulin()
-    }
-
-    private func updateStoredGlucoseValues() {
-        delegate?.getGlucoseSamples(start: chartDateInterval.start, end: nil) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                switch result {
-                case .failure(let error):
-                    self.log.error("Failure getting glucose samples: %{public}@", String(describing: error))
-                    self.storedGlucoseValues = []
-                case .success(let samples):
-                    self.storedGlucoseValues = samples
-                }
-                self.updateGlucoseChartValues()
-            }
+        Task {
+            await updateFromLoopState()
         }
     }
 
-    private func updateGlucoseChartValues() {
-        dispatchPrecondition(condition: .onQueue(.main))
-
-        self.glucoseValues = storedGlucoseValues
-    }
-
-    /// - NOTE: `completion` is invoked on the main queue after predicted glucose values are updated
-    private func updatePredictedGlucoseValues(from state: LoopState, completion: @escaping () -> Void = {}) {
-        dispatchPrecondition(condition: .notOnQueue(.main))
-
-        let (enteredBolus, doseDate, insulinType) = DispatchQueue.main.sync { (self.enteredBolus, self.selectedDoseDate, self.selectedInsulinType) }
-        
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: insulinType)
-
-        let predictedGlucoseValues: [PredictedGlucoseValue]
-        do {
-            predictedGlucoseValues = try state.predictGlucose(
-                using: .all,
-                potentialBolus: enteredBolusDose,
-                potentialCarbEntry: nil,
-                replacingCarbEntry: nil,
-                includingPendingInsulin: true,
-                considerPositiveVelocityAndRC: true
-            )
-        } catch {
-            predictedGlucoseValues = []
-        }
-
-        DispatchQueue.main.async {
-            self.predictedGlucoseValues = predictedGlucoseValues
-            completion()
-        }
-    }
-
-    private func updateActiveInsulin() {
-        delegate?.insulinOnBoard(at: Date()) { [weak self] result in
-            guard let self = self else { return }
-
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let iob):
-                    self.activeInsulin = HKQuantity(unit: .internationalUnit(), doubleValue: iob.value)
-                case .failure:
-                    self.activeInsulin = nil
-                }
-            }
-        }
-    }
-
-    private func updateFromLoopState() {
-        delegate?.withLoopState { [weak self] state in
-            self?.updatePredictedGlucoseValues(from: state)
-            self?.updateCarbsOnBoard(from: state)
-            DispatchQueue.main.async {
-                self?.updateSettings()
-            }
-        }
-    }
-
-    private func updateCarbsOnBoard(from state: LoopState) {
-        delegate?.carbsOnBoard(at: Date(), effectVelocities: state.insulinCounteractionEffects) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let carbValue):
-                    self.activeCarbs = carbValue.quantity
-                case .failure:
-                    self.activeCarbs = nil
-                }
-            }
-        }
-    }
-    
-
-    private func updateSettings() {
-        dispatchPrecondition(condition: .onQueue(.main))
-        
+    private func updateFromLoopState() async {
         guard let delegate = delegate else {
             return
         }
 
-        glucoseUnit = delegate.preferredGlucoseUnit
+        let state = await delegate.algorithmDisplayState
+
+        let enteredBolusDose = DoseEntry(type: .bolus, startDate: selectedDoseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: selectedInsulinType)
+
+        self.activeInsulin = state.activeInsulin?.quantity
+        self.activeCarbs = state.activeCarbs?.quantity
+
+
+        if let input = state.input {
+            self.storedGlucoseValues = input.glucoseHistory
+
+            do {
+                predictedGlucoseValues = try input
+                    .addingDose(dose: enteredBolusDose)
+                    .predictGlucose()
+            } catch {
+                predictedGlucoseValues = []
+            }
+        } else {
+            predictedGlucoseValues = []
+        }
+
+        updateSettings()
+    }
+
+    private func updateSettings() {
+        guard let delegate else {
+            return
+        }
 
         targetGlucoseSchedule = delegate.settings.glucoseTargetRangeSchedule
-        scheduleOverride = delegate.settings.scheduleOverride
+        scheduleOverride = delegate.scheduleOverride
 
         if preMealOverride?.hasFinished() == true {
             preMealOverride = nil

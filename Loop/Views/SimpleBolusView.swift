@@ -252,12 +252,11 @@ struct SimpleBolusView: View {
                 if self.viewModel.actionButtonAction == .enterBolus {
                     self.shouldBolusEntryBecomeFirstResponder = true
                 } else {
-                    self.viewModel.saveAndDeliver { (success) in
-                        if success {
+                    Task {
+                        if await viewModel.saveAndDeliver() {
                             self.dismiss()
                         }
                     }
-    
                 }
             },
             label: {
@@ -306,7 +305,7 @@ struct SimpleBolusView: View {
             } else {
                 title = Text("No Bolus Recommended", comment: "Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended")
             }
-            let suspendThresholdString = formatGlucose(viewModel.suspendThreshold)
+            let suspendThresholdString = formatGlucose(viewModel.suspendThreshold!)
             return WarningView(
                 title: title,
                 caption: Text(String(format: NSLocalizedString("Your glucose is below your glucose safety limit, %1$@.", comment: "Format string for bolus screen warning when no bolus is recommended due input value below glucose safety limit. (1: suspendThreshold)"), suspendThresholdString))
@@ -362,13 +361,12 @@ struct SimpleBolusView: View {
 
 struct SimpleBolusCalculatorView_Previews: PreviewProvider {
     class MockSimpleBolusViewDelegate: SimpleBolusViewModelDelegate {
-        func addGlucose(_ samples: [NewGlucoseSample], completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
-            completion(.success([]))
+        func saveGlucose(sample: NewGlucoseSample) async throws -> StoredGlucoseSample {
+            return StoredGlucoseSample(startDate: sample.date, quantity: sample.quantity)
         }
         
-        func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
-            
-            let storedCarbEntry = StoredCarbEntry(
+        func addCarbEntry(_ carbEntry: LoopKit.NewCarbEntry, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry {
+            StoredCarbEntry(
                 startDate: carbEntry.startDate,
                 quantity: carbEntry.quantity,
                 uuid: UUID(),
@@ -380,9 +378,12 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
                 createdByCurrentApp: true,
                 userCreatedDate: Date(),
                 userUpdatedDate: nil)
-            completion(.success(storedCarbEntry))
         }
         
+        func insulinOnBoard(at date: Date) async -> LoopKit.InsulinValue? {
+            return nil
+        }
+
         func enactBolus(units: Double, activationType: BolusActivationType) {
         }
         
@@ -404,20 +405,24 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             return DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
         }
         
-        var maximumBolus: Double {
+        var maximumBolus: Double? {
             return 6
         }
         
-        var suspendThreshold: HKQuantity {
+        var suspendThreshold: HKQuantity? {
             return HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 75)
         }
     }
 
-    static var viewModel: SimpleBolusViewModel = SimpleBolusViewModel(delegate: MockSimpleBolusViewDelegate(), displayMealEntry: true)
-    
+    static var previewViewModel: SimpleBolusViewModel = SimpleBolusViewModel(
+        delegate: MockSimpleBolusViewDelegate(),
+        displayMealEntry: true,
+        displayGlucosePreference: DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
+    )
+
     static var previews: some View {
         NavigationView {
-            SimpleBolusView(viewModel: viewModel)
+            SimpleBolusView(viewModel: previewViewModel)
         }
         .previewDevice("iPod touch (7th generation)")
         .environmentObject(DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter))
