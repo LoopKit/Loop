@@ -1469,7 +1469,29 @@ extension LoopDataManager {
         let pendingInsulin = try getPendingInsulin()
         let shouldIncludePendingInsulin = pendingInsulin > 0
         let prediction = try predictGlucose(using: .all, potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
-        return try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
+        let recommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
+        
+        guard recommendation != nil else {
+            return nil
+        }
+        
+        guard potentialCarbEntry != nil else {
+            return recommendation
+        }
+        
+        // when adding new carb entries, don't try to cover corrections. In particular when using
+        // auto-bolus, this prevents including the entire correction as part of the bolus for carbs
+        let predictionWithoutCarbs = try predictGlucose(using: .all, potentialBolus: nil, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
+        
+        let recommendationWithoutCarbs = try recommendBolusValidatingDataRecency(forPrediction: predictionWithoutCarbs, consideringPotentialCarbEntry: nil)
+        
+        guard recommendationWithoutCarbs != nil && recommendationWithoutCarbs!.amount > 0 else {
+            return recommendation
+        }
+        
+        let updatedAmount = volumeRounder()(recommendation!.amount - recommendationWithoutCarbs!.amount)
+        
+        return ManualBolusRecommendation(amount: updatedAmount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice)
     }
 
     /// - Throws:
@@ -1514,6 +1536,13 @@ extension LoopDataManager {
         return try recommendManualBolus(forPrediction: predictedGlucose, consideringPotentialCarbEntry: potentialCarbEntry)
     }
     
+    private func volumeRounder() -> ((Double) -> Double) {
+        let result = { (_ units: Double) in
+            return self.delegate?.roundBolusVolume(units: units) ?? units
+        }
+        return result
+    }
+    
     /// - Throws: LoopError.configurationError
     private func recommendManualBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
                                                       consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> ManualBolusRecommendation? {
@@ -1534,10 +1563,6 @@ extension LoopDataManager {
             // successful in any case.
             return nil
         }
-
-        let volumeRounder = { (_ units: Double) in
-            return self.delegate?.roundBolusVolume(units: units) ?? units
-        }
         
         let model = doseStore.insulinModelProvider.model(for: pumpInsulinType)
 
@@ -1549,7 +1574,7 @@ extension LoopDataManager {
             model: model,
             pendingInsulin: 0, // Pending insulin is already reflected in the prediction
             maxBolus: maxBolus,
-            volumeRounder: volumeRounder
+            volumeRounder: volumeRounder()
         )
     }
 
@@ -1798,10 +1823,6 @@ extension LoopDataManager {
 
             switch settings.automaticDosingStrategy {
             case .automaticBolus:
-                let volumeRounder = { (_ units: Double) in
-                    return self.delegate?.roundBolusVolume(units: units) ?? units
-                }
-
                 // Create dosing strategy based on user setting
                 let applicationFactorStrategy: ApplicationFactorStrategy = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
                     ? GlucoseBasedApplicationFactorStrategy()
@@ -1830,7 +1851,7 @@ extension LoopDataManager {
                     maxAutomaticBolus: maxAutomaticBolus,
                     partialApplicationFactor: effectiveBolusApplicationFactor * self.timeBasedDoseApplicationFactor,
                     lastTempBasal: lastTempBasal,
-                    volumeRounder: volumeRounder,
+                    volumeRounder: volumeRounder(),
                     rateRounder: rateRounder,
                     isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
                 )
