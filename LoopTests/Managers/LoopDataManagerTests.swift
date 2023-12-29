@@ -127,7 +127,8 @@ class LoopDataManagerTests: XCTestCase {
                basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil,
                maxBolus: Double = 10,
                maxBasalRate: Double = 5.0,
-               dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly)
+               dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
+               predictGlucose: Bool = false)
     {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(
@@ -163,7 +164,7 @@ class LoopDataManagerTests: XCTestCase {
         doseStore.basalProfileApplyingOverrideHistory = doseStore.basalProfile
         doseStore.sensitivitySchedule = insulinSensitivitySchedule
         let glucoseStore = MockGlucoseStore(for: test)
-        let carbStore = MockCarbStore(for: test)
+        let carbStore = MockCarbStore(for: test, predictGlucose: predictGlucose)
         carbStore.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivitySchedule
         carbStore.carbRatioSchedule = carbRatioSchedule
         

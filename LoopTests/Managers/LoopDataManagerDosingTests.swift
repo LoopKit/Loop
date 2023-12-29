@@ -489,7 +489,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     }
     
     func testLoopGetStateRecommendsManualBolusForCarbEntry() {
-        setUp(for: .highAndStable)
+        setUp(for: .highAndStable, predictGlucose: true)
         let exp = expectation(description: #function)
         
         var recommendedBolus: ManualBolusRecommendation?
@@ -500,8 +500,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
             exp.fulfill()
         }
         wait(for: [exp], timeout: 100000.0)
-        // MockCarbStore does not predict any glucose effects, so the recommendation must be 0
-        XCTAssertEqual(recommendedBolus!.amount, 0.0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.amount, 0.5, accuracy: 0.01)
     }
 
     func testLoopGetStateRecommendsManualBolusWithMomentum() {
