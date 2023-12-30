@@ -1475,7 +1475,7 @@ extension LoopDataManager {
             return nil
         }
         
-        guard potentialCarbEntry != nil else {
+        guard FeatureFlags.recommendBolusForCarbsWithoutCorrection && potentialCarbEntry != nil else {
             return recommendation
         }
         
