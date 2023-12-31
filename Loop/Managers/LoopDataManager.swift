@@ -1475,23 +1475,19 @@ extension LoopDataManager {
             return nil
         }
         
-        guard FeatureFlags.recommendBolusForCarbsWithoutCorrection && potentialCarbEntry != nil else {
-            return recommendation
+        guard potentialCarbEntry != nil else {
+            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: 0.0, correctionAmount: recommendation!.amount)
         }
         
-        // when adding new carb entries, don't try to cover corrections. In particular when using
-        // auto-bolus, this prevents including the entire correction as part of the bolus for carbs
         let predictionWithoutCarbs = try predictGlucose(using: .all, potentialBolus: nil, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
         
         let recommendationWithoutCarbs = try recommendBolusValidatingDataRecency(forPrediction: predictionWithoutCarbs, consideringPotentialCarbEntry: nil)
         
-        guard recommendationWithoutCarbs != nil && recommendationWithoutCarbs!.amount > 0 else {
-            return recommendation
+        guard recommendationWithoutCarbs != nil else {
+            return recommendation // unable to differentiate between carbs and correction
         }
-        
-        let updatedAmount = volumeRounder()(recommendation!.amount - recommendationWithoutCarbs!.amount)
-        
-        return ManualBolusRecommendation(amount: updatedAmount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice)
+                
+        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: recommendation!.amount - recommendationWithoutCarbs!.amount, correctionAmount: recommendationWithoutCarbs!.amount)
     }
 
     /// - Throws:
@@ -2012,7 +2008,7 @@ protocol LoopState {
     /// Computes the recommended bolus for correcting a glucose prediction, optionally considering a potential carb entry.
     /// - Parameter potentialCarbEntry: A carb entry under consideration for which to include effects in the prediction
     /// - Parameter replacedCarbEntry: An existing carb entry replaced by `potentialCarbEntry`
-    /// - Parameter considerPositiveVelocityAndRC: Positive velocity and positive retrospective correction will not be used if this is false.
+    /// - Parameter considerPositiveVelocityAndRC: Positive velocity and positive retrospective correction will not be used if this is false.    
     /// - Returns: A bolus recommendation, or `nil` if not applicable
     /// - Throws: LoopError.missingDataError if recommendation cannot be computed
     func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, considerPositiveVelocityAndRC: Bool) throws -> ManualBolusRecommendation?

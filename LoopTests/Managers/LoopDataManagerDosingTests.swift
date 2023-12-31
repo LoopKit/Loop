@@ -500,7 +500,8 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
             exp.fulfill()
         }
         wait(for: [exp], timeout: 100000.0)
-        XCTAssertEqual(recommendedBolus!.amount, 0.5, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, 1.82, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0.5, accuracy: 0.01)
     }
 
     func testLoopGetStateRecommendsManualBolusWithMomentum() {

@@ -191,7 +191,7 @@ struct BolusEntryView: View {
             if viewModel.isManualGlucoseEntryEnabled && viewModel.potentialCarbEntry != nil {
                 potentialCarbEntryRow
             }
-
+                        
             if viewModel.isManualGlucoseEntryEnabled || viewModel.potentialCarbEntry != nil {
                 recommendedBolusRow
             }
@@ -226,20 +226,74 @@ struct BolusEntryView: View {
             }
         }
     }
-
+    
+    private func displayRecommendationBreakdown() -> Bool {
+        return viewModel.potentialCarbEntry != nil && viewModel.carbBolus != nil && viewModel.correctionBolus != nil
+    }
+    
+    @State
+    private var recommendationBreakdownExpanded = false
+    
+    @ViewBuilder
     private var recommendedBolusRow: some View {
-        HStack {
-            Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
-            Spacer()
+        
+        VStack {
             HStack(alignment: .firstTextBaseline) {
-                Text(viewModel.recommendedBolusString)
-                    .font(.title)
-                    .foregroundColor(Color(.label))
-                bolusUnitsLabel
+                if displayRecommendationBreakdown() {
+                    Text(recommendationBreakdownExpanded ? "-": "+")
+                }
+                Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
+                Spacer()
+                HStack(alignment: .firstTextBaseline) {
+                    Text(viewModel.recommendedBolusString)
+                        .font(.title)
+                        .foregroundColor(Color(.label))
+                    bolusUnitsLabel
+                }
+            }
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
+            .onTapGesture {
+                if displayRecommendationBreakdown() {
+                    recommendationBreakdownExpanded.toggle()
+                }
+            }
+            if recommendationBreakdownExpanded {
+                VStack {
+                    HStack {
+                        Text("    ")
+                        Text("Carb Bolus", comment: "Label for carb bolus row on bolus screen")
+                            .font(.footnote)
+                        Spacer()
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(viewModel.carbBolusString)
+                                .font(.footnote)
+                                .foregroundColor(Color(.label))
+                            breakdownBolusUnitsLabel
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                    HStack {
+                        Text("    ")
+                        Text("Correction Bolus", comment: "Label for correction bolus row on bolus screen")
+                            .font(.footnote)
+                        Spacer()
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(viewModel.correctionBolusString)
+                                .font(.footnote)
+                                .foregroundColor(Color(.label))
+                            breakdownBolusUnitsLabel
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+                .accessibilityElement(children: .combine)
+                .transition(.slide)
             }
         }
-        .accessibilityElement(children: .combine)
+        
     }
+    
 
     private func didBeginEditing() {
         if !editedBolusAmount {
@@ -273,6 +327,12 @@ struct BolusEntryView: View {
 
     private var bolusUnitsLabel: some View {
         Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+            .foregroundColor(Color(.secondaryLabel))
+    }
+    
+    private var breakdownBolusUnitsLabel: some View {
+        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+            .font(.footnote)
             .foregroundColor(Color(.secondaryLabel))
     }
 

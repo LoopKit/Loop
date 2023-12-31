@@ -113,6 +113,14 @@ final class BolusEntryViewModel: ObservableObject {
     let potentialCarbEntry: NewCarbEntry?
     let selectedCarbAbsorptionTimeEmoji: String?
 
+    @Published var carbBolus: HKQuantity?
+    var carbBolusAmount: Double? {
+        carbBolus?.doubleValue(for: .internationalUnit())
+    }
+    @Published var correctionBolus: HKQuantity?
+    var correctionBolusAmount: Double? {
+        correctionBolus?.doubleValue(for: .internationalUnit())
+    }
     @Published var recommendedBolus: HKQuantity?
     var recommendedBolusAmount: Double? {
         recommendedBolus?.doubleValue(for: .internationalUnit())
@@ -656,12 +664,26 @@ final class BolusEntryViewModel: ObservableObject {
 
         let now = Date()
         var recommendation: ManualBolusRecommendation?
+        let carbBolus: HKQuantity?
+        let correctionBolus: HKQuantity?
         let recommendedBolus: HKQuantity?
         let notice: Notice?
         do {
             recommendation = try computeBolusRecommendation(from: state)
 
             if let recommendation = recommendation {
+                if let carbsAmount = recommendation.carbsAmount {
+                    carbBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: carbsAmount))
+                } else {
+                    carbBolus = nil
+                }
+
+                if let correctionAmount = recommendation.correctionAmount {
+                    correctionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: correctionAmount))
+                } else {
+                    correctionBolus = nil
+                }
+
                 recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: recommendation.amount))
                 //recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
                 
@@ -680,10 +702,14 @@ final class BolusEntryViewModel: ObservableObject {
                     notice = nil
                 }
             } else {
+                carbBolus = nil
+                correctionBolus = nil
                 recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
                 notice = nil
             }
         } catch {
+            carbBolus = nil
+            correctionBolus = nil
             recommendedBolus = nil
 
             switch error {
@@ -700,6 +726,8 @@ final class BolusEntryViewModel: ObservableObject {
 
         DispatchQueue.main.async {
             let priorRecommendedBolus = self.recommendedBolus
+            self.carbBolus = carbBolus
+            self.correctionBolus = correctionBolus
             self.recommendedBolus = recommendedBolus
             self.dosingDecision.manualBolusRecommendation = recommendation.map { ManualBolusRecommendationWithDate(recommendation: $0, date: now) }
             self.activeNotice = notice
@@ -729,7 +757,7 @@ final class BolusEntryViewModel: ObservableObject {
             return try state.recommendBolus(
                 consideringPotentialCarbEntry: potentialCarbEntry,
                 replacingCarbEntry: originalCarbEntry,
-                considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses
+                considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses               
             )
         }
     }
@@ -793,8 +821,18 @@ final class BolusEntryViewModel: ObservableObject {
         bolusAmountFormatter.string(from: bolusAmount) ?? String(bolusAmount)
     }
 
+    var carbBolusString: String {
+        return bolusString(carbBolusAmount)
+    }
+    var correctionBolusString: String {
+        return bolusString(correctionBolusAmount)
+    }
     var recommendedBolusString: String {
-        guard let amount = recommendedBolusAmount else {
+        return bolusString(recommendedBolusAmount)
+    }
+    
+    func bolusString(_ bolusAmount: Double?) -> String {
+        guard let amount = bolusAmount else {
             return "–"
         }
         return formatBolusAmount(amount)
