@@ -239,10 +239,12 @@ struct BolusEntryView: View {
         
         VStack {
             HStack(alignment: .firstTextBaseline) {
-                if displayRecommendationBreakdown() {
-                    Text(recommendationBreakdownExpanded ? "-": "+")
-                }
                 Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
+                if displayRecommendationBreakdown() {
+                    Image(systemName: "chevron.right.circle")
+                        .imageScale(.small)
+                        .rotationEffect(.degrees(recommendationBreakdownExpanded ? 90 : 0))
+                }
                 Spacer()
                 HStack(alignment: .firstTextBaseline) {
                     Text(viewModel.recommendedBolusString)
@@ -289,6 +291,7 @@ struct BolusEntryView: View {
                 }
                 .accessibilityElement(children: .combine)
                 .transition(.slide)
+                .animation(.smooth, value: recommendationBreakdownExpanded)
             }
         }
         
