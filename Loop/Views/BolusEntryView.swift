@@ -237,7 +237,7 @@ struct BolusEntryView: View {
     @ViewBuilder
     private var recommendedBolusRow: some View {
         
-        VStack {
+        Section {
             HStack(alignment: .firstTextBaseline) {
                 Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
                 if displayRecommendationBreakdown() {
