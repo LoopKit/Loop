@@ -673,13 +673,13 @@ final class BolusEntryViewModel: ObservableObject {
 
             if let recommendation = recommendation {
                 if let carbsAmount = recommendation.carbsAmount {
-                    carbBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: carbsAmount))
+                    carbBolus = HKQuantity(unit: .internationalUnit(), doubleValue: carbsAmount)
                 } else {
                     carbBolus = nil
                 }
 
                 if let correctionAmount = recommendation.correctionAmount {
-                    correctionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: correctionAmount))
+                    correctionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: correctionAmount)
                 } else {
                     correctionBolus = nil
                 }
