@@ -228,7 +228,11 @@ struct BolusEntryView: View {
     }
     
     private func displayRecommendationBreakdown() -> Bool {
-        return viewModel.potentialCarbEntry != nil && viewModel.carbBolus != nil && viewModel.correctionBolus != nil
+        if viewModel.potentialCarbEntry != nil {
+            return viewModel.carbBolus != nil && viewModel.correctionBolus != nil
+        } else {
+            return viewModel.correctionBolus != nil
+        }
     }
     
     @State
@@ -262,32 +266,51 @@ struct BolusEntryView: View {
             }
             if recommendationBreakdownExpanded {
                 VStack {
-                    HStack {
-                        Text("    ")
-                        Text("Carb Bolus", comment: "Label for carb bolus row on bolus screen")
-                            .font(.footnote)
-                        Spacer()
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(viewModel.carbBolusString)
+                    if viewModel.potentialCarbEntry != nil && viewModel.carbBolus != nil {
+                        HStack {
+                            Text("    ")
+                            Text("Carb Bolus", comment: "Label for carb bolus row on bolus screen")
                                 .font(.footnote)
-                                .foregroundColor(Color(.label))
-                            breakdownBolusUnitsLabel
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.carbBolusString)
+                                    .font(.footnote)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
                         }
+                        .accessibilityElement(children: .combine)
                     }
-                    .accessibilityElement(children: .combine)
-                    HStack {
-                        Text("    ")
-                        Text("Correction Bolus", comment: "Label for correction bolus row on bolus screen")
-                            .font(.footnote)
-                        Spacer()
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(viewModel.correctionBolusString)
+                    if viewModel.correctionBolus != nil {
+                        HStack {
+                            Text("    ")
+                            Text("Correction Bolus", comment: "Label for correction bolus row on bolus screen")
                                 .font(.footnote)
-                                .foregroundColor(Color(.label))
-                            breakdownBolusUnitsLabel
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.correctionBolusString)
+                                    .font(.footnote)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
                         }
+                        .accessibilityElement(children: .combine)
                     }
-                    .accessibilityElement(children: .combine)
+                    if viewModel.missingBolus != nil {
+                        HStack {
+                            Text("    ")
+                            Text("Limit to Max Bolus", comment: "Label for max bolus row on bolus screen")
+                                .font(.footnote)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.negativeMissingBolusString)
+                                    .font(.footnote)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
                 }
                 .accessibilityElement(children: .combine)
                 .transition(.slide)
