@@ -537,7 +537,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         wait(for: [exp], timeout: 100000.0)
         XCTAssertEqual(recommendedBolus!.amount, 1, accuracy: 0.01)
-        XCTAssertEqual(recommendedBolus!.correctionAmount!, 0.5, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, 1.82, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.carbsAmount!, 0.5, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.missingAmount!, 1.32, accuracy: 0.01)
     }

@@ -1520,7 +1520,8 @@ extension LoopDataManager {
         if recommendation!.amount <= 0 && correctionBreakdownRecommendation != nil {
             correctionAmount = calcCorrectionAmount(carbsAmount: carbsAmount, carbBreakdownRecommendation: carbBreakdownRecommendation!, correctionBreakdownRecommendation: correctionBreakdownRecommendation!)
         } else {
-            correctionAmount = recommendation!.amount - carbsAmount
+            let extra = Swift.max(recommendation!.missingAmount ?? 0, 0)            
+            correctionAmount = recommendation!.amount + extra - carbsAmount
         }
         
         return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: carbsAmount, correctionAmount: correctionAmount, missingAmount: recommendation!.missingAmount)
