@@ -245,7 +245,7 @@ struct BolusEntryView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
                 if displayRecommendationBreakdown() {
-                    Image(systemName: "chevron.right.circle")
+                    Image(systemName: "chevron.forward.circle")
                         .imageScale(.small)
                         .rotationEffect(.degrees(recommendationBreakdownExpanded ? 90 : 0))
                 }
