@@ -460,6 +460,7 @@ final class BolusEntryViewModel: ObservableObject {
     private lazy var breakdownBolusAmountFormatter: NumberFormatter = {
         let formatter = QuantityFormatter(for: .internationalUnit())
         formatter.numberFormatter.roundingMode = .halfUp
+        formatter.numberFormatter.maximumFractionDigits = 2
         return formatter.numberFormatter
     }()
 
