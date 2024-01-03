@@ -116,7 +116,7 @@ class LoopDataManagerTests: XCTestCase {
             RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: 100, maxValue: 110))
         ], timeZone: .utcTimeZone)!
     }
-    
+        
     // MARK: Mock stores
     var now: Date!
     var dosingDecisionStore: MockDosingDecisionStore!
@@ -128,7 +128,10 @@ class LoopDataManagerTests: XCTestCase {
                maxBolus: Double = 10,
                maxBasalRate: Double = 5.0,
                dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
-               predictGlucose: Bool = false)
+               predictGlucose: Bool = false,
+               correctionRanges: GlucoseRangeSchedule? = nil,
+               suspendThresholdValue: Double? = nil
+    )
     {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(
@@ -146,10 +149,13 @@ class LoopDataManagerTests: XCTestCase {
             ],
             timeZone: .utcTimeZone
         )!
+        let glucoseTargets = correctionRanges ?? glucoseTargetRangeSchedule
+        
+        let suspendThreshold = suspendThresholdValue == nil ? suspendThreshold : GlucoseThreshold(unit: .milligramsPerDeciliter, value: suspendThresholdValue!)
 
         let settings = LoopSettings(
             dosingEnabled: false,
-            glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+            glucoseTargetRangeSchedule: glucoseTargets,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
             carbRatioSchedule: carbRatioSchedule,
