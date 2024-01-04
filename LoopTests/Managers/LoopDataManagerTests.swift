@@ -128,7 +128,7 @@ class LoopDataManagerTests: XCTestCase {
                maxBolus: Double = 10,
                maxBasalRate: Double = 5.0,
                dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
-               predictGlucose: Bool = false,
+               predictCarbGlucoseEffects: Bool = false,
                correctionRanges: GlucoseRangeSchedule? = nil,
                suspendThresholdValue: Double? = nil
     )
@@ -170,7 +170,7 @@ class LoopDataManagerTests: XCTestCase {
         doseStore.basalProfileApplyingOverrideHistory = doseStore.basalProfile
         doseStore.sensitivitySchedule = insulinSensitivitySchedule
         let glucoseStore = MockGlucoseStore(for: test)
-        let carbStore = MockCarbStore(for: test, predictGlucose: predictGlucose)
+        let carbStore = MockCarbStore(for: test, predictGlucose: predictCarbGlucoseEffects)
         carbStore.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivitySchedule
         carbStore.carbRatioSchedule = carbRatioSchedule
         

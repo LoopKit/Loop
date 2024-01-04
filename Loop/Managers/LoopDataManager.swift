@@ -1518,7 +1518,7 @@ extension LoopDataManager {
         var missingAmount = recommendation!.missingAmount
         let correctionAmount : Double
 
-        if recommendation!.amount <= 0 && correctionBreakdownRecommendation != nil {
+        if recommendation!.amount <= 0 && correctionBreakdownRecommendation != nil && recommendation!.notice != .predictedGlucoseInRange {
             correctionAmount = calcCorrectionAmount(carbsAmount: carbsAmount, carbBreakdownRecommendation: carbBreakdownRecommendation!, correctionBreakdownRecommendation: correctionBreakdownRecommendation!)
             
             let amount = carbsAmount + correctionAmount
