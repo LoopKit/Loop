@@ -576,7 +576,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(recommendedBolus!.amount, 0, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.correctionAmount!, (176.21882841682697 - 230) / 45, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.carbsAmount!, 0.5, accuracy: 0.01)
-        XCTAssertNil(recommendedBolus!.missingAmount)
+        XCTAssertEqual(recommendedBolus!.missingAmount!, 0.5 + (176.21882841682697 - 230) / 45, accuracy: 0.01)
     }
 
     func testLoopGetStateRecommendsManualBolusWithMomentum() {

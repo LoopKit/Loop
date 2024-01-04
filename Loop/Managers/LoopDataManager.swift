@@ -1515,16 +1515,22 @@ extension LoopDataManager {
 
         let correctionBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .correctionBreakdown)
 
+        var missingAmount = recommendation!.missingAmount
         let correctionAmount : Double
 
         if recommendation!.amount <= 0 && correctionBreakdownRecommendation != nil {
             correctionAmount = calcCorrectionAmount(carbsAmount: carbsAmount, carbBreakdownRecommendation: carbBreakdownRecommendation!, correctionBreakdownRecommendation: correctionBreakdownRecommendation!)
+            
+            let amount = carbsAmount + correctionAmount
+            if volumeRounder()(amount) != 0 {
+                missingAmount = amount
+            }
         } else {
-            let extra = Swift.max(recommendation!.missingAmount ?? 0, 0)            
+            let extra = Swift.max(recommendation!.missingAmount ?? 0, 0)
             correctionAmount = recommendation!.amount + extra - carbsAmount
         }
         
-        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: carbsAmount, correctionAmount: correctionAmount, missingAmount: recommendation!.missingAmount)
+        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: carbsAmount, correctionAmount: correctionAmount, missingAmount: missingAmount)
     }
     
     fileprivate func calcCorrectionAmount(carbsAmount: Double,

@@ -296,11 +296,16 @@ struct BolusEntryView: View {
                         }
                         .accessibilityElement(children: .combine)
                     }
-                    if viewModel.missingBolus != nil {
+                    if viewModel.missingBolus != nil && viewModel.recommendedBolusAmount != nil {
                         HStack {
                             Text("    ")
-                            Text("Limit to Max Bolus", comment: "Label for max bolus row on bolus screen")
-                                .font(.footnote)
+                            if viewModel.recommendedBolusAmount! != 0 {
+                                Text("Limit to Max Bolus", comment: "Label for max bolus row on bolus screen")
+                                    .font(.footnote)
+                            } else {
+                                Text("Limit to 0 Bolus", comment: "Label for 0 bolus row on bolus screen")
+                                    .font(.footnote)
+                            }
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.negativeMissingBolusString)
