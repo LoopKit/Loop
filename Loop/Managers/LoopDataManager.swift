@@ -1494,6 +1494,10 @@ extension LoopDataManager {
 
                 if correctionBreakdownRecommendation != nil {
                     correctionAmount = calcCorrectionAmount(carbsAmount: 0, carbBreakdownRecommendation: carbBreakdownRecommendation!, correctionBreakdownRecommendation: correctionBreakdownRecommendation!)
+                    
+                    if recommendation!.notice == .predictedGlucoseInRange {
+                        correctionAmount = Swift.min(correctionAmount, 0) // ensure 0 if in range but above the mid-point
+                    }
                 } else {
                     correctionAmount = 0
                 }
