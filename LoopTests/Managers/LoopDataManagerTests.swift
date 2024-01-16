@@ -370,6 +370,41 @@ class LoopDataManagerTests: XCTestCase {
         }
     }
 
+    func testRunWithOngoingTempBasal() throws {
+        // Algorithm should assume that the current temp basal will be canceled to implement a recommendation,
+        // and should not include effects from future delivery of the temp basal in its prediction.
+        var input = LoopAlgorithmInputFixture.mock()
+
+        let now = input.predictionStart
+
+        // Add carbs (20g should be 2U at 10g/U)
+        input.carbEntries.append(
+            FixtureCarbEntry(
+                startDate: now.addingTimeInterval(-.minutes(5)),
+                quantity: .carbs(value: 20)
+            )
+        )
+
+        // High temp started 2 minutes ago, enough to cover carbs (2U)
+        let tempBasalStart = now.addingTimeInterval(-.minutes(2))
+
+        input.doses.append(
+            FixtureInsulinDose(
+                type: .tempBasal,
+                startDate: tempBasalStart,
+                endDate: tempBasalStart.addingTimeInterval(.minutes(30)),
+                volume: 2
+            )
+        )
+
+        let output = LoopAlgorithm.run(input: input)
+
+        let basalAdjustment = output.recommendation!.automatic!.basalAdjustment
+
+        XCTAssertEqual(basalAdjustment?.unitsPerHour, 4)
+    }
+
+
     func testLoopRecommendsTempBasalWithoutEnactingIfOpenLoop() async {
         glucoseStore.storedGlucose = [
             StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: .glucose(value: 150)),
