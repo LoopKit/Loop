@@ -82,10 +82,9 @@ public struct SettingsView: View {
                         configurationSection
                     }
                     deviceSettingsSection
-                    // Disables for Coastal HF study
-//                    if FeatureFlags.allowExperimentalFeatures {
-//                        favoriteFoodsSection
-//                    }
+                    if FeatureFlags.allowExperimentalFeatures {
+                        favoriteFoodsSection
+                    }
                     if (viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice) && viewModel.showDeleteTestData {
                         deleteDataSection
                     }
