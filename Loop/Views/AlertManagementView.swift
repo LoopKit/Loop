@@ -75,11 +75,11 @@ struct AlertManagementView: View {
     
     private var footerView: some View {
         VStack(alignment: .leading, spacing: 24) {
-            HStack(alignment: .top, spacing: 8) {
+            HStack(alignment: .top, spacing: 16) {
                 Image("phone")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: 64, maxHeight: 64)
+                    .frame(width: 54)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(
@@ -104,11 +104,11 @@ struct AlertManagementView: View {
                 }
             }
             
-            HStack(alignment: .top, spacing: 8) {
+            HStack(alignment: .top, spacing: 16) {
                 Image("hardware")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: 64, maxHeight: 64)
+                    .frame(width: 54)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("HARDWARE SOUNDS")
@@ -117,12 +117,13 @@ struct AlertManagementView: View {
                 }
             }
             
-            HStack(alignment: .top, spacing: 8) {
+            HStack(alignment: .top, spacing: 16) {
                 Image(systemName: "moon.fill")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: 64, maxHeight: 48)
+                    .frame(width: 44)
                     .foregroundColor(.accentColor)
+                    .padding(.horizontal, 5)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("IOS FOCUS MODES")
