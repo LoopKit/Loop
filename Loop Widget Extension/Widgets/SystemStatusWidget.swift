@@ -76,5 +76,6 @@ struct SystemStatusWidget: Widget {
         .configurationDisplayName("Loop Status Widget")
         .description("See your current blood glucose and insulin delivery.")
         .supportedFamilies([.systemSmall, .systemMedium])
+        .contentMarginsDisabledIfAvailable()
     }
 }

@@ -361,20 +361,9 @@ class AlertManagerTests: XCTestCase {
         }
 
         wait(for: [testExpectation], timeout: 1)
-        if #available(iOS 15.0, *) {
-            XCTAssertNil(loopNotRunningRequests.first(where: { $0.content.interruptionLevel == .timeSensitive })?.content.sound)
-            if let request = loopNotRunningRequests.first(where: { $0.content.interruptionLevel == .critical }) {
-                XCTAssertEqual(request.content.sound, .defaultCriticalSound(withAudioVolume: 0))
-            }
-        } else if FeatureFlags.criticalAlertsEnabled {
-            for request in loopNotRunningRequests {
-                let sound = request.content.sound
-                XCTAssertTrue(sound == nil || sound == .defaultCriticalSound(withAudioVolume: 0.0))
-            }
-        } else {
-            for request in loopNotRunningRequests {
-                XCTAssertNil(request.content.sound)
-            }
+        XCTAssertNil(loopNotRunningRequests.first(where: { $0.content.interruptionLevel == .timeSensitive })?.content.sound)
+        if let request = loopNotRunningRequests.first(where: { $0.content.interruptionLevel == .critical }) {
+            XCTAssertEqual(request.content.sound, .defaultCriticalSound(withAudioVolume: 0))
         }
     }
 }

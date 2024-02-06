@@ -16,7 +16,7 @@ import Combine
 
 protocol LoopControl {
     var lastLoopCompleted: Date? { get }
-    func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) async
+    func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) async throws
     func loop() async
 }
 
@@ -440,7 +440,7 @@ final class DeviceDataManager {
         }
 
         // Cancel active high temp basal
-        await loopControl.cancelActiveTempBasal(for: .unreliableCGMData)
+        try? await loopControl.cancelActiveTempBasal(for: .unreliableCGMData)
     }
 
     private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult) async {
@@ -1277,7 +1277,7 @@ extension GlucoseStore : CGMStalenessMonitorDelegate { }
 
 
 //MARK: TherapySettingsViewModelDelegate
-struct CancelTempBasalFailedError: LocalizedError {
+struct CancelTempBasalFailedMaximumBasalRateChangedError: LocalizedError {
     let reason: Error?
     
     var errorDescription: String? {
@@ -1317,19 +1317,16 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
     
     func syncDeliveryLimits(deliveryLimits: DeliveryLimits) async throws -> DeliveryLimits
     {
-        do {
-            // FIRST we need to check to make sure if we have to cancel temp basal first
-            if let maxRate = deliveryLimits.maximumBasalRate?.doubleValue(for: .internationalUnitsPerHour),
-               case .tempBasal(let dose) = basalDeliveryState,
-               dose.unitsPerHour > maxRate
-            {
-                // Temp basal is higher than proposed rate, so should cancel
-                await self.loopControl.cancelActiveTempBasal(for: .maximumBasalRateChanged)
-            }
-            return try await pumpManager?.syncDeliveryLimits(limits: deliveryLimits) ?? deliveryLimits
-        } catch {
-            throw CancelTempBasalFailedError(reason: error)
+        // FIRST we need to check to make sure if we have to cancel temp basal first
+        if let maxRate = deliveryLimits.maximumBasalRate?.doubleValue(for: .internationalUnitsPerHour),
+           case .tempBasal(let dose) = basalDeliveryState,
+           dose.unitsPerHour > maxRate
+        {
+            // Temp basal is higher than proposed rate, so should cancel
+            try await self.loopControl.cancelActiveTempBasal(for: .maximumBasalRateChanged)
         }
+        
+        return try await pumpManager?.syncDeliveryLimits(limits: deliveryLimits) ?? deliveryLimits
     }
 
     func saveCompletion(therapySettings: TherapySettings) {
