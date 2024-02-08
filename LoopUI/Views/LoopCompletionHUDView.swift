@@ -191,8 +191,10 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
         if loopIconClosed {
             accessibilityHint = LocalizedString("Closed loop", comment: "Accessibility hint describing completion HUD for a closed loop")
+            accessibilityIdentifier = "loopCompletionHUDLoopStatusClosed"
         } else {
             accessibilityHint = LocalizedString("Open loop", comment: "Accessbility hint describing completion HUD for an open loop")
+            accessibilityIdentifier = "loopCompletionHUDLoopStatusOpen"
         }
     }
 

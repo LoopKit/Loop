@@ -155,6 +155,7 @@ struct AlertManagementView: View {
                         Spacer()
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.critical)
+                            .accessibilityIdentifier("settingsViewAlertManagementAlertPermissionsAlertWarning")
                     }
                 }
             }

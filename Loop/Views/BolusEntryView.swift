@@ -271,7 +271,6 @@ struct BolusEntryView: View {
                 bolusUnitsLabel
             }
         }
-        .accessibilityElement(children: .combine)
     }
 
     private var bolusUnitsLabel: some View {

@@ -43,6 +43,10 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
     }
 
     override public func presentStatusHighlight() {
+        defer {
+            accessibilityValue = statusHighlightView.messageLabel.text
+        }
+        
         guard !isStatusHighlightDisplayed else {
             return
         }
@@ -60,6 +64,18 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
     }
     
     override public func dismissStatusHighlight() {
+        defer {
+            var parts = [String]()
+            if let basalRateAccessibilityValue = basalRateHUD.accessibilityValue {
+                parts.append(basalRateAccessibilityValue)
+            }
+            
+            if let pumpManagerProvidedAccessibilityValue = pumpManagerProvidedHUD.accessibilityValue {
+                parts.append(pumpManagerProvidedAccessibilityValue)
+            }
+            accessibilityValue = parts.joined(separator: ", ")
+        }
+        
         guard statusStackView.arrangedSubviews.contains(statusHighlightView) else {
             return
         }
