@@ -213,7 +213,7 @@ final class LoopDataManager {
                 if !$0 {
                     self.temporaryPresetsManager.clearOverride(matching: .preMeal)
                     Task {
-                        await self.cancelActiveTempBasal(for: .automaticDosingDisabled)
+                        try? await self.cancelActiveTempBasal(for: .automaticDosingDisabled)
                     }
                 } else {
                     Task {
@@ -408,7 +408,7 @@ final class LoopDataManager {
     }
 
     /// Cancel the active temp basal if it was automatically issued
-    func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) async {
+    func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) async throws {
         guard case .tempBasal(let dose) = deliveryDelegate?.basalDeliveryState, (dose.automatic ?? true) else { return }
 
         logger.default("Cancelling active temp basal for reason: %{public}@", String(describing: reason))
@@ -423,6 +423,11 @@ final class LoopDataManager {
             try await deliveryDelegate?.enact(recommendation)
         } catch {
             dosingDecision.appendError(error as? LoopError ?? .unknownError(error))
+            if reason == .maximumBasalRateChanged {
+                throw CancelTempBasalFailedMaximumBasalRateChangedError(reason: error)
+            } else {
+                throw error
+            }
         }
 
         await dosingDecisionStore.storeDosingDecision(dosingDecision)
