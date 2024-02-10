@@ -12,12 +12,12 @@ import LoopKit
 import LoopCore
 
 struct GlucoseBasedApplicationFactorStrategy: ApplicationFactorStrategy {
-    static let minPartialApplicationFactor = 0.20 // min fraction of correction when glucose > minGlucoseSlidingScale
-    static let maxPartialApplicationFactor = 0.80 // max fraction of correction when glucose > maxGlucoseSlidingScale
+    static let minPartialApplicationFactor = 0.40 // min fraction of correction when glucose > minGlucoseSlidingScale
+    static let maxPartialApplicationFactor = 1.50 // max fraction of correction when glucose > maxGlucoseSlidingScale
     // set minGlucoseSlidingScale based on user setting for correction range
     // use mg/dL for calculations
     static let minGlucoseDeltaSlidingScale = 10.0 // mg/dL
-    static let maxGlucoseSlidingScale = 200.0 // mg/dL
+    static let maxGlucoseSlidingScale = 180.0 // mg/dL
 
     func calculateDosingFactor(
         for glucose: HKQuantity,
