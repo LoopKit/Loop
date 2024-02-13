@@ -7,6 +7,7 @@
 
 import HealthKit
 import LoopKit
+import LoopAlgorithm
 
 
 extension Collection where Element == SampleValue {

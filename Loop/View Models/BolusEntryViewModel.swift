@@ -17,6 +17,7 @@ import LoopKitUI
 import LoopUI
 import SwiftUI
 import SwiftCharts
+import LoopAlgorithm
 
 protocol BolusEntryViewModelDelegate: AnyObject {
 
@@ -27,7 +28,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     var mostRecentGlucoseDataDate: Date? { get }
     var mostRecentPumpDataDate: Date? { get }
 
-    func fetchData(for baseTime: Date, disablingPreMeal: Bool) async throws -> LoopAlgorithmInput
+    func fetchData(for baseTime: Date, disablingPreMeal: Bool) async throws -> LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry>
     func effectiveGlucoseTargetRangeSchedule(presumingMealEntry: Bool) -> GlucoseRangeSchedule?
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
 
@@ -43,7 +44,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     ) async throws -> ManualBolusRecommendation?
 
 
-    func generatePrediction(input: LoopAlgorithmInput) throws -> [PredictedGlucoseValue]
+    func generatePrediction(input: LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry>) throws -> [PredictedGlucoseValue]
 
     var activeInsulin: InsulinValue? { get }
     var activeCarbs: CarbValue? { get }
@@ -532,9 +533,9 @@ final class BolusEntryViewModel: ObservableObject {
             // Add potential bolus, carbs, manual glucose
             input = input
                 .addingDose(dose: enteredBolusDose)
-                .addingGlucoseSample(sample: manualGlucoseSample)
+                .addingGlucoseSample(sample: manualGlucoseSample?.asStoredGlucoseStample)
                 .removingCarbEntry(carbEntry: originalCarbEntry)
-                .addingCarbEntry(carbEntry: potentialCarbEntry)
+                .addingCarbEntry(carbEntry: potentialCarbEntry?.asStoredCarbEntry)
 
             let prediction = try delegate.generatePrediction(input: input)
             predictedGlucoseValues = prediction

@@ -12,6 +12,8 @@ import LoopKit
 import LoopKitUI
 import SwiftUI
 import XCTest
+import LoopAlgorithm
+
 @testable import Loop
 
 @MainActor
@@ -21,7 +23,7 @@ class BolusEntryViewModelTests: XCTestCase {
     static let now = ISO8601DateFormatter().date(from: "2020-03-11T07:00:00-0700")!
     static let exampleStartDate = now - .hours(2)
     static let exampleEndDate = now - .hours(1)
-    static fileprivate let exampleGlucoseValue = MockGlucoseValue(quantity: exampleManualGlucoseQuantity, startDate: exampleStartDate)
+    static fileprivate let exampleGlucoseValue = SimpleGlucoseValue(startDate: exampleStartDate, quantity: exampleManualGlucoseQuantity)
     static let exampleManualGlucoseQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 123.4)
     static let exampleManualGlucoseSample =
         HKQuantitySample(type: HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
@@ -829,6 +831,7 @@ public enum BolusEntryViewTestError: Error {
 
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
 
+
     var settings = StoredSettings(
         dosingEnabled: true,
         glucoseTargetRangeSchedule: BolusEntryViewModelTests.exampleGlucoseRangeSchedule,
@@ -848,13 +851,13 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     
     var preMealOverride: LoopKit.TemporaryScheduleOverride?
     
-    var pumpInsulinType: LoopKit.InsulinType?
+    var pumpInsulinType: InsulinType?
     
     var mostRecentGlucoseDataDate: Date?
     
     var mostRecentPumpDataDate: Date?
 
-    var loopStateInput = LoopAlgorithmInput(
+    var loopStateInput = LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry>(
         predictionStart: Date(),
         glucoseHistory: [],
         doses: [],
@@ -872,7 +875,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         automaticBolusApplicationFactor: 0.4
     )
 
-    func fetchData(for baseTime: Date, disablingPreMeal: Bool) async throws -> LoopAlgorithmInput {
+    func fetchData(for baseTime: Date, disablingPreMeal: Bool) async throws -> LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry> {
         loopStateInput.predictionStart = baseTime
         return loopStateInput
     }
@@ -925,14 +928,14 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     var activeCarbs: CarbValue?
 
     var prediction: [PredictedGlucoseValue] = []
-    var lastGeneratePredictionInput: LoopAlgorithmInput?
+    var lastGeneratePredictionInput: LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry>?
 
-    func generatePrediction(input: LoopAlgorithmInput) throws -> [PredictedGlucoseValue] {
+    func generatePrediction(input: LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry>) throws -> [PredictedGlucoseValue] {
         lastGeneratePredictionInput = input
         return prediction
     }
 
-    var algorithmOutput: LoopAlgorithmOutput = LoopAlgorithmOutput(
+    var algorithmOutput: LoopAlgorithmOutput = LoopAlgorithmOutput<StoredCarbEntry>(
         recommendationResult: .success(.init()),
         predictedGlucose: [],
         effects: LoopAlgorithmEffects.emptyMock,

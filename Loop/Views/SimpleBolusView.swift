@@ -11,6 +11,7 @@ import LoopKit
 import LoopKitUI
 import HealthKit
 import LoopCore
+import LoopAlgorithm
 
 struct SimpleBolusView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
@@ -380,7 +381,7 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
                 userUpdatedDate: nil)
         }
         
-        func insulinOnBoard(at date: Date) async -> LoopKit.InsulinValue? {
+        func insulinOnBoard(at date: Date) async -> InsulinValue? {
             return nil
         }
 

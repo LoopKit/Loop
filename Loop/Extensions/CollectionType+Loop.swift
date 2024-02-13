@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import LoopAlgorithm
 
 
 public extension Sequence where Element: TimelineValue {

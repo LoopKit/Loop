@@ -12,6 +12,7 @@ import OSLog
 import LoopCore
 import LoopKit
 import Combine
+import LoopAlgorithm
 
 enum MissedMealStatus: Equatable {
     case hasMissedMeal(startTime: Date, carbAmount: Double)

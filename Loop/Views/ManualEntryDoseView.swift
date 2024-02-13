@@ -12,6 +12,7 @@ import SwiftUI
 import LoopKit
 import LoopKitUI
 import LoopUI
+import LoopAlgorithm
 
 
 struct ManualEntryDoseView: View {

@@ -10,6 +10,7 @@ import XCTest
 import LoopKit
 import LoopCore
 import HealthKit
+import LoopAlgorithm
 
 final class LoopAlgorithmTests: XCTestCase {
 
@@ -85,7 +86,7 @@ final class LoopAlgorithmTests: XCTestCase {
     func testAutoBolusMaxIOBClamping() async {
         let now = ISO8601DateFormatter().date(from: "2020-03-11T12:13:14-0700")!
 
-        var input = LoopAlgorithmInput.mock(for: now)
+        var input: LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry> = LoopAlgorithmInput.mock(for: now)
         input.recommendationType = .automaticBolus
 
         // 8U bolus on board, and 100g carbs; CR = 10, so that should be 10U to cover the carbs
@@ -142,14 +143,14 @@ final class LoopAlgorithmTests: XCTestCase {
 }
 
 
-extension LoopAlgorithmInput {
+extension LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry> {
     static func mock(for date: Date, glucose: [Double] = [100, 120, 140, 160]) -> LoopAlgorithmInput {
 
         func d(_ interval: TimeInterval) -> Date {
             return date.addingTimeInterval(interval)
         }
 
-        var input = LoopAlgorithmInput(
+        var input = LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry>(
             predictionStart: date,
             glucoseHistory: [],
             doses: [],

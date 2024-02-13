@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import HealthKit
+import LoopAlgorithm
 
 struct CarbAbsorptionReview {
     var carbEntries: [StoredCarbEntry]

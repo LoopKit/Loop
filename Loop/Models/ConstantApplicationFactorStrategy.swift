@@ -10,6 +10,7 @@ import Foundation
 import HealthKit
 import LoopKit
 import LoopCore
+import LoopAlgorithm
 
 struct ConstantApplicationFactorStrategy: ApplicationFactorStrategy {
     func calculateDosingFactor(

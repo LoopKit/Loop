@@ -10,6 +10,8 @@ import XCTest
 import HealthKit
 import LoopKit
 import LoopKitUI
+import LoopCore
+import LoopAlgorithm
 @testable import Loop
 
 @MainActor
@@ -50,12 +52,9 @@ final class DeviceDataManagerTests: XCTestCase {
 
         let healthStore = HKHealthStore()
 
-        let carbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .minutes(30), medium: .hours(3), slow: .hours(5))
-
         let carbStore = CarbStore(
             cacheStore: persistenceController,
-            cacheLength: .days(1),
-            defaultAbsorptionTimes: carbAbsorptionTimes
+            cacheLength: .days(1)
         )
 
         let doseStore = DoseStore(

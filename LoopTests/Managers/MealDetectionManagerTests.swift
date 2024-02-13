@@ -10,6 +10,8 @@ import XCTest
 import HealthKit
 import LoopCore
 import LoopKit
+import LoopAlgorithm
+
 @testable import Loop
 
 fileprivate class MockGlucoseSample: GlucoseSampleValue {
@@ -17,7 +19,7 @@ fileprivate class MockGlucoseSample: GlucoseSampleValue {
     let provenanceIdentifier = ""
     let isDisplayOnly: Bool
     let wasUserEntered: Bool
-    let condition: LoopKit.GlucoseCondition? = nil
+    let condition: GlucoseCondition? = nil
     let trendRate: HKQuantity? = nil
     var trend: LoopKit.GlucoseTrend?
     var syncIdentifier: String?
@@ -191,8 +193,8 @@ class MealDetectionManagerTests: XCTestCase {
         mealDetectionManager.test_currentDate!
     }
 
-    var algorithmInput: LoopAlgorithmInput!
-    var algorithmOutput: LoopAlgorithmOutput!
+    var algorithmInput: LoopAlgorithmInput<StoredCarbEntry, StoredGlucoseSample, DoseEntry>!
+    var algorithmOutput: LoopAlgorithmOutput<StoredCarbEntry>!
 
     var mockAlgorithmState: AlgorithmDisplayState!
 

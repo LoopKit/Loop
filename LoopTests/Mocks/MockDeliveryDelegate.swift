@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import LoopAlgorithm
 @testable import Loop
 
 class MockDeliveryDelegate: DeliveryDelegate {

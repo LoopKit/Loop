@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopAlgorithm
 
 struct PredictionInputEffect: OptionSet {
     let rawValue: Int

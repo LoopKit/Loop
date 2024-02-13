@@ -8,6 +8,7 @@
 
 import LoopKit
 import LoopCore
+import LoopAlgorithm
 
 extension PumpManagerStatus.BasalDeliveryState {
     func getNetBasal(basalSchedule: BasalRateSchedule, maximumBasalRatePerHour: Double?) -> NetBasal? {

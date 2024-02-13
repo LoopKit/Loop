@@ -16,6 +16,7 @@ import LoopKit
 import LoopKitUI
 import LoopUI
 import SwiftUI
+import LoopAlgorithm
 
 enum ManualEntryDoseViewModelError: Error {
     case notAuthenticated

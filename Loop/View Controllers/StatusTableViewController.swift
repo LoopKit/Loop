@@ -19,6 +19,7 @@ import SwiftCharts
 import os.log
 import Combine
 import WidgetKit
+import LoopAlgorithm
 
 
 private extension RefreshContext {
@@ -436,7 +437,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var glucoseSamples: [StoredGlucoseSample]?
         var predictedGlucoseValues: [GlucoseValue]?
         var iobValues: [InsulinValue]?
-        var doseEntries: [DoseEntry]?
+        var doseEntries: [BasalRelativeDose]?
         var totalDelivery: Double?
         var cobValues: [CarbValue]?
         var carbsOnBoard: HKQuantity?
@@ -488,7 +489,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         if currentContext.contains(.insulin) {
             doseEntries = loopManager.dosesRelativeToBasal.trimmed(from: startDate)
-            iobValues = loopManager.iobValues.trimmed(from: startDate)
+            iobValues = loopManager.iobValues.filterDateRange(startDate, nil)
             totalDelivery = try? await loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())).value
         }
 

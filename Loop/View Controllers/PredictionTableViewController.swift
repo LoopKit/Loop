@@ -13,6 +13,7 @@ import LoopKitUI
 import LoopUI
 import UIKit
 import os.log
+import LoopAlgorithm
 
 
 private extension RefreshContext {
@@ -125,7 +126,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         }
 
         self.retrospectiveGlucoseDiscrepancies = algoOutput?.effects.retrospectiveGlucoseDiscrepancies
-        totalRetrospectiveCorrection = algoOutput?.effects.totalGlucoseCorrectionEffect
+        totalRetrospectiveCorrection = algoOutput?.effects.totalRetrospectiveCorrectionEffect
 
         self.glucoseChart.setPredictedGlucoseValues(algoOutput?.predictedGlucose ?? [])
 

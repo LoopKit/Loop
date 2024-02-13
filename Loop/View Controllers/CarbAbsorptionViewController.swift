@@ -13,6 +13,7 @@ import LoopKit
 import LoopKitUI
 import LoopUI
 import os.log
+import LoopAlgorithm
 
 
 private extension RefreshContext {
@@ -147,7 +148,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         charts.updateEndDate(chartStartDate.addingTimeInterval(.hours(totalHours+1))) // When there is no data, this allows presenting current hour + 1
 
         let midnight = Calendar.current.startOfDay(for: Date())
-        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -carbStore.maximumAbsorptionTimeInterval))
+        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
 
         let shouldUpdateGlucose = currentContext.contains(.glucose)
         let shouldUpdateCarbs = currentContext.contains(.carbs)
@@ -344,7 +345,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 }
 
                 cell.observedProgress = observedProgress
-                cell.clampedProgress = Float(absorption.clampedProgress.doubleValue(for: .percent()))
+                cell.clampedProgress = Float(absorption.observedProgress.doubleValue(for: .percent()))
                 cell.observedDateText = absorptionFormatter.string(from: absorption.estimatedDate.duration)
 
                 // Absorbed time

@@ -15,7 +15,7 @@ import MockKit
 import HealthKit
 import WidgetKit
 import LoopCore
-
+import LoopAlgorithm
 
 #if targetEnvironment(simulator)
 enum SimulatorError: Error {
@@ -239,9 +239,7 @@ class LoopAppManager: NSObject {
         self.carbStore = CarbStore(
             healthKitSampleStore: carbHealthStore,
             cacheStore: cacheStore,
-            cacheLength: localCacheDuration,
-            defaultAbsorptionTimes: absorptionTimes,
-            carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .piecewiseLinear : .linear
+            cacheLength: localCacheDuration
         )
 
         let insulinHealthStore = HealthKitSampleStore(

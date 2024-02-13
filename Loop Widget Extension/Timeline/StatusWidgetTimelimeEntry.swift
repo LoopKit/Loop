@@ -10,6 +10,8 @@ import HealthKit
 import LoopCore
 import LoopKit
 import WidgetKit
+import LoopAlgorithm
+
 
 struct StatusWidgetTimelimeEntry: TimelineEntry {
     var date: Date
