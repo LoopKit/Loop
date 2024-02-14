@@ -41,7 +41,3 @@ class BaseScreen {
         }
     }
 }
-
-
-
-

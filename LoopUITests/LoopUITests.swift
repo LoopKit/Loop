@@ -2,55 +2,39 @@
 //  LoopUITests.swift
 //  LoopUITests
 //
-//  Created by Cameron Ingham on 2/6/24.
+//  Created by Cameron Ingham on 2/13/24.
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
+import LoopUITestingKit
 import XCTest
 
 @MainActor
 final class LoopUITests: XCTestCase {
     var app: XCUIApplication!
     var baseScreen: BaseScreen!
-    var onboardingScreen: OnboardingScreen!
     var homeScreen: HomeScreen!
     var settingsScreen: SettingsScreen!
     var systemSettingsScreen: SystemSettingsScreen!
     var pumpSimulatorScreen: PumpSimulatorScreen!
+    var onboardingScreen: OnboardingScreen!
     var common: Common!
-
+    
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication()
+        app = XCUIApplication(bundleIdentifier: "org.tidepool.Loop")
         app.launch()
         baseScreen = BaseScreen(app: app)
-        onboardingScreen = OnboardingScreen(app: app)
         homeScreen = HomeScreen(app: app)
         settingsScreen = SettingsScreen(app: app)
         systemSettingsScreen = SystemSettingsScreen()
         pumpSimulatorScreen = PumpSimulatorScreen(app: app)
-        common = Common()
-    }
-
-    func testSkippingOnboardingLeadsToHomepageWithSimulators() {
-        baseScreen.deleteApp()
-        app.launch()
-        onboardingScreen.skipAllOfOnboarding()
-        waitForExistence(homeScreen.hudStatusClosedLoop)
-        homeScreen.openSettings()
-        settingsScreen.openPumpManager()
-        waitForExistence(settingsScreen.pumpSimulatorTitle)
-        settingsScreen.closePumpSimulator()
-        settingsScreen.openCGMManager()
-        waitForExistence(settingsScreen.cgmSimulatorTitle)
-        settingsScreen.closeCGMSimulator()
-        settingsScreen.closeSettingsScreen()
-        waitForExistence(homeScreen.hudStatusClosedLoop)
+        onboardingScreen = OnboardingScreen(app: app)
+        common = Common(appName: "Tidepool Loop")
     }
     
     // https://tidepool.atlassian.net/browse/LOOP-1605
     func testAlertSettingsUI() {
-        onboardingScreen.skipAllOfOnboardingIfNeeded()
         systemSettingsScreen.launchApp()
         systemSettingsScreen.openAppSystemSettings()
         systemSettingsScreen.openSystemNotificationSettings()
@@ -76,7 +60,6 @@ final class LoopUITests: XCTestCase {
     
     // https://tidepool.atlassian.net/browse/LOOP-1713
     func testConfigureClosedLoopManagement() {
-        onboardingScreen.skipAllOfOnboardingIfNeeded()
         waitForExistence(homeScreen.hudStatusClosedLoop)
         waitForExistence(homeScreen.preMealTabEnabled)
         homeScreen.tapPreMealButton()
@@ -113,12 +96,12 @@ final class LoopUITests: XCTestCase {
     
     // https://tidepool.atlassian.net/browse/LOOP-1636
     func testPumpErrorAndStateHandlingStatusBarDisplay() {
-        onboardingScreen.skipAllOfOnboardingIfNeeded()
         waitForExistence(homeScreen.hudStatusClosedLoop)
         homeScreen.tapPumpPill()
         pumpSimulatorScreen.tapSuspendInsulinButton()
         waitForExistence(pumpSimulatorScreen.resumeInsulinButton)
         pumpSimulatorScreen.closePumpSimulator()
+        waitForExistence(homeScreen.hudPumpPill)
         XCTAssertEqual(homeScreen.hudPumpPill.value as? String, NSLocalizedString("Insulin Suspended", comment: ""))
         homeScreen.tapPumpPill()
         pumpSimulatorScreen.tapResumeInsulinButton()
@@ -131,6 +114,7 @@ final class LoopUITests: XCTestCase {
         pumpSimulatorScreen.closeReservoirRemainingScreen()
         pumpSimulatorScreen.closePumpSettings()
         pumpSimulatorScreen.closePumpSimulator()
+        waitForExistence(homeScreen.hudPumpPill)
         XCTAssertEqual(homeScreen.hudPumpPill.value as? String, NSLocalizedString("No Insulin", comment: ""))
         homeScreen.tapPumpPill()
         pumpSimulatorScreen.openPumpSettings()
@@ -141,6 +125,7 @@ final class LoopUITests: XCTestCase {
         pumpSimulatorScreen.closeReservoirRemainingScreen()
         pumpSimulatorScreen.closePumpSettings()
         pumpSimulatorScreen.closePumpSimulator()
+        waitForExistence(homeScreen.hudPumpPill)
         XCTAssert((homeScreen.hudPumpPill.value as? String)?.contains("15 units remaining") == true)
         homeScreen.tapPumpPill()
         pumpSimulatorScreen.openPumpSettings()
@@ -151,12 +136,14 @@ final class LoopUITests: XCTestCase {
         pumpSimulatorScreen.closeReservoirRemainingScreen()
         pumpSimulatorScreen.closePumpSettings()
         pumpSimulatorScreen.closePumpSimulator()
+        waitForExistence(homeScreen.hudPumpPill)
         XCTAssert((homeScreen.hudPumpPill.value as? String)?.contains("45 units remaining") == true)
         homeScreen.tapPumpPill()
         pumpSimulatorScreen.openPumpSettings()
         pumpSimulatorScreen.tapDetectOcclusionButton()
         pumpSimulatorScreen.closePumpSettings()
         pumpSimulatorScreen.closePumpSimulator()
+        waitForExistence(homeScreen.hudPumpPill)
         XCTAssertEqual(homeScreen.hudPumpPill.value as? String, NSLocalizedString("Pump Occlusion", comment: ""))
         homeScreen.tapBolusEntry()
         homeScreen.tapBolusEntryTextField()
@@ -171,6 +158,7 @@ final class LoopUITests: XCTestCase {
         pumpSimulatorScreen.tapCausePumpErrorButton()
         pumpSimulatorScreen.closePumpSettings()
         pumpSimulatorScreen.closePumpSimulator()
+        waitForExistence(homeScreen.hudPumpPill)
         XCTAssertEqual(homeScreen.hudPumpPill.value as? String, NSLocalizedString("Pump Error", comment: ""))
         homeScreen.tapPumpPill()
         pumpSimulatorScreen.openPumpSettings()

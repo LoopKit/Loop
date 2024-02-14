@@ -1,0 +1,36 @@
+{
+  "configurations" : [
+    {
+      "id" : "7D98F861-1A40-4E2D-B298-96208D0BC6BC",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:..\/Loop\/Loop.xcodeproj",
+      "identifier" : "43776F8B1B8022E90074EA36",
+      "name" : "Loop"
+    },
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:..\/Loop\/Loop.xcodeproj",
+        "identifier" : "847434F22B7C41D30084BE98",
+        "name" : "DIYLoopUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/Loop\/Loop.xcodeproj",
+        "identifier" : "840B7A7D2B7BFF58000ED932",
+        "name" : "LoopUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

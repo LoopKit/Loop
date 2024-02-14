@@ -231,8 +231,5 @@ class HomeScreen: BaseScreen {
         waitForExistence(passcodeEntry)
         passcodeEntry.tap()
         springboardApp.typeText("1\n")
-//        sleep(1)
-//        waitForExistence(springboardKeyboardDoneButton)
-//        springboardKeyboardDoneButton.tap()
     }
 }
