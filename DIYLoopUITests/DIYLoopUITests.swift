@@ -24,17 +24,17 @@ final class DIYLoopUITests: XCTestCase {
         continueAfterFailure = false
         app = XCUIApplication(bundleIdentifier: "org.tidepool.diy.Loop")
         app.launch()
-        baseScreen = BaseScreen(app: app)
-        homeScreen = HomeScreen(app: app)
-        settingsScreen = SettingsScreen(app: app)
-        systemSettingsScreen = SystemSettingsScreen()
-        pumpSimulatorScreen = PumpSimulatorScreen(app: app)
-        onboardingScreen = OnboardingScreen(app: app)
+        baseScreen = BaseScreen(app: app, appName: "DIY Loop")
+        homeScreen = HomeScreen(app: app, appName: "DIY Loop")
+        settingsScreen = SettingsScreen(app: app, appName: "DIY Loop")
+        systemSettingsScreen = SystemSettingsScreen(app: app, appName: "DIY Loop")
+        pumpSimulatorScreen = PumpSimulatorScreen(app: app, appName: "DIY Loop")
+        onboardingScreen = OnboardingScreen(app: app, appName: "DIY Loop")
         common = Common(appName: "DIY Loop")
     }
     
     func testSkippingOnboarding() async throws {
-        baseScreen.deleteApp(appName: "DIY Loop")
+        baseScreen.deleteApp()
         app.launch()
         onboardingScreen.skipAllOfOnboarding()
     }

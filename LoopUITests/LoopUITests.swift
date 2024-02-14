@@ -24,12 +24,12 @@ final class LoopUITests: XCTestCase {
         continueAfterFailure = false
         app = XCUIApplication(bundleIdentifier: "org.tidepool.Loop")
         app.launch()
-        baseScreen = BaseScreen(app: app)
-        homeScreen = HomeScreen(app: app)
-        settingsScreen = SettingsScreen(app: app)
-        systemSettingsScreen = SystemSettingsScreen()
-        pumpSimulatorScreen = PumpSimulatorScreen(app: app)
-        onboardingScreen = OnboardingScreen(app: app)
+        baseScreen = BaseScreen(app: app, appName: "Tidepool Loop")
+        homeScreen = HomeScreen(app: app, appName: "Tidepool Loop")
+        settingsScreen = SettingsScreen(app: app, appName: "Tidepool Loop")
+        systemSettingsScreen = SystemSettingsScreen(app: app, appName: "Tidepool Loop")
+        pumpSimulatorScreen = PumpSimulatorScreen(app: app, appName: "Tidepool Loop")
+        onboardingScreen = OnboardingScreen(app: app, appName: "Tidepool Loop")
         common = Common(appName: "Tidepool Loop")
     }
     
