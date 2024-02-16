@@ -115,13 +115,9 @@ final class ExtensionDataManager {
                 unit: HKUnit.milligramsPerDeciliter,
                 startDate: Date(),
                 interval: TimeInterval(minutes: 5))
-
-            let lastLoopCompleted = Date(timeIntervalSinceNow: -TimeInterval(minutes: 0))
-        #else
-            let lastLoopCompleted = loopDataManager.lastLoopCompleted
         #endif
 
-        context.lastLoopCompleted = lastLoopCompleted
+        context.lastLoopCompleted = loopDataManager.lastLoopCompleted
 
         context.isClosedLoop = self.automaticDosingStatus.automaticDosingEnabled
 

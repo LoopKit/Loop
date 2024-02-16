@@ -111,6 +111,8 @@ class LoopDataManagerTests: XCTestCase {
 
         now = dateFormatter.date(from: "2023-07-29T19:21:00Z")!
 
+        doseStore.lastAddedPumpData = now
+
         dosingDecisionStore = MockDosingDecisionStore()
         automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)
 

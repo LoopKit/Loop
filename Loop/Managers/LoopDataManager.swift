@@ -468,6 +468,10 @@ final class LoopDataManager {
                 throw LoopError.invalidFutureGlucose(date: latestGlucose.startDate)
             }
 
+            guard startDate.timeIntervalSince(doseStore.lastAddedPumpData) <= LoopAlgorithm.inputDataRecencyInterval else {
+                throw LoopError.pumpDataTooOld(date: doseStore.lastAddedPumpData)
+            }
+
             var output = LoopAlgorithm.run(input: input)
 
             switch output.recommendationResult {
