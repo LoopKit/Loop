@@ -10,7 +10,7 @@ import SwiftUI
 
 extension EditMode {
     var title: String {
-        self == .active ? "Done" : "Edit"
+        self == .active ? NSLocalizedString("Done", comment: "") : NSLocalizedString("Edit", comment: "")
     }
     
     mutating func toggle() {
