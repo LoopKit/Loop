@@ -72,8 +72,8 @@ class AlertStoreTests: XCTestCase {
             let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Self.historicDate)
             XCTAssertNil(object.acknowledgedDate)
             XCTAssertNil(object.retractedDate)
-            XCTAssertEqual("{\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\",\"body\":\"body\"}", object.backgroundContent)
-                XCTAssertEqual("{\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\",\"body\":\"body\"}", object.foregroundContent)
+            XCTAssertEqual("{\"acknowledgeActionButtonLabel\":\"label\",\"body\":\"body\",\"title\":\"title\"}", object.backgroundContent)
+            XCTAssertEqual("{\"acknowledgeActionButtonLabel\":\"label\",\"body\":\"body\",\"title\":\"title\"}", object.foregroundContent)
             XCTAssertEqual("managerIdentifier2.alertIdentifier2", object.identifier.value)
             XCTAssertEqual(Self.historicDate, object.issuedDate)
             XCTAssertEqual(1, object.modificationCounter)
@@ -870,14 +870,14 @@ class AlertStoreLogCriticalEventLogTests: XCTestCase {
                                        endDate: dateFormatter.date(from: "2100-01-02T03:09:00Z")!,
                                        to: outputStream,
                                        progress: progress))
-        XCTAssertEqual(outputStream.string, """
-[
-{"acknowledgedDate":"2100-01-02T03:08:00.000Z","alertIdentifier":"a1","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:08:00.000Z","managerIdentifier":"m1","modificationCounter":1,"syncIdentifier":"52A046F7-F449-49B2-B003-7A378D0002DE","triggerType":0},
-{"acknowledgedDate":"2100-01-02T03:04:00.000Z","alertIdentifier":"a3","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:04:00.000Z","managerIdentifier":"m3","modificationCounter":3,"syncIdentifier":"285AEA4B-0DEE-41F4-8669-800E9582A6E7","triggerType":0},
-{"acknowledgedDate":"2100-01-02T03:06:00.000Z","alertIdentifier":"a4","backgroundContent":"{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:06:00.000Z","managerIdentifier":"m4","modificationCounter":4,"syncIdentifier":"4B3109BD-DE11-42BD-A777-D4783459C483","triggerType":0}
-]
-"""
-        )
+
+        XCTAssertEqual(outputStream.string, #"""
+            [
+            {"acknowledgedDate":"2100-01-02T03:08:00.000Z","alertIdentifier":"a1","backgroundContent":"{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:08:00.000Z","managerIdentifier":"m1","modificationCounter":1,"syncIdentifier":"52A046F7-F449-49B2-B003-7A378D0002DE","triggerType":0},
+            {"acknowledgedDate":"2100-01-02T03:04:00.000Z","alertIdentifier":"a3","backgroundContent":"{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:04:00.000Z","managerIdentifier":"m3","modificationCounter":3,"syncIdentifier":"285AEA4B-0DEE-41F4-8669-800E9582A6E7","triggerType":0},
+            {"acknowledgedDate":"2100-01-02T03:06:00.000Z","alertIdentifier":"a4","backgroundContent":"{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}","interruptionLevel":"timeSensitive","issuedDate":"2100-01-02T03:06:00.000Z","managerIdentifier":"m4","modificationCounter":4,"syncIdentifier":"4B3109BD-DE11-42BD-A777-D4783459C483","triggerType":0}
+            ]
+            """#)
         XCTAssertEqual(progress.completedUnitCount, 3 * 1)
     }
 

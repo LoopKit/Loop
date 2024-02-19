@@ -45,10 +45,10 @@ class StoredAlertEncodableTests: XCTestCase {
             let storedAlert = StoredAlert(from: alert, context: managedObjectContext, syncIdentifier: UUID(uuidString: "A7073F28-0322-4506-A733-CF6E0687BAF7")!)
             XCTAssertEqual(.active, storedAlert.interruptionLevel)
             storedAlert.issuedDate = dateFormatter.date(from: "2020-05-14T21:00:12Z")!
-            try! assertStoredAlertEncodable(storedAlert, encodesJSON: """
+            try! assertStoredAlertEncodable(storedAlert, encodesJSON: #"""
             {
               "alertIdentifier" : "bar",
-              "backgroundContent" : "{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}",
+              "backgroundContent" : "{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}",
               "interruptionLevel" : "active",
               "issuedDate" : "2020-05-14T21:00:12Z",
               "managerIdentifier" : "foo",
@@ -56,15 +56,15 @@ class StoredAlertEncodableTests: XCTestCase {
               "syncIdentifier" : "A7073F28-0322-4506-A733-CF6E0687BAF7",
               "triggerType" : 0
             }
-            """
+            """#
             )
 
             storedAlert.interruptionLevel = .critical
             XCTAssertEqual(.critical, storedAlert.interruptionLevel)
-            try! assertStoredAlertEncodable(storedAlert, encodesJSON: """
+            try! assertStoredAlertEncodable(storedAlert, encodesJSON: #"""
             {
               "alertIdentifier" : "bar",
-              "backgroundContent" : "{\\\"title\\\":\\\"BACKGROUND\\\",\\\"acknowledgeActionButtonLabel\\\":\\\"OK\\\",\\\"body\\\":\\\"background\\\"}",
+              "backgroundContent" : "{\"acknowledgeActionButtonLabel\":\"OK\",\"body\":\"background\",\"title\":\"BACKGROUND\"}",
               "interruptionLevel" : "critical",
               "issuedDate" : "2020-05-14T21:00:12Z",
               "managerIdentifier" : "foo",
@@ -72,7 +72,7 @@ class StoredAlertEncodableTests: XCTestCase {
               "syncIdentifier" : "A7073F28-0322-4506-A733-CF6E0687BAF7",
               "triggerType" : 0
             }
-            """
+            """#
             )
         }
     }
