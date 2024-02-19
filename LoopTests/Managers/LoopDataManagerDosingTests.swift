@@ -486,6 +486,151 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         wait(for: [exp], timeout: 100000.0)
         XCTAssertEqual(recommendedBolus!.amount, 1.82, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, 1.82, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus!.missingAmount)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusMaxBolusClamping() {
+        setUp(for: .highAndStable, maxBolus: 1)
+        let exp = expectation(description: #function)
+        var recommendedBolus: ManualBolusRecommendation?
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 1, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, 1.82, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.missingAmount!, 0.82, accuracy: 0.01)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusForCarbEntry() {
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true)
+        let exp = expectation(description: #function)
+        
+        var recommendedBolus: ManualBolusRecommendation?
+
+        let carbEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 5.0), startDate: now, foodType: nil, absorptionTime: TimeInterval(hours: 1.0))
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: carbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 2.32, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, 1.82, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0.5, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus!.missingAmount)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusForCarbEntryMaxBolusClamping() {
+        setUp(for: .highAndStable, maxBolus: 1, predictCarbGlucoseEffects: true)
+        let exp = expectation(description: #function)
+        
+        var recommendedBolus: ManualBolusRecommendation?
+
+        let carbEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 5.0), startDate: now, foodType: nil, absorptionTime: TimeInterval(hours: 1.0))
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: carbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 1, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, 1.82, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0.5, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.missingAmount!, 1.32, accuracy: 0.01)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusForBeneathRange() {
+        setUp(for: .highAndStable, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 230, maxValue: 230))]))
+        
+        let exp = expectation(description: #function)
+        var recommendedBolus: ManualBolusRecommendation?
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, (176.21882841682697 - 230) / 45, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus!.missingAmount)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusForInRangeAboveMidPoint() {
+        setUp(for: .flatAndStable, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 80, maxValue: 110))]))
+        
+        let exp = expectation(description: #function)
+        var recommendedBolus: ManualBolusRecommendation?
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus!.missingAmount)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusForSuspendForCarbEntry() {
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 230, maxValue: 230))]), suspendThresholdValue: 180)
+        
+        let exp = expectation(description: #function)
+        var recommendedBolus: ManualBolusRecommendation?
+
+        let carbEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 5.0), startDate: now, foodType: nil, absorptionTime: TimeInterval(hours: 1.0))
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: carbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.correctionAmount!, (176.21882841682697 - 230) / 45, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0.5, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.missingAmount!, 0.5 + (176.21882841682697 - 230) / 45, accuracy: 0.01)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusForInRangeCarbEntry() {
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 170, maxValue: 210))]))
+                        
+        let exp1 = expectation(description: #function)
+        var recommendedBolus1: ManualBolusRecommendation?
+        
+        let exp2 = expectation(description: #function)
+        var recommendedBolus2: ManualBolusRecommendation?
+
+        // note that 176.218 + 5/10*45 < 210
+        let carbEntry1 = NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 5), startDate: now, foodType: nil, absorptionTime: TimeInterval(hours: 1.0))
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus1 = try? loopState.recommendBolus(consideringPotentialCarbEntry: carbEntry1, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            exp1.fulfill()
+        }
+        wait(for: [exp1], timeout: 100000.0)
+
+        let carbEntry2 = NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 4.8), startDate: now, foodType: nil, absorptionTime: TimeInterval(hours: 1.0))
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus2 = try? loopState.recommendBolus(consideringPotentialCarbEntry: carbEntry2, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            exp2.fulfill()
+        }
+        wait(for: [exp2], timeout: 100000.0)
+
+                
+        XCTAssertEqual(recommendedBolus1!.amount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus1!.correctionAmount!, -0.5, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus1!.carbsAmount!, 0.5, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus1!.missingAmount)
+        
+        XCTAssertEqual(recommendedBolus2!.amount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus2!.correctionAmount!, -0.48, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus2!.carbsAmount!, 0.48, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus2!.missingAmount)
     }
 
     func testLoopGetStateRecommendsManualBolusWithMomentum() {

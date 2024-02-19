@@ -116,7 +116,7 @@ class LoopDataManagerTests: XCTestCase {
             RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: 100, maxValue: 110))
         ], timeZone: .utcTimeZone)!
     }
-    
+        
     // MARK: Mock stores
     var now: Date!
     var dosingDecisionStore: MockDosingDecisionStore!
@@ -127,7 +127,11 @@ class LoopDataManagerTests: XCTestCase {
                basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil,
                maxBolus: Double = 10,
                maxBasalRate: Double = 5.0,
-               dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly)
+               dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
+               predictCarbGlucoseEffects: Bool = false,
+               correctionRanges: GlucoseRangeSchedule? = nil,
+               suspendThresholdValue: Double? = nil
+    )
     {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(
@@ -145,10 +149,13 @@ class LoopDataManagerTests: XCTestCase {
             ],
             timeZone: .utcTimeZone
         )!
+        let glucoseTargets = correctionRanges ?? glucoseTargetRangeSchedule
+        
+        let suspendThreshold = suspendThresholdValue == nil ? suspendThreshold : GlucoseThreshold(unit: .milligramsPerDeciliter, value: suspendThresholdValue!)
 
         let settings = LoopSettings(
             dosingEnabled: false,
-            glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+            glucoseTargetRangeSchedule: glucoseTargets,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
             carbRatioSchedule: carbRatioSchedule,
@@ -163,7 +170,7 @@ class LoopDataManagerTests: XCTestCase {
         doseStore.basalProfileApplyingOverrideHistory = doseStore.basalProfile
         doseStore.sensitivitySchedule = insulinSensitivitySchedule
         let glucoseStore = MockGlucoseStore(for: test)
-        let carbStore = MockCarbStore(for: test)
+        let carbStore = MockCarbStore(for: test, predictGlucose: predictCarbGlucoseEffects)
         carbStore.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivitySchedule
         carbStore.carbRatioSchedule = carbRatioSchedule
         

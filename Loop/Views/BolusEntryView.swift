@@ -191,7 +191,7 @@ struct BolusEntryView: View {
             if viewModel.isManualGlucoseEntryEnabled && viewModel.potentialCarbEntry != nil {
                 potentialCarbEntryRow
             }
-
+                        
             if viewModel.isManualGlucoseEntryEnabled || viewModel.potentialCarbEntry != nil {
                 recommendedBolusRow
             }
@@ -226,20 +226,105 @@ struct BolusEntryView: View {
             }
         }
     }
-
+    
+    private func displayRecommendationBreakdown() -> Bool {
+        if viewModel.potentialCarbEntry != nil {
+            return viewModel.carbBolus != nil && viewModel.correctionBolus != nil
+        } else {
+            return viewModel.correctionBolus != nil
+        }
+    }
+    
+    @State
+    private var recommendationBreakdownExpanded = false
+    
+    @ViewBuilder
     private var recommendedBolusRow: some View {
-        HStack {
-            Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
-            Spacer()
+        
+        Section {
             HStack(alignment: .firstTextBaseline) {
-                Text(viewModel.recommendedBolusString)
-                    .font(.title)
-                    .foregroundColor(Color(.label))
-                bolusUnitsLabel
+                Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
+                if displayRecommendationBreakdown() {
+                    Image(systemName: "chevron.forward.circle")
+                        .imageScale(.small)
+                        .rotationEffect(.degrees(recommendationBreakdownExpanded ? 90 : 0))
+                }
+                Spacer()
+                HStack(alignment: .firstTextBaseline) {
+                    Text(viewModel.recommendedBolusString)
+                        .font(.title)
+                        .foregroundColor(Color(.label))
+                    bolusUnitsLabel
+                }
+            }
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
+            .onTapGesture {
+                if displayRecommendationBreakdown() {
+                    recommendationBreakdownExpanded.toggle()
+                }
+            }
+            if recommendationBreakdownExpanded {
+                VStack {
+                    if viewModel.potentialCarbEntry != nil && viewModel.carbBolus != nil {
+                        HStack {
+                            Text("    ")
+                            Text("Carb Bolus", comment: "Label for carb bolus row on bolus screen")
+                                .font(.footnote)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.carbBolusString)
+                                    .font(.footnote)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                    if viewModel.correctionBolus != nil {
+                        HStack {
+                            Text("    ")
+                            Text("Correction Bolus", comment: "Label for correction bolus row on bolus screen")
+                                .font(.footnote)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.correctionBolusString)
+                                    .font(.footnote)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                    if viewModel.missingBolus != nil && viewModel.recommendedBolusAmount != nil {
+                        HStack {
+                            Text("    ")
+                            if viewModel.recommendedBolusAmount! != 0 {
+                                Text("Limit to Max Bolus", comment: "Label for max bolus row on bolus screen")
+                                    .font(.footnote)
+                            } else {
+                                Text("Limit to 0 Bolus", comment: "Label for 0 bolus row on bolus screen")
+                                    .font(.footnote)
+                            }
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.negativeMissingBolusString)
+                                    .font(.footnote)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                }
+                .accessibilityElement(children: .combine)
+                .transition(.slide)
+                .animation(.smooth, value: recommendationBreakdownExpanded)
             }
         }
-        .accessibilityElement(children: .combine)
+        
     }
+    
 
     private func didBeginEditing() {
         if !editedBolusAmount {
@@ -273,6 +358,12 @@ struct BolusEntryView: View {
 
     private var bolusUnitsLabel: some View {
         Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+            .foregroundColor(Color(.secondaryLabel))
+    }
+    
+    private var breakdownBolusUnitsLabel: some View {
+        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+            .font(.footnote)
             .foregroundColor(Color(.secondaryLabel))
     }
 
