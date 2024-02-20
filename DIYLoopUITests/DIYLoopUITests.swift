@@ -22,7 +22,7 @@ final class DIYLoopUITests: XCTestCase {
     
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication(bundleIdentifier: "org.tidepool.diy.Loop")
+        app = XCUIApplication(bundleIdentifier: Bundle.main.bundleIdentifier!)
         app.launch()
         baseScreen = BaseScreen(app: app, appName: "DIY Loop")
         homeScreen = HomeScreen(app: app, appName: "DIY Loop")

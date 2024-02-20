@@ -22,7 +22,7 @@ final class LoopUITests: XCTestCase {
     
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication(bundleIdentifier: "org.tidepool.Loop")
+        app = XCUIApplication(bundleIdentifier: Bundle.main.bundleIdentifier!)
         app.launch()
         baseScreen = BaseScreen(app: app, appName: "Tidepool Loop")
         homeScreen = HomeScreen(app: app, appName: "Tidepool Loop")
