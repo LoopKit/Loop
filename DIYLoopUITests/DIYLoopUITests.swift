@@ -22,15 +22,15 @@ final class DIYLoopUITests: XCTestCase {
     
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication(bundleIdentifier: Bundle.main.bundleIdentifier!)
+        app = XCUIApplication()
         app.launch()
-        baseScreen = BaseScreen(app: app, appName: "DIY Loop")
-        homeScreen = HomeScreen(app: app, appName: "DIY Loop")
-        settingsScreen = SettingsScreen(app: app, appName: "DIY Loop")
-        systemSettingsScreen = SystemSettingsScreen(app: app, appName: "DIY Loop")
-        pumpSimulatorScreen = PumpSimulatorScreen(app: app, appName: "DIY Loop")
-        onboardingScreen = OnboardingScreen(app: app, appName: "DIY Loop")
-        common = Common(appName: "DIY Loop")
+        baseScreen = BaseScreen(app: app)
+        homeScreen = HomeScreen(app: app)
+        settingsScreen = SettingsScreen(app: app)
+        systemSettingsScreen = SystemSettingsScreen(app: app)
+        pumpSimulatorScreen = PumpSimulatorScreen(app: app)
+        onboardingScreen = OnboardingScreen(app: app)
+        common = Common()
     }
     
     func testSkippingOnboarding() async throws {

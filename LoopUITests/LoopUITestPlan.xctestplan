@@ -4,7 +4,16 @@
       "id" : "E21F6FDF-4D9A-44ED-99CD-2F9CA0B20D37",
       "name" : "Configuration 1",
       "options" : {
-
+        "environmentVariableEntries" : [
+          {
+            "key" : "appName",
+            "value" : "Loop"
+          },
+          {
+            "key" : "bundleIdentifier",
+            "value" : "org.tidepool.Loop"
+          }
+        ]
       }
     }
   ],

@@ -22,15 +22,15 @@ final class LoopUITests: XCTestCase {
     
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication(bundleIdentifier: Bundle.main.bundleIdentifier!)
+        app = XCUIApplication()
         app.launch()
-        baseScreen = BaseScreen(app: app, appName: "Tidepool Loop")
-        homeScreen = HomeScreen(app: app, appName: "Tidepool Loop")
-        settingsScreen = SettingsScreen(app: app, appName: "Tidepool Loop")
-        systemSettingsScreen = SystemSettingsScreen(app: app, appName: "Tidepool Loop")
-        pumpSimulatorScreen = PumpSimulatorScreen(app: app, appName: "Tidepool Loop")
-        onboardingScreen = OnboardingScreen(app: app, appName: "Tidepool Loop")
-        common = Common(appName: "Tidepool Loop")
+        baseScreen = BaseScreen(app: app)
+        homeScreen = HomeScreen(app: app)
+        settingsScreen = SettingsScreen(app: app)
+        systemSettingsScreen = SystemSettingsScreen(app: app)
+        pumpSimulatorScreen = PumpSimulatorScreen(app: app)
+        onboardingScreen = OnboardingScreen(app: app)
+        common = Common()
     }
     
     // https://tidepool.atlassian.net/browse/LOOP-1605

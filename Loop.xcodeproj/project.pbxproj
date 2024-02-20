@@ -3296,9 +3296,11 @@
 					840B7A7D2B7BFF58000ED932 = {
 						CreatedOnToolsVersion = 15.2;
 						LastSwiftMigration = 1520;
+						TestTargetID = 43776F8B1B8022E90074EA36;
 					};
 					847434F22B7C41D30084BE98 = {
 						CreatedOnToolsVersion = 15.2;
+						TestTargetID = 43776F8B1B8022E90074EA36;
 					};
 					E9B07F7B253BBA6500BAD8F8 = {
 						ProvisioningStyle = Automatic;
@@ -5576,6 +5578,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Loop;
 			};
 			name = Debug;
 		};
@@ -5615,6 +5618,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Loop;
 			};
 			name = Testflight;
 		};
@@ -5653,6 +5657,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Loop;
 			};
 			name = Release;
 		};
@@ -5691,6 +5696,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Loop;
 			};
 			name = Debug;
 		};
@@ -5728,6 +5734,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Loop;
 			};
 			name = Testflight;
 		};
@@ -5765,6 +5772,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Loop;
 			};
 			name = Release;
 		};

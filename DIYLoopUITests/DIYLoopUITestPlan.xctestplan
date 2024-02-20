@@ -4,11 +4,26 @@
       "id" : "7D98F861-1A40-4E2D-B298-96208D0BC6BC",
       "name" : "Configuration 1",
       "options" : {
-
+        "environmentVariableEntries" : [
+          {
+            "key" : "appName",
+            "value" : "DIY Loop"
+          }
+        ]
       }
     }
   ],
   "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "bundleIdentifier",
+        "value" : "org.tidepool.diy.Loop"
+      },
+      {
+        "key" : "appName",
+        "value" : "DIY Loop"
+      }
+    ],
     "targetForVariableExpansion" : {
       "containerPath" : "container:..\/Loop\/Loop.xcodeproj",
       "identifier" : "43776F8B1B8022E90074EA36",
