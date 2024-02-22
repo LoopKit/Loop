@@ -9,7 +9,7 @@
 import LoopUITestingKit
 import XCTest
 
-extension OnboardingScreen {
+class OnboardingScreen: BaseScreen {
     
     // MARK: Elements
 

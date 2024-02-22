@@ -11,18 +11,17 @@ import XCTest
 
 @MainActor
 final class DIYLoopUITests: XCTestCase {
-    var app: XCUIApplication!
+    private let app = XCUIApplication()
+    
     var baseScreen: BaseScreen!
     var homeScreen: HomeScreen!
     var settingsScreen: SettingsScreen!
     var systemSettingsScreen: SystemSettingsScreen!
     var pumpSimulatorScreen: PumpSimulatorScreen!
     var onboardingScreen: OnboardingScreen!
-    var common: Common!
     
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication()
         app.launch()
         baseScreen = BaseScreen(app: app)
         homeScreen = HomeScreen(app: app)
@@ -30,7 +29,6 @@ final class DIYLoopUITests: XCTestCase {
         systemSettingsScreen = SystemSettingsScreen(app: app)
         pumpSimulatorScreen = PumpSimulatorScreen(app: app)
         onboardingScreen = OnboardingScreen(app: app)
-        common = Common()
     }
     
     func testSkippingOnboarding() async throws {
