@@ -140,7 +140,7 @@ final class CarbEntryViewModel: ObservableObject {
     
     var saveFavoriteFoodButtonDisabled: Bool {
         get {
-            if let carbsQuantity, 0...maxCarbEntryQuantity.doubleValue(for: preferredCarbUnit) ~= carbsQuantity, foodType != "", selectedFavoriteFoodIndex == -1 {
+            if let carbsQuantity, 0...maxCarbEntryQuantity.doubleValue(for: preferredCarbUnit) ~= carbsQuantity, selectedFavoriteFoodIndex == -1 {
                 return false
             }
             return true
