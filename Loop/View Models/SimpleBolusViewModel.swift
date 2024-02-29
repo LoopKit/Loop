@@ -216,7 +216,7 @@ class SimpleBolusViewModel: ObservableObject {
                 enteredBolusString = Self.doseAmountFormatter.string(from: min(recommendation, maxBolus))!
             } else {
                 recommendedBolus = NSLocalizedString("–", comment: "String denoting lack of a recommended bolus amount in the simple bolus calculator")
-                enteredBolusString = Self.doseAmountFormatter.string(from: 0.0)!
+                enteredBolusString = ""
             }
         }
     }

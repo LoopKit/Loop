@@ -202,7 +202,7 @@ struct SimpleBolusView: View {
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
                     text: $viewModel.enteredBolusString,
-                    placeholder: "",
+                    placeholder: "0",
                     font: .preferredFont(forTextStyle: .title1),
                     textColor: .loopAccent,
                     textAlignment: .right,
