@@ -16,6 +16,7 @@ import LoopKit
 import LoopKitUI
 import LoopUI
 import SwiftUI
+import LoopAlgorithm
 
 enum ManualEntryDoseViewModelError: Error {
     case notAuthenticated
@@ -28,7 +29,7 @@ protocol ManualDoseViewModelDelegate: AnyObject {
     var scheduleOverride: TemporaryScheduleOverride? { get }
 
     func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType?) async
-    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
+    func insulinModel(for type: InsulinType?) -> InsulinModel
 }
 
 @MainActor
@@ -229,7 +230,15 @@ final class ManualEntryDoseViewModel: ObservableObject {
 
         let state = await delegate.algorithmDisplayState
 
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: selectedDoseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinType: selectedInsulinType)
+        let insulinModel = delegate.insulinModel(for: selectedInsulinType)
+
+        let enteredBolusDose = SimpleInsulinDose(
+            deliveryType: .bolus,
+            startDate: selectedDoseDate,
+            endDate: selectedDoseDate,
+            volume: enteredBolus.doubleValue(for: .internationalUnit()),
+            insulinModel: insulinModel
+        )
 
         self.activeInsulin = state.activeInsulin?.quantity
         self.activeCarbs = state.activeCarbs?.quantity
@@ -277,7 +286,9 @@ final class ManualEntryDoseViewModel: ObservableObject {
         let availableWidth = screenWidth - chartManager.fixedHorizontalMargin - 2 * viewMarginInset
 
         let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
-        let futureHours = ceil((delegate?.insulinActivityDuration(for: selectedInsulinType) ?? .hours(4)).hours)
+
+        let insulinModel = delegate?.insulinModel(for: selectedInsulinType)
+        let futureHours = ceil((insulinModel?.effectDuration.hours ?? .hours(4)).hours)
         let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeInterval: -TimeInterval(hours: historyHours), since: now())

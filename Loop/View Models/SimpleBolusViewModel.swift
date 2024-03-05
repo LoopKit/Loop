@@ -15,6 +15,7 @@ import SwiftUI
 import LoopCore
 import Intents
 import LocalAuthentication
+import LoopAlgorithm
 
 protocol SimpleBolusViewModelDelegate: AnyObject {
     

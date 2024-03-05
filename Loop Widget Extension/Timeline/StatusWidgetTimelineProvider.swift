@@ -11,6 +11,7 @@ import LoopCore
 import LoopKit
 import OSLog
 import WidgetKit
+import LoopAlgorithm
 
 class StatusWidgetTimelineProvider: TimelineProvider {
     lazy var defaults = UserDefaults.appGroup

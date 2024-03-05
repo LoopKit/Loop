@@ -9,6 +9,7 @@
 import WatchKit
 import LoopCore
 import LoopKit
+import LoopAlgorithm
 
 class HUDInterfaceController: WKInterfaceController {
     private var activeContextObserver: NSObjectProtocol?

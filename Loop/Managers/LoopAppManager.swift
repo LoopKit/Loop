@@ -15,7 +15,7 @@ import MockKit
 import HealthKit
 import WidgetKit
 import LoopCore
-
+import LoopAlgorithm
 
 #if targetEnvironment(simulator)
 enum SimulatorError: Error {
@@ -228,8 +228,6 @@ class LoopAppManager: NSObject {
             observationStart: Date().addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
         )
 
-        let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
-
         temporaryPresetsManager = TemporaryPresetsManager(settingsProvider: settingsManager)
         temporaryPresetsManager.overrideHistory.delegate = self
 
@@ -239,9 +237,7 @@ class LoopAppManager: NSObject {
         self.carbStore = CarbStore(
             healthKitSampleStore: carbHealthStore,
             cacheStore: cacheStore,
-            cacheLength: localCacheDuration,
-            defaultAbsorptionTimes: absorptionTimes,
-            carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .piecewiseLinear : .linear
+            cacheLength: localCacheDuration
         )
 
         let insulinHealthStore = HealthKitSampleStore(
@@ -251,19 +247,10 @@ class LoopAppManager: NSObject {
             observationStart: Date().addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
         )
 
-        let insulinModelProvider: InsulinModelProvider
-
-        if FeatureFlags.adultChildInsulinModelSelectionEnabled {
-            insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: settingsManager.settings.defaultRapidActingModel?.presetForRapidActingInsulin)
-        } else {
-            insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
-        }
-
         self.doseStore = DoseStore(
             healthKitSampleStore: insulinHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            insulinModelProvider: insulinModelProvider,
             longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
             basalProfile: settingsManager.settings.basalRateSchedule,
             lastPumpEventsReconciliation: nil // PumpManager is nil at this point. Will update this via addPumpEvents below

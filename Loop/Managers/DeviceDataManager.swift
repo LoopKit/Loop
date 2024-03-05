@@ -13,6 +13,7 @@ import LoopCore
 import LoopTestingKit
 import UserNotifications
 import Combine
+import LoopAlgorithm
 
 protocol LoopControl {
     var lastLoopCompleted: Date? { get }
@@ -1397,7 +1398,7 @@ extension DeviceDataManager: DeliveryDelegate {
         return pumpManager.roundToSupportedBolusVolume(units: units)
     }
 
-    var pumpInsulinType: LoopKit.InsulinType? {
+    var pumpInsulinType: InsulinType? {
         return pumpManager?.status.insulinType
     }
     
@@ -1405,7 +1406,7 @@ extension DeviceDataManager: DeliveryDelegate {
         return pumpManager?.status.basalDeliveryState?.isSuspended ?? false
     }
     
-    func enact(_ recommendation: LoopKit.AutomaticDoseRecommendation) async throws {
+    func enact(_ recommendation: AutomaticDoseRecommendation) async throws {
         guard let pumpManager = pumpManager else {
             throw LoopError.configurationError(.pumpManager)
         }

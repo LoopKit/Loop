@@ -15,6 +15,7 @@ import Combine
 import LoopCore
 import LoopKitUI
 import os.log
+import LoopAlgorithm
 
 
 protocol DeviceStatusProvider {

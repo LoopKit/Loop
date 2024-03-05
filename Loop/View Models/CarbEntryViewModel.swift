@@ -10,9 +10,10 @@ import SwiftUI
 import LoopKit
 import HealthKit
 import Combine
+import LoopCore
 
 protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate {
-    var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes { get }
+    var defaultAbsorptionTimes: DefaultAbsorptionTimes { get }
     func scheduleOverrideEnabled(at date: Date) -> Bool
 }
 
@@ -72,7 +73,7 @@ final class CarbEntryViewModel: ObservableObject {
     private var absorptionEditIsProgrammatic = false // needed for when absorption time is changed due to favorite food selection, so that absorptionTimeWasEdited does not get set to true
 
     @Published var absorptionTime: TimeInterval
-    let defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes
+    let defaultAbsorptionTimes: DefaultAbsorptionTimes
     let minAbsorptionTime = LoopConstants.minCarbAbsorptionTime
     let maxAbsorptionTime = LoopConstants.maxCarbAbsorptionTime
     var absorptionRimesRange: ClosedRange<TimeInterval> {

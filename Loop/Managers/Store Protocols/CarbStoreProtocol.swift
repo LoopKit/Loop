@@ -19,8 +19,6 @@ protocol CarbStoreProtocol: AnyObject {
 
     func deleteCarbEntry(_ oldEntry: StoredCarbEntry) async throws -> Bool
 
-    var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes { get }
-
 }
 
 extension CarbStore: CarbStoreProtocol { }

@@ -10,6 +10,8 @@ import HealthKit
 import LoopCore
 import LoopKit
 import XCTest
+import LoopAlgorithm
+
 @testable import Loop
 
 @MainActor
@@ -73,7 +75,7 @@ class ManualEntryDoseViewModelTests: XCTestCase {
 }
 
 fileprivate class MockManualEntryDoseViewModelDelegate: ManualDoseViewModelDelegate {
-    var pumpInsulinType: LoopKit.InsulinType?
+    var pumpInsulinType: InsulinType?
    
     var manualEntryBolusUnits: Double?
     var manualEntryDoseStartDate: Date?
@@ -85,7 +87,7 @@ fileprivate class MockManualEntryDoseViewModelDelegate: ManualDoseViewModelDeleg
         manuallyEnteredDoseInsulinType = insulinType
     }
     
-    func insulinActivityDuration(for type: LoopKit.InsulinType?) -> TimeInterval {
+    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
         return InsulinMath.defaultInsulinActivityDuration
     }
     
@@ -95,5 +97,8 @@ fileprivate class MockManualEntryDoseViewModelDelegate: ManualDoseViewModelDeleg
 
     var scheduleOverride: TemporaryScheduleOverride?
 
+    func insulinModel(for type: LoopKit.InsulinType?) -> InsulinModel {
+        return ExponentialInsulinModelPreset.rapidActingAdult
+    }
 }
 

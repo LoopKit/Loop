@@ -12,6 +12,7 @@ import OSLog
 import LoopCore
 import LoopKit
 import Combine
+import LoopAlgorithm
 
 enum MissedMealStatus: Equatable {
     case hasMissedMeal(startTime: Date, carbAmount: Double)
@@ -386,6 +387,30 @@ extension BolusStateProvider {
             return nil
         }
         return max(0, dose.endDate.timeIntervalSince(date))
+    }
+}
+
+extension GlucoseEffectVelocity {
+    /// The integration of the velocity span from `start` to `end`
+    public func effect(from start: Date, to end: Date) -> GlucoseEffect? {
+        guard
+            start <= end,
+            startDate <= start,
+            end <= endDate
+        else {
+            return nil
+        }
+
+        let duration = end.timeIntervalSince(start)
+        let velocityPerSecond = quantity.doubleValue(for: GlucoseEffectVelocity.perSecondUnit)
+
+        return GlucoseEffect(
+            startDate: end,
+            quantity: HKQuantity(
+                unit: .milligramsPerDeciliter,
+                doubleValue: velocityPerSecond * duration
+            )
+        )
     }
 }
 

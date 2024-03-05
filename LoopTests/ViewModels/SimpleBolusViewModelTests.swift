@@ -11,6 +11,7 @@ import HealthKit
 import LoopKit
 import LoopKitUI
 import LoopCore
+import LoopAlgorithm
 
 @testable import Loop
 

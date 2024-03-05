@@ -7,6 +7,7 @@
 
 import HealthKit
 import LoopKit
+import LoopAlgorithm
 
 public extension AutomaticDosingStrategy {
     var title: String {

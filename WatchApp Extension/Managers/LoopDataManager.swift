@@ -12,6 +12,7 @@ import LoopKit
 import LoopCore
 import WatchConnectivity
 import os.log
+import LoopAlgorithm
 
 
 class LoopDataManager {
@@ -66,7 +67,6 @@ class LoopDataManager {
         carbStore = CarbStore(
             cacheStore: cacheStore,
             cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
-            defaultAbsorptionTimes: LoopCoreConstants.defaultCarbAbsorptionTimes,
             syncVersion: 0
         )
         glucoseStore = GlucoseStore(
@@ -114,7 +114,7 @@ extension LoopDataManager {
     func requestCarbBackfill() {
         dispatchPrecondition(condition: .onQueue(.main))
 
-        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -carbStore.maximumAbsorptionTimeInterval))
+        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
         let userInfo = CarbBackfillRequestUserInfo(startDate: start)
         WCSession.default.sendCarbBackfillRequestMessage(userInfo) { (result) in
             switch result {
