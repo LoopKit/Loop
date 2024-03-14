@@ -562,7 +562,7 @@ final class BolusEntryViewModel: ObservableObject {
             recommendation = try await computeBolusRecommendation()
 
             if let recommendation, let deliveryDelegate {
-                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: deliveryDelegate.roundBolusVolume(units: recommendation.amount))
+                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
 
                 switch recommendation.notice {
                 case .glucoseBelowSuspendThreshold:

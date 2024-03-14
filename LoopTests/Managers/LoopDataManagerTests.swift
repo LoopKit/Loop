@@ -443,11 +443,11 @@ class LoopDataManagerTests: XCTestCase {
 
         loopDataManager.usePositiveMomentumAndRCForManualBoluses = true
         var recommendation = try! await loopDataManager.recommendManualBolus()!
-        XCTAssertEqual(recommendation.amount, 3.44, accuracy: 0.01)
+        XCTAssertEqual(recommendation.amount, 3.45, accuracy: 0.01)
 
         loopDataManager.usePositiveMomentumAndRCForManualBoluses = false
         recommendation = try! await loopDataManager.recommendManualBolus()!
-        XCTAssertEqual(recommendation.amount, 1.73, accuracy: 0.01)
+        XCTAssertEqual(recommendation.amount, 1.75, accuracy: 0.01)
 
     }
 
