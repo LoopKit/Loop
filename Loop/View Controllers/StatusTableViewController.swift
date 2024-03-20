@@ -1343,7 +1343,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
             present(navigationWrapper, animated: true)
         } else {
-            let viewModel = CarbEntryViewModel(delegate: loopManager)
+            let viewModel = CarbEntryViewModel(delegate: loopManager, enableManualGlucoseEntry: deviceManager.isGlucoseValueStale)
             viewModel.deliveryDelegate = deviceManager
             viewModel.analyticsServicesManager = loopManager.analyticsServicesManager
             if let activity {
@@ -1358,7 +1358,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     @IBAction func presentBolusScreen() {
-        presentBolusEntryView()
+        presentBolusEntryView(enableManualGlucoseEntry: deviceManager.isGlucoseValueStale)
     }
     
     @ViewBuilder

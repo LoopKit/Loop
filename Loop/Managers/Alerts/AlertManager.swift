@@ -59,14 +59,14 @@ public final class AlertManager {
     var getCurrentDate = { return Date() }
     
     init(alertPresenter: AlertPresenter,
-                modalAlertScheduler: InAppModalAlertScheduler? = nil,
-                userNotificationAlertScheduler: UserNotificationAlertScheduler,
-                fileManager: FileManager = FileManager.default,
-                alertStore: AlertStore? = nil,
-                expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
-                bluetoothProvider: BluetoothProvider,
-                analyticsServicesManager: AnalyticsServicesManager,
-                preventIssuanceBeforePlayback: Bool = true
+         modalAlertScheduler: InAppModalAlertScheduler? = nil,
+         userNotificationAlertScheduler: UserNotificationAlertScheduler,
+         fileManager: FileManager = FileManager.default,
+         alertStore: AlertStore? = nil,
+         expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
+         bluetoothProvider: BluetoothProvider,
+         analyticsServicesManager: AnalyticsServicesManager,
+         preventIssuanceBeforePlayback: Bool = true
     ) {
         self.fileManager = fileManager
         self.analyticsServicesManager = analyticsServicesManager
