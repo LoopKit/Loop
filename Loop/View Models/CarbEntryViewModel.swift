@@ -15,6 +15,7 @@ import LoopCore
 protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate {
     var defaultAbsorptionTimes: DefaultAbsorptionTimes { get }
     func scheduleOverrideEnabled(at date: Date) -> Bool
+    func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample]
 }
 
 final class CarbEntryViewModel: ObservableObject {
@@ -38,11 +39,14 @@ final class CarbEntryViewModel: ObservableObject {
                 return 1
             case .overrideInProgress:
                 return 2
+            case .glucoseRisingRapidly:
+                return 3
             }
         }
         
         case entryIsMissedMeal
         case overrideInProgress
+        case glucoseRisingRapidly
     }
     
     @Published var alert: CarbEntryViewModel.Alert?
@@ -284,12 +288,14 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     private func observeLoopUpdates() {
-        self.checkIfOverrideEnabled()
+        checkIfOverrideEnabled()
+        checkGlucoseRisingRapidly()
         NotificationCenter.default
             .publisher(for: .LoopDataUpdated)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.checkIfOverrideEnabled()
+                self?.checkGlucoseRisingRapidly()
             }
             .store(in: &cancellables)
     }
@@ -309,6 +315,45 @@ final class CarbEntryViewModel: ObservableObject {
         }
     }
     
+    private func checkGlucoseRisingRapidly() {
+        guard let delegate else {
+            warnings.remove(.glucoseRisingRapidly)
+            return
+        }
+        
+        let now = Date()
+        let startDate = now.addingTimeInterval(-LoopConstants.missedMealWarningGlucoseRecencyWindow)
+        
+        Task { @MainActor in
+            let glucoseSamples = try? await delegate.getGlucoseSamples(start: startDate, end: nil)
+            guard let glucoseSamples else {
+                warnings.remove(.glucoseRisingRapidly)
+                return
+            }
+            
+            let filteredGlucoseSamples = glucoseSamples.filterDateRange(startDate, now)
+            guard let startSample = filteredGlucoseSamples.first, let endSample = filteredGlucoseSamples.last else {
+                warnings.remove(.glucoseRisingRapidly)
+                return
+            }
+            
+            let duration = endSample.startDate.timeIntervalSince(startSample.startDate)
+            guard duration >= LoopConstants.missedMealWarningVelocitySampleMinDuration else {
+                warnings.remove(.glucoseRisingRapidly)
+                return
+            }
+            
+            let delta = endSample.quantity.doubleValue(for: .milligramsPerDeciliter) - startSample.quantity.doubleValue(for: .milligramsPerDeciliter)
+            let velocity = delta / duration.minutes // Unit = mg/dL/m
+            
+            if velocity > LoopConstants.missedMealWarningGlucoseRiseThreshold {
+                warnings.insert(.glucoseRisingRapidly)
+            } else {
+                warnings.remove(.glucoseRisingRapidly)
+            }
+        }
+    }
+
     private func observeAbsorptionTimeChange() {
         $absorptionTime
             .receive(on: RunLoop.main)

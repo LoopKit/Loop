@@ -1134,7 +1134,10 @@ extension LoopDataManager: CarbEntryViewModelDelegate {
     var defaultAbsorptionTimes: DefaultAbsorptionTimes {
         LoopCoreConstants.defaultCarbAbsorptionTimes
     }
-    
+
+    func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample] {
+        try await glucoseStore.getGlucoseSamples(start: start, end: end)
+    }
 }
 
 extension LoopDataManager: ManualDoseViewModelDelegate {
