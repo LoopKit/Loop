@@ -1078,7 +1078,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     
                     let deliveredUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: bolusProgressReporter!.progress.deliveredUnits)
                     let deliveredUnitsString = insulinFormatter.string(from: deliveredUnitsQuantity, includeUnit: false) ?? ""
-                    cell.titleLabel.text = String(format: NSLocalizedString("Bolus Canceled: %1$@ of %2$@", comment: "The title of the cell indicating a bolus has been canceled. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)
+                    cell.titleLabel.text = String(format: NSLocalizedString("Bolus Canceled: %1$@ of %2$@ delivered", comment: "The title of the cell indicating a bolus has been canceled. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)
                     return cell
                 case .pumpSuspended(let resuming):
                     let cell = getTitleSubtitleCell()
@@ -1227,22 +1227,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     }
                 case .bolusing(let dose):
                     updateBannerAndHUDandStatusRows(statusRowMode: .cancelingBolus, newSize: nil, animated: true)
-                    deviceManager.pumpManager?.cancelBolus() { (result) in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success:
-                                self.canceledDose = dose
-                                Task {
-                                    try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 10)
+                    Task {
+                        self.canceledDose = dose
+                        deviceManager.pumpManager?.cancelBolus() { (result) in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success:
+                                    Task {
+                                        try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 10)
+                                        self.canceledDose = nil
+                                        self.updateBannerAndHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: false)
+                                    }
+                                case .failure(let error):
                                     self.canceledDose = nil
-                                    self.updateBannerAndHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: true)
-                                }
-                            case .failure(let error):
-                                self.presentErrorCancelingBolus(error)
-                                if case .inProgress(let dose) = self.bolusState {
-                                    self.updateBannerAndHUDandStatusRows(statusRowMode: .bolusing(dose: dose), newSize: nil, animated: true)
-                                } else {
-                                    self.updateBannerAndHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
+                                    self.presentErrorCancelingBolus(error)
+                                    if case .inProgress(let dose) = self.bolusState {
+                                        self.updateBannerAndHUDandStatusRows(statusRowMode: .bolusing(dose: dose), newSize: nil, animated: true)
+                                    } else {
+                                        self.updateBannerAndHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
+                                    }
                                 }
                             }
                         }
