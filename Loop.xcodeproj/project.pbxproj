@@ -5937,8 +5937,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/LoopKit/ZIPFoundation.git";
 			requirement = {
-				branch = "stream-entry";
-				kind = branch;
+				kind = revision;
+				revision = c67b7509ec82ee2b4b0ab3f97742b94ed9692494;
 			};
 		};
 		C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */ = {
