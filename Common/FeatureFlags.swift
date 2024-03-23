@@ -39,7 +39,6 @@ struct FeatureFlagConfiguration: Decodable {
     let profileExpirationSettingsViewEnabled: Bool
     let missedMealNotifications: Bool
     let allowAlgorithmExperiments: Bool
-    let recommendBolusForCarbsWithoutCorrection: Bool
 
 
     fileprivate init() {
@@ -232,12 +231,6 @@ struct FeatureFlagConfiguration: Decodable {
         self.allowAlgorithmExperiments = true
         #else
         self.allowAlgorithmExperiments = false
-        #endif
-        
-        #if RECOMMEND_BOLUS_FOR_CARBS_WITHOUT_CORRECTION
-        self.recommendBolusForCarbsWithoutCorrection = true
-        #else
-        self.recommendBolusForCarbsWithoutCorrection = false
         #endif
     }
 }

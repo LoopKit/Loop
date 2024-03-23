@@ -1474,14 +1474,26 @@ extension LoopDataManager {
         guard recommendation != nil else {
             return nil
         }
-
-        let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown)
+        
+        let cobPrediction = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
+        
+        let totalCobAmount : Double
+        
+        if let cobBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: cobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown) {
+            
+            totalCobAmount = cobBreakdownRecommendation.amount
+        } else {
+            return recommendation // unable to differentiate between correction amounts, this generally shouldn't happen
+        }
+        
+        
+        let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: cobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown)
         
         guard carbBreakdownRecommendation != nil else {
-            if potentialCarbEntry != nil {
-                return recommendation // unable to differentiate between carbs and correction
-            }
-            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: 0.0, correctionAmount: recommendation!.amount, missingAmount: recommendation!.missingAmount)
+            let carbsAmount = potentialCarbEntry == nil ? 0.0 : nil
+            let bgAmount = recommendation!.amount - totalCobAmount
+
+            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: carbsAmount, cobCorrectionAmount: totalCobAmount, bgCorrectionAmount: bgAmount, missingAmount: recommendation!.missingAmount)
         }
         
         guard potentialCarbEntry != nil else {
@@ -1489,42 +1501,42 @@ extension LoopDataManager {
             
             var correctionAmount = recommendation!.amount + extra
             
-            if (correctionAmount == 0) {
-                let correctionBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .correctionBreakdown)
-
-                if correctionBreakdownRecommendation != nil {
-                    correctionAmount = calcCorrectionAmount(carbsAmount: 0, carbBreakdownRecommendation: carbBreakdownRecommendation!, correctionBreakdownRecommendation: correctionBreakdownRecommendation!)
+            if correctionAmount == 0 {
+                if let calcAmount = try calcCorrectionAmount(carbsAmount: 0, prediction: prediction, potentialCarbEntry: potentialCarbEntry) {
                     
+                    correctionAmount = calcAmount
                     if recommendation!.notice == .predictedGlucoseInRange {
                         correctionAmount = Swift.min(correctionAmount, 0) // ensure 0 if in range but above the mid-point
                     }
-                } else {
-                    correctionAmount = 0
                 }
             }
             
-            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: 0.0, correctionAmount: correctionAmount, missingAmount: recommendation!.missingAmount)
+            let bgAmount = correctionAmount - totalCobAmount
+            
+            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: 0.0, cobCorrectionAmount: totalCobAmount, bgCorrectionAmount: bgAmount, missingAmount: recommendation!.missingAmount)
         }
         
+        let zeroCarbEntry = replacedCarbEntry == nil ? nil : NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 1E-50), startDate: potentialCarbEntry!.startDate, foodType: nil, absorptionTime: potentialCarbEntry!.absorptionTime)
         
-        let predictionWithoutCarbs = try predictGlucose(using: .all, potentialBolus: nil, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
+        let predictionWithoutCarbs = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: zeroCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
         
-        let carbBreakdownRecommendationWithoutCarbs = try recommendBolusValidatingDataRecency(forPrediction: predictionWithoutCarbs, consideringPotentialCarbEntry: nil, usage: .carbBreakdown)
+        let carbBreakdownRecommendationWithoutCarbs = try recommendBolusValidatingDataRecency(forPrediction: predictionWithoutCarbs, consideringPotentialCarbEntry: zeroCarbEntry, usage: .carbBreakdown)
         
         guard carbBreakdownRecommendationWithoutCarbs != nil else {
             return recommendation // unable to directly calculate carbsAmount
         }
         
         let carbsAmount = carbBreakdownRecommendation!.amount - carbBreakdownRecommendationWithoutCarbs!.amount
+        let cobAmount = max(totalCobAmount - carbsAmount, 0)
 
-        let correctionBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .correctionBreakdown)
 
         var missingAmount = recommendation!.missingAmount
         let correctionAmount : Double
 
-        if recommendation!.amount <= 0 && correctionBreakdownRecommendation != nil && recommendation!.notice != .predictedGlucoseInRange {
-            correctionAmount = calcCorrectionAmount(carbsAmount: carbsAmount, carbBreakdownRecommendation: carbBreakdownRecommendation!, correctionBreakdownRecommendation: correctionBreakdownRecommendation!)
+        if recommendation!.amount <= 0, recommendation!.notice != .predictedGlucoseInRange,
+           let calcAmount = try calcCorrectionAmount(carbsAmount: carbsAmount, prediction: prediction, potentialCarbEntry: potentialCarbEntry) {
             
+            correctionAmount = calcAmount
             let amount = carbsAmount + correctionAmount
             if volumeRounder()(amount) != 0 {
                 missingAmount = amount
@@ -1533,30 +1545,44 @@ extension LoopDataManager {
             let extra = Swift.max(recommendation!.missingAmount ?? 0, 0)
             correctionAmount = recommendation!.amount + extra - carbsAmount
         }
-        
-        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: carbsAmount, correctionAmount: correctionAmount, missingAmount: missingAmount)
+                
+        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: carbsAmount, cobCorrectionAmount: cobAmount, bgCorrectionAmount: correctionAmount - cobAmount, missingAmount: missingAmount)
     }
     
     fileprivate func calcCorrectionAmount(carbsAmount: Double,
-                                          carbBreakdownRecommendation : ManualBolusRecommendation,
-                                          correctionBreakdownRecommendation: ManualBolusRecommendation) -> Double {
+                                          prediction: [PredictedGlucoseValue],
+                                          potentialCarbEntry: NewCarbEntry?) throws -> Double? {
+        
+        let recommendationAmountForCarbs = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown)?.amount
+        
+        guard recommendationAmountForCarbs != nil else {
+            return nil
+        }
+        
+        let recommendationAmountForCorrection = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .correctionBreakdown)?.amount
+        
+        guard recommendationAmountForCorrection != nil else {
+            return nil
+        }
+
         // carbs + correction + y = a
         // carbs + correction + ratio*y = b
         // --> y = (b-a)/(ratio - 1)
         // --> correction = a - y - carbs
 
         let ratio = ManualBolusRecommendationUsage.correctionBreakdown.targetsAdjustment / ManualBolusRecommendationUsage.carbBreakdown.targetsAdjustment
-        let delta = correctionBreakdownRecommendation.amount - carbBreakdownRecommendation.amount
+        let y = (recommendationAmountForCorrection! - recommendationAmountForCarbs!) / (ratio - 1)
         
-        return carbBreakdownRecommendation.amount - delta / (ratio - 1) - carbsAmount
+        return recommendationAmountForCarbs! - y - carbsAmount
     }
 
     fileprivate enum ManualBolusRecommendationUsage {
-        case standard, carbBreakdown, correctionBreakdown
+        case standard, cobBreakdown, carbBreakdown, correctionBreakdown
         
         func suspendThresholdOverride(_ suspendThreshold: HKQuantity?) -> HKQuantity? {
             switch self {
             case .standard: return suspendThreshold
+            case .cobBreakdown: return HKQuantity(unit: HKUnit.milligramsPerDeciliter, doubleValue: -1E30)
             default: return nil
             }
         }
@@ -1578,14 +1604,19 @@ extension LoopDataManager {
         var targetsAdjustment : Double {
             switch self {
             case .standard: return 0.0
+            case .cobBreakdown: return 0.0
             case .carbBreakdown: return -1E5
             case .correctionBreakdown: return -2E5
             }
         }
         
-        func glucoseTargetsOverride(_ schedule: GlucoseRangeSchedule) -> GlucoseRangeSchedule{
+        func glucoseTargetsOverride(_ schedule: GlucoseRangeSchedule, _ startingGlucose: HKQuantity) -> GlucoseRangeSchedule{
             switch self {
             case .standard: return schedule
+            case .cobBreakdown:
+                let target = startingGlucose.doubleValue(for: .milligramsPerDeciliter)
+                return GlucoseRangeSchedule(unit: .milligramsPerDeciliter,
+                                            dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: target, maxValue: target))])!
             default: return adjustSchedule(schedule, amount: self.targetsAdjustment)
             }
         }
@@ -1659,10 +1690,6 @@ extension LoopDataManager {
         guard let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory else {
             throw LoopError.configurationError(.insulinSensitivitySchedule)
         }
-
-        let breakdownGlucoseRangeSchedule = GlucoseRangeSchedule(unit: .milligramsPerDeciliter, dailyItems: [
-            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: -1E5, maxValue: -1E5))
-        ])
         
         guard let glucoseTargetRange = settings.effectiveGlucoseTargetRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)  else {
             throw LoopError.configurationError(.glucoseTargetRangeSchedule)
@@ -1681,8 +1708,16 @@ extension LoopDataManager {
         
         let model = doseStore.insulinModelProvider.model(for: pumpInsulinType)
         
+        var startingGlucose : HKQuantity
+        
+        if let latestGlucose = self.glucoseStore.latestGlucose?.quantity {
+            startingGlucose = latestGlucose
+        } else {
+            startingGlucose = predictedGlucose[0].quantity
+        }
+        
         return predictedGlucose.recommendedManualBolus(
-            to: usage.glucoseTargetsOverride(glucoseTargetRange),
+            to: usage.glucoseTargetsOverride(glucoseTargetRange, startingGlucose),
             at: now(),
             suspendThreshold: usage.suspendThresholdOverride(settings.suspendThreshold?.quantity),
             sensitivity: insulinSensitivity,

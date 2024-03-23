@@ -229,9 +229,9 @@ struct BolusEntryView: View {
     
     private func displayRecommendationBreakdown() -> Bool {
         if viewModel.potentialCarbEntry != nil {
-            return viewModel.carbBolus != nil && viewModel.correctionBolus != nil
+            return viewModel.bgCorrectionBolus != nil && (viewModel.carbBolus != nil || viewModel.cobCorrectionBolus != nil)
         } else {
-            return viewModel.correctionBolus != nil
+            return viewModel.bgCorrectionBolus != nil
         }
     }
     
@@ -269,7 +269,7 @@ struct BolusEntryView: View {
                     if viewModel.potentialCarbEntry != nil && viewModel.carbBolus != nil {
                         HStack {
                             Text("    ")
-                            Text("Carb Bolus", comment: "Label for carb bolus row on bolus screen")
+                            Text("Carb Entry Bolus", comment: "Label for carb bolus row on bolus screen")
                                 .font(.footnote)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
@@ -281,14 +281,29 @@ struct BolusEntryView: View {
                         }
                         .accessibilityElement(children: .combine)
                     }
-                    if viewModel.correctionBolus != nil {
+                    if viewModel.cobCorrectionBolus != nil {
                         HStack {
                             Text("    ")
-                            Text("Correction Bolus", comment: "Label for correction bolus row on bolus screen")
+                            Text("COB Correction Bolus", comment: "Label for COB correction bolus row on bolus screen")
                                 .font(.footnote)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
-                                Text(viewModel.correctionBolusString)
+                                Text(viewModel.cobCorrectionBolusString)
+                                    .font(.footnote)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                    if viewModel.bgCorrectionBolus != nil {
+                        HStack {
+                            Text("    ")
+                            Text("BG Correction Bolus", comment: "Label for BG correction bolus row on bolus screen")
+                                .font(.footnote)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.bgCorrectionBolusString)
                                     .font(.footnote)
                                     .foregroundColor(Color(.label))
                                 breakdownBolusUnitsLabel

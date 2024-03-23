@@ -117,9 +117,13 @@ final class BolusEntryViewModel: ObservableObject {
     var carbBolusAmount: Double? {
         carbBolus?.doubleValue(for: .internationalUnit())
     }
-    @Published var correctionBolus: HKQuantity?
-    var correctionBolusAmount: Double? {
-        correctionBolus?.doubleValue(for: .internationalUnit())
+    @Published var cobCorrectionBolus: HKQuantity?
+    var cobCorrectionBolusAmount: Double? {
+        cobCorrectionBolus?.doubleValue(for: .internationalUnit())
+    }
+    @Published var bgCorrectionBolus: HKQuantity?
+    var bgCorrectionBolusAmount: Double? {
+        bgCorrectionBolus?.doubleValue(for: .internationalUnit())
     }
     @Published var missingBolus: HKQuantity?
     var missingBolusAmount: Double? {
@@ -676,7 +680,8 @@ final class BolusEntryViewModel: ObservableObject {
         let now = Date()
         var recommendation: ManualBolusRecommendation?
         let carbBolus: HKQuantity?
-        let correctionBolus: HKQuantity?
+        let cobCorrectionBolus: HKQuantity?
+        let bgCorrectionBolus: HKQuantity?
         let recommendedBolus: HKQuantity?
         let missingBolus: HKQuantity?
         let notice: Notice?
@@ -690,10 +695,16 @@ final class BolusEntryViewModel: ObservableObject {
                     carbBolus = nil
                 }
 
-                if let correctionAmount = recommendation.correctionAmount {
-                    correctionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: correctionAmount)
+                if let cobCorrectionAmount = recommendation.cobCorrectionAmount {
+                    cobCorrectionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: cobCorrectionAmount)
                 } else {
-                    correctionBolus = nil
+                    cobCorrectionBolus = nil
+                }
+                
+                if let bgCorrectionAmount = recommendation.bgCorrectionAmount {
+                    bgCorrectionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: bgCorrectionAmount)
+                } else {
+                    bgCorrectionBolus = nil
                 }
                 
                 if let missingAmount = recommendation.missingAmount {
@@ -725,14 +736,16 @@ final class BolusEntryViewModel: ObservableObject {
                 }
             } else {
                 carbBolus = nil
-                correctionBolus = nil
+                cobCorrectionBolus = nil
+                bgCorrectionBolus = nil
                 missingBolus = nil
                 recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
                 notice = nil
             }
         } catch {
             carbBolus = nil
-            correctionBolus = nil
+            cobCorrectionBolus = nil
+            bgCorrectionBolus = nil
             missingBolus = nil
             recommendedBolus = nil
 
@@ -751,7 +764,8 @@ final class BolusEntryViewModel: ObservableObject {
         DispatchQueue.main.async {
             let priorRecommendedBolus = self.recommendedBolus
             self.carbBolus = carbBolus
-            self.correctionBolus = correctionBolus
+            self.cobCorrectionBolus = cobCorrectionBolus
+            self.bgCorrectionBolus = bgCorrectionBolus
             self.missingBolus = missingBolus
             self.recommendedBolus = recommendedBolus
             self.dosingDecision.manualBolusRecommendation = recommendation.map { ManualBolusRecommendationWithDate(recommendation: $0, date: now) }
@@ -850,8 +864,11 @@ final class BolusEntryViewModel: ObservableObject {
     var carbBolusString: String {
         return bolusString(carbBolusAmount, forBreakdown: true)
     }
-    var correctionBolusString: String {
-        return bolusString(correctionBolusAmount, forBreakdown: true)
+    var cobCorrectionBolusString: String {
+        return bolusString(cobCorrectionBolusAmount, forBreakdown: true)
+    }
+    var bgCorrectionBolusString: String {
+        return bolusString(bgCorrectionBolusAmount, forBreakdown: true)
     }
     var negativeMissingBolusString: String {
         guard missingBolusAmount != nil else {
