@@ -1475,7 +1475,13 @@ extension LoopDataManager {
             return nil
         }
         
-        let cobPrediction = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
+        let totalCobPrediction = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
+        
+        guard !totalCobPrediction.isEmpty else {
+            return recommendation // unable to differentiate between correction amounts,
+        }
+        
+        let cobPrediction = totalCobPrediction.map{PredictedGlucoseValue(startDate: $0.startDate, quantity: totalCobPrediction.last!.quantity)}
         
         let totalCobAmount : Double
         
@@ -1483,11 +1489,11 @@ extension LoopDataManager {
             
             totalCobAmount = cobBreakdownRecommendation.amount
         } else {
-            return recommendation // unable to differentiate between correction amounts, this generally shouldn't happen
+            return recommendation // unable to differentiate between correction amounts
         }
         
         
-        let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: cobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown)
+        let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: totalCobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown)
         
         guard carbBreakdownRecommendation != nil else {
             let carbsAmount = potentialCarbEntry == nil ? 0.0 : nil
@@ -1526,6 +1532,7 @@ extension LoopDataManager {
             return recommendation // unable to directly calculate carbsAmount
         }
         
+        // carbs + cob = totalCob; in particular if user saves without bolusing and then requests a new recommendation it will be totalCob
         let carbsAmount = carbBreakdownRecommendation!.amount - carbBreakdownRecommendationWithoutCarbs!.amount
         let cobAmount = max(totalCobAmount - carbsAmount, 0)
 
@@ -1582,7 +1589,6 @@ extension LoopDataManager {
         func suspendThresholdOverride(_ suspendThreshold: HKQuantity?) -> HKQuantity? {
             switch self {
             case .standard: return suspendThreshold
-            case .cobBreakdown: return HKQuantity(unit: HKUnit.milligramsPerDeciliter, doubleValue: -1E30)
             default: return nil
             }
         }
@@ -1697,6 +1703,10 @@ extension LoopDataManager {
         guard let maxBolus = settings.maximumBolus else {
             throw LoopError.configurationError(.maximumBolus)
         }
+        
+        guard let startingGlucose = self.glucoseStore.latestGlucose?.quantity else {
+            throw LoopError.missingDataError(.glucose)
+        }
 
         guard lastRequestedBolus == nil
         else {
@@ -1707,15 +1717,7 @@ extension LoopDataManager {
         }
         
         let model = doseStore.insulinModelProvider.model(for: pumpInsulinType)
-        
-        var startingGlucose : HKQuantity
-        
-        if let latestGlucose = self.glucoseStore.latestGlucose?.quantity {
-            startingGlucose = latestGlucose
-        } else {
-            startingGlucose = predictedGlucose[0].quantity
-        }
-        
+                
         return predictedGlucose.recommendedManualBolus(
             to: usage.glucoseTargetsOverride(glucoseTargetRange, startingGlucose),
             at: now(),
