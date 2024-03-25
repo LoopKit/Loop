@@ -130,7 +130,10 @@ class LoopDataManagerTests: XCTestCase {
                dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
                predictCarbGlucoseEffects: Bool = false,
                correctionRanges: GlucoseRangeSchedule? = nil,
-               suspendThresholdValue: Double? = nil
+               suspendThresholdValue: Double? = nil,
+               // note that carbHistory is independent from carb effects;
+               // one can use dummy replacement carb entry to force recalculation when getting a manual bolus recommendation
+               carbHistorySupplier: ((Date) -> [StoredCarbEntry]?)? = nil
     )
     {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
@@ -170,12 +173,14 @@ class LoopDataManagerTests: XCTestCase {
         doseStore.basalProfileApplyingOverrideHistory = doseStore.basalProfile
         doseStore.sensitivitySchedule = insulinSensitivitySchedule
         let glucoseStore = MockGlucoseStore(for: test)
-        let carbStore = MockCarbStore(for: test, predictGlucose: predictCarbGlucoseEffects)
-        carbStore.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivitySchedule
-        carbStore.carbRatioSchedule = carbRatioSchedule
         
         let currentDate = glucoseStore.latestGlucose!.startDate
         now = currentDate
+        
+        let carbStore = MockCarbStore(for: test, predictGlucose: predictCarbGlucoseEffects, carbHistory: carbHistorySupplier?(now))
+        carbStore.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivitySchedule
+        carbStore.carbRatioSchedule = carbRatioSchedule
+
         
         dosingDecisionStore = MockDosingDecisionStore()
         automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)

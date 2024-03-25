@@ -14,10 +14,10 @@ class MockCarbStore: CarbStoreProtocol {
     var predictGlucose: Bool
     var carbHistory: [StoredCarbEntry]?
 
-    init(for scenario: DosingTestScenario = .flatAndStable, predictGlucose: Bool = false) {
+    init(for scenario: DosingTestScenario = .flatAndStable, predictGlucose: Bool = false, carbHistory: [StoredCarbEntry]? = nil) {
         self.scenario = scenario // The store returns different effect values based on the scenario
         self.predictGlucose = predictGlucose
-        self.carbHistory = loadHistoricCarbEntries(scenario: scenario)
+        self.carbHistory = carbHistory ?? loadHistoricCarbEntries(scenario: scenario)
     }
     
     var scenario: DosingTestScenario

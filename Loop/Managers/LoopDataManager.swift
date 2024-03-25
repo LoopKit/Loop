@@ -1483,15 +1483,10 @@ extension LoopDataManager {
         
         let cobPrediction = totalCobPrediction.map{PredictedGlucoseValue(startDate: $0.startDate, quantity: totalCobPrediction.last!.quantity)}
         
-        let totalCobAmount : Double
-        
-        if let cobBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: cobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown) {
+        guard let totalCobAmount = try recommendBolusValidatingDataRecency(forPrediction: cobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown)?.amount else {
             
-            totalCobAmount = cobBreakdownRecommendation.amount
-        } else {
             return recommendation // unable to differentiate between correction amounts
         }
-        
         
         let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: totalCobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown)
         

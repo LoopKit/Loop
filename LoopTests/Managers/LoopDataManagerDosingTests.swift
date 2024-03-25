@@ -508,6 +508,82 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(recommendedBolus!.missingAmount!, 0.82, accuracy: 0.01)
     }
     
+    func dummyReplacementEntry() -> StoredCarbEntry{
+        StoredCarbEntry(startDate: now, quantity: HKQuantity(unit: .gram(), doubleValue: -1))
+    }
+    
+    func dummyCarbEntry() -> NewCarbEntry {
+        NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 1E-50), startDate: now.addingTimeInterval(TimeInterval(days: -2)),
+                     foodType: nil, absorptionTime: TimeInterval(hours: 3))
+    }
+    
+    func testLoopGetStateRecommendsManualBolusForCob() {
+        // note that the default setup for .highAndStable has a _carb_effect file reflecting a 5g carb effect (with 45 ISF)
+        // predicted glucose starts from 200 and goes down to 176.21882841682697 (taking into account _insulin_effect)
+        let isf = 45.0
+        let cir = 10.0
+
+        let expectedCobCorrectionAmount = 0.5
+        let expectedBgCorrectionAmount = 1.82 + (200 - 176.21882841682697) / isf // COB correction is to 200. BG correction is the rest
+        
+        let carbValue = 5.0 + cir * ((200 - 176.21882841682697) / isf + expectedCobCorrectionAmount)
+        
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true,
+              carbHistorySupplier: {[StoredCarbEntry(startDate: $0, quantity: HKQuantity(unit: .gram(), doubleValue: carbValue))]})
+                
+        let exp = expectation(description: #function)
+        
+        var recommendedBolus: ManualBolusRecommendation?
+
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: self.dummyCarbEntry(), replacingCarbEntry: self.dummyReplacementEntry(), considerPositiveVelocityAndRC: false)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, expectedBgCorrectionAmount + expectedCobCorrectionAmount, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bgCorrectionAmount!, expectedBgCorrectionAmount, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.cobCorrectionAmount!, expectedCobCorrectionAmount, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, 0, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus!.missingAmount)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusForCobAndReducingCarbEntry() {
+        // note that the default setup for .highAndStable has a _carb_effect file reflecting a 5g carb effect (with 45 ISF)
+        // predicted glucose starts from 200 and goes down to 176.21882841682697 (taking into account _insulin_effect)
+        let isf = 45.0
+        let cir = 10.0
+
+        let expectedCobCorrectionAmount = 0.6
+        let expectedBgCorrectionAmount = 1.82 + (200 - 176.21882841682697) / isf // COB correction is to 200. BG correction is the rest
+        let expectedCarbsAmount = 0.5
+        
+        let carbValue = 5.0 + cir * ((200 - 176.21882841682697) / isf + expectedCobCorrectionAmount)
+        
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true,
+              carbHistorySupplier: {[
+                StoredCarbEntry(startDate: $0, quantity: HKQuantity(unit: .gram(), doubleValue: carbValue)),
+                StoredCarbEntry(startDate: $0, quantity: HKQuantity(unit: .gram(), doubleValue: 10))
+              ]})
+                
+        let exp = expectation(description: #function)
+        
+        let carbEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: expectedCarbsAmount * cir), startDate: now, foodType: nil, absorptionTime: TimeInterval(hours: 1))
+        
+        var recommendedBolus: ManualBolusRecommendation?
+
+        loopDataManager.getLoopState { (_, loopState) in
+            
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: carbEntry, replacingCarbEntry: StoredCarbEntry(startDate: self.now, quantity: HKQuantity(unit: .gram(), doubleValue: 10)), considerPositiveVelocityAndRC: false)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, expectedCarbsAmount + expectedBgCorrectionAmount + expectedCobCorrectionAmount, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bgCorrectionAmount!, expectedBgCorrectionAmount, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.cobCorrectionAmount!, expectedCobCorrectionAmount, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.carbsAmount!, expectedCarbsAmount, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus!.missingAmount)
+    }
+    
     func testLoopGetStateRecommendsManualBolusForCarbEntry() {
         setUp(for: .highAndStable, predictCarbGlucoseEffects: true)
         let exp = expectation(description: #function)
