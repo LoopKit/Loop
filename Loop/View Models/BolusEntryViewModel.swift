@@ -586,7 +586,7 @@ final class BolusEntryViewModel: ObservableObject {
             recommendedBolus = nil
 
             switch error {
-            case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld:
+            case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld, AlgorithmError.missingGlucose, AlgorithmError.glucoseTooOld:
                 notice = .staleGlucoseData
             case LoopError.invalidFutureGlucose:
                 notice = .futureGlucoseData
