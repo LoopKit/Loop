@@ -114,18 +114,23 @@ final class BolusEntryViewModel: ObservableObject {
     let selectedCarbAbsorptionTimeEmoji: String?
 
     @Published var carbBolus: HKQuantity?
+    @Published var carbBolusIncluded = true
     var carbBolusAmount: Double? {
         carbBolus?.doubleValue(for: .internationalUnit())
     }
     @Published var cobCorrectionBolus: HKQuantity?
+    @Published var cobCorrectionBolusIncluded = true
     var cobCorrectionBolusAmount: Double? {
         cobCorrectionBolus?.doubleValue(for: .internationalUnit())
     }
     @Published var bgCorrectionBolus: HKQuantity?
+    @Published var bgCorrectionBolusIncluded = true
     var bgCorrectionBolusAmount: Double? {
         bgCorrectionBolus?.doubleValue(for: .internationalUnit())
     }
     @Published var missingBolus: HKQuantity?
+    @Published var missingBolusIncluded = true
+    @Published var missingBolusIsMaxBolus = false
     var missingBolusAmount: Double? {
         missingBolus?.doubleValue(for: .internationalUnit())
     }
@@ -222,7 +227,7 @@ final class BolusEntryViewModel: ObservableObject {
         self.observeElapsedTime()
         self.observeEnteredManualGlucoseChanges()
         self.observeEnteredBolusChanges()
-
+        self.observeBolusBreakdownChanges()
     }
 
     private func observeLoopUpdates() {
@@ -251,6 +256,37 @@ final class BolusEntryViewModel: ObservableObject {
             .sink { [weak self] _ in
                 self?.delegate?.withLoopState { [weak self] state in
                     self?.updatePredictedGlucoseValues(from: state)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func observeBolusBreakdownChanges() {
+        $carbBolusIncluded
+            .sink { [weak self] _ in
+                self?.delegate?.withLoopState { [weak self] state in
+                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                }
+            }
+            .store(in: &cancellables)
+        $cobCorrectionBolusIncluded
+            .sink { [weak self] _ in
+                self?.delegate?.withLoopState { [weak self] state in
+                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                }
+            }
+            .store(in: &cancellables)
+        $bgCorrectionBolusIncluded
+            .sink { [weak self] _ in
+                self?.delegate?.withLoopState { [weak self] state in
+                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                }
+            }
+            .store(in: &cancellables)
+        $missingBolusIncluded
+            .sink { [weak self] _ in
+                self?.delegate?.withLoopState { [weak self] state in
+                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
                 }
             }
             .store(in: &cancellables)
@@ -668,6 +704,10 @@ final class BolusEntryViewModel: ObservableObject {
             }
         }
     }
+    
+    private func resolveValue(_ useValue: Bool, _ value: Double) -> Double {
+        useValue ? round(1000*value) / 1000 : 0
+    }
 
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
@@ -684,25 +724,31 @@ final class BolusEntryViewModel: ObservableObject {
         let bgCorrectionBolus: HKQuantity?
         let recommendedBolus: HKQuantity?
         let missingBolus: HKQuantity?
+        var missingBolusIsMaxBolus = false
         let notice: Notice?
         do {
             recommendation = try computeBolusRecommendation(from: state)
 
             if let recommendation = recommendation {
-                if let carbsAmount = recommendation.carbsAmount {
+                var totalRecommendation = 0.0
+                
+                if let carbsAmount = recommendation.bolusBreakdown?.carbsAmount {
                     carbBolus = HKQuantity(unit: .internationalUnit(), doubleValue: carbsAmount)
+                    totalRecommendation += resolveValue(carbBolusIncluded, carbsAmount)
                 } else {
                     carbBolus = nil
                 }
 
-                if let cobCorrectionAmount = recommendation.cobCorrectionAmount {
+                if let cobCorrectionAmount = recommendation.bolusBreakdown?.cobCorrectionAmount {
                     cobCorrectionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: cobCorrectionAmount)
+                    totalRecommendation += resolveValue(cobCorrectionBolusIncluded, cobCorrectionAmount)
                 } else {
                     cobCorrectionBolus = nil
                 }
                 
-                if let bgCorrectionAmount = recommendation.bgCorrectionAmount {
+                if let bgCorrectionAmount = recommendation.bolusBreakdown?.bgCorrectionAmount {
                     bgCorrectionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: bgCorrectionAmount)
+                    totalRecommendation += resolveValue(bgCorrectionBolusIncluded, bgCorrectionAmount)
                 } else {
                     bgCorrectionBolus = nil
                 }
@@ -710,14 +756,20 @@ final class BolusEntryViewModel: ObservableObject {
                 if let missingAmount = recommendation.missingAmount {
                     if missingAmount != 0 {
                         missingBolus = HKQuantity(unit: .internationalUnit(), doubleValue: missingAmount)
+                        missingBolusIsMaxBolus = recommendation.amount != 0
+                        totalRecommendation += resolveValue(missingBolusIncluded, missingAmount)
                     } else {
                         missingBolus = nil
                     }
                 } else {
                     missingBolus = nil
                 }
-
-                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: recommendation.amount))
+                
+                if carbBolusIncluded, cobCorrectionBolusIncluded, bgCorrectionBolusIncluded, missingBolusIncluded {
+                    totalRecommendation = recommendation.amount // avoid possible rounding issues
+                }
+                
+                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: max(0, totalRecommendation)))
                 //recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
                 
                 switch recommendation.notice {
@@ -767,6 +819,7 @@ final class BolusEntryViewModel: ObservableObject {
             self.cobCorrectionBolus = cobCorrectionBolus
             self.bgCorrectionBolus = bgCorrectionBolus
             self.missingBolus = missingBolus
+            self.missingBolusIsMaxBolus = missingBolusIsMaxBolus
             self.recommendedBolus = recommendedBolus
             self.dosingDecision.manualBolusRecommendation = recommendation.map { ManualBolusRecommendationWithDate(recommendation: $0, date: now) }
             self.activeNotice = notice

@@ -1492,9 +1492,8 @@ extension LoopDataManager {
         
         guard carbBreakdownRecommendation != nil else {
             let carbsAmount = potentialCarbEntry == nil ? 0.0 : nil
-            let bgAmount = recommendation!.amount - totalCobAmount
 
-            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: carbsAmount, cobCorrectionAmount: totalCobAmount, bgCorrectionAmount: bgAmount, missingAmount: recommendation!.missingAmount)
+            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, bolusBreakdown: BolusBreakdown(fullCarbsAmount: carbsAmount, fullCobCorrectionAmount: totalCobAmount, fullCorrectionAmount: recommendation!.amount))
         }
         
         guard potentialCarbEntry != nil else {
@@ -1512,11 +1511,10 @@ extension LoopDataManager {
                 }
             }
             
-            let bgAmount = correctionAmount - totalCobAmount
-            
-            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: 0.0, cobCorrectionAmount: totalCobAmount, bgCorrectionAmount: bgAmount, missingAmount: recommendation!.missingAmount)
+            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, missingAmount: recommendation!.missingAmount, bolusBreakdown: BolusBreakdown(fullCarbsAmount: 0.0, fullCobCorrectionAmount: totalCobAmount, fullCorrectionAmount: correctionAmount))
         }
         
+        // the insulin needed to cover the zeroCarbEntry will underflow to 0 once added/subtracted
         let zeroCarbEntry = replacedCarbEntry == nil ? nil : NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 1E-50), startDate: potentialCarbEntry!.startDate, foodType: nil, absorptionTime: potentialCarbEntry!.absorptionTime)
         
         let predictionWithoutCarbs = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: zeroCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
@@ -1527,10 +1525,7 @@ extension LoopDataManager {
             return recommendation // unable to directly calculate carbsAmount
         }
         
-        // carbs + cob = totalCob; in particular if user saves without bolusing and then requests a new recommendation it will be totalCob
         let carbsAmount = carbBreakdownRecommendation!.amount - carbBreakdownRecommendationWithoutCarbs!.amount
-        let cobAmount = max(totalCobAmount - carbsAmount, 0)
-
 
         var missingAmount = recommendation!.missingAmount
         let correctionAmount : Double
@@ -1548,7 +1543,7 @@ extension LoopDataManager {
             correctionAmount = recommendation!.amount + extra - carbsAmount
         }
                 
-        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, carbsAmount: carbsAmount, cobCorrectionAmount: cobAmount, bgCorrectionAmount: correctionAmount - cobAmount, missingAmount: missingAmount)
+        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, missingAmount: missingAmount, bolusBreakdown: BolusBreakdown(fullCarbsAmount: carbsAmount, fullCobCorrectionAmount: totalCobAmount, fullCorrectionAmount: correctionAmount))
     }
     
     fileprivate func calcCorrectionAmount(carbsAmount: Double,

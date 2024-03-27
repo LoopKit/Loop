@@ -237,16 +237,17 @@ struct BolusEntryView: View {
     
     @State
     private var recommendationBreakdownExpanded = false
-    
+        
     @ViewBuilder
     private var recommendedBolusRow: some View {
-        
+        let breakdownFont = Font.subheadline
         Section {
             HStack(alignment: .firstTextBaseline) {
                 Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
                 if displayRecommendationBreakdown() {
                     Image(systemName: "chevron.forward.circle")
                         .imageScale(.small)
+                        .foregroundColor(.accentColor)
                         .rotationEffect(.degrees(recommendationBreakdownExpanded ? 90 : 0))
                 }
                 Spacer()
@@ -266,70 +267,104 @@ struct BolusEntryView: View {
             }
             if recommendationBreakdownExpanded {
                 VStack {
-                    if viewModel.potentialCarbEntry != nil && viewModel.carbBolus != nil {
+                    if viewModel.potentialCarbEntry != nil, viewModel.carbBolus != nil {
                         HStack {
-                            Text("    ")
-                            Text("Carb Entry Bolus", comment: "Label for carb bolus row on bolus screen")
-                                .font(.footnote)
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.carbBolusIncluded ? 1 : 0)
+                            Text("Carb Entry", comment: "Label for carb bolus row on bolus screen")
+                                .font(breakdownFont)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.carbBolusString)
-                                    .font(.footnote)
+                                    .font(.subheadline)
                                     .foregroundColor(Color(.label))
                                 breakdownBolusUnitsLabel
                             }
                         }
                         .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.carbBolusIncluded.toggle()
+                        }
                     }
                     if viewModel.cobCorrectionBolus != nil {
                         HStack {
-                            Text("    ")
-                            Text("COB Correction Bolus", comment: "Label for COB correction bolus row on bolus screen")
-                                .font(.footnote)
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.cobCorrectionBolusIncluded ? 1 : 0)
+                            Text("COB Correction", comment: "Label for COB correction bolus row on bolus screen")
+                                .font(breakdownFont)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.cobCorrectionBolusString)
-                                    .font(.footnote)
+                                    .font(breakdownFont)
                                     .foregroundColor(Color(.label))
                                 breakdownBolusUnitsLabel
                             }
                         }
                         .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.cobCorrectionBolusIncluded.toggle()
+                        }
+
                     }
                     if viewModel.bgCorrectionBolus != nil {
                         HStack {
-                            Text("    ")
-                            Text("BG Correction Bolus", comment: "Label for BG correction bolus row on bolus screen")
-                                .font(.footnote)
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.bgCorrectionBolusIncluded ? 1 : 0)
+                            Text("BG Correction", comment: "Label for BG correction bolus row on bolus screen")
+                                .font(breakdownFont)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.bgCorrectionBolusString)
-                                    .font(.footnote)
+                                    .font(breakdownFont)
                                     .foregroundColor(Color(.label))
                                 breakdownBolusUnitsLabel
                             }
                         }
                         .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.bgCorrectionBolusIncluded.toggle()
+                        }
                     }
-                    if viewModel.missingBolus != nil && viewModel.recommendedBolusAmount != nil {
+                    if viewModel.missingBolus != nil {
                         HStack {
-                            Text("    ")
-                            if viewModel.recommendedBolusAmount! != 0 {
-                                Text("Limit to Max Bolus", comment: "Label for max bolus row on bolus screen")
-                                    .font(.footnote)
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.missingBolusIncluded ? 1 : 0)
+                            if viewModel.missingBolusIsMaxBolus {
+                                Text("Max Bolus Limit", comment: "Label for max bolus row on bolus screen")
+                                    .font(breakdownFont)
                             } else {
-                                Text("Limit to 0 Bolus", comment: "Label for 0 bolus row on bolus screen")
-                                    .font(.footnote)
+                                Text("Glucose Safety Limit", comment: "Label for glucose safety limit row on bolus screen")
+                                    .font(breakdownFont)
                             }
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.negativeMissingBolusString)
-                                    .font(.footnote)
+                                    .font(breakdownFont)
                                     .foregroundColor(Color(.label))
                                 breakdownBolusUnitsLabel
                             }
                         }
                         .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.missingBolusIncluded.toggle()
+                        }
+
                     }
                 }
                 .accessibilityElement(children: .combine)
