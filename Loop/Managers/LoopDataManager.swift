@@ -298,7 +298,7 @@ final class LoopDataManager {
 
         let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(.minutes(GlucoseMath.defaultDelta))
 
-        let carbsStart = baseTime.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
+        let carbsStart = baseTime.addingTimeInterval(CarbMath.dateAdjustmentPast + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
 
         // Include future carbs in query, but filter out ones entered after basetime. The filtering is only applicable when running in a retrospective situation.
         let carbEntries = try await carbStore.getCarbEntries(
@@ -1285,3 +1285,8 @@ extension LoopDataManager: DiagnosticReportGenerator {
 }
 
 extension LoopDataManager: LoopControl { }
+
+extension CarbMath {
+    public static let dateAdjustmentPast: TimeInterval = .hours(-12)
+    public static let dateAdjustmentFuture: TimeInterval = .hours(1)
+}

@@ -149,6 +149,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
         let midnight = Calendar.current.startOfDay(for: Date())
         let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
+        let listEnd = Date().addingTimeInterval(CarbMath.dateAdjustmentFuture)
 
         let shouldUpdateGlucose = currentContext.contains(.glucose)
         let shouldUpdateCarbs = currentContext.contains(.carbs)
@@ -160,7 +161,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
         if shouldUpdateGlucose || shouldUpdateCarbs {
             do {
-                let review = try await loopDataManager.fetchCarbAbsorptionReview(start: listStart, end: Date())
+                let review = try await loopDataManager.fetchCarbAbsorptionReview(start: listStart, end: listEnd)
                 insulinCounteractionEffects = review.effectsVelocities.filterDateRange(chartStartDate, nil)
                 carbStatuses = review.carbStatuses
                 carbsOnBoard = carbStatuses?.getClampedCarbsOnBoard()

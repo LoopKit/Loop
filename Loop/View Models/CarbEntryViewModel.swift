@@ -11,6 +11,7 @@ import LoopKit
 import HealthKit
 import Combine
 import LoopCore
+import LoopAlgorithm
 
 protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate {
     var defaultAbsorptionTimes: DefaultAbsorptionTimes { get }
@@ -64,10 +65,10 @@ final class CarbEntryViewModel: ObservableObject {
     @Published var time = Date()
     private var date = Date()
     var minimumDate: Date {
-        get { date.addingTimeInterval(.hours(-12)) }
+        get { date.addingTimeInterval(CarbMath.dateAdjustmentPast) }
     }
     var maximumDate: Date {
-        get { date.addingTimeInterval(.hours(1)) }
+        get { date.addingTimeInterval(CarbMath.dateAdjustmentFuture) }
     }
     
     @Published var foodType = ""
