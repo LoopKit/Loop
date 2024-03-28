@@ -337,23 +337,18 @@ struct BolusEntryView: View {
                             viewModel.bgCorrectionBolusIncluded.toggle()
                         }
                     }
-                    if viewModel.missingBolus != nil {
+                    if viewModel.maxExcessBolus != nil {
                         HStack {
                             Text("  ")
                             Image(systemName: "checkmark")
                                 .imageScale(.small)
                                 .foregroundColor(.accentColor)
-                                .opacity(viewModel.missingBolusIncluded ? 1 : 0)
-                            if viewModel.missingBolusIsMaxBolus {
-                                Text("Max Bolus Limit", comment: "Label for max bolus row on bolus screen")
-                                    .font(breakdownFont)
-                            } else {
-                                Text("Glucose Safety Limit", comment: "Label for glucose safety limit row on bolus screen")
-                                    .font(breakdownFont)
-                            }
+                                .opacity(viewModel.maxExcessBolusIncluded ? 1 : 0)
+                            Text("Max Bolus Limit", comment: "Label for max bolus row on bolus screen")
+                                .font(breakdownFont)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
-                                Text(viewModel.negativeMissingBolusString)
+                                Text(viewModel.negativeMaxExcessBolusString)
                                     .font(breakdownFont)
                                     .foregroundColor(Color(.label))
                                 breakdownBolusUnitsLabel
@@ -362,9 +357,31 @@ struct BolusEntryView: View {
                         .accessibilityElement(children: .combine)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            viewModel.missingBolusIncluded.toggle()
+                            viewModel.maxExcessBolusIncluded.toggle()
                         }
-
+                    }
+                    if viewModel.safetyLimitBolus != nil {
+                        HStack {
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.safetyLimitBolusIncluded ? 1 : 0)
+                            Text("Glucose Safety Limit", comment: "Label for glucose safety limit row on bolus screen")
+                                .font(breakdownFont)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.negativeSafetyLimitString)
+                                    .font(breakdownFont)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.safetyLimitBolusIncluded.toggle()
+                        }
                     }
                 }
                 .accessibilityElement(children: .combine)
