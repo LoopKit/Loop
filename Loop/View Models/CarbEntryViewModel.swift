@@ -343,7 +343,7 @@ final class CarbEntryViewModel: ObservableObject {
             let delta = endSample.quantity.doubleValue(for: .milligramsPerDeciliter) - startSample.quantity.doubleValue(for: .milligramsPerDeciliter)
             let velocity = delta / duration.minutes // Unit = mg/dL/m
             
-            if velocity > LoopConstants.missedMealWarningGlucoseRiseThreshold {
+            if velocity >= LoopConstants.missedMealWarningGlucoseRiseThreshold {
                 warnings.insert(.glucoseRisingRapidly)
             } else {
                 warnings.remove(.glucoseRisingRapidly)
