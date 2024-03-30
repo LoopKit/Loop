@@ -1865,15 +1865,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         lastOrientation = UIDevice.current.orientation
     }
 
-    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        guard FeatureFlags.allowDebugFeatures else {
-            return
-        }
-        if motion == .motionShake {
-            presentDebugMenu()
-        }
-    }
-
     private func presentDebugMenu() {
         guard FeatureFlags.allowDebugFeatures else {
             return
