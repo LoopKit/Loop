@@ -62,19 +62,19 @@ struct BolusEntryView: View {
             .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
             .onReceive(self.viewModel.$recommendedBolus) { recommendation in
                 // If the recommendation changes, and the user has not edited the bolus amount, update the bolus amount
-                let amount = recommendation?.doubleValue(for: .internationalUnit()) ?? 0
+                       var amount = recommendation?.doubleValue(for: .internationalUnit()) ?? 0
                 if !editedBolusAmount {
                     var newEnteredBolusString: String
                     if amount == 0 {
                         newEnteredBolusString = ""
                     } else {
+                        if viewModel.potentialCarbEntry != nil {
+                            amount = 0.0
+                        }
                         newEnteredBolusString = viewModel.formatBolusAmount(amount)
                     }
                     enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                 }
-            }
-        }
-    }
     
     private var title: Text {
         if viewModel.potentialCarbEntry == nil {
