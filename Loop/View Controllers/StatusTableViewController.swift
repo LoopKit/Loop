@@ -20,6 +20,10 @@ import os.log
 import Combine
 import WidgetKit
 
+private struct CanceledDose {
+    let dose: DoseEntry
+    let delivered: Double
+}
 
 private extension RefreshContext {
     static let all: Set<RefreshContext> = [.status, .glucose, .insulin, .carbs, .targets]
@@ -1076,9 +1080,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     let totalUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: dose.programmedUnits)
                     let totalUnitsString = insulinFormatter.string(from: totalUnitsQuantity) ?? ""
                     
-                    let deliveredUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: bolusProgressReporter!.progress.deliveredUnits)
+                    let deliveredUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: dose.deliveredUnits ?? 0)
                     let deliveredUnitsString = insulinFormatter.string(from: deliveredUnitsQuantity, includeUnit: false) ?? ""
-                    cell.titleLabel.text = String(format: NSLocalizedString("Bolus Canceled: %1$@ of %2$@ delivered", comment: "The title of the cell indicating a bolus has been canceled. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)
+                    cell.titleLabel.text = String(format: NSLocalizedString("Bolus Canceled: Delivered %1$@ of %2$@", comment: "The title of the cell indicating a bolus has been canceled. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)
                     return cell
                 case .pumpSuspended(let resuming):
                     let cell = getTitleSubtitleCell()
@@ -1225,9 +1229,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         vc.delegate = self
                         show(vc, sender: tableView.cellForRow(at: indexPath))
                     }
-                case .bolusing(let dose):
+                case .bolusing(var dose):
                     updateBannerAndHUDandStatusRows(statusRowMode: .cancelingBolus, newSize: nil, animated: true)
                     Task {
+                        try? await Task.sleep(nanoseconds: NSEC_PER_SEC)
+                        dose.deliveredUnits = bolusProgressReporter?.progress.deliveredUnits
                         self.canceledDose = dose
                         deviceManager.pumpManager?.cancelBolus() { (result) in
                             DispatchQueue.main.async {
@@ -1236,7 +1242,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                     Task {
                                         try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 10)
                                         self.canceledDose = nil
-                                        self.updateBannerAndHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: false)
+                                        self.updateBannerAndHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: true)
                                     }
                                 case .failure(let error):
                                     self.canceledDose = nil
