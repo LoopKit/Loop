@@ -20,11 +20,6 @@ import os.log
 import Combine
 import WidgetKit
 
-private struct CanceledDose {
-    let dose: DoseEntry
-    let delivered: Double
-}
-
 private extension RefreshContext {
     static let all: Set<RefreshContext> = [.status, .glucose, .insulin, .carbs, .targets]
 }
