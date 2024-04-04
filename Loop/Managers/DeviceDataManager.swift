@@ -595,6 +595,29 @@ final class DeviceDataManager {
             await self.checkPumpDataAndLoop()
         }
     }
+    
+//private func refreshCGM(_ completion: (() -> Void)? = nil) {
+//        guard let cgmManager = cgmManager else {
+//            completion?()
+//            return
+//        }
+//
+//        cgmManager.fetchNewDataIfNeeded { (result) in
+//            if case .newData = result {
+//                self.analyticsServicesManager.didFetchNewCGMData()
+//            }
+//
+//            self.queue.async {
+//                self.processCGMReadingResult(cgmManager, readingResult: result) {
+//                    if self.loopManager.lastLoopCompleted == nil || self.loopManager.lastLoopCompleted!.timeIntervalSinceNow < -.minutes(4.2) {
+//                        self.log.default("Triggering Loop from refreshCGM()")
+//                        self.checkPumpDataAndLoop()
+//                    }
+//                    completion?()
+//                }
+//            }
+//        }
+//    }
 
     func refreshDeviceData() async {
         await refreshCGM()
