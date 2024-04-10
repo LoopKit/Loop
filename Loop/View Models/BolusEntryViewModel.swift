@@ -61,7 +61,6 @@ final class BolusEntryViewModel: ObservableObject {
         case carbEntryPersistenceFailure
         case manualGlucoseEntryOutOfAcceptableRange
         case manualGlucoseEntryPersistenceFailure
-        case glucoseNoLongerStale
         case forecastInfo
     }
 
@@ -495,7 +494,6 @@ final class BolusEntryViewModel: ObservableObject {
             isManualGlucoseEntryEnabled = false
             manualGlucoseQuantity = nil
             manualGlucoseSample = nil
-            presentAlert(.glucoseNoLongerStale)
         }
     }
 
@@ -519,7 +517,7 @@ final class BolusEntryViewModel: ObservableObject {
             let startDate = now()
             var input = try await delegate.fetchData(for: startDate, disablingPreMeal: potentialCarbEntry != nil)
 
-            var insulinModel = delegate.insulinModel(for: deliveryDelegate?.pumpInsulinType)
+            let insulinModel = delegate.insulinModel(for: deliveryDelegate?.pumpInsulinType)
 
             let enteredBolusDose = SimpleInsulinDose(
                 deliveryType: .bolus,
@@ -550,7 +548,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func updateRecommendedBolusAndNotice(isUpdatingFromUserInput: Bool) async {
 
-        guard let delegate = delegate else {
+        guard let delegate else {
             assertionFailure("Missing BolusEntryViewModelDelegate")
             return
         }
@@ -561,7 +559,7 @@ final class BolusEntryViewModel: ObservableObject {
         do {
             recommendation = try await computeBolusRecommendation()
 
-            if let recommendation, let deliveryDelegate {
+            if let recommendation, deliveryDelegate != nil {
                 recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
 
                 switch recommendation.notice {

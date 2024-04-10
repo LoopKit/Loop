@@ -421,11 +421,6 @@ struct BolusEntryView: View {
                 title: Text("Unable to Save Manual Glucose Entry", comment: "Alert title for a manual glucose entry persistence error"),
                 message: Text("An error occurred while trying to save your manual glucose entry.", comment: "Alert message for a manual glucose entry persistence error")
             )
-        case .glucoseNoLongerStale:
-            return SwiftUI.Alert(
-                title: Text("Glucose Data Now Available", comment: "Alert title when glucose data returns while on bolus screen"),
-                message: Text("An updated bolus recommendation is available.", comment: "Alert message when glucose data returns while on bolus screen")
-            )
         case .forecastInfo:
             return SwiftUI.Alert(
                 title: Text("Forecasted Glucose", comment: "Title for forecast explanation modal on bolus view"),

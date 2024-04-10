@@ -150,16 +150,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
 
     // MARK: updating state
-    
-    func testUpdateDisableManualGlucoseEntryIfNecessary() async throws {
-        bolusEntryViewModel.isManualGlucoseEntryEnabled = true
-        bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
-        await bolusEntryViewModel.update()
-        XCTAssertFalse(bolusEntryViewModel.isManualGlucoseEntryEnabled)
-        XCTAssertNil(bolusEntryViewModel.manualGlucoseQuantity)
-        XCTAssertEqual(.glucoseNoLongerStale, bolusEntryViewModel.activeAlert)
-    }
-    
+
     func testUpdateDisableManualGlucoseEntryIfNecessaryStaleGlucose() async throws {
         delegate.mostRecentGlucoseDataDate = Date.distantPast
         bolusEntryViewModel.isManualGlucoseEntryEnabled = true
