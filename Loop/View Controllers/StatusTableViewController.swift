@@ -688,7 +688,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             statusRowMode = .pumpSuspended(resuming: false)
         } else if case .resuming = basalDeliveryState {
             statusRowMode = .pumpSuspended(resuming: true)
-        } else if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
+        } else if case .inProgress(let dose) = bolusState, bolusProgressReporter?.progress.isComplete == false {
+            // the isComplete check should be tested on DIY
             statusRowMode = .bolusing(dose: dose)
         } else if !onboardingManager.isComplete, deviceManager.pumpManager?.isOnboarded == true {
             statusRowMode = .onboardingSuspended
