@@ -19,7 +19,7 @@ import SwiftCharts
 import os.log
 import Combine
 import WidgetKit
-
+import LoopAlgorithm
 
 private extension RefreshContext {
     static let all: Set<RefreshContext> = [.status, .glucose, .insulin, .carbs, .targets]
@@ -440,7 +440,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var glucoseSamples: [StoredGlucoseSample]?
         var predictedGlucoseValues: [GlucoseValue]?
         var iobValues: [InsulinValue]?
-        var doseEntries: [DoseEntry]?
+        var doseEntries: [BasalRelativeDose]?
         var totalDelivery: Double?
         var cobValues: [CarbValue]?
         var carbsOnBoard: HKQuantity?
@@ -492,7 +492,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         if currentContext.contains(.insulin) {
             doseEntries = loopManager.dosesRelativeToBasal.trimmed(from: startDate)
-            iobValues = loopManager.iobValues.trimmed(from: startDate)
+            iobValues = loopManager.iobValues.filterDateRange(startDate, nil)
             totalDelivery = try? await loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())).value
         }
 
@@ -660,6 +660,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case enactingBolus
         case bolusing(dose: DoseEntry)
         case cancelingBolus
+        case canceledBolus(dose: DoseEntry)
         case pumpSuspended(resuming: Bool)
         case onboardingSuspended
         case recommendManualGlucoseEntry
@@ -676,6 +677,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private var statusRowMode = StatusRowMode.hidden
 
+    private var canceledDose: DoseEntry? = nil
+    
     private func determineStatusRowMode() -> StatusRowMode {
         let statusRowMode: StatusRowMode
 
@@ -683,11 +686,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
             statusRowMode = .enactingBolus
         } else if case .canceling = bolusState {
             statusRowMode = .cancelingBolus
+        } else if let canceledDose {
+            statusRowMode = .canceledBolus(dose: canceledDose)
         } else if case .suspended = basalDeliveryState {
             statusRowMode = .pumpSuspended(resuming: false)
         } else if case .resuming = basalDeliveryState {
             statusRowMode = .pumpSuspended(resuming: true)
-        } else if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
+        } else if case .inProgress(let dose) = bolusState, bolusProgressReporter?.progress.isComplete == false {
+            // the isComplete check should be tested on DIY
             statusRowMode = .bolusing(dose: dose)
         } else if !onboardingManager.isComplete, deviceManager.pumpManager?.isOnboarded == true {
             statusRowMode = .onboardingSuspended
@@ -1063,6 +1069,22 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
                     return cell
+                case .canceledBolus(let dose):
+                    let cell = getTitleSubtitleCell()
+                    
+                    lazy var insulinFormatter: QuantityFormatter = {
+                        let formatter = QuantityFormatter(for: .internationalUnit())
+                        formatter.numberFormatter.minimumFractionDigits = 2
+                        return formatter
+                    }()
+                    
+                    let totalUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: dose.programmedUnits)
+                    let totalUnitsString = insulinFormatter.string(from: totalUnitsQuantity) ?? ""
+                    
+                    let deliveredUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: dose.deliveredUnits ?? 0)
+                    let deliveredUnitsString = insulinFormatter.string(from: deliveredUnitsQuantity, includeUnit: false) ?? ""
+                    cell.titleLabel.text = String(format: NSLocalizedString("Bolus Canceled: Delivered %1$@ of %2$@", comment: "The title of the cell indicating a bolus has been canceled. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)
+                    return cell
                 case .pumpSuspended(let resuming):
                     let cell = getTitleSubtitleCell()
                     cell.titleLabel.text = NSLocalizedString("Insulin Suspended", comment: "The title of the cell indicating the pump is suspended")
@@ -1208,20 +1230,29 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         vc.delegate = self
                         show(vc, sender: tableView.cellForRow(at: indexPath))
                     }
-                case .bolusing:
+                case .bolusing(var dose):
                     updateBannerAndHUDandStatusRows(statusRowMode: .cancelingBolus, newSize: nil, animated: true)
-                    deviceManager.pumpManager?.cancelBolus() { (result) in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success:
-                                // show user confirmation and actual delivery amount?
-                                break
-                            case .failure(let error):
-                                self.presentErrorCancelingBolus(error)
-                                if case .inProgress(let dose) = self.bolusState {
-                                    self.updateBannerAndHUDandStatusRows(statusRowMode: .bolusing(dose: dose), newSize: nil, animated: true)
-                                } else {
-                                    self.updateBannerAndHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
+                    Task {
+                        try? await Task.sleep(nanoseconds: NSEC_PER_SEC)
+                        dose.deliveredUnits = bolusProgressReporter?.progress.deliveredUnits
+                        self.canceledDose = dose
+                        deviceManager.pumpManager?.cancelBolus() { (result) in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success:
+                                    Task {
+                                        try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 10)
+                                        self.canceledDose = nil
+                                        self.updateBannerAndHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: true)
+                                    }
+                                case .failure(let error):
+                                    self.canceledDose = nil
+                                    self.presentErrorCancelingBolus(error)
+                                    if case .inProgress(let dose) = self.bolusState {
+                                        self.updateBannerAndHUDandStatusRows(statusRowMode: .bolusing(dose: dose), newSize: nil, animated: true)
+                                    } else {
+                                        self.updateBannerAndHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
+                                    }
                                 }
                             }
                         }

@@ -11,6 +11,7 @@ import LoopKit
 import LoopKitUI
 import HealthKit
 import LoopCore
+import LoopAlgorithm
 
 struct SimpleBolusView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
@@ -202,7 +203,7 @@ struct SimpleBolusView: View {
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
                     text: $viewModel.enteredBolusString,
-                    placeholder: "",
+                    placeholder: "0",
                     font: .preferredFont(forTextStyle: .title1),
                     textColor: .loopAccent,
                     textAlignment: .right,
@@ -380,7 +381,7 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
                 userUpdatedDate: nil)
         }
         
-        func insulinOnBoard(at date: Date) async -> LoopKit.InsulinValue? {
+        func insulinOnBoard(at date: Date) async -> InsulinValue? {
             return nil
         }
 

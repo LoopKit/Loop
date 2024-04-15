@@ -10,6 +10,8 @@ import XCTest
 import HealthKit
 import LoopCore
 import LoopKit
+import LoopAlgorithm
+
 @testable import Loop
 
 fileprivate class MockGlucoseSample: GlucoseSampleValue {
@@ -17,7 +19,7 @@ fileprivate class MockGlucoseSample: GlucoseSampleValue {
     let provenanceIdentifier = ""
     let isDisplayOnly: Bool
     let wasUserEntered: Bool
-    let condition: LoopKit.GlucoseCondition? = nil
+    let condition: GlucoseCondition? = nil
     let trendRate: HKQuantity? = nil
     var trend: LoopKit.GlucoseTrend?
     var syncIdentifier: String?
@@ -191,8 +193,8 @@ class MealDetectionManagerTests: XCTestCase {
         mealDetectionManager.test_currentDate!
     }
 
-    var algorithmInput: LoopAlgorithmInput!
-    var algorithmOutput: LoopAlgorithmOutput!
+    var algorithmInput: StoredDataAlgorithmInput!
+    var algorithmOutput: AlgorithmOutput<StoredCarbEntry>!
 
     var mockAlgorithmState: AlgorithmDisplayState!
 
@@ -216,11 +218,11 @@ class MealDetectionManagerTests: XCTestCase {
         insulinSensitivityScheduleApplyingOverrideHistory = testType.insulinSensitivitySchedule
         carbRatioSchedule = testType.carbSchedule
 
-        algorithmInput = LoopAlgorithmInput(
-            predictionStart: date,
+        algorithmInput = StoredDataAlgorithmInput(
             glucoseHistory: [StoredGlucoseSample(startDate: date, quantity: .init(unit: .milligramsPerDeciliter, doubleValue: 100))],
             doses: [],
             carbEntries: testType.carbEntries.map { $0.asStoredCarbEntry },
+            predictionStart: date,
             basal: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!.between(start: historyStart, end: date),
             sensitivity: testType.insulinSensitivitySchedule.quantitiesBetween(start: historyStart, end: date),
             carbRatio: testType.carbSchedule.between(start: historyStart, end: date),
@@ -228,7 +230,10 @@ class MealDetectionManagerTests: XCTestCase {
             suspendThreshold: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 65),
             maxBolus: maximumBolus!,
             maxBasalRate: maximumBasalRatePerHour,
-            recommendationInsulinType: .novolog,
+            useIntegralRetrospectiveCorrection: false,
+            includePositiveVelocityAndRC: true,
+            carbAbsorptionModel: .piecewiseLinear,
+            recommendationInsulinModel: ExponentialInsulinModelPreset.rapidActingAdult.model,
             recommendationType: .automaticBolus
         )
 
@@ -260,7 +265,7 @@ class MealDetectionManagerTests: XCTestCase {
             retrospectiveGlucoseDiscrepancies: []
         )
 
-        algorithmOutput = LoopAlgorithmOutput(
+        algorithmOutput = AlgorithmOutput(
             recommendationResult: .success(.init()),
             predictedGlucose: [],
             effects: effects,

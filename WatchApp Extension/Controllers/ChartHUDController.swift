@@ -13,6 +13,7 @@ import HealthKit
 import SpriteKit
 import os.log
 import LoopCore
+import LoopAlgorithm
 
 final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     private enum TableRow: Int, CaseIterable {

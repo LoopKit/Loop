@@ -11,6 +11,7 @@ import HealthKit
 import LoopKit
 import LoopKitUI
 import LoopCore
+import LoopAlgorithm
 
 @testable import Loop
 
@@ -136,7 +137,7 @@ class SimpleBolusViewModelTests: XCTestCase {
         viewModel.enteredCarbString = ""
 
         XCTAssertEqual("–", viewModel.recommendedBolus)
-        XCTAssertEqual("0", viewModel.enteredBolusString)
+        XCTAssertEqual("", viewModel.enteredBolusString)
     }
 
     func testDeleteCurrentGlucoseRemovesRecommendation() {
@@ -155,7 +156,7 @@ class SimpleBolusViewModelTests: XCTestCase {
         viewModel.manualGlucoseString = ""
 
         XCTAssertEqual("–", viewModel.recommendedBolus)
-        XCTAssertEqual("0", viewModel.enteredBolusString)
+        XCTAssertEqual("", viewModel.enteredBolusString)
     }
 
     func testDeleteCurrentGlucoseRemovesActiveInsulin() {

@@ -11,6 +11,7 @@ import Foundation
 import HealthKit
 import LoopKit
 import LoopKitUI
+import LoopAlgorithm
 
 
 struct NetBasalContext {

@@ -8,6 +8,7 @@
 
 import HealthKit
 import LoopKit
+import LoopAlgorithm
 @testable import Loop
 
 class MockDoseStore: DoseStoreProtocol {
@@ -23,7 +24,7 @@ class MockDoseStore: DoseStoreProtocol {
     
     var lastReservoirValue: LoopKit.ReservoirValue?
 
-    func getTotalUnitsDelivered(since startDate: Date) async throws -> LoopKit.InsulinValue {
+    func getTotalUnitsDelivered(since startDate: Date) async throws -> InsulinValue {
         return InsulinValue(startDate: lastAddedPumpData, value: 0)
     }
     

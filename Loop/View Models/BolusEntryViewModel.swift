@@ -17,24 +17,25 @@ import LoopKitUI
 import LoopUI
 import SwiftUI
 import SwiftCharts
+import LoopAlgorithm
 
 protocol BolusEntryViewModelDelegate: AnyObject {
 
     var settings: StoredSettings { get }
     var scheduleOverride: TemporaryScheduleOverride? { get }
     var preMealOverride: TemporaryScheduleOverride? { get }
-    var pumpInsulinType: InsulinType? { get }
     var mostRecentGlucoseDataDate: Date? { get }
     var mostRecentPumpDataDate: Date? { get }
 
-    func fetchData(for baseTime: Date, disablingPreMeal: Bool) async throws -> LoopAlgorithmInput
+    func fetchData(for baseTime: Date, disablingPreMeal: Bool) async throws -> StoredDataAlgorithmInput
     func effectiveGlucoseTargetRangeSchedule(presumingMealEntry: Bool) -> GlucoseRangeSchedule?
-    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval
 
     func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry
     func saveGlucose(sample: NewGlucoseSample) async throws -> StoredGlucoseSample
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) async
     func enactBolus(units: Double, activationType: BolusActivationType) async throws
+
+    func insulinModel(for type: InsulinType?) -> InsulinModel
 
     func recommendManualBolus(
         manualGlucoseSample: NewGlucoseSample?,
@@ -43,7 +44,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     ) async throws -> ManualBolusRecommendation?
 
 
-    func generatePrediction(input: LoopAlgorithmInput) throws -> [PredictedGlucoseValue]
+    func generatePrediction(input: StoredDataAlgorithmInput) throws -> [PredictedGlucoseValue]
 
     var activeInsulin: InsulinValue? { get }
     var activeCarbs: CarbValue? { get }
@@ -60,7 +61,6 @@ final class BolusEntryViewModel: ObservableObject {
         case carbEntryPersistenceFailure
         case manualGlucoseEntryOutOfAcceptableRange
         case manualGlucoseEntryPersistenceFailure
-        case glucoseNoLongerStale
         case forecastInfo
     }
 
@@ -494,7 +494,6 @@ final class BolusEntryViewModel: ObservableObject {
             isManualGlucoseEntryEnabled = false
             manualGlucoseQuantity = nil
             manualGlucoseSample = nil
-            presentAlert(.glucoseNoLongerStale)
         }
     }
 
@@ -518,13 +517,14 @@ final class BolusEntryViewModel: ObservableObject {
             let startDate = now()
             var input = try await delegate.fetchData(for: startDate, disablingPreMeal: potentialCarbEntry != nil)
 
-            let enteredBolusDose = DoseEntry(
-                type: .bolus,
+            let insulinModel = delegate.insulinModel(for: deliveryDelegate?.pumpInsulinType)
+
+            let enteredBolusDose = SimpleInsulinDose(
+                deliveryType: .bolus,
                 startDate: startDate,
-                value: enteredBolus.doubleValue(for: .internationalUnit()),
-                unit: .units,
-                insulinType: deliveryDelegate?.pumpInsulinType,
-                manuallyEntered: true
+                endDate: startDate,
+                volume: enteredBolus.doubleValue(for: .internationalUnit()),
+                insulinModel: insulinModel
             )
 
             storedGlucoseValues = input.glucoseHistory
@@ -532,9 +532,9 @@ final class BolusEntryViewModel: ObservableObject {
             // Add potential bolus, carbs, manual glucose
             input = input
                 .addingDose(dose: enteredBolusDose)
-                .addingGlucoseSample(sample: manualGlucoseSample)
+                .addingGlucoseSample(sample: manualGlucoseSample?.asStoredGlucoseStample)
                 .removingCarbEntry(carbEntry: originalCarbEntry)
-                .addingCarbEntry(carbEntry: potentialCarbEntry)
+                .addingCarbEntry(carbEntry: potentialCarbEntry?.asStoredCarbEntry)
 
             let prediction = try delegate.generatePrediction(input: input)
             predictedGlucoseValues = prediction
@@ -548,7 +548,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func updateRecommendedBolusAndNotice(isUpdatingFromUserInput: Bool) async {
 
-        guard let delegate = delegate else {
+        guard let delegate else {
             assertionFailure("Missing BolusEntryViewModelDelegate")
             return
         }
@@ -559,8 +559,8 @@ final class BolusEntryViewModel: ObservableObject {
         do {
             recommendation = try await computeBolusRecommendation()
 
-            if let recommendation, let deliveryDelegate {
-                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: deliveryDelegate.roundBolusVolume(units: recommendation.amount))
+            if let recommendation, deliveryDelegate != nil {
+                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
 
                 switch recommendation.notice {
                 case .glucoseBelowSuspendThreshold:
@@ -584,7 +584,7 @@ final class BolusEntryViewModel: ObservableObject {
             recommendedBolus = nil
 
             switch error {
-            case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld:
+            case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld, AlgorithmError.missingGlucose, AlgorithmError.glucoseTooOld:
                 notice = .staleGlucoseData
             case LoopError.invalidFutureGlucose:
                 notice = .futureGlucoseData
@@ -658,7 +658,9 @@ final class BolusEntryViewModel: ObservableObject {
         let availableWidth = screenWidth - chartManager.fixedHorizontalMargin - 2 * viewMarginInset
 
         let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
-        let futureHours = ceil((delegate?.insulinActivityDuration(for: delegate?.pumpInsulinType) ?? .hours(4)).hours)
+        let insulinType = deliveryDelegate?.pumpInsulinType
+        let insulinModel = delegate?.insulinModel(for: insulinType)
+        let futureHours = ceil((insulinModel?.effectDuration ?? .hours(4)).hours)
         let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeInterval: -TimeInterval(hours: historyHours), since: now())

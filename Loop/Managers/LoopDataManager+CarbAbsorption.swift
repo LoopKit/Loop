@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import HealthKit
+import LoopAlgorithm
 
 struct CarbAbsorptionReview {
     var carbEntries: [StoredCarbEntry]
@@ -33,7 +34,7 @@ extension LoopDataManager {
         let doses = try await doseStore.getDoses(
             start: dosesStart,
             end: end
-        )
+        ).map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
 
         dosesStart = doses.map { $0.startDate }.min() ?? dosesStart
 
@@ -82,10 +83,7 @@ extension LoopDataManager {
         // Overlay basal history on basal doses, splitting doses to get amount delivered relative to basal
         let annotatedDoses = doses.annotated(with: basal)
 
-        let insulinModelProvider = PresetInsulinModelProvider(defaultRapidActingModel: nil)
-
         let insulinEffects = annotatedDoses.glucoseEffects(
-            insulinModelProvider: insulinModelProvider,
             insulinSensitivityHistory: sensitivity,
             from: start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval).dateFlooredToTimeInterval(GlucoseMath.defaultDelta),
             to: nil)

@@ -15,6 +15,7 @@ import LoopUI
 import NotificationCenter
 import UIKit
 import SwiftCharts
+import LoopAlgorithm
 
 class StatusViewController: UIViewController, NCWidgetProviding {
 
@@ -91,7 +92,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     lazy var doseStore = DoseStore(
         cacheStore: cacheStore,
-        insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsStore.latestSettings?.defaultRapidActingModel?.presetForRapidActingInsulin),
         longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
         basalProfile: settingsStore.latestSettings?.basalRateSchedule,
         insulinSensitivitySchedule: settingsStore.latestSettings?.insulinSensitivitySchedule,
@@ -187,17 +187,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         var activeInsulin: Double?
         let carbUnit = HKUnit.gram()
         var glucose: [StoredGlucoseSample] = []
-
-        group.enter()
-        doseStore.insulinOnBoard(at: Date()) { (result) in
-            switch result {
-            case .success(let iobValue):
-                activeInsulin = iobValue.value
-            case .failure:
-                activeInsulin = nil
-            }
-            group.leave()
-        }
     
         charts.startDate = Calendar.current.nextDate(after: Date(timeIntervalSinceNow: .minutes(-5)), matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? Date()
 

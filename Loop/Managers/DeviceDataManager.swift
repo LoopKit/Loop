@@ -13,6 +13,7 @@ import LoopCore
 import LoopTestingKit
 import UserNotifications
 import Combine
+import LoopAlgorithm
 
 protocol LoopControl {
     var lastLoopCompleted: Date? { get }
@@ -594,6 +595,29 @@ final class DeviceDataManager {
             await self.checkPumpDataAndLoop()
         }
     }
+    
+//private func refreshCGM(_ completion: (() -> Void)? = nil) {
+//        guard let cgmManager = cgmManager else {
+//            completion?()
+//            return
+//        }
+//
+//        cgmManager.fetchNewDataIfNeeded { (result) in
+//            if case .newData = result {
+//                self.analyticsServicesManager.didFetchNewCGMData()
+//            }
+//
+//            self.queue.async {
+//                self.processCGMReadingResult(cgmManager, readingResult: result) {
+//                    if self.loopManager.lastLoopCompleted == nil || self.loopManager.lastLoopCompleted!.timeIntervalSinceNow < -.minutes(4.2) {
+//                        self.log.default("Triggering Loop from refreshCGM()")
+//                        self.checkPumpDataAndLoop()
+//                    }
+//                    completion?()
+//                }
+//            }
+//        }
+//    }
 
     func refreshDeviceData() async {
         await refreshCGM()
@@ -1397,7 +1421,7 @@ extension DeviceDataManager: DeliveryDelegate {
         return pumpManager.roundToSupportedBolusVolume(units: units)
     }
 
-    var pumpInsulinType: LoopKit.InsulinType? {
+    var pumpInsulinType: InsulinType? {
         return pumpManager?.status.insulinType
     }
     
@@ -1405,7 +1429,7 @@ extension DeviceDataManager: DeliveryDelegate {
         return pumpManager?.status.basalDeliveryState?.isSuspended ?? false
     }
     
-    func enact(_ recommendation: LoopKit.AutomaticDoseRecommendation) async throws {
+    func enact(_ recommendation: AutomaticDoseRecommendation) async throws {
         guard let pumpManager = pumpManager else {
             throw LoopError.configurationError(.pumpManager)
         }

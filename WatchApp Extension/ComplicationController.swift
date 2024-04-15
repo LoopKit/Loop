@@ -11,6 +11,7 @@ import WatchKit
 import LoopKit
 import LoopCore
 import os.log
+import LoopAlgorithm
 
 final class ComplicationController: NSObject, CLKComplicationDataSource {
     
