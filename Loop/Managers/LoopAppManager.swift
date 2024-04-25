@@ -471,7 +471,6 @@ class LoopAppManager: NSObject {
             .assign(to: \.automaticDosingStatus.automaticDosingEnabled, on: self)
             .store(in: &cancellables)
 
-
         state = state.next
 
         await loopDataManager.updateDisplayState()
@@ -483,6 +482,21 @@ class LoopAppManager: NSObject {
                 }
             }
             .store(in: &cancellables)
+
+        // DoseStore still needs to keep updated basal schedule for now
+        NotificationCenter.default.publisher(for: .LoopDataUpdated)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] note in
+                if let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopUpdateContext.RawValue,
+                   let context = LoopUpdateContext(rawValue: rawContext),
+                   let self,
+                   context == .preferences
+                {
+                    self.doseStore.basalProfile = self.settingsManager.settings.basalRateSchedule
+                }
+            }
+            .store(in: &cancellables)
+
     }
 
     private func loopCycleDidComplete() async {
@@ -936,7 +950,7 @@ extension LoopAppManager: DiagnosticReportGenerator {
             "",
             await self.carbStore.generateDiagnosticReport(),
             "",
-            await self.carbStore.generateDiagnosticReport(),
+            await self.doseStore.generateDiagnosticReport(),
             "",
             await self.mealDetectionManager.generateDiagnosticReport(),
             "",
