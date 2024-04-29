@@ -11,7 +11,6 @@ import LoopKit
 import HealthKit
 import LoopAlgorithm
 
-
 extension UserDefaults {
 
     private enum Key: String {
@@ -24,6 +23,7 @@ extension UserDefaults {
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
         case LastMissedMealNotification = "com.loopkit.Loop.lastMissedMealNotification"
         case userRequestedLoopReset = "com.loopkit.Loop.userRequestedLoopReset"
+        case defaultEnvironment = "org.tidepool.TidepoolKit.DefaultEnvironment"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -164,6 +164,15 @@ extension UserDefaults {
         }
         set {
             setValue(newValue, forKey: Key.userRequestedLoopReset.rawValue)
+        }
+    }
+        
+    public var defaultEnvironment: Data? {
+        get {
+            data(forKey: Key.defaultEnvironment.rawValue)
+        }
+        set {
+            setValue(newValue, forKey: Key.defaultEnvironment.rawValue)
         }
     }
 

@@ -66,7 +66,7 @@ public final class AlertManager {
          expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
          bluetoothProvider: BluetoothProvider,
          analyticsServicesManager: AnalyticsServicesManager,
-         preventIssuanceBeforePlayback: Bool = true
+         preventIssuanceBeforePlayback: Bool = false
     ) {
         self.fileManager = fileManager
         self.analyticsServicesManager = analyticsServicesManager
