@@ -513,6 +513,7 @@ class LoopAppManager: NSObject {
         onboardingManager.launch {
             DispatchQueue.main.async {
                 self.state = self.state.next
+                self.alertManager.playbackAlertsFromPersistence()
                 Task {
                     await self.resumeLaunch()
                 }

@@ -66,7 +66,7 @@ public final class AlertManager {
          expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
          bluetoothProvider: BluetoothProvider,
          analyticsServicesManager: AnalyticsServicesManager,
-         preventIssuanceBeforePlayback: Bool = false
+         preventIssuanceBeforePlayback: Bool = true
     ) {
         self.fileManager = fileManager
         self.analyticsServicesManager = analyticsServicesManager
@@ -445,6 +445,7 @@ extension AlertManager {
 extension AlertManager {
 
     func playbackAlertsFromPersistence() {
+        guard !playbackFinished else { return }
         playbackAlertsFromAlertStore()
     }
 
