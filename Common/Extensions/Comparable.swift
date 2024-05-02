@@ -1,6 +1,6 @@
 //
 //  Comparable.swift
-//  WatchApp Extension
+//  Loop
 //
 //  Created by Michael Pangburn on 3/27/20.
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
