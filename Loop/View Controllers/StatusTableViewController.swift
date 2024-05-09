@@ -488,6 +488,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         if currentContext.contains(.insulin) {
             doseEntries = loopManager.dosesRelativeToBasal.trimmed(from: startDate)
+
             iobValues = loopManager.iobValues.filterDateRange(startDate, nil)
             totalDelivery = try? await loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())).value
         }

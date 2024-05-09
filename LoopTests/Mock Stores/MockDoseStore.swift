@@ -12,10 +12,10 @@ import LoopAlgorithm
 @testable import Loop
 
 class MockDoseStore: DoseStoreProtocol {
-    func getDoses(start: Date?, end: Date?) async throws -> [LoopKit.DoseEntry] {
+    func getNormalizedDoseEntries(start: Date, end: Date?) async throws -> [LoopKit.DoseEntry] {
         return doseHistory ?? [] + addedDoses
     }
-
+    
     var addedDoses: [DoseEntry] = []
 
     func addDoses(_ doses: [DoseEntry], from device: HKDevice?) async throws {

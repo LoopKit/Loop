@@ -31,7 +31,7 @@ extension LoopDataManager {
     func fetchCarbAbsorptionReview(start: Date, end: Date) async throws -> CarbAbsorptionReview {
         // Need to get insulin data from any active doses that might affect this time range
         var dosesStart = start.addingTimeInterval(-InsulinMath.defaultInsulinActivityDuration)
-        let doses = try await doseStore.getDoses(
+        let doses = try await doseStore.getNormalizedDoseEntries(
             start: dosesStart,
             end: end
         ).map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
