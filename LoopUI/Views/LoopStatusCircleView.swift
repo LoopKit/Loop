@@ -9,7 +9,6 @@
 import Foundation
 import SwiftUI
 
-@available(iOSApplicationExtension 17.0, *)
 public struct LoopStatusCircleView: View {
     
     public enum Status {
@@ -30,17 +29,17 @@ public struct LoopStatusCircleView: View {
     }
     
     @Binding var closedLoop: Bool
-    var closedLoopUnavailable: Bool
+    @Binding var closedLoopAvailable: Bool
     
     @State var loopStatus: Status
     
     public init(
         closedLoop: Binding<Bool>,
-        closedLoopUnavailable: Bool
+        closedLoopAvailable: Binding<Bool>
     ) {
         self._closedLoop = closedLoop
-        self.closedLoopUnavailable = closedLoopUnavailable
-        self.loopStatus = closedLoopUnavailable ? .closedLoopUnavailable : (closedLoop.wrappedValue ? .closedLoopOn : .closedLoopOff)
+        self._closedLoopAvailable = closedLoopAvailable
+        self.loopStatus = !closedLoopAvailable.wrappedValue ? .closedLoopUnavailable : (closedLoop.wrappedValue ? .closedLoopOn : .closedLoopOff)
     }
     
     public var body: some View {
@@ -50,18 +49,18 @@ public struct LoopStatusCircleView: View {
             .stroke(loopStatus.color, lineWidth: 6)
             .frame(width: 30)
             .animation(.default, value: closedLoop)
-            .onChange(of: closedLoop) { _, newValue in
+            .onChange(of: closedLoop) {newValue in
                 withAnimation {
-                    if closedLoopUnavailable {
+                    if !closedLoopAvailable {
                         loopStatus = .closedLoopUnavailable
                     } else {
                         loopStatus = newValue ? .closedLoopOn : .closedLoopOff
                     }
                 }
             }
-            .onChange(of: closedLoopUnavailable) { _, newValue in
+            .onChange(of: closedLoopAvailable) {newValue in
                 withAnimation {
-                    if newValue {
+                    if !newValue {
                         loopStatus = .closedLoopUnavailable
                     } else {
                         loopStatus = closedLoop ? .closedLoopOn : .closedLoopOff

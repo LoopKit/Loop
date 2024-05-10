@@ -93,7 +93,7 @@ public class SettingsViewModel: ObservableObject {
         }
     }
 
-    var closedLoopPreference: Bool {
+    @Published var closedLoopPreference: Bool {
        didSet {
            delegate?.dosingEnabledChanged(closedLoopPreference)
        }

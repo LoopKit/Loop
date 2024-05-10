@@ -32,9 +32,9 @@ public struct ConfirmationToggle<Label: View, ActionLabel: View>: View {
     let confirmationValue: Bool
     
     /// The title of the alert presented when asked to confirm toggle selection
-    let alertTitle: LocalizedStringKey
+    let alertTitle: String
     
-    let alertBody: LocalizedStringKey
+    let alertBody: String
     
     /// Action metadata of the confirmation action
     let action: Action
@@ -46,8 +46,8 @@ public struct ConfirmationToggle<Label: View, ActionLabel: View>: View {
     public init(
         isOn: Binding<Bool>,
         confirmationValue: Bool,
-        alertTitle: LocalizedStringKey,
-        alertBody: LocalizedStringKey,
+        alertTitle: String,
+        alertBody: String,
         action: Action,
         showConfirmationAlert: Bool = false,
         @ViewBuilder label: () -> Label

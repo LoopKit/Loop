@@ -61,7 +61,6 @@ public struct SettingsView: View {
     @State private var sheet: Destination.Sheet?
     
     var localizedAppNameAndVersion: String
-    var closedLoopUnavailable: Bool = false
 
     public init(viewModel: SettingsViewModel, localizedAppNameAndVersion: String) {
         self.viewModel = viewModel
@@ -223,12 +222,12 @@ extension SettingsView {
             ConfirmationToggle(
                 isOn: closedLoopToggleState,
                 confirmationValue: false,
-                alertTitle: "Are you sure you want to turn automation OFF?",
-                alertBody: "Your pump and CGM will continue operating but the app will not make automatic adjustments. You will receive your scheduled basal rate(s).",
+                alertTitle: NSLocalizedString("Are you sure you want to turn automation OFF?", comment: "Closed loop alert title"),
+                alertBody: NSLocalizedString("Your pump and CGM will continue operating but the app will not make automatic adjustments. You will receive your scheduled basal rate(s).", comment: "Closed loop alert message"),
                 action: .init(label: {Text("Yes, turn OFF")})
             ) {
                 HStack {
-                    LoopStatusCircleView(closedLoop: closedLoopToggleState, closedLoopUnavailable: closedLoopUnavailable)
+                    LoopStatusCircleView(closedLoop: closedLoopToggleState, closedLoopAvailable: $viewModel.isClosedLoopAllowed)
                         .padding(.trailing)
                     VStack(alignment: .leading) {
                         Text("Closed Loop", comment: "The title text for the looping enabled switch cell")
