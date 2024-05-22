@@ -229,7 +229,8 @@ extension SettingsView {
                 HStack {
                     LoopStatusCircleView(
                         closedLoop: closedLoopToggleState,
-                        isClosedLoopAllowed: viewModel.isClosedLoopAllowed
+                        isClosedLoopAllowed: viewModel.isClosedLoopAllowed,
+                        colorPalette: .loopStatus
                     )
                     .padding(.trailing)
                     

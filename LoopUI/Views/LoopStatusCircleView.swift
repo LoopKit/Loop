@@ -11,21 +11,19 @@ import SwiftUI
 
 public struct LoopStatusCircleView: View {
     
-    @Environment(\.guidanceColors) private var guidanceColors
-    
     private enum Status {
         case closedLoopOn
         case closedLoopOff
         case closedLoopNotAllowed
         
-        func color(from guidanceColors: GuidanceColors) -> Color {
+        func color(from palette: StateColorPalette) -> Color {
             switch self {
             case .closedLoopOn:
-                return guidanceColors.acceptable
+                return Color(palette.normal)
             case .closedLoopOff:
-                return guidanceColors.critical
+                return Color(palette.error)
             case .closedLoopNotAllowed:
-                return guidanceColors.warning
+                return Color(palette.warning)
             }
         }
     }
@@ -39,6 +37,9 @@ public struct LoopStatusCircleView: View {
     /// - a value of `false` will always show a yellow ring (broken or unbroken)
     /// - a value of `true` will show green when ``closedLoop`` is `true` and red when ``closedLoop`` is `false`
     private var isClosedLoopAllowed: Bool
+
+    /// Determines the colors used for different states
+    private let colorPalette: StateColorPalette
     
     /// The aggregated ``Status`` derived from ``closedLoop`` and ``isClosedLoopAllowed``
     @State private var loopStatus: Status
@@ -48,12 +49,15 @@ public struct LoopStatusCircleView: View {
     /// - Parameters:
     ///   - closedLoop: Binding to the current state of the user's closed loop setting
     ///   - isClosedLoopAllowed: Binding to whether closed loop therapy is currently allowed
+    ///   - colorPalette: Determines the colors used for different states
     public init(
         closedLoop: Binding<Bool>,
-        isClosedLoopAllowed: Bool
+        isClosedLoopAllowed: Bool,
+        colorPalette: StateColorPalette
     ) {
         self._closedLoop = closedLoop
         self.isClosedLoopAllowed = isClosedLoopAllowed
+        self.colorPalette = colorPalette
         self.loopStatus = !isClosedLoopAllowed ? .closedLoopNotAllowed : (closedLoop.wrappedValue ? .closedLoopOn : .closedLoopOff)
     }
     
@@ -61,7 +65,7 @@ public struct LoopStatusCircleView: View {
         Circle()
             .trim(from: closedLoop ? 0 : 0.25, to: 1)
             .rotation(.degrees(-135))
-            .stroke(loopStatus.color(from: guidanceColors), lineWidth: 6)
+            .stroke(loopStatus.color(from: colorPalette), lineWidth: 6)
             .frame(width: 30)
             .onChange(of: closedLoop) {
                 if !isClosedLoopAllowed {
