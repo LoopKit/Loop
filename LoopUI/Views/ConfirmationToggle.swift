@@ -13,50 +13,58 @@ public struct ConfirmationToggle<Label: View, ActionLabel: View>: View {
     
     public struct Action {
         let role: ButtonRole?
-        let action: () -> Void
         let label: () -> ActionLabel
         
-        public init(role: ButtonRole? = nil, action: @escaping () -> Void = {}, label: @escaping () -> ActionLabel) {
+        public init(role: ButtonRole? = nil, label: @escaping () -> ActionLabel) {
             self.role = role
-            self.action = action
             self.label = label
         }
     }
     
     /// Label of the Toggle
-    let label: Label
+    private let label: Label
     
     /// The value of the toggle to confirm before setting
     /// - A value of false means the confirmation alert will present before setting the isOn Binding to false
     /// - A value of true means the confirmation alert will present before setting the isOn Binding to true
-    let confirmationValue: Bool
+    private let confirmOn: Bool
     
     /// The title of the alert presented when asked to confirm toggle selection
-    let alertTitle: String
+    private let alertTitle: String
     
-    let alertBody: String
+    /// The body of the alert presented when asked to confirm toggle selection
+    private let alertBody: String
     
     /// Action metadata of the confirmation action
-    let action: Action
+    private let confirmAction: Action
     
+    /// Determines display of alert confirming toggled state
     @State private var showConfirmAlert: Bool = false
     
-    @Binding  var isOn: Bool
+    /// State of the toggle
+    @Binding private var isOn: Bool
     
+    /// Creates a ConfirmationToggle
+    /// - Parameters:
+    ///   - isOn: State of the toggle
+    ///   - confirmOn: The value of the toggle to confirm before setting
+    ///   - alertTitle: The title of the alert presented when asked to confirm toggle selection
+    ///   - alertBody: The body of the alert presented when asked to confirm toggle selection
+    ///   - confirmAction: Action metadata of the confirmation action
+    ///   - label: Label of the Toggle
     public init(
         isOn: Binding<Bool>,
-        confirmationValue: Bool,
+        confirmOn: Bool,
         alertTitle: String,
         alertBody: String,
-        action: Action,
-        showConfirmationAlert: Bool = false,
+        confirmAction: Action,
         @ViewBuilder label: () -> Label
     ) {
         self.label = label()
-        self.confirmationValue = confirmationValue
+        self.confirmOn = confirmOn
         self.alertTitle = alertTitle
         self.alertBody = alertBody
-        self.action = action
+        self.confirmAction = confirmAction
         self._isOn = isOn
         self.showConfirmAlert = showConfirmAlert
     }
@@ -66,8 +74,8 @@ public struct ConfirmationToggle<Label: View, ActionLabel: View>: View {
             isOn: Binding(
                 get: { isOn },
                 set: { newValue in
-                    if newValue == confirmationValue {
-                        isOn = !confirmationValue
+                    if newValue == confirmOn {
+                        isOn = !confirmOn
                         showConfirmAlert = true
                     } else {
                         isOn = newValue
@@ -88,15 +96,15 @@ public struct ConfirmationToggle<Label: View, ActionLabel: View>: View {
                 )
                 
                 Button(
-                    role: action.role,
+                    role: confirmAction.role,
                     action: {
-                        isOn = confirmationValue
-                        action.action()
+                        isOn = confirmOn
                     },
-                    label: action.label
+                    label: confirmAction.label
                 )
             },
-            message: {Text(alertBody)})
+            message: { Text(alertBody) }
+        )
     }
 }
 

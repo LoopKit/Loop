@@ -221,14 +221,18 @@ extension SettingsView {
         Section(header: SectionHeader(label: NSLocalizedString("Tidepool Loop", comment: "Loop section header label"))) {
             ConfirmationToggle(
                 isOn: closedLoopToggleState,
-                confirmationValue: false,
+                confirmOn: false,
                 alertTitle: NSLocalizedString("Are you sure you want to turn automation OFF?", comment: "Closed loop alert title"),
                 alertBody: NSLocalizedString("Your pump and CGM will continue operating but the app will not make automatic adjustments. You will receive your scheduled basal rate(s).", comment: "Closed loop alert message"),
-                action: .init(label: {Text("Yes, turn OFF")})
+                confirmAction: .init(role: .destructive, label: { Text("Yes, turn OFF") })
             ) {
                 HStack {
-                    LoopStatusCircleView(closedLoop: closedLoopToggleState, closedLoopAvailable: $viewModel.isClosedLoopAllowed)
-                        .padding(.trailing)
+                    LoopStatusCircleView(
+                        closedLoop: closedLoopToggleState,
+                        isClosedLoopAllowed: viewModel.isClosedLoopAllowed
+                    )
+                    .padding(.trailing)
+                    
                     VStack(alignment: .leading) {
                         Text("Closed Loop", comment: "The title text for the looping enabled switch cell")
                         DescriptiveText(label: NSLocalizedString("Insulin Automation", comment: "Closed loop settings button descriptive text"))
