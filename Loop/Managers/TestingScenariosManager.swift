@@ -275,11 +275,13 @@ extension TestingScenariosManager {
                 if let error {
                     bail(with: error)
                 } else {
-                    testingPumpManager?.reservoirFillFraction = 1.0
-                    testingPumpManager?.injectPumpEvents(instance.pumpEvents)
-                    testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
-                    self.activeScenario = scenario
-                    completion(nil)
+                    Task {
+                        testingPumpManager?.reservoirFillFraction = 1.0
+                        testingPumpManager?.injectPumpEvents(instance.pumpEvents)
+                        await testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
+                        self.activeScenario = scenario
+                        completion(nil)
+                    }
                 }
             }
         }
@@ -327,7 +329,9 @@ extension TestingScenariosManager {
         case .success(let setupUIResult):
             switch setupUIResult {
             case .createdAndOnboarded(let cgmManager):
-                return cgmManager as! TestingCGMManager
+                let cgmManager = cgmManager as! TestingCGMManager
+                cgmManager.autoStartTrace = false
+                return cgmManager
             default:
                 fatalError("Failed to reload CGM manager. UI interaction required for setup")
             }
@@ -340,6 +344,9 @@ extension TestingScenariosManager {
         guard FeatureFlags.scenariosEnabled else {
             fatalError("\(#function) should be invoked only when scenarios are enabled")
         }
+        
+        activeScenario = nil
+        activeScenarioURL = nil
         
         deviceManager.deleteTestingPumpData { error in
             guard error == nil else {
