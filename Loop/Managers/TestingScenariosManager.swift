@@ -275,11 +275,11 @@ extension TestingScenariosManager {
                 if let error {
                     bail(with: error)
                 } else {
-                        testingPumpManager?.reservoirFillFraction = 1.0
-                        testingPumpManager?.injectPumpEvents(instance.pumpEvents)
-                        testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
-                        self.activeScenario = scenario
-                        completion(nil)
+                    testingPumpManager?.reservoirFillFraction = 1.0
+                    testingPumpManager?.injectPumpEvents(instance.pumpEvents)
+                    testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
+                    self.activeScenario = scenario
+                    completion(nil)
                 }
             }
         }
