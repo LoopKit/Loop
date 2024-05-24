@@ -275,13 +275,11 @@ extension TestingScenariosManager {
                 if let error {
                     bail(with: error)
                 } else {
-                    Task {
                         testingPumpManager?.reservoirFillFraction = 1.0
                         testingPumpManager?.injectPumpEvents(instance.pumpEvents)
-                        await testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
+                        testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
                         self.activeScenario = scenario
                         completion(nil)
-                    }
                 }
             }
         }
@@ -344,9 +342,6 @@ extension TestingScenariosManager {
         guard FeatureFlags.scenariosEnabled else {
             fatalError("\(#function) should be invoked only when scenarios are enabled")
         }
-        
-        activeScenario = nil
-        activeScenarioURL = nil
         
         deviceManager.deleteTestingPumpData { error in
             guard error == nil else {
