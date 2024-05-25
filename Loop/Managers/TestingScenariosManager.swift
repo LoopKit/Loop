@@ -327,7 +327,9 @@ extension TestingScenariosManager {
         case .success(let setupUIResult):
             switch setupUIResult {
             case .createdAndOnboarded(let cgmManager):
-                return cgmManager as! TestingCGMManager
+                let cgmManager = cgmManager as! TestingCGMManager
+                cgmManager.autoStartTrace = false
+                return cgmManager
             default:
                 fatalError("Failed to reload CGM manager. UI interaction required for setup")
             }
