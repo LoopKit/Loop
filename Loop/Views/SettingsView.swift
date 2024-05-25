@@ -220,7 +220,7 @@ extension SettingsView {
     private var loopSection: some View {
         Section(
             header: SectionHeader(
-                label: NSLocalizedString("Tidepool Loop", comment: "Loop section header label")
+                label: localizedAppNameAndVersion.description
             )
         ) {
             ConfirmationToggle(
