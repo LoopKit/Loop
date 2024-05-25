@@ -80,7 +80,7 @@ public class SettingsViewModel: ObservableObject {
     let isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
 
-    @Published var isClosedLoopAllowed: Bool
+    @Published private(set) var isClosedLoopAllowed: Bool
 
     var closedLoopDescriptiveText: String? {
         return delegate?.closedLoopDescriptiveText
@@ -93,7 +93,7 @@ public class SettingsViewModel: ObservableObject {
         }
     }
 
-    var closedLoopPreference: Bool {
+    @Published var closedLoopPreference: Bool {
        didSet {
            delegate?.dosingEnabledChanged(closedLoopPreference)
        }
