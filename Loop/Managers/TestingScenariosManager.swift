@@ -242,7 +242,9 @@ extension TestingScenariosManager {
         if instance.hasCGMData {
             if let cgmManager = deviceManager.cgmManager as? TestingCGMManager {
                 if instance.shouldReloadManager?.cgm == true {
-                    testingCGMManager = reloadCGMManager(withIdentifier: cgmManager.pluginIdentifier)
+                    Task {
+                        testingCGMManager = await reloadCGMManager(withIdentifier: cgmManager.pluginIdentifier)
+                    }
                 } else {
                     testingCGMManager = cgmManager
                 }
@@ -320,21 +322,37 @@ extension TestingScenariosManager {
         }
     }
     
-    private func reloadCGMManager(withIdentifier cgmManagerIdentifier: String) -> TestingCGMManager {
-        deviceManager.cgmManager = nil
-        let result = deviceManager.setupCGMManager(withIdentifier: cgmManagerIdentifier, prefersToSkipUserInteraction: true)
-        switch result {
-        case .success(let setupUIResult):
-            switch setupUIResult {
-            case .createdAndOnboarded(let cgmManager):
-                let cgmManager = cgmManager as! TestingCGMManager
-                cgmManager.autoStartTrace = false
-                return cgmManager
-            default:
-                fatalError("Failed to reload CGM manager. UI interaction required for setup")
+    func reloadCGMManager(withIdentifier cgmManagerIdentifier: String) async -> TestingCGMManager {
+        var cgmManager: TestingCGMManager? = nil
+        try? await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            reloadCGMManager(withIdentifier: cgmManagerIdentifier) { testingCGMManager in
+                cgmManager = testingCGMManager
+                continuation.resume()
             }
-        default:
-            fatalError("Failed to reload CGM manager. Setup failed")
+        }
+        guard let cgmManager else {
+            fatalError("Failed to reload CGM manager. UI interaction required for setup")
+        }
+        
+        return cgmManager
+    }
+        
+    private func reloadCGMManager(withIdentifier cgmManagerIdentifier: String, completion: @escaping (TestingCGMManager) -> Void) {
+        self.deviceManager.cgmManager?.delete() { [weak self] in
+            let result = self?.deviceManager.setupCGMManager(withIdentifier: cgmManagerIdentifier, prefersToSkipUserInteraction: true)
+            switch result {
+            case .success(let setupUIResult):
+                switch setupUIResult {
+                case .createdAndOnboarded(let cgmManager):
+                    let cgmManager = cgmManager as! TestingCGMManager
+                    cgmManager.autoStartTrace = false
+                    completion(cgmManager)
+                default:
+                    fatalError("Failed to reload CGM manager. UI interaction required for setup")
+                }
+            default:
+                fatalError("Failed to reload CGM manager. Setup failed")
+            }
         }
     }
 
