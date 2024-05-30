@@ -224,71 +224,73 @@ extension TestingScenariosManager {
     }
 
     private func loadScenario(_ scenario: TestingScenario, completion: @escaping (Error?) -> Void) {
-        guard FeatureFlags.scenariosEnabled else {
-            fatalError("\(#function) should be invoked only when scenarios are enabled")
-        }
-
         func bail(with error: Error) {
             activeScenarioURL = nil
             log.error("%{public}@", String(describing: error))
             completion(error)
         }
         
-        let instance = scenario.instantiate()
-        
-        var testingCGMManager: TestingCGMManager?
-        var testingPumpManager: TestingPumpManager?
-        
-        if instance.hasCGMData {
-            if let cgmManager = deviceManager.cgmManager as? TestingCGMManager {
-                if instance.shouldReloadManager?.cgm == true {
-                    testingCGMManager = reloadCGMManager(withIdentifier: cgmManager.pluginIdentifier)
-                } else {
-                    testingCGMManager = cgmManager
-                }
-            } else {
-                bail(with: ScenarioLoadingError.noTestingCGMManagerEnabled)
-                return
+        Task {
+            guard FeatureFlags.scenariosEnabled else {
+                fatalError("\(#function) should be invoked only when scenarios are enabled")
             }
-        }
-        
-        if instance.hasPumpData {
-            if let pumpManager = deviceManager.pumpManager as? TestingPumpManager {
-                if instance.shouldReloadManager?.pump == true {
-                    testingPumpManager = reloadPumpManager(withIdentifier: pumpManager.pluginIdentifier)
+            
+            let instance = scenario.instantiate()
+            
+            var testingCGMManager: TestingCGMManager?
+            var testingPumpManager: TestingPumpManager?
+            
+            if instance.hasCGMData {
+                if let cgmManager = deviceManager.cgmManager as? TestingCGMManager {
+                    if instance.shouldReloadManager?.cgm == true {
+                            testingCGMManager = await reloadCGMManager(withIdentifier: cgmManager.pluginIdentifier)
+                    } else {
+                        testingCGMManager = cgmManager
+                    }
                 } else {
-                    testingPumpManager = pumpManager
+                    bail(with: ScenarioLoadingError.noTestingCGMManagerEnabled)
+                    return
                 }
-            } else {
-                bail(with: ScenarioLoadingError.noTestingPumpManagerEnabled)
-                return
             }
-        }
+            
+            if instance.hasPumpData {
+                if let pumpManager = deviceManager.pumpManager as? TestingPumpManager {
+                    if instance.shouldReloadManager?.pump == true {
+                        testingPumpManager = reloadPumpManager(withIdentifier: pumpManager.pluginIdentifier)
+                    } else {
+                        testingPumpManager = pumpManager
+                    }
+                } else {
+                    bail(with: ScenarioLoadingError.noTestingPumpManagerEnabled)
+                    return
+                }
+            }
 
-        wipeExistingData { error in
-            guard error == nil else {
-                bail(with: error!)
-                return
-            }
+            wipeExistingData { error in
+                guard error == nil else {
+                    bail(with: error!)
+                    return
+                }
 
-            self.carbStore.addNewCarbEntries(entries: instance.carbEntries) { error in
-                if let error {
-                    bail(with: error)
-                } else {
-                    testingPumpManager?.reservoirFillFraction = 1.0
-                    testingPumpManager?.injectPumpEvents(instance.pumpEvents)
-                    testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
-                    self.activeScenario = scenario
-                    completion(nil)
+                self.carbStore.addNewCarbEntries(entries: instance.carbEntries) { error in
+                    if let error {
+                        bail(with: error)
+                    } else {
+                        testingPumpManager?.reservoirFillFraction = 1.0
+                        testingPumpManager?.injectPumpEvents(instance.pumpEvents)
+                        testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
+                        self.activeScenario = scenario
+                        completion(nil)
+                    }
                 }
             }
-        }
-        
-        instance.deviceActions.forEach { [testingCGMManager, testingPumpManager] action in
-            if testingCGMManager?.pluginIdentifier == action.managerIdentifier {
-                testingCGMManager?.trigger(action: action)
-            } else if testingPumpManager?.pluginIdentifier == action.managerIdentifier {
-                testingPumpManager?.trigger(action: action)
+            
+            instance.deviceActions.forEach { [testingCGMManager, testingPumpManager] action in
+                if testingCGMManager?.pluginIdentifier == action.managerIdentifier {
+                    testingCGMManager?.trigger(action: action)
+                } else if testingPumpManager?.pluginIdentifier == action.managerIdentifier {
+                    testingPumpManager?.trigger(action: action)
+                }
             }
         }
     }
@@ -320,21 +322,24 @@ extension TestingScenariosManager {
         }
     }
     
-    private func reloadCGMManager(withIdentifier cgmManagerIdentifier: String) -> TestingCGMManager {
-        deviceManager.cgmManager = nil
-        let result = deviceManager.setupCGMManager(withIdentifier: cgmManagerIdentifier, prefersToSkipUserInteraction: true)
-        switch result {
-        case .success(let setupUIResult):
-            switch setupUIResult {
-            case .createdAndOnboarded(let cgmManager):
-                let cgmManager = cgmManager as! TestingCGMManager
-                cgmManager.autoStartTrace = false
-                return cgmManager
-            default:
-                fatalError("Failed to reload CGM manager. UI interaction required for setup")
+    private func reloadCGMManager(withIdentifier cgmManagerIdentifier: String) async -> TestingCGMManager {
+        await withCheckedContinuation { continuation in
+            self.deviceManager.cgmManager?.delete() { [weak self] in
+                let result = self?.deviceManager.setupCGMManager(withIdentifier: cgmManagerIdentifier, prefersToSkipUserInteraction: true)
+                switch result {
+                case .success(let setupUIResult):
+                    switch setupUIResult {
+                    case .createdAndOnboarded(let cgmManager):
+                        let cgmManager = cgmManager as! TestingCGMManager
+                        cgmManager.autoStartTrace = false
+                        continuation.resume(returning: cgmManager)
+                    default:
+                        fatalError("Failed to reload CGM manager. UI interaction required for setup")
+                    }
+                default:
+                    fatalError("Failed to reload CGM manager. Setup failed")
+                }
             }
-        default:
-            fatalError("Failed to reload CGM manager. Setup failed")
         }
     }
 
