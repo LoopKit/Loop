@@ -507,8 +507,6 @@
 		DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
 		DDC389FC2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */; };
 		DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */; };
-		E0BF443F2BEC3D0B00B3358D /* ConfirmationToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0BF443E2BEC3D0B00B3358D /* ConfirmationToggle.swift */; };
-		E0BF44412BEC4F2600B3358D /* LoopStatusCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0BF44402BEC4F2600B3358D /* LoopStatusCircleView.swift */; };
 		E93E865424DB6CBA00FF40C8 /* retrospective_output.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865324DB6CBA00FF40C8 /* retrospective_output.json */; };
 		E93E865624DB731900FF40C8 /* predicted_glucose_without_retrospective.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865524DB731900FF40C8 /* predicted_glucose_without_retrospective.json */; };
 		E93E865824DB75BE00FF40C8 /* predicted_glucose_very_negative.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865724DB75BD00FF40C8 /* predicted_glucose_very_negative.json */; };
@@ -1609,8 +1607,6 @@
 		DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+algorithmExperimentsSection.swift"; sourceTree = "<group>"; };
 		DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorSelectionView.swift; sourceTree = "<group>"; };
-		E0BF443E2BEC3D0B00B3358D /* ConfirmationToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationToggle.swift; sourceTree = "<group>"; };
-		E0BF44402BEC4F2600B3358D /* LoopStatusCircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopStatusCircleView.swift; sourceTree = "<group>"; };
 		E93E865324DB6CBA00FF40C8 /* retrospective_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = retrospective_output.json; sourceTree = "<group>"; };
 		E93E865524DB731900FF40C8 /* predicted_glucose_without_retrospective.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = predicted_glucose_without_retrospective.json; sourceTree = "<group>"; };
 		E93E865724DB75BD00FF40C8 /* predicted_glucose_very_negative.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = predicted_glucose_very_negative.json; sourceTree = "<group>"; };
@@ -2362,8 +2358,6 @@
 				B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */,
 				B4E96D5A248A8229002DABAD /* StatusBarHUDView.swift */,
 				B4E96D56248A7B0F002DABAD /* StatusHighlightHUDView.swift */,
-				E0BF443E2BEC3D0B00B3358D /* ConfirmationToggle.swift */,
-				E0BF44402BEC4F2600B3358D /* LoopStatusCircleView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -3955,7 +3949,6 @@
 				B4AC0D3F24B9005300CDB0A1 /* UIImage.swift in Sources */,
 				B4E96D5B248A8229002DABAD /* StatusBarHUDView.swift in Sources */,
 				4F7528A11DFE200B00C322D6 /* BasalStateView.swift in Sources */,
-				E0BF443F2BEC3D0B00B3358D /* ConfirmationToggle.swift in Sources */,
 				43BFF0C61E465A4400FF19A9 /* UIColor+HIG.swift in Sources */,
 				4F7528A01DFE1F9D00C322D6 /* LoopStateView.swift in Sources */,
 				B491B0A324D0B66D004CBE8F /* Color.swift in Sources */,
@@ -3972,7 +3965,6 @@
 				B490A04124D0559D00F509FA /* DeviceLifecycleProgressState.swift in Sources */,
 				4F75289C1DFE1F6000C322D6 /* GlucoseHUDView.swift in Sources */,
 				B4E96D53248A7386002DABAD /* GlucoseValueHUDView.swift in Sources */,
-				E0BF44412BEC4F2600B3358D /* LoopStatusCircleView.swift in Sources */,
 				B4E96D57248A7B0F002DABAD /* StatusHighlightHUDView.swift in Sources */,
 				B42C951424A3C76000857C73 /* CGMStatusHUDViewModel.swift in Sources */,
 				4F75289E1DFE1F6000C322D6 /* LoopCompletionHUDView.swift in Sources */,
