@@ -75,7 +75,7 @@ enum LoopUpdateContext: Int {
 }
 
 @MainActor
-final class LoopDataManager {
+final class LoopDataManager: ObservableObject {
     nonisolated static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
     // Represents the current state of the loop algorithm for display
@@ -98,7 +98,7 @@ final class LoopDataManager {
         displayState.output?.recommendation?.automatic
     }
 
-    private(set) var lastLoopCompleted: Date?
+    @Published private(set) var lastLoopCompleted: Date?
 
     var deliveryDelegate: DeliveryDelegate?
 

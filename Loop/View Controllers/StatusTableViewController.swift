@@ -1605,13 +1605,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: criticalEventLogExportManager),
                                           therapySettings: { [weak self] in self?.settingsManager.therapySettings ?? TherapySettings() },
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
-                                          initialDosingEnabled: self.settingsManager.settings.dosingEnabled,
-                                          isClosedLoopAllowed: automaticDosingStatus.$isAutomaticDosingAllowed,
+                                          initialDosingEnabled: self.settingsManager.settings.dosingEnabled, automaticDosingStatus: self.automaticDosingStatus,
                                           automaticDosingStrategy: self.settingsManager.settings.automaticDosingStrategy,
+                                          lastLoopCompletion: loopManager.$lastLoopCompleted,
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
-                                          delegate: self)
+                                          delegate: self
+        )
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucosePreference)

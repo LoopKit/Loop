@@ -7,8 +7,8 @@
 //
 
 import UIKit
+import LoopKit
 import LoopKitUI
-import LoopCore
 
 public final class LoopCompletionHUDView: BaseHUDView {
 

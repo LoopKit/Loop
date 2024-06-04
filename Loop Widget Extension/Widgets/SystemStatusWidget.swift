@@ -20,7 +20,7 @@ struct SystemStatusWidgetEntryView : View {
         HStack(alignment: .center, spacing: 5) {
             VStack(alignment: .center, spacing: 5) {
                 HStack(alignment: .center, spacing: 15) {
-                    LoopCircleView(entry: entry)
+                    LoopCircleEntryView(entry: entry)
                     
                     GlucoseView(entry: entry)
                 }
