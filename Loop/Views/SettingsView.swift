@@ -230,12 +230,13 @@ extension SettingsView {
                 alertBody: NSLocalizedString("Your pump and CGM will continue operating but the app will not make automatic adjustments. You will receive your scheduled basal rate(s).", comment: "Closed loop alert message"),
                 confirmAction: .init(label: { Text("Yes, turn OFF") })
             ) {
-                HStack {
+                HStack(spacing: 12) {
                     LoopCircleView(
                         closedLoop: viewModel.automaticDosingStatus.automaticDosingEnabled,
                         freshness: viewModel.loopStatusCircleFreshness
                     )
-                    .padding(.trailing)
+                    .frame(width: 36, height: 36)
+                    .padding(12)
                     
                     VStack(alignment: .leading) {
                         Text("Closed Loop", comment: "The title text for the looping enabled switch cell")
@@ -247,10 +248,9 @@ extension SettingsView {
                         }
                     }
                 }
-                .fixedSize(horizontal: false, vertical: true)
-                .padding()
             }
             .disabled(!viewModel.isOnboardingComplete || !viewModel.automaticDosingStatus.isAutomaticDosingAllowed)
+            .padding(.vertical)
         }
     }
     
