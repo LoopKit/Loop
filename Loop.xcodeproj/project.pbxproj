@@ -28,7 +28,6 @@
 		14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736E28AEDBF6006CCD7C /* BasalView.swift */; };
 		14B1737328AEDBF6006CCD7C /* SystemStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */; };
 		14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1737028AEDBF6006CCD7C /* GlucoseView.swift */; };
-		14B1737528AEDBF6006CCD7C /* LoopCircleEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B1737128AEDBF6006CCD7C /* LoopCircleEntryView.swift */; };
 		14B1737628AEDC6C006CCD7C /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		14B1737728AEDC6C006CCD7C /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
 		14B1737828AEDC6C006CCD7C /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
@@ -742,7 +741,6 @@
 		14B1736E28AEDBF6006CCD7C /* BasalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalView.swift; sourceTree = "<group>"; };
 		14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SystemStatusWidget.swift; sourceTree = "<group>"; };
 		14B1737028AEDBF6006CCD7C /* GlucoseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseView.swift; sourceTree = "<group>"; };
-		14B1737128AEDBF6006CCD7C /* LoopCircleEntryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopCircleEntryView.swift; sourceTree = "<group>"; };
 		14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsViewModel.swift; sourceTree = "<group>"; };
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
 		1D05219C2469F1F5000EBBDE /* AlertStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStore.swift; sourceTree = "<group>"; };
@@ -2474,7 +2472,6 @@
 			children = (
 				14B1736E28AEDBF6006CCD7C /* BasalView.swift */,
 				14B1737028AEDBF6006CCD7C /* GlucoseView.swift */,
-				14B1737128AEDBF6006CCD7C /* LoopCircleEntryView.swift */,
 				84AA81E22A4A36FB000B658B /* SystemActionLink.swift */,
 				84AA81E62A4A4DEF000B658B /* PumpView.swift */,
 			);
@@ -3508,7 +3505,6 @@
 				14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */,
 				14B1737328AEDBF6006CCD7C /* SystemStatusWidget.swift in Sources */,
 				84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */,
-				14B1737528AEDBF6006CCD7C /* LoopCircleEntryView.swift in Sources */,
 				8496F7312B5711C4003E672C /* ContentMargin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
