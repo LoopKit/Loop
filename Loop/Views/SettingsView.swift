@@ -185,7 +185,7 @@ public struct SettingsView: View {
     
     private var closedLoopToggleState: Binding<Bool> {
         Binding(
-            get: { self.viewModel.isClosedLoopAllowed && self.viewModel.closedLoopPreference },
+            get: { self.viewModel.automaticDosingStatus.isAutomaticDosingAllowed && self.viewModel.closedLoopPreference },
             set: { self.viewModel.closedLoopPreference = $0 }
         )
     }
@@ -231,10 +231,9 @@ extension SettingsView {
                 confirmAction: .init(label: { Text("Yes, turn OFF") })
             ) {
                 HStack {
-                    LoopStatusCircleView(
-                        closedLoop: closedLoopToggleState,
-                        isClosedLoopAllowed: viewModel.isClosedLoopAllowed,
-                        colorPalette: .loopStatus
+                    LoopCircleView(
+                        closedLoop: viewModel.automaticDosingStatus.automaticDosingEnabled,
+                        freshness: viewModel.loopStatusCircleFreshness
                     )
                     .padding(.trailing)
                     
@@ -251,7 +250,7 @@ extension SettingsView {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding()
             }
-            .disabled(!viewModel.isOnboardingComplete || !viewModel.isClosedLoopAllowed)
+            .disabled(!viewModel.isOnboardingComplete || !viewModel.automaticDosingStatus.isAutomaticDosingAllowed)
         }
     }
     

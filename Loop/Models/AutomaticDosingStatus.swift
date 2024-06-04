@@ -8,11 +8,11 @@
 
 import Foundation
 
-class AutomaticDosingStatus {
-    @Published var automaticDosingEnabled: Bool
-    @Published var isAutomaticDosingAllowed: Bool
+public class AutomaticDosingStatus: ObservableObject {
+    @Published public var automaticDosingEnabled: Bool
+    @Published public var isAutomaticDosingAllowed: Bool
 
-    init(automaticDosingEnabled: Bool,
+    public init(automaticDosingEnabled: Bool,
          isAutomaticDosingAllowed: Bool)
     {
         self.automaticDosingEnabled = automaticDosingEnabled
