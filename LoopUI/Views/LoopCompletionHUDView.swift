@@ -7,8 +7,8 @@
 //
 
 import UIKit
+import LoopKit
 import LoopKitUI
-import LoopCore
 
 public final class LoopCompletionHUDView: BaseHUDView {
 
@@ -69,20 +69,20 @@ public final class LoopCompletionHUDView: BaseHUDView {
         super.stateColorsDidUpdate()
         updateTintColor()
     }
-
-    private func updateTintColor() {
-        let tintColor: UIColor?
-
+    
+    private var _tintColor: UIColor? {
         switch freshness {
         case .fresh:
-            tintColor = stateColors?.normal
+            return stateColors?.normal
         case .aging:
-            tintColor = stateColors?.warning
+            return stateColors?.warning
         case .stale:
-            tintColor = stateColors?.error
+            return stateColors?.error
         }
+    }
 
-        self.tintColor = tintColor
+    private func updateTintColor() {
+        self.tintColor = _tintColor        
     }
 
     private func initTimer(_ startDate: Date) {

@@ -492,6 +492,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         if currentContext.contains(.insulin) {
             doseEntries = loopManager.dosesRelativeToBasal.trimmed(from: startDate)
+
             iobValues = loopManager.iobValues.filterDateRange(startDate, nil)
             totalDelivery = try? await loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())).value
         }
@@ -858,7 +859,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private class AlertPermissionsDisabledWarningCell: UITableViewCell {
+        
+        var alert: AlertPermissionsChecker.UnsafeNotificationPermissionAlert?
+        
         override func updateConfiguration(using state: UICellConfigurationState) {
+            guard let alert else {
+                return
+            }
+            
             super.updateConfiguration(using: state)
 
             let adjustViewForNarrowDisplay = bounds.width < 350
@@ -866,14 +874,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
             var contentConfig = defaultContentConfiguration().updated(for: state)
             let titleImageAttachment = NSTextAttachment()
             titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.white)
-            let title = NSMutableAttributedString(string: NSLocalizedString(" Safety Notifications are OFF", comment: "Warning text for when Notifications or Critical Alerts Permissions is disabled"))
+            let title = NSMutableAttributedString(string: alert.bannerTitle)
             let titleWithImage = NSMutableAttributedString(attachment: titleImageAttachment)
             titleWithImage.append(title)
             contentConfig.attributedText = titleWithImage
             contentConfig.textProperties.color = .white
             contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
             contentConfig.textProperties.adjustsFontSizeToFitWidth = true
-            contentConfig.secondaryText = NSLocalizedString("Fix now by turning Notifications, Critical Alerts and Time Sensitive Notifications ON.", comment: "Secondary text for alerts disabled warning, which appears on the main status screen.")
+            contentConfig.secondaryText = alert.bannerBody
             contentConfig.secondaryTextProperties.color = .white
             contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
             contentConfiguration = contentConfig
@@ -942,7 +950,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         switch Section(rawValue: indexPath.section)! {
         case .alertWarning:
             if alertPermissionsChecker.showWarning {
-                let cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
+                var cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
+                cell.alert = AlertPermissionsChecker.UnsafeNotificationPermissionAlert(permissions: alertPermissionsChecker.notificationCenterSettings)
                 return cell
             } else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: MuteAlertsWarningCell.className, for: indexPath) as! MuteAlertsWarningCell
@@ -1601,13 +1610,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: criticalEventLogExportManager),
                                           therapySettings: { [weak self] in self?.settingsManager.therapySettings ?? TherapySettings() },
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
-                                          initialDosingEnabled: self.settingsManager.settings.dosingEnabled,
-                                          isClosedLoopAllowed: automaticDosingStatus.$isAutomaticDosingAllowed,
+                                          initialDosingEnabled: self.settingsManager.settings.dosingEnabled, automaticDosingStatus: self.automaticDosingStatus,
                                           automaticDosingStrategy: self.settingsManager.settings.automaticDosingStrategy,
+                                          lastLoopCompletion: loopManager.$lastLoopCompleted,
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
-                                          delegate: self)
+                                          delegate: self
+        )
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucosePreference)

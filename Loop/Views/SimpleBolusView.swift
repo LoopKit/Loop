@@ -17,7 +17,7 @@ struct SimpleBolusView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismissAction) var dismiss
     
-    @State private var shouldBolusEntryBecomeFirstResponder = false
+    @State private var shouldGlucoseEntryBecomeFirstResponder = false
     @State private var isKeyboardVisible = false
     @State private var isClosedLoopOffInformationalModalVisible = false
 
@@ -43,46 +43,33 @@ struct SimpleBolusView: View {
     }
         
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 0) {
-                List() {
-                    self.infoSection
-                    self.summarySection
-                }
-                // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
-                // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Bolus".
-                // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
-                // TODO: Fix this in Xcode 12 when we're building for iOS 14.
-                .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : 0)
-                .insetGroupedListStyle()
-                .navigationBarTitle(Text(self.title), displayMode: .inline)
-                
-                self.actionArea
-                    .frame(height: self.isKeyboardVisible ? 0 : nil)
-                    .opacity(self.isKeyboardVisible ? 0 : 1)
+        VStack(spacing: 0) {
+            List() {
+                self.infoSection
+                self.summarySection
             }
-            .onKeyboardStateChange { state in
-                self.isKeyboardVisible = state.height > 0
-                
-                if state.height == 0 {
-                    // Ensure tapping 'Enter Bolus' can make the text field the first responder again
-                    self.shouldBolusEntryBecomeFirstResponder = false
-                }
-            }
-            .keyboardAware()
-            .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
-            .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
+            .insetGroupedListStyle()
+            .navigationBarTitle(Text(self.title), displayMode: .inline)
+            
+            self.actionArea
+                .frame(height: self.isKeyboardVisible ? 0 : nil)
+                .opacity(self.isKeyboardVisible ? 0 : 1)
         }
+        .onKeyboardStateChange { state in
+            self.isKeyboardVisible = state.height > 0
+            
+            if state.height == 0 {
+                // Ensure tapping 'Enter Bolus' can make the text field the first responder again
+                self.shouldGlucoseEntryBecomeFirstResponder = false
+            }
+        }
+        .keyboardAware()
+        .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
+        .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
     }
     
     private func formatGlucose(_ quantity: HKQuantity) -> String {
         return displayGlucosePreference.format(quantity)
-    }
-    
-    private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
-        // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
-        // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
-        shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
     }
     
     private var infoSection: some View {
@@ -110,10 +97,10 @@ struct SimpleBolusView: View {
     
     private var summarySection: some View {
         Section {
+            glucoseEntryRow
             if viewModel.displayMealEntry {
                 carbEntryRow
             }
-            glucoseEntryRow
             recommendedBolusRow
             bolusEntryRow
         }
@@ -151,9 +138,13 @@ struct SimpleBolusView: View {
                     font: .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,
+                    shouldBecomeFirstResponder: shouldGlucoseEntryBecomeFirstResponder,
                     maxLength: 4,
                     doneButtonColor: .loopAccent
                 )
+                .onAppear {
+                    shouldGlucoseEntryBecomeFirstResponder = true
+                }
 
                 glucoseUnitsLabel
             }
@@ -208,7 +199,6 @@ struct SimpleBolusView: View {
                     textColor: .loopAccent,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
-                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
                     maxLength: 5,
                     doneButtonColor: .loopAccent
                 )
@@ -222,6 +212,7 @@ struct SimpleBolusView: View {
 
     private var carbUnitsLabel: some View {
         Text(QuantityFormatter(for: .gram()).localizedUnitStringWithPlurality())
+            .foregroundColor(Color(.secondaryLabel))
     }
     
     private var glucoseUnitsLabel: some View {
@@ -251,7 +242,7 @@ struct SimpleBolusView: View {
         Button<Text>(
             action: {
                 if self.viewModel.actionButtonAction == .enterBolus {
-                    self.shouldBolusEntryBecomeFirstResponder = true
+                    self.shouldGlucoseEntryBecomeFirstResponder = true
                 } else {
                     Task {
                         if await viewModel.saveAndDeliver() {

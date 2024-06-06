@@ -375,14 +375,9 @@ extension AlertManager: AlertIssuer {
     }
 
     private func replayAlert(_ alert: Alert) {
-        guard alert.identifier != AlertPermissionsChecker.unsafeNotificationPermissionsAlertIdentifier else {
-            // this alert does not replay through the alert system, since it provides a button to navigate to settings
-            presentUnsafeNotificationPermissionsInAppAlert()
-            return
-        }
-
-        // Only alerts with foreground content are replayed
-        if alert.foregroundContent != nil {
+        if let unsafeNotificationPermissionsAlert = AlertPermissionsChecker.UnsafeNotificationPermissionAlert.allCases.first(where: { $0.alertIdentifier == alert.identifier }) {
+            presentUnsafeNotificationPermissionsInAppAlert(unsafeNotificationPermissionsAlert)
+        } else if alert.foregroundContent != nil {
             modalAlertScheduler.scheduleAlert(alert)
         }
     }
@@ -445,6 +440,7 @@ extension AlertManager {
 extension AlertManager {
 
     func playbackAlertsFromPersistence() {
+        guard !playbackFinished else { return }
         playbackAlertsFromAlertStore()
     }
 
@@ -725,28 +721,47 @@ extension AlertManager: PresetActivationObserver {
 
 // MARK: - Issue/Retract Alert Permissions Warning
 extension AlertManager: AlertPermissionsCheckerDelegate {
-    func notificationsPermissions(requiresRiskMitigation: Bool, scheduledDeliveryEnabled: Bool) {
-        if !issueOrRetract(alert: AlertPermissionsChecker.unsafeNotificationPermissionsAlert,
-                           condition: requiresRiskMitigation,
-                           alreadyIssued: UserDefaults.standard.hasIssuedNotificationPermissionsAlert,
-                           setAlreadyIssued: { UserDefaults.standard.hasIssuedNotificationPermissionsAlert = $0 },
-                           issueHandler: { alert in
-            // in-app modal is presented with a button to navigate to settings
-            self.presentUnsafeNotificationPermissionsInAppAlert()
-            self.userNotificationAlertScheduler.scheduleAlert(alert, muted: self.alertMuter.shouldMuteAlert(alert))
-            self.recordIssued(alert: alert)
-        },
-                           retractionHandler: { alert in
-            // need to dismiss the in-app alert outside of the alert system
-            self.recordRetractedAlert(alert, at: Date())
-            self.dismissUnsafeNotificationPermissionsInAppAlert()
-        }) {
-            _ = issueOrRetract(alert: AlertPermissionsChecker.scheduledDeliveryEnabledAlert,
-                               condition: scheduledDeliveryEnabled,
-                               alreadyIssued: UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert,
-                               setAlreadyIssued: { UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert = $0 },
-                               issueHandler: { alert in self.issueAlert(alert) },
-                               retractionHandler: { alert in self.retractAlert(identifier: alert.identifier) })
+    func notificationsPermissions(requiresRiskMitigation: Bool, scheduledDeliveryEnabled: Bool, permissions: NotificationCenterSettingsFlags) {
+        guard let unsafeNotificationAlert = AlertPermissionsChecker.UnsafeNotificationPermissionAlert(permissions: permissions) else {
+            return
+        }
+        
+        if !issueOrRetract(
+            alert: unsafeNotificationAlert.alert,
+            condition: requiresRiskMitigation,
+            alreadyIssued: UserDefaults.standard.hasIssuedNotificationPermissionsAlert,
+            setAlreadyIssued: {
+                UserDefaults.standard.hasIssuedNotificationPermissionsAlert = $0
+            },
+            issueHandler: { alert in
+                // in-app modal is presented with a button to navigate to settings
+                self.presentUnsafeNotificationPermissionsInAppAlert(unsafeNotificationAlert)
+                self.userNotificationAlertScheduler.scheduleAlert(
+                    alert,
+                    muted: self.alertMuter.shouldMuteAlert(alert)
+                )
+                self.recordIssued(alert: alert)
+            },
+            retractionHandler: { alert in
+                // need to dismiss the in-app alert outside of the alert system
+                self.recordRetractedAlert(alert, at: Date())
+                self.dismissUnsafeNotificationPermissionsInAppAlert()
+            }
+        ) {
+            _ = issueOrRetract(
+                alert: AlertPermissionsChecker.scheduledDeliveryEnabledAlert,
+                condition: scheduledDeliveryEnabled,
+                alreadyIssued: UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert,
+                setAlreadyIssued: {
+                    UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert = $0
+                },
+                issueHandler: {
+                    alert in self.issueAlert(alert)
+                },
+                retractionHandler: {
+                    alert in self.retractAlert(identifier: alert.identifier)
+                }
+            )
         }
     }
 
@@ -772,11 +787,17 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
         }
     }
 
-    private func presentUnsafeNotificationPermissionsInAppAlert() {
+    private func presentUnsafeNotificationPermissionsInAppAlert(_ alert: AlertPermissionsChecker.UnsafeNotificationPermissionAlert) {
         DispatchQueue.main.async {
-            let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert() { [weak self] in
-                self?.acknowledgeAlert(identifier: AlertPermissionsChecker.unsafeNotificationPermissionsAlertIdentifier)
+            let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert(alert: alert) { [weak self] in
+                AlertPermissionsChecker.UnsafeNotificationPermissionAlert.allCases.forEach { [weak self] in
+                    UserDefaults.standard.hasIssuedNotificationPermissionsAlert = false
+                    self?.acknowledgeAlert(
+                        identifier: $0.alertIdentifier
+                    )
+                }
             }
+            
             self.alertPresenter.present(alertController, animated: true) { [weak self] in
                 // the completion is called after the alert is presented
                 self?.unsafeNotificationPermissionsAlertController = alertController

@@ -79,8 +79,10 @@ public class SettingsViewModel: ObservableObject {
     let sensitivityOverridesEnabled: Bool
     let isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
-
-    @Published var isClosedLoopAllowed: Bool
+    
+    @Published private(set) var automaticDosingStatus: AutomaticDosingStatus
+    
+    @Published private(set) var lastLoopCompletion: Date?
 
     var closedLoopDescriptiveText: String? {
         return delegate?.closedLoopDescriptiveText
@@ -93,7 +95,7 @@ public class SettingsViewModel: ObservableObject {
         }
     }
 
-    var closedLoopPreference: Bool {
+    @Published var closedLoopPreference: Bool {
        didSet {
            delegate?.dosingEnabledChanged(closedLoopPreference)
        }
@@ -101,6 +103,12 @@ public class SettingsViewModel: ObservableObject {
 
     var showDeleteTestData: Bool {
         availableSupports.contains(where: { $0.showsDeleteTestDataUI })
+    }
+    
+    var loopStatusCircleFreshness: LoopCompletionFreshness {
+        let lastLoopCompletion = lastLoopCompletion ?? Date().addingTimeInterval(.minutes(16))
+        let age = abs(min(0, lastLoopCompletion.timeIntervalSinceNow))
+        return LoopCompletionFreshness(age: age)
     }
     
     lazy private var cancellables = Set<AnyCancellable>()
@@ -115,8 +123,9 @@ public class SettingsViewModel: ObservableObject {
                 therapySettings: @escaping () -> TherapySettings,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
-                isClosedLoopAllowed: Published<Bool>.Publisher,
+                automaticDosingStatus: AutomaticDosingStatus,
                 automaticDosingStrategy: AutomaticDosingStrategy,
+                lastLoopCompletion: Published<Date?>.Publisher,
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
@@ -132,8 +141,9 @@ public class SettingsViewModel: ObservableObject {
         self.therapySettings = therapySettings
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.closedLoopPreference = initialDosingEnabled
-        self.isClosedLoopAllowed = false
+        self.automaticDosingStatus = automaticDosingStatus
         self.automaticDosingStrategy = automaticDosingStrategy
+        self.lastLoopCompletion = nil
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
@@ -156,18 +166,22 @@ public class SettingsViewModel: ObservableObject {
             self?.objectWillChange.send()
         }
         .store(in: &cancellables)
-        
-        isClosedLoopAllowed
-            .assign(to: \.isClosedLoopAllowed, on: self)
+        automaticDosingStatus.objectWillChange.sink { [weak self] in
+            self?.objectWillChange.send()
+        }
+        .store(in: &cancellables)
+        lastLoopCompletion
+            .assign(to: \.lastLoopCompletion, on: self)
             .store(in: &cancellables)
+
     }
 }
 
 // For previews only
 @MainActor
 extension SettingsViewModel {
-    fileprivate class FakeClosedLoopAllowedPublisher {
-        @Published var mockIsClosedLoopAllowed: Bool = false
+    fileprivate class FakeLastLoopCompletionPublisher {
+        @Published var mockLastLoopCompletion: Date? = nil
     }
 
     static var preview: SettingsViewModel {
@@ -181,11 +195,13 @@ extension SettingsViewModel {
                                  therapySettings: { TherapySettings() },
                                  sensitivityOverridesEnabled: false,
                                  initialDosingEnabled: true,
-                                 isClosedLoopAllowed: FakeClosedLoopAllowedPublisher().$mockIsClosedLoopAllowed,
+                                 automaticDosingStatus: AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true),
                                  automaticDosingStrategy: .automaticBolus,
+                                 lastLoopCompletion: FakeLastLoopCompletionPublisher().$mockLastLoopCompletion,
                                  availableSupports: [],
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,
-                                 delegate: nil)
+                                 delegate: nil
+        )
     }
 }

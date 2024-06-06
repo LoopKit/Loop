@@ -11,6 +11,8 @@ import LoopKitUI
 import MockKit
 import SwiftUI
 import HealthKit
+import LoopUI
+
 
 public struct SettingsView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
@@ -79,7 +81,7 @@ public struct SettingsView: View {
                     }
                     alertManagementSection
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
-                        configurationSection
+                        therapySection
                     }
                     deviceSettingsSection
                     if FeatureFlags.allowExperimentalFeatures {
@@ -183,7 +185,7 @@ public struct SettingsView: View {
     
     private var closedLoopToggleState: Binding<Bool> {
         Binding(
-            get: { self.viewModel.isClosedLoopAllowed && self.viewModel.closedLoopPreference },
+            get: { self.viewModel.automaticDosingStatus.isAutomaticDosingAllowed && self.viewModel.closedLoopPreference },
             set: { self.viewModel.closedLoopPreference = $0 }
         )
     }
@@ -216,21 +218,40 @@ extension SettingsView {
     }
     
     private var loopSection: some View {
-        Section(header: SectionHeader(label: localizedAppNameAndVersion)) {
-            Toggle(isOn: closedLoopToggleState) {
-                VStack(alignment: .leading) {
-                    Text("Closed Loop", comment: "The title text for the looping enabled switch cell")
-                        .padding(.vertical, 3)
-                    if !viewModel.isOnboardingComplete {
-                        DescriptiveText(label: NSLocalizedString("Closed Loop requires Setup to be Complete", comment: "The description text for the looping enabled switch cell when onboarding is not complete"))
-                    } else if let closedLoopDescriptiveText = viewModel.closedLoopDescriptiveText {
-                        DescriptiveText(label: closedLoopDescriptiveText)
+        Section(
+            header: SectionHeader(
+                label: localizedAppNameAndVersion.description
+            )
+        ) {
+            ConfirmationToggle(
+                isOn: closedLoopToggleState,
+                confirmOn: false,
+                alertTitle: NSLocalizedString("Are you sure you want to turn automation OFF?", comment: "Closed loop alert title"),
+                alertBody: NSLocalizedString("Your pump and CGM will continue operating but the app will not make automatic adjustments. You will receive your scheduled basal rate(s).", comment: "Closed loop alert message"),
+                confirmAction: .init(label: { Text("Yes, turn OFF") })
+            ) {
+                HStack(spacing: 12) {
+                    LoopCircleView(
+                        closedLoop: viewModel.automaticDosingStatus.automaticDosingEnabled,
+                        freshness: viewModel.loopStatusCircleFreshness
+                    )
+                    .frame(width: 36, height: 36)
+                    .padding(12)
+                    
+                    VStack(alignment: .leading) {
+                        Text("Closed Loop", comment: "The title text for the looping enabled switch cell")
+                        DescriptiveText(label: NSLocalizedString("Insulin Automation", comment: "Closed loop settings button descriptive text"))
+                        if !viewModel.isOnboardingComplete {
+                            DescriptiveText(label: NSLocalizedString("Closed Loop requires Setup to be Complete", comment: "The description text for the looping enabled switch cell when onboarding is not complete"))
+                        } else if let closedLoopDescriptiveText = viewModel.closedLoopDescriptiveText {
+                            DescriptiveText(label: closedLoopDescriptiveText)
+                        }
                     }
                 }
-                .fixedSize(horizontal: false, vertical: true)
             }
             .accessibilityIdentifier("settingsViewClosedLoopToggle")
-            .disabled(!viewModel.isOnboardingComplete || !viewModel.isClosedLoopAllowed)
+            .disabled(!viewModel.isOnboardingComplete || !viewModel.automaticDosingStatus.isAutomaticDosingAllowed)
+            .padding(.vertical)
         }
     }
     
@@ -283,15 +304,15 @@ extension SettingsView {
                         .frame(width: 30),
                     secondaryImageView: alertWarning,
                     label: NSLocalizedString("Alert Management", comment: "Alert Permissions button text"),
-                    descriptiveText: NSLocalizedString("Alert Permissions and Mute Alerts", comment: "Alert Permissions descriptive text")
+                    descriptiveText: NSLocalizedString("iOS Permissions and Mute App Sounds", comment: "Alert Permissions descriptive text")
                 )
                 .accessibilityIdentifier("settingsViewAlertManagement")
             }
         }
     }
         
-    private var configurationSection: some View {
-        Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
+    private var therapySection: some View {
+        Section {
             LargeButton(action: { sheet = .therapySettings },
                             includeArrow: true,
                             imageView: Image("Therapy Icon"),
@@ -317,7 +338,7 @@ extension SettingsView {
     }
 
     private var deviceSettingsSection: some View {
-        Section {
+        Section(header: SectionHeader(label: NSLocalizedString("Devices", comment: ""))) {
             pumpSection
                 .accessibilityIdentifier("settingsViewInsulinPump")
             

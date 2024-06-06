@@ -6,6 +6,8 @@
 //  Copyright © 2022 LoopKit Authors. All rights reserved.
 //
 
+import LoopKit
+import LoopKitUI
 import LoopUI
 import SwiftUI
 import WidgetKit
@@ -15,12 +17,20 @@ struct SystemStatusWidgetEntryView : View {
     @Environment(\.widgetFamily) private var widgetFamily
     
     var entry: StatusWidgetTimelineProvider.Entry
+    
+    var freshness: LoopCompletionFreshness {
+        let lastLoopCompleted = entry.lastLoopCompleted ?? Date().addingTimeInterval(.minutes(16))
+        let age = abs(min(0, lastLoopCompleted.timeIntervalSinceNow))
+        return LoopCompletionFreshness(age: age)
+    }
 
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
             VStack(alignment: .center, spacing: 5) {
                 HStack(alignment: .center, spacing: 15) {
-                    LoopCircleView(entry: entry)
+                    LoopCircleView(closedLoop: entry.closeLoop, freshness: freshness)
+                        .environment(\.guidanceColors, .default)
+                        .disabled(entry.contextIsStale)
                     
                     GlucoseView(entry: entry)
                 }
