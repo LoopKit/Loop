@@ -18,7 +18,6 @@ struct AlertManagementView: View {
     @ObservedObject private var alertMuter: AlertMuter
 
     @State private var showMuteAlertOptions: Bool = false
-    @State private var showHowMuteAlertWork: Bool = false
 
     private var formatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -69,87 +68,18 @@ struct AlertManagementView: View {
             if FeatureFlags.missedMealNotifications {
                 missedMealAlertSection
             }
+            supportSection
         }
         .navigationTitle(NSLocalizedString("Alert Management", comment: "Title of alert management screen"))
     }
-    
-    private var footerView: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            HStack(alignment: .top, spacing: 16) {
-                Image("phone")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 54)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(
-                        String(
-                            format: NSLocalizedString(
-                                "%1$@ APP SOUNDS",
-                                comment: "App sounds title text (1: app name)"
-                            ),
-                            appName.uppercased()
-                        )
-                    )
-                    
-                    Text(
-                        String(
-                            format: NSLocalizedString(
-                                "While mute alerts is on, all alerts from your %1$@ app including Critical and Time Sensitive alerts will temporarily display without sounds and will vibrate only.",
-                                comment: "App sounds descriptive text (1: app name)"
-                            ),
-                            appName
-                        )
-                    )
-                }
-            }
-            
-            HStack(alignment: .top, spacing: 16) {
-                Image("hardware")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 54)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("HARDWARE SOUNDS")
-                    
-                    Text("While mute alerts is on, your insulin pump and CGM hardware may still sound.")
-                }
-            }
-            
-            HStack(alignment: .top, spacing: 16) {
-                Image(systemName: "moon.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 44)
-                    .foregroundColor(.accentColor)
-                    .padding(.horizontal, 5)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("IOS FOCUS MODES")
-                    
-                    Text(
-                        String(
-                            format: NSLocalizedString(
-                                "If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered and non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App.",
-                                comment: "Focus modes descriptive text (1: app name)"
-                            ),
-                            appName
-                        )
-                    )
-                }
-            }
-        }
-        .padding(.top)
-    }
 
     private var alertPermissionsSection: some View {
-        Section(footer: DescriptiveText(label: String(format: NSLocalizedString("Notifications give you important %1$@ app information without requiring you to open the app.", comment: "Alert Permissions descriptive text (1: app name)"), appName))) {
+        Section(header: Text("iOS").textCase(nil)) {
             NavigationLink(destination:
                             NotificationsCriticalAlertPermissionsView(mode: .flow, checker: checker))
             {
                 HStack {
-                    Text(NSLocalizedString("Alert Permissions", comment: "Alert Permissions button text"))
+                    Text(NSLocalizedString("iOS Permissions", comment: "iOS Permissions button text"))
                     if checker.showWarning ||
                         checker.notificationCenterSettings.scheduledDeliveryEnabled {
                         Spacer()
@@ -163,30 +93,45 @@ struct AlertManagementView: View {
 
     @ViewBuilder
     private var muteAlertsSection: some View {
-        Section(footer: footerView) {
+        Section(
+            header: Text(String(format: "%1$@", appName)),
+            footer: !alertMuter.configuration.shouldMute ? Text(String(format: NSLocalizedString("Temporarily silence all sounds from %1$@, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, Pump Expiration and others.\n\nWhile sounds are muted, alerts from %1$@ will still vibrate if haptics are enabled. Your insulin pump and CGM hardware may still sound.", comment: ""), appName, appName)) : nil
+        ) {
             if !alertMuter.configuration.shouldMute {
-                howMuteAlertsWork
                 Button(action: { showMuteAlertOptions = true }) {
-                    HStack {
+                    HStack(spacing: 12) {
+                        Spacer()
                         muteAlertIcon
                         Text(NSLocalizedString("Mute All Alerts", comment: "Label for button to mute all alerts"))
+                            .fontWeight(.semibold)
+                        Spacer()
                     }
+                    .padding(.vertical, 6)
                 }
                 .actionSheet(isPresented: $showMuteAlertOptions) {
                    muteAlertOptionsActionSheet
                 }
             } else {
                 Button(action: alertMuter.unmuteAlerts) {
-                    HStack {
+                    HStack(spacing: 12) {
+                        Spacer()
                         unmuteAlertIcon
-                        Text(NSLocalizedString("Tap to Unmute Alerts", comment: "Label for button to unmute all alerts"))
+                        Text(NSLocalizedString("Tap to Unmute App Sounds", comment: "Label for button to unmute all app sounds"))
+                            .fontWeight(.semibold)
+                        Spacer()
                     }
+                    .padding(.vertical, 6)
                 }
-                HStack {
-                    Text(NSLocalizedString("All alerts muted until", comment: "Label for when mute alert will end"))
-                    Spacer()
-                    Text(alertMuter.formattedEndTime)
-                        .foregroundColor(.secondary)
+                VStack(spacing: 12) {
+                    HStack {
+                        Text(NSLocalizedString("Muted until", comment: "Label for when mute alert will end"))
+                        Spacer()
+                        Text(alertMuter.formattedEndTime)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Text("All app sounds, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, and Pump Expiration will NOT sound.", comment: "Warning label that all alerts will not sound")
+                        .font(.footnote)
                 }
             }
         }
@@ -194,35 +139,23 @@ struct AlertManagementView: View {
 
     private var muteAlertIcon: some View {
         Image(systemName: "speaker.slash.fill")
+            .resizable()
             .foregroundColor(.white)
             .padding(5)
-            .background(guidanceColors.warning)
+            .frame(width: 22, height: 22)
+            .background(Color.accentColor)
             .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
     }
 
     private var unmuteAlertIcon: some View {
         Image(systemName: "speaker.wave.2.fill")
+            .resizable()
             .foregroundColor(.white)
             .padding(.vertical, 5)
             .padding(.horizontal, 2)
+            .frame(width: 22, height: 22)
             .background(guidanceColors.warning)
             .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
-    }
-
-    private var howMuteAlertsWork: some View {
-        Button(action: { showHowMuteAlertWork = true }) {
-            HStack {
-                Text(NSLocalizedString("Frequently asked questions about alerts", comment: "Label for link to see frequently asked questions"))
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Image(systemName: "info.circle")
-                    .font(.body)
-            }
-        }
-        .sheet(isPresented: $showHowMuteAlertWork) {
-            HowMuteAlertWorkView()
-        }
     }
 
     private var muteAlertOptionsActionSheet: ActionSheet {
@@ -233,14 +166,28 @@ struct AlertManagementView: View {
         muteAlertDurationOptions.append(.cancel())
 
         return ActionSheet(
-            title: Text(NSLocalizedString("Mute All Alerts Temporarily", comment: "Title for mute alert duration selection action sheet")),
-            message: Text(NSLocalizedString("No alerts or alarms will sound while muted. Select how long you would you like to mute for.", comment: "Message for mute alert duration selection action sheet")),
+            title: Text(NSLocalizedString("Set Time Duration", comment: "Title for mute alert duration selection action sheet")),
+            message: Text(NSLocalizedString("All app sounds, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, and Pump Expiration will NOT sound.", comment: "Message for mute alert duration selection action sheet")),
             buttons: muteAlertDurationOptions)
     }
     
     private var missedMealAlertSection: some View {
         Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
             Toggle(NSLocalizedString("Missed Meal Notifications", comment: "Title for missed meal notifications toggle"), isOn: missedMealNotificationsEnabled)
+        }
+    }
+    
+    @ViewBuilder
+    private var supportSection: some View {
+        Section(
+            header: SectionHeader(label: NSLocalizedString("Support", comment: "Section title for Support")).padding(.leading, -16).padding(.bottom, 4),
+            footer: Text(String(format: "Frequently asked questions about alerts from iOS and %1$@.", appName))) {
+                NavigationLink {
+                    HowMuteAlertWorkView()
+                } label: {
+                    Text("Learn more about Alerts", comment: "Link to learn more about alerts")
+                }
+
         }
     }
 }
