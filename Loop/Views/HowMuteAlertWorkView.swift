@@ -108,10 +108,16 @@ struct HowMuteAlertWorkView: View {
                     title: Text(
                         String(
                             format: NSLocalizedString(
-                                "Make sure to keep Notifications, Time Sensitive Notifications, and Critical Alerts turned ON in your iOS Settings to receive essential %1$@ safety and maintenance notifications.",
+                                "Keep All Notifications ON for %1$@",
                                 comment: "Time sensitive notifications callout title (1: app name)"
                             ),
                             appName
+                        )
+                    ),
+                    message: Text(
+                        NSLocalizedString(
+                            "Make sure to keep Notifications, Time Sensitive Notifications, and Critical Alerts turned ON in iOS Settings to receive essential safety and maintenance notifications.",
+                            comment: "Time sensitive notifications callout message"
                         )
                     )
                 )
