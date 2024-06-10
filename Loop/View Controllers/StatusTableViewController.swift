@@ -1616,7 +1616,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucosePreference)
-                .environment(\.appName, Bundle.main.bundleDisplayName),
+                .environment(\.appName, Bundle.main.bundleDisplayName)
+                .environment(\.loopStatusColorPalette, .loopStatus),
             isModalInPresentation: false)
         present(hostingController, animated: true)
     }
