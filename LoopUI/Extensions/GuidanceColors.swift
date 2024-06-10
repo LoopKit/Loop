@@ -10,6 +10,6 @@ import LoopKitUI
 
 extension GuidanceColors {
     public static var `default`: GuidanceColors {
-        return GuidanceColors(acceptable: .fresh, warning: .warning, critical: .critical)
+        return GuidanceColors(acceptable: .primary, warning: .warning, critical: .critical)
     }
 }
