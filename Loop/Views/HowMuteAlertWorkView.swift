@@ -149,7 +149,7 @@ struct HowMuteAlertWorkView: View {
             
             Section(header: SectionHeader(label: NSLocalizedString("Learn More", comment: "Learn more section header")).padding(.leading, -16).padding(.bottom, 4)) {
                 NavigationLink {
-                    Text("TBD")
+                    IOSFocusModesView()
                 } label: {
                     Text("iOS Focus Modes", comment: "iOS focus modes navigation link label")
                 }
