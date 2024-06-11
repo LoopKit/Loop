@@ -231,6 +231,7 @@ final class DeviceDataManager {
     private weak var displayGlucoseUnitBroadcaster: DisplayGlucoseUnitBroadcaster?
 
     init(pluginManager: PluginManager,
+         deviceLog: PersistentDeviceLog,
          alertManager: AlertManager,
          settingsManager: SettingsManager,
          healthStore: HKHealthStore,
@@ -253,19 +254,8 @@ final class DeviceDataManager {
          displayGlucoseUnitBroadcaster: DisplayGlucoseUnitBroadcaster
     ) {
 
-        let fileManager = FileManager.default
-        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
-        if !fileManager.fileExists(atPath: deviceLogDirectory.path) {
-            do {
-                try fileManager.createDirectory(at: deviceLogDirectory, withIntermediateDirectories: false)
-            } catch let error {
-                preconditionFailure("Could not create DeviceLog directory: \(error)")
-            }
-        }
-        deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
-
         self.pluginManager = pluginManager
+        self.deviceLog = deviceLog
         self.alertManager = alertManager
         self.settingsManager = settingsManager
         self.healthStore = healthStore

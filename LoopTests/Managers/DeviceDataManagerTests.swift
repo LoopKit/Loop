@@ -60,6 +60,19 @@ final class DeviceDataManagerTests: XCTestCase {
             cacheStore: persistenceController
         )
 
+        let fileManager = FileManager.default
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
+        if !fileManager.fileExists(atPath: deviceLogDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: deviceLogDirectory, withIntermediateDirectories: false)
+            } catch let error {
+                preconditionFailure("Could not create DeviceLog directory: \(error)")
+            }
+        }
+        let deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"))
+
+
         let glucoseStore = GlucoseStore(cacheStore: persistenceController)
 
         let cgmEventStore = CgmEventStore(cacheStore: persistenceController)
@@ -70,6 +83,7 @@ final class DeviceDataManagerTests: XCTestCase {
 
         deviceDataManager = DeviceDataManager(
             pluginManager: PluginManager(),
+            deviceLog: deviceLog,
             alertManager: alertManager,
             settingsManager: settingsManager,
             healthStore: healthStore,
