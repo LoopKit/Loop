@@ -910,7 +910,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let adjustViewForNarrowDisplay = bounds.width < 350
 
             var contentConfig = defaultContentConfiguration().updated(for: state)
-            let title = NSMutableAttributedString(string: NSLocalizedString("All Alerts Muted", comment: "Warning text for when alerts are muted"))
+            let title = NSMutableAttributedString(string: NSLocalizedString("All App Sounds Muted", comment: "Warning text for when alerts are muted"))
             let image = UIImage(systemName: "speaker.slash.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 25, weight: .thin, scale: .large))
             contentConfig.image = image
             contentConfig.imageProperties.tintColor = .white
@@ -1285,10 +1285,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func presentUnmuteAlertConfirmation() {
-        let title = NSLocalizedString("Unmute Alerts?", comment: "The alert title for unmute alert confirmation")
-        let body = NSLocalizedString("Tap Unmute to resume sound for your alerts and alarms.", comment: "The alert body for unmute alert confirmation")
+        let title = NSLocalizedString("Unmute App Sounds?", comment: "The alert title for unmute alert confirmation")
+        let body = NSLocalizedString("Tap Unmute to resume app sounds for your alerts and alarms.", comment: "The alert body for unmute alert confirmation")
         let action = UIAlertAction(
-            title: NSLocalizedString("Unmute", comment: "The title of the action used to unmute alerts"),
+            title: NSLocalizedString("Unmute", comment: "The title of the action used to unmute app sounds"),
             style: .default) { _ in
                 self.alertMuter.unmuteAlerts()
             }
