@@ -89,7 +89,7 @@ struct HowMuteAlertWorkView: View {
                     
                     Text(
                         NSLocalizedString(
-                            "Silence your iPhone by turning down the volume or switching it to Silent mode, indicated by the orange color on the Ring/Silent switch.",
+                            "To turn Silent mode on, flip the Ring/Silent switch toward the back of your iPhone.",
                             comment: "Description text for temporarily silencing non-critical alerts"
                         )
                     )
