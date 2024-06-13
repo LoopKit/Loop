@@ -37,6 +37,7 @@ public final class AlertManager {
 
     // Defer issuance of new alerts until playback is done
     private var deferredAlerts: [Alert] = []
+    private var deferredRetractions: [Alert.Identifier] = []
     private var playbackFinished: Bool
 
     private let fileManager: FileManager
@@ -370,6 +371,10 @@ extension AlertManager: AlertIssuer {
     }
 
     public func retractAlert(identifier: Alert.Identifier) {
+        guard playbackFinished else {
+            deferredRetractions.append(identifier)
+            return
+        }
         unscheduleAlertWithSchedulers(identifier: identifier)
         alertStore.recordRetraction(of: identifier)
     }
@@ -486,6 +491,9 @@ extension AlertManager {
             self.playbackFinished = true
             for alert in self.deferredAlerts {
                 self.issueAlert(alert)
+            }
+            for identifier in self.deferredRetractions {
+                self.retractAlert(identifier: identifier)
             }
         }
     }
