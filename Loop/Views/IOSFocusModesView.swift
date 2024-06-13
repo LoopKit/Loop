@@ -86,8 +86,8 @@ struct IOSFocusModesView: View {
                         )
                     )
                 )
-                .padding(.horizontal, -20)
-                .padding(.bottom, -22)
+                .padding(.horizontal, -16)
+                .padding(.bottom, -16)
             }
         }
         .insetGroupedListStyle()
