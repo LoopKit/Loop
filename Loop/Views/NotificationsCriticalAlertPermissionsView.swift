@@ -138,6 +138,7 @@ extension NotificationsCriticalAlertPermissionsView {
 
     private var notificationAndCriticalAlertPermissionSupportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "Section title for Support")).padding(.leading, -16).padding(.bottom, 4)) {
+            // MARK: TO be reverted to NavigationLink once we have a page to link to
             HStack {
                 Text(NSLocalizedString("Get help with iOS Permissions", comment: "Get help with iOS Permissions support button text"))
                 
