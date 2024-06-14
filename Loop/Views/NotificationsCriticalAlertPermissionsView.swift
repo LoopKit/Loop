@@ -118,7 +118,7 @@ extension NotificationsCriticalAlertPermissionsView {
         HStack {
             Text("Time Sensitive Notifications", comment: "Time Sensitive Status text")
             Spacer()
-            onOff(!checker.notificationCenterSettings.timeSensitiveNotificationsDisabled)
+            onOff(!checker.notificationCenterSettings.timeSensitiveDisabled)
         }
     }
     
