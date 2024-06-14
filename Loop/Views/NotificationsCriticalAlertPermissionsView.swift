@@ -65,8 +65,7 @@ public struct NotificationsCriticalAlertPermissionsView: View {
                     }
                 }
             }
-            // MARK: Disabled for Formative 3. To be Re-enabled once design has provided an appropriate screen to link to.
-//            notificationAndCriticalAlertPermissionSupportSection
+            notificationAndCriticalAlertPermissionSupportSection
         }
         .insetGroupedListStyle()
         .navigationBarTitle(Text(NSLocalizedString("iOS Permissions", comment: "Notification & Critical Alert Permissions screen title")))
@@ -139,8 +138,16 @@ extension NotificationsCriticalAlertPermissionsView {
 
     private var notificationAndCriticalAlertPermissionSupportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "Section title for Support")).padding(.leading, -16).padding(.bottom, 4)) {
-            NavigationLink(destination: Text("Get help with iOS Permissions")) {
+            HStack {
                 Text(NSLocalizedString("Get help with iOS Permissions", comment: "Get help with iOS Permissions support button text"))
+                
+                Spacer()
+                
+                Image(systemName: "chevron.forward")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 12)
+                    .foregroundStyle(.secondary)
             }
         }
     }
