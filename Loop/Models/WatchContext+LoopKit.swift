@@ -16,6 +16,7 @@ extension WatchContext {
         self.init()
 
         self.glucose = glucose?.quantity
+        self.glucoseCondition = glucose?.condition
         self.glucoseDate = glucose?.startDate
         self.glucoseIsDisplayOnly = glucose?.isDisplayOnly
         self.glucoseWasUserEntered = glucose?.wasUserEntered
