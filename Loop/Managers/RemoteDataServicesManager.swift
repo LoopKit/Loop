@@ -253,10 +253,10 @@ extension RemoteDataServicesManager {
                         do {
                             try await remoteDataService.uploadAlertData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .alert, queryAnchor)
-                            self.uploadSucceeded(key)
+                            await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing alert data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            await self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -290,10 +290,10 @@ extension RemoteDataServicesManager {
                             try await remoteDataService.uploadCarbData(created: created, updated: updated, deleted: deleted)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .carb, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
+                            await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing carb data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            await self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -332,10 +332,10 @@ extension RemoteDataServicesManager {
                             try await remoteDataService.uploadDoseData(created: created, deleted: deleted)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .dose, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
+                            await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing dose data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            await self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -374,11 +374,11 @@ extension RemoteDataServicesManager {
                             try await remoteDataService.uploadDosingDecisionData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .dosingDecision, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
+                            await self.uploadSucceeded(key)
 
                         } catch {
                             self.log.error("Error synchronizing dosing decision data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            await self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -422,10 +422,10 @@ extension RemoteDataServicesManager {
                             try await remoteDataService.uploadGlucoseData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
+                            await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing glucose data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            await self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -464,10 +464,10 @@ extension RemoteDataServicesManager {
                             try await remoteDataService.uploadPumpEventData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
+                            await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            await self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -506,10 +506,10 @@ extension RemoteDataServicesManager {
                             try await remoteDataService.uploadSettingsData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .settings, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
+                            await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing settings data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            await self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -543,10 +543,10 @@ extension RemoteDataServicesManager {
                 do {
                     try await remoteDataService.uploadTemporaryOverrideData(updated: overrides, deleted: deletedOverrides)
                     UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides, newAnchor)
-                    self.uploadSucceeded(key)
+                    await self.uploadSucceeded(key)
                 } catch {
                     self.log.error("Error synchronizing temporary override data: %{public}@", String(describing: error))
-                    self.uploadFailed(key)
+                    await self.uploadFailed(key)
                 }
                 semaphore.signal()
             }
@@ -579,10 +579,10 @@ extension RemoteDataServicesManager {
                             try await remoteDataService.uploadCgmEventData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .cgmEvent, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
+                            await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            await self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
