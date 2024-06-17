@@ -98,42 +98,55 @@ struct AlertManagementView: View {
             footer: !alertMuter.configuration.shouldMute ? Text(String(format: NSLocalizedString("Temporarily silence all sounds from %1$@, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, Pump Expiration and others.\n\nWhile sounds are muted, alerts from %1$@ will still vibrate if haptics are enabled. Your insulin pump and CGM hardware may still sound.", comment: ""), appName, appName)) : nil
         ) {
             if !alertMuter.configuration.shouldMute {
-                Button(action: { showMuteAlertOptions = true }) {
-                    HStack(spacing: 12) {
-                        Spacer()
-                        muteAlertIcon
-                        Text(NSLocalizedString("Mute App Sounds", comment: "Label for button to mute app sounds"))
-                            .fontWeight(.semibold)
-                        Spacer()
-                    }
-                    .padding(.vertical, 6)
-                }
-                .actionSheet(isPresented: $showMuteAlertOptions) {
-                   muteAlertOptionsActionSheet
-                }
+                muteAlertsButton
             } else {
-                Button(action: alertMuter.unmuteAlerts) {
-                    HStack(spacing: 12) {
-                        Spacer()
-                        unmuteAlertIcon
-                        Text(NSLocalizedString("Tap to Unmute App Sounds", comment: "Label for button to unmute all app sounds"))
-                            .fontWeight(.semibold)
-                        Spacer()
-                    }
-                    .padding(.vertical, 6)
-                }
-                VStack(spacing: 12) {
-                    HStack {
-                        Text(NSLocalizedString("Muted until", comment: "Label for when mute alert will end"))
-                        Spacer()
-                        Text(alertMuter.formattedEndTime)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Text("All app sounds, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, and Pump Expiration will NOT sound.", comment: "Warning label that all alerts will not sound")
-                        .font(.footnote)
-                }
+                unmuteAlertsButton
+                    .listRowSeparator(.visible, edges: .all)
+                muteAlertsSummary
             }
+        }
+    }
+    
+    private var muteAlertsButton: some View {
+        Button(action: { showMuteAlertOptions = true }) {
+            HStack(spacing: 12) {
+                Spacer()
+                muteAlertIcon
+                Text(NSLocalizedString("Mute App Sounds", comment: "Label for button to mute app sounds"))
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+            .padding(.vertical, 6)
+        }
+        .actionSheet(isPresented: $showMuteAlertOptions) {
+           muteAlertOptionsActionSheet
+        }
+    }
+    
+    private var unmuteAlertsButton: some View {
+        Button(action: alertMuter.unmuteAlerts) {
+            HStack(spacing: 12) {
+                Spacer()
+                unmuteAlertIcon
+                Text(NSLocalizedString("Tap to Unmute App Sounds", comment: "Label for button to unmute all app sounds"))
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+            .padding(.vertical, 6)
+        }
+    }
+    
+    private var muteAlertsSummary: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text(NSLocalizedString("Muted until", comment: "Label for when mute alert will end"))
+                Spacer()
+                Text(alertMuter.formattedEndTime)
+                    .foregroundColor(.secondary)
+            }
+            
+            Text("All app sounds, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, and Pump Expiration will NOT sound.", comment: "Warning label that all alerts will not sound")
+                .font(.footnote)
         }
     }
 
