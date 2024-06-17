@@ -118,6 +118,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     self?.hudView?.loopCompletionHUD.loopInProgress = true
                 }
             },
+            notificationCenter.addObserver(forName: .LoopCycleCompleted, object: nil, queue: nil) { _ in
+                Task { @MainActor [weak self] in
+                    self?.hudView?.loopCompletionHUD.loopInProgress = false
+                }
+            },
             notificationCenter.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: nil) { (notification: Notification) in
                 Task { @MainActor [weak self] in
                     self?.registerPumpManager()

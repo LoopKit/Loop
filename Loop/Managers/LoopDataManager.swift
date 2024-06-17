@@ -577,6 +577,7 @@ final class LoopDataManager: ObservableObject {
             dosingDecision.appendError(loopError)
             await dosingDecisionStore.storeDosingDecision(dosingDecision)
             analyticsServicesManager?.loopDidError(error: loopError)
+            NotificationCenter.default.post(name: .LoopCycleCompleted, object: self)
         }
         logger.default("Loop ended")
     }
