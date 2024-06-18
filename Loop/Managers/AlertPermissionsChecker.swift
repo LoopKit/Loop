@@ -143,14 +143,14 @@ extension AlertPermissionsChecker {
             case .criticalAlertsDisabled:
                 NSLocalizedString("Critical Alerts are turned OFF", comment: "Critical alerts disabled banner title")
             case .timeSensitiveDisabled, .notificationsDisabled:
-                NSLocalizedString("Time Sensitive Alerts are turned OFF", comment: "Time sensitive notifications disabled banner title")
+                NSLocalizedString("Time Sensitive Notifications are turned OFF", comment: "Time sensitive notifications disabled banner title")
             }
         }
         
         var alertBody: String {
             switch self {
             case .notificationsDisabled:
-                NSLocalizedString("Time Sensitive Alerts are turned OFF. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications are turned ON.", comment: "Notifications disabled alert body")
+                NSLocalizedString("Time Sensitive Notifications are turned OFF. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications are turned ON.", comment: "Notifications disabled alert body")
             case .criticalAlertsAndNotificationDisabled:
                 NSLocalizedString("Critical Alerts and Time Sensitive Notifications are turned off. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications and Critical Alerts are turned ON.", comment: "Both Notifications and Critical Alerts disabled alert body")
             case .criticalAlertsAndTimeSensitiveDisabled:
@@ -158,7 +158,7 @@ extension AlertPermissionsChecker {
             case .criticalAlertsDisabled:
                 NSLocalizedString("Critical Alerts are turned off. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Critical Alerts are turned ON.", comment: "Critical alerts disabled alert body")
             case .timeSensitiveDisabled:
-                NSLocalizedString("Time Sensitive Alerts are turned OFF. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Time Sensitive Notifications are turned ON.", comment: "Time sensitive notifications disabled alert body")
+                NSLocalizedString("Time Sensitive Notifications are turned OFF. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Time Sensitive Notifications are turned ON.", comment: "Time sensitive notifications disabled alert body")
             }
         }
         
