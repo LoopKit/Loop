@@ -235,6 +235,8 @@ final class RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
     private func uploadAlertData(to remoteDataService: RemoteDataService) {
+        guard delegate?.shouldSyncToRemoteService == true else { return }
+
         uploadGroup.enter()
 
         let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .alert)
@@ -270,6 +272,8 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
     private func uploadCarbData(to remoteDataService: RemoteDataService) {
+        guard delegate?.shouldSyncToRemoteService == true else { return }
+
         uploadGroup.enter()
 
         let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .carb)
@@ -312,6 +316,8 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
     private func uploadDoseData(to remoteDataService: RemoteDataService) {
+        guard delegate?.shouldSyncToRemoteService == true else { return }
+
         uploadGroup.enter()
 
         let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .dose)
@@ -354,6 +360,8 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
     private func uploadDosingDecisionData(to remoteDataService: RemoteDataService) {
+        guard delegate?.shouldSyncToRemoteService == true else { return }
+
         uploadGroup.enter()
 
         let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .dosingDecision)
@@ -397,11 +405,8 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
     private func uploadGlucoseData(to remoteDataService: RemoteDataService) {
-        
-        if delegate?.shouldSyncToRemoteService == false {
-            return
-        }
-        
+        guard delegate?.shouldSyncToRemoteService == true else { return }
+
         uploadGroup.enter()
 
         let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .glucose)
@@ -444,6 +449,8 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
     private func uploadPumpEventData(to remoteDataService: RemoteDataService) {
+        guard delegate?.shouldSyncToRemoteService == true else { return }
+
         uploadGroup.enter()
 
         let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .pumpEvent)
@@ -486,6 +493,8 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
     private func uploadSettingsData(to remoteDataService: RemoteDataService) {
+        guard delegate?.shouldSyncToRemoteService == true else { return }
+
         uploadGroup.enter()
 
         let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .settings)
