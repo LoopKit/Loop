@@ -24,7 +24,7 @@ public class BolusProgressTableViewCell: UITableViewCell {
     
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var paddedView: UIView!
-    
+    @IBOutlet weak var progressIndicator: RingProgressView!
     @IBOutlet weak var progressLabel: UILabel!
     
     @IBOutlet weak var tapToStopLabel: UILabel! {
@@ -39,17 +39,11 @@ public class BolusProgressTableViewCell: UITableViewCell {
         }
     }
 
-    @IBOutlet weak var progressIndicator: RingProgressView!
-
     public var configuration: Configuration? {
         didSet {
             updateProgress()
         }
     }
-
-    private var doseTotalUnits: Double?
-
-    private var disableUpdates: Bool = false
 
     lazy var insulinFormatter: QuantityFormatter = {
         let formatter = QuantityFormatter(for: .internationalUnit())
@@ -145,9 +139,7 @@ public class BolusProgressTableViewCell: UITableViewCell {
 
     override public func prepareForReuse() {
         super.prepareForReuse()
-        disableUpdates = true
         configuration = nil
-        disableUpdates = false
         progressIndicator.progress = 0
         CATransaction.flush()
         progressLabel.text = ""
