@@ -164,7 +164,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 let review = try await loopDataManager.fetchCarbAbsorptionReview(start: listStart, end: listEnd)
                 insulinCounteractionEffects = review.effectsVelocities.filterDateRange(chartStartDate, nil)
                 carbStatuses = review.carbStatuses
-                carbsOnBoard = carbStatuses?.getClampedCarbsOnBoard()
+                carbsOnBoard = loopDataManager.activeCarbs
                 carbEffects = review.carbEffects
             } catch {
                 log.error("Failed to get carb absorption review: %{public}@", String(describing: error))
@@ -235,11 +235,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         static let count = 1
     }
 
-    private lazy var carbFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .none
-        return formatter
-    }()
+    private lazy var carbFormatter: QuantityFormatter = QuantityFormatter(for: .gram())
 
     private lazy var absorptionFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -301,7 +297,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
             // Entry value
             let status = carbStatuses[indexPath.row]
-            let carbText = carbFormatter.string(from: status.entry.quantity.doubleValue(for: unit), unit: unit.unitString)
+            let carbText = carbFormatter.string(from: status.entry.quantity)
 
             if let carbText = carbText, let foodType = status.entry.foodType {
                 cell.valueLabel?.text = String(
@@ -328,9 +324,9 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             if let absorption = status.absorption {
                 // Absorbed value
                 let observedProgress = Float(absorption.observedProgress.doubleValue(for: .percent()))
-                let observedCarbs = max(0, absorption.observed.doubleValue(for: unit))
+                let observedCarbs = absorption.observed
 
-                if let observedCarbsText = carbFormatter.string(from: observedCarbs, unit: unit.unitString) {
+                if let observedCarbsText = carbFormatter.string(from: observedCarbs) {
                     cell.observedValueText = String(
                         format: NSLocalizedString("%@ absorbed", comment: "Formats absorbed carb value"),
                         observedCarbsText
@@ -377,7 +373,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 format: NSLocalizedString("at %@", comment: "Format fragment for a specific time"),
                 timeFormatter.string(from: carbsOnBoard.startDate)
             )
-            cell.COBValueLabel.text = carbFormatter.string(from: carbsOnBoard.quantity.doubleValue(for: unit))
+            cell.COBValueLabel.text = carbFormatter.string(from: carbsOnBoard.quantity, includeUnit: false)
 
             // Warn the user if the carbsOnBoard value isn't recent
             let textColor: UIColor
@@ -393,7 +389,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             cell.COBDateLabel.textColor = textColor
         } else {
             cell.COBDateLabel.text = nil
-            cell.COBValueLabel.text = carbFormatter.string(from: 0.0)
+            cell.COBValueLabel.text = carbFormatter.string(from: HKQuantity(unit: .gram(), doubleValue: 0), includeUnit: false)
         }
 
         if let carbTotal = carbTotal {
@@ -401,10 +397,10 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 format: NSLocalizedString("since %@", comment: "Format fragment for a start time"),
                 timeFormatter.string(from: carbTotal.startDate)
             )
-            cell.totalValueLabel.text = carbFormatter.string(from: carbTotal.quantity.doubleValue(for: unit))
+            cell.totalValueLabel.text = carbFormatter.string(from: carbTotal.quantity, includeUnit: false)
         } else {
             cell.totalDateLabel.text = nil
-            cell.totalValueLabel.text = carbFormatter.string(from: 0.0)
+            cell.totalValueLabel.text = carbFormatter.string(from: HKQuantity(unit: .gram(), doubleValue: 0), includeUnit: false)
         }
     }
 

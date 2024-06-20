@@ -118,6 +118,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     self?.hudView?.loopCompletionHUD.loopInProgress = true
                 }
             },
+            notificationCenter.addObserver(forName: .LoopCycleCompleted, object: nil, queue: nil) { _ in
+                Task { @MainActor [weak self] in
+                    self?.hudView?.loopCompletionHUD.loopInProgress = false
+                }
+            },
             notificationCenter.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: nil) { (notification: Notification) in
                 Task { @MainActor [weak self] in
                     self?.registerPumpManager()
@@ -914,7 +919,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let adjustViewForNarrowDisplay = bounds.width < 350
 
             var contentConfig = defaultContentConfiguration().updated(for: state)
-            let title = NSMutableAttributedString(string: NSLocalizedString("All Alerts Muted", comment: "Warning text for when alerts are muted"))
+            let title = NSMutableAttributedString(string: NSLocalizedString("All App Sounds Muted", comment: "Warning text for when alerts are muted"))
             let image = UIImage(systemName: "speaker.slash.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 25, weight: .thin, scale: .large))
             contentConfig.image = image
             contentConfig.imageProperties.tintColor = .white
@@ -1289,10 +1294,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func presentUnmuteAlertConfirmation() {
-        let title = NSLocalizedString("Unmute Alerts?", comment: "The alert title for unmute alert confirmation")
-        let body = NSLocalizedString("Tap Unmute to resume sound for your alerts and alarms.", comment: "The alert body for unmute alert confirmation")
+        let title = NSLocalizedString("Unmute App Sounds?", comment: "The alert title for unmute alert confirmation")
+        let body = NSLocalizedString("Tap Unmute to resume app sounds for your alerts and alarms.", comment: "The alert body for unmute alert confirmation")
         let action = UIAlertAction(
-            title: NSLocalizedString("Unmute", comment: "The title of the action used to unmute alerts"),
+            title: NSLocalizedString("Unmute", comment: "The title of the action used to unmute app sounds"),
             style: .default) { _ in
                 self.alertMuter.unmuteAlerts()
             }
@@ -1621,7 +1626,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucosePreference)
-                .environment(\.appName, Bundle.main.bundleDisplayName),
+                .environment(\.appName, Bundle.main.bundleDisplayName)
+                .environment(\.loopStatusColorPalette, .loopStatus),
             isModalInPresentation: false)
         present(hostingController, animated: true)
     }
@@ -1914,6 +1920,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
         })
         actionSheet.addAction(UIAlertAction(title: "Delete CGM Manager", style: .destructive) { _ in
             self.deviceManager.cgmManager?.delete() { }
+        })
+        
+        actionSheet.addAction(UIAlertAction(title: "Delete Pump Manager", style: .destructive) { _ in
+            self.deviceManager.pumpManager?.prepareForDeactivation(){ [weak self] _ in
+                self?.deviceManager.pumpManager?.notifyDelegateOfDeactivation() { }
+            }
         })
 
         actionSheet.addCancelAction()

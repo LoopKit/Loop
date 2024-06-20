@@ -543,6 +543,10 @@ final class LoopDataManager: ObservableObject {
                 dosingDecision.updateFrom(input: input, output: output)
 
                 if self.automaticDosingStatus.automaticDosingEnabled {
+                    if deliveryDelegate.basalDeliveryState == .pumpInoperable {
+                        throw LoopError.pumpInoperable
+                    }
+
                     if deliveryDelegate.isSuspended {
                         throw LoopError.pumpSuspended
                     }
@@ -573,6 +577,7 @@ final class LoopDataManager: ObservableObject {
             dosingDecision.appendError(loopError)
             await dosingDecisionStore.storeDosingDecision(dosingDecision)
             analyticsServicesManager?.loopDidError(error: loopError)
+            NotificationCenter.default.post(name: .LoopCycleCompleted, object: self)
         }
         logger.default("Loop ended")
     }

@@ -103,6 +103,7 @@ class LoopAppManager: NSObject {
     private var remoteDataServicesManager: RemoteDataServicesManager!
     private var statefulPluginManager: StatefulPluginManager!
     private var criticalEventLogExportManager: CriticalEventLogExportManager!
+    private var deviceLog: PersistentDeviceLog!
 
     // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
     public private(set) var displayGlucosePreference = DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
@@ -312,6 +313,18 @@ class LoopAppManager: NSObject {
 
         cgmEventStore = CgmEventStore(cacheStore: cacheStore, cacheLength: localCacheDuration)
 
+        let fileManager = FileManager.default
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
+        if !fileManager.fileExists(atPath: deviceLogDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: deviceLogDirectory, withIntermediateDirectories: false)
+            } catch let error {
+                preconditionFailure("Could not create DeviceLog directory: \(error)")
+            }
+        }
+        deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
+
 
         remoteDataServicesManager = RemoteDataServicesManager(
             alertStore: alertManager.alertStore,
@@ -322,7 +335,8 @@ class LoopAppManager: NSObject {
             cgmEventStore: cgmEventStore,
             settingsStore: settingsManager.settingsStore,
             overrideHistory: temporaryPresetsManager.overrideHistory,
-            insulinDeliveryStore: doseStore.insulinDeliveryStore
+            insulinDeliveryStore: doseStore.insulinDeliveryStore,
+            deviceLog: deviceLog
         )
 
         settingsManager.remoteDataServicesManager = remoteDataServicesManager
@@ -341,6 +355,7 @@ class LoopAppManager: NSObject {
         statefulPluginManager = StatefulPluginManager(pluginManager: pluginManager, servicesManager: servicesManager)
 
         deviceDataManager = DeviceDataManager(pluginManager: pluginManager,
+                                              deviceLog: deviceLog,
                                               alertManager: alertManager,
                                               settingsManager: settingsManager,
                                               healthStore: healthStore,

@@ -68,7 +68,7 @@ public struct NotificationsCriticalAlertPermissionsView: View {
             notificationAndCriticalAlertPermissionSupportSection
         }
         .insetGroupedListStyle()
-        .navigationBarTitle(Text(NSLocalizedString("Alert Permissions", comment: "Notification & Critical Alert Permissions screen title")))
+        .navigationBarTitle(Text(NSLocalizedString("iOS Permissions", comment: "Notification & Critical Alert Permissions screen title")))
     }
 }
 
@@ -89,7 +89,7 @@ extension NotificationsCriticalAlertPermissionsView {
     private var manageNotifications: some View {
         Button( action: { AlertPermissionsChecker.gotoSettings() } ) {
             HStack {
-                Text(NSLocalizedString("Manage Permissions in Settings", comment: "Manage Permissions in Settings button text"))
+                Text(NSLocalizedString("Manage iOS Permissions", comment: "Manage Permissions in Settings button text"))
                 Spacer()
                 Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
             }
@@ -128,7 +128,7 @@ extension NotificationsCriticalAlertPermissionsView {
         HStack {
             Text("Time Sensitive Notifications", comment: "Time Sensitive Status text")
             Spacer()
-            onOff(!checker.notificationCenterSettings.timeSensitiveNotificationsDisabled)
+            onOff(!checker.notificationCenterSettings.timeSensitiveDisabled)
         }
     }
     
@@ -147,9 +147,18 @@ extension NotificationsCriticalAlertPermissionsView {
     }
 
     private var notificationAndCriticalAlertPermissionSupportSection: some View {
-        Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "Section title for Support"))) {
-            NavigationLink(destination: Text("Get help with Alert Permissions")) {
-                Text(NSLocalizedString("Get help with Alert Permissions", comment: "Get help with Alert Permissions support button text"))
+        Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "Section title for Support")).padding(.leading, -16).padding(.bottom, 4)) {
+            // MARK: TO be reverted to NavigationLink once we have a page to link to
+            HStack {
+                Text(NSLocalizedString("Get help with iOS Permissions", comment: "Get help with iOS Permissions support button text"))
+                
+                Spacer()
+                
+                Image(systemName: "chevron.forward")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 12)
+                    .foregroundStyle(.secondary)
             }
         }
     }

@@ -285,8 +285,10 @@ extension SettingsView {
                 .accessibilityIdentifier("settingsViewAlertManagementAlertWarning")
         } else if viewModel.alertMuter.configuration.shouldMute {
             Image(systemName: "speaker.slash.fill")
+                .resizable()
                 .foregroundColor(.white)
                 .padding(5)
+                .frame(width: 22, height: 22)
                 .background(guidanceColors.warning)
                 .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
         }

@@ -99,6 +99,9 @@ enum LoopError: Error {
     // Recommendation Expired
     case recommendationExpired(date: Date)
 
+    // Pump Failure
+    case pumpInoperable
+
     // Pump Suspended
     case pumpSuspended
 
@@ -133,6 +136,8 @@ extension LoopError {
             return "pumpDataTooOld"
         case .recommendationExpired:
             return "recommendationExpired"
+        case .pumpInoperable:
+            return "pumpInoperable"
         case .pumpSuspended:
             return "pumpSuspended"
         case .pumpManagerError:
@@ -205,6 +210,8 @@ extension LoopError: LocalizedError {
         case .recommendationExpired(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
             return String(format: NSLocalizedString("Recommendation expired: %1$@ old", comment: "The error message when a recommendation has expired. (1: age of recommendation in minutes)"), minutes)
+        case .pumpInoperable:
+            return NSLocalizedString("Pump Inoperable. Automatic dosing is disabled.", comment: "The error message displayed for LoopError.pumpInoperable errors.")
         case .pumpSuspended:
             return NSLocalizedString("Pump Suspended. Automatic dosing is disabled.", comment: "The error message displayed for LoopError.pumpSuspended errors.")
         case .pumpManagerError(let pumpManagerError):
