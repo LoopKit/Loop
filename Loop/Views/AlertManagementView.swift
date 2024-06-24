@@ -112,7 +112,7 @@ struct AlertManagementView: View {
             HStack(spacing: 12) {
                 Spacer()
                 muteAlertIcon
-                Text(NSLocalizedString("Mute App Sounds", comment: "Label for button to mute app sounds"))
+                Text(NSLocalizedString("Mute All App Sounds", comment: "Label for button to mute all app sounds"))
                     .fontWeight(.semibold)
                 Spacer()
             }
