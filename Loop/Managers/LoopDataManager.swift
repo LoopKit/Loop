@@ -68,6 +68,8 @@ final class LoopDataManager {
     private var timeBasedDoseApplicationFactor: Double = 1.0
 
     private var insulinOnBoard: InsulinValue?
+    
+    private var liveActivityManager: GlucoseActivityManager?
 
     deinit {
         for observer in notificationObservers {
@@ -124,6 +126,8 @@ final class LoopDataManager {
         self.automaticDosingStatus = automaticDosingStatus
 
         self.trustedTimeOffset = trustedTimeOffset
+        
+        self.liveActivityManager = GlucoseActivityManager()
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
@@ -182,7 +186,8 @@ final class LoopDataManager {
             ) { (note) in
                 self.dataAccessQueue.async {
                     self.logger.default("Received notification of glucose samples changing")
-
+                    
+                    self.liveActivityManager?.update(glucose: self.glucoseStore.latestGlucose)
                     self.glucoseMomentumEffect = nil
                     self.remoteRecommendationNeedsUpdating = true
 

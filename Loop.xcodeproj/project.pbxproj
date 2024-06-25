@@ -401,6 +401,13 @@
 		B4E96D5D248A82A2002DABAD /* StatusBarHUDView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */; };
 		B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */; };
 		B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */; };
+		B87539C92C2B06CE0085A975 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539C82C2B06CE0085A975 /* LocalizedString.swift */; };
+		B87539CB2C2B08430085A975 /* Bootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539CA2C2B08430085A975 /* Bootstrap.swift */; };
+		B87D411D2C28A69600120877 /* LiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87D411C2C28A69600120877 /* LiveActivityConfiguration.swift */; };
+		B87D411F2C28A85F00120877 /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B87D411E2C28A85F00120877 /* ActivityKit.framework */; };
+		B8A937B82C29BA5900E38645 /* GlucoseActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */; };
+		B8A937C32C29C3B400E38645 /* GlucoseActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */; };
+		B8A937C42C29C43B00E38645 /* GlucoseActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */; };
 		C1004DF22981F5B700B8CF94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1004DF02981F5B700B8CF94 /* InfoPlist.strings */; };
 		C1004DF52981F5B700B8CF94 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1004DF32981F5B700B8CF94 /* Localizable.strings */; };
 		C1004DF82981F5B700B8CF94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1004DF62981F5B700B8CF94 /* InfoPlist.strings */; };
@@ -1325,6 +1332,12 @@
 		B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = StatusBarHUDView.xib; sourceTree = "<group>"; };
 		B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
 		B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+DeviceStatus.swift"; sourceTree = "<group>"; };
+		B87539C82C2B06CE0085A975 /* LocalizedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
+		B87539CA2C2B08430085A975 /* Bootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bootstrap.swift; sourceTree = "<group>"; };
+		B87D411C2C28A69600120877 /* LiveActivityConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityConfiguration.swift; sourceTree = "<group>"; };
+		B87D411E2C28A85F00120877 /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
+		B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseActivityManager.swift; sourceTree = "<group>"; };
+		B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseActivityAttributes.swift; sourceTree = "<group>"; };
 		C1004DEF2981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1004DF12981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1004DF42981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1727,6 +1740,7 @@
 				1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */,
 				1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */,
 				1481F9BB28DA26F4004C5AEB /* LoopUI.framework in Frameworks */,
+				B87D411F2C28A85F00120877 /* ActivityKit.framework in Frameworks */,
 				1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1836,6 +1850,7 @@
 				84AA81D12A4A2778000B658B /* Components */,
 				84AA81D92A4A2966000B658B /* Helpers */,
 				84AA81DE2A4A2B3D000B658B /* Timeline */,
+				B87D41192C28A61900120877 /* Live Activity */,
 				84AA81DF2A4A2B7A000B658B /* Widgets */,
 				84AA81D22A4A27A3000B658B /* LoopWidgets.swift */,
 			);
@@ -2315,6 +2330,7 @@
 				1DA6499D2441266400F61E75 /* Alerts */,
 				E95D37FF24EADE68005E2F50 /* Store Protocols */,
 				E9B355232935906B0076AB04 /* Missed Meal Detection */,
+				B8A937C52C29C44600E38645 /* Live Activity */,
 				C1F2075B26D6F9B0007AB7EB /* AppExpirationAlerter.swift */,
 				A96DAC2B2838F31200D94E38 /* SharedLogging.swift */,
 				7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */,
@@ -2525,6 +2541,7 @@
 				C11613472983096D00777E7C /* InfoPlist.strings */,
 				14B1736D28AEDA63006CCD7C /* LoopWidgetExtension.entitlements */,
 				14B1736628AED9EE006CCD7C /* Info.plist */,
+				B87539CA2C2B08430085A975 /* Bootstrap.swift */,
 			);
 			path = Bootstrap;
 			sourceTree = "<group>";
@@ -2535,6 +2552,7 @@
 				84AA81DA2A4A2973000B658B /* Date.swift */,
 				84AA81D52A4A28AF000B658B /* WidgetBackground.swift */,
 				84D2879E2AC756C8007ED283 /* ContentMargin.swift */,
+				B87539C82C2B06CE0085A975 /* LocalizedString.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -2663,6 +2681,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B87D411E2C28A85F00120877 /* ActivityKit.framework */,
 				C159C82E286787EF00A86EC0 /* LoopKit.framework */,
 				C159C8212867859800A86EC0 /* MockKitUI.framework */,
 				C159C8192867857000A86EC0 /* LoopKitUI.framework */,
@@ -2758,6 +2777,23 @@
 				B4CAD8782549D2540057946B /* LoopCompletionFreshnessTests.swift */,
 			);
 			path = LoopCore;
+			sourceTree = "<group>";
+		};
+		B87D41192C28A61900120877 /* Live Activity */ = {
+			isa = PBXGroup;
+			children = (
+				B87D411C2C28A69600120877 /* LiveActivityConfiguration.swift */,
+			);
+			path = "Live Activity";
+			sourceTree = "<group>";
+		};
+		B8A937C52C29C44600E38645 /* Live Activity */ = {
+			isa = PBXGroup;
+			children = (
+				B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */,
+				B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */,
+			);
+			path = "Live Activity";
 			sourceTree = "<group>";
 		};
 		C13072B82A76AF0A009A7C58 /* live_capture */ = {
@@ -3623,6 +3659,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B87539CB2C2B08430085A975 /* Bootstrap.swift in Sources */,
 				14B1738128AEDC70006CCD7C /* StatusExtensionContext.swift in Sources */,
 				14B1737628AEDC6C006CCD7C /* HKUnit.swift in Sources */,
 				14B1737728AEDC6C006CCD7C /* NSBundle.swift in Sources */,
@@ -3639,7 +3676,10 @@
 				14B1737E28AEDC6C006CCD7C /* FeatureFlags.swift in Sources */,
 				84AA81E72A4A4DEF000B658B /* PumpView.swift in Sources */,
 				14B1737F28AEDC6C006CCD7C /* PluginManager.swift in Sources */,
+				B87D411D2C28A69600120877 /* LiveActivityConfiguration.swift in Sources */,
+				B87539C92C2B06CE0085A975 /* LocalizedString.swift in Sources */,
 				14B1738028AEDC6C006CCD7C /* Debug.swift in Sources */,
+				B8A937C42C29C43B00E38645 /* GlucoseActivityAttributes.swift in Sources */,
 				84AA81DB2A4A2973000B658B /* Date.swift in Sources */,
 				14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */,
 				14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */,
@@ -3818,6 +3858,7 @@
 				A97F250825E056D500F0EE19 /* OnboardingManager.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
+				B8A937B82C29BA5900E38645 /* GlucoseActivityManager.swift in Sources */,
 				DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */,
 				4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
@@ -3835,6 +3876,7 @@
 				439706E622D2E84900C81566 /* PredictionSettingTableViewCell.swift in Sources */,
 				430D85891F44037000AF2D4F /* HUDViewTableViewCell.swift in Sources */,
 				43A51E211EB6DBDD000736CC /* LoopChartsTableViewController.swift in Sources */,
+				B8A937C32C29C3B400E38645 /* GlucoseActivityAttributes.swift in Sources */,
 				8968B1122408B3520074BB48 /* UIFont.swift in Sources */,
 				1452F4A92A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift in Sources */,
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,
@@ -4832,6 +4874,7 @@
 				INFOPLIST_FILE = "Loop Widget Extension/Bootstrap/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Loop Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4880,6 +4923,7 @@
 				INFOPLIST_FILE = "Loop Widget Extension/Bootstrap/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Loop Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5138,6 +5182,7 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5167,6 +5212,7 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5423,6 +5469,7 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5449,6 +5496,7 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5516,6 +5564,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5543,6 +5592,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
