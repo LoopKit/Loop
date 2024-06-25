@@ -95,7 +95,7 @@ struct AlertManagementView: View {
     private var muteAlertsSection: some View {
         Section(
             header: Text(String(format: "%1$@", appName)),
-            footer: !alertMuter.configuration.shouldMute ? Text(String(format: NSLocalizedString("Temporarily silence all sounds from %1$@, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, Pump Expiration and others.\n\nWhile sounds are muted, alerts from %1$@ will still vibrate if haptics are enabled. Your insulin pump and CGM hardware may still sound.", comment: ""), appName, appName)) : nil
+            footer: !alertMuter.configuration.shouldMute ? Text(String(format: NSLocalizedString("Temporarily silence all sounds from %1$@, including sounds for all critical alerts such as Urgent Low, Sensor Fail, Pump Expiration and others.", comment: ""), appName)) : nil
         ) {
             if !alertMuter.configuration.shouldMute {
                 muteAlertsButton
@@ -111,8 +111,7 @@ struct AlertManagementView: View {
         Button(action: { showMuteAlertOptions = true }) {
             HStack(spacing: 12) {
                 Spacer()
-                muteAlertIcon
-                Text(NSLocalizedString("Mute App Sounds", comment: "Label for button to mute app sounds"))
+                Text(NSLocalizedString("Mute All App Sounds", comment: "Label for button to mute all app sounds"))
                     .fontWeight(.semibold)
                 Spacer()
             }
@@ -148,16 +147,6 @@ struct AlertManagementView: View {
             Text("All app sounds, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, and Pump Expiration will NOT sound.", comment: "Warning label that all alerts will not sound")
                 .font(.footnote)
         }
-    }
-
-    private var muteAlertIcon: some View {
-        Image(systemName: "speaker.slash.fill")
-            .resizable()
-            .foregroundColor(.white)
-            .padding(5)
-            .frame(width: 22, height: 22)
-            .background(Color.accentColor)
-            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
     }
 
     private var unmuteAlertIcon: some View {

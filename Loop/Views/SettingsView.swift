@@ -304,7 +304,7 @@ extension SettingsView {
                         .frame(width: 30),
                     secondaryImageView: alertWarning,
                     label: NSLocalizedString("Alert Management", comment: "Alert Permissions button text"),
-                    descriptiveText: NSLocalizedString("iOS Permissions and Mute App Sounds", comment: "Alert Permissions descriptive text")
+                    descriptiveText: NSLocalizedString("iOS Permissions and Mute All App Sounds", comment: "Alert Permissions descriptive text")
                 )
             }
         }
