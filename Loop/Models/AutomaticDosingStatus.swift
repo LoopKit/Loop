@@ -13,7 +13,7 @@ public class AutomaticDosingStatus: ObservableObject {
     @Published public var isAutomaticDosingAllowed: Bool
 
     public init(automaticDosingEnabled: Bool,
-         isAutomaticDosingAllowed: Bool)
+                isAutomaticDosingAllowed: Bool)
     {
         self.automaticDosingEnabled = automaticDosingEnabled
         self.isAutomaticDosingAllowed = isAutomaticDosingAllowed
