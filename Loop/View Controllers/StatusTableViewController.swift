@@ -772,16 +772,23 @@ final class StatusTableViewController: LoopChartsTableViewController {
         switch (statusWasVisible, statusIsVisible) {
         case (true, true):
             switch (oldStatusRowMode, self.statusRowMode) {
+            case (.pumpSuspended(resuming: let wasResuming), .pumpSuspended(resuming: let isResuming)):
+                if isResuming != wasResuming {
+                    tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
+                }
             case (.enactingBolus, .enactingBolus):
                 break
             case (.bolusing(let oldDose), .bolusing(let newDose)):
                 if oldDose.syncIdentifier != newDose.syncIdentifier {
                     tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
                 }
-            case (.pumpSuspended(resuming: let wasResuming), .pumpSuspended(resuming: let isResuming)):
-                if isResuming != wasResuming {
+            case (.canceledBolus(let oldDose), .canceledBolus(let newDose)):
+                if oldDose != newDose {
                     tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
                 }
+            case (.cancelingBolus, .cancelingBolus), (.cancelingBolus, .bolusing(_)), (.canceledBolus(_), .cancelingBolus), (.canceledBolus(_), .bolusing(_)):
+                // these updates cause flickering and/or confusion.
+                break
             default:
                 tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
             }
