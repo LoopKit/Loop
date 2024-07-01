@@ -1283,8 +1283,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func presentUnmuteAlertConfirmation() {
-        let title = NSLocalizedString("Unmute App Sounds?", comment: "The alert title for unmute alert confirmation")
-        let body = NSLocalizedString("Tap Unmute to resume app sounds for your alerts and alarms.", comment: "The alert body for unmute alert confirmation")
+        let title = NSLocalizedString("Unmute All App Sounds?", comment: "The alert title for unmute all app sounds confirmation")
+        let body = NSLocalizedString("Tap Unmute to resume all app sounds for your alerts.", comment: "The alert body for unmute alert confirmation")
         let action = UIAlertAction(
             title: NSLocalizedString("Unmute", comment: "The title of the action used to unmute app sounds"),
             style: .default) { _ in
