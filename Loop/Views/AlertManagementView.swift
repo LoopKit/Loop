@@ -152,14 +152,15 @@ struct AlertManagementView: View {
     
     private var unmuteAlertsButton: some View {
         Button(action: alertMuter.unmuteAlerts) {
-            HStack(spacing: 12) {
-                Spacer()
-                unmuteAlertIcon
-                Text(NSLocalizedString("Tap to Unmute App Sounds", comment: "Label for button to unmute all app sounds"))
+            Group {
+                Text(Image(systemName: "speaker.slash.fill"))
+                    .foregroundColor(guidanceColors.warning)
+                + Text("  ")
+                + Text(NSLocalizedString("Tap to Unmute All App Sounds", comment: "Label for button to unmute all app sounds"))
                     .fontWeight(.semibold)
-                Spacer()
             }
-            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .padding(8)
         }
     }
     
@@ -172,20 +173,10 @@ struct AlertManagementView: View {
                     .foregroundColor(.secondary)
             }
             
-            Text("All app sounds, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, and Pump Expiration will NOT sound.", comment: "Warning label that all alerts will not sound")
+            Text("All app sounds, including sounds for all critical alerts such as Urgent Low, Sensor Fail, Pump Expiration, and others will NOT sound.", comment: "Warning label that all alerts will not sound")
                 .font(.footnote)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-    }
-
-    private var unmuteAlertIcon: some View {
-        Image(systemName: "speaker.wave.2.fill")
-            .resizable()
-            .foregroundColor(.white)
-            .padding(.vertical, 5)
-            .padding(.horizontal, 2)
-            .frame(width: 22, height: 22)
-            .background(guidanceColors.warning)
-            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
     }
     
     private var missedMealAlertSection: some View {
