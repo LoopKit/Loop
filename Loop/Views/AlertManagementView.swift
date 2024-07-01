@@ -17,7 +17,18 @@ struct AlertManagementView: View {
     @ObservedObject private var checker: AlertPermissionsChecker
     @ObservedObject private var alertMuter: AlertMuter
 
-    @State private var showMuteAlertOptions: Bool = false
+    enum Sheet: Hashable, Identifiable {
+        case durationSelection
+        case confirmation(resumeDate: Date)
+        
+        var id: Int {
+            hashValue
+        }
+    }
+    
+    @State private var sheet: Sheet?
+    @State private var durationSelection: TimeInterval?
+    @State private var durationWasSelection: Bool = false
 
     private var formatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -30,7 +41,7 @@ struct AlertManagementView: View {
         Binding(
             get: { formatter.string(from: alertMuter.configuration.duration)! },
             set: { newValue in
-                guard let selectedDurationIndex = formatterDurations.firstIndex(of: newValue)
+                guard let selectedDurationIndex = AlertMuter.allowedDurations.compactMap({ formatter.string(from: $0) }).firstIndex(of: newValue)
                 else { return }
                 DispatchQueue.main.async {
                     // avoid publishing during view update
@@ -39,10 +50,6 @@ struct AlertManagementView: View {
                 }
             }
         )
-    }
-
-    private var formatterDurations: [String] {
-        AlertMuter.allowedDurations.compactMap { formatter.string(from: $0) }
     }
     
     private var missedMealNotificationsEnabled: Binding<Bool> {
@@ -108,17 +115,38 @@ struct AlertManagementView: View {
     }
     
     private var muteAlertsButton: some View {
-        Button(action: { showMuteAlertOptions = true }) {
+        Button {
+            if !alertMuter.configuration.shouldMute {
+                sheet = .durationSelection
+            }
+        } label: {
             HStack(spacing: 12) {
                 Spacer()
                 Text(NSLocalizedString("Mute All App Sounds", comment: "Label for button to mute all app sounds"))
                     .fontWeight(.semibold)
                 Spacer()
             }
-            .padding(.vertical, 6)
+            .padding(.vertical, 8)
         }
-        .actionSheet(isPresented: $showMuteAlertOptions) {
-           muteAlertOptionsActionSheet
+        .sheet(item: $sheet) { sheet in
+            switch sheet {
+            case .durationSelection:
+                DurationSheet(
+                    allowedDurations: AlertMuter.allowedDurations,
+                    duration: $durationSelection,
+                    durationWasSelected: $durationWasSelection
+                )
+            case .confirmation(let resumeDate):
+                ConfirmationSheet(resumeDate: resumeDate)
+            }
+        }
+        .onChange(of: durationWasSelection) { _ in
+            if durationWasSelection, let durationSelection, let durationSelectionString = formatter.string(from: durationSelection) {
+                sheet = .confirmation(resumeDate: Date().addingTimeInterval(durationSelection))
+                formattedSelectedDuration.wrappedValue = durationSelectionString
+                self.durationSelection = nil
+                self.durationWasSelection = false
+            }
         }
     }
     
@@ -131,7 +159,7 @@ struct AlertManagementView: View {
                     .fontWeight(.semibold)
                 Spacer()
             }
-            .padding(.vertical, 6)
+            .padding(.vertical, 8)
         }
     }
     
@@ -158,19 +186,6 @@ struct AlertManagementView: View {
             .frame(width: 22, height: 22)
             .background(guidanceColors.warning)
             .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
-    }
-
-    private var muteAlertOptionsActionSheet: ActionSheet {
-        var muteAlertDurationOptions: [SwiftUI.Alert.Button] = formatterDurations.map { muteAlertDuration in
-            .default(Text(muteAlertDuration),
-                     action: { formattedSelectedDuration.wrappedValue =  muteAlertDuration })
-        }
-        muteAlertDurationOptions.append(.cancel())
-
-        return ActionSheet(
-            title: Text(NSLocalizedString("Set Time Duration", comment: "Title for mute alert duration selection action sheet")),
-            message: Text(NSLocalizedString("All app sounds, including sounds for Critical Alerts such as Urgent Low, Sensor Fail, and Pump Expiration will NOT sound.", comment: "Message for mute alert duration selection action sheet")),
-            buttons: muteAlertDurationOptions)
     }
     
     private var missedMealAlertSection: some View {
