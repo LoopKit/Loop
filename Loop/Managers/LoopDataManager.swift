@@ -127,7 +127,7 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
         
-        self.liveActivityManager = GlucoseActivityManager()
+        self.liveActivityManager = GlucoseActivityManager(glucoseStore: self.glucoseStore, doseStore: self.doseStore)
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
@@ -171,6 +171,7 @@ final class LoopDataManager {
             ) { (note) -> Void in
                 self.dataAccessQueue.async {
                     self.logger.default("Received notification of carb entries changing")
+                    self.liveActivityManager?.update()
 
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
@@ -201,6 +202,7 @@ final class LoopDataManager {
             ) { (note) in
                 self.dataAccessQueue.async {
                     self.logger.default("Received notification of dosing changing")
+                    self.liveActivityManager?.update()
 
                     self.clearCachedInsulinEffects()
                     self.remoteRecommendationNeedsUpdating = true

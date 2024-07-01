@@ -17,41 +17,74 @@ import UIKit
 class GlucoseActivityManager {
     private let activityInfo = ActivityAuthorizationInfo()
     private var activity: Activity<GlucoseActivityAttributes>
+    private var activityChart: Activity<GlucoseChartActivityAttributes>?
     private let healthStore = HKHealthStore()
     
+    private let glucoseStore: GlucoseStoreProtocol
+    private let doseStore: DoseStoreProtocol
+    
+    private var lastGlucoseSample: GlucoseSampleValue?
     private var prevGlucoseSample: GlucoseSampleValue?
+    
     private var startDate: Date = Date.now
     
-    init?() {
+    private let cobFormatter: NumberFormatter =  {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .none
+        return numberFormatter
+    }()
+    private let iobFormatter: NumberFormatter =  {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .none
+        numberFormatter.maximumFractionDigits = 1
+        numberFormatter.minimumFractionDigits = 1
+        return numberFormatter
+    }()
+    
+    init?(glucoseStore: GlucoseStoreProtocol, doseStore: DoseStoreProtocol) {
         guard self.activityInfo.areActivitiesEnabled else {
             print("ERROR: Activities are not enabled... :(")
             return nil
         }
+        
+        self.glucoseStore = glucoseStore
+        self.doseStore = doseStore
         
         do {
             let lastCompleted: Date? = nil
             let pumpHighlight: PumpHighlightAttributes? = nil
             let netBasal: NetBasalAttributes? = nil
             
-            let state = GlucoseActivityAttributes()
             let dynamicState = GlucoseActivityAttributes.ContentState(
                 date: Date.now,
                 glucose: "--",
+                trendType: nil,
                 delta: "",
-                unit: "",
+                cob: "0",
+                iob: "0",
                 isCloseLoop: false,
                 lastCompleted: lastCompleted,
                 pumpHighlight: pumpHighlight,
                 netBasal: netBasal,
-                eventualGlucose: "",
-                predicatedGlucose: [],
-                predicatedStartDate: nil,
-                predicatedInterval: nil
+                eventualGlucose: ""
             )
             
             self.activity = try Activity.request(
-                attributes: state,
+                attributes: GlucoseActivityAttributes(),
                 content: .init(state: dynamicState, staleDate: nil),
+                pushType: .token
+            )
+            
+            let dynamicChartState = GlucoseChartActivityAttributes.ContentState(
+                predicatedGlucose: [],
+                predicatedStartDate: nil,
+                predicatedInterval: nil,
+                glucoseSamples: []
+            )
+            
+            self.activityChart = try Activity.request(
+                attributes: GlucoseChartActivityAttributes(),
+                content: .init(state: dynamicChartState, staleDate: nil),
                 pushType: .token
             )
             
@@ -62,6 +95,10 @@ class GlucoseActivityManager {
             print("ERROR: \(error.localizedDescription) :(")
             return nil
         }
+    }
+    
+    public func update() {
+        self.update(glucose: self.lastGlucoseSample)
     }
     
     public func update(glucose: GlucoseSampleValue?) {
@@ -83,10 +120,12 @@ class GlucoseActivityManager {
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             
             let current = glucose.quantity.doubleValue(for: unit)
-            var delta: String = "+ \(glucoseFormatter.string(from: Double(0)) ?? "")"
+            self.lastGlucoseSample = glucose
+            
+            var delta: String = "+\(glucoseFormatter.string(from: Double(0)) ?? "")"
             if let prevSample = self.prevGlucoseSample {
                 let deltaValue = current - (prevSample.quantity.doubleValue(for: unit))
-                delta = "\(deltaValue < 0 ? "-" : "+") \(glucoseFormatter.string(from: abs(deltaValue)) ?? "")"
+                delta = "\(deltaValue < 0 ? "-" : "+")\(glucoseFormatter.string(from: abs(deltaValue)) ?? "??")"
             }
             
             var pumpHighlight: PumpHighlightAttributes? = nil
@@ -101,25 +140,35 @@ class GlucoseActivityManager {
             if let netBasalContext = statusContext?.netBasal {
                 netBasal = NetBasalAttributes(
                     rate: netBasalContext.rate,
-                    percentage: netBasalContext.percentage,
-                    start: netBasalContext.start,
-                    end: netBasalContext.end
+                    percentage: netBasalContext.percentage
                 )
             }
             
+            var predicatedGlucose: [Double] = []
+            if let samples = statusContext?.predictedGlucose?.values {
+                predicatedGlucose = samples
+            }
+            
+            var cob: String = "0"
+            if let cobValue = statusContext?.carbsOnBoard {
+                cob = self.cobFormatter.string(from: cobValue) ?? "??"
+            }
+            
+            let glucoseSamples = await self.getGlucoseSample(unit: unit)
+            let iob = await self.getInsulinOnBoard()
+
             let state = GlucoseActivityAttributes.ContentState(
                 date: glucose.startDate,
                 glucose: glucoseFormatter.string(from: current) ?? "??",
+                trendType: statusContext?.glucoseDisplay?.trendType,
                 delta: delta,
-                unit: unit.localizedShortUnitString,
+                cob: cob,
+                iob: iob,
                 isCloseLoop: statusContext?.isClosedLoop ?? false,
                 lastCompleted: statusContext?.lastLoopCompleted,
                 pumpHighlight: pumpHighlight,
                 netBasal: netBasal,
-                eventualGlucose: glucoseFormatter.string(from: statusContext?.predictedGlucose?.values.last ?? 0) ?? "??",
-                predicatedGlucose: statusContext?.predictedGlucose?.values ?? [],
-                predicatedStartDate: statusContext?.predictedGlucose?.startDate,
-                predicatedInterval: statusContext?.predictedGlucose?.interval
+                eventualGlucose: glucoseFormatter.string(from: statusContext?.predictedGlucose?.values.last ?? 0) ?? "??"
             )
             
             await self.activity.update(ActivityContent(
@@ -127,13 +176,27 @@ class GlucoseActivityManager {
                 staleDate: min(state.date, Date.now).addingTimeInterval(TimeInterval(6 * 60))
             ))
             
+            if let activityChart = self.activityChart {
+                let stateChart = GlucoseChartActivityAttributes.ContentState(
+                    predicatedGlucose: predicatedGlucose,
+                    predicatedStartDate: statusContext?.predictedGlucose?.startDate,
+                    predicatedInterval: statusContext?.predictedGlucose?.interval,
+                    glucoseSamples: glucoseSamples
+                )
+                
+                await activityChart.update(ActivityContent(
+                    state: stateChart,
+                    staleDate: min(state.date, Date.now).addingTimeInterval(TimeInterval(6 * 60))
+                ))
+            }
+            
             self.prevGlucoseSample = glucose
         }
     }
     
     private func endUnknownActivities() async {
         for unknownActivity in Activity<GlucoseActivityAttributes>.activities
-            .filter({ self.activity.id != $0.id })
+            .filter({ self.activity.id != $0.id && self.activityChart?.id != $0.id })
         {
             await unknownActivity.end(nil, dismissalPolicy: .immediate)
         }
@@ -141,8 +204,10 @@ class GlucoseActivityManager {
     
     private func endActivity() async {
         let dynamicState = self.activity.content.state
+        let dynamicChartState = self.activityChart?.content.state
         
         await self.activity.end(nil, dismissalPolicy: .immediate)
+        await self.activityChart?.end(nil, dismissalPolicy: .immediate)
         for unknownActivity in Activity<GlucoseActivityAttributes>.activities {
             await unknownActivity.end(nil, dismissalPolicy: .immediate)
         }
@@ -153,6 +218,15 @@ class GlucoseActivityManager {
                 content: .init(state: dynamicState, staleDate: nil),
                 pushType: .token
             )
+            
+            
+            if let dynamicChartState = dynamicChartState {
+                self.activityChart = try Activity.request(
+                    attributes: GlucoseChartActivityAttributes(),
+                    content: .init(state: dynamicChartState, staleDate: nil),
+                    pushType: .token
+                )
+            }
             self.startDate = Date.now
         } catch {}
 
@@ -169,6 +243,38 @@ class GlucoseActivityManager {
                 TimeInterval(60 * 60)
         default:
             return true
+        }
+    }
+    
+    private func getInsulinOnBoard() async -> String {
+        return await withCheckedContinuation { continuation in
+            self.doseStore.insulinOnBoard(at: Date.now) { result in
+                switch (result) {
+                case .failure:
+                    continuation.resume(returning: "??")
+                    break
+                case .success(let iob):
+                    continuation.resume(returning: self.iobFormatter.string(from: iob.value) ?? "??")
+                    break
+                }
+            }
+        }
+    }
+    
+    private func getGlucoseSample(unit: HKUnit) async -> [GlucoseSampleAttributes] {
+        return await withCheckedContinuation { continuation in
+            self.glucoseStore.getGlucoseSamples(start: Date.now.addingTimeInterval(.hours(-1)), end: Date.now) { result in
+                switch (result) {
+                case .failure:
+                    continuation.resume(returning: [])
+                    break
+                case .success(let data):
+                    continuation.resume(returning: data.map { item in
+                        return GlucoseSampleAttributes(x: item.startDate, y: item.quantity.doubleValue(for: unit))
+                    })
+                    return
+                }
+            }
         }
     }
 }

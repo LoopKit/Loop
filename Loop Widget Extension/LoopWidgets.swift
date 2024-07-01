@@ -14,6 +14,7 @@ struct LoopWidgets: WidgetBundle {
     @WidgetBundleBuilder
     var body: some Widget {
         SystemStatusWidget()
-        LiveActivityConfiguration()
+        GlucoseLiveActivityConfiguration()
+        GlucoseChartLiveActivityConfiguration()
     }
 }
