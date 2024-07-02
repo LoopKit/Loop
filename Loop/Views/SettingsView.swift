@@ -22,6 +22,7 @@ public struct SettingsView: View {
     @Environment(\.carbTintColor) private var carbTintColor
     @Environment(\.glucoseTintColor) private var glucoseTintColor
     @Environment(\.insulinTintColor) private var insulinTintColor
+    @Environment(\.isInvestigationalDevice) private var isInvestigationalDevice
 
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var versionUpdateViewModel: VersionUpdateViewModel
@@ -219,9 +220,21 @@ extension SettingsView {
     
     private var loopSection: some View {
         Section(
-            header: SectionHeader(
-                label: localizedAppNameAndVersion.description
-            )
+            header: 
+                VStack(alignment: .leading, spacing: 8) {
+                    SectionHeader(label: localizedAppNameAndVersion.description)
+                    
+                    Group {
+                        Text(Image(systemName: "exclamationmark.triangle.fill"))
+                            .foregroundColor(guidanceColors.warning) +
+                        Text(" ") +
+                        Text("Caution: For Investigational Use Only")
+                    }
+                    .font(.callout)
+                    .textCase(nil)
+                    .foregroundColor(.primary)
+                }
+                .padding(.bottom, 6)
         ) {
             ConfirmationToggle(
                 isOn: closedLoopToggleState,

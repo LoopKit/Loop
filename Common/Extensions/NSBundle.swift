@@ -40,6 +40,10 @@ extension Bundle {
     var appStoreURL: String? {
         return object(forInfoDictionaryKey: "AppStoreURL") as? String
     }
+    
+    var isInvestigationalDevice: Bool {
+        return object(forInfoDictionaryKey: "IsInvestigationalDevice") as? String == "YES"
+    }
 
     var isAppExtension: Bool {
         return bundleURL.pathExtension == "appex"
