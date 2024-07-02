@@ -34,7 +34,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     lazy var insulinFormatter: QuantityFormatter = {
         let formatter = QuantityFormatter(for: .internationalUnit())
-        formatter.numberFormatter.minimumFractionDigits = 2
+        formatter.numberFormatter.maximumFractionDigits = 2
         return formatter
     }()
 
