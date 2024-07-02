@@ -224,17 +224,19 @@ extension SettingsView {
                 VStack(alignment: .leading, spacing: 8) {
                     SectionHeader(label: localizedAppNameAndVersion.description)
                     
-                    Group {
-                        Text(Image(systemName: "exclamationmark.triangle.fill"))
-                            .foregroundColor(guidanceColors.warning) +
-                        Text(" ") +
-                        Text("Caution: For Investigational Use Only")
+                    if isInvestigationalDevice {
+                        Group {
+                            Text(Image(systemName: "exclamationmark.triangle.fill"))
+                                .foregroundColor(guidanceColors.warning) +
+                            Text(" ") +
+                            Text("Caution: For Investigational Use Only")
+                        }
+                        .font(.callout)
+                        .textCase(nil)
+                        .foregroundColor(.primary)
+                        .padding(.bottom, 6)
                     }
-                    .font(.callout)
-                    .textCase(nil)
-                    .foregroundColor(.primary)
                 }
-                .padding(.bottom, 6)
         ) {
             ConfirmationToggle(
                 isOn: closedLoopToggleState,
