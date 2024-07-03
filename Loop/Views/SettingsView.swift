@@ -229,9 +229,9 @@ extension SettingsView {
                             Text(Image(systemName: "exclamationmark.triangle.fill"))
                                 .foregroundColor(guidanceColors.warning) +
                             Text(" ") +
-                            Text("Caution: For Investigational Use Only")
+                            Text("CAUTION - Investigational device. Limited by Federal (or United States) law to investigational use.")
                         }
-                        .font(.callout)
+                        .font(.footnote)
                         .textCase(nil)
                         .foregroundColor(.primary)
                         .padding(.bottom, 6)
