@@ -157,6 +157,11 @@ struct AlertManagementView: View {
                     }
                 }
             }
+            
+            NavigationLink(destination: LiveActivityManagementView())
+            {
+                    Text(NSLocalizedString("Live activity", comment: "Alert Permissions live activity"))
+            }
         }
     }
 

@@ -28,29 +28,44 @@ struct GlucoseLiveActivityConfiguration: Widget {
             // Create the presentation that appears on the Lock Screen and as a
             // banner on the Home Screen of devices that don't support the Dynamic Island.
             VStack {
-                HStack {
-                    glucoseView(context)
-                    Spacer()
-                    metaView(context)
+                switch (context.attributes.mode) {
+                case .spacious:
+                    topRowSpaciousView(context)
+                case .compact:
+                    topRowCompactView(context)
                 }
                 
                 Spacer()
                 
                 HStack {
                     bottomSpacer(border: false)
-                    bottomItem(
-                        value: context.state.iob,
-                        unit: LocalizedString("U", comment: "No comment"),
-                        title: LocalizedString("IOB", comment: "No comment")
-                    )
-                    bottomSpacer(border: true)
-                    bottomItem(
-                        value: context.state.cob,
-                        unit: LocalizedString("g", comment: "No comment"),
-                        title: LocalizedString("COB", comment: "No comment")
-                    )
-                    bottomSpacer(border: true)
-                    basalView(context)
+                    
+                    let endIndex = context.state.bottomRow.endIndex - 1
+                    ForEach(Array(context.state.bottomRow.enumerated()), id: \.element) { (index, item) in
+                        switch (item.type) {
+                        case .generic:
+                            bottomItemGeneric(
+                                title: LocalizedString(item.label, comment: "No comment"),
+                                value: item.value,
+                                unit: LocalizedString(item.unit, comment: "No comment")
+                            )
+                            
+                        case .basal:
+                            BasalViewActivity(percent: item.percentage, rate: item.rate)
+                            
+                        case .currentBg:
+                            bottomItemCurrentBG(
+                                title: LocalizedString(item.label, comment: "No comment"),
+                                value: item.value,
+                                trend: item.trend
+                            )
+                        }
+                        
+                        if index != endIndex {
+                            bottomSpacer(border: true)
+                        }
+                    }
+                    
                     bottomSpacer(border: false)
                 }
             }
@@ -83,38 +98,53 @@ struct GlucoseLiveActivityConfiguration: Widget {
     }
     
     @ViewBuilder
-    private func glucoseView(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+    private func topRowSpaciousView(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
         HStack {
-            Circle()
-                .trim(from: context.state.isCloseLoop ? 0 : 0.2, to: 1)
-                .stroke(getLoopColor(context.state.lastCompleted), lineWidth: 8)
-                .rotationEffect(Angle(degrees: -126))
-                .frame(width: 36, height: 36)
+            HStack {
+                loopIcon(context)
+                
+                Text("\(context.state.glucose)")
+                    .font(.title)
+                    .fontWeight(.heavy)
+                    .padding(.leading, 16)
+                
+                if let trendImageName = getArrowImage(context.state.trendType) {
+                    Image(systemName: trendImageName)
+                        .font(.system(size: 24))
+                }
+            }
             
-            Text("\(context.state.glucose)")
-                .font(.title)
-                .fontWeight(.heavy)
-                .padding(.leading, 16)
+            Spacer()
             
-            if let trendImageName = getArrowImage(context.state.trendType) {
-                Image(systemName: trendImageName)
-                    .font(.system(size: 24))
+            VStack(alignment: .trailing) {
+                Text("\(timeFormatter.string(from: context.state.date))")
+                    .font(.subheadline)
+                
+                Text("\(context.state.delta)")
+                    .font(.subheadline)
             }
         }
     }
     
-    private func metaView(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
-        VStack(alignment: .trailing) {
-            Text("\(timeFormatter.string(from: context.state.date))")
-                .font(.subheadline)
-            
-            Text("\(context.state.delta)")
-                .font(.subheadline)
+    @ViewBuilder
+    private func topRowCompactView(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+        HStack(spacing: 20) {
+            loopIcon(context)
+            ChartView(glucoseSamples: context.state.glucoseSamples)
         }
     }
     
     @ViewBuilder
-    private func bottomItem(value: String, unit: String, title: String) -> some View {
+    private func loopIcon(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+        Circle()
+            .trim(from: context.state.isCloseLoop ? 0 : 0.2, to: 1)
+            .stroke(getLoopColor(context.state.lastCompleted), lineWidth: 8)
+            .rotationEffect(Angle(degrees: -126))
+            .frame(width: 36, height: 36)
+    }
+    
+    @ViewBuilder
+    private func bottomItemGeneric(title: String, value: String, unit: String) -> some View {
         VStack(alignment: .center) {
             Text("\(value)\(unit)")
                 .font(.headline)
@@ -125,10 +155,19 @@ struct GlucoseLiveActivityConfiguration: Widget {
     }
     
     @ViewBuilder
-    private func basalView(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
-        let netBasal = context.state.netBasal
-        
-        BasalViewActivity(percent: netBasal?.percentage ?? 0, rate: netBasal?.rate ?? 0)
+    private func bottomItemCurrentBG(title: String, value: String, trend: GlucoseTrend?) -> some View {
+        VStack(alignment: .center) {
+            HStack {
+                Text(value)
+                    .font(.title)
+                    .fontWeight(.heavy)
+                
+                if let trend = trend, let trendImageName = getArrowImage(trend) {
+                    Image(systemName: trendImageName)
+                        .font(.system(size: 24))
+                }
+            }
+        }
     }
     
     @ViewBuilder
@@ -142,22 +181,6 @@ struct GlucoseLiveActivityConfiguration: Widget {
         }
         
     }
-    
-    private func getLoopColor(_ age: Date?) -> Color {
-         var freshness: LoopCompletionFreshness = .stale
-         if let age = age {
-             freshness = LoopCompletionFreshness(age: abs(min(0, age.timeIntervalSinceNow)))
-         }
-         
-         switch freshness {
-         case .fresh:
-             return Color("fresh")
-         case .aging:
-             return Color("warning")
-         case .stale:
-             return Color.red
-         }
-     }
     
     private func getArrowImage(_ trendType: GlucoseTrend?) -> String? {
         switch trendType {
@@ -179,6 +202,22 @@ struct GlucoseLiveActivityConfiguration: Widget {
             return "arrow.down"
         case .none:
             return nil
+        }
+    }
+    
+    private func getLoopColor(_ age: Date?) -> Color {
+        var freshness: LoopCompletionFreshness = .stale
+        if let age = age {
+            freshness = LoopCompletionFreshness(age: abs(min(0, age.timeIntervalSinceNow)))
+        }
+        
+        switch freshness {
+        case .fresh:
+            return Color("fresh")
+        case .aging:
+            return Color("warning")
+        case .stale:
+            return .red
         }
     }
 }

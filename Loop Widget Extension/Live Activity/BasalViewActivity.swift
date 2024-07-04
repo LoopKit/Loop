@@ -23,7 +23,7 @@ struct BasalViewActivity: View {
                 .frame(width: 44, height: 22)
 
             if let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
-                Text("\(rateString) U")
+                Text("\(rateString)U")
                     .font(.subheadline)
             }
             else {

@@ -401,9 +401,12 @@
 		B4E96D5D248A82A2002DABAD /* StatusBarHUDView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */; };
 		B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */; };
 		B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */; };
+		B851FFC52C37221800D738C1 /* LiveActivityManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B851FFC42C37221800D738C1 /* LiveActivityManagementView.swift */; };
+		B851FFCA2C3731DE00D738C1 /* LiveActivitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B851FFC62C37271E00D738C1 /* LiveActivitySettings.swift */; };
+		B851FFCB2C3731DE00D738C1 /* LiveActivitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B851FFC62C37271E00D738C1 /* LiveActivitySettings.swift */; };
 		B87539C92C2B06CE0085A975 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539C82C2B06CE0085A975 /* LocalizedString.swift */; };
 		B87539CB2C2B08430085A975 /* Bootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539CA2C2B08430085A975 /* Bootstrap.swift */; };
-		B87539CD2C2B46950085A975 /* ChartValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539CC2C2B46950085A975 /* ChartValues.swift */; };
+		B87539CD2C2B46950085A975 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539CC2C2B46950085A975 /* ChartView.swift */; };
 		B87539CF2C2DCB770085A975 /* BasalViewActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539CE2C2DCB770085A975 /* BasalViewActivity.swift */; };
 		B87539D12C2DDE760085A975 /* GlucoseChartLiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539D02C2DDE760085A975 /* GlucoseChartLiveActivityConfiguration.swift */; };
 		B87D411D2C28A69600120877 /* GlucoseLiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87D411C2C28A69600120877 /* GlucoseLiveActivityConfiguration.swift */; };
@@ -1335,9 +1338,11 @@
 		B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = StatusBarHUDView.xib; sourceTree = "<group>"; };
 		B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
 		B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+DeviceStatus.swift"; sourceTree = "<group>"; };
+		B851FFC42C37221800D738C1 /* LiveActivityManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagementView.swift; sourceTree = "<group>"; };
+		B851FFC62C37271E00D738C1 /* LiveActivitySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivitySettings.swift; sourceTree = "<group>"; };
 		B87539C82C2B06CE0085A975 /* LocalizedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
 		B87539CA2C2B08430085A975 /* Bootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bootstrap.swift; sourceTree = "<group>"; };
-		B87539CC2C2B46950085A975 /* ChartValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartValues.swift; sourceTree = "<group>"; };
+		B87539CC2C2B46950085A975 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		B87539CE2C2DCB770085A975 /* BasalViewActivity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalViewActivity.swift; sourceTree = "<group>"; };
 		B87539D02C2DDE760085A975 /* GlucoseChartLiveActivityConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseChartLiveActivityConfiguration.swift; sourceTree = "<group>"; };
 		B87D411C2C28A69600120877 /* GlucoseLiveActivityConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseLiveActivityConfiguration.swift; sourceTree = "<group>"; };
@@ -2184,6 +2189,7 @@
 				43DE92581C5479E4001FFDE1 /* PotentialCarbEntryUserInfo.swift */,
 				43C05CB721EBEA54006FB252 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
+				E9C00EEF24C620EF00628F35 /* LoopSettings.swift */,
 				C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */,
 				430B29892041F54A00BA9F93 /* NSUserDefaults.swift */,
 				431E73471FF95A900069B5F7 /* PersistenceController.swift */,
@@ -2191,10 +2197,10 @@
 				43D9FFD121EAE05D00AF44BF /* LoopCore.h */,
 				43D9FFD221EAE05D00AF44BF /* Info.plist */,
 				4B60626A287E286000BF8BBB /* Localizable.strings */,
-				E9C00EEF24C620EF00628F35 /* LoopSettings.swift */,
 				C16575742539FD60004AE16E /* LoopCoreConstants.swift */,
 				E9B3551B292844010076AB04 /* MissedMealNotification.swift */,
 				C1D0B62F2986D4D90098D215 /* LocalizedString.swift */,
+				B851FFC62C37271E00D738C1 /* LiveActivitySettings.swift */,
 			);
 			path = LoopCore;
 			sourceTree = "<group>";
@@ -2297,6 +2303,7 @@
 				C1AF062229426300002C1B19 /* ManualGlucoseEntryRow.swift */,
 				DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */,
 				DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */,
+				B851FFC42C37221800D738C1 /* LiveActivityManagementView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2790,7 +2797,7 @@
 			children = (
 				B87D411C2C28A69600120877 /* GlucoseLiveActivityConfiguration.swift */,
 				B87539D02C2DDE760085A975 /* GlucoseChartLiveActivityConfiguration.swift */,
-				B87539CC2C2B46950085A975 /* ChartValues.swift */,
+				B87539CC2C2B46950085A975 /* ChartView.swift */,
 				B87539CE2C2DCB770085A975 /* BasalViewActivity.swift */,
 			);
 			path = "Live Activity";
@@ -3676,7 +3683,7 @@
 				84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */,
 				84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */,
 				B87539CF2C2DCB770085A975 /* BasalViewActivity.swift in Sources */,
-				B87539CD2C2B46950085A975 /* ChartValues.swift in Sources */,
+				B87539CD2C2B46950085A975 /* ChartView.swift in Sources */,
 				B87539D12C2DDE760085A975 /* GlucoseChartLiveActivityConfiguration.swift in Sources */,
 				84AA81E32A4A36FB000B658B /* SystemActionLink.swift in Sources */,
 				14B1737828AEDC6C006CCD7C /* NSTimeInterval.swift in Sources */,
@@ -3784,6 +3791,7 @@
 				A967D94C24F99B9300CDDF8A /* OutputStream.swift in Sources */,
 				1DB1065124467E18005542BD /* AlertManager.swift in Sources */,
 				1D9650C82523FBA100A1370B /* DeviceDataManager+BolusEntryViewModelDelegate.swift in Sources */,
+				B851FFC52C37221800D738C1 /* LiveActivityManagementView.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				149A28E42A8A63A700052EDF /* FavoriteFoodDetailView.swift in Sources */,
 				1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */,
@@ -4010,6 +4018,7 @@
 				C17DDC9D28AC33A1005FBF4C /* PersistedProperty.swift in Sources */,
 				43C05CA921EB2B26006FB252 /* PersistenceController.swift in Sources */,
 				A9CE912224CA032E00302A40 /* NSUserDefaults.swift in Sources */,
+				B851FFCB2C3731DE00D738C1 /* LiveActivitySettings.swift in Sources */,
 				43C05CAB21EB2B4A006FB252 /* NSBundle.swift in Sources */,
 				43C05CC721EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
 				E9B3552B293591E70076AB04 /* MissedMealNotification.swift in Sources */,
@@ -4031,6 +4040,7 @@
 				C17DDC9C28AC339E005FBF4C /* PersistedProperty.swift in Sources */,
 				43C05CA821EB2B26006FB252 /* PersistenceController.swift in Sources */,
 				43C05CAA21EB2B49006FB252 /* NSBundle.swift in Sources */,
+				B851FFCA2C3731DE00D738C1 /* LiveActivitySettings.swift in Sources */,
 				43C05CC821EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
 				43C05CAD21EB2BBF006FB252 /* NSUserDefaults.swift in Sources */,
 				E9B3552A293591E70076AB04 /* MissedMealNotification.swift in Sources */,
