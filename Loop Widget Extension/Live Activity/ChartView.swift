@@ -58,13 +58,16 @@ struct ChartView: View {
                 .lineStyle(StrokeStyle(lineWidth: 3, dash: [2, 3]))
             }
         }
-            .chartYScale(domain: [lowerBoundY, upperBoundY])
             .chartForegroundStyleScale([
                 "Good": .green,
                 "High": .orange,
                 "Low": .red
             ])
+            .chartPlotStyle { plotContent in
+                plotContent.background(.cyan.opacity(0.15))
+            }
             .chartLegend(.hidden)
+            .chartYScale(domain: .automatic(includesZero: false))
             .chartYAxis {
                 AxisMarks(position: .trailing) { _ in
                     AxisValueLabel().foregroundStyle(Color.primary)
@@ -73,8 +76,8 @@ struct ChartView: View {
                 }
             }
             .chartXAxis {
-                AxisMarks(position: .automatic) { _ in
-                    AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .narrow)), anchor: .top)
+                AxisMarks(position: .automatic, values: .stride(by: .hour)) { _ in
+                    AxisValueLabel(format: .dateTime.hour(.twoDigits(amPM: .narrow)).minute(.twoDigits), anchor: .top)
                         .foregroundStyle(Color.primary)
                     AxisGridLine(stroke: .init(lineWidth: 0.1, dash: [2, 3]))
                         .foregroundStyle(Color.primary)

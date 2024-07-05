@@ -12,6 +12,7 @@ import SwiftUI
 import LoopCore
 import WidgetKit
 import Charts
+import HealthKit
 
 @available(iOS 16.2, *)
 struct GlucoseLiveActivityConfiguration: Widget {
@@ -28,14 +29,21 @@ struct GlucoseLiveActivityConfiguration: Widget {
             // Create the presentation that appears on the Lock Screen and as a
             // banner on the Home Screen of devices that don't support the Dynamic Island.
             VStack {
-                switch (context.attributes.mode) {
-                case .spacious:
-                    topRowSpaciousView(context)
-                case .compact:
-                    topRowCompactView(context)
+                HStack(spacing: 15) {
+                    loopIcon(context)
+                    if context.attributes.addPredictiveLine {
+                        ChartView(
+                            glucoseSamples: context.state.glucoseSamples,
+                            predicatedGlucose: context.state.predicatedGlucose,
+                            predicatedStartDate: context.state.predicatedStartDate,
+                            predicatedInterval: context.state.predicatedInterval
+                        )
+                            .frame(height: 85)
+                    } else {
+                        ChartView(glucoseSamples: context.state.glucoseSamples)
+                            .frame(height: 85)
+                    }
                 }
-                
-                Spacer()
                 
                 HStack {
                     bottomSpacer(border: false)
@@ -73,8 +81,10 @@ struct GlucoseLiveActivityConfiguration: Widget {
                 .padding(.all, 15)
                 .background(BackgroundStyle.background.opacity(0.4))
                 .activityBackgroundTint(Color.clear)
-        } dynamicIsland: { _ in
-            DynamicIsland {
+        } dynamicIsland: { context in
+            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: context.state.isMmol ? HKUnit.millimolesPerLiter : HKUnit.milligramsPerDeciliter)
+            
+            return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     HStack{}
                 }
@@ -85,52 +95,18 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     HStack{}
                 }
             } compactLeading: {
-                // Create the compact leading presentation.
-                HStack{}
+                Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
+                    .foregroundStyle(getGlucoseColor(context.state.currentGlucose))
+                    .minimumScaleFactor(0.1)
             } compactTrailing: {
-                // Create the compact trailing presentation.
-                HStack{}
+                Text(context.state.delta)
+                    .foregroundStyle(Color(white: 0.9))
+                    .minimumScaleFactor(0.1)
             } minimal: {
-                // Create the minimal presentation.
-                HStack{}
+                Text(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")
+                    .foregroundStyle(getGlucoseColor(context.state.currentGlucose))
+                    .minimumScaleFactor(0.1)
             }
-        }
-    }
-    
-    @ViewBuilder
-    private func topRowSpaciousView(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
-        HStack {
-            HStack {
-                loopIcon(context)
-                
-                Text("\(context.state.glucose)")
-                    .font(.title)
-                    .fontWeight(.heavy)
-                    .padding(.leading, 16)
-                
-                if let trendImageName = getArrowImage(context.state.trendType) {
-                    Image(systemName: trendImageName)
-                        .font(.system(size: 24))
-                }
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing) {
-                Text("\(timeFormatter.string(from: context.state.date))")
-                    .font(.subheadline)
-                
-                Text("\(context.state.delta)")
-                    .font(.subheadline)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func topRowCompactView(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
-        HStack(spacing: 20) {
-            loopIcon(context)
-            ChartView(glucoseSamples: context.state.glucoseSamples)
         }
     }
     
@@ -158,14 +134,9 @@ struct GlucoseLiveActivityConfiguration: Widget {
     private func bottomItemCurrentBG(title: String, value: String, trend: GlucoseTrend?) -> some View {
         VStack(alignment: .center) {
             HStack {
-                Text(value)
+                Text(value + getArrowImage(trend))
                     .font(.title)
                     .fontWeight(.heavy)
-                
-                if let trend = trend, let trendImageName = getArrowImage(trend) {
-                    Image(systemName: trendImageName)
-                        .font(.system(size: 24))
-                }
             }
         }
     }
@@ -176,32 +147,29 @@ struct GlucoseLiveActivityConfiguration: Widget {
         if (border) {
             Divider()
                 .background(.secondary)
-                .padding(.vertical, 10)
             Spacer()
         }
         
     }
     
-    private func getArrowImage(_ trendType: GlucoseTrend?) -> String? {
+    private func getArrowImage(_ trendType: GlucoseTrend?) -> String {
         switch trendType {
         case .upUpUp:
-//            return "arrow.double.up" -> This one isn't available anymore
-            return "arrow.up"
+            return "\u{2191}\u{2191}" // ↑↑
         case .upUp:
-            return "arrow.up"
+            return "\u{2191}" // ↑
         case .up:
-            return "arrow.up.right"
+            return "\u{2197}" // ↗
         case .flat:
-            return "arrow.right"
+            return "\u{2192}" // →
         case .down:
-            return "arrow.down.right"
+            return "\u{2198}" // ↘
         case .downDown:
-            return "arrow.down"
+            return "\u{2193}" // ↓
         case .downDownDown:
-//            return "arrow.double.down.circle" -> This one isn't available anymore
-            return "arrow.down"
+            return "\u{2193}\u{2193}" // ↓↓
         case .none:
-            return nil
+            return ""
         }
     }
     
@@ -219,5 +187,17 @@ struct GlucoseLiveActivityConfiguration: Widget {
         case .stale:
             return .red
         }
+    }
+    
+    private func getGlucoseColor(_ value: Double) -> Color {
+        if value < 4 {
+            return .red
+        }
+        
+        if value > 10 {
+            return .orange
+        }
+        
+        return .green
     }
 }

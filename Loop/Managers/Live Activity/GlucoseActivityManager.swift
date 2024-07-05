@@ -21,7 +21,6 @@ extension Notification.Name {
 class GlucoseActivityManager {
     private let activityInfo = ActivityAuthorizationInfo()
     private var activity: Activity<GlucoseActivityAttributes>?
-    private var activityChart: Activity<GlucoseChartActivityAttributes>?
     private let healthStore = HKHealthStore()
     
     private let glucoseStore: GlucoseStoreProtocol
@@ -73,7 +72,6 @@ class GlucoseActivityManager {
         }
         
         initEmptyActivity()
-        initEmptyChartActivity()
         
         Task {
             await self.endUnknownActivities()
@@ -86,7 +84,7 @@ class GlucoseActivityManager {
     
     public func update(glucose: GlucoseSampleValue?) {
         Task {
-            if self.needsRecreation() {
+            if self.needsRecreation(), await UIApplication.shared.applicationState == .active {
                 // activity is no longer visible or old. End it and try to push the update again
                 await endActivity()
                 update(glucose: glucose)
@@ -118,75 +116,63 @@ class GlucoseActivityManager {
                 statusContext: statusContext,
                 glucoseFormatter: glucoseFormatter
             )
+            
+            var predicatedGlucose: [Double] = []
+            if let samples = statusContext?.predictedGlucose?.values {
+                predicatedGlucose = samples
+            }
 
             let state = GlucoseActivityAttributes.ContentState(
                 date: glucose.startDate,
-                glucose: glucoseFormatter.string(from: current) ?? "??",
+                currentGlucose: current,
                 trendType: statusContext?.glucoseDisplay?.trendType,
                 delta: delta,
+                isMmol: unit == HKUnit.millimolesPerLiter,
                 isCloseLoop: statusContext?.isClosedLoop ?? false,
                 lastCompleted: statusContext?.lastLoopCompleted,
                 bottomRow: bottomRow,
-                glucoseSamples: glucoseSamples
+                glucoseSamples: glucoseSamples,
+                predicatedGlucose: predicatedGlucose,
+                predicatedStartDate: statusContext?.predictedGlucose?.startDate,
+                predicatedInterval: statusContext?.predictedGlucose?.interval
             )
             
             await self.activity?.update(ActivityContent(
                 state: state,
-                staleDate: min(state.date, Date.now).addingTimeInterval(.minutes(12))
+                staleDate: Date.now.addingTimeInterval(60)
             ))
-            
-            if let activityChart = self.activityChart {
-                var predicatedGlucose: [Double] = []
-                if let samples = statusContext?.predictedGlucose?.values {
-                    predicatedGlucose = samples
-                }
-                
-                let stateChart = GlucoseChartActivityAttributes.ContentState(
-                    predicatedGlucose: predicatedGlucose,
-                    predicatedStartDate: statusContext?.predictedGlucose?.startDate,
-                    predicatedInterval: statusContext?.predictedGlucose?.interval,
-                    glucoseSamples: glucoseSamples
-                )
-                
-                await activityChart.update(ActivityContent(
-                    state: stateChart,
-                    staleDate: min(state.date, Date.now).addingTimeInterval(.minutes(12))
-                ))
-            }
             
             self.prevGlucoseSample = glucose
         }
     }
     
     @objc private func settingsChanged() {
-        let newSettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-        
-        // Update live activity if needed
-        if !newSettings.enabled, let activity = self.activity {
-            Task {
+        Task {
+            let newSettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
+            
+            // Update live activity if needed
+            if !newSettings.enabled, let activity = self.activity {
                 await activity.end(nil, dismissalPolicy: .immediate)
                 self.activity = nil
+            } else if newSettings.enabled && self.activity == nil {
+                initEmptyActivity()
             }
-        } else if newSettings.enabled && self.activity == nil {
-            initEmptyActivity()
-        }
-        
-        if !newSettings.enabled, let activityChart = self.activityChart {
-            Task {
-                await activityChart.end(nil, dismissalPolicy: .immediate)
-                self.activityChart = nil
+            
+            if newSettings.addPredictiveLine != self.settings.addPredictiveLine {
+                await self.activity?.end(nil, dismissalPolicy: .immediate)
+                self.activity = nil
+                
+                initEmptyActivity()
             }
-        } else if newSettings.enabled && self.activityChart == nil {
-            initEmptyChartActivity()
+            
+            update()
+            self.settings = newSettings
         }
-        
-        update()
-        self.settings = newSettings
     }
     
     private func endUnknownActivities() async {
         for unknownActivity in Activity<GlucoseActivityAttributes>.activities
-            .filter({ self.activity?.id != $0.id && self.activityChart?.id != $0.id })
+            .filter({ self.activity?.id != $0.id })
         {
             await unknownActivity.end(nil, dismissalPolicy: .immediate)
         }
@@ -194,10 +180,8 @@ class GlucoseActivityManager {
     
     private func endActivity() async {
         let dynamicState = self.activity?.content.state
-        let dynamicChartState = self.activityChart?.content.state
         
         await self.activity?.end(nil, dismissalPolicy: .immediate)
-        await self.activityChart?.end(nil, dismissalPolicy: .immediate)
         for unknownActivity in Activity<GlucoseActivityAttributes>.activities {
             await unknownActivity.end(nil, dismissalPolicy: .immediate)
         }
@@ -205,17 +189,8 @@ class GlucoseActivityManager {
         do {
             if let dynamicState = dynamicState {
                 self.activity = try Activity.request(
-                    attributes: GlucoseActivityAttributes(mode: self.settings.mode),
+                    attributes: GlucoseActivityAttributes(addPredictiveLine: self.settings.addPredictiveLine),
                     content: .init(state: dynamicState, staleDate: nil),
-                    pushType: .token
-                )
-            }
-            
-            
-            if let dynamicChartState = dynamicChartState {
-                self.activityChart = try Activity.request(
-                    attributes: GlucoseChartActivityAttributes(),
-                    content: .init(state: dynamicChartState, staleDate: nil),
                     pushType: .token
                 )
             }
@@ -267,12 +242,19 @@ class GlucoseActivityManager {
         var samples: [GlucoseSampleAttributes] = []
         
         updateGroup.enter()
-        self.glucoseStore.getGlucoseSamples(start: Date.now.addingTimeInterval(.hours(-1)), end: Date.now) { result in
+        
+        // When in spacious mode, we want to show the predictive line
+        // In compact mode, we only want to show the history
+        let timeInterval: TimeInterval = self.settings.addPredictiveLine ? .hours(-2) : .hours(-6)
+        self.glucoseStore.getGlucoseSamples(
+            start: Date.now.addingTimeInterval(timeInterval),
+            end: Date.now
+        ) { result in
             switch (result) {
             case .failure:
                 break
             case .success(let data):
-                samples = data.suffix(30).map { item in
+                samples = data.suffix(100).map { item in
                     return GlucoseSampleAttributes(x: item.startDate, y: item.quantity.doubleValue(for: unit))
                 }
                 break
@@ -328,39 +310,24 @@ class GlucoseActivityManager {
         do {
             let dynamicState = GlucoseActivityAttributes.ContentState(
                 date: Date.now,
-                glucose: "--",
+                currentGlucose: 0,
                 trendType: nil,
                 delta: "",
+                isMmol: true,
                 isCloseLoop: false,
                 lastCompleted: nil,
                 bottomRow: [],
-                glucoseSamples: []
+                glucoseSamples: [],
+                predicatedGlucose: [],
+                predicatedStartDate: nil,
+                predicatedInterval: nil
             )
             
             self.activity = try Activity.request(
-                attributes: GlucoseActivityAttributes(mode: self.settings.mode),
+                attributes: GlucoseActivityAttributes(addPredictiveLine: self.settings.addPredictiveLine),
                 content: .init(state: dynamicState, staleDate: nil),
                 pushType: .token
             )
-        } catch {}
-    }
-    
-    private func initEmptyChartActivity() {
-        do {
-            if self.settings.mode == .spacious {
-                let dynamicChartState = GlucoseChartActivityAttributes.ContentState(
-                    predicatedGlucose: [],
-                    predicatedStartDate: nil,
-                    predicatedInterval: nil,
-                    glucoseSamples: []
-                )
-                
-                self.activityChart = try Activity.request(
-                    attributes: GlucoseChartActivityAttributes(),
-                    content: .init(state: dynamicChartState, staleDate: nil),
-                    pushType: .token
-                )
-            }
         } catch {}
     }
 }

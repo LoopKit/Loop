@@ -17,23 +17,17 @@ public enum BottomRowConfiguration: Codable {
     case deltaBg
     case updatedAt
     
-    static let defaults: [BottomRowConfiguration] =  [.iob, .cob, .basal, .eventualBg] //[.currentBg, .iob, .cob, .updatedAt]
-}
-
-public enum GlucoseActivityMode: Codable, Hashable {
-    case compact
-    case spacious
+    static let defaults: [BottomRowConfiguration] =  [.currentBg, .iob, .cob, .updatedAt]//[.iob, .cob, .basal, .eventualBg] //[.currentBg, .iob, .cob, .updatedAt]
 }
 
 public struct LiveActivitySettings: Codable {
     public var enabled: Bool
-    
-    public var mode: GlucoseActivityMode
+    public var addPredictiveLine: Bool
     public var bottomRowConfiguration: [BottomRowConfiguration]
     
     private enum CodingKeys: String, CodingKey {
         case enabled
-        case mode
+        case addPredictiveLine
         case bottomRowConfiguration
     }
     
@@ -43,13 +37,13 @@ public struct LiveActivitySettings: Codable {
 //        mode = try values.decode(GlucoseActivityMode.self, forKey: .mode)
 //        bottomRowConfiguration = try values.decode([BottomRowConfiguration].self, forKey: .bottomRowConfiguration)
         self.enabled = true
-        self.mode = .spacious
+        self.addPredictiveLine = true
         self.bottomRowConfiguration = BottomRowConfiguration.defaults
     }
     
     public init() {
         self.enabled = true
-        self.mode = .spacious
+        self.addPredictiveLine = true
         self.bottomRowConfiguration = BottomRowConfiguration.defaults
     }
 }

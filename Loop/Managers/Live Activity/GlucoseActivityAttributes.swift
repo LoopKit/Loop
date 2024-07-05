@@ -16,27 +16,27 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
         // Meta data
         public let date: Date
         
-        // Glucose view
-        public let glucose: String
+        // Dynamic island data
+        public let currentGlucose: Double
         public let trendType: GlucoseTrend?
         public let delta: String
+        public let isMmol: Bool
+        
+        // Loop circle
         public let isCloseLoop: Bool
         public let lastCompleted: Date?
         
+        // Bottom row
         public let bottomRow: [BottomRowItem]
+        
+        // Chart view
         public let glucoseSamples: [GlucoseSampleAttributes]
-    }
-    
-    public let mode: GlucoseActivityMode
-}
-
-public struct GlucoseChartActivityAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
         public let predicatedGlucose: [Double]
         public let predicatedStartDate: Date?
         public let predicatedInterval: TimeInterval?
-        public let glucoseSamples: [GlucoseSampleAttributes]
     }
+    
+    public let addPredictiveLine: Bool
 }
 
 public struct BottomRowItem: Codable, Hashable {
