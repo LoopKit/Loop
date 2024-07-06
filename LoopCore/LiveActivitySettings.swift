@@ -17,7 +17,46 @@ public enum BottomRowConfiguration: Codable {
     case deltaBg
     case updatedAt
     
-    static let defaults: [BottomRowConfiguration] =  [.currentBg, .iob, .cob, .updatedAt]//[.iob, .cob, .basal, .eventualBg] //[.currentBg, .iob, .cob, .updatedAt]
+    static let defaults: [BottomRowConfiguration] =  [.currentBg, .iob, .cob, .updatedAt]
+    public static let all: [BottomRowConfiguration] = [.iob, .cob, .basal, .currentBg, .eventualBg, .deltaBg, .updatedAt]
+    
+    public func name() -> String {
+        switch self {
+        case .iob:
+            return NSLocalizedString("IOB", comment: "")
+        case .cob:
+            return NSLocalizedString("COB", comment: "")
+        case .basal:
+            return NSLocalizedString("Basal", comment: "")
+        case .currentBg:
+            return NSLocalizedString("Current BG", comment: "")
+        case .eventualBg:
+            return NSLocalizedString("Event", comment: "")
+        case .deltaBg:
+            return NSLocalizedString("Delta", comment: "")
+        case .updatedAt:
+            return NSLocalizedString("Updated", comment: "")
+        }
+    }
+    
+    public func description() -> String {
+        switch self {
+        case .iob:
+            return NSLocalizedString("Active Insulin", comment: "")
+        case .cob:
+            return NSLocalizedString("Active Carbohydrates", comment: "")
+        case .basal:
+            return NSLocalizedString("Basal", comment: "")
+        case .currentBg:
+            return NSLocalizedString("Current Glucose", comment: "")
+        case .eventualBg:
+            return NSLocalizedString("Eventually", comment: "")
+        case .deltaBg:
+            return NSLocalizedString("Delta", comment: "")
+        case .updatedAt:
+            return NSLocalizedString("Updated at", comment: "")
+        }
+    }
 }
 
 public struct LiveActivitySettings: Codable {
@@ -32,13 +71,10 @@ public struct LiveActivitySettings: Codable {
     }
     
     public init(from decoder:Decoder) throws {
-//        let values = try decoder.container(keyedBy: CodingKeys.self)
-//        enabled = try values.decode(Bool.self, forKey: .enabled)
-//        mode = try values.decode(GlucoseActivityMode.self, forKey: .mode)
-//        bottomRowConfiguration = try values.decode([BottomRowConfiguration].self, forKey: .bottomRowConfiguration)
-        self.enabled = true
-        self.addPredictiveLine = true
-        self.bottomRowConfiguration = BottomRowConfiguration.defaults
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        enabled = try values.decode(Bool.self, forKey: .enabled)
+        addPredictiveLine = try values.decode(Bool.self, forKey: .addPredictiveLine)
+        bottomRowConfiguration = try values.decode([BottomRowConfiguration].self, forKey: .bottomRowConfiguration)
     }
     
     public init() {

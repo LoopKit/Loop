@@ -53,7 +53,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                         switch (item.type) {
                         case .generic:
                             bottomItemGeneric(
-                                title: LocalizedString(item.label, comment: "No comment"),
+                                title: item.label,
                                 value: item.value,
                                 unit: LocalizedString(item.unit, comment: "No comment")
                             )
@@ -63,7 +63,6 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             
                         case .currentBg:
                             bottomItemCurrentBG(
-                                title: LocalizedString(item.label, comment: "No comment"),
                                 value: item.value,
                                 trend: item.trend
                             )
@@ -131,7 +130,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
     }
     
     @ViewBuilder
-    private func bottomItemCurrentBG(title: String, value: String, trend: GlucoseTrend?) -> some View {
+    private func bottomItemCurrentBG(value: String, trend: GlucoseTrend?) -> some View {
         VStack(alignment: .center) {
             HStack {
                 Text(value + getArrowImage(trend))

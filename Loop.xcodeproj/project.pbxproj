@@ -413,6 +413,7 @@
 		B8A937B82C29BA5900E38645 /* GlucoseActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */; };
 		B8A937C32C29C3B400E38645 /* GlucoseActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */; };
 		B8A937C42C29C43B00E38645 /* GlucoseActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */; };
+		B8FD0B522C39CA3E003FB72B /* LiveActivityBottomRowManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FD0B512C39CA3E003FB72B /* LiveActivityBottomRowManagerView.swift */; };
 		C1004DF22981F5B700B8CF94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1004DF02981F5B700B8CF94 /* InfoPlist.strings */; };
 		C1004DF52981F5B700B8CF94 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1004DF32981F5B700B8CF94 /* Localizable.strings */; };
 		C1004DF82981F5B700B8CF94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1004DF62981F5B700B8CF94 /* InfoPlist.strings */; };
@@ -1347,6 +1348,7 @@
 		B87D411E2C28A85F00120877 /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
 		B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseActivityManager.swift; sourceTree = "<group>"; };
 		B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseActivityAttributes.swift; sourceTree = "<group>"; };
+		B8FD0B512C39CA3E003FB72B /* LiveActivityBottomRowManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityBottomRowManagerView.swift; sourceTree = "<group>"; };
 		C1004DEF2981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1004DF12981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1004DF42981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -2302,6 +2304,7 @@
 				DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */,
 				DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */,
 				B851FFC42C37221800D738C1 /* LiveActivityManagementView.swift */,
+				B8FD0B512C39CA3E003FB72B /* LiveActivityBottomRowManagerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -3780,6 +3783,7 @@
 				B4E202302661063E009421B5 /* AutomaticDosingStatus.swift in Sources */,
 				C191D2A125B3ACAA00C26C0B /* DosingStrategySelectionView.swift in Sources */,
 				A977A2F424ACFECF0059C207 /* CriticalEventLogExportManager.swift in Sources */,
+				B8FD0B522C39CA3E003FB72B /* LiveActivityBottomRowManagerView.swift in Sources */,
 				89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */,
 				43E93FB71E469A5100EAB8DB /* HKUnit.swift in Sources */,
 				43C05CAF21EB2C24006FB252 /* NSBundle.swift in Sources */,

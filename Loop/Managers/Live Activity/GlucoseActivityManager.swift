@@ -71,7 +71,7 @@ class GlucoseActivityManager {
             return
         }
         
-        initEmptyActivity()
+        initEmptyActivity(settings: self.settings)
         
         Task {
             await self.endUnknownActivities()
@@ -154,19 +154,20 @@ class GlucoseActivityManager {
             if !newSettings.enabled, let activity = self.activity {
                 await activity.end(nil, dismissalPolicy: .immediate)
                 self.activity = nil
+                
+                return
             } else if newSettings.enabled && self.activity == nil {
-                initEmptyActivity()
-            }
-            
-            if newSettings.addPredictiveLine != self.settings.addPredictiveLine {
+                initEmptyActivity(settings: newSettings)
+                
+            } else if newSettings.addPredictiveLine != self.settings.addPredictiveLine {
                 await self.activity?.end(nil, dismissalPolicy: .immediate)
                 self.activity = nil
                 
-                initEmptyActivity()
+                initEmptyActivity(settings: newSettings)
             }
             
-            update()
             self.settings = newSettings
+            update()
         }
     }
     
@@ -271,14 +272,14 @@ class GlucoseActivityManager {
         return self.settings.bottomRowConfiguration.map { type in
             switch(type) {
             case .iob:
-                return BottomRowItem(label: "IOB", value: getInsulinOnBoard(), unit: "U")
+                return BottomRowItem(label: type.name(), value: getInsulinOnBoard(), unit: "U")
                 
             case .cob:
                 var cob: String = "0"
                 if let cobValue = statusContext?.carbsOnBoard {
                     cob = self.cobFormatter.string(from: cobValue) ?? "??"
                 }
-                return BottomRowItem(label: "COB", value: cob, unit: "g")
+                return BottomRowItem(label: type.name(), value: cob, unit: "g")
                 
             case .basal:
                 guard let netBasalContext = statusContext?.netBasal else {
@@ -288,25 +289,25 @@ class GlucoseActivityManager {
                 return BottomRowItem(rate: netBasalContext.rate, percentage: netBasalContext.percentage)
                 
             case .currentBg:
-                return BottomRowItem(label: "Current", value: "\(glucoseFormatter.string(from: currentGlucose) ?? "??")", trend: statusContext?.glucoseDisplay?.trendType)
+                return BottomRowItem(label: type.name(), value: "\(glucoseFormatter.string(from: currentGlucose) ?? "??")", trend: statusContext?.glucoseDisplay?.trendType)
                 
             case .eventualBg:
                 guard let eventual = statusContext?.predictedGlucose?.values.last else {
-                    return BottomRowItem(label: "Event.", value: "??", unit: "")
+                    return BottomRowItem(label: type.name(), value: "??", unit: "")
                 }
                 
-                return BottomRowItem(label: "Event.", value: glucoseFormatter.string(from: eventual) ?? "??", unit: "")
+                return BottomRowItem(label: type.name(), value: glucoseFormatter.string(from: eventual) ?? "??", unit: "")
                 
             case .deltaBg:
-                return BottomRowItem(label: "Delta", value: delta, unit: "")
+                return BottomRowItem(label: type.name(), value: delta, unit: "")
                 
             case .updatedAt:
-                return BottomRowItem(label: "Updated", value: timeFormatter.string(from: Date.now), unit: "")
+                return BottomRowItem(label: type.name(), value: timeFormatter.string(from: Date.now), unit: "")
             }
        }
     }
     
-    private func initEmptyActivity() {
+    private func initEmptyActivity(settings: LiveActivitySettings) {
         do {
             let dynamicState = GlucoseActivityAttributes.ContentState(
                 date: Date.now,
@@ -324,7 +325,7 @@ class GlucoseActivityManager {
             )
             
             self.activity = try Activity.request(
-                attributes: GlucoseActivityAttributes(addPredictiveLine: self.settings.addPredictiveLine),
+                attributes: GlucoseActivityAttributes(addPredictiveLine: settings.addPredictiveLine),
                 content: .init(state: dynamicState, staleDate: nil),
                 pushType: .token
             )

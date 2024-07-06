@@ -7,39 +7,45 @@
 //
 
 import SwiftUI
+import LoopKitUI
 import LoopCore
 
 struct LiveActivityManagementView: View {
-    
-    private var enabled: Binding<Bool> {
+    private var enabled: Binding<Bool> =
         Binding(
-            get: {  UserDefaults.standard.liveActivity?.enabled ?? false },
+            get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).enabled },
             set: { newValue in
-                mutate { settings in
-                    settings.enabled = newValue
-                }
+                var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
+                settings.enabled = newValue
+                
+                UserDefaults.standard.liveActivity = settings
+                NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
             }
         )
-    }
 
+    private var addPredictiveLine: Binding<Bool> =
+        Binding(
+            get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).addPredictiveLine },
+            set: { newValue in
+                var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
+                settings.addPredictiveLine = newValue
+                
+                UserDefaults.standard.liveActivity = settings
+                NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
+            }
+        )
+    
     var body: some View {
         List {
-            Toggle(NSLocalizedString("Enabled", comment: "Title for missed meal notifications toggle"), isOn: enabled)
+            Toggle(NSLocalizedString("Enabled", comment: "Title for enable live activity toggle"), isOn: enabled)
+            Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: addPredictiveLine)
+            NavigationLink(
+                destination: LiveActivityBottomRowManagerView(),
+                label: { Text(NSLocalizedString("Bottom row configuration", comment: "Title for Bottom row configuration")) }
+            )
         }
             .insetGroupedListStyle()
             .navigationBarTitle(Text(NSLocalizedString("Live activity", comment: "Live activity screen title")))
-    }
-    
-    func mutate(_ updater: (inout LiveActivitySettings) -> Void) {
-        var settings = UserDefaults.standard.liveActivity
-        if settings == nil {
-            settings = LiveActivitySettings()
-        }
-        
-        updater(&settings!)
-        
-        UserDefaults.standard.liveActivity = settings
-        NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
     }
 }
 

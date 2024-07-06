@@ -100,7 +100,7 @@ struct ChartValues: Identifiable {
     }
     
     static func convert(data: [Double], startDate: Date, interval: TimeInterval, lowerLimit: Double, upperLimit: Double) -> [ChartValues] {
-        let twoHours = Date.now.addingTimeInterval(.hours(2))
+        let twoHours = Date.now.addingTimeInterval(.hours(4))
         
         return data.enumerated().filter { (index, item) in
             return startDate.addingTimeInterval(interval * Double(index)) < twoHours
