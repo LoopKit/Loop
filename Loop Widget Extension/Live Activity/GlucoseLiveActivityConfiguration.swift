@@ -72,7 +72,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                 bottomItemCurrentBG(
                                     value: item.value,
                                     trend: item.trend,
-                                    currentGlucose: context.state.currentGlucose
+                                    context: context
                                 )
                             }
                             
@@ -112,7 +112,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             .frame(width: 40, height: 40, alignment: .trailing)
                         VStack(alignment: .trailing) {
                             Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
-                                .foregroundStyle(getGlucoseColor(context.state.currentGlucose))
+                                .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
                                 .font(.subheadline)
                             Text(context.state.delta)
                                 .foregroundStyle(Color(white: 0.9))
@@ -145,7 +145,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                 }
             } compactLeading: {
                 Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
-                    .foregroundStyle(getGlucoseColor(context.state.currentGlucose))
+                    .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
                     .minimumScaleFactor(0.1)
             } compactTrailing: {
                 Text(context.state.delta)
@@ -153,7 +153,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     .minimumScaleFactor(0.1)
             } minimal: {
                 Text(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")
-                    .foregroundStyle(getGlucoseColor(context.state.currentGlucose))
+                    .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
                     .minimumScaleFactor(0.1)
             }
         }
@@ -181,12 +181,12 @@ struct GlucoseLiveActivityConfiguration: Widget {
     }
     
     @ViewBuilder
-    private func bottomItemCurrentBG(value: String, trend: GlucoseTrend?, currentGlucose: Double) -> some View {
+    private func bottomItemCurrentBG(value: String, trend: GlucoseTrend?, context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
         VStack(alignment: .center) {
             HStack {
                 Text(value + getArrowImage(trend))
                     .font(.title)
-                    .foregroundStyle(getGlucoseColor(currentGlucose))
+                    .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
                     .fontWeight(.heavy)
                     .font(Font.body.leading(.tight))
             }
@@ -241,12 +241,18 @@ struct GlucoseLiveActivityConfiguration: Widget {
         }
     }
     
-    private func getGlucoseColor(_ value: Double) -> Color {
-        if value < 4 {
+    private func getGlucoseColor(_ value: Double, context: ActivityViewContext<GlucoseActivityAttributes>) -> Color {
+        if
+            context.state.isMmol && value < context.attributes.lowerLimitChartMmol ||
+            !context.state.isMmol && value < context.attributes.lowerLimitChartMg
+        {
             return .red
         }
         
-        if value > 10 {
+        if
+            context.state.isMmol && value > context.attributes.upperLimitChartMmol ||
+            !context.state.isMmol && value > context.attributes.upperLimitChartMg
+        {
             return .orange
         }
         

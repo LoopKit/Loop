@@ -139,7 +139,7 @@ class GlucoseActivityManager {
             
             await self.activity?.update(ActivityContent(
                 state: state,
-                staleDate: Date.now.addingTimeInterval(60)
+                staleDate: Date.now.addingTimeInterval(.hours(1))
             ))
             
             if prevGlucoseSample == nil || prevGlucoseSample!.startDate.timeIntervalSince(glucose.startDate) < .minutes(-4.5) {
