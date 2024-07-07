@@ -28,58 +28,74 @@ struct GlucoseLiveActivityConfiguration: Widget {
         ActivityConfiguration(for: GlucoseActivityAttributes.self) { context in
             // Create the presentation that appears on the Lock Screen and as a
             // banner on the Home Screen of devices that don't support the Dynamic Island.
-            VStack {
-                HStack(spacing: 15) {
-                    loopIcon(context)
-                    if context.attributes.addPredictiveLine {
-                        ChartView(
-                            glucoseSamples: context.state.glucoseSamples,
-                            predicatedGlucose: context.state.predicatedGlucose,
-                            predicatedStartDate: context.state.predicatedStartDate,
-                            predicatedInterval: context.state.predicatedInterval,
-                            lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
-                            upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
-                        )
+            ZStack {
+                VStack {
+                    HStack(spacing: 15) {
+                        loopIcon(context)
+                        if context.attributes.addPredictiveLine {
+                            ChartView(
+                                glucoseSamples: context.state.glucoseSamples,
+                                predicatedGlucose: context.state.predicatedGlucose,
+                                predicatedStartDate: context.state.predicatedStartDate,
+                                predicatedInterval: context.state.predicatedInterval,
+                                lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
+                                upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
+                            )
                             .frame(height: 85)
-                    } else {
-                        ChartView(
-                            glucoseSamples: context.state.glucoseSamples,
-                            lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
-                            upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
-                        )
+                        } else {
+                            ChartView(
+                                glucoseSamples: context.state.glucoseSamples,
+                                lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
+                                upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
+                            )
                             .frame(height: 85)
+                        }
                     }
-                }
-                
-                HStack {
-                    bottomSpacer(border: false)
                     
-                    let endIndex = context.state.bottomRow.endIndex - 1
-                    ForEach(Array(context.state.bottomRow.enumerated()), id: \.element) { (index, item) in
-                        switch (item.type) {
-                        case .generic:
-                            bottomItemGeneric(
-                                title: item.label,
-                                value: item.value,
-                                unit: LocalizedString(item.unit, comment: "No comment")
-                            )
+                    HStack {
+                        bottomSpacer(border: false)
+                        
+                        let endIndex = context.state.bottomRow.endIndex - 1
+                        ForEach(Array(context.state.bottomRow.enumerated()), id: \.element) { (index, item) in
+                            switch (item.type) {
+                            case .generic:
+                                bottomItemGeneric(
+                                    title: item.label,
+                                    value: item.value,
+                                    unit: LocalizedString(item.unit, comment: "No comment")
+                                )
+                                
+                            case .basal:
+                                BasalViewActivity(percent: item.percentage, rate: item.rate)
+                                
+                            case .currentBg:
+                                bottomItemCurrentBG(
+                                    value: item.value,
+                                    trend: item.trend,
+                                    currentGlucose: context.state.currentGlucose
+                                )
+                            }
                             
-                        case .basal:
-                            BasalViewActivity(percent: item.percentage, rate: item.rate)
-                            
-                        case .currentBg:
-                            bottomItemCurrentBG(
-                                value: item.value,
-                                trend: item.trend
-                            )
+                            if index != endIndex {
+                                bottomSpacer(border: true)
+                            }
                         }
                         
-                        if index != endIndex {
-                            bottomSpacer(border: true)
-                        }
+                        bottomSpacer(border: false)
                     }
-                    
-                    bottomSpacer(border: false)
+                }
+                if context.isStale {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Text(NSLocalizedString("Open the app to update the widget", comment: "No comment"))
+                            Spacer()
+                        }
+                        Spacer()
+                    }
+                    .background(.ultraThinMaterial.opacity(0.8))
+                    .padding(.all, -15)
                 }
             }
                 .privacySensitive()
@@ -91,13 +107,41 @@ struct GlucoseLiveActivityConfiguration: Widget {
             
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    HStack{}
+                    HStack(alignment: .center) {
+                        loopIcon(context)
+                            .frame(width: 40, height: 40, alignment: .trailing)
+                        VStack(alignment: .trailing) {
+                            Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
+                                .foregroundStyle(getGlucoseColor(context.state.currentGlucose))
+                                .font(.subheadline)
+                            Text(context.state.delta)
+                                .foregroundStyle(Color(white: 0.9))
+                                .font(.subheadline)
+                        }
+                    }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     HStack{}
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack{}
+                    if context.attributes.addPredictiveLine {
+                        ChartView(
+                            glucoseSamples: context.state.glucoseSamples,
+                            predicatedGlucose: context.state.predicatedGlucose,
+                            predicatedStartDate: context.state.predicatedStartDate,
+                            predicatedInterval: context.state.predicatedInterval,
+                            lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
+                            upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
+                        )
+                            .frame(height: 80)
+                    } else {
+                        ChartView(
+                            glucoseSamples: context.state.glucoseSamples,
+                            lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
+                            upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
+                        )
+                            .frame(height: 80)
+                    }
                 }
             } compactLeading: {
                 Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
@@ -130,18 +174,21 @@ struct GlucoseLiveActivityConfiguration: Widget {
             Text("\(value)\(unit)")
                 .font(.headline)
                 .fontWeight(.heavy)
+                .font(Font.body.leading(.tight))
             Text(title)
                 .font(.subheadline)
         }
     }
     
     @ViewBuilder
-    private func bottomItemCurrentBG(value: String, trend: GlucoseTrend?) -> some View {
+    private func bottomItemCurrentBG(value: String, trend: GlucoseTrend?, currentGlucose: Double) -> some View {
         VStack(alignment: .center) {
             HStack {
                 Text(value + getArrowImage(trend))
                     .font(.title)
+                    .foregroundStyle(getGlucoseColor(currentGlucose))
                     .fontWeight(.heavy)
+                    .font(Font.body.leading(.tight))
             }
         }
     }
