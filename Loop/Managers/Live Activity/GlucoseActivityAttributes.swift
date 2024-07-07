@@ -37,6 +37,10 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
     }
     
     public let addPredictiveLine: Bool
+    public let upperLimitChartMmol: Double
+    public let lowerLimitChartMmol: Double
+    public let upperLimitChartMg: Double
+    public let lowerLimitChartMg: Double
 }
 
 public struct BottomRowItem: Codable, Hashable {

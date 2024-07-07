@@ -13,32 +13,21 @@ import Charts
 struct ChartView: View {
     private let glucoseSampleData: [ChartValues]
     private let predicatedData: [ChartValues]
-    private let lowerBoundY: Double
-    private let upperBoundY: Double
     
-    private let high = Double(10)
-    private let low = Double(4)
-    
-    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?) {
-        self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: low, upperLimit: high)
+    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, lowerLimit: Double, upperLimit: Double) {
+        self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = ChartValues.convert(
             data: predicatedGlucose,
             startDate: predicatedStartDate ?? Date.now,
             interval: predicatedInterval ?? .minutes(5),
-            lowerLimit: low,
-            upperLimit: high
+            lowerLimit: lowerLimit,
+            upperLimit: upperLimit
         )
-        
-        self.lowerBoundY = min(4, glucoseSampleData.min { $0.y < $1.y }?.y ?? 0, predicatedData.min { $0.y < $1.y }?.y ?? 0)
-        self.upperBoundY = max(10, glucoseSampleData.max { $0.y < $1.y }?.y ?? 0, predicatedData.max { $0.y < $1.y }?.y ?? 0)
     }
     
-    init(glucoseSamples: [GlucoseSampleAttributes]) {
-        self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: low, upperLimit: high)
+    init(glucoseSamples: [GlucoseSampleAttributes], lowerLimit: Double, upperLimit: Double) {
+        self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = []
-        
-        self.lowerBoundY = min(4, glucoseSampleData.min { $0.y < $1.y }?.y ?? 0)
-        self.upperBoundY = max(10, glucoseSampleData.max { $0.y < $1.y }?.y ?? 0)
     }
     
     var body: some View {

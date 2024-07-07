@@ -159,7 +159,13 @@ class GlucoseActivityManager {
             } else if newSettings.enabled && self.activity == nil {
                 initEmptyActivity(settings: newSettings)
                 
-            } else if newSettings.addPredictiveLine != self.settings.addPredictiveLine {
+            } else if
+                newSettings.addPredictiveLine != self.settings.addPredictiveLine ||
+                newSettings.lowerLimitChartMmol != self.settings.lowerLimitChartMmol ||
+                newSettings.upperLimitChartMmol != self.settings.upperLimitChartMmol ||
+                newSettings.lowerLimitChartMg != self.settings.lowerLimitChartMg ||
+                newSettings.upperLimitChartMg != self.settings.upperLimitChartMg
+            {
                 await self.activity?.end(nil, dismissalPolicy: .immediate)
                 self.activity = nil
                 
@@ -190,7 +196,13 @@ class GlucoseActivityManager {
         do {
             if let dynamicState = dynamicState {
                 self.activity = try Activity.request(
-                    attributes: GlucoseActivityAttributes(addPredictiveLine: self.settings.addPredictiveLine),
+                    attributes: GlucoseActivityAttributes(
+                        addPredictiveLine: self.settings.addPredictiveLine,
+                        upperLimitChartMmol: self.settings.upperLimitChartMmol,
+                        lowerLimitChartMmol: self.settings.lowerLimitChartMmol,
+                        upperLimitChartMg: self.settings.upperLimitChartMg,
+                        lowerLimitChartMg: self.settings.lowerLimitChartMg
+                    ),
                     content: .init(state: dynamicState, staleDate: nil),
                     pushType: .token
                 )
@@ -325,7 +337,13 @@ class GlucoseActivityManager {
             )
             
             self.activity = try Activity.request(
-                attributes: GlucoseActivityAttributes(addPredictiveLine: settings.addPredictiveLine),
+                attributes: GlucoseActivityAttributes(
+                    addPredictiveLine: settings.addPredictiveLine,
+                    upperLimitChartMmol: self.settings.upperLimitChartMmol,
+                    lowerLimitChartMmol: self.settings.lowerLimitChartMmol,
+                    upperLimitChartMg: self.settings.upperLimitChartMg,
+                    lowerLimitChartMg: self.settings.lowerLimitChartMg
+                ),
                 content: .init(state: dynamicState, staleDate: nil),
                 pushType: .token
             )
