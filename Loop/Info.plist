@@ -6,8 +6,6 @@
 	<string>$(APP_GROUP_IDENTIFIER)</string>
 	<key>AppStoreURL</key>
 	<string>$(APP_STORE_URL)</string>
-	<key>IsInvestigationalDevice</key>
-	<string>$(IS_INVESTIGATIONAL_DEVICE)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.loopkit.background-task.critical-event-log.historical-export</string>

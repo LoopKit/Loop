@@ -1615,7 +1615,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucosePreference)
                 .environment(\.appName, Bundle.main.bundleDisplayName)
-                .environment(\.isInvestigationalDevice, Bundle.main.isInvestigationalDevice)
+                .environment(\.isInvestigationalDevice, FeatureFlags.isInvestigationalDevice)
                 .environment(\.loopStatusColorPalette, .loopStatus),
             isModalInPresentation: false)
         present(hostingController, animated: true)
