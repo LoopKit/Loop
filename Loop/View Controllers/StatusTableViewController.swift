@@ -1431,7 +1431,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let hostingController = DismissibleHostingController(
             content: bolusEntryView(
                 enableManualGlucoseEntry: enableManualGlucoseEntry
-            )
+            ),
+            guidanceColors: .default
         )
         
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
