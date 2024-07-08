@@ -147,7 +147,7 @@ class OnboardingManager {
     }
 
     private func displayOnboarding(_ onboarding: OnboardingUI, resuming: Bool) -> Bool {
-        var onboardingViewController = onboarding.onboardingViewController(onboardingProvider: self, displayGlucosePreference: deviceDataManager.displayGlucosePreference, colorPalette: .default)
+        var onboardingViewController = onboarding.onboardingViewController(onboardingProvider: self, displayGlucosePreference: deviceDataManager.displayGlucosePreference, colorPalette: .default, adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled)
         onboardingViewController.cgmManagerOnboardingDelegate = deviceDataManager
         onboardingViewController.pumpManagerOnboardingDelegate = deviceDataManager
         onboardingViewController.serviceOnboardingDelegate = servicesManager
