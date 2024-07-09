@@ -124,6 +124,7 @@ class GlucoseActivityManager {
 
             let state = GlucoseActivityAttributes.ContentState(
                 date: glucose.startDate,
+                ended: false,
                 currentGlucose: current,
                 trendType: statusContext?.glucoseDisplay?.trendType,
                 delta: delta,
@@ -325,6 +326,7 @@ class GlucoseActivityManager {
         do {
             let dynamicState = GlucoseActivityAttributes.ContentState(
                 date: Date.now,
+                ended: true,
                 currentGlucose: 0,
                 trendType: nil,
                 delta: "",

@@ -80,8 +80,8 @@ public struct LiveActivitySettings: Codable {
     
     private static let defaultUpperLimitMmol = Double(10)
     private static let defaultLowerLimitMmol = Double(4)
-    private static let defaultUpperLimitMg = Double(72)
-    private static let defaultLowerLimitMg = Double(180)
+    private static let defaultUpperLimitMg = Double(180)
+    private static let defaultLowerLimitMg = Double(72)
     
     public init(from decoder:Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)

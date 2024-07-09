@@ -84,7 +84,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                         bottomSpacer(border: false)
                     }
                 }
-                if context.isStale {
+                if context.state.ended {
                     VStack {
                         Spacer()
                         HStack {

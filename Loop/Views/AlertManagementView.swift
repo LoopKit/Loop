@@ -21,7 +21,6 @@ struct AlertManagementView: View {
 
     @State private var showMuteAlertOptions: Bool = false
     @State private var showHowMuteAlertWork: Bool = false
-    @State private var unit: HKUnit = HKUnit.millimolesPerLiter
 
     private var formatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -61,14 +60,6 @@ struct AlertManagementView: View {
     public init(checker: AlertPermissionsChecker, alertMuter: AlertMuter = AlertMuter()) {
         self.checker = checker
         self.alertMuter = alertMuter
-        
-        self.setUnit()
-    }
-    
-    private func setUnit() {
-        Task {
-            self.unit = await HKHealthStore().cachedPreferredUnits(for: .bloodGlucose) ?? HKUnit.millimolesPerLiter
-        }
     }
 
     var body: some View {
@@ -169,7 +160,7 @@ struct AlertManagementView: View {
                 }
             }
             
-            NavigationLink(destination: LiveActivityManagementView(unit: self.unit))
+            NavigationLink(destination: LiveActivityManagementView())
             {
                     Text(NSLocalizedString("Live activity", comment: "Alert Permissions live activity"))
             }

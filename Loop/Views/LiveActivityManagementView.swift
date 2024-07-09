@@ -12,7 +12,7 @@ import LoopCore
 import HealthKit
 
 struct LiveActivityManagementView: View {
-    let unit: HKUnit
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     
     private var enabled: Binding<Bool> =
         Binding(
@@ -90,15 +90,11 @@ struct LiveActivityManagementView: View {
             }
         )
     
-    public init(unit: HKUnit) {
-        self.unit = unit
-    }
-    
     var body: some View {
         List {
             Toggle(NSLocalizedString("Enabled", comment: "Title for enable live activity toggle"), isOn: enabled)
             Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: addPredictiveLine)
-            if self.unit == .millimolesPerLiter {
+            if self.displayGlucosePreference.unit == .millimolesPerLiter {
                 TextInput(label: "Upper limit chart", value: upperLimitMmol)
                 TextInput(label: "Lower limit chart", value: lowerLimitMmol)
             } else {
@@ -124,7 +120,7 @@ struct LiveActivityManagementView: View {
             Spacer()
             TextField("", value: value, format: .number)
                 .multilineTextAlignment(.trailing)
-            Text(self.unit.localizedShortUnitString)
+            Text(self.displayGlucosePreference.unit.localizedShortUnitString)
         }
     }
     
@@ -136,8 +132,4 @@ struct LiveActivityManagementView: View {
         UserDefaults.standard.liveActivity = settings
         NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
     }
-}
-
-#Preview {
-    LiveActivityManagementView(unit: HKUnit.millimolesPerLiter)
 }

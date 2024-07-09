@@ -15,6 +15,7 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         // Meta data
         public let date: Date
+        public let ended: Bool
         
         // Dynamic island data
         public let currentGlucose: Double
