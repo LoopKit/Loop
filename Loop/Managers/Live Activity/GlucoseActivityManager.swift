@@ -142,7 +142,8 @@ class GlucoseActivityManager {
                 staleDate: Date.now.addingTimeInterval(.hours(1))
             ))
             
-            if prevGlucoseSample == nil || prevGlucoseSample!.startDate.timeIntervalSince(glucose.startDate) < .minutes(-4.5) {
+            if 
+                prevGlucoseSample == nil || prevGlucoseSample!.startDate.timeIntervalSince(glucose.startDate) < .minutes(-4.5) {
                 self.prevGlucoseSample = glucose
             }
         }

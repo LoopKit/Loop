@@ -113,15 +113,20 @@ struct GlucoseLiveActivityConfiguration: Widget {
                         VStack(alignment: .trailing) {
                             Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
                                 .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
-                                .font(.subheadline)
-                            Text(context.state.delta)
-                                .foregroundStyle(Color(white: 0.9))
-                                .font(.subheadline)
+                                .font(.title2)
+                                .fontWeight(.heavy)
                         }
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    HStack{}
+                    HStack{
+                        Text(context.state.delta)
+                            .foregroundStyle(Color(white: 0.9))
+                            .font(.headline)
+                        Text(context.state.isMmol ? HKUnit.millimolesPerLiter.localizedShortUnitString : HKUnit.milligramsPerDeciliter.localizedShortUnitString)
+                            .foregroundStyle(Color(white: 0.7))
+                            .font(.subheadline)
+                    }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     if context.attributes.addPredictiveLine {
@@ -133,14 +138,14 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                             upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
                         )
-                            .frame(height: 80)
+                            .frame(height: 75)
                     } else {
                         ChartView(
                             glucoseSamples: context.state.glucoseSamples,
                             lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                             upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
                         )
-                            .frame(height: 80)
+                            .frame(height: 75)
                     }
                 }
             } compactLeading: {
