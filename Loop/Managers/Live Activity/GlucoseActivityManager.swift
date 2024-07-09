@@ -54,7 +54,6 @@ class GlucoseActivityManager {
     
     init?(glucoseStore: GlucoseStoreProtocol, doseStore: DoseStoreProtocol) {
         guard self.activityInfo.areActivitiesEnabled else {
-            print("ERROR: Activities are not enabled... :(")
             return nil
         }
         
