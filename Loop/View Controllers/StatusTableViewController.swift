@@ -1429,9 +1429,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentBolusEntryView(enableManualGlucoseEntry: Bool = false) {
         let hostingController = DismissibleHostingController(
-            content: bolusEntryView(
+            rootView: bolusEntryView(
                 enableManualGlucoseEntry: enableManualGlucoseEntry
-            )
+            ),
+            isModalInPresentation: false
         )
         
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
