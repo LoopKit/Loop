@@ -253,7 +253,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 case .reservoir:
                     self.values = .reservoir(try await doseStore.getReservoirValues(since: sinceDate, limit: nil))
                 case .history:
-                    self.values = .history(try await doseStore.getPumpEventValues(since: sinceDate))
+                    self.values = .history(try await self.getPumpEvents(since: sinceDate))
                 case .manualEntryDose:
                     self.values = .manualEntryDoses(try await doseStore.getManuallyEnteredDoses(since: sinceDate))
                 }
@@ -263,6 +263,13 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             } catch {
                 self.state = .unavailable(error)
             }
+        }
+    }
+
+    private func getPumpEvents(since sinceDate: Date) async throws -> [PersistedPumpEvent] {
+        let events = try await doseStore.getPumpEventValues(since: sinceDate)
+        return events.filter { event in
+            return event.dose != nil
         }
     }
 
