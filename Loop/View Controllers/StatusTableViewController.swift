@@ -786,8 +786,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 if oldDose != newDose {
                     tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
                 }
-            case (.cancelingBolus, .cancelingBolus), (.cancelingBolus, .bolusing(_)), (.canceledBolus(_), .cancelingBolus), (.canceledBolus(_), .bolusing(_)):
-                // these updates cause flickering and/or confusion.
+            // these updates cause flickering and/or confusion.
+            case (.cancelingBolus, .cancelingBolus):
+                break
+            case (.cancelingBolus, .bolusing(_)):
+                break
+            case (.canceledBolus(_), .cancelingBolus):
+                break
+            case (.canceledBolus(_), .bolusing(_)):
                 break
             default:
                 tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
@@ -1082,6 +1088,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     let progressCell = tableView.dequeueReusableCell(withIdentifier: BolusProgressTableViewCell.className, for: indexPath) as! BolusProgressTableViewCell
                     progressCell.selectionStyle = .none
                     progressCell.configuration = .canceling
+                    progressCell.activityIndicator.startAnimating()
                     return progressCell
                 case .canceledBolus(let dose):
                     let progressCell = tableView.dequeueReusableCell(withIdentifier: BolusProgressTableViewCell.className, for: indexPath) as! BolusProgressTableViewCell
@@ -1234,6 +1241,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         show(vc, sender: tableView.cellForRow(at: indexPath))
                     }
                 case .bolusing(var dose):
+                    bolusState = .canceling
                     updateBannerAndHUDandStatusRows(statusRowMode: .cancelingBolus, newSize: nil, animated: true)
                     Task {
                         try? await Task.sleep(nanoseconds: NSEC_PER_SEC)
@@ -1243,6 +1251,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                             DispatchQueue.main.async {
                                 switch result {
                                 case .success:
+                                    self.updateBannerAndHUDandStatusRows(statusRowMode: .canceledBolus(dose: dose), newSize: nil, animated: true)
+                                    self.bolusState = .noBolus
                                     Task {
                                         try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 10)
                                         self.canceledDose = nil
