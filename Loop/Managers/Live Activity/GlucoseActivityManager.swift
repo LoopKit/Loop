@@ -26,9 +26,6 @@ class GlucoseActivityManager {
     private let glucoseStore: GlucoseStoreProtocol
     private let doseStore: DoseStoreProtocol
     
-    private var lastGlucoseSample: GlucoseSampleValue?
-    private var prevGlucoseSample: GlucoseSampleValue?
-    
     private var startDate: Date = Date.now
     private var settings: LiveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
     
@@ -65,7 +62,9 @@ class GlucoseActivityManager {
             self.settings = LiveActivitySettings()
         }
         
-        NotificationCenter.default.addObserver(self, selector: #selector(self.settingsChanged), name: .LiveActivitySettingsChanged, object: nil)
+        let nc = NotificationCenter.default
+        nc.addObserver(self, selector: #selector(self.appMovedToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        nc.addObserver(self, selector: #selector(self.settingsChanged), name: .LiveActivitySettingsChanged, object: nil)
         guard self.settings.enabled else {
             return
         }
@@ -78,19 +77,15 @@ class GlucoseActivityManager {
     }
     
     public func update() {
-        self.update(glucose: self.lastGlucoseSample)
-    }
-    
-    public func update(glucose: GlucoseSampleValue?) {
         Task {
             if self.needsRecreation(), await UIApplication.shared.applicationState == .active {
                 // activity is no longer visible or old. End it and try to push the update again
                 await endActivity()
-                update(glucose: glucose)
+                update()
                 return
             }
             
-            guard let glucose = glucose, let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) else {
+            guard let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) else {
                 return
             }
             
@@ -99,16 +94,21 @@ class GlucoseActivityManager {
             let statusContext = UserDefaults.appGroup?.statusExtensionContext
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             
-            let current = glucose.quantity.doubleValue(for: unit)
-            self.lastGlucoseSample = glucose
+            let glucoseSamples = self.getGlucoseSample(unit: unit)
+            guard let currentGlucose = glucoseSamples.last else {
+                return
+            }
+            
+            let current = currentGlucose.quantity.doubleValue(for: unit)
             
             var delta: String = "+\(glucoseFormatter.string(from: Double(0)) ?? "")"
-            if let prevSample = self.prevGlucoseSample {
+            if glucoseSamples.count > 1 {
+                let prevSample = glucoseSamples[glucoseSamples.count - 2]
                 let deltaValue = current - (prevSample.quantity.doubleValue(for: unit))
                 delta = "\(deltaValue < 0 ? "-" : "+")\(glucoseFormatter.string(from: abs(deltaValue)) ?? "??")"
             }
             
-            let glucoseSamples = self.getGlucoseSample(unit: unit)
+            
             let bottomRow = self.getBottomRow(
                 currentGlucose: current,
                 delta: delta,
@@ -122,7 +122,7 @@ class GlucoseActivityManager {
             }
 
             let state = GlucoseActivityAttributes.ContentState(
-                date: glucose.startDate,
+                date: currentGlucose.startDate,
                 ended: false,
                 currentGlucose: current,
                 trendType: statusContext?.glucoseDisplay?.trendType,
@@ -131,7 +131,11 @@ class GlucoseActivityManager {
                 isCloseLoop: statusContext?.isClosedLoop ?? false,
                 lastCompleted: statusContext?.lastLoopCompleted,
                 bottomRow: bottomRow,
-                glucoseSamples: glucoseSamples,
+                // In order to prevent maxSize errors, only allow the last 100 samples to be sent
+                // Will most likely not be an issue, might be an issue for debugging/CGM simulator with 5sec interval
+                glucoseSamples: glucoseSamples.suffix(100).map { item in
+                    return GlucoseSampleAttributes(x: item.startDate, y: item.quantity.doubleValue(for: unit))
+                },
                 predicatedGlucose: predicatedGlucose,
                 predicatedStartDate: statusContext?.predictedGlucose?.startDate,
                 predicatedInterval: statusContext?.predictedGlucose?.interval
@@ -141,11 +145,6 @@ class GlucoseActivityManager {
                 state: state,
                 staleDate: Date.now.addingTimeInterval(.hours(1))
             ))
-            
-            if 
-                prevGlucoseSample == nil || prevGlucoseSample!.startDate.timeIntervalSince(glucose.startDate) < .minutes(-4.5) {
-                self.prevGlucoseSample = glucose
-            }
         }
     }
     
@@ -176,6 +175,21 @@ class GlucoseActivityManager {
             }
             
             self.settings = newSettings
+            update()
+        }
+    }
+    
+    @objc private func appMovedToForeground() {
+        guard let activity = self.activity else {
+            return
+        }
+        
+        Task {
+            await activity.end(nil, dismissalPolicy: .immediate)
+            await self.endUnknownActivities()
+            self.activity = nil
+            
+            initEmptyActivity(settings: self.settings)
             update()
         }
     }
@@ -253,9 +267,9 @@ class GlucoseActivityManager {
         return iob
     }
     
-    private func getGlucoseSample(unit: HKUnit) -> [GlucoseSampleAttributes] {
+    private func getGlucoseSample(unit: HKUnit) -> [StoredGlucoseSample] {
         let updateGroup = DispatchGroup()
-        var samples: [GlucoseSampleAttributes] = []
+        var samples: [StoredGlucoseSample] = []
         
         updateGroup.enter()
         
@@ -270,9 +284,7 @@ class GlucoseActivityManager {
             case .failure:
                 break
             case .success(let data):
-                samples = data.suffix(100).map { item in
-                    return GlucoseSampleAttributes(x: item.startDate, y: item.quantity.doubleValue(for: unit))
-                }
+                samples = data
                 break
             }
             

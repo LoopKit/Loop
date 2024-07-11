@@ -187,7 +187,7 @@ final class LoopDataManager {
             ) { (note) in
                 self.dataAccessQueue.async {
                     self.logger.default("Received notification of glucose samples changing")
-                    self.liveActivityManager?.update(glucose: self.glucoseStore.latestGlucose)
+                    self.liveActivityManager?.update()
                     
                     self.glucoseMomentumEffect = nil
                     self.remoteRecommendationNeedsUpdating = true
