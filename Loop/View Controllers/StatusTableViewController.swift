@@ -557,7 +557,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         // Show the larger of the value either before or after the current date
         if let activeInsulin = loopManager.activeInsulin {
-            self.currentIOBDescription = insulinFormatter.string(from: activeInsulin.quantity, includeUnit: false)
+            self.currentIOBDescription = insulinFormatter.string(from: activeInsulin.quantity, includeUnit: true)
         } else {
             self.currentIOBDescription = nil
         }
