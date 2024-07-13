@@ -29,7 +29,7 @@
 "MZU-QV-PtZ.text" = "TYTUŁ";
 
 /* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
-"nC0-X3-oFJ.text" = "Pominięcie";
+"nC0-X3-oFJ.text" = "Cel Tymczasowy";
 
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
 "rNf-Mh-tID.title" = "Loop";

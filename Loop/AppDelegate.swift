@@ -20,6 +20,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         log.default("%{public}@ with launchOptions: %{public}@", #function, String(describing: launchOptions))
 
+        setenv("CFNETWORK_DIAGNOSTICS", "3", 1)
+
+        log.default("lastPathComponent = %{public}@", String(describing: Bundle.main.appStoreReceiptURL?.lastPathComponent))
+
         loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
         loopAppManager.launch()
         return loopAppManager.isLaunchComplete
@@ -43,6 +47,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         log.default(#function)
+        
+        loopAppManager.askUserToConfirmLoopReset()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -76,6 +82,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
         log.default(#function)
 
         completionHandler(loopAppManager.handleRemoteNotification(userInfo as? [String: AnyObject]) ? .noData : .failed)
+    }
+    
+    // MARK: - UIApplicationDelegate - Deeplinking
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        loopAppManager.handle(url)
     }
 
     // MARK: - UIApplicationDelegate - Continuity

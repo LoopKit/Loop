@@ -125,9 +125,6 @@
 /* Alert message for a missing pump error */
 "A pump must be configured before a bolus can be delivered." = "O pompă trebuie configurată înainte ca un bolus să poată fi livrat.";
 
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "Timp de absorbție";
-
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
 
@@ -284,8 +281,7 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Efecte carbohidrați";
 
-/* Back button text for bolus screen to return to carb entry screen
-   Label for carb entry row on bolus screen */
+/* Label for carb entry row on bolus screen */
 "Carb Entry" = "Cantitate CH";
 
 /* Details for configuration error when carb ratio schedule is missing */
@@ -297,9 +293,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Adaugă carbohidrați";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Editează carbohidrați";
 
 /* Title for bolus screen warning when carbohydrate entry is too large */
 "Carbohydrate Entry Too Large" = "Intrarea de carbohidrați este prea mare";
@@ -331,7 +324,8 @@
 /* Carb entry section footer text explaining absorption time */
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Alegeți o durată mai lungă de absorbție pentru mese mai mari sau pentru cele care conțin grăsimi și proteine. Nu e necesară o valoare exactă, scopul e să oferim doar o ghidare pentru algoritm.";
 
-/* The button label of the action used to dismiss the unsafe notification permission alert */
+/* Button title to close view
+   The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Închide";
 
 /* The title text for the looping enabled switch cell */
@@ -456,7 +450,7 @@
 /* The title of the Dosing Strategy section in settings */
 "Dosing Strategy" = "Strategie de dozare";
 
-/* Remote command error description: duration exceed max (1: max duration in hours). */
+/* Override error description: duration exceed max (1: max duration in hours). */
 "Duration exceeds: %1$.1f hours" = "Durata depășește: %1$.1f ore";
 
 /* Message to the user to enable bluetooth */
@@ -495,10 +489,10 @@
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Ajunge la %@";
 
-/* Remote command error description: bolus exceeds maximum bolus in settings. */
+/* Bolus error description: bolus exceeds maximum bolus in settings. */
 "Exceeds maximum allowed bolus in settings" = "Depășește bolusul maxim permis în setări";
 
-/* Remote command error description: carbs exceed maximum amount. */
+/* Carb error description: carbs exceed maximum amount. */
 "Exceeds maximum allowed carbs" = "Depășește maximul de carbohidrați permis";
 
 /* The title of the alert describing a maximum bolus validation error */
@@ -568,9 +562,6 @@
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Nedeterminat";
 
-/* Title of the alert when carb input maximum was exceeded. */
-"Input Maximum Exceeded" = "Maximul de intrare a fost depășit";
-
 /* Title of the prediction input effect for insulin */
 "Insulin" = "Insulină";
 
@@ -581,7 +572,7 @@
 "Insulin adjustments have been disabled!" = "Ajustările de insulină au fost dezactivate!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Administrare insulină";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Efecte insulină";
@@ -609,13 +600,10 @@
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Întrerupere %1$@: <b>%2$@</b> din %3$@ %4$@";
 
-/* Remote command error description: invalid absorption time. */
-"Invalid absorption time: %d hours" = "Timp invalid de absorbție: %li ore";
-
-/* Remote command error description: invalid bolus amount. */
+/* Bolus error description: invalid bolus amount. */
 "Invalid Bolus Amount" = "Cantitate invalidă de bolus";
 
-/* Remote command error description: invalid carb amount. */
+/* Carb error description: invalid carb amount. */
 "Invalid carb amount" = "Cantitate de carbohidrați invalidă";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
@@ -698,9 +686,6 @@
 /* Title for bolus screen warning when max bolus is exceeded */
 "Maximum Bolus Exceeded" = "Bolusul maxim depășit";
 
-/* Alert title when maximum duration exceeded. */
-"Maximum Duration Exceeded" = "Durata maximă depășită";
-
 /* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Bolus prandial";
 
@@ -713,7 +698,7 @@
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Date lipsă: %1$@";
 
-/* Remote command error description: missing maximum bolus in settings. */
+/* Bolus error description: missing maximum bolus in settings. */
 "Missing maximum allowed bolus in settings" = "Lipsește bolusul maxim permis în setări";
 
 /* The short unit display string for millimoles of glucose per liter */
@@ -722,23 +707,21 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Efecte momentum";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Detalii";
 
-/* Label for toggle to mute all alerts */
+/* Label for button to mute all alerts */
 "Mute All Alerts" = "Dezactivați toate alertele";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Necesită atenție";
 
-/* Remote command error description: negative duration error. */
+/* Override error description: negative duration error. */
 "Negative duration not allowed" = "Durata negativă nu este permisă";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
-
-/* Description of temporary mute alerts */
-"No alerts will sound while muted. Once this period ends, your alerts and alarms will resume as normal." = "Nicio alertă nu va suna când este dezactivat sunetul. Odată ce această perioadă se încheie, alertele și alarmele dvs. vor relua normal.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -795,6 +778,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -899,9 +883,6 @@
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
 "Remote Carbs Entry: %d grams" = "Introducere de la distanță a carbohidraților: %d grame";
 
-/* The notification title for the remote command expiration error */
-"Remote Command Expired" = "Comanda de la distanță a expirat";
-
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Rezervor";
 
@@ -919,9 +900,6 @@
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Programat";
-
-/* List header for mute all alerts period */
-"Select Mute Period" = "Selectați perioada de dezactivare";
 
 /* The title of the services section in settings */
 "Services" = "Servicii";
@@ -950,7 +928,7 @@
 /* Software update button link text */
 "Software Update" = "Actualizare de software";
 
-/* Remote command error description: invalid start time is out of range. */
+/* Carb error description: invalid start time is out of range. */
 "Start time is out of range: %@" = "Ora de începere este în afara intervalului: %@";
 
 /* The format for the description of a temporary override start date */
@@ -960,8 +938,6 @@
 "Starting Bolus" = "Start Bolus";
 
 /* Section title for Support
-   Support screen title
-   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Asistenţă";
 
@@ -986,9 +962,6 @@
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Atingeți pentru a opri";
 
-/* The title of the cell indicating alerts are temporarily muted */
-"Temp Mute Alerts" = "Dezactivare temporară a alertelor";
-
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "Cantitatea de bolus introdusă este mai mică decât valoarea minimă administrabilă.";
 
@@ -1000,9 +973,6 @@
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Modelul vechi utilizat de Loop, permite personalizarea duratei de acțiune.";
-
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "Timpul maxim de absorbție este %@";
 
 /* Alert body displayed for quantity greater than max (1: maximum quantity in grams) */
 "The maximum allowed amount is %@ grams." = "Cantitatea maximă admisă este de %@ grame.";
@@ -1019,14 +989,8 @@
 /* Alert message for a missing maximum bolus setting error */
 "The maximum bolus setting must be configured before a bolus can be delivered." = "Trebuie sa configurați o valoare maxima pentru bolus înainte ca acesta să poată fi livrat.";
 
-/* The notification body for a remote command expiration. (1: Expiration in minutes) */
-"The remote command expired %.0f minutes ago." = "Comanda de la distanță a expirat acum %.0f minute.";
-
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Setări Terapie";
-
-/* Title of the carb entry date picker cell */
-"Time" = "Timp";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Notificări urgente";
@@ -1056,13 +1020,15 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Nu s-a putut opri livrarea bolusului. Mutați iPhone-ul mai aproape de pompă și încercați din nou. Verificați istoricul administrării insulinei pentru detalii și monitorizați îndeaproape glicemia.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Necunoscut";
 
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Eroare necunoscută: %1$@";
 
-/* Remote command error description: unknown preset (1: preset name). */
+/* Override error description: unknown preset (1: preset name). */
 "Unknown preset: %1$@" = "Presetare necunoscută: %1$@";
 
 /* Unknown amount of time in settings' profile expiration section */

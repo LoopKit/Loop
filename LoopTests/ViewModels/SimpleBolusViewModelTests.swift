@@ -26,7 +26,7 @@ class SimpleBolusViewModelTests: XCTestCase {
     var enactedBolus: (units: Double, activationType: BolusActivationType)?
     var currentIOB: InsulinValue = SimpleBolusViewModelTests.noIOB
     var currentRecommendation: Double = 0
-    var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
+    var displayGlucosePreference: DisplayGlucosePreference = DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
 
     static var noIOB = InsulinValue(startDate: Date(), value: 0)
     static var someIOB = InsulinValue(startDate: Date(), value: 2.4)
@@ -205,18 +205,18 @@ class SimpleBolusViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.manualGlucoseString, "")
         viewModel.manualGlucoseString = "260"
         XCTAssertEqual(viewModel.manualGlucoseString, "260")
-        self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .millimolesPerLiter)
+        self.displayGlucosePreference.unitDidChange(to: .millimolesPerLiter)
         XCTAssertEqual(viewModel.manualGlucoseString, "14.4")
-        self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .milligramsPerDeciliter)
+        self.displayGlucosePreference.unitDidChange(to: .milligramsPerDeciliter)
         XCTAssertEqual(viewModel.manualGlucoseString, "260")
-        self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .millimolesPerLiter)
+        self.displayGlucosePreference.unitDidChange(to: .millimolesPerLiter)
         XCTAssertEqual(viewModel.manualGlucoseString, "14.4")
 
         viewModel.manualGlucoseString = "14.0"
         XCTAssertEqual(viewModel.manualGlucoseString, "14.0")
         viewModel.manualGlucoseString = "14.4"
         XCTAssertEqual(viewModel.manualGlucoseString, "14.4")
-        self.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: .milligramsPerDeciliter)
+        self.displayGlucosePreference.unitDidChange(to: .milligramsPerDeciliter)
         XCTAssertEqual(viewModel.manualGlucoseString, "259")
     }
     
@@ -294,12 +294,12 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         
         addedCarbEntry = carbEntry
         let storedCarbEntry = StoredCarbEntry(
+            startDate: carbEntry.startDate,
+            quantity: carbEntry.quantity,
             uuid: UUID(),
             provenanceIdentifier: UUID().uuidString,
             syncIdentifier: UUID().uuidString,
             syncVersion: 1,
-            startDate: carbEntry.startDate,
-            quantity: carbEntry.quantity,
             foodType: carbEntry.foodType,
             absorptionTime: carbEntry.absorptionTime,
             createdByCurrentApp: true,

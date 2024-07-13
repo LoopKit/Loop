@@ -231,6 +231,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -261,13 +262,12 @@
 /* The title of the nightscout site URL credential */
 "Site URL" = "URL adresa webu";
 
-/* Title of the carb entry date picker cell */
-"Time" = "Čas";
-
 /* The short unit display string for international units of insulin */
 "U" = "j";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Neznáme";
 

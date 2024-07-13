@@ -36,19 +36,130 @@ class MockDelegate: LoopDataManagerDelegate {
 
 class LoopDataManagerDosingTests: LoopDataManagerTests {
     // MARK: Functions to load fixtures
-    func loadGlucoseEffect(_ name: String) -> [GlucoseEffect] {
+    func loadLocalDateGlucoseEffect(_ name: String) -> [GlucoseEffect] {
         let fixture: [JSONDictionary] = loadFixture(name)
-        let dateFormatter = ISO8601DateFormatter.localTimeDate()
+        let localDateFormatter = ISO8601DateFormatter.localTimeDate()
 
         return fixture.map {
-            return GlucoseEffect(startDate: dateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
+            return GlucoseEffect(startDate: localDateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
         }
     }
-    
+
+    func loadPredictedGlucoseFixture(_ name: String) -> [PredictedGlucoseValue] {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        let url = bundle.url(forResource: name, withExtension: "json")!
+        return try! decoder.decode([PredictedGlucoseValue].self, from: try! Data(contentsOf: url))
+    }
+
     // MARK: Tests
+    func testForecastFromLiveCaptureInputData() {
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let url = bundle.url(forResource: "live_capture_input", withExtension: "json")!
+        let predictionInput = try! decoder.decode(LoopPredictionInput.self, from: try! Data(contentsOf: url))
+
+        // Therapy settings in the "live capture" input only have one value, so we can fake some schedules
+        // from the first entry of each therapy setting's history.
+        let basalRateSchedule = BasalRateSchedule(dailyItems: [
+            RepeatingScheduleValue(startTime: 0, value: predictionInput.settings.basal.first!.value)
+        ])
+        let insulinSensitivitySchedule = InsulinSensitivitySchedule(
+            unit: .milligramsPerDeciliter,
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0, value: predictionInput.settings.sensitivity.first!.value.doubleValue(for: .milligramsPerDeciliter))
+            ],
+            timeZone: .utcTimeZone
+        )!
+        let carbRatioSchedule = CarbRatioSchedule(
+            unit: .gram(),
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0.0, value: predictionInput.settings.carbRatio.first!.value)
+            ],
+            timeZone: .utcTimeZone
+        )!
+
+        let settings = LoopSettings(
+            dosingEnabled: false,
+            glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            carbRatioSchedule: carbRatioSchedule,
+            maximumBasalRatePerHour: 10,
+            maximumBolus: 5,
+            suspendThreshold: predictionInput.settings.suspendThreshold,
+            automaticDosingStrategy: .automaticBolus
+        )
+
+        let glucoseStore = MockGlucoseStore()
+        glucoseStore.storedGlucose = predictionInput.glucoseHistory
+
+        let currentDate = glucoseStore.latestGlucose!.startDate
+        now = currentDate
+
+        let doseStore = MockDoseStore()
+        doseStore.basalProfile = basalRateSchedule
+        doseStore.basalProfileApplyingOverrideHistory = doseStore.basalProfile
+        doseStore.sensitivitySchedule = insulinSensitivitySchedule
+        doseStore.doseHistory = predictionInput.doses
+        doseStore.lastAddedPumpData = predictionInput.doses.last!.startDate
+        let carbStore = MockCarbStore()
+        carbStore.insulinSensitivityScheduleApplyingOverrideHistory = insulinSensitivitySchedule
+        carbStore.carbRatioSchedule = carbRatioSchedule
+        carbStore.carbRatioScheduleApplyingOverrideHistory = carbRatioSchedule
+        carbStore.carbHistory = predictionInput.carbEntries
+
+
+        dosingDecisionStore = MockDosingDecisionStore()
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)
+        loopDataManager = LoopDataManager(
+            lastLoopCompleted: currentDate,
+            basalDeliveryState: .active(currentDate),
+            settings: settings,
+            overrideHistory: TemporaryScheduleOverrideHistory(),
+            analyticsServicesManager: AnalyticsServicesManager(),
+            localCacheDuration: .days(1),
+            doseStore: doseStore,
+            glucoseStore: glucoseStore,
+            carbStore: carbStore,
+            dosingDecisionStore: dosingDecisionStore,
+            latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
+            now: { currentDate },
+            pumpInsulinType: .novolog,
+            automaticDosingStatus: automaticDosingStatus,
+            trustedTimeOffset: { 0 }
+        )
+
+        let expectedPredictedGlucose = loadPredictedGlucoseFixture("live_capture_predicted_glucose")
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var predictedGlucose: [PredictedGlucoseValue]?
+        var recommendedBasal: TempBasalRecommendation?
+        self.loopDataManager.getLoopState { _, state in
+            predictedGlucose = state.predictedGlucoseIncludingPendingInsulin
+            recommendedBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
+            updateGroup.leave()
+        }
+        // We need to wait until the task completes to get outputs
+        updateGroup.wait()
+
+        XCTAssertNotNil(predictedGlucose)
+
+        XCTAssertEqual(expectedPredictedGlucose.count, predictedGlucose!.count)
+
+        for (expected, calculated) in zip(expectedPredictedGlucose, predictedGlucose!) {
+            XCTAssertEqual(expected.startDate, calculated.startDate)
+            XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
+        }
+    }
+
+
     func testFlatAndStable() {
         setUp(for: .flatAndStable)
-        let predictedGlucoseOutput = loadGlucoseEffect("flat_and_stable_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("flat_and_stable_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -77,7 +188,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testHighAndStable() {
         setUp(for: .highAndStable)
-        let predictedGlucoseOutput = loadGlucoseEffect("high_and_stable_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_stable_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -104,7 +215,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testHighAndFalling() {
         setUp(for: .highAndFalling)
-        let predictedGlucoseOutput = loadGlucoseEffect("high_and_falling_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_falling_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -131,7 +242,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testHighAndRisingWithCOB() {
         setUp(for: .highAndRisingWithCOB)
-        let predictedGlucoseOutput = loadGlucoseEffect("high_and_rising_with_cob_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_rising_with_cob_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -158,7 +269,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testLowAndFallingWithCOB() {
         setUp(for: .lowAndFallingWithCOB)
-        let predictedGlucoseOutput = loadGlucoseEffect("low_and_falling_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("low_and_falling_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -185,7 +296,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testLowWithLowTreatment() {
         setUp(for: .lowWithLowTreatment)
-        let predictedGlucoseOutput = loadGlucoseEffect("low_with_low_treatment_predicted_glucose")
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("low_with_low_treatment_predicted_glucose")
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
@@ -290,12 +401,12 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         let observer = NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: nil, queue: nil) { _ in
             exp.fulfill()
         }
-        automaticDosingStatus.isClosedLoop = false
+        automaticDosingStatus.automaticDosingEnabled = false
         wait(for: [exp], timeout: 1.0)
         let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel)
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
-        XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "closedLoopDisabled")
+        XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "automaticDosingDisabled")
         XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].automaticDoseRecommendation, expectedAutomaticDoseRecommendation)
         NotificationCenter.default.removeObserver(observer)
     }
@@ -345,7 +456,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
 
     func testLoopRecommendsTempBasalWithoutEnactingIfOpenLoop() {
         setUp(for: .highAndStable)
-        automaticDosingStatus.isClosedLoop = false
+        automaticDosingStatus.automaticDosingEnabled = false
         waitOnDataQueue()
         let delegate = MockDelegate()
         loopDataManager.delegate = delegate
@@ -411,13 +522,13 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         )
 
         let doseStore = MockDoseStore()
-        let glucoseStore = MockGlucoseStore()
+        let glucoseStore = MockGlucoseStore(for: .flatAndStable)
         let carbStore = MockCarbStore()
 
         let currentDate = Date()
 
         dosingDecisionStore = MockDosingDecisionStore()
-        automaticDosingStatus = AutomaticDosingStatus(isClosedLoop: false, isClosedLoopAllowed: true)
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: false, isAutomaticDosingAllowed: true)
         let existingTempBasal = DoseEntry(
             type: .tempBasal,
             startDate: currentDate.addingTimeInterval(-.minutes(2)),

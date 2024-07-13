@@ -14,21 +14,28 @@ class MockGlucoseStore: GlucoseStoreProtocol {
     
     init(for scenario: DosingTestScenario = .flatAndStable) {
         self.scenario = scenario // The store returns different effect values based on the scenario
+        storedGlucose = loadHistoricGlucose(scenario: scenario)
     }
     
     let dateFormatter = ISO8601DateFormatter.localTimeDate()
     
     var scenario: DosingTestScenario
+
+    var storedGlucose: [StoredGlucoseSample]?
     
     var latestGlucose: GlucoseSampleValue? {
-        return StoredGlucoseSample(
-            sample: HKQuantitySample(
-                type: HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
-                quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliter, doubleValue: latestGlucoseValue),
-                start: glucoseStartDate,
-                end: glucoseStartDate
+        if let storedGlucose {
+            return storedGlucose.last
+        } else {
+            return StoredGlucoseSample(
+                sample: HKQuantitySample(
+                    type: HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
+                    quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliter, doubleValue: latestGlucoseValue),
+                    start: glucoseStartDate,
+                    end: glucoseStartDate
+                )
             )
-        )
+        }
     }
     
     var preferredUnit: HKUnit?
@@ -73,26 +80,36 @@ class MockGlucoseStore: GlucoseStoreProtocol {
     }
     
     func counteractionEffects<Sample>(for samples: [Sample], to effects: [GlucoseEffect]) -> [GlucoseEffectVelocity] where Sample : GlucoseSampleValue {
-        return [] // TODO: check if we'll ever want to test this
+        samples.counteractionEffects(to: effects)
     }
     
-    func getRecentMomentumEffect(_ completion: @escaping (_ effects: Result<[GlucoseEffect], Error>) -> Void) {
-        let fixture: [JSONDictionary] = loadFixture(momentumEffectToLoad)
-        let dateFormatter = ISO8601DateFormatter.localTimeDate()
+    func getRecentMomentumEffect(for date: Date? = nil, _ completion: @escaping (_ effects: Result<[GlucoseEffect], Error>) -> Void) {
+        if let storedGlucose {
+            let samples = storedGlucose.filterDateRange((date ?? Date()).addingTimeInterval(-GlucoseMath.momentumDataInterval), nil)
+            completion(.success(samples.linearMomentumEffect()))
+        } else {
+            let fixture: [JSONDictionary] = loadFixture(momentumEffectToLoad)
+            let dateFormatter = ISO8601DateFormatter.localTimeDate()
 
-        return completion(.success(fixture.map {
-            return GlucoseEffect(startDate: dateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue: $0["amount"] as! Double))
+            return completion(.success(fixture.map {
+                return GlucoseEffect(startDate: dateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue: $0["amount"] as! Double))
             }
-        ))
+                                      ))
+        }
     }
     
     func getCounteractionEffects(start: Date, end: Date? = nil, to effects: [GlucoseEffect], _ completion: @escaping (_ effects: Result<[GlucoseEffectVelocity], Error>) -> Void) {
-        let fixture: [JSONDictionary] = loadFixture(counteractionEffectToLoad)
-        let dateFormatter = ISO8601DateFormatter.localTimeDate()
+        if let storedGlucose {
+            let samples = storedGlucose.filterDateRange(start, end)
+            completion(.success(self.counteractionEffects(for: samples, to: effects)))
+        } else {
+            let fixture: [JSONDictionary] = loadFixture(counteractionEffectToLoad)
+            let dateFormatter = ISO8601DateFormatter.localTimeDate()
 
-        return completion(.success(fixture.map {
-            return GlucoseEffectVelocity(startDate: dateFormatter.date(from: $0["startDate"] as! String)!, endDate: dateFormatter.date(from: $0["endDate"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["value"] as! Double))
-        }))
+            completion(.success(fixture.map {
+                return GlucoseEffectVelocity(startDate: dateFormatter.date(from: $0["startDate"] as! String)!, endDate: dateFormatter.date(from: $0["endDate"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["value"] as! Double))
+            }))
+        }
     }
 }
 
@@ -105,9 +122,23 @@ extension MockGlucoseStore {
         let path = bundle.path(forResource: resourceName, ofType: "json")!
         return try! JSONSerialization.jsonObject(with: Data(contentsOf: URL(fileURLWithPath: path)), options: []) as! T
     }
+
+    public func loadHistoricGlucose(scenario: DosingTestScenario) -> [StoredGlucoseSample]? {
+        if let url = bundle.url(forResource: scenario.fixturePrefix + "historic_glucose", withExtension: "json"),
+           let data = try? Data(contentsOf: url)
+        {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try? decoder.decode([StoredGlucoseSample].self, from: data)
+        } else {
+            return nil
+        }
+    }
     
     var counteractionEffectToLoad: String {
         switch scenario {
+        case .liveCapture:
+            fatalError("live capture scenario computes counteraction effects from input data, does not used pre-canned effects")
         case .flatAndStable:
             return "flat_and_stable_counteraction_effect"
         case .highAndStable:
@@ -125,6 +156,8 @@ extension MockGlucoseStore {
     
     var momentumEffectToLoad: String {
         switch scenario {
+        case .liveCapture:
+            fatalError("live capture scenario computes momentu effects from input data, does not used pre-canned effects")
         case .flatAndStable:
             return "flat_and_stable_momentum_effect"
         case .highAndStable:
@@ -142,6 +175,8 @@ extension MockGlucoseStore {
     
     var glucoseStartDate: Date {
         switch scenario {
+        case .liveCapture:
+            fatalError("live capture scenario uses actual glucose input data")
         case .flatAndStable:
             return dateFormatter.date(from: "2020-08-11T20:45:02")!
         case .highAndStable:
@@ -159,6 +194,8 @@ extension MockGlucoseStore {
     
     var latestGlucoseValue: Double {
         switch scenario {
+        case .liveCapture:
+            fatalError("live capture scenario uses actual glucose input data")
         case .flatAndStable:
             return 123.42849966275706
         case .highAndStable:

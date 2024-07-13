@@ -14,14 +14,14 @@
 "NSCameraUsageDescription" = "Die Kamera wird verwendet, um Barcodes von Geräten zu scannen.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID wird benutzt, um einen Insulin-Bolus zu authentifizieren.";
+"NSFaceIDUsageDescription" = "Face ID wird benutzt, um einen Bolus zu authentifizieren.";
 
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Mahlzeit-Daten aus der HealthKit-Datenbank werden verwendet, um Blutzuckereffekte zu bestimmen. Blutzuckerdaten aus der HealthKit-Datenbank werden für die Grafik- und Momentumberechnung verwendet.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "In der App und auf der Uhr eingegebene Daten zu Kohlenhydratmahlzeiten werden in der HealthKit-Datenbank  gespeichert. Vom CGM abgerufene Glukosedaten werden sicher in HealthKit-Datenbank gespeichert.";
+"NSHealthUpdateUsageDescription" = "In der App und auf der Uhr eingegebene Daten zu Kohlenhydratmahlzeiten werden in der HealthKit-Datenbank gespeichert. Vom CGM abgerufene Glukosedaten werden sicher in HealthKit-Datenbank gespeichert.";
 
 /* Privacy - Siri Usage Description */
-"NSSiriUsageDescription" = "Loop verwendet Siri, damit Sie Voreinstellungen mit Ihrer Sprache ausführen können.";
+"NSSiriUsageDescription" = "Loop verwendet Siri, damit Du Voreinstellungen mit Deiner Sprache ausführen kannst.";
 

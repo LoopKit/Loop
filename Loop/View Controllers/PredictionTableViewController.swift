@@ -197,7 +197,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
     private var eventualGlucoseDescription: String?
 
-    private var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection]
+    private var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection, .suspend]
 
     private var selectedInputs = PredictionInputEffect.all
 
@@ -265,20 +265,36 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             let lastDiscrepancy = retrospectiveGlucoseDiscrepancies?.last,
             let currentGlucose = deviceManager.glucoseStore.latestGlucose
         {
-            let formatter = QuantityFormatter()
-            formatter.setPreferredNumberFormatter(for: glucoseChart.glucoseUnit)
+            let formatter = QuantityFormatter(for: glucoseChart.glucoseUnit)
             let predicted = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: currentGlucose.quantity.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit))
-            var values = [predicted, currentGlucose.quantity].map { formatter.string(from: $0, for: glucoseChart.glucoseUnit) ?? "?" }
+            var values = [predicted, currentGlucose.quantity].map { formatter.string(from: $0) ?? "?" }
             formatter.numberFormatter.positivePrefix = formatter.numberFormatter.plusSign
-            values.append(formatter.string(from: lastDiscrepancy.quantity, for: glucoseChart.glucoseUnit) ?? "?")
+            values.append(formatter.string(from: lastDiscrepancy.quantity) ?? "?")
 
             let retro = String(
                 format: NSLocalizedString("Predicted: %1$@\nActual: %2$@ (%3$@)", comment: "Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference)"),
                 values[0], values[1], values[2]
             )
-
-            // Standard retrospective correction
-            subtitleText = String(format: "%@\n%@", subtitleText, retro)
+            let isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+            
+            if isIntegralRetrospectiveCorrectionEnabled {
+                var integralEffectDisplay = "?"
+                var totalEffectDisplay = "?"
+                if let totalEffect = self.totalRetrospectiveCorrection {
+                    let integralEffectValue = totalEffect.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit)
+                    let integralEffect = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: integralEffectValue)
+                    integralEffectDisplay = formatter.string(from: integralEffect) ?? "?"
+                    totalEffectDisplay = formatter.string(from: totalEffect) ?? "?"
+                }
+                let integralRetro = String(
+                    format: NSLocalizedString("prediction-description-integral-retrospective-correction", comment: "Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect)"),
+                    integralEffectDisplay, totalEffectDisplay
+                )
+                subtitleText = String(format: "%@\n%@", retro, integralRetro)
+            } else {
+                subtitleText = String(format: "%@\n%@", subtitleText, retro)
+            }
+        
         }
 
         cell.subtitleLabel?.text = subtitleText

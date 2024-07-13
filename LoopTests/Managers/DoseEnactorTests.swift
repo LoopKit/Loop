@@ -121,7 +121,7 @@ class MockPumpManager: PumpManager {
         .minutes(units / deliveryUnitsPerMinute)
     }
 
-    var managerIdentifier: String = "MockPumpManager"
+    static var pluginIdentifier: String = "MockPumpManager"
     
     var localizedTitle: String = "MockPumpManager"
     

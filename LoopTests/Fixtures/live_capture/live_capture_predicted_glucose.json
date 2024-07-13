@@ -1,0 +1,392 @@
+[
+  {
+    "quantity" : 180,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T02:37:35Z"
+  },
+  {
+    "quantity" : 180.29132150657966,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T02:40:00Z"
+  },
+  {
+    "quantity" : 180.51458820506667,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T02:45:00Z"
+  },
+  {
+    "quantity" : 179.7158986124237,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T02:50:00Z"
+  },
+  {
+    "quantity" : 177.66868460973922,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T02:55:00Z"
+  },
+  {
+    "quantity" : 174.80252509117634,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:00:00Z"
+  },
+  {
+    "quantity" : 171.74984493231631,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:05:00Z"
+  },
+  {
+    "quantity" : 168.58187755437024,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:10:00Z"
+  },
+  {
+    "quantity" : 165.36216340804185,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:15:00Z"
+  },
+  {
+    "quantity" : 162.12697210734922,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:20:00Z"
+  },
+  {
+    "quantity" : 158.90986429144345,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:25:00Z"
+  },
+  {
+    "quantity" : 155.75684851046043,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:30:00Z"
+  },
+  {
+    "quantity" : 152.70869296700107,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:35:00Z"
+  },
+  {
+    "quantity" : 149.78068888956841,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:40:00Z"
+  },
+  {
+    "quantity" : 147.00401242102828,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:45:00Z"
+  },
+  {
+    "quantity" : 144.40563853768242,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:50:00Z"
+  },
+  {
+    "quantity" : 142.0087170601098,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T03:55:00Z"
+  },
+  {
+    "quantity" : 139.83295658233396,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:00:00Z"
+  },
+  {
+    "quantity" : 137.89511837124121,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:05:00Z"
+  },
+  {
+    "quantity" : 136.07526338088792,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:10:00Z"
+  },
+  {
+    "quantity" : 134.25815754225141,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:15:00Z"
+  },
+  {
+    "quantity" : 132.45275084533137,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:20:00Z"
+  },
+  {
+    "quantity" : 130.66563522056958,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:25:00Z"
+  },
+  {
+    "quantity" : 128.90146920949769,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:30:00Z"
+  },
+  {
+    "quantity" : 127.16322092092855,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:35:00Z"
+  },
+  {
+    "quantity" : 125.45215396105368,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:40:00Z"
+  },
+  {
+    "quantity" : 123.76712483433676,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:45:00Z"
+  },
+  {
+    "quantity" : 122.10683165409341,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:50:00Z"
+  },
+  {
+    "quantity" : 120.46857875163471,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T04:55:00Z"
+  },
+  {
+    "quantity" : 118.84903308222181,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:00:00Z"
+  },
+  {
+    "quantity" : 117.24445077397047,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:05:00Z"
+  },
+  {
+    "quantity" : 115.65043839655846,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:10:00Z"
+  },
+  {
+    "quantity" : 114.06198688414838,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:15:00Z"
+  },
+  {
+    "quantity" : 112.47356001340279,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:20:00Z"
+  },
+  {
+    "quantity" : 110.87917488553444,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:25:00Z"
+  },
+  {
+    "quantity" : 109.27247502015473,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:30:00Z"
+  },
+  {
+    "quantity" : 107.64679662666447,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:35:00Z"
+  },
+  {
+    "quantity" : 105.99522857963143,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:40:00Z"
+  },
+  {
+    "quantity" : 104.31066658787131,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:45:00Z"
+  },
+  {
+    "quantity" : 102.58586201263279,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:50:00Z"
+  },
+  {
+    "quantity" : 100.81350120847731,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T05:55:00Z"
+  },
+  {
+    "quantity" : 98.986445102805988,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:00:00Z"
+  },
+  {
+    "quantity" : 97.097518927124952,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:05:00Z"
+  },
+  {
+    "quantity" : 95.139330662672023,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:10:00Z"
+  },
+  {
+    "quantity" : 93.104670202578632,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:15:00Z"
+  },
+  {
+    "quantity" : 90.986165185301502,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:20:00Z"
+  },
+  {
+    "quantity" : 88.909927040807588,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:25:00Z"
+  },
+  {
+    "quantity" : 86.994338611676767,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:30:00Z"
+  },
+  {
+    "quantity" : 85.232136877351081,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:35:00Z"
+  },
+  {
+    "quantity" : 83.615651290380811,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:40:00Z"
+  },
+  {
+    "quantity" : 82.136746744082188,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:45:00Z"
+  },
+  {
+    "quantity" : 80.787935960558002,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:50:00Z"
+  },
+  {
+    "quantity" : 79.561150334091622,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T06:55:00Z"
+  },
+  {
+    "quantity" : 78.448809315519384,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:00:00Z"
+  },
+  {
+    "quantity" : 77.444295000376087,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:05:00Z"
+  },
+  {
+    "quantity" : 76.541144021775267,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:10:00Z"
+  },
+  {
+    "quantity" : 75.734033247701291,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:15:00Z"
+  },
+  {
+    "quantity" : 75.018229944400559,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:20:00Z"
+  },
+  {
+    "quantity" : 74.389076912965834,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:25:00Z"
+  },
+  {
+    "quantity" : 73.841309919727451,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:30:00Z"
+  },
+  {
+    "quantity" : 73.370549918316215,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:35:00Z"
+  },
+  {
+    "quantity" : 72.972744055408953,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:40:00Z"
+  },
+  {
+    "quantity" : 72.643975082565134,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:45:00Z"
+  },
+  {
+    "quantity" : 72.380461060355856,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:50:00Z"
+  },
+  {
+    "quantity" : 72.178520063294286,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T07:55:00Z"
+  },
+  {
+    "quantity" : 72.034174053629386,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:00:00Z"
+  },
+  {
+    "quantity" : 71.942299096190823,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:05:00Z"
+  },
+  {
+    "quantity" : 71.897751011456421,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:10:00Z"
+  },
+  {
+    "quantity" : 71.895123880236383,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:15:00Z"
+  },
+  {
+    "quantity" : 71.906254842464136,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:20:00Z"
+  },
+  {
+    "quantity" : 71.914434937142801,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:25:00Z"
+  },
+  {
+    "quantity" : 71.920167940771535,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:30:00Z"
+  },
+  {
+    "quantity" : 71.923927819981145,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:35:00Z"
+  },
+  {
+    "quantity" : 71.926159114246957,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:40:00Z"
+  },
+  {
+    "quantity" : 71.927280081079402,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:45:00Z"
+  },
+  {
+    "quantity" : 71.927682355083221,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:50:00Z"
+  },
+  {
+    "quantity" : 71.927731342958282,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T08:55:00Z"
+  },
+  {
+    "quantity" : 71.927731342958282,
+    "quantityUnit" : "mg\/dL",
+    "startDate" : "2023-06-23T09:00:00Z"
+  }
+]

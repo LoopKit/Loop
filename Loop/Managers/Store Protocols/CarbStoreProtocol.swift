@@ -11,8 +11,6 @@ import HealthKit
 
 protocol CarbStoreProtocol: AnyObject {
     
-    var sampleType: HKSampleType { get }
-    
     var preferredUnit: HKUnit! { get }
     
     var delegate: CarbStoreDelegate? { get set }
@@ -32,13 +30,6 @@ protocol CarbStoreProtocol: AnyObject {
     
     var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes { get }
     
-    // MARK: HealthKit
-    var authorizationRequired: Bool { get }
-    
-    var sharingDenied: Bool { get }
-    
-    func authorize(toShare: Bool, read: Bool, _ completion: @escaping (_ result: HealthKitSampleStoreResult<Bool>) -> Void)
-    
     // MARK: Data Management
     func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: NewCarbEntry, completion: @escaping (_ result: CarbStoreResult<StoredCarbEntry>) -> Void)
     
@@ -49,9 +40,9 @@ protocol CarbStoreProtocol: AnyObject {
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
     
     // MARK: COB & Effect Generation
-    func getGlucoseEffects(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping(_ result: CarbStoreResult<(entries: [StoredCarbEntry], effects: [GlucoseEffect])>) -> Void)
+    func getGlucoseEffects(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity], completion: @escaping(_ result: CarbStoreResult<(entries: [StoredCarbEntry], effects: [GlucoseEffect])>) -> Void)
     
-    func glucoseEffects<Sample: CarbEntry>(of samples: [Sample], startingAt start: Date, endingAt end: Date?, effectVelocities: [GlucoseEffectVelocity]?) throws -> [GlucoseEffect]
+    func glucoseEffects<Sample: CarbEntry>(of samples: [Sample], startingAt start: Date, endingAt end: Date?, effectVelocities: [GlucoseEffectVelocity]) throws -> [GlucoseEffect]
     
     func getCarbsOnBoardValues(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ result: CarbStoreResult<[CarbValue]>) -> Void)
     

@@ -29,8 +29,6 @@ final class DeviceDataManager {
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
 
-    private(set) var testingScenariosManager: TestingScenariosManager?
-
     /// The last error recorded by a device manager
     /// Should be accessed only on the main queue
     private(set) var lastError: (date: Date, error: Error)?
@@ -47,7 +45,9 @@ final class DeviceDataManager {
 
     @Published var pumpIsAllowingAutomation: Bool
 
-    private let closedLoopStatus: ClosedLoopStatus
+    private var lastCGMLoopTrigger: Date = .distantPast
+
+    private let automaticDosingStatus: AutomaticDosingStatus
 
     var closedLoopDisallowedLocalizedDescription: String? {
         if !cgmHasValidSensorSession {
@@ -86,7 +86,9 @@ final class DeviceDataManager {
 
     private var displayGlucoseUnitObservers = WeakSynchronizedSet<DisplayGlucoseUnitObserver>()
 
-    public private(set) var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
+    public private(set) var displayGlucosePreference: DisplayGlucosePreference
+    
+    var deviceWhitelist = DeviceWhitelist()
 
     // MARK: - CGM
 
@@ -95,9 +97,9 @@ final class DeviceDataManager {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
 
-            if cgmManager?.managerIdentifier != oldValue?.managerIdentifier {
+            if cgmManager?.pluginIdentifier != oldValue?.pluginIdentifier {
                 if let cgmManager = cgmManager {
-                    analyticsServicesManager.cgmWasAdded(identifier: cgmManager.managerIdentifier)
+                    analyticsServicesManager.cgmWasAdded(identifier: cgmManager.pluginIdentifier)
                 } else {
                     analyticsServicesManager.cgmWasRemoved()
                 }
@@ -123,9 +125,9 @@ final class DeviceDataManager {
                 cgmManager = nil
             }
 
-            if pumpManager?.managerIdentifier != oldValue?.managerIdentifier {
+            if pumpManager?.pluginIdentifier != oldValue?.pluginIdentifier {
                 if let pumpManager = pumpManager {
-                    analyticsServicesManager.pumpWasAdded(identifier: pumpManager.managerIdentifier)
+                    analyticsServicesManager.pumpWasAdded(identifier: pumpManager.pluginIdentifier)
                 } else {
                     analyticsServicesManager.pumpWasRemoved()
                 }
@@ -137,7 +139,6 @@ final class DeviceDataManager {
 
             rawPumpManager = pumpManager?.rawValue
             UserDefaults.appGroup?.clearLegacyPumpManagerRawValue()
-
         }
     }
 
@@ -156,6 +157,8 @@ final class DeviceDataManager {
     
     let glucoseStore: GlucoseStore
 
+    let cgmEventStore: CgmEventStore
+
     private let cacheStore: PersistenceController
 
     let dosingDecisionStore: DosingDecisionStore
@@ -165,13 +168,13 @@ final class DeviceDataManager {
         var readTypes: Set<HKSampleType> = []
 
         if FeatureFlags.observeHealthKitCarbSamplesFromOtherApps {
-            readTypes.insert(carbStore.sampleType)
+            readTypes.insert(HealthKitSampleStore.carbType)
         }
         if FeatureFlags.observeHealthKitDoseSamplesFromOtherApps {
-            readTypes.insert(doseStore.sampleType)
+            readTypes.insert(HealthKitSampleStore.insulinQuantityType)
         }
         if FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps {
-            readTypes.insert(glucoseStore.sampleType)
+            readTypes.insert(HealthKitSampleStore.glucoseType)
         }
 
         readTypes.insert(HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!)
@@ -182,36 +185,30 @@ final class DeviceDataManager {
     /// All the HealthKit types to be shared by stores
     private var shareTypes: Set<HKSampleType> {
         return Set([
-            glucoseStore.sampleType,
-            carbStore.sampleType,
-            doseStore.sampleType,
+            HealthKitSampleStore.glucoseType,
+            HealthKitSampleStore.carbType,
+            HealthKitSampleStore.insulinQuantityType,
         ])
     }
 
     var sleepDataAuthorizationRequired: Bool {
-        return carbStore.healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .notDetermined
+        return healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .notDetermined
     }
     
     var sleepDataSharingDenied: Bool {
-        return carbStore.healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .sharingDenied
+        return healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .sharingDenied
     }
 
     /// True if any stores require HealthKit authorization
     var authorizationRequired: Bool {
-        return glucoseStore.authorizationRequired ||
-        carbStore.authorizationRequired ||
-        doseStore.authorizationRequired ||
-        sleepDataAuthorizationRequired
+        return healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .notDetermined ||
+               healthStore.authorizationStatus(for: HealthKitSampleStore.carbType) == .notDetermined ||
+               healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .notDetermined ||
+               sleepDataAuthorizationRequired
     }
 
-    /// True if the user has explicitly denied access to any stores' HealthKit types
-    private var sharingDenied: Bool {
-        return glucoseStore.sharingDenied ||
-        carbStore.sharingDenied ||
-        doseStore.sharingDenied ||
-        sleepDataSharingDenied
-    }
-
+    private(set) var statefulPluginManager: StatefulPluginManager!
+    
     // MARK: Services
 
     private(set) var servicesManager: ServicesManager!
@@ -249,7 +246,7 @@ final class DeviceDataManager {
          analyticsServicesManager: AnalyticsServicesManager,
          bluetoothProvider: BluetoothProvider,
          alertPresenter: AlertPresenter,
-         closedLoopStatus: ClosedLoopStatus,
+         automaticDosingStatus: AutomaticDosingStatus,
          cacheStore: PersistenceController,
          localCacheDuration: TimeInterval,
          overrideHistory: TemporaryScheduleOverrideHistory,
@@ -279,14 +276,19 @@ final class DeviceDataManager {
 
         let absorptionTimes = LoopCoreConstants.defaultCarbAbsorptionTimes
         let sensitivitySchedule = settingsManager.latestSettings.insulinSensitivitySchedule
-        
-        self.carbStore = CarbStore(
+
+        let carbHealthStore = HealthKitSampleStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitCarbSamplesFromOtherApps, // At some point we should let the user decide which apps they would like to import from.
+            type: HealthKitSampleStore.carbType,
+            observationStart: Date().addingTimeInterval(-absorptionTimes.slow * 2)
+        )
+        
+        self.carbStore = CarbStore(
+            healthKitSampleStore: carbHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             defaultAbsorptionTimes: absorptionTimes,
-            observationInterval: absorptionTimes.slow * 2,
             carbRatioSchedule: settingsManager.latestSettings.carbRatioSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
@@ -302,10 +304,16 @@ final class DeviceDataManager {
         }
 
         self.analyticsServicesManager = analyticsServicesManager
-        
-        self.doseStore = DoseStore(
+
+        let insulinHealthStore = HealthKitSampleStore(
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
+            type: HealthKitSampleStore.insulinQuantityType,
+            observationStart: Date().addingTimeInterval(-absorptionTimes.slow * 2)
+        )
+
+        self.doseStore = DoseStore(
+            healthKitSampleStore: insulinHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             insulinModelProvider: insulinModelProvider,
@@ -316,27 +324,34 @@ final class DeviceDataManager {
             lastPumpEventsReconciliation: nil, // PumpManager is nil at this point. Will update this via addPumpEvents below
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
+
+        let glucoseHealthStore = HealthKitSampleStore(
+            healthStore: healthStore,
+            observeHealthKitSamplesFromOtherApps:  FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
+            type: HealthKitSampleStore.glucoseType,
+            observationStart: Date().addingTimeInterval(-.hours(24))
+        )
         
         self.glucoseStore = GlucoseStore(
-            healthStore: healthStore,
-            observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
+            healthKitSampleStore: glucoseHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
-            observationInterval: .hours(24),
             provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
         cgmStalenessMonitor = CGMStalenessMonitor()
         cgmStalenessMonitor.delegate = glucoseStore
+
+        cgmEventStore = CgmEventStore(cacheStore: cacheStore, cacheLength: localCacheDuration)
+
+        dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
         
-        self.dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
-        
-        self.cgmHasValidSensorSession = false
-        self.pumpIsAllowingAutomation = true
-        self.closedLoopStatus = closedLoopStatus
+        cgmHasValidSensorSession = false
+        pumpIsAllowingAutomation = true
+        self.automaticDosingStatus = automaticDosingStatus
 
         // HealthStorePreferredGlucoseUnitDidChange will be notified once the user completes the health access form. Set to .milligramsPerDeciliter until then
-        displayGlucoseUnitObservable = DisplayGlucoseUnitObservable(displayGlucoseUnit: glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
+        displayGlucosePreference = DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
 
         self.trustedTimeChecker = trustedTimeChecker
 
@@ -366,7 +381,7 @@ final class DeviceDataManager {
         }
 
         //TODO The instantiation of these non-device related managers should be moved to LoopAppManager, and then LoopAppManager can wire up the connections between them.
-        statusExtensionManager = ExtensionDataManager(deviceDataManager: self, closedLoopStatus: closedLoopStatus)
+        statusExtensionManager = ExtensionDataManager(deviceDataManager: self, automaticDosingStatus: automaticDosingStatus)
 
         loopManager = LoopDataManager(
             lastLoopCompleted: ExtensionDataManager.lastLoopCompleted,
@@ -381,7 +396,7 @@ final class DeviceDataManager {
             dosingDecisionStore: dosingDecisionStore,
             latestStoredSettingsProvider: settingsManager,
             pumpInsulinType: pumpManager?.status.insulinType,
-            automaticDosingStatus: closedLoopStatus,
+            automaticDosingStatus: automaticDosingStatus,
             trustedTimeOffset: { trustedTimeChecker.detectedSystemTimeOffset }
         )
         cacheStore.delegate = loopManager
@@ -396,29 +411,31 @@ final class DeviceDataManager {
             doseStore: doseStore,
             dosingDecisionStore: dosingDecisionStore,
             glucoseStore: glucoseStore,
+            cgmEventStore: cgmEventStore,
             settingsStore: settingsManager.settingsStore,
             overrideHistory: overrideHistory,
             insulinDeliveryStore: doseStore.insulinDeliveryStore
         )
-        
 
         settingsManager.remoteDataServicesManager = remoteDataServicesManager
         
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
+            alertManager: alertManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
-            remoteDataServicesManager: remoteDataServicesManager
+            remoteDataServicesManager: remoteDataServicesManager,
+            settingsManager: settingsManager,
+            servicesManagerDelegate: loopManager,
+            servicesManagerDosingDelegate: self
         )
-
+        
+        statefulPluginManager = StatefulPluginManager(pluginManager: pluginManager, servicesManager: servicesManager)
+        
         let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
                                                                       directory: FileManager.default.exportsDirectoryURL,
                                                                       historicalDuration: Bundle.main.localCacheDuration)
-
-        if FeatureFlags.scenariosEnabled {
-            testingScenariosManager = LocalTestingScenariosManager(deviceManager: self)
-        }
 
         loopManager.delegate = self
 
@@ -427,6 +444,7 @@ final class DeviceDataManager {
         doseStore.delegate = self
         dosingDecisionStore.delegate = self
         glucoseStore.delegate = self
+        cgmEventStore.delegate = self
         doseStore.insulinDeliveryStore.delegate = self
         remoteDataServicesManager.delegate = self
         
@@ -440,28 +458,39 @@ final class DeviceDataManager {
             .map { $0 && $1 }
             .receive(on: RunLoop.main)
             .removeDuplicates()
-            .assign(to: \.closedLoopStatus.isClosedLoopAllowed, on: self)
+            .assign(to: \.automaticDosingStatus.isAutomaticDosingAllowed, on: self)
             .store(in: &cancellables)
 
-        NotificationCenter.default.addObserver(forName: .HealthStorePreferredGlucoseUnitDidChange, object: glucoseStore.healthStore, queue: nil) { [weak self] _ in
-            guard let strongSelf = self else {
+        NotificationCenter.default.addObserver(forName: .HealthStorePreferredGlucoseUnitDidChange, object: healthStore, queue: nil) { [weak self] _ in
+            guard let self else {
                 return
             }
 
-            if let preferredGlucoseUnit = strongSelf.glucoseStore.preferredUnit {
-                strongSelf.displayGlucoseUnitObservable.displayGlucoseUnitDidChange(to: preferredGlucoseUnit)
-                strongSelf.notifyObserversOfDisplayGlucoseUnitChange(to: preferredGlucoseUnit)
+            Task { @MainActor in
+                if let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) {
+                    self.displayGlucosePreference.unitDidChange(to: unit)
+                    self.notifyObserversOfDisplayGlucoseUnitChange(to: unit)
+                }
             }
         }
     }
-    
 
     var availablePumpManagers: [PumpManagerDescriptor] {
-        return pluginManager.availablePumpManagers + availableStaticPumpManagers
+        var pumpManagers = pluginManager.availablePumpManagers + availableStaticPumpManagers
+        
+        pumpManagers = pumpManagers.filter({ pumpManager in
+            guard !deviceWhitelist.pumpDevices.isEmpty else {
+                return true
+            }
+            
+            return deviceWhitelist.pumpDevices.contains(pumpManager.identifier)
+        })
+        
+        return pumpManagers
     }
 
-    func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManager>, Error> {
-        switch setupPumpManagerUI(withIdentifier: identifier, initialSettings: settings) {
+    func setupPumpManager(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings, prefersToSkipUserInteraction: Bool) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManager>, Error> {
+        switch setupPumpManagerUI(withIdentifier: identifier, initialSettings: settings, prefersToSkipUserInteraction: prefersToSkipUserInteraction) {
         case .failure(let error):
             return .failure(error)
         case .success(let success):
@@ -476,18 +505,25 @@ final class DeviceDataManager {
 
     struct UnknownPumpManagerIdentifierError: Error {}
 
-    func setupPumpManagerUI(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManagerUI>, Error> {
+    func setupPumpManagerUI(withIdentifier identifier: String, initialSettings settings: PumpManagerSetupSettings, prefersToSkipUserInteraction: Bool = false) -> Swift.Result<SetupUIResult<PumpManagerViewController, PumpManagerUI>, Error> {
         guard let pumpManagerUIType = pumpManagerTypeByIdentifier(identifier) else {
             return .failure(UnknownPumpManagerIdentifierError())
         }
 
-        let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, allowedInsulinTypes: allowedInsulinTypes)
+        let result = pumpManagerUIType.setupViewController(initialSettings: settings, bluetoothProvider: bluetoothProvider, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, prefersToSkipUserInteraction: prefersToSkipUserInteraction, allowedInsulinTypes: allowedInsulinTypes)
+        
         if case .createdAndOnboarded(let pumpManagerUI) = result {
             pumpManagerOnboarding(didCreatePumpManager: pumpManagerUI)
             pumpManagerOnboarding(didOnboardPumpManager: pumpManagerUI)
         }
 
         return .success(result)
+    }
+    
+    public func saveUpdatedBasalRateSchedule(_ basalRateSchedule: BasalRateSchedule) {
+        var therapySettings = self.loopManager.therapySettings
+        therapySettings.basalRateSchedule = basalRateSchedule
+        self.saveCompletion(therapySettings: therapySettings)
     }
 
     public func pumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
@@ -533,7 +569,6 @@ final class DeviceDataManager {
     private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult, completion: @escaping () -> Void) {
         switch readingResult {
         case .newData(let values):
-            log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
             loopManager.addGlucoseSamples(values) { result in
                 if !values.isEmpty {
                     DispatchQueue.main.async {
@@ -546,10 +581,8 @@ final class DeviceDataManager {
             loopManager.receivedUnreliableCGMReading()
             completion()
         case .noData:
-            log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
             completion()
         case .error(let error):
-            log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
             self.setLastError(error: error)
             completion()
         }
@@ -559,17 +592,26 @@ final class DeviceDataManager {
     var availableCGMManagers: [CGMManagerDescriptor] {
         var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
-            availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
+            availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.pluginIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
         }
+        
+        availableCGMManagers = availableCGMManagers.filter({ cgmManager in
+            guard !deviceWhitelist.cgmDevices.isEmpty else {
+                return true
+            }
+            
+            return deviceWhitelist.cgmDevices.contains(cgmManager.identifier)
+        })
+
         return availableCGMManagers
     }
 
-    func setupCGMManager(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<CGMManagerViewController, CGMManager>, Error> {
+    func setupCGMManager(withIdentifier identifier: String, prefersToSkipUserInteraction: Bool = false) -> Swift.Result<SetupUIResult<CGMManagerViewController, CGMManager>, Error> {
         if let cgmManager = setupCGMManagerFromPumpManager(withIdentifier: identifier) {
             return .success(.createdAndOnboarded(cgmManager))
         }
 
-        switch setupCGMManagerUI(withIdentifier: identifier) {
+        switch setupCGMManagerUI(withIdentifier: identifier, prefersToSkipUserInteraction: prefersToSkipUserInteraction) {
         case .failure(let error):
             return .failure(error)
         case .success(let success):
@@ -584,12 +626,12 @@ final class DeviceDataManager {
 
     struct UnknownCGMManagerIdentifierError: Error {}
 
-    fileprivate func setupCGMManagerUI(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<CGMManagerViewController, CGMManagerUI>, Error> {
+    fileprivate func setupCGMManagerUI(withIdentifier identifier: String, prefersToSkipUserInteraction: Bool) -> Swift.Result<SetupUIResult<CGMManagerViewController, CGMManagerUI>, Error> {
         guard let cgmManagerUIType = cgmManagerTypeByIdentifier(identifier) else {
             return .failure(UnknownCGMManagerIdentifierError())
         }
 
-        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, displayGlucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
+        let result = cgmManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, displayGlucosePreference: displayGlucosePreference, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures, prefersToSkipUserInteraction: prefersToSkipUserInteraction)
         if case .createdAndOnboarded(let cgmManagerUI) = result {
             cgmManagerOnboarding(didCreateCGMManager: cgmManagerUI)
             cgmManagerOnboarding(didOnboardCGMManager: cgmManagerUI)
@@ -603,7 +645,7 @@ final class DeviceDataManager {
     }
     
     public func setupCGMManagerFromPumpManager(withIdentifier identifier: String) -> CGMManager? {
-        guard identifier == pumpManager?.managerIdentifier, let cgmManager = pumpManager as? CGMManager else {
+        guard identifier == pumpManager?.pluginIdentifier, let cgmManager = pumpManager as? CGMManager else {
             return nil
         }
 
@@ -650,70 +692,12 @@ final class DeviceDataManager {
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
                 // Call the individual authorization methods to trigger query creation
-                self.carbStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitCarbSamplesFromOtherApps, { _ in })
-                self.doseStore.insulinDeliveryStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps, { _ in })
-                self.glucoseStore.authorize(toShare: true, read: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps, { _ in })
+                self.carbStore.hkSampleStore?.authorizationIsDetermined()
+                self.doseStore.hkSampleStore?.authorizationIsDetermined()
+                self.glucoseStore.hkSampleStore?.authorizationIsDetermined()
             }
 
             self.getHealthStoreAuthorization(completion)
-        }
-    }
-
-    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
-        self.loopManager.generateDiagnosticReport { (loopReport) in
-
-            let logDurationHours = 84.0
-
-            self.alertManager.getStoredEntries(startDate: Date() - .hours(logDurationHours)) { (alertReport) in
-                self.deviceLog.getLogEntries(startDate: Date() - .hours(logDurationHours)) { (result) in
-                    let deviceLogReport: String
-                    switch result {
-                    case .failure(let error):
-                        deviceLogReport = "Error fetching entries: \(error)"
-                    case .success(let entries):
-                        deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
-                    }
-
-                    let report = [
-                        "## Build Details",
-                        "* appNameAndVersion: \(Bundle.main.localizedNameAndVersion)",
-                        "* profileExpiration: \(BuildDetails.default.profileExpirationString)",
-                        "* gitRevision: \(BuildDetails.default.gitRevision ?? "N/A")",
-                        "* gitBranch: \(BuildDetails.default.gitBranch ?? "N/A")",
-                        "* workspaceGitRevision: \(BuildDetails.default.workspaceGitRevision ?? "N/A")",
-                        "* workspaceGitBranch: \(BuildDetails.default.workspaceGitBranch ?? "N/A")",
-                        "* sourceRoot: \(BuildDetails.default.sourceRoot ?? "N/A")",
-                        "* buildDateString: \(BuildDetails.default.buildDateString ?? "N/A")",
-                        "* xcodeVersion: \(BuildDetails.default.xcodeVersion ?? "N/A")",
-                        "",
-                        "## FeatureFlags",
-                        "\(FeatureFlags)",
-                        "",
-                        alertReport,
-                        "",
-                        "## DeviceDataManager",
-                        "* launchDate: \(self.launchDate)",
-                        "* lastError: \(String(describing: self.lastError))",
-                        "",
-                        "cacheStore: \(String(reflecting: self.cacheStore))",
-                        "",
-                        self.cgmManager != nil ? String(reflecting: self.cgmManager!) : "cgmManager: nil",
-                        "",
-                        self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
-                        "",
-                        "## Device Communication Log",
-                        deviceLogReport,
-                        "",
-                        String(reflecting: self.watchManager!),
-                        "",
-                        String(reflecting: self.statusExtensionManager!),
-                        "",
-                        loopReport,
-                        ].joined(separator: "\n")
-
-                    completion(report)
-                }
-            }
         }
     }
 }
@@ -724,19 +708,20 @@ private extension DeviceDataManager {
 
         cgmManager?.cgmManagerDelegate = self
         cgmManager?.delegateQueue = queue
+        reportPluginInitializationComplete()
 
         glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
         glucoseStore.healthKitStorageDelay = cgmManager.map{ type(of: $0).healthKitStorageDelay } ?? 0
 
         updatePumpManagerBLEHeartbeatPreference()
         if let cgmManager = cgmManager {
-            alertManager?.addAlertResponder(managerIdentifier: cgmManager.managerIdentifier,
+            alertManager?.addAlertResponder(managerIdentifier: cgmManager.pluginIdentifier,
                                             alertResponder: cgmManager)
-            alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
+            alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.pluginIdentifier,
                                               soundVendor: cgmManager)            
             cgmHasValidSensorSession = cgmManager.cgmManagerStatus.hasValidSensorSession
 
-            analyticsServicesManager.identifyCGMType(cgmManager.managerIdentifier)
+            analyticsServicesManager.identifyCGMType(cgmManager.pluginIdentifier)
         }
 
         if let cgmManagerUI = cgmManager as? CGMManagerUI {
@@ -749,6 +734,7 @@ private extension DeviceDataManager {
 
         pumpManager?.pumpManagerDelegate = self
         pumpManager?.delegateQueue = queue
+        reportPluginInitializationComplete()
 
         doseStore.device = pumpManager?.status.device
         pumpManagerHUDProvider = pumpManager?.hudProvider(bluetoothProvider: bluetoothProvider, colorPalette: .default, allowedInsulinTypes: allowedInsulinTypes)
@@ -758,14 +744,16 @@ private extension DeviceDataManager {
             doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
         }
         if let pumpManager = pumpManager {
-            alertManager?.addAlertResponder(managerIdentifier: pumpManager.managerIdentifier,
+            alertManager?.addAlertResponder(managerIdentifier: pumpManager.pluginIdentifier,
                                                   alertResponder: pumpManager)
-            alertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.managerIdentifier,
+            alertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.pluginIdentifier,
                                                     soundVendor: pumpManager)
             
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
 
-            analyticsServicesManager.identifyPumpType(pumpManager.managerIdentifier)
+            analyticsServicesManager.identifyPumpType(pumpManager.pluginIdentifier)
+
+            updatePumpManagerBLEHeartbeatPreference()
         }
     }
 
@@ -773,6 +761,58 @@ private extension DeviceDataManager {
         DispatchQueue.main.async {
             self.lastError = (date: Date(), error: error)
         }
+    }
+}
+
+// MARK: - Plugins
+extension DeviceDataManager {
+    func reportPluginInitializationComplete() {
+        let allActivePlugins = self.allActivePlugins
+        
+        for plugin in servicesManager.activeServices {
+            plugin.initializationComplete(for: allActivePlugins)
+        }
+        
+        for plugin in statefulPluginManager.activeStatefulPlugins {
+            plugin.initializationComplete(for: allActivePlugins)
+        }
+        
+        for plugin in availableSupports {
+            plugin.initializationComplete(for: allActivePlugins)
+        }
+        
+        cgmManager?.initializationComplete(for: allActivePlugins)
+        pumpManager?.initializationComplete(for: allActivePlugins)
+    }
+    
+    var allActivePlugins: [Pluggable] {
+        var allActivePlugins: [Pluggable] = servicesManager.activeServices
+        
+        for plugin in statefulPluginManager.activeStatefulPlugins {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == plugin.pluginIdentifier }) {
+                allActivePlugins.append(plugin)
+            }
+        }
+        
+        for plugin in availableSupports {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == plugin.pluginIdentifier }) {
+                allActivePlugins.append(plugin)
+            }
+        }
+        
+        if let cgmManager = cgmManager {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == cgmManager.pluginIdentifier }) {
+                allActivePlugins.append(cgmManager)
+            }
+        }
+        
+        if let pumpManager = pumpManager {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == pumpManager.pluginIdentifier }) {
+                allActivePlugins.append(pumpManager)
+            }
+        }
+        
+        return allActivePlugins
     }
 }
 
@@ -887,7 +927,7 @@ extension DeviceDataManager {
 extension DeviceDataManager: DeviceManagerDelegate {
 
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
-        deviceLog.log(managerIdentifier: manager.managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
+        deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
     }
     
     var allowDebugFeatures: Bool {
@@ -935,7 +975,7 @@ extension DeviceDataManager: CGMManagerDelegate {
     func cgmManagerWantsDeletion(_ manager: CGMManager) {
         dispatchPrecondition(condition: .onQueue(queue))
 
-        log.default("CGM manager with identifier '%{public}@' wants deletion", manager.managerIdentifier)
+        log.default("CGM manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
 
         DispatchQueue.main.async {
             if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
@@ -949,8 +989,24 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
         dispatchPrecondition(condition: .onQueue(queue))
+        log.default("CGMManager:%{public}@ did update with %{public}@", String(describing: type(of: manager)), String(describing: readingResult))
         processCGMReadingResult(manager, readingResult: readingResult) {
-            self.checkPumpDataAndLoop()
+            let now = Date()
+            if case .newData = readingResult, now.timeIntervalSince(self.lastCGMLoopTrigger) > .minutes(4.2) {
+                self.log.default("Triggering loop from new CGM data at %{public}@", String(describing: now))
+                self.lastCGMLoopTrigger = now
+                self.checkPumpDataAndLoop()
+            }
+        }
+    }
+
+    func cgmManager(_ manager: LoopKit.CGMManager, hasNew events: [PersistedCgmEvent]) {
+        Task {
+            do {
+                try await cgmEventStore.add(events: events)
+            } catch {
+                self.log.error("Error storing cgm events: %{public}@", error.localizedDescription)
+            }
         }
     }
 
@@ -982,13 +1038,13 @@ extension DeviceDataManager: CGMManagerDelegate {
 
 extension DeviceDataManager: CGMManagerOnboardingDelegate {
     func cgmManagerOnboarding(didCreateCGMManager cgmManager: CGMManagerUI) {
-        log.default("CGM manager with identifier '%{public}@' created", cgmManager.managerIdentifier)
+        log.default("CGM manager with identifier '%{public}@' created", cgmManager.pluginIdentifier)
         self.cgmManager = cgmManager
     }
 
     func cgmManagerOnboarding(didOnboardCGMManager cgmManager: CGMManagerUI) {
         precondition(cgmManager.isOnboarded)
-        log.default("CGM manager with identifier '%{public}@' onboarded", cgmManager.managerIdentifier)
+        log.default("CGM manager with identifier '%{public}@' onboarded", cgmManager.pluginIdentifier)
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
@@ -1012,6 +1068,11 @@ extension DeviceDataManager: PumpManagerDelegate {
 
         rawPumpManager = pumpManager.rawValue
     }
+    
+    func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule, completion: @escaping (Error?) -> Void) {
+        saveUpdatedBasalRateSchedule(basalRateSchedule)
+        completion(nil)
+    }
 
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
@@ -1032,7 +1093,8 @@ extension DeviceDataManager: PumpManagerDelegate {
 
             self.queue.async {
                 self.processCGMReadingResult(cgmManager, readingResult: result) {
-                    if self.loopManager.lastLoopCompleted == nil || self.loopManager.lastLoopCompleted!.timeIntervalSinceNow < -.minutes(6) {
+                    if self.loopManager.lastLoopCompleted == nil || self.loopManager.lastLoopCompleted!.timeIntervalSinceNow < -.minutes(4.2) {
+                        self.log.default("Triggering Loop from refreshCGM()")
                         self.checkPumpDataAndLoop()
                     }
                     completion?()
@@ -1110,14 +1172,12 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
-        // PumpManagers should report a continuous dosing history, across pump changes
-        //doseStore.resetPumpData(completion: nil)
     }
     
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
 
-        log.default("Pump manager with identifier '%{public}@' will deactivate", pumpManager.managerIdentifier)
+        log.default("Pump manager with identifier '%{public}@' will deactivate", pumpManager.pluginIdentifier)
 
         DispatchQueue.main.async {
             self.pumpManager = nil
@@ -1140,11 +1200,17 @@ extension DeviceDataManager: PumpManagerDelegate {
         setLastError(error: error)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
+    func pumpManager(
+        _ pumpManager: PumpManager,
+        hasNewPumpEvents events: [NewPumpEvent],
+        lastReconciliation: Date?,
+        replacePendingEvents: Bool,
+        completion: @escaping (_ error: Error?) -> Void)
+    {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
 
-        loopManager.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
+        doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
             }
@@ -1176,19 +1242,23 @@ extension DeviceDataManager: PumpManagerDelegate {
         dispatchPrecondition(condition: .onQueue(queue))
         return doseStore.pumpEventQueryAfterDate
     }
+
+    var automaticDosingEnabled: Bool {
+        automaticDosingStatus.automaticDosingEnabled
+    }
 }
 
 // MARK: - PumpManagerOnboardingDelegate
 
 extension DeviceDataManager: PumpManagerOnboardingDelegate {
     func pumpManagerOnboarding(didCreatePumpManager pumpManager: PumpManagerUI) {
-        log.default("Pump manager with identifier '%{public}@' created", pumpManager.managerIdentifier)
+        log.default("Pump manager with identifier '%{public}@' created", pumpManager.pluginIdentifier)
         self.pumpManager = pumpManager
     }
 
     func pumpManagerOnboarding(didOnboardPumpManager pumpManager: PumpManagerUI) {
         precondition(pumpManager.isOnboarded)
-        log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.managerIdentifier)
+        log.default("Pump manager with identifier '%{public}@' onboarded", pumpManager.pluginIdentifier)
 
         DispatchQueue.main.async {
             self.refreshDeviceData()
@@ -1203,92 +1273,100 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
 
 // MARK: - AlertStoreDelegate
 extension DeviceDataManager: AlertStoreDelegate {
-
     func alertStoreHasUpdatedAlertData(_ alertStore: AlertStore) {
-        remoteDataServicesManager.alertStoreHasUpdatedAlertData(alertStore)
+        remoteDataServicesManager.triggerUpload(for: .alert)
     }
-
 }
 
 // MARK: - CarbStoreDelegate
 extension DeviceDataManager: CarbStoreDelegate {
-
     func carbStoreHasUpdatedCarbData(_ carbStore: CarbStore) {
-        remoteDataServicesManager.carbStoreHasUpdatedCarbData(carbStore)
+        remoteDataServicesManager.triggerUpload(for: .carb)
     }
 
     func carbStore(_ carbStore: CarbStore, didError error: CarbStore.CarbStoreError) {}
-
 }
 
 // MARK: - DoseStoreDelegate
 extension DeviceDataManager: DoseStoreDelegate {
-
     func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
-        remoteDataServicesManager.doseStoreHasUpdatedPumpEventData(doseStore)
+        remoteDataServicesManager.triggerUpload(for: .pumpEvent)
     }
-
 }
 
 // MARK: - DosingDecisionStoreDelegate
 extension DeviceDataManager: DosingDecisionStoreDelegate {
-
     func dosingDecisionStoreHasUpdatedDosingDecisionData(_ dosingDecisionStore: DosingDecisionStore) {
-        remoteDataServicesManager.dosingDecisionStoreHasUpdatedDosingDecisionData(dosingDecisionStore)
+        remoteDataServicesManager.triggerUpload(for: .dosingDecision)
     }
-
 }
 
 // MARK: - GlucoseStoreDelegate
 extension DeviceDataManager: GlucoseStoreDelegate {
-
     func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
-        remoteDataServicesManager.glucoseStoreHasUpdatedGlucoseData(glucoseStore)
+        remoteDataServicesManager.triggerUpload(for: .glucose)
     }
-
 }
 
 // MARK: - InsulinDeliveryStoreDelegate
 extension DeviceDataManager: InsulinDeliveryStoreDelegate {
-
     func insulinDeliveryStoreHasUpdatedDoseData(_ insulinDeliveryStore: InsulinDeliveryStore) {
-        remoteDataServicesManager.insulinDeliveryStoreHasUpdatedDoseData(insulinDeliveryStore)
+        remoteDataServicesManager.triggerUpload(for: .dose)
     }
-
 }
+
+// MARK: - CgmEventStoreDelegate
+extension DeviceDataManager: CgmEventStoreDelegate {
+    func cgmEventStoreHasUpdatedData(_ cgmEventStore: LoopKit.CgmEventStore) {
+        remoteDataServicesManager.triggerUpload(for: .cgmEvent)
+    }
+}
+
 
 // MARK: - TestingPumpManager
 extension DeviceDataManager {
     func deleteTestingPumpData(completion: ((Error?) -> Void)? = nil) {
-
         guard let testingPumpManager = pumpManager as? TestingPumpManager else {
-            assertionFailure("\(#function) should be invoked only when a testing pump manager is in use")
+            completion?(nil)
             return
         }
 
         let devicePredicate = HKQuery.predicateForObjects(from: [testingPumpManager.testingDevice])
         let insulinDeliveryStore = doseStore.insulinDeliveryStore
         
-        let healthStore = insulinDeliveryStore.healthStore
         doseStore.resetPumpData { doseStoreError in
             guard doseStoreError == nil else {
                 completion?(doseStoreError!)
                 return
             }
 
-            healthStore.deleteObjects(of: self.doseStore.sampleType, predicate: devicePredicate) { success, deletedObjectCount, error in
-                if success {
-                    insulinDeliveryStore.test_lastImmutableBasalEndDate = nil
+            let insulinSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .sharingDenied
+            guard !insulinSharingDenied else {
+                // only clear cache since access to health kit is denied
+                insulinDeliveryStore.purgeCachedInsulinDeliveryObjects() { error in
+                    completion?(error)
                 }
+                return
+            }
+            
+            insulinDeliveryStore.purgeAllDoseEntries(healthKitPredicate: devicePredicate) { error in
                 completion?(error)
             }
         }
     }
 
     func deleteTestingCGMData(completion: ((Error?) -> Void)? = nil) {
-        
         guard let testingCGMManager = cgmManager as? TestingCGMManager else {
-            assertionFailure("\(#function) should be invoked only when a testing CGM manager is in use")
+            completion?(nil)
+            return
+        }
+        
+        let glucoseSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .sharingDenied
+        guard !glucoseSharingDenied else {
+            // only clear cache since access to health kit is denied
+            glucoseStore.purgeCachedGlucoseObjects() { error in
+                completion?(error)
+            }
             return
         }
 
@@ -1314,7 +1392,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             return units
         }
 
-        let rounded = ([0.0] + pumpManager.supportedBolusVolumes).enumerated().min( by: { abs($0.1 - units) < abs($1.1 - units) } )!.1
+        let rounded = pumpManager.roundToSupportedBolusVolume(units: units)
         self.log.default("Rounded %{public}@ to %{public}@", String(describing: units), String(describing: rounded))
 
         return rounded
@@ -1347,6 +1425,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             self.crashRecoveryManager.dosingFinished()
         }
     }
+
 }
 
 extension Notification.Name {
@@ -1355,177 +1434,14 @@ extension Notification.Name {
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 
-// MARK: - Remote Notification Handling
-extension DeviceDataManager {
-    
-    func handleRemoteNotification(_ notification: [String: AnyObject]) {
-        Task {
-            let backgroundTask = await beginBackgroundTask(name: "Remote Data Upload")
-            await handleRemoteNotification(notification)
-            await endBackgroundTask(backgroundTask)
-        }
-    }
-    
-    func handleRemoteNotification(_ notification: [String: AnyObject]) async {
-        
-        defer {
-            log.default("Remote Notification: Finished handling")
-        }
-        
-        guard FeatureFlags.remoteCommandsEnabled else {
-            log.error("Remote Notification: Remote Commands not enabled.")
-            return
-        }
+// MARK: - ServicesManagerDosingDelegate
 
-        if let expirationStr = notification["expiration"] as? String {
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions =  [.withInternetDateTime, .withFractionalSeconds]
-            if let expiration = formatter.date(from: expirationStr) {
-                let nowDate = Date()
-                guard nowDate < expiration else {
-                    let expiredInterval = nowDate.timeIntervalSince(expiration)
-                    await NotificationManager.sendRemoteCommandExpiredNotification(timeExpired: expiredInterval)
-                    log.error("Remote Notification: Expired: %{public}@", String(describing: notification))
-                    return
-                }
-            } else {
-                log.error("Remote Notification: Invalid expiration: %{public}@", expirationStr)
-                return
-            }
-        }
-        
-        let action: Action
-        
-        do {
-            action = try RemoteCommand.createRemoteAction(notification: notification).get()
-        } catch {
-            log.error("Remote Notification: Parse Error: %{public}@", String(describing: error))
-            return
-        }
-        
-        log.default("Remote Notification: Handling action %{public}@", String(describing: action))
-        
-        switch action {
-        case .temporaryScheduleOverride(let overrideAction):
-            do {
-                try await handleOverrideAction(overrideAction)
-            } catch {
-                log.error("Remote Notification: Override Action Error: %{public}@", String(describing: error))
-            }
-        case .cancelTemporaryOverride(let overrideCancelAction):
-            do {
-                try await handleOverrideCancelAction(overrideCancelAction)
-            } catch {
-                log.error("Remote Notification: Override Action Cancel Error: %{public}@", String(describing: error))
-            }
-        case .bolusEntry(let bolusAction):
-            do {
-                try validatePushNotificationSource(notification: notification)
-                try await handleBolusAction(bolusAction)
-            } catch {
-                await NotificationManager.sendRemoteBolusFailureNotification(for: error, amount: bolusAction.amountInUnits)
-                log.error("Remote Notification: Bolus Action Error: %{public}@", String(describing: notification))
-            }
-        case .carbsEntry(let carbAction):
-            do {
-                try validatePushNotificationSource(notification: notification)
-                try await handleCarbAction(carbAction)
-            } catch {
-                await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: carbAction.amountInGrams)
-                log.error("Remote Notification: Carb Action Error: %{public}@", String(describing: notification))
-            }
-        }
+extension DeviceDataManager: ServicesManagerDosingDelegate {
+    
+    func deliverBolus(amountInUnits: Double) async throws {
+        try await enactBolus(units: amountInUnits, activationType: .manualNoRecommendation)
     }
     
-    func validatePushNotificationSource(notification: [String: AnyObject]) throws {
-        
-        let defaultServiceIdentifier = "NightscoutService"
-        let serviceIdentifer = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
-        
-        let validationResult = remoteDataServicesManager.validatePushNotificationSource(notification, serviceIdentifier: serviceIdentifer)
-        switch validationResult {
-        case .success():
-            log.info("Remote Notification: Validation successful")
-        case .failure(let error):
-            throw error
-        }
-    }
-    
-    //Remote Overrides
-    
-    func handleOverrideAction(_ action: OverrideAction) async throws {
-        let remoteOverride = try action.toValidOverride(allowedPresets: loopManager.settings.overridePresets)
-        await activateRemoteOverride(remoteOverride)
-    }
-    
-    func handleOverrideCancelAction(_ action: OverrideCancelAction) async throws {
-        await activateRemoteOverride(nil)
-    }
-    
-    func activateRemoteOverride(_ remoteOverride: TemporaryScheduleOverride?) async {
-        loopManager.mutateSettings { settings in settings.scheduleOverride = remoteOverride }
-        await remoteDataServicesManager.triggerUpload(for: .overrides)
-    }
-    
-    //Remote Bolus
-    
-    func handleBolusAction(_ action: BolusAction) async throws {
-        let validBolusAmount = try action.toValidBolusAmount(maximumBolus: loopManager.settings.maximumBolus)
-        try await self.enactBolus(units: validBolusAmount, activationType: .manualNoRecommendation)
-        await remoteDataServicesManager.triggerUpload(for: .dose)
-        self.analyticsServicesManager.didBolus(source: "Remote", units: validBolusAmount)
-    }
-    
-    //Remote Carb Entry
-    
-    func handleCarbAction(_ action: CarbAction) async throws {
-        let candidateCarbEntry = try action.toValidCarbEntry(defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
-                                                                  minAbsorptionTime: LoopConstants.minCarbAbsorptionTime,
-                                                                  maxAbsorptionTime: LoopConstants.maxCarbAbsorptionTime,
-                                                                  maxCarbEntryQuantity: LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram()),
-                                                                  maxCarbEntryPastTime: LoopConstants.maxCarbEntryPastTime,
-                                                                  maxCarbEntryFutureTime: LoopConstants.maxCarbEntryFutureTime
-        )
-        
-        let _ = try await addRemoteCarbEntry(candidateCarbEntry)
-        await remoteDataServicesManager.triggerUpload(for: .carb)
-    }
-    
-    //Can't add this concurrency wrapper method to LoopKit due to the minimum iOS version
-    func addRemoteCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
-        return try await withCheckedThrowingContinuation { continuation in
-            carbStore.addCarbEntry(carbEntry) { result in
-                switch result {
-                case .success(let storedCarbEntry):
-                    self.analyticsServicesManager.didAddCarbs(source: "Remote", amount: carbEntry.quantity.doubleValue(for: .gram()))
-                    continuation.resume(returning: storedCarbEntry)
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-    }
-    
-    //Background Uploads
-    
-    func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
-        var backgroundTask: UIBackgroundTaskIdentifier?
-        backgroundTask = await UIApplication.shared.beginBackgroundTask(withName: name) {
-            guard let backgroundTask = backgroundTask else {return}
-            Task {
-                await UIApplication.shared.endBackgroundTask(backgroundTask)
-            }
-            
-            self.log.error("Background Task Expired: %{public}@", name)
-        }
-        
-        return backgroundTask
-    }
-    
-    func endBackgroundTask(_ backgroundTask: UIBackgroundTaskIdentifier?) async {
-        guard let backgroundTask else {return}
-        await UIApplication.shared.endBackgroundTask(backgroundTask)
-    }
 }
 
 // MARK: - Critical Event Log Export
@@ -1668,40 +1584,6 @@ fileprivate extension FileManager {
 extension GlucoseStore : CGMStalenessMonitorDelegate { }
 
 
-//MARK: - SupportInfoProvider protocol conformance
-
-extension DeviceDataManager: SupportInfoProvider {
-
-    private var branchNameIfNotReleaseBranch: String? {
-        return BuildDetails.default.gitBranch.filter { branch in
-            return branch != "" &&
-                branch != "main" &&
-                branch != "master" &&
-                !branch.starts(with: "release/")
-        }
-    }
-    
-    public var localizedAppNameAndVersion: String {
-        if let branch = branchNameIfNotReleaseBranch {
-            return Bundle.main.localizedNameAndVersion + " (\(branch))"
-        }
-        return Bundle.main.localizedNameAndVersion
-    }
-    
-    public var pumpStatus: PumpManagerStatus? {
-        return pumpManager?.status
-    }
-    
-    public var cgmStatus: CGMManagerStatus? {
-        return cgmManager?.cgmManagerStatus
-    }
-    
-    public func generateIssueReport(completion: @escaping (String) -> Void) {
-        generateDiagnosticReport(completion)
-    }
-    
-}
-
 //MARK: TherapySettingsViewModelDelegate
 struct CancelTempBasalFailedError: LocalizedError {
     let reason: Error?
@@ -1784,10 +1666,8 @@ extension DeviceDataManager {
     func addDisplayGlucoseUnitObserver(_ observer: DisplayGlucoseUnitObserver) {
         let queue = DispatchQueue.main
         displayGlucoseUnitObservers.insert(observer, queue: queue)
-        if let displayGlucoseUnit = glucoseStore.preferredUnit {
-            queue.async {
-                observer.displayGlucoseUnitDidChange(to: displayGlucoseUnit)
-            }
+        queue.async {
+            observer.unitDidChange(to: self.displayGlucosePreference.unit)
         }
     }
 
@@ -1797,13 +1677,71 @@ extension DeviceDataManager {
 
     func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: HKUnit) {
         self.displayGlucoseUnitObservers.forEach {
-            $0.displayGlucoseUnitDidChange(to: displayGlucoseUnit)
+            $0.unitDidChange(to: displayGlucoseUnit)
         }
     }
 }
 
-extension DeviceDataManager {
+extension DeviceDataManager: DeviceSupportDelegate {
     var availableSupports: [SupportUI] { [cgmManager, pumpManager].compactMap { $0 as? SupportUI } }
+
+    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
+        self.loopManager.generateDiagnosticReport { (loopReport) in
+
+            let logDurationHours = 84.0
+
+            self.alertManager.getStoredEntries(startDate: Date() - .hours(logDurationHours)) { (alertReport) in
+                self.deviceLog.getLogEntries(startDate: Date() - .hours(logDurationHours)) { (result) in
+                    let deviceLogReport: String
+                    switch result {
+                    case .failure(let error):
+                        deviceLogReport = "Error fetching entries: \(error)"
+                    case .success(let entries):
+                        deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
+                    }
+
+                    let report = [
+                        "## Build Details",
+                        "* appNameAndVersion: \(Bundle.main.localizedNameAndVersion)",
+                        "* profileExpiration: \(BuildDetails.default.profileExpirationString)",
+                        "* gitRevision: \(BuildDetails.default.gitRevision ?? "N/A")",
+                        "* gitBranch: \(BuildDetails.default.gitBranch ?? "N/A")",
+                        "* workspaceGitRevision: \(BuildDetails.default.workspaceGitRevision ?? "N/A")",
+                        "* workspaceGitBranch: \(BuildDetails.default.workspaceGitBranch ?? "N/A")",
+                        "* sourceRoot: \(BuildDetails.default.sourceRoot ?? "N/A")",
+                        "* buildDateString: \(BuildDetails.default.buildDateString ?? "N/A")",
+                        "* xcodeVersion: \(BuildDetails.default.xcodeVersion ?? "N/A")",
+                        "",
+                        "## FeatureFlags",
+                        "\(FeatureFlags)",
+                        "",
+                        alertReport,
+                        "",
+                        "## DeviceDataManager",
+                        "* launchDate: \(self.launchDate)",
+                        "* lastError: \(String(describing: self.lastError))",
+                        "",
+                        "cacheStore: \(String(reflecting: self.cacheStore))",
+                        "",
+                        self.cgmManager != nil ? String(reflecting: self.cgmManager!) : "cgmManager: nil",
+                        "",
+                        self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
+                        "",
+                        "## Device Communication Log",
+                        deviceLogReport,
+                        "",
+                        String(reflecting: self.watchManager!),
+                        "",
+                        String(reflecting: self.statusExtensionManager!),
+                        "",
+                        loopReport,
+                        ].joined(separator: "\n")
+
+                    completion(report)
+                }
+            }
+        }
+    }
 }
 
 extension DeviceDataManager: DeviceStatusProvider {}

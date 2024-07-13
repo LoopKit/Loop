@@ -13,13 +13,13 @@ import LoopKit
 
 final class ExtensionDataManager {
     unowned let deviceManager: DeviceDataManager
-    private let closedLoopStatus: ClosedLoopStatus
+    private let automaticDosingStatus: AutomaticDosingStatus
 
     init(deviceDataManager: DeviceDataManager,
-         closedLoopStatus: ClosedLoopStatus)
+         automaticDosingStatus: AutomaticDosingStatus)
     {
         self.deviceManager = deviceDataManager
-        self.closedLoopStatus = closedLoopStatus
+        self.automaticDosingStatus = automaticDosingStatus
 
         NotificationCenter.default.addObserver(self, selector: #selector(notificationReceived(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
         NotificationCenter.default.addObserver(self, selector: #selector(notificationReceived(_:)), name: .PumpManagerChanged, object: nil)
@@ -61,11 +61,7 @@ final class ExtensionDataManager {
     }
     
     private func update() {
-        guard let unit = (deviceManager.glucoseStore.preferredUnit ?? ExtensionDataManager.context?.predictedGlucose?.unit) else {
-            return
-        }
-
-        createStatusContext(glucoseUnit: unit) { (context) in
+        createStatusContext(glucoseUnit:  deviceManager.preferredGlucoseUnit) { (context) in
             if let context = context {
                 ExtensionDataManager.context = context
             }
@@ -119,7 +115,11 @@ final class ExtensionDataManager {
 
             context.lastLoopCompleted = lastLoopCompleted
             
-            context.isClosedLoop = self.closedLoopStatus.isClosedLoop
+            context.isClosedLoop = self.automaticDosingStatus.automaticDosingEnabled
+            
+            context.preMealPresetAllowed = self.automaticDosingStatus.automaticDosingEnabled && manager.settings.preMealTargetRange != nil
+            context.preMealPresetActive = manager.settings.preMealTargetEnabled()
+            context.customPresetActive = manager.settings.nonPreMealOverrideEnabled()
 
             // Drop the first element in predictedGlucose because it is the currentGlucose
             // and will have a different interval to the next element

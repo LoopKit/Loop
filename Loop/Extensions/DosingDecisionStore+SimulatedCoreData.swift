@@ -103,23 +103,23 @@ fileprivate extension StoredDosingDecision {
             historicalGlucose.append(HistoricalGlucoseValue(startDate: date.addingTimeInterval(.minutes(minutes)),
                                                             quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 125 + minutes / 5)))
         }
-        let originalCarbEntry = StoredCarbEntry(uuid: UUID(uuidString: "C86DEB61-68E9-464E-9DD5-96A9CB445FD3")!,
+        let originalCarbEntry = StoredCarbEntry(startDate: date.addingTimeInterval(-.minutes(15)),
+                                                quantity: HKQuantity(unit: .gram(), doubleValue: 15),
+                                                uuid: UUID(uuidString: "C86DEB61-68E9-464E-9DD5-96A9CB445FD3")!,
                                                 provenanceIdentifier: Bundle.main.bundleIdentifier!,
                                                 syncIdentifier: "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
                                                 syncVersion: 1,
-                                                startDate: date.addingTimeInterval(-.minutes(15)),
-                                                quantity: HKQuantity(unit: .gram(), doubleValue: 15),
                                                 foodType: "Simulated",
                                                 absorptionTime: .hours(3),
                                                 createdByCurrentApp: true,
                                                 userCreatedDate: date.addingTimeInterval(-.minutes(15)),
                                                 userUpdatedDate: date.addingTimeInterval(-.minutes(1)))
-        let carbEntry = StoredCarbEntry(uuid: UUID(uuidString: "71B699D7-0E8F-4B13-B7A1-E7751EB78E74")!,
+        let carbEntry = StoredCarbEntry(startDate: date.addingTimeInterval(-.minutes(1)),
+                                        quantity: HKQuantity(unit: .gram(), doubleValue: 25),
+                                        uuid: UUID(uuidString: "71B699D7-0E8F-4B13-B7A1-E7751EB78E74")!,
                                         provenanceIdentifier: Bundle.main.bundleIdentifier!,
                                         syncIdentifier: "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
                                         syncVersion: 2,
-                                        startDate: date.addingTimeInterval(-.minutes(1)),
-                                        quantity: HKQuantity(unit: .gram(), doubleValue: 25),
                                         foodType: "Simulated",
                                         absorptionTime: .hours(5),
                                         createdByCurrentApp: true,
@@ -147,7 +147,7 @@ fileprivate extension StoredDosingDecision {
                                                       healthKitEligibleDate: nil)
         let carbsOnBoard = CarbValue(startDate: date,
                                      endDate: date.addingTimeInterval(.minutes(5)),
-                                     quantity: HKQuantity(unit: .gram(), doubleValue: 45.5))
+                                     value: 45.5)
         let insulinOnBoard = InsulinValue(startDate: date, value: 1.5)
         let glucoseTargetRangeSchedule = GlucoseRangeSchedule(rangeSchedule: DailyQuantitySchedule(unit: .milligramsPerDeciliter,
                                                                                                    dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: DoubleRange(minValue: 100.0, maxValue: 110.0)),

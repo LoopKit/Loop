@@ -11,8 +11,11 @@ import LoopKit
 @testable import Loop
 
 class MockCarbStore: CarbStoreProtocol {
+    var carbHistory: [StoredCarbEntry]?
+
     init(for scenario: DosingTestScenario = .flatAndStable) {
         self.scenario = scenario // The store returns different effect values based on the scenario
+        self.carbHistory = loadHistoricCarbEntries(scenario: scenario)
     }
     
     var scenario: DosingTestScenario
@@ -77,7 +80,7 @@ class MockCarbStore: CarbStoreProtocol {
         completion("")
     }
     
-    func glucoseEffects<Sample>(of samples: [Sample], startingAt start: Date, endingAt end: Date?, effectVelocities: [GlucoseEffectVelocity]?) throws -> [GlucoseEffect] where Sample : CarbEntry {
+    func glucoseEffects<Sample>(of samples: [Sample], startingAt start: Date, endingAt end: Date?, effectVelocities: [LoopKit.GlucoseEffectVelocity]) throws -> [LoopKit.GlucoseEffect] where Sample : LoopKit.CarbEntry {
         return []
     }
     
@@ -96,15 +99,38 @@ class MockCarbStore: CarbStoreProtocol {
     func deleteCarbEntry(_ entry: StoredCarbEntry, completion: @escaping (CarbStoreResult<Bool>) -> Void) {
         completion(.failure(.notConfigured))
     }
-    
-    func getGlucoseEffects(start: Date, end: Date? = nil, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping(_ result: CarbStoreResult<(entries: [StoredCarbEntry], effects: [GlucoseEffect])>) -> Void) {
-        let fixture: [JSONDictionary] = loadFixture(fixtureToLoad)
 
-        let dateFormatter = ISO8601DateFormatter.localTimeDate()
+    func getGlucoseEffects(start: Date, end: Date?, effectVelocities: [LoopKit.GlucoseEffectVelocity], completion: @escaping (LoopKit.CarbStoreResult<(entries: [LoopKit.StoredCarbEntry], effects: [LoopKit.GlucoseEffect])>) -> Void)
+    {
+        if let carbHistory, let carbRatioScheduleApplyingOverrideHistory, let insulinSensitivityScheduleApplyingOverrideHistory {
+            let foodStart = start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
+            let samples = carbHistory.filterDateRange(foodStart, end)
+            let carbDates = samples.map { $0.startDate }
+            let maxCarbDate = carbDates.max()!
+            let minCarbDate = carbDates.min()!
+            let carbRatio = carbRatioScheduleApplyingOverrideHistory.between(start: minCarbDate, end: maxCarbDate)
+            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory.quantitiesBetween(start: minCarbDate, end: maxCarbDate)
+            let effects = samples.map(
+                to: effectVelocities,
+                carbRatio: carbRatio,
+                insulinSensitivity: insulinSensitivity
+            ).dynamicGlucoseEffects(
+                from: start,
+                to: end,
+                carbRatios: carbRatio,
+                insulinSensitivities: insulinSensitivity
+            )
+            completion(.success((entries: samples, effects: effects)))
 
-        return completion(.success(([], fixture.map {
-            return GlucoseEffect(startDate: dateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
-        })))
+        } else {
+            let fixture: [JSONDictionary] = loadFixture(fixtureToLoad)
+
+            let dateFormatter = ISO8601DateFormatter.localTimeDate()
+
+            return completion(.success(([], fixture.map {
+                return GlucoseEffect(startDate: dateFormatter.date(from: $0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
+            })))
+        }
     }
 }
 
@@ -120,6 +146,8 @@ extension MockCarbStore {
     
     var fixtureToLoad: String {
         switch scenario {
+        case .liveCapture:
+            fatalError("live capture scenario computes effects from carb entries, does not used pre-canned effects")
         case .flatAndStable:
             return "flat_and_stable_carb_effect"
         case .highAndStable:
@@ -132,6 +160,18 @@ extension MockCarbStore {
             return "low_with_low_treatment_carb_effect"
         case .highAndFalling:
             return "high_and_falling_carb_effect"
+        }
+    }
+
+    public func loadHistoricCarbEntries(scenario: DosingTestScenario) -> [StoredCarbEntry]? {
+        if let url = bundle.url(forResource: scenario.fixturePrefix + "carb_entries", withExtension: "json"),
+           let data = try? Data(contentsOf: url)
+        {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try? decoder.decode([StoredCarbEntry].self, from: data)
+        } else {
+            return nil
         }
     }
 }

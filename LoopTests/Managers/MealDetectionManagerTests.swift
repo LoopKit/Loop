@@ -12,6 +12,25 @@ import LoopCore
 import LoopKit
 @testable import Loop
 
+fileprivate class MockGlucoseSample: GlucoseSampleValue {
+
+    let provenanceIdentifier = ""
+    let isDisplayOnly: Bool
+    let wasUserEntered: Bool
+    let condition: LoopKit.GlucoseCondition? = nil
+    let trendRate: HKQuantity? = nil
+    var trend: LoopKit.GlucoseTrend?
+    var syncIdentifier: String?
+    let quantity: HKQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)
+    let startDate: Date
+    
+    init(startDate: Date, isDisplayOnly: Bool = false, wasUserEntered: Bool = false) {
+        self.startDate = startDate
+        self.isDisplayOnly = isDisplayOnly
+        self.wasUserEntered = wasUserEntered
+    }
+}
+
 enum MissedMealTestType {
     private static var dateFormatter = ISO8601DateFormatter.localTimeDate()
     
@@ -33,6 +52,8 @@ enum MissedMealTestType {
     case dynamicCarbAutofill
     /// Test case for purely testing the notifications (not the algorithm)
     case notificationTest
+    /// Test case for testing the algorithm with settings in mmol/L
+    case mmolUser
 }
 
 extension MissedMealTestType {
@@ -48,7 +69,7 @@ extension MissedMealTestType {
             return "noisy_cgm_counteraction_effect"
         case .manyMeals, .missedMealWithCOB:
             return "realistic_report_counteraction_effect"
-        case .dynamicCarbAutofill:
+        case .dynamicCarbAutofill, .mmolUser:
             return "dynamic_autofill_counteraction_effect"
         }
     }
@@ -65,7 +86,7 @@ extension MissedMealTestType {
             return Self.dateFormatter.date(from: "2022-10-19T19:50:15")!
         case .manyMeals:
             return Self.dateFormatter.date(from: "2022-10-19T21:50:15")!
-        case .dynamicCarbAutofill:
+        case .dynamicCarbAutofill, .mmolUser:
             return Self.dateFormatter.date(from: "2022-10-17T07:51:09")!
         }
     }
@@ -78,7 +99,7 @@ extension MissedMealTestType {
             return Self.dateFormatter.date(from: "2022-10-19T19:00:00")
         case .manyMeals:
             return Self.dateFormatter.date(from: "2022-10-19T20:40:00 ")
-        case .dynamicCarbAutofill:
+        case .dynamicCarbAutofill, .mmolUser:
             return Self.dateFormatter.date(from: "2022-10-17T07:20:00")!
         default:
             return nil
@@ -136,13 +157,26 @@ extension MissedMealTestType {
     }
     
     var insulinSensitivitySchedule: InsulinSensitivitySchedule {
-        InsulinSensitivitySchedule(
-            unit: HKUnit.milligramsPerDeciliter,
-            dailyItems: [
-                RepeatingScheduleValue(startTime: 0.0, value: 50.0)
-            ],
-            timeZone: .utcTimeZone
-        )!
+        let value = 50.0
+        switch self {
+        case .mmolUser:
+            return InsulinSensitivitySchedule(
+                unit: HKUnit.millimolesPerLiter,
+                dailyItems: [
+                    RepeatingScheduleValue(startTime: 0.0,
+                                           value: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: value).doubleValue(for: .millimolesPerLiter))
+                ],
+                timeZone: .utcTimeZone
+            )!
+        default:
+            return InsulinSensitivitySchedule(
+                unit: HKUnit.milligramsPerDeciliter,
+                dailyItems: [
+                    RepeatingScheduleValue(startTime: 0.0, value: value)
+                ],
+                timeZone: .utcTimeZone
+            )!
+        }
     }
 }
 
@@ -160,15 +194,13 @@ class MealDetectionManagerTests: XCTestCase {
     var bolusUnits: Double?
     var bolusDurationEstimator: ((Double) -> TimeInterval?)!
     
+    fileprivate var glucoseSamples: [MockGlucoseSample]!
+    
     @discardableResult func setUp(for testType: MissedMealTestType) -> [GlucoseEffectVelocity] {
-        let healthStore = HKHealthStoreMock()
-        
         carbStore = CarbStore(
-            healthStore: healthStore,
             cacheStore: PersistenceController(directoryURL: URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true).appendingPathComponent(UUID().uuidString, isDirectory: true)),
             cacheLength: .hours(24),
             defaultAbsorptionTimes: (fast: .minutes(30), medium: .hours(3), slow: .hours(5)),
-            observationInterval: 0,
             overrideHistory: TemporaryScheduleOverrideHistory(),
             provenanceIdentifier: Bundle.main.bundleIdentifier!,
             test_currentDate: testType.currentDate)
@@ -197,6 +229,8 @@ class MealDetectionManagerTests: XCTestCase {
             maximumBolus: 5,
             test_currentDate: testType.currentDate
         )
+        
+        glucoseSamples = [MockGlucoseSample(startDate: now)]
         
         bolusDurationEstimator = { units in
             self.bolusUnits = units
@@ -252,7 +286,7 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .noMissedMeal)
             updateGroup.leave()
         }
@@ -264,7 +298,7 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .noMissedMeal)
             updateGroup.leave()
         }
@@ -277,7 +311,7 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 55))
             updateGroup.leave()
         }
@@ -290,7 +324,7 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 25))
             updateGroup.leave()
         }
@@ -303,7 +337,7 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 50))
             updateGroup.leave()
         }
@@ -315,7 +349,7 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .noMissedMeal)
             updateGroup.leave()
         }
@@ -328,8 +362,21 @@ class MealDetectionManagerTests: XCTestCase {
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
-        mealDetectionManager.hasMissedMeal(insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
             XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 40))
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+    }
+    
+    func testMMOLUser() {
+        let testType = MissedMealTestType.mmolUser
+        let counteractionEffects = setUp(for: testType)
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        mealDetectionManager.hasMissedMeal(glucoseSamples: glucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+            XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 25))
             updateGroup.leave()
         }
         updateGroup.wait()
@@ -435,6 +482,44 @@ class MealDetectionManagerTests: XCTestCase {
         let expectedDeliveryTime2 = now.addingTimeInterval(TimeInterval(minutes: 3))
         XCTAssertEqual(bolusUnits, 4.5)
         XCTAssertEqual(mealDetectionManager.lastMissedMealNotification?.deliveryTime, expectedDeliveryTime2)
+    }
+    
+    func testHasCalibrationPoints_NoNotification() {
+        let testType = MissedMealTestType.manyMeals
+        let counteractionEffects = setUp(for: testType)
+
+        let calibratedGlucoseSamples = [MockGlucoseSample(startDate: now), MockGlucoseSample(startDate: now, isDisplayOnly: true)]
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        mealDetectionManager.hasMissedMeal(glucoseSamples: calibratedGlucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+            XCTAssertEqual(status, .noMissedMeal)
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+        
+        let manualGlucoseSamples = [MockGlucoseSample(startDate: now), MockGlucoseSample(startDate: now, wasUserEntered: true)]
+        updateGroup.enter()
+        mealDetectionManager.hasMissedMeal(glucoseSamples: manualGlucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+            XCTAssertEqual(status, .noMissedMeal)
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+    }
+    
+    func testHasTooOldCalibrationPoint_NoImpactOnNotificationDelivery() {
+        let testType = MissedMealTestType.manyMeals
+        let counteractionEffects = setUp(for: testType)
+
+        let tooOldCalibratedGlucoseSamples = [MockGlucoseSample(startDate: now, isDisplayOnly: false), MockGlucoseSample(startDate: now.addingTimeInterval(-MissedMealSettings.maxRecency-1), isDisplayOnly: true)]
+        
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        mealDetectionManager.hasMissedMeal(glucoseSamples: tooOldCalibratedGlucoseSamples, insulinCounteractionEffects: counteractionEffects, carbEffects: mealDetectionCarbEffects(using: counteractionEffects)) { status in
+            XCTAssertEqual(status, .hasMissedMeal(startTime: testType.missedMealDate!, carbAmount: 40))
+            updateGroup.leave()
+        }
+        updateGroup.wait()
     }
 }
 

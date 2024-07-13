@@ -157,8 +157,7 @@ struct ManualEntryDoseView: View {
     }
 
     private static let doseAmountFormatter: NumberFormatter = {
-        let quantityFormatter = QuantityFormatter()
-        quantityFormatter.setPreferredNumberFormatter(for: .internationalUnit())
+        let quantityFormatter = QuantityFormatter(for: .internationalUnit())
         return quantityFormatter.numberFormatter
     }()
     
@@ -207,7 +206,7 @@ struct ManualEntryDoseView: View {
     }
 
     private var bolusUnitsLabel: some View {
-        Text(QuantityFormatter().string(from: .internationalUnit()))
+        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
             .foregroundColor(Color(.secondaryLabel))
     }
 

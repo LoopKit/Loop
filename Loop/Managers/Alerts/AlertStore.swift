@@ -539,7 +539,7 @@ extension AlertStore: CriticalEventLog {
         return result!
     }
 
-    public func export(startDate: Date, endDate: Date, to stream: OutputStream, progress: Progress) -> Error? {
+    public func export(startDate: Date, endDate: Date, to stream: DataOutputStream, progress: Progress) -> Error? {
         let encoder = JSONStreamEncoder(stream: stream)
         var modificationCounter: Int64 = 0
         var fetching = true

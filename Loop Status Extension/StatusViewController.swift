@@ -43,7 +43,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 axisLabel: .axisLabelColor,
                 grid: .gridColor,
                 glucoseTint: .glucoseTintColor,
-                insulinTint: .insulinTintColor
+                insulinTint: .insulinTintColor,
+                carbTint: .carbTintColor
             ),
             settings: {
                 var settings = ChartSettings()
@@ -84,20 +85,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         expireAfter: localCacheDuration)
 
     lazy var glucoseStore = GlucoseStore(
-        healthStore: healthStore,
-        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps,
-        storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
-        observationEnabled: false,
         provenanceIdentifier: HKSource.default().bundleIdentifier
     )
 
     lazy var doseStore = DoseStore(
-        healthStore: healthStore,
-        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
-        storeSamplesToHealthKit: false,
         cacheStore: cacheStore,
-        observationEnabled: false,
         insulinModelProvider: PresetInsulinModelProvider(defaultRapidActingModel: settingsStore.latestSettings?.defaultRapidActingModel?.presetForRapidActingInsulin),
         longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
         basalProfile: settingsStore.latestSettings?.basalRateSchedule,
@@ -275,11 +268,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             self.hudView.pumpStatusHUD.lifecycleProgress = context.pumpLifecycleProgressContext
 
             // Active carbs
-            let carbsFormatter = QuantityFormatter()
-            carbsFormatter.setPreferredNumberFormatter(for: carbUnit)
+            let carbsFormatter = QuantityFormatter(for: carbUnit)
 
             if let carbsOnBoard = context.carbsOnBoard,
-               let activeCarbsNumberString = carbsFormatter.string(from: HKQuantity(unit: carbUnit, doubleValue: carbsOnBoard), for: carbUnit)
+               let activeCarbsNumberString = carbsFormatter.string(from: HKQuantity(unit: carbUnit, doubleValue: carbsOnBoard))
             {
                 self.activeCarbsAmountLabel.text = String(format: NSLocalizedString("%1$@", comment: "The subtitle format describing the grams of active carbs.  (1: localized carb value description)"), activeCarbsNumberString)
             } else {
@@ -307,9 +299,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
 
             // Charts
-            let glucoseFormatter = QuantityFormatter()
-            glucoseFormatter.setPreferredNumberFormatter(for: unit)
-
             self.charts.predictedGlucose.glucoseUnit = unit
             self.charts.predictedGlucose.setGlucoseValues(glucose)
 

@@ -58,9 +58,6 @@
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "大人使用時の Humalog、Novolog、Apidraインスリンの公表吸収率に基づいたモデル。";
 
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "吸収時間";
-
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "推奨ボーラス値を使う";
 
@@ -149,9 +146,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "糖質の記入を追加";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "糖質の記入を編集";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "残存糖質";
@@ -291,7 +285,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "吸収済インスリン(U) × インスリン効果値(%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "インスリン放出";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "インスリン効果";
@@ -337,7 +331,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "モメンタム効果";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "詳細";
 
 /* Sensor state description for the non-valid state */
@@ -354,6 +349,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -456,9 +452,6 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "ループのレガシーモデルで、作用期間をカスタマイズできます。";
 
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "最大吸収時間: %@";
-
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "最大ボーラス量は %@単位です";
 
@@ -466,6 +459,8 @@
 "U" = "U";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "不明";
 

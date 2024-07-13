@@ -11,11 +11,14 @@ import LoopKit
 @testable import Loop
 
 class MockDoseStore: DoseStoreProtocol {
+    var doseHistory: [DoseEntry]?
+    var sensitivitySchedule: InsulinSensitivitySchedule?
     
     init(for scenario: DosingTestScenario = .flatAndStable) {
         self.scenario = scenario // The store returns different effect values based on the scenario
-        self.pumpEventQueryAfterDate = MockDoseStore.currentDate(for: scenario)
-        self.lastAddedPumpData = MockDoseStore.currentDate(for: scenario)
+        self.pumpEventQueryAfterDate = scenario.currentDate
+        self.lastAddedPumpData = scenario.currentDate
+        self.doseHistory = loadHistoricDoses(scenario: scenario)
     }
     
     static let dateFormatter = ISO8601DateFormatter.localTimeDate()
@@ -37,7 +40,7 @@ class MockDoseStore: DoseStoreProtocol {
     // Default to the adult exponential insulin model
     var insulinModelProvider: InsulinModelProvider = StaticInsulinModelProvider(ExponentialInsulinModelPreset.rapidActingAdult)
 
-    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.rapidActingAdult.actionDuration
+    var longestEffectDuration: TimeInterval = ExponentialInsulinModelPreset.rapidActingAdult.effectDuration
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule?
     
@@ -51,7 +54,7 @@ class MockDoseStore: DoseStoreProtocol {
     
     var lastAddedPumpData: Date
 
-    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (DoseStore.DoseStoreError?) -> Void) {
+    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool, completion: @escaping (DoseStore.DoseStoreError?) -> Void) {
         completion(nil)
     }
     
@@ -60,7 +63,7 @@ class MockDoseStore: DoseStoreProtocol {
     }
     
     func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
-        completion(.success(.init(startDate: MockDoseStore.currentDate(for: scenario), value: 9.5)))
+        completion(.success(.init(startDate: scenario.currentDate, value: 9.5)))
     }
     
     func generateDiagnosticReport(_ completion: @escaping (String) -> Void) {
@@ -69,10 +72,6 @@ class MockDoseStore: DoseStoreProtocol {
     
     func addDoses(_ doses: [DoseEntry], from device: HKDevice?, completion: @escaping (Error?) -> Void) {
         completion(nil)
-    }
-    
-    func resetPumpData(completion: ((DoseStore.DoseStoreError?) -> Void)?) {
-        completion?(.configurationError)
     }
     
     func getInsulinOnBoardValues(start: Date, end: Date?, basalDosingEnd: Date?, completion: @escaping (DoseStoreResult<[InsulinValue]>) -> Void) {
@@ -92,10 +91,31 @@ class MockDoseStore: DoseStoreProtocol {
     }
     
     func getGlucoseEffects(start: Date, end: Date? = nil, basalDosingEnd: Date? = Date(), completion: @escaping (_ result: DoseStoreResult<[GlucoseEffect]>) -> Void) {
+        if let doseHistory, let sensitivitySchedule, let basalProfile = basalProfileApplyingOverrideHistory {
+            // To properly know glucose effects at startDate, we need to go back another DIA hours
+            let doseStart = start.addingTimeInterval(-longestEffectDuration)
+            let doses = doseHistory.filterDateRange(doseStart, end)
+            let trimmedDoses = doses.map { (dose) -> DoseEntry in
+                guard dose.type != .bolus else {
+                    return dose
+                }
+                return dose.trimmed(to: basalDosingEnd)
+            }
+
+            let annotatedDoses = trimmedDoses.annotated(with: basalProfile)
+
+            let glucoseEffects = annotatedDoses.glucoseEffects(insulinModelProvider: self.insulinModelProvider, longestEffectDuration: self.longestEffectDuration, insulinSensitivity: sensitivitySchedule, from: start, to: end)
+            completion(.success(glucoseEffects.filterDateRange(start, end)))
+        } else {
+            return completion(.success(getCannedGlucoseEffects()))
+        }
+    }
+
+    func getCannedGlucoseEffects() -> [GlucoseEffect] {
         let fixture: [JSONDictionary] = loadFixture(fixtureToLoad)
         let dateFormatter = ISO8601DateFormatter.localTimeDate()
 
-        return completion(.success(fixture.map {
+        return fixture.map {
             return GlucoseEffect(
                 startDate: dateFormatter.date(from: $0["date"] as! String)!,
                 quantity: HKQuantity(
@@ -103,23 +123,6 @@ class MockDoseStore: DoseStoreProtocol {
                     doubleValue: $0["amount"] as! Double
                 )
             )
-        }))
-    }
-    
-    static func currentDate(for testType: DosingTestScenario) -> Date {
-        switch testType {
-        case .flatAndStable:
-            return dateFormatter.date(from: "2020-08-11T20:45:02")!
-        case .highAndStable:
-            return dateFormatter.date(from: "2020-08-12T12:39:22")!
-        case .highAndRisingWithCOB:
-            return dateFormatter.date(from: "2020-08-11T21:48:17")!
-        case .lowAndFallingWithCOB:
-            return dateFormatter.date(from: "2020-08-11T22:06:06")!
-        case .lowWithLowTreatment:
-            return dateFormatter.date(from: "2020-08-11T22:23:55")!
-        case .highAndFalling:
-            return dateFormatter.date(from: "2020-08-11T22:59:45")!
         }
     }
 }
@@ -136,6 +139,8 @@ extension MockDoseStore {
     
     var fixtureToLoad: String {
         switch scenario {
+        case .liveCapture:
+            fatalError("live capture scenario computes effects from doses, does not used pre-canned effects")
         case .flatAndStable:
             return "flat_and_stable_insulin_effect"
         case .highAndStable:
@@ -150,4 +155,17 @@ extension MockDoseStore {
             return "high_and_falling_insulin_effect"
         }
     }
+
+    public func loadHistoricDoses(scenario: DosingTestScenario) -> [DoseEntry]? {
+        if let url = bundle.url(forResource: scenario.fixturePrefix + "doses", withExtension: "json"),
+           let data = try? Data(contentsOf: url)
+        {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try? decoder.decode([DoseEntry].self, from: data)
+        } else {
+            return nil
+        }
+    }
+
 }

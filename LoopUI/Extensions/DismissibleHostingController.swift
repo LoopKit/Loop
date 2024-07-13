@@ -10,13 +10,13 @@ import SwiftUI
 import LoopKitUI
 
 extension DismissibleHostingController {
-    public convenience init<Content: View>(
+    public convenience init(
            rootView: Content,
            dismissalMode: DismissalMode = .modalDismiss,
            isModalInPresentation: Bool = true,
            onDisappear: @escaping () -> Void = {}
     ) {
-        self.init(rootView: rootView,
+        self.init(content: rootView,
                   dismissalMode: dismissalMode,
                   isModalInPresentation: isModalInPresentation,
                   onDisappear: onDisappear,

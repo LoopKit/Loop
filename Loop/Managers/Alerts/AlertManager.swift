@@ -181,7 +181,7 @@ public final class AlertManager {
 
         for (minutes, isCritical) in [(20.0, false), (40.0, false), (60.0, true), (120.0, true)] {
             let warningInterval = TimeInterval(minutes: minutes)
-            let timeUntilNotification = lastLoopDate.addingTimeInterval(.minutes(minutes)).timeIntervalSinceNow
+            let timeUntilNotification = lastLoopDate.addingTimeInterval(warningInterval).timeIntervalSinceNow
             guard timeUntilNotification >= 0 else { break }
 
             let formatter = DateComponentsFormatter()
@@ -227,7 +227,6 @@ public final class AlertManager {
                     alertAt: nextTriggerDate,
                     title: notificationContent.title,
                     body: notificationContent.body,
-                    timeInterval: warningInterval,
                     isCritical: isCritical)
                 scheduledNotifications.append(scheduledNotification)
             }
@@ -781,6 +780,31 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
         alertPresenter.dismissAlert(alertController, animated: true) { [weak self] in
             self?.unsafeNotificationPermissionsAlertController = nil
         }
+    }
+}
+
+extension AlertManager {
+    func presentLoopResetConfirmationAlert(confirmAction: @escaping (@escaping () -> Void) -> Void, cancelAction: @escaping () -> Void) {
+        let alert = UIAlertController(title: "Loop Reset Requested", message: "We've detected a Loop reset may be needed. Tapping confirm will reset Loop and quit the app.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+            confirmAction() {
+                fatalError("DEBUG: Resetting Loop")
+            }
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            cancelAction()
+        }))
+        
+        alertPresenter.present(alert, animated: true)
+    }
+    
+    func presentCouldNotResetLoopAlert(error: Error) {
+        let titleString = String(format: NSLocalizedString("Could Not Restart %1$@", comment: "Format string for title of reset loop alert. (1: App name)"), Bundle.main.bundleDisplayName)
+        let message = String(format: NSLocalizedString("While trying to restart %1$@ an error occured.\n\n%2$@", comment: "Format string for message of reset loop alert. (1: App name) (2: error description)"), Bundle.main.bundleDisplayName, error.localizedDescription)
+        let alert = UIAlertController(title: titleString, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel button for reset loop alert"), style: .cancel))
+        
+        alertPresenter.present(alert, animated: true)
     }
 }
 

@@ -26,14 +26,12 @@ struct BolusInput: View {
     }
 
     private static let amountFormatter: NumberFormatter = {
-        let formatter = QuantityFormatter()
-        formatter.setPreferredNumberFormatter(for: .internationalUnit())
+        let formatter = QuantityFormatter(for: .internationalUnit())
         return formatter.numberFormatter
     }()
 
     private static let recommendedAmountFormatter: NumberFormatter = {
-        let formatter = QuantityFormatter()
-        formatter.setPreferredNumberFormatter(for: .internationalUnit())
+        let formatter = QuantityFormatter(for: .internationalUnit())
         return formatter.numberFormatter
     }()
 
@@ -102,10 +100,10 @@ fileprivate extension Collection where Element == Decimal {
     /// - Precondition: The collection is sorted in ascending order.
     func deltaScale(boundedBy maxScale: Int) -> Int {
         let roundedToMaxScale = lazy.map { $0.rounded(toPlaces: maxScale) }
-        guard let maxDelta = roundedToMaxScale.adjacentPairs().map(-).map(abs).max() else {
+        guard let minDelta = roundedToMaxScale.adjacentPairs().map(-).map(abs).min() else {
             return 0
         }
 
-        return abs(Swift.min(maxDelta.exponent, 0))
+        return abs(Swift.min(minDelta.exponent, 0))
     }
 }

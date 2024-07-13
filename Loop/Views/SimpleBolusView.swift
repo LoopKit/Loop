@@ -13,7 +13,7 @@ import HealthKit
 import LoopCore
 
 struct SimpleBolusView: View {
-    @EnvironmentObject private var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismissAction) var dismiss
     
     @State private var shouldBolusEntryBecomeFirstResponder = false
@@ -74,10 +74,8 @@ struct SimpleBolusView: View {
         }
     }
     
-    let glucoseFormatter = QuantityFormatter()
-    
     private func formatGlucose(_ quantity: HKQuantity) -> String {
-        return glucoseFormatter.string(from: quantity, for: displayGlucoseUnitObservable.displayGlucoseUnit)!
+        return displayGlucosePreference.format(quantity)
     }
     
     private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
@@ -222,17 +220,17 @@ struct SimpleBolusView: View {
     }
 
     private var carbUnitsLabel: some View {
-        Text(QuantityFormatter().string(from: .gram()))
+        Text(QuantityFormatter(for: .gram()).localizedUnitStringWithPlurality())
     }
     
     private var glucoseUnitsLabel: some View {
-        Text(QuantityFormatter().string(from: displayGlucoseUnitObservable.displayGlucoseUnit))
+        Text(displayGlucosePreference.formatter.localizedUnitStringWithPlurality())
             .fixedSize()
             .foregroundColor(Color(.secondaryLabel))
     }
 
     private var bolusUnitsLabel: Text {
-        Text(QuantityFormatter().string(from: .internationalUnit()))
+        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
             .foregroundColor(Color(.secondaryLabel))
     }
 
@@ -345,7 +343,7 @@ struct SimpleBolusView: View {
                 title: Text("Recommended Bolus Exceeds Maximum Bolus", comment: "Title for bolus screen warning when recommended bolus exceeds max bolus"),
                 caption: Text(String(format: NSLocalizedString("Your recommended bolus exceeds your maximum bolus amount of %1$@.", comment: "Warning for simple bolus when recommended bolus exceeds max bolus. (1: maximum bolus)"), viewModel.maximumBolusAmountString )))
         case .carbohydrateEntryTooLarge:
-            let maximumCarbohydrateString = QuantityFormatter().string(from: LoopConstants.maxCarbEntryQuantity, for: .gram())!
+            let maximumCarbohydrateString = QuantityFormatter(for: .gram()).string(from: LoopConstants.maxCarbEntryQuantity)!
             return WarningView(
                 title: Text("Carbohydrate Entry Too Large", comment: "Title for bolus screen warning when carbohydrate entry is too large"),
                 caption: Text(String(format: NSLocalizedString("The maximum amount allowed is %1$@.", comment: "Warning for simple bolus when carbohydrate entry is too large. (1: maximum carbohydrate entry)"), maximumCarbohydrateString)))
@@ -371,12 +369,12 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
         func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
             
             let storedCarbEntry = StoredCarbEntry(
+                startDate: carbEntry.startDate,
+                quantity: carbEntry.quantity,
                 uuid: UUID(),
                 provenanceIdentifier: UUID().uuidString,
                 syncIdentifier: UUID().uuidString,
                 syncVersion: 1,
-                startDate: carbEntry.startDate,
-                quantity: carbEntry.quantity,
                 foodType: carbEntry.foodType,
                 absorptionTime: carbEntry.absorptionTime,
                 createdByCurrentApp: true,
@@ -402,8 +400,8 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
         func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
         }
         
-        var displayGlucoseUnitObservable: DisplayGlucoseUnitObservable {
-            return DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter)
+        var displayGlucosePreference: DisplayGlucosePreference {
+            return DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
         }
         
         var maximumBolus: Double {
@@ -422,6 +420,6 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             SimpleBolusView(viewModel: viewModel)
         }
         .previewDevice("iPod touch (7th generation)")
-        .environmentObject(DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter))
+        .environmentObject(DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter))
     }
 }

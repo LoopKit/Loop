@@ -487,6 +487,8 @@ class AlertManagerTests: XCTestCase {
     }
 
     func testRescheduleMutedLoopNotLoopingAlerts() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        
         let lastLoopDate = Date()
         alertManager.loopDidComplete(lastLoopDate)
         alertManager.alertMuter.configuration.startTime = Date()

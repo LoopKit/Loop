@@ -306,6 +306,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "موافق";
 
@@ -412,8 +413,13 @@
 "U" = "وحدة";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Unknown";
+
+/* The error message displayed for unknown errors. (1: unknown error) */
+"Unknown Error: %1$@" = "خطأ غير معروف";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "حتى %@";

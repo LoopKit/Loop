@@ -12,6 +12,14 @@ import LoopKit
 import LoopKitUI
 import SwiftUI
 
+public protocol DeviceSupportDelegate {
+    var availableSupports: [SupportUI] { get }
+    var pumpManagerStatus: LoopKit.PumpManagerStatus? { get }
+    var cgmManagerStatus: LoopKit.CGMManagerStatus? { get }
+
+    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
+}
+
 public final class SupportManager {
     
     private lazy var log = DiagnosticLog(category: "SupportManager")
@@ -28,29 +36,55 @@ public final class SupportManager {
     }
     
     private let alertIssuer: AlertIssuer
-    private let pluginManager: PluginManager?
+    private let deviceSupportDelegate: DeviceSupportDelegate
+    private let pluginManager: PluginManager
     private let staticSupportTypes: [SupportUI.Type]
     private let staticSupportTypesByIdentifier: [String: SupportUI.Type]
 
     lazy private var cancellables = Set<AnyCancellable>()
 
-    init(pluginManager: PluginManager? = nil,
-         deviceDataManager: DeviceDataManager? = nil,
+    init(pluginManager: PluginManager,
+         deviceSupportDelegate: DeviceSupportDelegate,
          servicesManager: ServicesManager? = nil,
          staticSupportTypes: [SupportUI.Type]? = nil,
          alertIssuer: AlertIssuer) {
         
         self.alertIssuer = alertIssuer
+        self.deviceSupportDelegate = deviceSupportDelegate
         self.pluginManager = pluginManager
         self.staticSupportTypes = []
         staticSupportTypesByIdentifier = self.staticSupportTypes.reduce(into: [:]) { (map, type) in
-            map[type.supportIdentifier] = type
+            map[type.pluginIdentifier] = type
         }
 
         restoreState()
 
-        let availablePluginSupports = pluginManager?.availableSupports ?? [SupportUI]()
-        let availableDeviceSupports = deviceDataManager?.availableSupports ?? [SupportUI]()
+        // Any supports that we don't have state for, we still initialize.
+        let existingIds = supports.value.keys
+        let remainingSupportBundles = pluginManager.pluginBundles.filter { bundle in
+            guard bundle.isSupportPlugin || bundle.isAppExtension else {
+                return false
+            }
+            guard let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.supportIdentifier.rawValue) as? String else {
+                return false
+            }
+            return !existingIds.contains(identifier)
+        }
+
+
+        for bundle in remainingSupportBundles {
+            do {
+                if let support = try bundle.loadAndInstantiateSupport() {
+                    log.debug("Loaded support plugin: %{public}@", support.pluginIdentifier)
+                    addSupport(support)
+                }
+            } catch {
+                log.error("Error loading plugin: %{public}@", String(describing: error))
+            }
+        }
+
+        let availablePluginSupports = [SupportUI]()
+        let availableDeviceSupports = deviceSupportDelegate.availableSupports
         let availableServiceSupports = servicesManager?.availableSupports ?? [SupportUI]()
         let staticSupports = self.staticSupportTypes.map { $0.init(rawState: [:]) }.compactMap { $0 }
         let allSupports = availablePluginSupports + availableDeviceSupports + availableServiceSupports + staticSupports
@@ -77,8 +111,8 @@ public final class SupportManager {
 extension SupportManager {
     func addSupport(_ support: SupportUI) {
         supports.mutate {
-            if $0[support.identifier] == nil {
-                $0[support.identifier] = support
+            if $0[support.pluginIdentifier] == nil {
+                $0[support.pluginIdentifier] = support
                 support.delegate = self
             }
         }
@@ -90,7 +124,7 @@ extension SupportManager {
 
     func removeSupport(_ support: SupportUI) {
         supports.mutate {
-            $0[support.identifier] = nil
+            $0[support.pluginIdentifier] = nil
             support.delegate = self
         }
     }
@@ -103,8 +137,9 @@ extension SupportManager {
 // MARK: Version checking
 extension SupportManager {
     func performCheck() {
-        checkVersion { [weak self] versionUpdate in
-            self?.notify(versionUpdate)
+        Task { @MainActor in
+            let versionUpdate = await checkVersion()
+            self.notify(versionUpdate)
         }
     }
     
@@ -114,37 +149,41 @@ extension SupportManager {
         }
     }
         
-    func checkVersion(completion: @escaping (VersionUpdate) -> Void) {
-        let group = DispatchGroup()
-        var results = [String: Result<VersionUpdate?, Error>]()
-        supports.value.values.forEach { support in
-            group.enter()
-            support.checkVersion(bundleIdentifier: Bundle.main.bundleIdentifier!, currentVersion: Bundle.main.shortVersionString) { result in
-                results[support.identifier] = result
-                group.leave()
+    func checkVersion() async -> VersionUpdate {
+
+        let results = await withTaskGroup(of: (VersionUpdate?,String).self) { group in
+            var updatesFromServices = [(VersionUpdate?,String)]()
+
+            supports.value.values.forEach { support in
+                group.addTask {
+                    return (await support.checkVersion(bundleIdentifier: Bundle.main.bundleIdentifier!, currentVersion: Bundle.main.shortVersionString), support.pluginIdentifier)
+                }
             }
+
+            for await update in group {
+                updatesFromServices.append(update)
+            }
+
+            return updatesFromServices
         }
-        group.notify(queue: DispatchQueue.main) { [weak self] in
-            guard let self = self else { return }
-            self.saveState()
-            let (identifierWithHighestVersionUpdate, aggregatedVersionUpdate) = self.aggregate(results: results)
-            self.identifierWithHighestVersionUpdate = identifierWithHighestVersionUpdate
-            completion(aggregatedVersionUpdate)
-        }
+
+        self.saveState()
+        let (identifierWithHighestVersionUpdate, aggregatedVersionUpdate) = self.aggregate(results: results)
+        self.identifierWithHighestVersionUpdate = identifierWithHighestVersionUpdate
+        return aggregatedVersionUpdate
     }
 
-    private func aggregate(results: [String : Result<VersionUpdate?, Error>]) -> (String?, VersionUpdate) {
+    private func aggregate(results: [(VersionUpdate?,String)]) -> (String?, VersionUpdate) {
         var aggregatedVersionUpdate = VersionUpdate.default
         var identifierWithHighestVersionUpdate: String?
-        results.forEach { key, value in
-            switch value {
-            case .failure(let error):
-                self.log.error("Error from version check %{public}@: %{public}@", key, error.localizedDescription)
-            case .success(let versionUpdate):
-                if let versionUpdate = versionUpdate, versionUpdate > aggregatedVersionUpdate {
+        results.forEach { versionUpdate, identifier in
+            if let versionUpdate {
+                if versionUpdate > aggregatedVersionUpdate {
                     aggregatedVersionUpdate = versionUpdate
-                    identifierWithHighestVersionUpdate = key
+                    identifierWithHighestVersionUpdate = identifier
                 }
+            } else {
+                self.log.error("Version check failed for %{public}@", identifier)
             }
         }
         return (identifierWithHighestVersionUpdate, aggregatedVersionUpdate)
@@ -175,6 +214,38 @@ extension SupportManager {
 
 // MARK: SupportUIDelegate
 extension SupportManager: SupportUIDelegate {
+    public func openURL(url: URL) {
+        UIApplication.shared.open(url)
+    }
+    
+    public var pumpStatus: LoopKit.PumpManagerStatus? {
+        deviceSupportDelegate.pumpManagerStatus
+    }
+    
+    public var cgmStatus: LoopKit.CGMManagerStatus? {
+        deviceSupportDelegate.cgmManagerStatus
+    }
+    
+    private var branchNameIfNotReleaseBranch: String? {
+        return BuildDetails.default.gitBranch.filter { branch in
+            return branch != "" &&
+                branch != "main" &&
+                branch != "master" &&
+                !branch.starts(with: "release/")
+        }
+    }
+
+    public var localizedAppNameAndVersion: String {
+        if let branch = branchNameIfNotReleaseBranch {
+            return Bundle.main.localizedNameAndVersion + " (\(branch))"
+        }
+        return Bundle.main.localizedNameAndVersion
+    }
+
+    public func generateIssueReport(completion: @escaping (String) -> Void) {
+        deviceSupportDelegate.generateDiagnosticReport(completion)
+    }
+    
     public func issueAlert(_ alert: LoopKit.Alert) {
         alertIssuer.issueAlert(alert)
     }
@@ -212,7 +283,7 @@ extension SupportManager {
 
     private func supportTypeFromRawValue(_ rawValue: [String: Any]) -> SupportUI.Type? {
         guard let supportIdentifier = rawValue["supportIdentifier"] as? String,
-              let supportType = pluginManager?.getSupportUITypeByIdentifier(supportIdentifier) ?? staticSupportTypesByIdentifier[supportIdentifier]
+              let supportType = pluginManager.getSupportUITypeByIdentifier(supportIdentifier) ?? staticSupportTypesByIdentifier[supportIdentifier]
         else {
             return nil
         }
@@ -225,8 +296,8 @@ extension SupportManager {
 fileprivate extension Result where Success == VersionUpdate? {
     var value: VersionUpdate {
         switch self {
-        case .failure: return .none
-        case .success(let val): return val ?? .none
+        case .failure: return .noUpdateNeeded
+        case .success(let val): return val ?? .noUpdateNeeded
         }
     }
 }
@@ -258,12 +329,24 @@ fileprivate extension UserDefaults {
 }
 
 extension SupportUI {
-
     var rawValue: RawStateValue {
         return [
-            "supportIdentifier": Self.supportIdentifier,
+            "supportIdentifier": Self.pluginIdentifier,
             "state": rawState
         ]
     }
 
+}
+
+extension Bundle {
+    fileprivate func loadAndInstantiateSupport() throws -> SupportUI? {
+        try loadAndReturnError()
+
+        guard let principalClass = principalClass as? NSObject.Type,
+              let supportUIPlugin = principalClass.init() as? SupportUIPlugin else {
+            return nil
+        }
+
+        return supportUIPlugin.support
+    }
 }

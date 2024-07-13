@@ -160,8 +160,8 @@ extension GlucoseDisplayableContext: RawRepresentable {
             trendType = nil
         }
         
-        if let trendRateUnit = rawValue["trendRateUnit"] as? String, let trendRateValue = rawValue["trendRateValue"] as? Double {
-            trendRate = HKQuantity(unit: HKUnit(from: trendRateUnit), doubleValue: trendRateValue)
+        if let trendRateValue = rawValue["trendRateValue"] as? Double {
+            trendRate = HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: trendRateValue)
         } else {
             trendRate = nil
         }
@@ -181,7 +181,6 @@ extension GlucoseDisplayableContext: RawRepresentable {
         ]
         raw["trendType"] = trendType?.rawValue
         if let trendRate = trendRate {
-            raw["trendRateUnit"] = HKUnit.milligramsPerDeciliterPerMinute.unitString
             raw["trendRateValue"] = trendRate.doubleValue(for: HKUnit.milligramsPerDeciliterPerMinute)
         }
         raw["glucoseRangeCategory"] = glucoseRangeCategory?.rawValue
@@ -298,6 +297,9 @@ struct StatusExtensionContext: RawRepresentable {
     var lastLoopCompleted: Date?
     var createdAt: Date?
     var isClosedLoop: Bool?
+    var preMealPresetAllowed: Bool?
+    var preMealPresetActive: Bool?
+    var customPresetActive: Bool?
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
     var reservoirCapacity: Double?
@@ -327,6 +329,9 @@ struct StatusExtensionContext: RawRepresentable {
         lastLoopCompleted = rawValue["lastLoopCompleted"] as? Date
         createdAt = rawValue["createdAt"] as? Date
         isClosedLoop = rawValue["isClosedLoop"] as? Bool
+        preMealPresetAllowed = rawValue["preMealPresetAllowed"] as? Bool
+        preMealPresetActive = rawValue["preMealPresetActive"] as? Bool
+        customPresetActive = rawValue["customPresetActive"] as? Bool
         batteryPercentage = rawValue["batteryPercentage"] as? Double
         reservoirCapacity = rawValue["reservoirCapacity"] as? Double
         carbsOnBoard = rawValue["carbsOnBoard"] as? Double
@@ -365,6 +370,9 @@ struct StatusExtensionContext: RawRepresentable {
         raw["lastLoopCompleted"] = lastLoopCompleted
         raw["createdAt"] = createdAt
         raw["isClosedLoop"] = isClosedLoop
+        raw["preMealPresetAllowed"] = preMealPresetAllowed
+        raw["preMealPresetActive"] = preMealPresetActive
+        raw["customPresetActive"] = customPresetActive
         raw["netBasal"] = netBasal?.rawValue
         raw["batteryPercentage"] = batteryPercentage
         raw["reservoirCapacity"] = reservoirCapacity

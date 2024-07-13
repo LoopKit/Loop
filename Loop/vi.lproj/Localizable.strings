@@ -58,9 +58,6 @@
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Mô hình dựa trên sự hấp thụ được công bố của các loại insulin Humalog, Novolog và Apidra ở người lớn.";
 
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "Thời gian Hấp thụ";
-
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
 
@@ -149,9 +146,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Khai báo Carb";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Chỉnh sửa Carb";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Carbohydrates";
@@ -291,7 +285,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Lượng insulin tiêu hao (U) × Độ nhạy của insulin (%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Khối lượng tiêm insulin";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Tác dụng của insulin";
@@ -337,7 +331,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Hiệu ứng động lượng";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Thêm thông tin";
 
 /* Sensor state description for the non-valid state */
@@ -354,6 +349,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -456,9 +452,6 @@
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Mô hình cũ được Loop sử dụng, cho phép tùy chỉnh thời lượng hành động.";
 
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "Thời gian tiêu hóa tối đa là  %@";
-
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Số lượng bolus tối đa là %@ Units";
 
@@ -466,6 +459,8 @@
 "U" = "U";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Không nhận ra";
 

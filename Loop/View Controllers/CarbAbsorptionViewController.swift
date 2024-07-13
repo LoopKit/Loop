@@ -5,7 +5,7 @@
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
 //
 
-import UIKit
+import SwiftUI
 import HealthKit
 import Intents
 import LoopCore
@@ -28,7 +28,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
     var isOnboardingComplete: Bool = true
 
-    var closedLoopStatus: ClosedLoopStatus!
+    var automaticDosingStatus: AutomaticDosingStatus!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,7 +64,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
         navigationItem.rightBarButtonItem?.isEnabled = isOnboardingComplete
         
-        allowEditing = closedLoopStatus.isClosedLoop || !FeatureFlags.simpleBolusCalculatorEnabled
+        allowEditing = automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
 
         if allowEditing {
             navigationItem.rightBarButtonItems?.append(editButtonItem)
@@ -159,7 +159,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 insulinCounteractionEffects = allInsulinCounteractionEffects.filterDateRange(chartStartDate, nil)
 
                 reloadGroup.enter()
-                self.deviceManager.carbStore.getCarbStatus(start: listStart, end: nil, effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? allInsulinCounteractionEffects : nil) { (result) in
+                self.deviceManager.carbStore.getCarbStatus(start: listStart, end: nil, effectVelocities: allInsulinCounteractionEffects) { (result) in
                     switch result {
                     case .success(let status):
                         carbStatuses = status
@@ -173,7 +173,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 }
 
                 reloadGroup.enter()
-                self.deviceManager.carbStore.getGlucoseEffects(start: chartStartDate, end: nil, effectVelocities: FeatureFlags.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
+                self.deviceManager.carbStore.getGlucoseEffects(start: chartStartDate, end: nil, effectVelocities: insulinCounteractionEffects!) { (result) in
                     switch result {
                     case .success((_, let effects)):
                         carbEffects = effects
@@ -488,55 +488,44 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             return (allowEditing && carbStatuses[indexPath.row].entry.createdByCurrentApp) ? indexPath : nil
         }
     }
-
-    // MARK: - Navigation
-
-    override func restoreUserActivityState(_ activity: NSUserActivity) {
-        switch activity.activityType {
-        case NSUserActivity.newCarbEntryActivityType:
-            performSegue(withIdentifier: CarbEntryViewController.className, sender: activity)
-        default:
-            break
-        }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard indexPath.row < carbStatuses.count else { return }
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        let originalCarbEntry = carbStatuses[indexPath.row].entry
+        
+        let viewModel = CarbEntryViewModel(delegate: deviceManager, originalCarbEntry: originalCarbEntry)
+        let carbEntryView = CarbEntryView(viewModel: viewModel)
+            .environmentObject(deviceManager.displayGlucosePreference)
+            .environment(\.dismissAction, carbEditWasCanceled)
+        let hostingController = UIHostingController(rootView: carbEntryView)
+        hostingController.title = "Edit Carb Entry"
+        hostingController.navigationItem.largeTitleDisplayMode = .never
+        let leftBarButton = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(carbEditWasCanceled))
+        hostingController.navigationItem.backBarButtonItem = leftBarButton
+        navigationController?.pushViewController(hostingController, animated: true)
     }
     
+    @objc func carbEditWasCanceled() {
+        navigationController?.popToViewController(self, animated: true)
+    }
+    
+    // MARK: - Navigation
     @IBAction func presentCarbEntryScreen() {
-        let navigationWrapper: UINavigationController
-        if FeatureFlags.simpleBolusCalculatorEnabled && !closedLoopStatus.isClosedLoop {
+        if FeatureFlags.simpleBolusCalculatorEnabled && !automaticDosingStatus.automaticDosingEnabled {
             let viewModel = SimpleBolusViewModel(delegate: deviceManager, displayMealEntry: true)
-            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(DisplayGlucoseUnitObservable(displayGlucoseUnit: .milligramsPerDeciliter))
+            let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter))
             let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
-            navigationWrapper = UINavigationController(rootViewController: hostingController)
+            let navigationWrapper = UINavigationController(rootViewController: hostingController)
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+            present(navigationWrapper, animated: true)
         } else {
-            let carbEntryViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "CarbEntryViewController") as! CarbEntryViewController
-            
-            carbEntryViewController.deviceManager = deviceManager
-            carbEntryViewController.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
-            carbEntryViewController.preferredCarbUnit = deviceManager.carbStore.preferredUnit
-            navigationWrapper = UINavigationController(rootViewController: carbEntryViewController)
-        }
-        self.present(navigationWrapper, animated: true)
-    }
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        super.prepare(for: segue, sender: sender)
-
-        switch segue.destination {
-        case let vc as CarbEntryViewController:
-            if let selectedCell = sender as? UITableViewCell, let indexPath = tableView.indexPath(for: selectedCell), indexPath.row < carbStatuses.count {
-                vc.originalCarbEntry = carbStatuses[indexPath.row].entry
-            } else if let activity = sender as? NSUserActivity {
-                vc.restoreUserActivityState(activity)
-            }
-
-            vc.deviceManager = deviceManager
-            vc.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
-            vc.preferredCarbUnit = deviceManager.carbStore.preferredUnit
-        default:
-            break
+            let viewModel = CarbEntryViewModel(delegate: deviceManager)
+            let carbEntryView = CarbEntryView(viewModel: viewModel)
+                .environmentObject(deviceManager.displayGlucosePreference)
+            let hostingController = DismissibleHostingController(rootView: carbEntryView, isModalInPresentation: false)
+            present(hostingController, animated: true)
         }
     }
-
-    @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {}
 }

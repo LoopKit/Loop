@@ -16,31 +16,45 @@ class SupportManagerTests: XCTestCase {
     enum MockError: Error { case nothing }
 
     class Mixin {
-        func supportMenuItem(supportInfoProvider: SupportInfoProvider, urlHandler: @escaping (URL) -> Void) -> AnyView? {
-            nil
-        }
+        @ViewBuilder
+        func supportMenuItem(supportInfoProvider: SupportInfoProvider, urlHandler: @escaping (URL) -> Void) -> some View {}
+        
         func softwareUpdateView(bundleIdentifier: String, currentVersion: String, guidanceColors: GuidanceColors, openAppStore: (() -> Void)?) -> AnyView? {
             nil
         }
         var mockResult: Result<VersionUpdate?, Error> = .success(.default)
-        func checkVersion(bundleIdentifier: String, currentVersion: String, completion: @escaping (Result<VersionUpdate?, Error>) -> Void) {
-            completion(mockResult)
+        func checkVersion(bundleIdentifier: String, currentVersion: String) async -> VersionUpdate? {
+            switch mockResult {
+            case .success(let update):
+                return update
+            case .failure:
+                return nil
+            }
         }
         weak var delegate: SupportUIDelegate?
     }
     class MockSupport: Mixin, SupportUI {
-        func configurationMenuItems() -> [AnyView] { return [] }
-        static var supportIdentifier: String { "SupportManagerTestsMockSupport" }
+        static var pluginIdentifier: String { "SupportManagerTestsMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
+        
+        func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
+        func loopWillReset() {}
+        func loopDidReset() {}
+        func configurationMenuItems() -> [LoopKitUI.CustomMenuItem] { return [] }
     }
+
     class AnotherMockSupport: Mixin, SupportUI {
-        func configurationMenuItems() -> [AnyView] { return [] }
-        static var supportIdentifier: String { "SupportManagerTestsAnotherMockSupport" }
+        static var pluginIdentifier: String { "SupportManagerTestsAnotherMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
+        
+        func getScenarios(from scenarioURLs: [URL]) -> [LoopScenario] { [] }
+        func loopWillReset() {}
+        func loopDidReset() {}
+        func configurationMenuItems() -> [LoopKitUI.CustomMenuItem] { return [] }
     }
     
     class MockAlertIssuer: AlertIssuer {
@@ -50,49 +64,62 @@ class SupportManagerTests: XCTestCase {
         func retractAlert(identifier: LoopKit.Alert.Identifier) {
         }
     }
+
+    class MockDeviceSupportDelegate: DeviceSupportDelegate {
+        var availableSupports: [LoopKitUI.SupportUI] = []
+
+        var pumpManagerStatus: LoopKit.PumpManagerStatus?
+
+        var cgmManagerStatus: LoopKit.CGMManagerStatus?
+
+        func generateDiagnosticReport(_ completion: @escaping (String) -> Void) {
+            completion("Mock Issue Report")
+        }
+    }
     
     var supportManager: SupportManager!
     var mockSupport: SupportManagerTests.MockSupport!
     var mockAlertIssuer: MockAlertIssuer!
+    var pluginManager = PluginManager()
+    var mocKDeviceSupportDelegate = MockDeviceSupportDelegate()
+
 
     override func setUp() {
         mockAlertIssuer = MockAlertIssuer()
-        supportManager = SupportManager(staticSupportTypes: [], alertIssuer: mockAlertIssuer)
+        supportManager = SupportManager(pluginManager: pluginManager, deviceSupportDelegate: mocKDeviceSupportDelegate,  staticSupportTypes: [], alertIssuer: mockAlertIssuer)
         mockSupport = SupportManagerTests.MockSupport()
         supportManager.addSupport(mockSupport)
     }
     
-    func getVersion(fn: String = #function) -> VersionUpdate? {
-        let e = expectation(description: fn)
-        var result: VersionUpdate?
-        supportManager.checkVersion {
-            result = $0
-            e.fulfill()
-        }
-        wait(for: [e], timeout: 1.0)
-        return result
-    }
-    
-    func testVersionCheckOneService() throws {
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+    func testVersionCheckOneService() async throws {
+        let result = await supportManager.checkVersion()
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, result)
         mockSupport.mockResult = .success(.required)
-        XCTAssertEqual(.required, getVersion())
+
+        let result2 = await supportManager.checkVersion()
+        XCTAssertEqual(.required, result2)
     }
     
-    func testVersionCheckOneServiceError() throws {
+    func testVersionCheckOneServiceError() async throws {
         // Error doesn't really do anything but log
         mockSupport.mockResult = .failure(MockError.nothing)
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+        let result = await supportManager.checkVersion()
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, result)
     }
     
-    func testVersionCheckMultipleServices() throws {
+    func testVersionCheckMultipleServices() async throws {
         let anotherSupport = AnotherMockSupport()
         supportManager.addSupport(anotherSupport)
-        XCTAssertEqual(VersionUpdate.none, getVersion())
+        let result = await supportManager.checkVersion()
+        XCTAssertEqual(VersionUpdate.noUpdateNeeded, result)
+
         anotherSupport.mockResult = .success(.required)
-        XCTAssertEqual(.required, getVersion())
+        let result2 = await supportManager.checkVersion()
+        XCTAssertEqual(.required, result2)
+
+        let result3 = await supportManager.checkVersion()
         mockSupport.mockResult = .success(.recommended)
-        XCTAssertEqual(.required, getVersion())
+        XCTAssertEqual(.required, result3)
     }
     
 }

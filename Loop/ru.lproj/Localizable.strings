@@ -2,7 +2,7 @@
 " (pending: %@)" = " (В ожидании: %@)";
 
 /* Status row title for premeal override enabled (leading space is to separate from symbol) */
-" Pre-meal Preset" = "Пресет до еды";
+" Pre-meal Preset" = "Режим до еды";
 
 /* remaining time in setting's profile expiration section */
 " remaining" = " осталось";
@@ -83,7 +83,7 @@
 "%1$@ U/hour @ %2$@" = "%1$@ ед/час @ %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ против %2$@";
+"%1$@ v%2$@" = "%1$@ версии %2$@";
 
 /* Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration */
 "%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile." = "%1$@ перестанет работать в %2$@. Вам нужно будет обновить его до этого, используя новую подпись.";
@@ -94,6 +94,9 @@
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
    Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
+
+/* No comment provided by engineer. */
+"⚠️" = "⚠️";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15-мин коэффициент регрессии гликемии (b1), продолжен с угасанием 30 мин";
@@ -124,9 +127,6 @@
 
 /* Alert message for a missing pump error */
 "A pump must be configured before a bolus can be delivered." = "Перед введением болюса необходимо настроить помпу.";
-
-/* Title of the carb entry absorption time cell */
-"Absorption Time" = "Длительность усвоения";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "Принятьрекомендуемыйболюс";
@@ -264,7 +264,7 @@
 "Bolus Recommendation Updated" = "Рекомендации по болюсу обновлены";
 
 /* Title for card displaying carb entry and bolus recommendation */
-"Bolus Summary" = "Суммарно болюса";
+"Bolus Summary" = "Суммарный болюс";
 
 /* Alert title for a bolus too small validation error */
 "Bolus Too Small" = "Болюс слишком маленький";
@@ -284,8 +284,7 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Влияние углеводов";
 
-/* Back button text for bolus screen to return to carb entry screen
-   Label for carb entry row on bolus screen */
+/* Label for carb entry row on bolus screen */
 "Carb Entry" = "Добавить запись углеводов";
 
 /* Details for configuration error when carb ratio schedule is missing */
@@ -297,9 +296,6 @@
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Добавить запись углеводов";
-
-/* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Редактировать запись углеводов";
 
 /* Title for bolus screen warning when carbohydrate entry is too large */
 "Carbohydrate Entry Too Large" = "Слишком много углеводов";
@@ -329,9 +325,10 @@
 "Check your device time and/or remove any invalid data from Apple Health." = "Проверьте время вашего устройства и/или удалите недействительные данные из Apple Health.";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Выберите более высокую длительность усвоения для обильной пищи или для пищи с белками и протеинами. Это единственное указание для алгоритма не нуждается в дополнительных уточнениях.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Выберите более длительное время усвоения для больших порций пищи или тех, которые содержат жиры и белки. Это лишь руководство к алгоритму и не обязательно должно быть точным.";
 
-/* The button label of the action used to dismiss the unsafe notification permission alert */
+/* Button title to close view
+   The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Закрыть";
 
 /* The title text for the looping enabled switch cell */
@@ -411,10 +408,10 @@
 "Delete Account" = "Удалить аккаунт";
 
 /* Button title to delete all objects */
-"Delete All" = "Стереть все";
+"Delete All" = "Удалить все";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Удалить CGM";
+"Delete CGM" = "Удалить мониторинг";
 
 /* Button title to delete a service */
 "Delete Service" = "Удалить сервис";
@@ -454,9 +451,9 @@
 "Dose Summary" = "Сводная информация о дозе";
 
 /* The title of the Dosing Strategy section in settings */
-"Dosing Strategy" = "Стратегия дозирования";
+"Dosing Strategy" = "Режим ввода инсулина";
 
-/* Remote command error description: duration exceed max (1: max duration in hours). */
+/* Override error description: duration exceed max (1: max duration in hours). */
 "Duration exceeds: %1$.1f hours" = "Продолжительность превышает: %1$.1f часов";
 
 /* Message to the user to enable bluetooth */
@@ -495,10 +492,10 @@
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "В конечном итоге %@";
 
-/* Remote command error description: bolus exceeds maximum bolus in settings. */
+/* Bolus error description: bolus exceeds maximum bolus in settings. */
 "Exceeds maximum allowed bolus in settings" = "Превышен максимально допустимый болюс в настройках";
 
-/* Remote command error description: carbs exceed maximum amount. */
+/* Carb error description: carbs exceed maximum amount. */
 "Exceeds maximum allowed carbs" = "Превышено максимально допустимое количество углеводов";
 
 /* The title of the alert describing a maximum bolus validation error */
@@ -568,9 +565,6 @@
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "На неопределенное время";
 
-/* Title of the alert when carb input maximum was exceeded. */
-"Input Maximum Exceeded" = "Входной максимум превышен";
-
 /* Title of the prediction input effect for insulin */
 "Insulin" = "Инсулин";
 
@@ -581,7 +575,7 @@
 "Insulin adjustments have been disabled!" = "Регулировка инсулина была отключена!";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Подача инсулина";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Влияние инсулина";
@@ -609,10 +603,10 @@
 /* Description of an interrupted bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: programmed value (? if no value), 4: unit) */
 "Interrupted %1$@: <b>%2$@</b> of %3$@ %4$@" = "Прервано %1$@: <b>%2$@</b> из %3$@ %4$@";
 
-/* Remote command error description: invalid bolus amount. */
+/* Bolus error description: invalid bolus amount. */
 "Invalid Bolus Amount" = "Неверный объем болюса";
 
-/* Remote command error description: invalid carb amount. */
+/* Carb error description: invalid carb amount. */
 "Invalid carb amount" = "Неверное количество углеводов";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
@@ -625,7 +619,7 @@
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Неверное показание глюкозы с временной меткой, которая находится на %1$@ в будущем";
 
 /* The title text for the issue report cell */
-"Issue Report" = "Сообщить об ошибе";
+"Issue Report" = "Сообщить об ошибке";
 
 /* The notification description for a meal that was possibly not logged in Loop. */
 "It looks like you may not have logged a meal you ate. Tap to log it now." = "Похоже, что Вы не ввели съеденную Вами еду. Нажмите , чтобы записать ее сейчас.";
@@ -695,44 +689,42 @@
 /* Title for bolus screen warning when max bolus is exceeded */
 "Maximum Bolus Exceeded" = "Превышен максимальный объем болюса";
 
-/* Alert title when maximum duration exceeded. */
-"Maximum Duration Exceeded" = "Превышена максимальная продолжительность";
-
 /* Title for bolus entry screen when also entering carbs */
 "Meal Bolus" = "Болюс на еду";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "мг/дл";
 
+/* Title for missed meal notifications toggle */
+"Missed Meal Notifications" = "Уведомления о пропущенных приемах пищи";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Пропущены данные: %1$@";
 
-/* Remote command error description: missing maximum bolus in settings. */
+/* Bolus error description: missing maximum bolus in settings. */
 "Missing maximum allowed bolus in settings" = "Отсутствие максимально допустимого болюса в настройках";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
+"mmol/L" = "ммоль/л";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Влияние динамики СК";
 
-/* Text for more info action on notification of upcoming profile expiration */
+/* Text for more info action on notification of upcoming profile expiration
+   Text for more info action on notification of upcoming TestFlight expiration */
 "More Info" = "Доп. инфо";
 
-/* Label for toggle to mute all alerts */
+/* Label for button to mute all alerts */
 "Mute All Alerts" = "Выключить все оповещения";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Требует внимания";
 
-/* Remote command error description: negative duration error. */
+/* Override error description: negative duration error. */
 "Negative duration not allowed" = "Отрицательная продолжительность не допускается";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
-
-/* Description of temporary mute alerts */
-"No alerts will sound while muted. Once this period ends, your alerts and alarms will resume as normal." = "Во время отключения звуковые сигналы не будут подаваться. По окончании этого периода оповещения и сигналы тревоги возобновятся в обычном режиме.";
 
 /* Title for bolus screen notice when no bolus is recommended
    Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
@@ -789,6 +781,7 @@
    Default action for alert when alert acknowledgment fails
    Notifications permissions disabled alert button
    Text for ok action on notification of upcoming profile expiration
+   Text for ok action on notification of upcoming TestFlight expiration
    The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
@@ -818,6 +811,9 @@
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Прогноз: %1$@\nФакт: %2$@ (%3$@)";
+
+/* Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect) */
+"prediction-description-integral-retrospective-correction" = "описание прогнозирования с помощью интегральной ретроспективной коррекции";
 
 /* Preparing critical event log text */
 "Preparing Critical Event Logs" = "Подготовка логов критических событий";
@@ -893,11 +889,8 @@
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
 "Remote Carbs Entry: %d grams" = "Удаленный ввод углеводов: %d грамм";
 
-/* The notification title for the remote command expiration error */
-"Remote Command Expired" = "Срок действия удаленной команды истек";
-
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Reservoir";
+"Reservoir" = "Резервуар";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Ретроспективная коррекция";
@@ -913,9 +906,6 @@
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Запланировано";
-
-/* List header for mute all alerts period */
-"Select Mute Period" = "Выберите период отключения звука";
 
 /* The title of the services section in settings */
 "Services" = "Службы";
@@ -944,7 +934,7 @@
 /* Software update button link text */
 "Software Update" = "Обновление программного обеспечения";
 
-/* Remote command error description: invalid start time is out of range. */
+/* Carb error description: invalid start time is out of range. */
 "Start time is out of range: %@" = "Время начала вне допустимого диапазона: %@";
 
 /* The format for the description of a temporary override start date */
@@ -954,8 +944,6 @@
 "Starting Bolus" = "Начинаю болюс";
 
 /* Section title for Support
-   Support screen title
-   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Поддержка";
 
@@ -980,9 +968,6 @@
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Нажмите, чтобы остановить";
 
-/* The title of the cell indicating alerts are temporarily muted */
-"Temp Mute Alerts" = "Временное отключение звуковых оповещений";
-
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "Введенное количество болюса меньше минимально допустимого в помпе";
 
@@ -994,9 +979,6 @@
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Устаревшая модель, используемая Loop, позволяющая настраивать продолжительность действия.";
-
-/* Alert body displayed absorption time greater than max (1: maximum absorption time) */
-"The maximum absorption time is %@" = "Максимальная длительность усвоения %@";
 
 /* Alert body displayed for quantity greater than max (1: maximum quantity in grams) */
 "The maximum allowed amount is %@ grams." = "Максимально допустимое количество составляет %@ грамм.";
@@ -1013,14 +995,11 @@
 /* Alert message for a missing maximum bolus setting error */
 "The maximum bolus setting must be configured before a bolus can be delivered." = "Перед подачей болюса необходимо настроить максимальное значение болюса.";
 
-/* The notification body for a remote command expiration. (1: Expiration in minutes) */
-"The remote command expired %.0f minutes ago." = "Срок действия удаленной команды истек %.0f минут назад.";
-
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Настройки терапии";
 
-/* Title of the carb entry date picker cell */
-"Time" = "Время";
+/* String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus */
+"This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." = "Эта опция применима только в том случае, если для стратегии дозирования петли установлено значение «Автоматический болюс».";
 
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Уведомления, чувствительные к времени";
@@ -1032,7 +1011,7 @@
 "Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Включите Bluetooth для получения предупреждений, сигналов тревоги или показаний датчика глюкозы.";
 
 /* The short unit display string for international units of insulin */
-"U" = "ед";
+"U" = "Ед";
 
 /* Title for alert shown when alert acknowledgement fails */
 "Unable To Clear Alert" = "Невозможно снять предупреждение";
@@ -1050,20 +1029,34 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Не удается остановить текущий болюс. Переместите свой iPhone ближе к помпе и попробуйте еще раз. Проверьте историю введения инсулина и внимательно следите за уровнем глюкозы.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
+   label for when the alert mute end time is unknown
+   result when time cannot be formatted
    The default description to use when an entry has no dose description */
 "Unknown" = "Неизвестно";
 
 /* The error message displayed for unknown errors. (1: unknown error) */
 "Unknown Error: %1$@" = "Неизвестная ошибка: %1$@";
 
-/* Remote command error description: unknown preset (1: preset name). */
+/* Override error description: unknown preset (1: preset name). */
 "Unknown preset: %1$@" = "Неизвестный пресет: %1$@";
 
 /* Unknown amount of time in settings' profile expiration section */
 "Unknown time" = "Неизвестное время";
 
+/* The title of the action used to unmute alerts */
+"Unmute" = "Включить звук";
+
+/* The alert title for unmute alert confirmation */
+"Unmute Alerts?" = "Включить звук оповещений?";
+
+/* Error message when a service can't be found to handle a push notification. (1: Service Identifier) */
+"Unsupported Notification Service: %1$@" = "Неподдерживаемая служба уведомлений: %1$@";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "до %@";
+
+/* indication of when alerts will be unmuted (1: time when alerts unmute) */
+"Until %1$@" = "До %1$@";
 
 /* The title of a target alert action specifying pre-meal targets duration for 1 hour or until the user enters carbs (whichever comes first). */
 "Until I enter carbs" = "Пока я не введу углеводы";
@@ -1097,6 +1090,9 @@
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Когда приложение выходит из режима замкнутого цикла, оно использует упрощенный калькулятор болюса, как в обычной помпе.";
+
+/* Format string for message of reset loop alert. (1: App name) (2: error description) */
+"While trying to restart %1$@ an error occured.\n\n%2$@" = "При попытке перезапустить %1$@ произошла ошибка. \n\n %2$@";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Целевые значения при физической нагрузке";

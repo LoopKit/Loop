@@ -10,13 +10,14 @@ import os.log
 import Foundation
 import LoopKit
 
-enum RemoteDataType: String {
+enum RemoteDataType: String, CaseIterable {
     case alert = "Alert"
     case carb = "Carb"
     case dose = "Dose"
     case dosingDecision = "DosingDecision"
     case glucose = "Glucose"
     case pumpEvent = "PumpEvent"
+    case cgmEvent = "CgmEvent"
     case settings = "Settings"
     case overrides = "Overrides"
 
@@ -64,7 +65,7 @@ final class RemoteDataServicesManager {
 
     func removeService(_ remoteDataService: RemoteDataService) {
         lock.withLock {
-            unlockedRemoteDataServices.removeAll { $0.serviceIdentifier == remoteDataService.serviceIdentifier }
+            unlockedRemoteDataServices.removeAll { $0.pluginIdentifier == remoteDataService.pluginIdentifier }
         }
         clearQueryAnchors(for: remoteDataService)
     }
@@ -80,7 +81,7 @@ final class RemoteDataServicesManager {
 
 
     private func dispatchQueue(for remoteDataService: RemoteDataService, withRemoteDataType remoteDataType: RemoteDataType) -> DispatchQueue {
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: remoteDataType)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: remoteDataType)
         return dispatchQueue(key)
     }
 
@@ -129,6 +130,8 @@ final class RemoteDataServicesManager {
 
     private let glucoseStore: GlucoseStore
 
+    private let cgmEventStore: CgmEventStore
+
     private let insulinDeliveryStore: InsulinDeliveryStore
 
     private let settingsStore: SettingsStore
@@ -141,6 +144,7 @@ final class RemoteDataServicesManager {
         doseStore: DoseStore,
         dosingDecisionStore: DosingDecisionStore,
         glucoseStore: GlucoseStore,
+        cgmEventStore: CgmEventStore,
         settingsStore: SettingsStore,
         overrideHistory: TemporaryScheduleOverrideHistory,
         insulinDeliveryStore: InsulinDeliveryStore
@@ -150,6 +154,7 @@ final class RemoteDataServicesManager {
         self.doseStore = doseStore
         self.dosingDecisionStore = dosingDecisionStore
         self.glucoseStore = glucoseStore
+        self.cgmEventStore = cgmEventStore
         self.insulinDeliveryStore = insulinDeliveryStore
         self.settingsStore = settingsStore
         self.overrideHistory = overrideHistory
@@ -167,13 +172,11 @@ final class RemoteDataServicesManager {
     }
 
     private func clearQueryAnchors(for remoteDataService: RemoteDataService) {
-        clearAlertQueryAnchor(for: remoteDataService)
-        clearCarbQueryAnchor(for: remoteDataService)
-        clearDoseQueryAnchor(for: remoteDataService)
-        clearDosingDecisionQueryAnchor(for: remoteDataService)
-        clearGlucoseQueryAnchor(for: remoteDataService)
-        clearPumpEventQueryAnchor(for: remoteDataService)
-        clearSettingsQueryAnchor(for: remoteDataService)
+        for remoteDataType in RemoteDataType.allCases {
+            dispatchQueue(for: remoteDataService, withRemoteDataType: remoteDataType).async {
+                UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: remoteDataType)
+            }
+        }
     }
 
     func triggerUpload(for triggeringType: RemoteDataType) {
@@ -195,6 +198,8 @@ final class RemoteDataServicesManager {
                 remoteDataServices.forEach { self.uploadGlucoseData(to: $0) }
             case .pumpEvent:
                 remoteDataServices.forEach { self.uploadPumpEventData(to: $0) }
+            case .cgmEvent:
+                remoteDataServices.forEach { self.uploadCgmEventData(to: $0) }
             case .settings:
                 remoteDataServices.forEach { self.uploadSettingsData(to: $0) }
             case .overrides:
@@ -220,15 +225,10 @@ final class RemoteDataServicesManager {
 }
 
 extension RemoteDataServicesManager {
-
-    public func alertStoreHasUpdatedAlertData(_ alertStore: AlertStore) {
-        triggerUpload(for: .alert)
-    }
-
     private func uploadAlertData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .alert)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .alert)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -257,25 +257,13 @@ extension RemoteDataServicesManager {
             self.uploadGroup.leave()
         }
     }
-
-    private func clearAlertQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .alert).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .alert)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func carbStoreHasUpdatedCarbData(_ carbStore: CarbStore) {
-        triggerUpload(for: .carb)
-    }
-
     private func uploadCarbData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .carb)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .carb)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -311,25 +299,13 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearCarbQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .carb).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .carb)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func insulinDeliveryStoreHasUpdatedDoseData(_ insulinDeliveryStore: InsulinDeliveryStore) {
-        triggerUpload(for: .dose)
-    }
-
     private func uploadDoseData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .dose)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .dose)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -365,25 +341,13 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearDoseQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .dose).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .dose)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func dosingDecisionStoreHasUpdatedDosingDecisionData(_ dosingDecisionStore: DosingDecisionStore) {
-        triggerUpload(for: .dosingDecision)
-    }
-
     private func uploadDosingDecisionData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .dosingDecision)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .dosingDecision)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -419,21 +383,9 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearDosingDecisionQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .dosingDecision).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .dosingDecision)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
-        triggerUpload(for: .glucose)
-    }
-
     private func uploadGlucoseData(to remoteDataService: RemoteDataService) {
         
         if delegate?.shouldSyncToRemoteService == false {
@@ -442,7 +394,7 @@ extension RemoteDataServicesManager {
         
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .glucose)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .glucose)
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -478,25 +430,13 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearGlucoseQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .glucose).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
-        triggerUpload(for: .pumpEvent)
-    }
-
     private func uploadPumpEventData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .pumpEvent)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .pumpEvent)
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .pumpEvent).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -532,25 +472,13 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearPumpEventQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .pumpEvent).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    public func settingsStoreHasUpdatedSettingsData(_ settingsStore: SettingsStore) {
-        triggerUpload(for: .settings)
-    }
-
     private func uploadSettingsData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .settings)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .settings)
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .settings).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -586,34 +514,13 @@ extension RemoteDataServicesManager {
             }
         }
     }
-
-    private func clearSettingsQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .settings).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .settings)
-        }
-    }
-
 }
 
 extension RemoteDataServicesManager {
-
-    func validatePushNotificationSource(_ notification: [String: AnyObject], serviceIdentifier: String) -> Result<Void, Error> {
-        
-        guard let matchedService = remoteDataServices.first(where: {$0.serviceIdentifier == serviceIdentifier}) else {
-            return .failure(PushNotificationValidationError.unsupportedService(serviceIdentifier: serviceIdentifier))
-        }
-        
-        return matchedService.validatePushNotificationSource(notification)
-    }
-    
-    public func temporaryScheduleOverrideHistoryDidUpdate() {
-        triggerUpload(for: .overrides)
-    }
-
     private func uploadTemporaryOverrideData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.serviceIdentifier, remoteDataType: .overrides)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .overrides)
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -638,26 +545,78 @@ extension RemoteDataServicesManager {
             self.uploadGroup.leave()
         }
     }
+}
 
-    private func clearTemporaryOverrideQueryAnchor(for remoteDataService: RemoteDataService) {
-        dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
-            UserDefaults.appGroup?.deleteQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides)
-        }
-    }
-    
-    private enum PushNotificationValidationError: LocalizedError {
-        case unsupportedService(serviceIdentifier: String)
-        
-        var errorDescription: String? {
-            switch self {
-            case .unsupportedService(let serviceIdentifier):
-                return "Unsupported Loop service: \(serviceIdentifier)"
+extension RemoteDataServicesManager {
+    private func uploadCgmEventData(to remoteDataService: RemoteDataService) {
+        uploadGroup.enter()
+
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .pumpEvent)
+
+        dispatchQueue(for: remoteDataService, withRemoteDataType: .cgmEvent).async {
+            let semaphore = DispatchSemaphore(value: 0)
+            let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .cgmEvent) ?? CgmEventStore.QueryAnchor()
+            var continueUpload = false
+
+            self.cgmEventStore.executeCgmEventQuery(fromQueryAnchor: previousQueryAnchor) { result in
+                switch result {
+                case .failure(let error):
+                    self.log.error("Error querying cgm event data: %{public}@", String(describing: error))
+                    semaphore.signal()
+                case .success(let queryAnchor, let data):
+                    remoteDataService.uploadCgmEventData(data) { result in
+                        switch result {
+                        case .failure(let error):
+                            self.log.error("Error synchronizing cgm event data: %{public}@", String(describing: error))
+                            self.uploadFailed(key)
+                        case .success:
+                            UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .cgmEvent, queryAnchor)
+                            continueUpload = queryAnchor != previousQueryAnchor
+                            self.uploadSucceeded(key)
+                        }
+                        semaphore.signal()
+                    }
+                }
+            }
+
+            semaphore.wait()
+            self.uploadGroup.leave()
+
+            if continueUpload {
+                self.uploadPumpEventData(to: remoteDataService)
             }
         }
     }
-
 }
 
+//Remote Commands
+extension RemoteDataServicesManager {
+    
+    public func remoteNotificationWasReceived(_ notification: [String: AnyObject]) async throws {
+        let service = try serviceForPushNotification(notification)
+        return try await service.remoteNotificationWasReceived(notification)
+    }
+    
+    func serviceForPushNotification(_ notification: [String: AnyObject]) throws -> RemoteDataService {
+        let defaultServiceIdentifier = "NightscoutService"
+        let serviceIdentifier = notification["serviceIdentifier"] as? String ?? defaultServiceIdentifier
+        guard let service = remoteDataServices.first(where: {$0.pluginIdentifier == serviceIdentifier}) else {
+            throw RemoteDataServicesManagerCommandError.unsupportedServiceIdentifier(serviceIdentifier)
+        }
+        return service
+    }
+    
+    enum RemoteDataServicesManagerCommandError: LocalizedError {
+        case unsupportedServiceIdentifier(String)
+        
+        var errorDescription: String? {
+            switch self {
+            case .unsupportedServiceIdentifier(let serviceIdentifier):
+                return String(format: NSLocalizedString("Unsupported Notification Service: %1$@", comment: "Error message when a service can't be found to handle a push notification. (1: Service Identifier)"), serviceIdentifier)
+            }
+        }
+    }
+}
 
 protocol RemoteDataServicesManagerDelegate: AnyObject {
     var shouldSyncToRemoteService: Bool {get}
@@ -667,7 +626,7 @@ protocol RemoteDataServicesManagerDelegate: AnyObject {
 fileprivate extension UserDefaults {
 
     private func queryAnchorKey(for remoteDataService: RemoteDataService, withRemoteDataType remoteDataType: RemoteDataType) -> String {
-        return "com.loopkit.Loop.RemoteDataServicesManager.\(remoteDataService.serviceIdentifier).\(remoteDataType.rawValue)QueryAnchor"
+        return "com.loopkit.Loop.RemoteDataServicesManager.\(remoteDataService.pluginIdentifier).\(remoteDataType.rawValue)QueryAnchor"
     }
 
     func getQueryAnchor<T>(for remoteDataService: RemoteDataService, withRemoteDataType remoteDataType: RemoteDataType) -> T? where T: RawRepresentable, T.RawValue == [String: Any] {

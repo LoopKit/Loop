@@ -8,7 +8,7 @@
 
 import LoopKit
 import LoopTestingKit
-
+import LoopKitUI
 
 protocol TestingScenariosManagerDelegate: AnyObject {
     func testingScenariosManager(_ manager: TestingScenariosManager, didUpdateScenarioURLs scenarioURLs: [URL])
@@ -18,6 +18,7 @@ protocol TestingScenariosManager: AnyObject {
     var delegate: TestingScenariosManagerDelegate? { get set }
     var activeScenarioURL: URL? { get }
     var scenarioURLs: [URL] { get }
+    var supportManager: SupportManager { get }
     func loadScenario(from url: URL, completion: @escaping (Error?) -> Void)
     func loadScenario(from url: URL, advancedByLoopIterations iterations: Int, completion: @escaping (Error?) -> Void)
     func loadScenario(from url: URL, rewoundByLoopIterations iterations: Int, completion: @escaping (Error?) -> Void)
@@ -96,12 +97,15 @@ extension TestingScenariosManagerRequirements {
 // MARK: - Implementation details
 
 private enum ScenarioLoadingError: LocalizedError {
-    case noTestingManagersEnabled
+    case noTestingCGMManagerEnabled
+    case noTestingPumpManagerEnabled
 
     var errorDescription: String? {
         switch self {
-        case .noTestingManagersEnabled:
-            return "Testing pump and CGM managers must be enabled to load scenarios"
+        case .noTestingCGMManagerEnabled:
+            return "Testing CGM manager must be enabled to load CGM scenarios"
+        case .noTestingPumpManagerEnabled:
+            return "Testing pump manager must be enabled to load pump scenarios"
         }
     }
 }
@@ -186,13 +190,36 @@ extension TestingScenariosManagerRequirements {
             log.error("%{public}@", String(describing: error))
             completion(error)
         }
-
-        guard
-            let pumpManager = deviceManager.pumpManager as? TestingPumpManager,
-            let cgmManager = deviceManager.cgmManager as? TestingCGMManager
-        else {
-            bail(with: ScenarioLoadingError.noTestingManagersEnabled)
-            return
+        
+        let instance = scenario.instantiate()
+        
+        var testingCGMManager: TestingCGMManager?
+        var testingPumpManager: TestingPumpManager?
+        
+        if instance.hasCGMData {
+            if let cgmManager = deviceManager.cgmManager as? TestingCGMManager {
+                if instance.shouldReloadManager?.cgm == true {
+                    testingCGMManager = reloadCGMManager(withIdentifier: cgmManager.pluginIdentifier)
+                } else {
+                    testingCGMManager = cgmManager
+                }
+            } else {
+                bail(with: ScenarioLoadingError.noTestingCGMManagerEnabled)
+                return
+            }
+        }
+        
+        if instance.hasPumpData {
+            if let pumpManager = deviceManager.pumpManager as? TestingPumpManager {
+                if instance.shouldReloadManager?.pump == true {
+                    testingPumpManager = reloadPumpManager(withIdentifier: pumpManager.pluginIdentifier)
+                } else {
+                    testingPumpManager = pumpManager
+                }
+            } else {
+                bail(with: ScenarioLoadingError.noTestingPumpManagerEnabled)
+                return
+            }
         }
 
         wipeExistingData { error in
@@ -201,14 +228,12 @@ extension TestingScenariosManagerRequirements {
                 return
             }
 
-            let instance = scenario.instantiate()
-
             self.deviceManager.carbStore.addCarbEntries(instance.carbEntries) { result in
                 switch result {
                 case .success(_):
-                    pumpManager.reservoirFillFraction = 1.0
-                    pumpManager.injectPumpEvents(instance.pumpEvents)
-                    cgmManager.injectGlucoseSamples(instance.glucoseSamples)
+                    testingPumpManager?.reservoirFillFraction = 1.0
+                    testingPumpManager?.injectPumpEvents(instance.pumpEvents)
+                    testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
                     self.activeScenario = scenario
                     completion(nil)
                 case .failure(let error):
@@ -216,13 +241,64 @@ extension TestingScenariosManagerRequirements {
                 }
             }
         }
+        
+        instance.deviceActions.forEach { [testingCGMManager, testingPumpManager] action in
+            if testingCGMManager?.pluginIdentifier == action.managerIdentifier {
+                testingCGMManager?.trigger(action: action)
+            } else if testingPumpManager?.pluginIdentifier == action.managerIdentifier {
+                testingPumpManager?.trigger(action: action)
+            }
+        }
+    }
+    
+    private func reloadPumpManager(withIdentifier pumpManagerIdentifier: String) -> TestingPumpManager {
+        deviceManager.pumpManager = nil
+        guard let maximumBasalRate = deviceManager.loopManager.settings.maximumBasalRatePerHour,
+              let maxBolus = deviceManager.loopManager.settings.maximumBolus,
+              let basalSchedule = deviceManager.loopManager.settings.basalRateSchedule else
+        {
+            fatalError("Failed to reload pump manager. Missing initial settings")
+        }
+        let initialSettings = PumpManagerSetupSettings(maxBasalRateUnitsPerHour: maximumBasalRate,
+                                                       maxBolusUnits: maxBolus,
+                                                       basalSchedule: basalSchedule)
+        let result = deviceManager.setupPumpManager(withIdentifier: pumpManagerIdentifier,
+                                                    initialSettings: initialSettings,
+                                                    prefersToSkipUserInteraction: true)
+        switch result {
+        case .success(let setupUIResult):
+            switch setupUIResult {
+            case .createdAndOnboarded(let pumpManager):
+                return pumpManager as! TestingPumpManager
+            default:
+                fatalError("Failed to reload pump manager. UI interaction required for setup")
+            }
+        default:
+            fatalError("Failed to reload pump manager. Setup failed")
+        }
+    }
+    
+    private func reloadCGMManager(withIdentifier cgmManagerIdentifier: String) -> TestingCGMManager {
+        deviceManager.cgmManager = nil
+        let result = deviceManager.setupCGMManager(withIdentifier: cgmManagerIdentifier, prefersToSkipUserInteraction: true)
+        switch result {
+        case .success(let setupUIResult):
+            switch setupUIResult {
+            case .createdAndOnboarded(let cgmManager):
+                return cgmManager as! TestingCGMManager
+            default:
+                fatalError("Failed to reload CGM manager. UI interaction required for setup")
+            }
+        default:
+            fatalError("Failed to reload CGM manager. Setup failed")
+        }
     }
 
     private func wipeExistingData(completion: @escaping (Error?) -> Void) {
         guard FeatureFlags.scenariosEnabled else {
             fatalError("\(#function) should be invoked only when scenarios are enabled")
         }
-
+        
         deviceManager.deleteTestingPumpData { error in
             guard error == nil else {
                 completion(error!)
@@ -235,7 +311,14 @@ extension TestingScenariosManagerRequirements {
                     return
                 }
 
-                self.deviceManager.carbStore.deleteAllCarbEntries(completion: completion)
+                self.deviceManager.carbStore.deleteAllCarbEntries() { error in
+                    guard error == nil else {
+                        completion(error!)
+                        return
+                    }
+                    
+                    self.deviceManager.alertManager.alertStore.purge(before: Date(), completion: completion)
+                }
             }
         }
     }

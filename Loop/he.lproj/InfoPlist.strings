@@ -5,17 +5,23 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth משמש לתקשורת עם משאבת אינסולין, חיישנים ומכשירים נוספים.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth משמש לתקשורת עם משאבת אינסולין, חיישנים ומכשירים נוספים.";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "המצלמה משמשת לסריקת ברקודים של מכשירים.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID is used to authenticate insulin bolus and to save changes to therapy settings.";
+"NSFaceIDUsageDescription" = "Face ID ישמש לאימות הזרקת בולוס ואישור שינויים בתוכנית הטיפול.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to improve the Apple Watch complication.";
+"NSHealthShareUsageDescription" = "נתוני ארוחות ממאגר Health משמשים לקביעת השפעות הגלוקוז. נתוני הגלוקוז ממסד Health הבריאות משמשים לגרפים ולחישוב מגמה. נתוני שינה ממסד Health משפרים את הנראות ב-Apple Watch.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.";
+"NSHealthUpdateUsageDescription" = "נתוני ארוחות הפחמימות המוזנים באפליקציה ובשעון נשמרים במסד Health. נתוני הגלוקוז שאוחזרו מה-CGM מאוחסנים בצורה מאובטחת ב-HealthKit.";
+
+/* Privacy - Siri Usage Description */
+"NSSiriUsageDescription" = "Loop משתמש ב-Siri כדי לאפשר לך להפעיל פקודות קוליות.";
 

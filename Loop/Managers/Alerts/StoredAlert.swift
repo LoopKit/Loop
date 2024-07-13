@@ -12,9 +12,19 @@ import UIKit
 
 extension StoredAlert {
     
-    static var encoder = JSONEncoder()
-    static var decoder = JSONDecoder()
-          
+    static let encoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }()
+
+    static let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }()
+
     convenience init(from alert: Alert, context: NSManagedObjectContext, issuedDate: Date = Date(), syncIdentifier: UUID = UUID()) {
         do {
             /// This code, using the `init(entity:insertInto:)` instead of the `init(context:)` avoids warnings during unit testing that look like this:

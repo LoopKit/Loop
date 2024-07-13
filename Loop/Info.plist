@@ -55,6 +55,8 @@
 	<true/>
 	<key>LoopLocalCacheDurationDays</key>
 	<string>$(LOOP_LOCAL_CACHE_DURATION_DAYS)</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>The app uses NFC to pair with diabetes devices.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>

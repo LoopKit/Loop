@@ -14,9 +14,10 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
 
     private let scenariosManager: TestingScenariosManager
 
-    private var scenarioURLs: [URL] = [] {
+    private var scenarios: [LoopScenario] = [] {
         didSet {
-            options = scenarioURLs.map { $0.deletingPathExtension().lastPathComponent }
+            options = scenarios.map(\.name)
+            
             if isViewLoaded {
                 DispatchQueue.main.async {
                     self.updateLoadButtonEnabled()
@@ -58,14 +59,14 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
         contextHelp = "The scenarios directory location is available in the debug output of the Xcode console."
 
         if let activeScenarioURL = scenariosManager.activeScenarioURL {
-            selectedIndex = scenarioURLs.firstIndex(of: activeScenarioURL)
+            selectedIndex = scenarios.firstIndex(where: { $0.url == activeScenarioURL })
         }
 
         updateLoadButtonEnabled()
     }
 
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let url = scenarioURLs[indexPath.row]
+        let url = scenarios[indexPath.row].url
 
         let rewindScenario = contextualAction(
             rowTitle: "⏮ Rewind",
@@ -79,7 +80,7 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
     }
 
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let url = scenarioURLs[indexPath.row]
+        let url = scenarios[indexPath.row].url
 
         let advanceScenario = contextualAction(
             rowTitle: "Advance ⏭",
@@ -130,7 +131,7 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
     }
 
     private func updateLoadButtonEnabled() {
-        loadButtonItem.isEnabled = !scenarioURLs.isEmpty && selectedIndex != nil
+        loadButtonItem.isEnabled = !scenarios.isEmpty && selectedIndex != nil
     }
 
     @objc private func loadSelectedScenario() {
@@ -139,9 +140,14 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
             return
         }
 
-        let url = scenarioURLs[selectedIndex]
+        let url = scenarios[selectedIndex].url
+
+        loadButtonItem.isEnabled = false
+        loadButtonItem.title = "Loading..."
         scenariosManager.loadScenario(from: url) { error in
             DispatchQueue.main.async {
+                self.loadButtonItem.isEnabled = true
+                self.loadButtonItem.title = "Load"
                 if let error = error {
                     self.present(UIAlertController(with: error), animated: true)
                 } else {
@@ -158,6 +164,13 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
 
 extension TestingScenariosTableViewController: TestingScenariosManagerDelegate {
     func testingScenariosManager(_ manager: TestingScenariosManager, didUpdateScenarioURLs scenarioURLs: [URL]) {
-        self.scenarioURLs = scenarioURLs
+        var filteredScenarios = Set<LoopScenario>()
+        manager.supportManager.availableSupports.forEach { supportUI in
+            supportUI.getScenarios(from: scenarioURLs).forEach { scenario in
+                filteredScenarios.insert(scenario)
+            }
+        }
+        
+        self.scenarios = Array(filteredScenarios).sorted(by: { $0.name < $1.name })
     }
 }
