@@ -110,12 +110,11 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     HStack(alignment: .center) {
                         loopIcon(context)
                             .frame(width: 40, height: 40, alignment: .trailing)
-                        VStack(alignment: .trailing) {
-                            Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
-                                .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
-                                .font(.title2)
-                                .fontWeight(.heavy)
-                        }
+                        Spacer()
+                        Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
+                            .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
+                            .font(.title2)
+                            .fontWeight(.heavy)
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
