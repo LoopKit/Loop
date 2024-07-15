@@ -117,7 +117,7 @@ class GlucoseActivityManager {
             )
             
             var predicatedGlucose: [Double] = []
-            if let samples = statusContext?.predictedGlucose?.values {
+            if let samples = statusContext?.predictedGlucose?.values, settings.addPredictiveLine {
                 predicatedGlucose = samples
             }
 
