@@ -93,20 +93,40 @@ struct AddEditFavoriteFoodView: View {
             let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
             let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
             
-            TextFieldRow(text: $viewModel.name, isFocused: nameFocused, title: "Name", placeholder: "Apple")
+            TextFieldRow(
+                text: $viewModel.name,
+                isFocused: nameFocused,
+                title: NSLocalizedString("Name", comment: "Label for name in favorite food entry screen"),
+                placeholder: NSLocalizedString("Apple", comment: "Placeholder for name in favorite food entry screen")
+            )
             
             CardSectionDivider()
 
-            CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: carbQuantityFocused, title: "Carb Quantity", preferredCarbUnit: viewModel.preferredCarbUnit)
+            CarbQuantityRow(
+                quantity: $viewModel.carbsQuantity,
+                isFocused: carbQuantityFocused,
+                title: NSLocalizedString("Carb Quantity", comment: "Label for carb quantity in favorite food entry screen"),
+                preferredCarbUnit: viewModel.preferredCarbUnit
+            )
             
             CardSectionDivider()
             
-            EmojiRow(text: $viewModel.foodType, isFocused: foodTypeFocused, emojiType: .food, title: "Food Type")
+            EmojiRow(
+                text: $viewModel.foodType,
+                isFocused: foodTypeFocused,
+                emojiType: .food,
+                title: NSLocalizedString("Food Type", comment: "Label for food type in favorite entry screen")
+            )
             
             CardSectionDivider()
 
-            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
-                .padding(.bottom, 2)
+            AbsorptionTimePickerRow(
+                absorptionTime: $viewModel.absorptionTime,
+                isFocused: absorptionTimeFocused,
+                validDurationRange: viewModel.absorptionRimesRange,
+                showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks
+            )
+            .padding(.bottom, 2)
         }
         .padding(.vertical, 12)
         .padding(.horizontal)
