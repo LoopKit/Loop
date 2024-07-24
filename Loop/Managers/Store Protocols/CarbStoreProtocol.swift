@@ -22,8 +22,8 @@ protocol CarbStoreProtocol: AnyObject {
 }
 
 extension CarbStoreProtocol {
-    func getCarbEntries(start: Date?, end: Date?, dateAscending: Bool = true, with favoriteFoodID: String? = nil) async throws -> [StoredCarbEntry] {
-        try await getCarbEntries(start: start, end: end, dateAscending: dateAscending, with: favoriteFoodID)
+    func getCarbEntries(start: Date?, end: Date?) async throws -> [StoredCarbEntry] {
+        try await getCarbEntries(start: start, end: end, dateAscending: true, with: nil)
     }
 }
 
