@@ -468,15 +468,3 @@ struct LabeledQuantity: View {
         return Text(string)
     }
 }
-
-struct LabelBackground: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color(.systemGray6))
-            )
-    }
-}
