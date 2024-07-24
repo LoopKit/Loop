@@ -20,7 +20,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
     private(set) var freshness = LoopCompletionFreshness.stale {
         didSet {
-            updateTintColor()
+            loopStateView.freshness = freshness
         }
     }
 
@@ -30,6 +30,12 @@ public final class LoopCompletionHUDView: BaseHUDView {
         updateDisplay(nil)
     }
 
+    public var loopStatusColors: StateColorPalette = StateColorPalette(unknown: .black, normal: .black, warning: .black, error: .black) {
+        didSet {
+            loopStateView.loopStatusColors = loopStatusColors
+        }
+    }
+    
     public var loopIconClosed = false {
         didSet {
             loopStateView.open = !loopIconClosed
@@ -63,26 +69,6 @@ public final class LoopCompletionHUDView: BaseHUDView {
         } else {
             updateTimer = nil
         }
-    }
-
-    override public func stateColorsDidUpdate() {
-        super.stateColorsDidUpdate()
-        updateTintColor()
-    }
-    
-    private var _tintColor: UIColor? {
-        switch freshness {
-        case .fresh:
-            return stateColors?.normal
-        case .aging:
-            return stateColors?.warning
-        case .stale:
-            return stateColors?.error
-        }
-    }
-
-    private func updateTintColor() {
-        self.tintColor = _tintColor        
     }
 
     private func initTimer(_ startDate: Date) {
