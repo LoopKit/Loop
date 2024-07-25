@@ -113,7 +113,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                         Spacer()
                         Text("\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))")
                             .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
-                            .font(.title2)
+                            .font(.headline)
                             .fontWeight(.heavy)
                     }
                 }
