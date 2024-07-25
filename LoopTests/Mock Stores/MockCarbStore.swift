@@ -16,7 +16,7 @@ class MockCarbStore: CarbStoreProtocol {
 
     var carbHistory: [StoredCarbEntry] = []
 
-    func getCarbEntries(start: Date?, end: Date?) async throws -> [StoredCarbEntry] {
+    func getCarbEntries(start: Date?, end: Date?, dateAscending: Bool, with favoriteFoodID: String?) async throws -> [StoredCarbEntry] {
         return carbHistory.filterDateRange(start, end)
     }
 
