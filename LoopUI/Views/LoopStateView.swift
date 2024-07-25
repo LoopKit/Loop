@@ -30,30 +30,6 @@ class WrappedLoopStateViewModel: ObservableObject {
     }
 }
 
-struct WrappedLoopCircleView: View {
-    
-    @ObservedObject var viewModel: WrappedLoopStateViewModel
-    
-    var body: some View {
-        LoopCircleView(closedLoop: $viewModel.closedLoop, freshness: $viewModel.freshness, animating: $viewModel.animating)
-            .environment(\.loopStatusColorPalette, viewModel.loopStatusColors)
-    }
-}
-
-class LoopCircleHostingController: UIHostingController<WrappedLoopCircleView> {
-    init(viewModel: WrappedLoopStateViewModel) {
-        super.init(
-            rootView: WrappedLoopCircleView(
-                viewModel: viewModel
-            )
-        )
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError()
-    }
-}
-
 final class LoopStateView: UIView {
     
     override init(frame: CGRect) {
@@ -95,7 +71,14 @@ final class LoopStateView: UIView {
     private let viewModel = WrappedLoopStateViewModel()
     
     private func setupViews() {
-        let hostingController = LoopCircleHostingController(viewModel: viewModel)
+        let hostingController = UIHostingController(
+            rootView: LoopCircleView(
+                closedLoop: viewModel.closedLoop,
+                freshness: viewModel.freshness,
+                animating: viewModel.animating
+            )
+            .environment(\.loopStatusColorPalette, viewModel.loopStatusColors)
+        )
         
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
