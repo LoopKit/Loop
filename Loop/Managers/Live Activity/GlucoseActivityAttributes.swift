@@ -16,6 +16,8 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
         // Meta data
         public let date: Date
         public let ended: Bool
+        public let preset: Preset?
+        public let glucoseRanges: [GlucoseRangeValue]
         
         // Dynamic island data
         public let currentGlucose: Double
@@ -42,6 +44,21 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
     public let lowerLimitChartMmol: Double
     public let upperLimitChartMg: Double
     public let lowerLimitChartMg: Double
+}
+
+public struct Preset: Codable, Hashable {
+    public let title: String
+    public let endDate: Date
+    public let minValue: Double
+    public let maxValue: Double
+}
+
+public struct GlucoseRangeValue: Identifiable, Codable, Hashable {
+    public let id: UUID
+    public let minValue: Double
+    public let maxValue: Double
+    public let startDate: Date
+    public let endDate: Date
 }
 
 public struct BottomRowItem: Codable, Hashable {

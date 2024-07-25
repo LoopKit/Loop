@@ -25,6 +25,8 @@ class GlucoseActivityManager {
     
     private let glucoseStore: GlucoseStoreProtocol
     private let doseStore: DoseStoreProtocol
+    private let glucoseRangeSchedule: GlucoseRangeSchedule?
+    private var preset: TemporaryScheduleOverride?
     
     private var startDate: Date = Date.now
     private var settings: LiveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
@@ -49,13 +51,15 @@ class GlucoseActivityManager {
         return dateFormatter
     }()
     
-    init?(glucoseStore: GlucoseStoreProtocol, doseStore: DoseStoreProtocol) {
+    init?(glucoseStore: GlucoseStoreProtocol, doseStore: DoseStoreProtocol, glucoseRangeSchedule: GlucoseRangeSchedule?, preset: TemporaryScheduleOverride?) {
         guard self.activityInfo.areActivitiesEnabled else {
             return nil
         }
         
         self.glucoseStore = glucoseStore
         self.doseStore = doseStore
+        self.glucoseRangeSchedule = glucoseRangeSchedule
+        self.preset = preset
         
         // Ensure settings exist
         if UserDefaults.standard.liveActivity == nil {
@@ -120,10 +124,42 @@ class GlucoseActivityManager {
             if let samples = statusContext?.predictedGlucose?.values, settings.addPredictiveLine {
                 predicatedGlucose = samples
             }
+            
+            var endDateChart: Date? = nil
+            if predicatedGlucose.count == 0 {
+                endDateChart = glucoseSamples.last?.startDate
+            } else if let predictedGlucose = statusContext?.predictedGlucose {
+                endDateChart = predictedGlucose.startDate.addingTimeInterval(.hours(4))
+            }
+            
+            var presetContext: Preset? = nil
+            if let preset = self.preset, let endDateChart = endDateChart {
+                presetContext = Preset(
+                    title: preset.getTitle(),
+                    endDate: preset.duration.isInfinite ? endDateChart : min(Date.now + preset.duration.timeInterval, endDateChart),
+                    minValue: preset.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
+                    maxValue: preset.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
+                )
+            }
+            
+            var glucoseRanges: [GlucoseRangeValue] = []
+            if let glucoseRangeSchedule = self.glucoseRangeSchedule, let start = glucoseSamples.first?.startDate, let end = endDateChart {
+                for item in glucoseRangeSchedule.quantityBetween(start: start, end: end) {
+                    glucoseRanges.append(GlucoseRangeValue(
+                        id: UUID(),
+                        minValue: item.value.lowerBound.doubleValue(for: unit),
+                        maxValue: item.value.upperBound.doubleValue(for: unit),
+                        startDate: max(item.startDate, start),
+                        endDate: min(item.endDate, end)
+                    ))
+                }
+            }
 
             let state = GlucoseActivityAttributes.ContentState(
                 date: currentGlucose.startDate,
                 ended: false,
+                preset: presetContext,
+                glucoseRanges: glucoseRanges,
                 currentGlucose: current,
                 trendType: statusContext?.glucoseDisplay?.trendType,
                 delta: delta,
@@ -226,7 +262,6 @@ class GlucoseActivityManager {
             }
             self.startDate = Date.now
         } catch {}
-
     }
     
     private func needsRecreation() -> Bool {
@@ -339,6 +374,8 @@ class GlucoseActivityManager {
             let dynamicState = GlucoseActivityAttributes.ContentState(
                 date: Date.now,
                 ended: true,
+                preset: nil,
+                glucoseRanges: [],
                 currentGlucose: 0,
                 trendType: nil,
                 delta: "",
@@ -364,5 +401,30 @@ class GlucoseActivityManager {
                 pushType: .token
             )
         } catch {}
+    }
+    
+    func presetActivated(preset: TemporaryScheduleOverride) {
+        self.preset = preset
+        self.update()
+    }
+    
+    func presetDeactivated() {
+        self.preset = nil
+        self.update()
+    }
+}
+
+extension TemporaryScheduleOverride {
+    func getTitle() -> String {
+        switch (self.context) {
+        case .preset(let preset):
+            return "\(preset.symbol) \(preset.name)"
+        case .custom:
+            return NSLocalizedString("Custom preset", comment: "The title of the cell indicating a generic custom preset is enabled")
+        case .preMeal:
+            return NSLocalizedString(" Pre-meal Preset", comment: "Status row title for premeal override enabled (leading space is to separate from symbol)")
+        case .legacyWorkout:
+            return ""
+        }
     }
 }

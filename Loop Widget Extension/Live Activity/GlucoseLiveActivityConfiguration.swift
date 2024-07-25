@@ -39,14 +39,18 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                 predicatedStartDate: context.state.predicatedStartDate,
                                 predicatedInterval: context.state.predicatedInterval,
                                 lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
-                                upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
+                                upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
+                                glucoseRanges: context.state.glucoseRanges,
+                                preset: context.state.preset
                             )
                             .frame(height: 85)
                         } else {
                             ChartView(
                                 glucoseSamples: context.state.glucoseSamples,
                                 lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
-                                upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
+                                upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
+                                glucoseRanges: context.state.glucoseRanges,
+                                preset: context.state.preset
                             )
                             .frame(height: 85)
                         }
@@ -135,14 +139,18 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             predicatedStartDate: context.state.predicatedStartDate,
                             predicatedInterval: context.state.predicatedInterval,
                             lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
-                            upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
+                            upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
+                            glucoseRanges: context.state.glucoseRanges,
+                            preset: context.state.preset
                         )
                             .frame(height: 75)
                     } else {
                         ChartView(
                             glucoseSamples: context.state.glucoseSamples,
                             lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
-                            upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg
+                            upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
+                            glucoseRanges: context.state.glucoseRanges,
+                            preset: context.state.preset
                         )
                             .frame(height: 75)
                     }

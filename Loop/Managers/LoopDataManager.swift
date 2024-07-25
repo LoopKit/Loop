@@ -127,7 +127,12 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
         
-        self.liveActivityManager = GlucoseActivityManager(glucoseStore: self.glucoseStore, doseStore: self.doseStore)
+        self.liveActivityManager = GlucoseActivityManager(
+            glucoseStore: self.glucoseStore,
+            doseStore: self.doseStore,
+            glucoseRangeSchedule: settings.glucoseTargetRangeSchedule,
+            preset: self.settings.scheduleOverride
+        )
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
@@ -147,12 +152,16 @@ final class LoopDataManager {
                             observer.presetDeactivated(context: oldPreset.context)
                         }
                     }
+                    self?.liveActivityManager?.presetDeactivated()
                 }
                 settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
                 if let observers = self?.presetActivationObservers {
                     for observer in observers {
                         observer.presetActivated(context: .preset(preset), duration: preset.duration)
                     }
+                }
+                if let override = settings.scheduleOverride {
+                    self?.liveActivityManager?.presetActivated(preset: override)
                 }
             }
             // Remove the override from UserDefaults so we don't set it multiple times
@@ -263,12 +272,14 @@ final class LoopDataManager {
                 for observer in self.presetActivationObservers {
                     observer.presetDeactivated(context: oldPreset.context)
                 }
-
+                self.liveActivityManager?.presetDeactivated()
             }
             if let newPreset = newValue.scheduleOverride {
                 for observer in self.presetActivationObservers {
                     observer.presetActivated(context: newPreset.context, duration: newPreset.duration)
                 }
+                
+                self.liveActivityManager?.presetActivated(preset: newPreset)
             }
 
             // Invalidate cached effects affected by the override

@@ -13,8 +13,10 @@ import Charts
 struct ChartView: View {
     private let glucoseSampleData: [ChartValues]
     private let predicatedData: [ChartValues]
+    private let glucoseRanges: [GlucoseRangeValue]
+    private let preset: Preset?
     
-    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, lowerLimit: Double, upperLimit: Double) {
+    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = ChartValues.convert(
             data: predicatedGlucose,
@@ -23,30 +25,57 @@ struct ChartView: View {
             lowerLimit: lowerLimit,
             upperLimit: upperLimit
         )
+        self.preset = preset
+        self.glucoseRanges = glucoseRanges
     }
     
-    init(glucoseSamples: [GlucoseSampleAttributes], lowerLimit: Double, upperLimit: Double) {
+    init(glucoseSamples: [GlucoseSampleAttributes], lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = []
+        self.preset = preset
+        self.glucoseRanges = glucoseRanges
     }
     
     var body: some View {
-        Chart {
-            ForEach(glucoseSampleData) { item in
-                PointMark (x: .value("Date", item.x),
-                          y: .value("Glucose level", item.y)
-                )
-                .symbolSize(20)
-                .foregroundStyle(by: .value("Color", item.color))
+        ZStack(alignment: Alignment(horizontal: .trailing, vertical: .top)){
+            Chart {
+                if let preset = self.preset, predicatedData.count > 0 {
+                    RectangleMark(
+                        xStart: .value("Start", Date.now),
+                        xEnd: .value("End", preset.endDate),
+                        yStart: .value("Preset override", preset.minValue),
+                        yEnd: .value("Preset override", preset.maxValue)
+                    )
+                    .foregroundStyle(.primary)
+                    .opacity(0.6)
+                }
+                
+                ForEach(glucoseRanges) { item in
+                    RectangleMark(
+                        xStart: .value("Start", item.startDate),
+                        xEnd: .value("End", item.endDate),
+                        yStart: .value("Glucose range", item.minValue),
+                        yEnd: .value("Glucose range", item.maxValue)
+                    )
+                    .foregroundStyle(.primary)
+                    .opacity(0.3)
+                }
+                
+                ForEach(glucoseSampleData) { item in
+                    PointMark (x: .value("Date", item.x),
+                               y: .value("Glucose level", item.y)
+                    )
+                    .symbolSize(20)
+                    .foregroundStyle(by: .value("Color", item.color))
+                }
+                
+                ForEach(predicatedData) { item in
+                    LineMark (x: .value("Date", item.x),
+                              y: .value("Glucose level", item.y)
+                    )
+                    .lineStyle(StrokeStyle(lineWidth: 3, dash: [2, 3]))
+                }
             }
-            
-            ForEach(predicatedData) { item in
-                LineMark (x: .value("Date", item.x),
-                          y: .value("Glucose level", item.y)
-                )
-                .lineStyle(StrokeStyle(lineWidth: 3, dash: [2, 3]))
-            }
-        }
             .chartForegroundStyleScale([
                 "Good": .green,
                 "High": .orange,
@@ -58,7 +87,7 @@ struct ChartView: View {
             .chartLegend(.hidden)
             .chartYScale(domain: .automatic(includesZero: false))
             .chartYAxis {
-                AxisMarks(position: .trailing) { _ in
+                AxisMarks(position: .leading) { _ in
                     AxisValueLabel().foregroundStyle(Color.primary)
                     AxisGridLine(stroke: .init(lineWidth: 0.1, dash: [2, 3]))
                         .foregroundStyle(Color.primary)
@@ -72,6 +101,14 @@ struct ChartView: View {
                         .foregroundStyle(Color.primary)
                 }
             }
+            
+            if let preset = self.preset {
+                Text(preset.title)
+                    .font(.footnote)
+                    .padding(.trailing, 5)
+                    .padding(.top, 5)
+            }
+        }
     }
 }
 
