@@ -35,7 +35,7 @@ struct WrappedLoopCircleView: View {
     @ObservedObject var viewModel: WrappedLoopStateViewModel
     
     var body: some View {
-        LoopCircleView(closedLoop: $viewModel.closedLoop, freshness: $viewModel.freshness, animating: $viewModel.animating)
+        LoopCircleView(closedLoop: viewModel.closedLoop, freshness: viewModel.freshness, animating: viewModel.animating)
             .environment(\.loopStatusColorPalette, viewModel.loopStatusColors)
     }
 }
