@@ -982,6 +982,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .hud:
             let cell = tableView.dequeueReusableCell(withIdentifier: HUDViewTableViewCell.className, for: indexPath) as! HUDViewTableViewCell
             hudView = cell.hudView
+            cell.hudView.loopCompletionHUD.loopStatusColors = .loopStatus
 
             return cell
         case .charts:
