@@ -27,6 +27,7 @@ class GlucoseActivityManager {
     private let doseStore: DoseStoreProtocol
     private let glucoseRangeSchedule: GlucoseRangeSchedule?
     private var preset: TemporaryScheduleOverride?
+    private var presetStartDate: Date?
     
     private var startDate: Date = Date.now
     private var settings: LiveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
@@ -60,6 +61,7 @@ class GlucoseActivityManager {
         self.doseStore = doseStore
         self.glucoseRangeSchedule = glucoseRangeSchedule
         self.preset = preset
+        self.presetStartDate = preset != nil ? Date.now : nil
         
         // Ensure settings exist
         if UserDefaults.standard.liveActivity == nil {
@@ -74,6 +76,7 @@ class GlucoseActivityManager {
         }
         
         initEmptyActivity(settings: self.settings)
+        update()
         
         Task {
             await self.endUnknownActivities()
@@ -133,9 +136,13 @@ class GlucoseActivityManager {
             }
             
             var presetContext: Preset? = nil
-            if let preset = self.preset, let endDateChart = endDateChart {
+            if let preset = self.preset,
+               let endDateChart = endDateChart,
+               let startDate = presetStartDate
+            {
                 presetContext = Preset(
                     title: preset.getTitle(),
+                    startDate: startDate,
                     endDate: preset.duration.isInfinite ? endDateChart : min(Date.now + preset.duration.timeInterval, endDateChart),
                     minValue: preset.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
                     maxValue: preset.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
@@ -145,13 +152,47 @@ class GlucoseActivityManager {
             var glucoseRanges: [GlucoseRangeValue] = []
             if let glucoseRangeSchedule = self.glucoseRangeSchedule, let start = glucoseSamples.first?.startDate, let end = endDateChart {
                 for item in glucoseRangeSchedule.quantityBetween(start: start, end: end) {
-                    glucoseRanges.append(GlucoseRangeValue(
-                        id: UUID(),
-                        minValue: item.value.lowerBound.doubleValue(for: unit),
-                        maxValue: item.value.upperBound.doubleValue(for: unit),
-                        startDate: max(item.startDate, start),
-                        endDate: min(item.endDate, end)
-                    ))
+                    let minValue = item.value.lowerBound.doubleValue(for: unit)
+                    let maxValue = item.value.upperBound.doubleValue(for: unit)
+                    let startDate = max(item.startDate, start)
+                    let endDate = min(item.endDate, end)
+                    
+                    if let presetContext = presetContext {
+                        if presetContext.startDate > startDate, presetContext.endDate < endDate {
+                            // A preset is active during this schedule
+                            glucoseRanges.append(GlucoseRangeValue(
+                                id: UUID(),
+                                minValue: minValue,
+                                maxValue: maxValue,
+                                startDate: startDate,
+                                endDate: presetContext.startDate
+                            ))
+                            glucoseRanges.append(GlucoseRangeValue(
+                                id: UUID(),
+                                minValue: minValue,
+                                maxValue: maxValue,
+                                startDate: presetContext.endDate,
+                                endDate: endDate
+                            ))
+                        } else {
+                            // No preset is active in this schedule
+                            glucoseRanges.append(GlucoseRangeValue(
+                                id: UUID(),
+                                minValue: minValue,
+                                maxValue: maxValue,
+                                startDate: startDate,
+                                endDate: endDate
+                            ))
+                        }
+                    } else {
+                        glucoseRanges.append(GlucoseRangeValue(
+                            id: UUID(),
+                            minValue: minValue,
+                            maxValue: maxValue,
+                            startDate: startDate,
+                            endDate: endDate
+                        ))
+                    }
                 }
             }
 
@@ -405,6 +446,7 @@ class GlucoseActivityManager {
     
     func presetActivated(preset: TemporaryScheduleOverride) {
         self.preset = preset
+        self.presetStartDate = Date.now
         self.update()
     }
     

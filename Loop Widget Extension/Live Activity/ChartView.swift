@@ -39,9 +39,9 @@ struct ChartView: View {
     var body: some View {
         ZStack(alignment: Alignment(horizontal: .trailing, vertical: .top)){
             Chart {
-                if let preset = self.preset, predicatedData.count > 0 {
+                if let preset = self.preset, predicatedData.count > 0, preset.endDate > Date.now.addingTimeInterval(.hours(-6)) {
                     RectangleMark(
-                        xStart: .value("Start", Date.now),
+                        xStart: .value("Start", preset.startDate),
                         xEnd: .value("End", preset.endDate),
                         yStart: .value("Preset override", preset.minValue),
                         yEnd: .value("Preset override", preset.maxValue)
@@ -102,11 +102,11 @@ struct ChartView: View {
                 }
             }
             
-            if let preset = self.preset {
+            if let preset = self.preset, preset.endDate > Date.now {
                 Text(preset.title)
                     .font(.footnote)
                     .padding(.trailing, 5)
-                    .padding(.top, 5)
+                    .padding(.top, 2)
             }
         }
     }

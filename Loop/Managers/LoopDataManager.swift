@@ -131,7 +131,7 @@ final class LoopDataManager {
             glucoseStore: self.glucoseStore,
             doseStore: self.doseStore,
             glucoseRangeSchedule: settings.glucoseTargetRangeSchedule,
-            preset: self.settings.scheduleOverride
+            preset: self.settings.scheduleOverride ?? self.settings.preMealOverride
         )
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
@@ -263,6 +263,12 @@ final class LoopDataManager {
         if newValue.preMealOverride != oldValue.preMealOverride {
             // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
             predictedGlucose = nil
+            
+            if let preMeal = newValue.preMealOverride {
+                self.liveActivityManager?.presetActivated(preset: preMeal)
+            } else {
+                self.liveActivityManager?.presetDeactivated()
+            }
         }
 
         if newValue.scheduleOverride != oldValue.scheduleOverride {
