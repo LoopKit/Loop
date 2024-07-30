@@ -422,15 +422,15 @@ extension AlertStore {
         case failure(Error)
     }
 
-    func executeQuery(fromQueryAnchor queryAnchor: QueryAnchor? = nil, since date: Date, excludingFutureAlerts: Bool = true, now: Date = Date(), limit: Int, completion: @escaping (AlertQueryResult) -> Void) {
+    func executeQuery(fromQueryAnchor queryAnchor: QueryAnchor? = nil, since date: Date, excludingFutureAlerts: Bool = true, now: Date = Date(), limit: Int, ascending: Bool = true, completion: @escaping (AlertQueryResult) -> Void) {
         let sinceDateFilter = SinceDateFilter(predicateExpressionNotYetExpired: predicateExpressionNotYetExpired,
                                               date: date,
                                               excludingFutureAlerts: excludingFutureAlerts,
                                               now: now)
-        executeAlertQuery(fromQueryAnchor: queryAnchor, queryFilter: sinceDateFilter, limit: limit, completion: completion)
+        executeAlertQuery(fromQueryAnchor: queryAnchor, queryFilter: sinceDateFilter, limit: limit, ascending: ascending, completion: completion)
     }
 
-    func executeAlertQuery(fromQueryAnchor queryAnchor: QueryAnchor?, queryFilter: QueryFilter? = nil, limit: Int, completion: @escaping (AlertQueryResult) -> Void) {
+    func executeAlertQuery(fromQueryAnchor queryAnchor: QueryAnchor?, queryFilter: QueryFilter? = nil, limit: Int, ascending: Bool = true, completion: @escaping (AlertQueryResult) -> Void) {
         var queryAnchor = queryAnchor ?? QueryAnchor()
         var queryResult = [SyncAlertObject]()
         var queryError: Error?
@@ -449,7 +449,7 @@ extension AlertStore {
             } else {
                 storedRequest.predicate = queryAnchorPredicate
             }
-            storedRequest.sortDescriptors = [NSSortDescriptor(key: "modificationCounter", ascending: true)]
+            storedRequest.sortDescriptors = [NSSortDescriptor(key: "modificationCounter", ascending: ascending)]
             storedRequest.fetchLimit = limit
 
             do {
