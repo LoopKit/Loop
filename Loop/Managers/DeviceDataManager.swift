@@ -938,11 +938,10 @@ extension DeviceDataManager: CGMManagerDelegate {
 // MARK: - CGMManagerOnboardingDelegate
 
 extension DeviceDataManager: CGMManagerOnboardingDelegate {
+    @MainActor
     func cgmManagerOnboarding(didCreateCGMManager cgmManager: CGMManagerUI) {
-        Task { @MainActor in
-            log.default("CGM manager with identifier '%{public}@' created", cgmManager.pluginIdentifier)
-            self.cgmManager = cgmManager
-        }
+        log.default("CGM manager with identifier '%{public}@' created", cgmManager.pluginIdentifier)
+        self.cgmManager = cgmManager
     }
 
     func cgmManagerOnboarding(didOnboardCGMManager cgmManager: CGMManagerUI) {
