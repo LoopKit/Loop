@@ -54,7 +54,9 @@ class OnboardingScreen: BaseScreen {
     
     private func allowSiri() {
         waitForExistence(alertAllowButton)
-        alertAllowButton.tap()
+        if alertAllowButton.exists {
+            alertAllowButton.tap()
+        }
     }
 
     private func skipOnboarding() {

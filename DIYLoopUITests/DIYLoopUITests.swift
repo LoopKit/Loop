@@ -32,8 +32,13 @@ final class DIYLoopUITests: XCTestCase {
     }
     
     func testSkippingOnboarding() async throws {
-        baseScreen.deleteApp()
-        app.launch()
         onboardingScreen.skipAllOfOnboarding()
+        homeScreen.openSettings()
+        settingsScreen.openPumpManager()
+        waitForExistence(settingsScreen.pumpSimulatorButton)
+        settingsScreen.pumpSimulatorButton.tap()
+        settingsScreen.openCGMManager()
+        waitForExistence(settingsScreen.cgmSimulatorButton)
+        settingsScreen.cgmSimulatorButton.tap()
     }
 }
