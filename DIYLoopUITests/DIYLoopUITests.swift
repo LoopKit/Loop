@@ -26,7 +26,7 @@ final class DIYLoopUITests: XCTestCase {
         baseScreen = BaseScreen(app: app)
         homeScreen = HomeScreen(app: app)
         settingsScreen = SettingsScreen(app: app)
-        systemSettingsScreen = SystemSettingsScreen(app: app)
+        systemSettingsScreen = SystemSettingsScreen()
         pumpSimulatorScreen = PumpSimulatorScreen(app: app)
         onboardingScreen = OnboardingScreen(app: app)
     }
