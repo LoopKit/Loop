@@ -6,110 +6,109 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
+import LoopKit
+import LoopKitUI
+import SwiftUI
 import UIKit
 
-final class LoopStateView: UIView {
-    var firstDataUpdate = true
+class WrappedLoopStateViewModel: ObservableObject {
+    @Published var loopStatusColors: StateColorPalette
+    @Published var closedLoop: Bool
+    @Published var freshness: LoopCompletionFreshness
+    @Published var animating: Bool
     
-    override func tintColorDidChange() {
-        super.tintColorDidChange()
-
-        updateTintColor()
+    init(
+        loopStatusColors: StateColorPalette = StateColorPalette(unknown: .black, normal: .black, warning: .black, error: .black),
+        closedLoop: Bool = true,
+        freshness: LoopCompletionFreshness = .stale,
+        animating: Bool = false
+    ) {
+        self.loopStatusColors = loopStatusColors
+        self.closedLoop = closedLoop
+        self.freshness = freshness
+        self.animating = animating
     }
+}
 
-    private func updateTintColor() {
-        shapeLayer.strokeColor = tintColor.cgColor
+struct WrappedLoopCircleView: View {
+    
+    @ObservedObject var viewModel: WrappedLoopStateViewModel
+    
+    var body: some View {
+        LoopCircleView(closedLoop: viewModel.closedLoop, freshness: viewModel.freshness, animating: viewModel.animating)
+            .environment(\.loopStatusColorPalette, viewModel.loopStatusColors)
     }
+}
 
-    var open = false {
+class LoopCircleHostingController: UIHostingController<WrappedLoopCircleView> {
+    init(viewModel: WrappedLoopStateViewModel) {
+        super.init(
+            rootView: WrappedLoopCircleView(
+                viewModel: viewModel
+            )
+        )
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError()
+    }
+}
+
+
+final class LoopStateView: UIView {
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        setupViews()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        
+        setupViews()
+    }
+    
+    var loopStatusColors: StateColorPalette = StateColorPalette(unknown: .black, normal: .black, warning: .black, error: .black) {
         didSet {
-            if open != oldValue {
-                shapeLayer.path = drawPath()
-            }
+            viewModel.loopStatusColors = loopStatusColors
         }
     }
 
-    override class var layerClass : AnyClass {
-        return CAShapeLayer.self
+    var freshness: LoopCompletionFreshness = .stale {
+        didSet {
+            viewModel.freshness = freshness
+        }
     }
-
-    private var shapeLayer: CAShapeLayer {
-        return layer as! CAShapeLayer
+    
+    var open = false {
+        didSet {
+            viewModel.closedLoop = !open
+        }
     }
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-
-        shapeLayer.lineWidth = 8
-        shapeLayer.fillColor = UIColor.clear.cgColor
-        updateTintColor()
-
-        shapeLayer.path = drawPath()
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-
-        shapeLayer.lineWidth = 8
-        shapeLayer.fillColor = UIColor.clear.cgColor
-        updateTintColor()
-
-        shapeLayer.path = drawPath()
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        shapeLayer.path = drawPath()
-    }
-
-    private func drawPath(lineWidth: CGFloat? = nil) -> CGPath {
-        let center = CGPoint(x: bounds.midX, y: bounds.midY)
-        let lineWidth = lineWidth ?? shapeLayer.lineWidth
-        let radius = min(bounds.width / 2, bounds.height / 2) - lineWidth / 2
-
-        let startAngle = open ? -CGFloat.pi / 4 : 0
-        let endAngle = open ? 5 * CGFloat.pi / 4 : 2 * CGFloat.pi
-
-        let path = UIBezierPath(
-            arcCenter: center,
-            radius: radius,
-            startAngle: startAngle,
-            endAngle: endAngle,
-            clockwise: true
-        )
-
-        return path.cgPath
-    }
-
-    private static let AnimationKey = "com.loudnate.Naterade.breatheAnimation"
 
     var animated: Bool = false {
         didSet {
-            if animated != oldValue {
-                if animated {
-                    let path = CABasicAnimation(keyPath: "path")
-                    path.fromValue = shapeLayer.path ?? drawPath()
-                    path.toValue = drawPath(lineWidth: 16)
-
-                    let width = CABasicAnimation(keyPath: "lineWidth")
-                    width.fromValue = shapeLayer.lineWidth
-                    width.toValue = 10
-
-                    let group = CAAnimationGroup()
-                    group.animations = [path, width]
-                    group.duration = firstDataUpdate ? 0 : 1
-                    group.repeatCount = HUGE
-                    group.autoreverses = true
-                    group.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-
-                    shapeLayer.add(group, forKey: type(of: self).AnimationKey)
-                } else {
-                    shapeLayer.removeAnimation(forKey: type(of: self).AnimationKey)
-                }
-            }
-            firstDataUpdate = false
+            viewModel.animating = animated
         }
+    }
+    
+    private let viewModel = WrappedLoopStateViewModel()
+    
+    private func setupViews() {
+        let hostingController = LoopCircleHostingController(viewModel: viewModel)
+        
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        addSubview(hostingController.view)
+        
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
     }
 }
 

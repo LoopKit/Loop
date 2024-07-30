@@ -75,7 +75,7 @@ struct HowMuteAlertWorkView: View {
                     Text(
                         String(
                             format: NSLocalizedString(
-                                "Use the Mute App Sounds feature. It allows you to temporarily silence (up to 4 hours) all of the sounds from %1$@, including Critical Alerts and Time Sensitive Notifications.",
+                                "Use the Mute All App Sounds feature. It allows you to temporarily silence (up to 4 hours) all of the sounds from %1$@, including Critical Alerts and Time Sensitive Notifications.",
                                 comment: "Description text for temporarily silencing all sounds (1: app name)"
                             ),
                             appName

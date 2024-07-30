@@ -507,7 +507,7 @@ extension AlertManager {
         await withCheckedContinuation { continuation in
             let startDate = Date() - .days(3.5) // Report the last 3 and half days of alerts
             let header = "## Alerts\n"
-            alertStore.executeQuery(since: startDate, limit: 100) { result in
+            alertStore.executeQuery(since: startDate, limit: 100, ascending: false) { result in
                 switch result {
                 case .failure:
                     continuation.resume(returning: header)

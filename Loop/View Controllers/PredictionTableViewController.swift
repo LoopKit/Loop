@@ -188,7 +188,9 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
     private var eventualGlucoseDescription: String?
 
-    private var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection, .suspend]
+    // Removed .suspend from this list; LoopAlgorithm needs updates to support this. Also review
+    // for better ways to support desired use cases. https://github.com/LoopKit/Loop/pull/2026
+    private var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection]
 
     private var selectedInputs = PredictionInputEffect.all
 

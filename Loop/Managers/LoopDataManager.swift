@@ -349,34 +349,22 @@ final class LoopDataManager: ObservableObject {
             throw LoopError.configurationError(.insulinSensitivitySchedule)
         }
 
-        let sensitivityWithOverrides = overrides.apply(over: sensitivity) { (quantity, override) in
-            let value = quantity.doubleValue(for: .milligramsPerDeciliter)
-            return HKQuantity(
-                unit: .milligramsPerDeciliter,
-                doubleValue: value / override.settings.effectiveInsulinNeedsScaleFactor
-            )
-        }
+        let sensitivityWithOverrides = overrides.applySensitivity(over: sensitivity)
 
         guard !basal.isEmpty else {
             throw LoopError.configurationError(.basalRateSchedule)
         }
-        let basalWithOverrides = overrides.apply(over: basal) { (value, override) in
-            value * override.settings.effectiveInsulinNeedsScaleFactor
-        }
+        let basalWithOverrides = overrides.applyBasal(over: basal)
 
         guard !carbRatio.isEmpty else {
             throw LoopError.configurationError(.carbRatioSchedule)
         }
-        let carbRatioWithOverrides = overrides.apply(over: carbRatio) { (value, override) in
-            value * override.settings.effectiveInsulinNeedsScaleFactor
-        }
+        let carbRatioWithOverrides = overrides.applyCarbRatio(over: carbRatio)
 
         guard !target.isEmpty else {
             throw LoopError.configurationError(.glucoseTargetRangeSchedule)
         }
-        let targetWithOverrides = overrides.apply(over: target) { (range, override) in
-            override.settings.targetRange ?? range
-        }
+        let targetWithOverrides = overrides.applyTarget(over: target, at: baseTime)
 
         // Create dosing strategy based on user setting
         let applicationFactorStrategy: ApplicationFactorStrategy = UserDefaults.standard.glucoseBasedApplicationFactorEnabled

@@ -444,7 +444,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
-            return indexPath
+            return nil
         case .totals:
             return nil
         case .entries:
@@ -453,23 +453,29 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard indexPath.row < carbStatuses.count else { return }
         tableView.deselectRow(at: indexPath, animated: true)
-        
-        let originalCarbEntry = carbStatuses[indexPath.row].entry
-        
-        let viewModel = CarbEntryViewModel(delegate: loopDataManager, originalCarbEntry: originalCarbEntry)
-        viewModel.analyticsServicesManager = analyticsServicesManager
-        viewModel.deliveryDelegate = deviceManager
-        let carbEntryView = CarbEntryView(viewModel: viewModel)
-            .environmentObject(deviceManager.displayGlucosePreference)
-            .environment(\.dismissAction, carbEditWasCanceled)
-        let hostingController = UIHostingController(rootView: carbEntryView)
-        hostingController.title = "Edit Carb Entry"
-        hostingController.navigationItem.largeTitleDisplayMode = .never
-        let leftBarButton = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(carbEditWasCanceled))
-        hostingController.navigationItem.backBarButtonItem = leftBarButton
-        navigationController?.pushViewController(hostingController, animated: true)
+
+        switch Section(rawValue: indexPath.section)! {
+        case .entries:
+            guard indexPath.row < carbStatuses.count else { return }
+            
+            let originalCarbEntry = carbStatuses[indexPath.row].entry
+            
+            let viewModel = CarbEntryViewModel(delegate: loopDataManager, originalCarbEntry: originalCarbEntry)
+            viewModel.analyticsServicesManager = analyticsServicesManager
+            viewModel.deliveryDelegate = deviceManager
+            let carbEntryView = CarbEntryView(viewModel: viewModel)
+                .environmentObject(deviceManager.displayGlucosePreference)
+                .environment(\.dismissAction, carbEditWasCanceled)
+            let hostingController = UIHostingController(rootView: carbEntryView)
+            hostingController.title = "Edit Carb Entry"
+            hostingController.navigationItem.largeTitleDisplayMode = .never
+            let leftBarButton = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(carbEditWasCanceled))
+            hostingController.navigationItem.backBarButtonItem = leftBarButton
+            navigationController?.pushViewController(hostingController, animated: true)
+        default:
+            return
+        }
     }
     
     @objc func carbEditWasCanceled() {

@@ -22,6 +22,7 @@ public struct SettingsView: View {
     @Environment(\.carbTintColor) private var carbTintColor
     @Environment(\.glucoseTintColor) private var glucoseTintColor
     @Environment(\.insulinTintColor) private var insulinTintColor
+    @Environment(\.isInvestigationalDevice) private var isInvestigationalDevice
 
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var versionUpdateViewModel: VersionUpdateViewModel
@@ -219,9 +220,23 @@ extension SettingsView {
     
     private var loopSection: some View {
         Section(
-            header: SectionHeader(
-                label: localizedAppNameAndVersion.description
-            )
+            header: 
+                VStack(alignment: .leading, spacing: 8) {
+                    SectionHeader(label: localizedAppNameAndVersion.description)
+                    
+                    if isInvestigationalDevice {
+                        Group {
+                            Text(Image(systemName: "exclamationmark.triangle.fill"))
+                                .foregroundColor(guidanceColors.warning) +
+                            Text(" ") +
+                            Text("CAUTION - Investigational device. Limited by Federal (or United States) law to investigational use.")
+                        }
+                        .font(.footnote)
+                        .textCase(nil)
+                        .foregroundColor(.primary)
+                        .padding(.bottom, 6)
+                    }
+                }
         ) {
             ConfirmationToggle(
                 isOn: closedLoopToggleState,
@@ -286,11 +301,9 @@ extension SettingsView {
         } else if viewModel.alertMuter.configuration.shouldMute {
             Image(systemName: "speaker.slash.fill")
                 .resizable()
-                .foregroundColor(.white)
+                .aspectRatio(contentMode: .fit)
+                .foregroundColor(guidanceColors.warning)
                 .padding(5)
-                .frame(width: 22, height: 22)
-                .background(guidanceColors.warning)
-                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
         }
     }
 
@@ -306,7 +319,7 @@ extension SettingsView {
                         .frame(width: 30),
                     secondaryImageView: alertWarning,
                     label: NSLocalizedString("Alert Management", comment: "Alert Permissions button text"),
-                    descriptiveText: NSLocalizedString("iOS Permissions and Mute App Sounds", comment: "Alert Permissions descriptive text")
+                    descriptiveText: NSLocalizedString("iOS Permissions and Mute All App Sounds", comment: "Alert Permissions descriptive text")
                 )
                 .accessibilityIdentifier("settingsViewAlertManagement")
             }

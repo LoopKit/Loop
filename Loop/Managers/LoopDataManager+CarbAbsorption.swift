@@ -50,41 +50,31 @@ extension LoopDataManager {
 
         let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(startDate: sensitivityStart, endDate: end)
 
-        var overrides = temporaryPresetsManager.overrideHistory.getOverrideHistory(startDate: sensitivityStart, endDate: end)
+        let overrides = temporaryPresetsManager.overrideHistory.getOverrideHistory(startDate: sensitivityStart, endDate: end)
 
         guard !sensitivity.isEmpty else {
             throw LoopError.configurationError(.insulinSensitivitySchedule)
         }
 
-        let sensitivityWithOverrides = overrides.apply(over: sensitivity) { (quantity, override) in
-            let value = quantity.doubleValue(for: .milligramsPerDeciliter)
-            return HKQuantity(
-                unit: .milligramsPerDeciliter,
-                doubleValue: value / override.settings.effectiveInsulinNeedsScaleFactor
-            )
-        }
+        let sensitivityWithOverrides = overrides.applySensitivity(over: sensitivity)
 
         guard !basal.isEmpty else {
             throw LoopError.configurationError(.basalRateSchedule)
         }
-        let basalWithOverrides = overrides.apply(over: basal) { (value, override) in
-            value * override.settings.effectiveInsulinNeedsScaleFactor
-        }
+        let basalWithOverrides = overrides.applyBasal(over: basal)
 
         guard !carbRatio.isEmpty else {
             throw LoopError.configurationError(.carbRatioSchedule)
         }
-        let carbRatioWithOverrides = overrides.apply(over: carbRatio) { (value, override) in
-            value * override.settings.effectiveInsulinNeedsScaleFactor
-        }
+        let carbRatioWithOverrides = overrides.applyCarbRatio(over: carbRatio)
 
         let carbModel: CarbAbsorptionModel = FeatureFlags.nonlinearCarbModelEnabled ? .piecewiseLinear : .linear
 
         // Overlay basal history on basal doses, splitting doses to get amount delivered relative to basal
-        let annotatedDoses = doses.annotated(with: basal)
+        let annotatedDoses = doses.annotated(with: basalWithOverrides)
 
         let insulinEffects = annotatedDoses.glucoseEffects(
-            insulinSensitivityHistory: sensitivity,
+            insulinSensitivityHistory: sensitivityWithOverrides,
             from: start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval).dateFlooredToTimeInterval(GlucoseMath.defaultDelta),
             to: nil)
 
@@ -94,15 +84,15 @@ extension LoopDataManager {
         // Carb Effects
         let carbStatus = carbEntries.map(
             to: insulinCounteractionEffects,
-            carbRatio: carbRatio,
-            insulinSensitivity: sensitivity
+            carbRatio: carbRatioWithOverrides,
+            insulinSensitivity: sensitivityWithOverrides
         )
 
         let carbEffects = carbStatus.dynamicGlucoseEffects(
             from: end,
             to: end.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration),
-            carbRatios: carbRatio,
-            insulinSensitivities: sensitivity,
+            carbRatios: carbRatioWithOverrides,
+            insulinSensitivities: sensitivityWithOverrides,
             absorptionModel: carbModel.model
         )
 

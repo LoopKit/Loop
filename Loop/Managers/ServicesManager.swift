@@ -305,7 +305,7 @@ extension ServicesManager: ServiceDelegate {
         }
         
         try await servicesManagerDelegate?.enactOverride(name: name, duration: duration, remoteAddress: remoteAddress)
-        await remoteDataServicesManager.triggerUpload(for: .overrides)
+        await remoteDataServicesManager.performUpload(for: .overrides)
     }
     
     enum OverrideActionError: LocalizedError {
@@ -325,14 +325,14 @@ extension ServicesManager: ServiceDelegate {
     
     func cancelRemoteOverride() async throws {
         try await servicesManagerDelegate?.cancelCurrentOverride()
-        await remoteDataServicesManager.triggerUpload(for: .overrides)
+        await remoteDataServicesManager.performUpload(for: .overrides)
     }
     
     func deliverRemoteCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         do {
             try await servicesManagerDelegate?.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
             NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
-            await remoteDataServicesManager.triggerUpload(for: .carb)
+            await remoteDataServicesManager.performUpload(for: .carb)
             analyticsServicesManager.didAddCarbs(source: "Remote", amount: amountInGrams)
         } catch {
             NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
@@ -357,7 +357,7 @@ extension ServicesManager: ServiceDelegate {
             
             try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits)
             NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
-            await remoteDataServicesManager.triggerUpload(for: .dose)
+            await remoteDataServicesManager.performUpload(for: .dose)
             analyticsServicesManager.didBolus(source: "Remote", units: amountInUnits)
         } catch {
             NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
