@@ -1,67 +1,51 @@
 //
-//  PredictedGlucoseChartView.swift
+//  LoopChartView.swift
 //  Loop
 //
-//  Created by Michael Pangburn on 7/22/20.
-//  Copyright © 2020 LoopKit Authors. All rights reserved.
+//  Created by Noah Brauner on 7/25/24.
+//  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
 import SwiftUI
-import LoopKit
 import LoopKitUI
-import LoopUI
-import LoopAlgorithm
 
-
-struct PredictedGlucoseChartView: UIViewRepresentable {
+struct LoopChartView<Chart: ChartProviding>: UIViewRepresentable {
     let chartManager: ChartsManager
-    var glucoseUnit: HKUnit
-    var glucoseValues: [GlucoseValue]
-    var predictedGlucoseValues: [GlucoseValue]
-    var targetGlucoseSchedule: GlucoseRangeSchedule?
-    var preMealOverride: TemporaryScheduleOverride?
-    var scheduleOverride: TemporaryScheduleOverride?
-    var dateInterval: DateInterval
-
+    let dateInterval: DateInterval
     @Binding var isInteractingWithChart: Bool
+    var configuration = { (view: Chart) in }
 
     func makeUIView(context: Context) -> ChartContainerView {
+        guard let chartIndex = chartManager.charts.firstIndex(where: { $0 is Chart }) else {
+            fatalError("Expected exactly one matching chart in ChartsManager")
+        }
+        
         let view = ChartContainerView()
         view.chartGenerator = { [chartManager] frame in
-            chartManager.chart(atIndex: 0, frame: frame)?.view
+            chartManager.chart(atIndex: chartIndex, frame: frame)?.view
         }
 
         let gestureRecognizer = UILongPressGestureRecognizer()
         gestureRecognizer.minimumPressDuration = 0.1
         gestureRecognizer.addTarget(context.coordinator, action: #selector(Coordinator.handlePan(_:)))
-        chartManager.gestureRecognizer = gestureRecognizer
         view.addGestureRecognizer(gestureRecognizer)
 
         return view
     }
 
     func updateUIView(_ chartContainerView: ChartContainerView, context: Context) {
-        chartManager.invalidateChart(atIndex: 0)
+        guard let chartIndex = chartManager.charts.firstIndex(where: { $0 is Chart }),
+              let chart = chartManager.charts[chartIndex] as? Chart else {
+                  fatalError("Expected exactly one matching chart in ChartsManager")
+        }
+        
+        chartManager.invalidateChart(atIndex: chartIndex)
         chartManager.startDate = dateInterval.start
         chartManager.maxEndDate = dateInterval.end
         chartManager.updateEndDate(dateInterval.end)
-        predictedGlucoseChart.glucoseUnit = glucoseUnit
-        predictedGlucoseChart.targetGlucoseSchedule = targetGlucoseSchedule
-        predictedGlucoseChart.preMealOverride = preMealOverride
-        predictedGlucoseChart.scheduleOverride = scheduleOverride
-        predictedGlucoseChart.setGlucoseValues(glucoseValues)
-        predictedGlucoseChart.setPredictedGlucoseValues(predictedGlucoseValues)
+        configuration(chart)
         chartManager.prerender()
         chartContainerView.reloadChart()
-    }
-
-    var predictedGlucoseChart: PredictedGlucoseChart {
-        guard chartManager.charts.count == 1, let predictedGlucoseChart = chartManager.charts.first as? PredictedGlucoseChart else {
-            fatalError("Expected exactly one predicted glucose chart in ChartsManager")
-        }
-
-        return predictedGlucoseChart
     }
 
     func makeCoordinator() -> Coordinator {
@@ -69,15 +53,16 @@ struct PredictedGlucoseChartView: UIViewRepresentable {
     }
 
     final class Coordinator {
-        var parent: PredictedGlucoseChartView
+        var parent: LoopChartView
 
-        init(_ parent: PredictedGlucoseChartView) {
+        init(_ parent: LoopChartView) {
             self.parent = parent
         }
-
+        
         @objc func handlePan(_ recognizer: UIPanGestureRecognizer) {
             switch recognizer.state {
             case .began:
+                parent.chartManager.gestureRecognizer = recognizer
                 withAnimation(.easeInOut(duration: 0.2)) {
                     parent.isInteractingWithChart = true
                 }
