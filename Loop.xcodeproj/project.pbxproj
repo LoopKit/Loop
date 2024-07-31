@@ -41,6 +41,9 @@
 		14B1738028AEDC6C006CCD7C /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
 		14B1738128AEDC70006CCD7C /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		14C970682C5991CD00E8A01B /* LoopChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970672C5991CD00E8A01B /* LoopChartView.swift */; };
+		14C9706A2C5A833100E8A01B /* CarbEffectChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970692C5A833100E8A01B /* CarbEffectChartView.swift */; };
+		14C9706C2C5A836000E8A01B /* DoseChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9706B2C5A836000E8A01B /* DoseChartView.swift */; };
+		14C9706E2C5A83AF00E8A01B /* IOBChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9706D2C5A83AF00E8A01B /* IOBChartView.swift */; };
 		14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */; };
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
@@ -744,6 +747,9 @@
 		14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SystemStatusWidget.swift; sourceTree = "<group>"; };
 		14B1737028AEDBF6006CCD7C /* GlucoseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseView.swift; sourceTree = "<group>"; };
 		14C970672C5991CD00E8A01B /* LoopChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopChartView.swift; sourceTree = "<group>"; };
+		14C970692C5A833100E8A01B /* CarbEffectChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEffectChartView.swift; sourceTree = "<group>"; };
+		14C9706B2C5A836000E8A01B /* DoseChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseChartView.swift; sourceTree = "<group>"; };
+		14C9706D2C5A83AF00E8A01B /* IOBChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBChartView.swift; sourceTree = "<group>"; };
 		14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsViewModel.swift; sourceTree = "<group>"; };
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
 		1D05219C2469F1F5000EBBDE /* AlertStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStore.swift; sourceTree = "<group>"; };
@@ -1809,6 +1815,9 @@
 		14C970662C59918100E8A01B /* Charts */ = {
 			isa = PBXGroup;
 			children = (
+				14C970692C5A833100E8A01B /* CarbEffectChartView.swift */,
+				14C9706B2C5A836000E8A01B /* DoseChartView.swift */,
+				14C9706D2C5A83AF00E8A01B /* IOBChartView.swift */,
 				14C970672C5991CD00E8A01B /* LoopChartView.swift */,
 				89CAB36224C8FE95009EE3CE /* PredictedGlucoseChartView.swift */,
 			);
@@ -3531,6 +3540,7 @@
 				C1F2075C26D6F9B0007AB7EB /* AppExpirationAlerter.swift in Sources */,
 				B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */,
 				142CB7592A60BF2E0075748A /* EditMode.swift in Sources */,
+				14C9706E2C5A83AF00E8A01B /* IOBChartView.swift in Sources */,
 				E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */,
 				B470F5842AB22B5100049695 /* StatefulPluggable.swift in Sources */,
 				E98A55ED24EDD6380008715D /* LatestStoredSettingsProvider.swift in Sources */,
@@ -3647,6 +3657,7 @@
 				1D63DEA526E950D400F46FA5 /* SupportManager.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
+				14C9706C2C5A836000E8A01B /* DoseChartView.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
 				B43CF07E29434EC4008A520B /* HowMuteAlertWorkView.swift in Sources */,
 				84AA81E52A4A3981000B658B /* DeeplinkManager.swift in Sources */,
@@ -3697,6 +3708,7 @@
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
 				1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */,
+				14C9706A2C5A833100E8A01B /* CarbEffectChartView.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsServicesManager.swift in Sources */,
 				14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */,
 				DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */,
