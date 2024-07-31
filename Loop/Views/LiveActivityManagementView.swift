@@ -14,6 +14,8 @@ import HealthKit
 struct LiveActivityManagementView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     
+    @State private var isSharePresented: Bool = false
+    
     private var enabled: Binding<Bool> =
         Binding(
             get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).enabled },
@@ -107,6 +109,12 @@ struct LiveActivityManagementView: View {
                     destination: LiveActivityBottomRowManagerView(),
                     label: { Text(NSLocalizedString("Bottom row configuration", comment: "Title for Bottom row configuration")) }
                 )
+                Button("Share logs") {
+                    self.isSharePresented = true
+                }
+                .sheet(isPresented: $isSharePresented, onDismiss: { }, content: {
+                    LAActivityViewController(activityItems: getLogs())
+                })
             }
         }
             .insetGroupedListStyle()
@@ -131,5 +139,9 @@ struct LiveActivityManagementView: View {
         
         UserDefaults.standard.liveActivity = settings
         NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
+    }
+    
+    private func getLogs() -> [URL] {
+        return LALogger(category: "View").getDebugLogs()
     }
 }

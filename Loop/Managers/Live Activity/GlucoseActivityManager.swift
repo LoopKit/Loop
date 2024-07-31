@@ -25,8 +25,7 @@ class GlucoseActivityManager {
     
     private let glucoseStore: GlucoseStoreProtocol
     private let doseStore: DoseStoreProtocol
-    private let glucoseRangeSchedule: GlucoseRangeSchedule?
-    private var preset: TemporaryScheduleOverride?
+    private let loopSettings: LoopSettings
     
     private var startDate: Date = Date.now
     private var settings: LiveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
@@ -51,15 +50,15 @@ class GlucoseActivityManager {
         return dateFormatter
     }()
     
-    init?(glucoseStore: GlucoseStoreProtocol, doseStore: DoseStoreProtocol, glucoseRangeSchedule: GlucoseRangeSchedule?, preset: TemporaryScheduleOverride?) {
+    init?(glucoseStore: GlucoseStoreProtocol, doseStore: DoseStoreProtocol, loopSettings: LoopSettings) {
         guard self.activityInfo.areActivitiesEnabled else {
+            print("ERROR: Live Activities are not enabled...")
             return nil
         }
         
         self.glucoseStore = glucoseStore
         self.doseStore = doseStore
-        self.glucoseRangeSchedule = glucoseRangeSchedule
-        self.preset = preset
+        self.loopSettings = loopSettings
         
         // Ensure settings exist
         if UserDefaults.standard.liveActivity == nil {
@@ -84,12 +83,14 @@ class GlucoseActivityManager {
         Task {
             if self.needsRecreation(), await UIApplication.shared.applicationState == .active {
                 // activity is no longer visible or old. End it and try to push the update again
+                print("INFO: Live Activities needs recreation")
                 await endActivity()
                 update()
                 return
             }
             
             guard let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) else {
+                print("ERROR: No unit found...")
                 return
             }
             
@@ -100,6 +101,7 @@ class GlucoseActivityManager {
             
             let glucoseSamples = self.getGlucoseSample(unit: unit)
             guard let currentGlucose = glucoseSamples.last else {
+                print("ERROR: No glucose sample found...")
                 return
             }
             
@@ -132,25 +134,29 @@ class GlucoseActivityManager {
                 endDateChart = predictedGlucose.startDate.addingTimeInterval(.hours(4))
             }
             
+            guard let endDateChart = endDateChart else {
+                return
+            }
+            
             var presetContext: Preset? = nil
-            if let preset = self.preset, let endDateChart = endDateChart {
+            if let override = self.loopSettings.preMealOverride ?? loopSettings.scheduleOverride {
                 presetContext = Preset(
-                    title: preset.getTitle(),
-                    endDate: preset.duration.isInfinite ? endDateChart : min(Date.now + preset.duration.timeInterval, endDateChart),
-                    minValue: preset.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
-                    maxValue: preset.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
+                    title: override.getTitle(),
+                    endDate: override.duration.isInfinite ? endDateChart : min(Date.now + override.duration.timeInterval, endDateChart),
+                    minValue: override.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
+                    maxValue: override.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
                 )
             }
             
             var glucoseRanges: [GlucoseRangeValue] = []
-            if let glucoseRangeSchedule = self.glucoseRangeSchedule, let start = glucoseSamples.first?.startDate, let end = endDateChart {
-                for item in glucoseRangeSchedule.quantityBetween(start: start, end: end) {
+            if let glucoseRangeSchedule = self.loopSettings.glucoseTargetRangeSchedule, let start = glucoseSamples.first?.startDate {
+                for item in glucoseRangeSchedule.quantityBetween(start: start, end: endDateChart) {
                     glucoseRanges.append(GlucoseRangeValue(
                         id: UUID(),
                         minValue: item.value.lowerBound.doubleValue(for: unit),
                         maxValue: item.value.upperBound.doubleValue(for: unit),
                         startDate: max(item.startDate, start),
-                        endDate: min(item.endDate, end)
+                        endDate: min(item.endDate, endDateChart)
                     ))
                 }
             }
@@ -217,6 +223,7 @@ class GlucoseActivityManager {
     
     @objc private func appMovedToForeground() {
         guard let activity = self.activity else {
+            print("ERROR: appMovedToForeground: No Live activity found...")
             return
         }
         
@@ -261,7 +268,9 @@ class GlucoseActivityManager {
                 )
             }
             self.startDate = Date.now
-        } catch {}
+        } catch {
+            print("ERROR: Error while ending live activity: \(error.localizedDescription)")
+        }
     }
     
     private func needsRecreation() -> Bool {
@@ -400,17 +409,9 @@ class GlucoseActivityManager {
                 content: .init(state: dynamicState, staleDate: nil),
                 pushType: .token
             )
-        } catch {}
-    }
-    
-    func presetActivated(preset: TemporaryScheduleOverride) {
-        self.preset = preset
-        self.update()
-    }
-    
-    func presetDeactivated() {
-        self.preset = nil
-        self.update()
+        } catch {
+            print("ERROR: Error while creating empty live activity: \(error.localizedDescription)")
+        }
     }
 }
 
