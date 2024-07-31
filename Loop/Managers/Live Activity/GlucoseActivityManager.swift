@@ -25,7 +25,7 @@ class GlucoseActivityManager {
     
     private let glucoseStore: GlucoseStoreProtocol
     private let doseStore: DoseStoreProtocol
-    private let loopSettings: LoopSettings
+    private var loopSettings: LoopSettings
     
     private var startDate: Date = Date.now
     private var settings: LiveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
@@ -80,7 +80,12 @@ class GlucoseActivityManager {
         }
     }
     
-    public func update() {
+    public func update(loopSettings: LoopSettings) {
+        self.loopSettings = loopSettings
+        update()
+    }
+    
+    private func update() {
         Task {
             if self.needsRecreation(), await UIApplication.shared.applicationState == .active {
                 // activity is no longer visible or old. End it and try to push the update again
@@ -140,10 +145,10 @@ class GlucoseActivityManager {
             }
             
             var presetContext: Preset? = nil
-            if let override = self.loopSettings.preMealOverride ?? loopSettings.scheduleOverride {
+            if let override = self.loopSettings.preMealOverride ?? self.loopSettings.scheduleOverride, let start = glucoseSamples.first?.startDate {
                 presetContext = Preset(
                     title: override.getTitle(),
-                    startDate: override.startDate,
+                    startDate: max(override.startDate, start),
                     endDate: override.duration.isInfinite ? endDateChart : min(Date.now + override.duration.timeInterval, endDateChart),
                     minValue: override.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
                     maxValue: override.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
@@ -158,22 +163,54 @@ class GlucoseActivityManager {
                     let startDate = max(item.startDate, start)
                     let endDate = min(item.endDate, endDateChart)
                     
-                    if let presetContext = presetContext, presetContext.startDate > startDate, presetContext.endDate < endDate {
-                        // A preset is active during this schedule
-                        glucoseRanges.append(GlucoseRangeValue(
-                            id: UUID(),
-                            minValue: minValue,
-                            maxValue: maxValue,
-                            startDate: startDate,
-                            endDate: presetContext.startDate
-                        ))
-                        glucoseRanges.append(GlucoseRangeValue(
-                            id: UUID(),
-                            minValue: minValue,
-                            maxValue: maxValue,
-                            startDate: presetContext.endDate,
-                            endDate: endDate
-                        ))
+                    if let presetContext = presetContext {
+                        if presetContext.startDate > startDate, presetContext.endDate < endDate {
+                            // A preset is active during this schedule
+                            glucoseRanges.append(GlucoseRangeValue(
+                                id: UUID(),
+                                minValue: minValue,
+                                maxValue: maxValue,
+                                startDate: startDate,
+                                endDate: presetContext.startDate
+                            ))
+                            glucoseRanges.append(GlucoseRangeValue(
+                                id: UUID(),
+                                minValue: minValue,
+                                maxValue: maxValue,
+                                startDate: presetContext.endDate,
+                                endDate: endDate
+                            ))
+                        } else if presetContext.endDate > startDate, presetContext.endDate < endDate {
+                            // Cut off the start of the glucose target
+                            glucoseRanges.append(GlucoseRangeValue(
+                                id: UUID(),
+                                minValue: minValue,
+                                maxValue: maxValue,
+                                startDate: presetContext.endDate,
+                                endDate: endDate
+                            ))
+                        } else if presetContext.startDate < endDate, presetContext.startDate > startDate {
+                            // Cut off the end of the glucose target
+                            glucoseRanges.append(GlucoseRangeValue(
+                                id: UUID(),
+                                minValue: minValue,
+                                maxValue: maxValue,
+                                startDate: startDate,
+                                endDate: presetContext.startDate
+                            ))
+                            if presetContext.endDate == endDateChart {
+                                break
+                            }
+                        } else {
+                            // No overlap with target and override
+                            glucoseRanges.append(GlucoseRangeValue(
+                                id: UUID(),
+                                minValue: minValue,
+                                maxValue: maxValue,
+                                startDate: startDate,
+                                endDate: endDate
+                            ))
+                        }
                     } else {
                         glucoseRanges.append(GlucoseRangeValue(
                             id: UUID(),
