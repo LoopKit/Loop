@@ -44,6 +44,7 @@
 		14C9706A2C5A833100E8A01B /* CarbEffectChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970692C5A833100E8A01B /* CarbEffectChartView.swift */; };
 		14C9706C2C5A836000E8A01B /* DoseChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9706B2C5A836000E8A01B /* DoseChartView.swift */; };
 		14C9706E2C5A83AF00E8A01B /* IOBChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9706D2C5A83AF00E8A01B /* IOBChartView.swift */; };
+		14C9707E2C5A9EB600E8A01B /* GlucoseCarbChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9707D2C5A9EB600E8A01B /* GlucoseCarbChartView.swift */; };
 		14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */; };
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
@@ -750,6 +751,7 @@
 		14C970692C5A833100E8A01B /* CarbEffectChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEffectChartView.swift; sourceTree = "<group>"; };
 		14C9706B2C5A836000E8A01B /* DoseChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseChartView.swift; sourceTree = "<group>"; };
 		14C9706D2C5A83AF00E8A01B /* IOBChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBChartView.swift; sourceTree = "<group>"; };
+		14C9707D2C5A9EB600E8A01B /* GlucoseCarbChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseCarbChartView.swift; sourceTree = "<group>"; };
 		14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsViewModel.swift; sourceTree = "<group>"; };
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
 		1D05219C2469F1F5000EBBDE /* AlertStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStore.swift; sourceTree = "<group>"; };
@@ -1817,6 +1819,7 @@
 			children = (
 				14C970692C5A833100E8A01B /* CarbEffectChartView.swift */,
 				14C9706B2C5A836000E8A01B /* DoseChartView.swift */,
+				14C9707D2C5A9EB600E8A01B /* GlucoseCarbChartView.swift */,
 				14C9706D2C5A83AF00E8A01B /* IOBChartView.swift */,
 				14C970672C5991CD00E8A01B /* LoopChartView.swift */,
 				89CAB36224C8FE95009EE3CE /* PredictedGlucoseChartView.swift */,
@@ -3656,6 +3659,7 @@
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				1D63DEA526E950D400F46FA5 /* SupportManager.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
+				14C9707E2C5A9EB600E8A01B /* GlucoseCarbChartView.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
 				14C9706C2C5A836000E8A01B /* DoseChartView.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
