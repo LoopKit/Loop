@@ -260,6 +260,8 @@ final class LoopDataManager {
         if newValue.preMealOverride != oldValue.preMealOverride {
             // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
             predictedGlucose = nil
+            
+            self.liveActivityManager?.update()
         }
 
         if newValue.scheduleOverride != oldValue.scheduleOverride {

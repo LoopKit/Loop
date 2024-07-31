@@ -48,6 +48,7 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
 
 public struct Preset: Codable, Hashable {
     public let title: String
+    public let startDate: Date
     public let endDate: Date
     public let minValue: Double
     public let maxValue: Double
