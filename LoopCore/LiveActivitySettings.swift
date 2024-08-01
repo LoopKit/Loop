@@ -62,6 +62,7 @@ public enum BottomRowConfiguration: Codable {
 public struct LiveActivitySettings: Codable {
     public var enabled: Bool
     public var addPredictiveLine: Bool
+    public var useLimits: Bool
     public var upperLimitChartMmol: Double
     public var lowerLimitChartMmol: Double
     public var upperLimitChartMg: Double
@@ -72,6 +73,7 @@ public struct LiveActivitySettings: Codable {
         case enabled
         case addPredictiveLine
         case bottomRowConfiguration
+        case useLimits
         case upperLimitChartMmol
         case lowerLimitChartMmol
         case upperLimitChartMg
@@ -87,6 +89,7 @@ public struct LiveActivitySettings: Codable {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         enabled = try values.decode(Bool.self, forKey: .enabled)
         addPredictiveLine = try values.decode(Bool.self, forKey: .addPredictiveLine)
+        useLimits = try values.decodeIfPresent(Bool.self, forKey: .useLimits) ?? true
         upperLimitChartMmol = try values.decode(Double?.self, forKey: .upperLimitChartMmol) ?? LiveActivitySettings.defaultUpperLimitMmol
         lowerLimitChartMmol = try values.decode(Double?.self, forKey: .lowerLimitChartMmol) ?? LiveActivitySettings.defaultLowerLimitMmol
         upperLimitChartMg = try values.decode(Double?.self, forKey: .upperLimitChartMg) ?? LiveActivitySettings.defaultUpperLimitMg
@@ -97,6 +100,7 @@ public struct LiveActivitySettings: Codable {
     public init() {
         self.enabled = true
         self.addPredictiveLine = true
+        useLimits = true
         self.upperLimitChartMmol = LiveActivitySettings.defaultUpperLimitMmol
         self.lowerLimitChartMmol = LiveActivitySettings.defaultLowerLimitMmol
         self.upperLimitChartMg = LiveActivitySettings.defaultUpperLimitMg

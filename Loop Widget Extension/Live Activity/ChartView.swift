@@ -14,9 +14,10 @@ struct ChartView: View {
     private let glucoseSampleData: [ChartValues]
     private let predicatedData: [ChartValues]
     private let glucoseRanges: [GlucoseRangeValue]
+    private let useLimits: Bool
     private let preset: Preset?
     
-    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
+    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = ChartValues.convert(
             data: predicatedGlucose,
@@ -25,13 +26,15 @@ struct ChartView: View {
             lowerLimit: lowerLimit,
             upperLimit: upperLimit
         )
+        self.useLimits = useLimits
         self.preset = preset
         self.glucoseRanges = glucoseRanges
     }
     
-    init(glucoseSamples: [GlucoseSampleAttributes], lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
+    init(glucoseSamples: [GlucoseSampleAttributes], useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = []
+        self.useLimits = useLimits
         self.preset = preset
         self.glucoseRanges = glucoseRanges
     }
@@ -76,10 +79,14 @@ struct ChartView: View {
                     .lineStyle(StrokeStyle(lineWidth: 3, dash: [2, 3]))
                 }
             }
-            .chartForegroundStyleScale([
+            .chartForegroundStyleScale(useLimits ? [
                 "Good": .green,
                 "High": .orange,
                 "Low": .red
+            ] : [
+                "Good": .primary,
+                "High": .primary,
+                "Low": .primary
             ])
             .chartPlotStyle { plotContent in
                 plotContent.background(.cyan.opacity(0.15))

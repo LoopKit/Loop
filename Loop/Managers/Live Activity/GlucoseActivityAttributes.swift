@@ -40,6 +40,7 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
     }
     
     public let addPredictiveLine: Bool
+    public let useLimits: Bool
     public let upperLimitChartMmol: Double
     public let lowerLimitChartMmol: Double
     public let upperLimitChartMg: Double

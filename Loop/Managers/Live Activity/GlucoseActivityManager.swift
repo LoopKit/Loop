@@ -267,6 +267,7 @@ class GlucoseActivityManager {
                 
             } else if
                 newSettings.addPredictiveLine != self.settings.addPredictiveLine ||
+                newSettings.useLimits != self.settings.useLimits ||
                 newSettings.lowerLimitChartMmol != self.settings.lowerLimitChartMmol ||
                 newSettings.upperLimitChartMmol != self.settings.upperLimitChartMmol ||
                 newSettings.lowerLimitChartMg != self.settings.lowerLimitChartMg ||
@@ -320,6 +321,7 @@ class GlucoseActivityManager {
                 self.activity = try Activity.request(
                     attributes: GlucoseActivityAttributes(
                         addPredictiveLine: self.settings.addPredictiveLine,
+                        useLimits: self.settings.useLimits,
                         upperLimitChartMmol: self.settings.upperLimitChartMmol,
                         lowerLimitChartMmol: self.settings.lowerLimitChartMmol,
                         upperLimitChartMg: self.settings.upperLimitChartMg,
@@ -463,10 +465,11 @@ class GlucoseActivityManager {
             self.activity = try Activity.request(
                 attributes: GlucoseActivityAttributes(
                     addPredictiveLine: settings.addPredictiveLine,
-                    upperLimitChartMmol: self.settings.upperLimitChartMmol,
-                    lowerLimitChartMmol: self.settings.lowerLimitChartMmol,
-                    upperLimitChartMg: self.settings.upperLimitChartMg,
-                    lowerLimitChartMg: self.settings.lowerLimitChartMg
+                    useLimits: settings.useLimits,
+                    upperLimitChartMmol: settings.upperLimitChartMmol,
+                    lowerLimitChartMmol: settings.lowerLimitChartMmol,
+                    upperLimitChartMg: settings.upperLimitChartMg,
+                    lowerLimitChartMg: settings.lowerLimitChartMg
                 ),
                 content: .init(state: dynamicState, staleDate: nil),
                 pushType: .token

@@ -38,6 +38,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                 predicatedGlucose: context.state.predicatedGlucose,
                                 predicatedStartDate: context.state.predicatedStartDate,
                                 predicatedInterval: context.state.predicatedInterval,
+                                useLimits: context.attributes.useLimits,
                                 lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                                 upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
                                 glucoseRanges: context.state.glucoseRanges,
@@ -47,6 +48,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                         } else {
                             ChartView(
                                 glucoseSamples: context.state.glucoseSamples,
+                                useLimits: context.attributes.useLimits,
                                 lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                                 upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
                                 glucoseRanges: context.state.glucoseRanges,
@@ -138,6 +140,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             predicatedGlucose: context.state.predicatedGlucose,
                             predicatedStartDate: context.state.predicatedStartDate,
                             predicatedInterval: context.state.predicatedInterval,
+                            useLimits: context.attributes.useLimits,
                             lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                             upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
                             glucoseRanges: context.state.glucoseRanges,
@@ -147,6 +150,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     } else {
                         ChartView(
                             glucoseSamples: context.state.glucoseSamples,
+                            useLimits: context.attributes.useLimits,
                             lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                             upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
                             glucoseRanges: context.state.glucoseRanges,

@@ -14,92 +14,60 @@ import HealthKit
 struct LiveActivityManagementView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     
-    private var enabled: Binding<Bool> =
-        Binding(
-            get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).enabled },
-            set: { newValue in
-                var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-                settings.enabled = newValue
-                
-                UserDefaults.standard.liveActivity = settings
-                NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
-            }
-        )
-
-    private var addPredictiveLine: Binding<Bool> =
-        Binding(
-            get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).addPredictiveLine },
-            set: { newValue in
-                var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-                settings.addPredictiveLine = newValue
-                
-                UserDefaults.standard.liveActivity = settings
-                NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
-            }
-        )
+    @State private var enabled: Bool
+    @State private var addPredictiveLine: Bool
+    @State private var useLimits: Bool
+    @State private var upperLimitMmol: Double
+    @State private var lowerLimitMmol: Double
+    @State private var upperLimitMg: Double
+    @State private var lowerLimitMg: Double
     
-    private var upperLimitMmol: Binding<Double> =
-        Binding(
-            get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).upperLimitChartMmol },
-            set: { newValue in
-                var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-                settings.upperLimitChartMmol = newValue
-                
-                UserDefaults.standard.liveActivity = settings
-                NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
-
-            }
-        )
-    
-    private var lowerLimitMmol: Binding<Double> =
-        Binding(
-            get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).lowerLimitChartMmol },
-            set: { newValue in
-                var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-                settings.lowerLimitChartMmol = newValue
-                
-                UserDefaults.standard.liveActivity = settings
-                NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
-
-            }
-        )
-    
-    private var upperLimitMg: Binding<Double> =
-        Binding(
-            get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).upperLimitChartMg },
-            set: { newValue in
-                var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-                settings.upperLimitChartMg = newValue
-                
-                UserDefaults.standard.liveActivity = settings
-                NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
-
-            }
-        )
-    
-    private var lowerLimitMg: Binding<Double> =
-        Binding(
-            get: { (UserDefaults.standard.liveActivity ?? LiveActivitySettings()).lowerLimitChartMg },
-            set: { newValue in
-                var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-                settings.lowerLimitChartMg = newValue
-                
-                UserDefaults.standard.liveActivity = settings
-                NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
-
-            }
-        )
-    
+    init() {
+        let liveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
+        
+        self.enabled = liveActivitySettings.enabled
+        self.addPredictiveLine = liveActivitySettings.addPredictiveLine
+        self.useLimits = liveActivitySettings.useLimits
+        self.upperLimitMmol = liveActivitySettings.upperLimitChartMmol
+        self.lowerLimitMmol = liveActivitySettings.lowerLimitChartMmol
+        self.upperLimitMg = liveActivitySettings.upperLimitChartMg
+        self.lowerLimitMg = liveActivitySettings.lowerLimitChartMg
+    }
+   
     var body: some View {
         List {
-            Toggle(NSLocalizedString("Enabled", comment: "Title for enable live activity toggle"), isOn: enabled)
-            Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: addPredictiveLine)
-            if self.displayGlucosePreference.unit == .millimolesPerLiter {
-                TextInput(label: "Upper limit chart", value: upperLimitMmol)
-                TextInput(label: "Lower limit chart", value: lowerLimitMmol)
-            } else {
-                TextInput(label: "Upper limit chart", value: upperLimitMg)
-                TextInput(label: "Lower limit chart", value: lowerLimitMg)
+            Toggle(NSLocalizedString("Enabled", comment: "Title for enable live activity toggle"), isOn: $enabled)
+                .onChange(of: enabled) { newValue in
+                    self.mutate { settings in
+                        settings.enabled = newValue
+                    }
+                }
+            
+            Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: $addPredictiveLine)
+                .onChange(of: addPredictiveLine) { newValue in
+                    self.mutate { settings in
+                        settings.addPredictiveLine = newValue
+                    }
+                }
+            Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: $useLimits)
+                .onChange(of: useLimits) { newValue in
+                    self.mutate { settings in
+                        settings.useLimits = newValue
+                    }
+                }
+            
+            if useLimits {
+                if self.displayGlucosePreference.unit == .millimolesPerLiter {
+                    TextInput(label: "Upper limit chart", value: $upperLimitMmol)
+                        .transition(.move(edge: useLimits ? .top : .bottom))
+                    TextInput(label: "Lower limit chart", value: $lowerLimitMmol)
+                        .transition(.move(edge: useLimits ? .top : .bottom))
+                } else {
+                    TextInput(label: "Upper limit chart", value: $upperLimitMg)
+                        .transition(.move(edge: useLimits ? .top : .bottom))
+                    TextInput(label: "Lower limit chart", value: $lowerLimitMg)
+                        .transition(.move(edge: useLimits ? .top : .bottom))
+                }
             }
             
             Section {
@@ -109,6 +77,7 @@ struct LiveActivityManagementView: View {
                 )
             }
         }
+            .animation(.easeInOut, value: UUID())
             .insetGroupedListStyle()
             .navigationBarTitle(Text(NSLocalizedString("Live activity", comment: "Live activity screen title")))
     }
