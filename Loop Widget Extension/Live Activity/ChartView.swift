@@ -14,27 +14,25 @@ struct ChartView: View {
     private let glucoseSampleData: [ChartValues]
     private let predicatedData: [ChartValues]
     private let glucoseRanges: [GlucoseRangeValue]
-    private let useLimits: Bool
     private let preset: Preset?
     
     init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
-        self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: lowerLimit, upperLimit: upperLimit)
+        self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = ChartValues.convert(
             data: predicatedGlucose,
             startDate: predicatedStartDate ?? Date.now,
             interval: predicatedInterval ?? .minutes(5),
+            useLimits: useLimits,
             lowerLimit: lowerLimit,
             upperLimit: upperLimit
         )
-        self.useLimits = useLimits
         self.preset = preset
         self.glucoseRanges = glucoseRanges
     }
     
     init(glucoseSamples: [GlucoseSampleAttributes], useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
-        self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, lowerLimit: lowerLimit, upperLimit: upperLimit)
+        self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = []
-        self.useLimits = useLimits
         self.preset = preset
         self.glucoseRanges = glucoseRanges
     }
@@ -79,14 +77,11 @@ struct ChartView: View {
                     .lineStyle(StrokeStyle(lineWidth: 3, dash: [2, 3]))
                 }
             }
-            .chartForegroundStyleScale(useLimits ? [
+            .chartForegroundStyleScale([
                 "Good": .green,
                 "High": .orange,
-                "Low": .red
-            ] : [
-                "Good": .primary,
-                "High": .primary,
-                "Low": .primary
+                "Low": .red,
+                "Default": .blue
             ])
             .chartPlotStyle { plotContent in
                 plotContent.background(.cyan.opacity(0.15))
@@ -132,7 +127,7 @@ struct ChartValues: Identifiable {
         self.color = color
     }
     
-    static func convert(data: [Double], startDate: Date, interval: TimeInterval, lowerLimit: Double, upperLimit: Double) -> [ChartValues] {
+    static func convert(data: [Double], startDate: Date, interval: TimeInterval, useLimits: Bool, lowerLimit: Double, upperLimit: Double) -> [ChartValues] {
         let twoHours = Date.now.addingTimeInterval(.hours(4))
         
         return data.enumerated().filter { (index, item) in
@@ -141,17 +136,17 @@ struct ChartValues: Identifiable {
             return ChartValues(
                 x: startDate.addingTimeInterval(interval * Double(index)),
                 y: item,
-                color: item < lowerLimit ? "Low" : item > upperLimit ? "High" : "Good"
+                color: !useLimits ? "Default" : item < lowerLimit ? "Low" : item > upperLimit ? "High" : "Good"
             )
         }
     }
     
-    static func convert(data: [GlucoseSampleAttributes], lowerLimit: Double, upperLimit: Double) -> [ChartValues] {
+    static func convert(data: [GlucoseSampleAttributes], useLimits: Bool, lowerLimit: Double, upperLimit: Double) -> [ChartValues] {
         return data.map { item in
             return ChartValues(
                 x: item.x,
                 y: item.y,
-                color: item.y < lowerLimit ? "Low" : item.y > upperLimit ? "High" : "Good"
+                color: !useLimits ? "Default" : item.y < lowerLimit ? "Low" : item.y > upperLimit ? "High" : "Good"
             )
         }
     }

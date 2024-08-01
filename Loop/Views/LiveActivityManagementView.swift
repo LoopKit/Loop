@@ -49,7 +49,7 @@ struct LiveActivityManagementView: View {
                         settings.addPredictiveLine = newValue
                     }
                 }
-            Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: $useLimits)
+            Toggle(NSLocalizedString("Use BG coloring", comment: "Title for cBG coloring"), isOn: $useLimits)
                 .onChange(of: useLimits) { newValue in
                     self.mutate { settings in
                         settings.useLimits = newValue

@@ -189,6 +189,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
         VStack(alignment: .center) {
             Text("\(value)\(unit)")
                 .font(.headline)
+                .foregroundStyle(.primary)
                 .fontWeight(.heavy)
                 .font(Font.body.leading(.tight))
             Text(title)
@@ -202,7 +203,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
             HStack {
                 Text(value + getArrowImage(trend))
                     .font(.title)
-                    .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
+                    .foregroundStyle(!context.attributes.useLimits ? .primary : getGlucoseColor(context.state.currentGlucose, context: context))
                     .fontWeight(.heavy)
                     .font(Font.body.leading(.tight))
             }
