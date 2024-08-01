@@ -16,6 +16,7 @@ import LoopAlgorithm
 protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate {
     var defaultAbsorptionTimes: DefaultAbsorptionTimes { get }
     func scheduleOverrideEnabled(at date: Date) -> Bool
+    func selectedFavoriteFoodLastEaten(_ favoriteFood: StoredFavoriteFood) async throws -> Date?
     func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample]
 }
 
@@ -86,11 +87,22 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     @Published var favoriteFoods = UserDefaults.standard.favoriteFoods
-    @Published var selectedFavoriteFoodIndex = -1
+    @Published var selectedFavoriteFoodIndex = -1 {
+        willSet {
+            self.selectedFavoriteFoodLastEaten = nil
+        }
+    }
     var selectedFavoriteFood: StoredFavoriteFood? {
         let foodExistsForIndex = 0..<favoriteFoods.count ~= selectedFavoriteFoodIndex
         return foodExistsForIndex ? favoriteFoods[selectedFavoriteFoodIndex] : nil
     }
+    // Favorite Food Insights
+    @Published var selectedFavoriteFoodLastEaten: Date? = nil
+    lazy var relativeDateFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter
+    }()
     
     weak var delegate: CarbEntryViewModelDelegate?
     weak var analyticsServicesManager: AnalyticsServicesManager?
@@ -270,6 +282,20 @@ final class CarbEntryViewModel: ObservableObject {
             self.absorptionTime = food.absorptionTime
             self.absorptionTimeWasEdited = true
             self.usesCustomFoodType = true
+            
+            // Update favorite food insights last eaten date
+            Task { @MainActor in
+                do {
+                    if let lastEaten = try await delegate?.selectedFavoriteFoodLastEaten(food) {
+                        withAnimation(.default) {
+                            self.selectedFavoriteFoodLastEaten = lastEaten
+                        }
+                    }
+                }
+                catch {
+                    print("could not fetch carb entries: \(error.localizedDescription)")
+                }
+            }
         }
     }
     

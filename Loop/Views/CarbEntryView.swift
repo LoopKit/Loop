@@ -21,6 +21,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     
     @State private var showHowAbsorptionTimeWorks = false
     @State private var showAddFavoriteFood = false
+    @State private var showFavoriteFoodInsights = false
     
     private let isNewEntry: Bool
 
@@ -75,6 +76,11 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                 
                 if isNewEntry, FeatureFlags.allowExperimentalFeatures {
                     favoriteFoodsCard
+                }
+                
+                if viewModel.selectedFavoriteFoodLastEaten != nil, FeatureFlags.allowExperimentalFeatures {
+                    favoriteFoodInsightsCard
+                        .padding(.top, 8)
                 }
                 
                 let isBolusViewActive = Binding(get: { viewModel.bolusViewModel != nil }, set: { _, _ in viewModel.bolusViewModel = nil })
@@ -215,7 +221,7 @@ extension CarbEntryView {
 // MARK: - Favorite Foods Card
 extension CarbEntryView {
     private var favoriteFoodsCard: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        return VStack(alignment: .leading, spacing: 6) {
             Text("FAVORITE FOODS")
                 .font(.footnote)
                 .foregroundColor(.secondary)
@@ -267,6 +273,15 @@ extension CarbEntryView {
             .padding(.horizontal)
             .background(CardBackground())
             .padding(.horizontal)
+            .onChange(of: viewModel.selectedFavoriteFoodIndex, perform: contractFavoriteFoodsRowIfNeeded(_:))
+        }
+    }
+    
+    private func contractFavoriteFoodsRowIfNeeded(_ newIndex: Int) {
+        if newIndex != -1 {
+            withAnimation {
+                clearExpandedRow()
+            }
         }
     }
     
@@ -288,6 +303,57 @@ extension CarbEntryView {
         clearExpandedRow()
         self.showAddFavoriteFood = false
         viewModel.onFavoriteFoodSave(food)
+    }
+}
+
+// MARK: - Favorite Food Insights Card
+extension CarbEntryView {
+    private var favoriteFoodInsightsCard: some View {
+        Button(action: {
+            showFavoriteFoodInsights = true
+        }) {
+            VStack(spacing: 10) {
+                HStack(spacing: 4) {
+                    Image(systemName: "sparkles")
+
+                    Text("Favorite Food Insights")
+                }
+                .font(.headline)
+                .foregroundColor(.accentColor)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                if let foodName = viewModel.selectedFavoriteFood?.name,
+                   let lastEatenDate = viewModel.selectedFavoriteFoodLastEaten {
+                    let relativeTime = viewModel.relativeDateFormatter.localizedString(for: lastEatenDate, relativeTo: Date())
+                    let attributedFoodDescription = attributedFoodInsightsDescription(for: foodName, timeAgo: relativeTime)
+                    
+                    Text(attributedFoodDescription)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal)
+            .background(CardBackground())
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(Color.accentColor, lineWidth: 2)
+            }
+            .padding(.horizontal)
+            .contentShape(Rectangle())
+        }
+    }
+    
+    private func attributedFoodInsightsDescription(for food: String, timeAgo: String) -> AttributedString {
+        var attributedString = AttributedString("You last ate ")
+        
+        var foodString = AttributedString(food)
+        foodString.inlinePresentationIntent = .stronglyEmphasized
+        
+        attributedString.append(foodString)
+        attributedString.append(AttributedString(" \(timeAgo)\n Tap to see more"))
+        
+        return attributedString
     }
 }
 

@@ -1127,6 +1127,10 @@ extension LoopDataManager: CarbEntryViewModelDelegate {
     var defaultAbsorptionTimes: DefaultAbsorptionTimes {
         LoopCoreConstants.defaultCarbAbsorptionTimes
     }
+    
+    func selectedFavoriteFoodLastEaten(_ favoriteFood: StoredFavoriteFood) async throws -> Date? {
+        try await carbStore.getCarbEntries(start: nil, end: nil, dateAscending: false, fetchLimit: 1, with: favoriteFood.id).first?.startDate
+    }
 
     func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample] {
         try await glucoseStore.getGlucoseSamples(start: start, end: end)
