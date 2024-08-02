@@ -99,6 +99,11 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
         .sheet(isPresented: $showHowAbsorptionTimeWorks) {
             HowAbsorptionTimeWorksView()
         }
+        .sheet(isPresented: $showFavoriteFoodInsights) {
+            if let food = viewModel.selectedFavoriteFood {
+                FavoriteFoodInsightsView(viewModel: FavoriteFoodInsightsViewModel(delegate: viewModel.delegate, food: food))
+            }
+        }
     }
     
     private var mainCard: some View {
@@ -273,11 +278,11 @@ extension CarbEntryView {
             .padding(.horizontal)
             .background(CardBackground())
             .padding(.horizontal)
-            .onChange(of: viewModel.selectedFavoriteFoodIndex, perform: contractFavoriteFoodsRowIfNeeded(_:))
+            .onChange(of: viewModel.selectedFavoriteFoodIndex, perform: collapseFavoriteFoodsRowIfNeeded(_:))
         }
     }
     
-    private func contractFavoriteFoodsRowIfNeeded(_ newIndex: Int) {
+    private func collapseFavoriteFoodsRowIfNeeded(_ newIndex: Int) {
         if newIndex != -1 {
             withAnimation {
                 clearExpandedRow()

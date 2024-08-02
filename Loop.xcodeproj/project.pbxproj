@@ -45,6 +45,10 @@
 		14C9706C2C5A836000E8A01B /* DoseChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9706B2C5A836000E8A01B /* DoseChartView.swift */; };
 		14C9706E2C5A83AF00E8A01B /* IOBChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9706D2C5A83AF00E8A01B /* IOBChartView.swift */; };
 		14C9707E2C5A9EB600E8A01B /* GlucoseCarbChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9707D2C5A9EB600E8A01B /* GlucoseCarbChartView.swift */; };
+		14C970802C5C0A1500E8A01B /* FavoriteFoodInsightsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9707F2C5C0A1500E8A01B /* FavoriteFoodInsightsViewModel.swift */; };
+		14C970822C5C2EC100E8A01B /* FavoriteFoodInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970812C5C2EC100E8A01B /* FavoriteFoodInsightsView.swift */; };
+		14C970842C5C2FB400E8A01B /* HowCarbEffectsWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970832C5C2FB400E8A01B /* HowCarbEffectsWorksView.swift */; };
+		14C970862C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970852C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift */; };
 		14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */; };
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
@@ -752,6 +756,10 @@
 		14C9706B2C5A836000E8A01B /* DoseChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseChartView.swift; sourceTree = "<group>"; };
 		14C9706D2C5A83AF00E8A01B /* IOBChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBChartView.swift; sourceTree = "<group>"; };
 		14C9707D2C5A9EB600E8A01B /* GlucoseCarbChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseCarbChartView.swift; sourceTree = "<group>"; };
+		14C9707F2C5C0A1500E8A01B /* FavoriteFoodInsightsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodInsightsViewModel.swift; sourceTree = "<group>"; };
+		14C970812C5C2EC100E8A01B /* FavoriteFoodInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodInsightsView.swift; sourceTree = "<group>"; };
+		14C970832C5C2FB400E8A01B /* HowCarbEffectsWorksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowCarbEffectsWorksView.swift; sourceTree = "<group>"; };
+		14C970852C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodInsightsChartsView.swift; sourceTree = "<group>"; };
 		14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsViewModel.swift; sourceTree = "<group>"; };
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
 		1D05219C2469F1F5000EBBDE /* AlertStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStore.swift; sourceTree = "<group>"; };
@@ -2241,9 +2249,12 @@
 				A9A056B224B93C62007CF06D /* CriticalEventLogExportView.swift */,
 				C191D2A025B3ACAA00C26C0B /* DosingStrategySelectionView.swift */,
 				149A28E32A8A63A700052EDF /* FavoriteFoodDetailView.swift */,
+				14C970852C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift */,
+				14C970812C5C2EC100E8A01B /* FavoriteFoodInsightsView.swift */,
 				142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */,
 				43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */,
 				1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */,
+				14C970832C5C2FB400E8A01B /* HowCarbEffectsWorksView.swift */,
 				B43CF07D29434EC4008A520B /* HowMuteAlertWorkView.swift */,
 				430D85881F44037000AF2D4F /* HUDViewTableViewCell.swift */,
 				A91D2A3E26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift */,
@@ -2608,6 +2619,7 @@
 				897A5A9824C22DE800C4E71D /* BolusEntryViewModel.swift */,
 				149A28BA2A853E5100052EDF /* CarbEntryViewModel.swift */,
 				A9A056B424B94123007CF06D /* CriticalEventLogExportViewModel.swift */,
+				14C9707F2C5C0A1500E8A01B /* FavoriteFoodInsightsViewModel.swift */,
 				14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */,
 				C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */,
 				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
@@ -3561,9 +3573,11 @@
 				C1F7822627CC056900C0919A /* SettingsManager.swift in Sources */,
 				1452F4AD2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift in Sources */,
 				C16575712538A36B004AE16E /* CGMStalenessMonitor.swift in Sources */,
+				14C970822C5C2EC100E8A01B /* FavoriteFoodInsightsView.swift in Sources */,
 				1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */,
 				C11BD0552523CFED00236B08 /* SimpleBolusViewModel.swift in Sources */,
 				C1F2CAAA2B76B3EE00D7F581 /* TempBasalRecommendation.swift in Sources */,
+				14C970802C5C0A1500E8A01B /* FavoriteFoodInsightsViewModel.swift in Sources */,
 				149A28BB2A853E5100052EDF /* CarbEntryViewModel.swift in Sources */,
 				C19008FE25225D3900721625 /* SimpleBolusCalculator.swift in Sources */,
 				C1F8B243223E73FD00DD66CF /* BolusProgressTableViewCell.swift in Sources */,
@@ -3664,6 +3678,7 @@
 				14C9706C2C5A836000E8A01B /* DoseChartView.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
 				B43CF07E29434EC4008A520B /* HowMuteAlertWorkView.swift in Sources */,
+				14C970842C5C2FB400E8A01B /* HowCarbEffectsWorksView.swift in Sources */,
 				84AA81E52A4A3981000B658B /* DeeplinkManager.swift in Sources */,
 				1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */,
 				C16F511B2B89363A00EFD7A1 /* SimpleInsulinDose.swift in Sources */,
@@ -3732,6 +3747,7 @@
 				7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */,
 				B40D07C7251A89D500C1C6D7 /* GlucoseDisplay.swift in Sources */,
 				43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */,
+				14C970862C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

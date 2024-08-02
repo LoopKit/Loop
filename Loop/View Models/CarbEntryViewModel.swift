@@ -12,11 +12,11 @@ import HealthKit
 import Combine
 import LoopCore
 import LoopAlgorithm
+import os.log
 
-protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate {
+protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate, FavoriteFoodInsightsViewModelDelegate {
     var defaultAbsorptionTimes: DefaultAbsorptionTimes { get }
     func scheduleOverrideEnabled(at date: Date) -> Bool
-    func selectedFavoriteFoodLastEaten(_ favoriteFood: StoredFavoriteFood) async throws -> Date?
     func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample]
 }
 
@@ -104,6 +104,8 @@ final class CarbEntryViewModel: ObservableObject {
         return formatter
     }()
     
+    private let log = OSLog(category: "CarbEntryViewModel")
+    
     weak var delegate: CarbEntryViewModelDelegate?
     weak var analyticsServicesManager: AnalyticsServicesManager?
     weak var deliveryDelegate: DeliveryDelegate?
@@ -145,7 +147,6 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     var originalCarbEntry: StoredCarbEntry? = nil
-    private var favoriteFood: FavoriteFood? = nil
     
     private var updatedCarbEntry: NewCarbEntry? {
         if let quantity = carbsQuantity, quantity != 0 {
@@ -293,7 +294,7 @@ final class CarbEntryViewModel: ObservableObject {
                     }
                 }
                 catch {
-                    print("could not fetch carb entries: \(error.localizedDescription)")
+                    log.error("Failed to fetch last eaten date for favorite food: %{public}@, %{public}@", String(describing: selectedFavoriteFood), String(describing: error))
                 }
             }
         }

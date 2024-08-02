@@ -1127,13 +1127,108 @@ extension LoopDataManager: CarbEntryViewModelDelegate {
     var defaultAbsorptionTimes: DefaultAbsorptionTimes {
         LoopCoreConstants.defaultCarbAbsorptionTimes
     }
-    
+    func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample] {
+        try await glucoseStore.getGlucoseSamples(start: start, end: end)
+    }
+}
+
+extension LoopDataManager: FavoriteFoodInsightsViewModelDelegate {
     func selectedFavoriteFoodLastEaten(_ favoriteFood: StoredFavoriteFood) async throws -> Date? {
         try await carbStore.getCarbEntries(start: nil, end: nil, dateAscending: false, fetchLimit: 1, with: favoriteFood.id).first?.startDate
     }
 
-    func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample] {
-        try await glucoseStore.getGlucoseSamples(start: start, end: end)
+    
+    func getFavoriteFoodCarbEntries(_ favoriteFood: StoredFavoriteFood) async throws -> [LoopKit.StoredCarbEntry] {
+        try await carbStore.getCarbEntries(start: nil, end: nil, dateAscending: false, fetchLimit: nil, with: favoriteFood.id)
+    }
+    
+    func getHistoricalChartsData(start: Date, end: Date) async throws -> HistoricalChartsData {
+        // Need to get insulin data from any active doses that might affect this time range
+        var dosesStart = start.addingTimeInterval(-InsulinMath.defaultInsulinActivityDuration)
+        let doses = try await doseStore.getNormalizedDoseEntries(
+            start: dosesStart,
+            end: end
+        ).map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
+
+        dosesStart = doses.map { $0.startDate }.min() ?? dosesStart
+
+        let basal = try await settingsProvider.getBasalHistory(startDate: dosesStart, endDate: end)
+
+        let carbEntries = try await carbStore.getCarbEntries(start: start, end: end)
+
+        let carbRatio = try await settingsProvider.getCarbRatioHistory(startDate: start, endDate: end)
+
+        let glucose = try await glucoseStore.getGlucoseSamples(start: start, end: end)
+
+        let sensitivityStart = min(start, dosesStart)
+
+        let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(startDate: sensitivityStart, endDate: end)
+
+        let overrides = temporaryPresetsManager.overrideHistory.getOverrideHistory(startDate: sensitivityStart, endDate: end)
+
+        guard !sensitivity.isEmpty else {
+            throw LoopError.configurationError(.insulinSensitivitySchedule)
+        }
+
+        let sensitivityWithOverrides = overrides.applySensitivity(over: sensitivity)
+
+        guard !basal.isEmpty else {
+            throw LoopError.configurationError(.basalRateSchedule)
+        }
+        let basalWithOverrides = overrides.applyBasal(over: basal)
+
+        guard !carbRatio.isEmpty else {
+            throw LoopError.configurationError(.carbRatioSchedule)
+        }
+        let carbRatioWithOverrides = overrides.applyCarbRatio(over: carbRatio)
+
+        let carbModel: CarbAbsorptionModel = FeatureFlags.nonlinearCarbModelEnabled ? .piecewiseLinear : .linear
+
+        // Overlay basal history on basal doses, splitting doses to get amount delivered relative to basal
+        let annotatedDoses = doses.annotated(with: basalWithOverrides)
+
+        let insulinEffects = annotatedDoses.glucoseEffects(
+            insulinSensitivityHistory: sensitivityWithOverrides,
+            from: start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval).dateFlooredToTimeInterval(GlucoseMath.defaultDelta),
+            to: nil)
+
+        // ICE
+        let insulinCounteractionEffects = glucose.counteractionEffects(to: insulinEffects)
+
+        // Carb Effects
+        let carbStatus = carbEntries.map(
+            to: insulinCounteractionEffects,
+            carbRatio: carbRatioWithOverrides,
+            insulinSensitivity: sensitivityWithOverrides
+        )
+
+        let carbEffects = carbStatus.dynamicGlucoseEffects(
+            from: end,
+            to: end.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration),
+            carbRatios: carbRatioWithOverrides,
+            insulinSensitivities: sensitivityWithOverrides,
+            absorptionModel: carbModel.model
+        )
+        
+        let carbAbsorptionReview = CarbAbsorptionReview(
+            carbEntries: carbEntries,
+            carbStatuses: carbStatus,
+            effectsVelocities: insulinCounteractionEffects,
+            carbEffects: carbEffects
+        )
+        
+        let trimmedDoses = annotatedDoses.filterDateRange(start, end)
+        let trimmedIOBValues = annotatedDoses.insulinOnBoardTimeline().filterDateRange(start, end)
+        
+        let historicalChartsData = HistoricalChartsData(
+            glucoseValues: glucose,
+            carbEntries: carbEntries,
+            doses: trimmedDoses,
+            iobValues: trimmedIOBValues,
+            carbAbsorptionReview: carbAbsorptionReview
+        )
+
+        return historicalChartsData
     }
 }
 
