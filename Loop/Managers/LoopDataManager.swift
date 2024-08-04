@@ -1009,7 +1009,7 @@ extension LoopDataManager {
 
         let retrospectiveStart = lastGlucoseDate.addingTimeInterval(-type(of: retrospectiveCorrection).retrospectionInterval)
 
-        let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
+        let earliestEffectDate = Date(timeInterval: .days(-2), since: now())
         let nextCounteractionEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
         let insulinEffectStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-5))
 

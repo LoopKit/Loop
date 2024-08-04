@@ -139,7 +139,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         charts.updateEndDate(chartStartDate.addingTimeInterval(.hours(totalHours+1))) // When there is no data, this allows presenting current hour + 1
 
         let midnight = Calendar.current.startOfDay(for: Date())
-        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -deviceManager.carbStore.maximumAbsorptionTimeInterval))
+        let previousMidnight = midnight - .days(1)
 
         let reloadGroup = DispatchGroup()
         let shouldUpdateGlucose = currentContext.contains(.glucose)
@@ -157,12 +157,20 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             if shouldUpdateGlucose || shouldUpdateCarbs {
                 let allInsulinCounteractionEffects = state.insulinCounteractionEffects
                 insulinCounteractionEffects = allInsulinCounteractionEffects.filterDateRange(chartStartDate, nil)
+                
+                let earliestCounteractionEffect = allInsulinCounteractionEffects.first?.startDate ?? Date()
+                // Show carb entries as far back as previous midnight, or only as far back as counteraction effects are available
+                let boundOnCarbList = max(previousMidnight, earliestCounteractionEffect)
+                // If counteraction effects are missing, at least show all the entries for today and those on the chart
+                let displayListStart = min(boundOnCarbList, midnight, chartStartDate)
+                // To estimate dynamic carb absorption for the entry at the start of the list, we need to fetch samples that might still be absorbing
+                let fetchEntriesStart = displayListStart.addingTimeInterval(-self.deviceManager.carbStore.maximumAbsorptionTimeInterval)
 
                 reloadGroup.enter()
-                self.deviceManager.carbStore.getCarbStatus(start: listStart, end: nil, effectVelocities: allInsulinCounteractionEffects) { (result) in
+                self.deviceManager.carbStore.getCarbStatus(start: fetchEntriesStart, end: nil, effectVelocities: allInsulinCounteractionEffects) { (result) in
                     switch result {
                     case .success(let status):
-                        carbStatuses = status
+                        carbStatuses = status.filterDateRange(displayListStart, nil)
                         carbsOnBoard = status.getClampedCarbsOnBoard()
                     case .failure(let error):
                         self.log.error("CarbStore failed to get carbStatus: %{public}@", String(describing: error))
@@ -286,6 +294,14 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         formatter.timeStyle = .short
         return formatter
     }()
+    
+    private lazy var relativeTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.doesRelativeDateFormatting = true
+        formatter.timeStyle = .short
+        return formatter
+    }()
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         return Section.count
@@ -343,7 +359,14 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             }
 
             // Entry time
-            let startTime = timeFormatter.string(from: status.entry.startDate)
+            let startTime: String
+            // Indicate if an entry is from the previous day to avoid potential confusion
+            let midnight = Calendar.current.startOfDay(for: Date())
+            if status.entry.startDate < midnight {
+                startTime = relativeTimeFormatter.string(from: status.entry.startDate)
+            } else {
+                startTime = timeFormatter.string(from: status.entry.startDate)
+            }
             if  let absorptionTime = status.entry.absorptionTime,
                 let duration = absorptionFormatter.string(from: absorptionTime)
             {
