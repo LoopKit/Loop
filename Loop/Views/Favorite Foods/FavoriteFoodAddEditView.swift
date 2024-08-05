@@ -10,10 +10,10 @@ import SwiftUI
 import LoopKit
 import LoopKitUI
 
-struct AddEditFavoriteFoodView: View {
+struct FavoriteFoodAddEditView: View {
     @Environment(\.dismiss) var dismiss
     
-    @StateObject private var viewModel: AddEditFavoriteFoodViewModel
+    @StateObject private var viewModel: FavoriteFoodAddEditViewModel
     
     @State private var expandedRow: Row?
     @State private var showHowAbsorptionTimeWorks = false
@@ -22,13 +22,13 @@ struct AddEditFavoriteFoodView: View {
         
     /// Initializer for adding a new favorite food or editing a `StoredFavoriteFood`
     init(originalFavoriteFood: StoredFavoriteFood? = nil, onSave: @escaping (NewFavoriteFood) -> Void) {
-        self._viewModel = StateObject(wrappedValue: AddEditFavoriteFoodViewModel(originalFavoriteFood: originalFavoriteFood, onSave: onSave))
+        self._viewModel = StateObject(wrappedValue: FavoriteFoodAddEditViewModel(originalFavoriteFood: originalFavoriteFood, onSave: onSave))
         self.isNewEntry = originalFavoriteFood == nil
     }
     
-    /// Initializer for presenting the `AddEditFavoriteFoodView` prepopulated from the `CarbEntryView`
+    /// Initializer for presenting the `FavoriteFoodAddEditView` prepopulated from the `CarbEntryView`
     init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, onSave: @escaping (NewFavoriteFood) -> Void) {
-        self._viewModel = StateObject(wrappedValue: AddEditFavoriteFoodViewModel(carbsQuantity: carbsQuantity, foodType: foodType, absorptionTime: absorptionTime, onSave: onSave))
+        self._viewModel = StateObject(wrappedValue: FavoriteFoodAddEditViewModel(carbsQuantity: carbsQuantity, foodType: foodType, absorptionTime: absorptionTime, onSave: onSave))
     }
     
     var body: some View {
@@ -114,7 +114,7 @@ struct AddEditFavoriteFoodView: View {
         .padding(.horizontal)
     }
     
-    private func alert(for alert: AddEditFavoriteFoodViewModel.Alert) -> SwiftUI.Alert {
+    private func alert(for alert: FavoriteFoodAddEditViewModel.Alert) -> SwiftUI.Alert {
         switch alert {
         case .maxQuantityExceded:
             let message = String(
@@ -142,7 +142,7 @@ struct AddEditFavoriteFoodView: View {
     }
 }
 
-extension AddEditFavoriteFoodView {
+extension FavoriteFoodAddEditView {
     private var dismissButton: some View {
         Button(action: dismiss.callAsFunction) {
             Text("Cancel")
@@ -166,7 +166,7 @@ extension AddEditFavoriteFoodView {
     }
 }
 
-extension AddEditFavoriteFoodView {
+extension FavoriteFoodAddEditView {
     enum Row {
         case name, carbQuantity, foodType, absorptionTime
     }

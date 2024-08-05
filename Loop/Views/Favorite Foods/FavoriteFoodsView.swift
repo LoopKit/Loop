@@ -48,7 +48,7 @@ struct FavoriteFoodsView: View {
                 .insetGroupedListStyle()
                 
                 
-                NavigationLink(destination: AddEditFavoriteFoodView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: $viewModel.isEditViewActive) {
+                NavigationLink(destination: FavoriteFoodAddEditView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: $viewModel.isEditViewActive) {
                     EmptyView()
                 }
                 
@@ -64,7 +64,7 @@ struct FavoriteFoodsView: View {
             .navigationBarTitle("Favorite Foods", displayMode: .large)
         }
         .sheet(isPresented: $viewModel.isAddViewActive) {
-            AddEditFavoriteFoodView(onSave: viewModel.onFoodSave(_:))
+            FavoriteFoodAddEditView(onSave: viewModel.onFoodSave(_:))
         }
         .onChange(of: editMode) { newValue in
             if !newValue.isEditing {
