@@ -133,7 +133,7 @@ fileprivate struct ChartModifier: ViewModifier {
             .padding(.horizontal, -4)
             .padding(.top, UIFont.preferredFont(forTextStyle: .subheadline).lineHeight + 8)
             .clipped()
-            .frame(height: floor(UIScreen.main.bounds.height * fractionOfScreenHeight))
+            .frame(height: floor(max(UIScreen.main.bounds.height, UIScreen.main.bounds.width) * fractionOfScreenHeight))
     }
 }
 

@@ -48,8 +48,8 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                             continueButton
                         }
                     }
-                
             }
+            .navigationViewStyle(.stack)
         }
         else {
             content

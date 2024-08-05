@@ -32,7 +32,6 @@ struct FavoriteFoodInsightsView: View {
                 historicalDataReviewSection
             }
             .padding(.top, -28)
-            .insetGroupedListStyle()
             .navigationTitle("Favorite Food Insights")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
