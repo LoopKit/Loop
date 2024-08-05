@@ -47,12 +47,12 @@ struct FavoriteFoodsView: View {
                 }
                 .insetGroupedListStyle()
                 
-                
-                NavigationLink(destination: FavoriteFoodAddEditView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: $viewModel.isEditViewActive) {
+                let editViewIsActive = Binding(get: { viewModel.isEditViewActive && !viewModel.isDetailViewActive }, set: { viewModel.isEditViewActive = $0 })
+                NavigationLink(destination: FavoriteFoodAddEditView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: editViewIsActive) {
                     EmptyView()
                 }
                 
-                NavigationLink(destination: FavoriteFoodDetailView(food: viewModel.selectedFood, onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit), isActive: $viewModel.isDetailViewActive) {
+                NavigationLink(destination: FavoriteFoodDetailView(viewModel: viewModel), isActive: $viewModel.isDetailViewActive) {
                     EmptyView()
                 }
             }

@@ -11,63 +11,75 @@ import LoopKit
 import HealthKit
 
 public struct FavoriteFoodDetailView: View {
-    let food: StoredFavoriteFood?
-    let onFoodDelete: (StoredFavoriteFood) -> Void
+    @ObservedObject var viewModel: FavoriteFoodsViewModel
     
     @State private var isConfirmingDelete = false
-    
-    let carbFormatter: QuantityFormatter
-    let absorptionTimeFormatter: DateComponentsFormatter
-    let preferredCarbUnit: HKUnit
-    
-    public init(food: StoredFavoriteFood?, onFoodDelete: @escaping (StoredFavoriteFood) -> Void, isConfirmingDelete: Bool = false, carbFormatter: QuantityFormatter, absorptionTimeFormatter: DateComponentsFormatter, preferredCarbUnit: HKUnit = HKUnit.gram()) {
-        self.food = food
-        self.onFoodDelete = onFoodDelete
-        self.isConfirmingDelete = isConfirmingDelete
-        self.carbFormatter = carbFormatter
-        self.absorptionTimeFormatter = absorptionTimeFormatter
-        self.preferredCarbUnit = preferredCarbUnit
-    }
-    
+
     public var body: some View {
-        if let food {
-            List {
-                Section("Information") {
-                    VStack(spacing: 16) {
-                        let rows: [(field: String, value: String)] = [
-                            ("Name", food.name),
-                            ("Carb Quantity", food.carbsString(formatter: carbFormatter)),
-                            ("Food Type", food.foodType),
-                            ("Absorption Time", food.absorptionTimeString(formatter: absorptionTimeFormatter))
-                        ]
-                        ForEach(rows, id: \.field) { row in
-                            HStack {
-                                Text(row.field)
-                                    .font(.subheadline)
-                                Spacer()
-                                Text(row.value)
-                                    .font(.subheadline)
+        if let food = viewModel.selectedFood {
+            Group {
+                List {
+                    Section("Information") {
+                        VStack(spacing: 16) {
+                            let rows: [(field: String, value: String)] = [
+                                ("Name", food.name),
+                                ("Carb Quantity", food.carbsString(formatter: viewModel.carbFormatter)),
+                                ("Food Type", food.foodType),
+                                ("Absorption Time", food.absorptionTimeString(formatter: viewModel.absorptionTimeFormatter))
+                            ]
+                            ForEach(rows, id: \.field) { row in
+                                HStack {
+                                    Text(row.field)
+                                        .font(.subheadline)
+                                    Spacer()
+                                    Text(row.value)
+                                        .font(.subheadline)
+                                }
                             }
                         }
                     }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+                    
+                    Section {
+                        Button(action: { viewModel.isEditViewActive.toggle() }) {
+                            HStack {
+                                // Fix the list row inset with centered content from shifting to the center.
+                                // https://stackoverflow.com/questions/75046730/swiftui-list-divider-unwanted-inset-at-the-start-when-non-text-component-is-u
+                                Text("")
+                                    .frame(maxWidth: 0)
+                                    .accessibilityHidden(true)
+                                
+                                Spacer()
+                                
+                                Text("Edit Food")
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .foregroundColor(.accentColor)
+                                
+                                Spacer()
+                            }
+                        }
+                        
+                        Button(role: .destructive, action: { isConfirmingDelete.toggle() }) {
+                            Text("Delete Food")
+                                .frame(maxWidth: .infinity, alignment: .center) // Align text in center
+                        }
+                    }
                 }
-                .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
-                
-                Button(role: .destructive, action: { isConfirmingDelete.toggle() }) {
-                    Text("Delete Food")
-                        .frame(maxWidth: .infinity, alignment: .center) // Align text in center
+                .alert(isPresented: $isConfirmingDelete) {
+                    Alert(
+                        title: Text("Delete “\(food.name)”?"),
+                        message: Text("Are you sure you want to delete this food?"),
+                        primaryButton: .cancel(),
+                        secondaryButton: .destructive(Text("Delete"), action: viewModel.deleteSelectedFood)
+                    )
+                }
+                .insetGroupedListStyle()
+                .navigationTitle(food.title)
+                                
+                NavigationLink(destination: FavoriteFoodAddEditView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: $viewModel.isEditViewActive) {
+                    EmptyView()
                 }
             }
-            .alert(isPresented: $isConfirmingDelete) {
-                Alert(
-                    title: Text("Delete “\(food.name)”?"),
-                    message: Text("Are you sure you want to delete this food?"),
-                    primaryButton: .cancel(),
-                    secondaryButton: .destructive(Text("Delete"), action: { onFoodDelete(food) })
-                )
-            }
-            .insetGroupedListStyle()
-            .navigationTitle(food.title)
         }
     }
 }

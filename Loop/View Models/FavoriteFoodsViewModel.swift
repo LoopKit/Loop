@@ -48,14 +48,21 @@ final class FavoriteFoodsViewModel: ObservableObject {
             selectedFood.foodType = newFood.foodType
             selectedFood.absorptionTime = newFood.absorptionTime
             favoriteFoods[selectedFooxIndex] = selectedFood
+            if isDetailViewActive {
+                self.selectedFood = selectedFood
+            }
             isEditViewActive = false
         }
     }
     
-    func onFoodDelete(_ food: StoredFavoriteFood) {
-        if isDetailViewActive {
-            isDetailViewActive = false
+    func deleteSelectedFood() {
+        if let selectedFood {
+            onFoodDelete(selectedFood)
         }
+        isDetailViewActive = false
+    }
+    
+    func onFoodDelete(_ food: StoredFavoriteFood) {
         withAnimation {
             _ = favoriteFoods.remove(food)
         }
