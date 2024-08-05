@@ -14,6 +14,7 @@ import HealthKit
 struct CarbEntryView: View, HorizontalSizeClassOverride {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismissAction) private var dismiss
+    @Environment(\.guidanceColors) private var guidanceColors
 
     @ObservedObject var viewModel: CarbEntryViewModel
         
@@ -130,6 +131,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             BolusEntryView(viewModel: viewModel)
                 .environmentObject(displayGlucosePreference)
                 .environment(\.dismissAction, dismiss)
+                .environment(\.guidanceColors, guidanceColors)
         }
     }
     
