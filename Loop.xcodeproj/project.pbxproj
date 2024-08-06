@@ -40,6 +40,7 @@
 		14B1737F28AEDC6C006CCD7C /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		14B1738028AEDC6C006CCD7C /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
 		14B1738128AEDC70006CCD7C /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
+		14BBB3B22C629DB100ECB800 /* Character+IsEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14BBB3B12C629DB100ECB800 /* Character+IsEmoji.swift */; };
 		14C970682C5991CD00E8A01B /* LoopChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970672C5991CD00E8A01B /* LoopChartView.swift */; };
 		14C9706A2C5A833100E8A01B /* CarbEffectChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970692C5A833100E8A01B /* CarbEffectChartView.swift */; };
 		14C9706C2C5A836000E8A01B /* DoseChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C9706B2C5A836000E8A01B /* DoseChartView.swift */; };
@@ -751,6 +752,7 @@
 		14B1736E28AEDBF6006CCD7C /* BasalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalView.swift; sourceTree = "<group>"; };
 		14B1736F28AEDBF6006CCD7C /* SystemStatusWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SystemStatusWidget.swift; sourceTree = "<group>"; };
 		14B1737028AEDBF6006CCD7C /* GlucoseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseView.swift; sourceTree = "<group>"; };
+		14BBB3B12C629DB100ECB800 /* Character+IsEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Character+IsEmoji.swift"; sourceTree = "<group>"; };
 		14C970672C5991CD00E8A01B /* LoopChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopChartView.swift; sourceTree = "<group>"; };
 		14C970692C5A833100E8A01B /* CarbEffectChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEffectChartView.swift; sourceTree = "<group>"; };
 		14C9706B2C5A836000E8A01B /* DoseChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseChartView.swift; sourceTree = "<group>"; };
@@ -2191,6 +2193,7 @@
 				C1F2CAAB2B7A980600D7F581 /* BasalRelativeDose.swift */,
 				A9F703722489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift */,
 				C17824991E1999FA00D9D25C /* CaseCountable.swift */,
+				14BBB3B12C629DB100ECB800 /* Character+IsEmoji.swift */,
 				4F6663931E905FD2009E74FC /* ChartColorPalette+Loop.swift */,
 				4389916A1E91B689000EEF90 /* ChartSettings+Loop.swift */,
 				4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */,
@@ -3625,6 +3628,7 @@
 				C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */,
 				1D49795824E7289700948F05 /* ServicesViewModel.swift in Sources */,
 				1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */,
+				14BBB3B22C629DB100ECB800 /* Character+IsEmoji.swift in Sources */,
 				C1B80D632AF97D7200AB7705 /* LoopDataManager+CarbAbsorption.swift in Sources */,
 				DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */,
 				B4E202302661063E009421B5 /* AutomaticDosingStatus.swift in Sources */,
