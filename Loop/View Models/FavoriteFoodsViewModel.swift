@@ -10,6 +10,7 @@ import SwiftUI
 import HealthKit
 import LoopKit
 import Combine
+import os.log
 
 final class FavoriteFoodsViewModel: ObservableObject {
     @Published var favoriteFoods = UserDefaults.standard.favoriteFoods
@@ -28,10 +29,24 @@ final class FavoriteFoodsViewModel: ObservableObject {
         return formatter
     }()
     
+    // Favorite Food Insights
+    @Published var selectedFoodLastEaten: Date? = nil
+    lazy var relativeDateFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter
+    }()
+
+    private let log = OSLog(category: "CarbEntryViewModel")
+    
+    weak var insightsDelegate: FavoriteFoodInsightsViewModelDelegate?
+    
     private lazy var cancellables = Set<AnyCancellable>()
     
-    init() {
+    init(insightsDelegate: FavoriteFoodInsightsViewModelDelegate?) {
+        self.insightsDelegate = insightsDelegate
         observeFavoriteFoodChange()
+        observeDetailViewPresentation()
     }
     
     func onFoodSave(_ newFood: NewFavoriteFood) {
@@ -86,5 +101,30 @@ final class FavoriteFoodsViewModel: ObservableObject {
                 UserDefaults.standard.favoriteFoods = newValue
             }
             .store(in: &cancellables)
+    }
+    
+    private func observeDetailViewPresentation() {
+        $isDetailViewActive
+            .sink { [weak self] newValue in
+                if newValue {
+                    self?.fetchFoodLastEaten()
+                }
+                else {
+                    self?.selectedFoodLastEaten = nil
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func fetchFoodLastEaten() {
+        Task { @MainActor in
+            do {
+                if let selectedFood, let lastEaten = try await insightsDelegate?.selectedFavoriteFoodLastEaten(selectedFood) {
+                    self.selectedFoodLastEaten = lastEaten
+                }
+            } catch {
+                log.error("Failed to fetch last eaten date for favorite food: %{public}@, %{public}@", String(describing: selectedFood), String(describing: error))
+            }
+        }
     }
 }

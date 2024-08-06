@@ -21,25 +21,38 @@ struct FavoriteFoodInsightsView: View {
     
     @State private var showHowCarbEffectsWorks = false
 
-    init(viewModel: FavoriteFoodInsightsViewModel) {
+    let presentedAsSheet: Bool
+    
+    init(viewModel: FavoriteFoodInsightsViewModel, presentedAsSheet: Bool = true) {
         self._viewModel = StateObject(wrappedValue: viewModel)
+        self.presentedAsSheet = presentedAsSheet
     }
     
     var body: some View {
-        NavigationView {
-            List {
-                historicalCarbEntriesSection
-                historicalDataReviewSection
+        if presentedAsSheet {
+            NavigationView {
+                content
+                    .toolbar {
+                        dismissButton
+                    }
             }
-            .padding(.top, -28)
-            .navigationTitle("Favorite Food Insights")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                dismissButton
-            }
-            .sheet(isPresented: $showHowCarbEffectsWorks) {
-                HowCarbEffectsWorksView()
-            }
+        }
+        else {
+            content
+                .insetGroupedListStyle()
+        }
+    }
+    
+    private var content: some View {
+        List {
+            historicalCarbEntriesSection
+            historicalDataReviewSection
+        }
+        .padding(.top, -28)
+        .navigationTitle("Favorite Food Insights")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showHowCarbEffectsWorks) {
+            HowCarbEffectsWorksView()
         }
     }
 

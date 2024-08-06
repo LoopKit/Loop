@@ -13,7 +13,11 @@ import LoopKitUI
 struct FavoriteFoodsView: View {
     @Environment(\.dismissAction) private var dismiss
     
-    @StateObject private var viewModel = FavoriteFoodsViewModel()
+    @StateObject private var viewModel: FavoriteFoodsViewModel
+    
+    init(insightsDelegate: FavoriteFoodInsightsViewModelDelegate? = nil) {
+        self._viewModel = StateObject(wrappedValue: FavoriteFoodsViewModel(insightsDelegate: insightsDelegate))
+    }
 
     @State private var foodToConfirmDeleteId: String? = nil
     @State private var editMode: EditMode = .inactive

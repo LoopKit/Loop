@@ -8,61 +8,23 @@
 
 import SwiftUI
 import LoopKit
+import LoopKitUI
 import HealthKit
 
 public struct FavoriteFoodDetailView: View {
     @ObservedObject var viewModel: FavoriteFoodsViewModel
     
     @State private var isConfirmingDelete = false
+    @State private var showFavoriteFoodInsights = false
 
     public var body: some View {
         if let food = viewModel.selectedFood {
             Group {
                 List {
-                    Section("Information") {
-                        VStack(spacing: 16) {
-                            let rows: [(field: String, value: String)] = [
-                                ("Name", food.name),
-                                ("Carb Quantity", food.carbsString(formatter: viewModel.carbFormatter)),
-                                ("Food Type", food.foodType),
-                                ("Absorption Time", food.absorptionTimeString(formatter: viewModel.absorptionTimeFormatter))
-                            ]
-                            ForEach(rows, id: \.field) { row in
-                                HStack {
-                                    Text(row.field)
-                                        .font(.subheadline)
-                                    Spacer()
-                                    Text(row.value)
-                                        .font(.subheadline)
-                                }
-                            }
-                        }
-                    }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
-                    
-                    Section {
-                        Button(action: { viewModel.isEditViewActive.toggle() }) {
-                            HStack {
-                                // Fix the list row inset with centered content from shifting to the center.
-                                // https://stackoverflow.com/questions/75046730/swiftui-list-divider-unwanted-inset-at-the-start-when-non-text-component-is-u
-                                Text("")
-                                    .frame(maxWidth: 0)
-                                    .accessibilityHidden(true)
-                                
-                                Spacer()
-                                
-                                Text("Edit Food")
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .foregroundColor(.accentColor)
-                                
-                                Spacer()
-                            }
-                        }
-                        
-                        Button(role: .destructive, action: { isConfirmingDelete.toggle() }) {
-                            Text("Delete Food")
-                                .frame(maxWidth: .infinity, alignment: .center) // Align text in center
-                        }
+                    informationSection(for: food)
+                    actionsSection(for: food)
+                    if let lastEatenDate = viewModel.selectedFoodLastEaten {
+                        insightsSection(for: food, lastEaten: lastEatenDate)
                     }
                 }
                 .alert(isPresented: $isConfirmingDelete) {
@@ -79,7 +41,107 @@ public struct FavoriteFoodDetailView: View {
                 NavigationLink(destination: FavoriteFoodAddEditView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: $viewModel.isEditViewActive) {
                     EmptyView()
                 }
+                
+                NavigationLink(destination: FavoriteFoodInsightsView(viewModel: FavoriteFoodInsightsViewModel(delegate: viewModel.insightsDelegate, food: food), presentedAsSheet: false), isActive: $showFavoriteFoodInsights) {
+                    EmptyView()
+                }
             }
         }
+    }
+    
+    private func informationSection(for food: StoredFavoriteFood) -> some View {
+        Section("Information") {
+            VStack(spacing: 16) {
+                let rows: [(field: String, value: String)] = [
+                    ("Name", food.name),
+                    ("Carb Quantity", food.carbsString(formatter: viewModel.carbFormatter)),
+                    ("Food Type", food.foodType),
+                    ("Absorption Time", food.absorptionTimeString(formatter: viewModel.absorptionTimeFormatter))
+                ]
+                ForEach(rows, id: \.field) { row in
+                    HStack {
+                        Text(row.field)
+                            .font(.subheadline)
+                        Spacer()
+                        Text(row.value)
+                            .font(.subheadline)
+                    }
+                }
+            }
+        }
+        .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+    }
+    
+    private func actionsSection(for food: StoredFavoriteFood) -> some View {
+        Section {
+            Button(action: { viewModel.isEditViewActive.toggle() }) {
+                HStack {
+                    // Fix the list row inset with centered content from shifting to the center.
+                    // https://stackoverflow.com/questions/75046730/swiftui-list-divider-unwanted-inset-at-the-start-when-non-text-component-is-u
+                    Text("")
+                        .frame(maxWidth: 0)
+                        .accessibilityHidden(true)
+                    
+                    Spacer()
+                    
+                    Text("Edit Food")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .foregroundColor(.accentColor)
+                    
+                    Spacer()
+                }
+            }
+            
+            Button(role: .destructive, action: { isConfirmingDelete.toggle() }) {
+                Text("Delete Food")
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+    }
+    
+    private func insightsSection(for food: StoredFavoriteFood, lastEaten: Date) -> some View {
+        Section {
+            Button(action: {
+                showFavoriteFoodInsights = true
+            }) {
+                VStack(spacing: 10) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                        
+                        Text("Favorite Food Insights")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.accentColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    let relativeTime = viewModel.relativeDateFormatter.localizedString(for: lastEaten, relativeTo: Date())
+                    let attributedFoodDescription = attributedFoodInsightsDescription(for: food.name, timeAgo: relativeTime)
+                    Text(attributedFoodDescription)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Color.accentColor, lineWidth: 2)
+                }
+                .contentShape(Rectangle())
+            }
+            .listRowInsets(EdgeInsets())
+            .buttonStyle(PlainButtonStyle())
+        }
+    }
+    
+    private func attributedFoodInsightsDescription(for food: String, timeAgo: String) -> AttributedString {
+        var attributedString = AttributedString("You last ate ")
+        
+        var foodString = AttributedString(food)
+        foodString.inlinePresentationIntent = .stronglyEmphasized
+        
+        attributedString.append(foodString)
+        attributedString.append(AttributedString(" \(timeAgo)\n Tap to see more"))
+        
+        return attributedString
     }
 }

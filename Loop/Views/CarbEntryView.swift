@@ -342,7 +342,7 @@ extension CarbEntryView {
             .background(CardBackground())
             .overlay {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(Color.accentColor, lineWidth: 2)
+                    .strokeBorder(Color.accentColor, lineWidth: 2)
             }
             .padding(.horizontal)
             .contentShape(Rectangle())
