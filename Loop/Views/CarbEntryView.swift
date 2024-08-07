@@ -113,6 +113,14 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             let timeFocused: Binding<Bool> = Binding(get: { expandedRow == .time }, set: { expandedRow = $0 ? .time : nil })
             let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
             let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
+            // Food type row shows an x button next to favorite food chip that clears favorite food by setting this binding to nil
+            let selectedFavoriteFoodBinding = Binding(
+                get: { viewModel.selectedFavoriteFood },
+                set: { food in
+                    guard food == nil else { return }
+                    viewModel.selectedFavoriteFoodIndex = -1
+                }
+            )
             
             CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
 
@@ -122,8 +130,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             
             CardSectionDivider()
             
-            let selectedFavoriteFoodBinding = Binding(get: { viewModel.selectedFavoriteFood }, set: { _ in })
-            FoodTypeRow(selectedFavoriteFood: selectedFavoriteFoodBinding, foodType: $viewModel.foodType, absorptionTime: $viewModel.absorptionTime, selectedDefaultAbsorptionTimeEmoji: $viewModel.selectedDefaultAbsorptionTimeEmoji, usesCustomFoodType: $viewModel.usesCustomFoodType, absorptionTimeWasEdited: $viewModel.absorptionTimeWasEdited, isFocused: foodTypeFocused, defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes)
+            FoodTypeRow(selectedFavoriteFood: selectedFavoriteFoodBinding, foodType: $viewModel.foodType, absorptionTime: $viewModel.absorptionTime, selectedDefaultAbsorptionTimeEmoji: $viewModel.selectedDefaultAbsorptionTimeEmoji, usesCustomFoodType: $viewModel.usesCustomFoodType, absorptionTimeWasEdited: $viewModel.absorptionTimeWasEdited, isFocused: foodTypeFocused, showClearFavoriteFoodButton: !isNewEntry, defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes)
             
             CardSectionDivider()
             
@@ -228,14 +235,14 @@ extension CarbEntryView {
 // MARK: - Favorite Foods Card
 extension CarbEntryView {
     private var favoriteFoodsCard: some View {
-        return VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("FAVORITE FOODS")
                 .font(.footnote)
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 26)
             
             VStack(spacing: 10) {
-                if !viewModel.favoriteFoods.isEmpty {
+                if !viewModel.favoriteFoods.isEmpty, isNewEntry {
                     VStack {
                         HStack {
                             Text("Choose Favorite:")
@@ -267,14 +274,18 @@ extension CarbEntryView {
                         }
                     }
                     
-                    CardSectionDivider()
+                    if viewModel.selectedFavoriteFood == nil {
+                        CardSectionDivider()
+                    }
                 }
                 
-                Button(action: saveAsFavoriteFood) {
-                    Text("Save as favorite food")
-                        .frame(maxWidth: .infinity)
+                if viewModel.selectedFavoriteFood == nil {
+                    Button(action: saveAsFavoriteFood) {
+                        Text("Save as favorite food")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .disabled(viewModel.saveFavoriteFoodButtonDisabled)
                 }
-                .disabled(viewModel.saveFavoriteFoodButtonDisabled)
             }
             .padding(.vertical, 12)
             .padding(.horizontal)

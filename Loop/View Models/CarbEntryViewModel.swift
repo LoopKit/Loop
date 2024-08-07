@@ -141,8 +141,10 @@ final class CarbEntryViewModel: ObservableObject {
         
         if let favoriteFoodIndex = favoriteFoods.firstIndex(where: { $0.id == originalCarbEntry.favoriteFoodID }) {
             self.selectedFavoriteFoodIndex = favoriteFoodIndex
+            updateFavoriteFoodLastEatenDate(for: favoriteFoods[favoriteFoodIndex])
         }
         
+        observeFavoriteFoodIndexChange()
         observeLoopUpdates()
     }
     
@@ -150,11 +152,11 @@ final class CarbEntryViewModel: ObservableObject {
     
     private var updatedCarbEntry: NewCarbEntry? {
         if let quantity = carbsQuantity, quantity != 0 {
-            if let o = originalCarbEntry, o.quantity.doubleValue(for: preferredCarbUnit) == quantity && o.startDate == time && o.foodType == foodType && o.absorptionTime == absorptionTime {
+            let favoriteFoodID = selectedFavoriteFoodIndex == -1 ? nil : favoriteFoods[selectedFavoriteFoodIndex].id
+
+            if let o = originalCarbEntry, o.quantity.doubleValue(for: preferredCarbUnit) == quantity && o.startDate == time && o.foodType == foodType && o.absorptionTime == absorptionTime, o.favoriteFoodID == favoriteFoodID {
                 return nil  // No changes were made
             }
-            
-            let favoriteFoodID = selectedFavoriteFoodIndex == -1 ? nil : favoriteFoods[selectedFavoriteFoodIndex].id
             
             return NewCarbEntry(
                 date: date,
@@ -269,12 +271,15 @@ final class CarbEntryViewModel: ObservableObject {
 
     private func favoriteFoodSelected(at index: Int) {
         self.absorptionEditIsProgrammatic = true
+        // only updates carb entry fields if on new carb entry screen
         if index == -1 {
-            self.carbsQuantity = 0
+            if originalCarbEntry == nil {
+                self.carbsQuantity = 0
+                self.absorptionTime = defaultAbsorptionTimes.medium
+                self.absorptionTimeWasEdited = false
+                self.usesCustomFoodType = false
+            }
             self.foodType = ""
-            self.absorptionTime = defaultAbsorptionTimes.medium
-            self.absorptionTimeWasEdited = false
-            self.usesCustomFoodType = false
         }
         else {
             let food = favoriteFoods[index]
@@ -283,19 +288,22 @@ final class CarbEntryViewModel: ObservableObject {
             self.absorptionTime = food.absorptionTime
             self.absorptionTimeWasEdited = true
             self.usesCustomFoodType = true
-            
-            // Update favorite food insights last eaten date
-            Task { @MainActor in
-                do {
-                    if let lastEaten = try await delegate?.selectedFavoriteFoodLastEaten(food) {
-                        withAnimation(.default) {
-                            self.selectedFavoriteFoodLastEaten = lastEaten
-                        }
+            updateFavoriteFoodLastEatenDate(for: food)
+        }
+    }
+    
+    private func updateFavoriteFoodLastEatenDate(for food: StoredFavoriteFood) {
+        // Update favorite food insights last eaten date
+        Task { @MainActor in
+            do {
+                if let lastEaten = try await delegate?.selectedFavoriteFoodLastEaten(food) {
+                    withAnimation(.default) {
+                        self.selectedFavoriteFoodLastEaten = lastEaten
                     }
                 }
-                catch {
-                    log.error("Failed to fetch last eaten date for favorite food: %{public}@, %{public}@", String(describing: selectedFavoriteFood), String(describing: error))
-                }
+            }
+            catch {
+                log.error("Failed to fetch last eaten date for favorite food: %{public}@, %{public}@", String(describing: selectedFavoriteFood), String(describing: error))
             }
         }
     }
