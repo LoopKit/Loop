@@ -23,9 +23,13 @@ public struct FavoriteFoodDetailView: View {
                 List {
                     informationSection(for: food)
                     actionsSection(for: food)
-                    if let lastEatenDate = viewModel.selectedFoodLastEaten {
-                        insightsSection(for: food, lastEaten: lastEatenDate)
-                    }
+                    FavoriteFoodInsightsCardView(
+                        showFavoriteFoodInsights: $showFavoriteFoodInsights,
+                        foodName: viewModel.selectedFood?.name,
+                        lastEatenDate: viewModel.selectedFoodLastEaten,
+                        relativeDateFormatter: viewModel.relativeDateFormatter,
+                        presentInSection: true
+                    )
                 }
                 .alert(isPresented: $isConfirmingDelete) {
                     Alert(
@@ -97,51 +101,5 @@ public struct FavoriteFoodDetailView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
             }
         }
-    }
-    
-    private func insightsSection(for food: StoredFavoriteFood, lastEaten: Date) -> some View {
-        Section {
-            Button(action: {
-                showFavoriteFoodInsights = true
-            }) {
-                VStack(spacing: 10) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "sparkles")
-                        
-                        Text("Favorite Food Insights")
-                    }
-                    .font(.headline)
-                    .foregroundColor(.accentColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    let relativeTime = viewModel.relativeDateFormatter.localizedString(for: lastEaten, relativeTo: Date())
-                    let attributedFoodDescription = attributedFoodInsightsDescription(for: food.name, timeAgo: relativeTime)
-                    Text(attributedFoodDescription)
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Color.accentColor, lineWidth: 2)
-                }
-                .contentShape(Rectangle())
-            }
-            .listRowInsets(EdgeInsets())
-            .buttonStyle(PlainButtonStyle())
-        }
-    }
-    
-    private func attributedFoodInsightsDescription(for food: String, timeAgo: String) -> AttributedString {
-        var attributedString = AttributedString("You last ate ")
-        
-        var foodString = AttributedString(food)
-        foodString.inlinePresentationIntent = .stronglyEmphasized
-        
-        attributedString.append(foodString)
-        attributedString.append(AttributedString(" \(timeAgo)\n Tap to see more"))
-        
-        return attributedString
     }
 }
