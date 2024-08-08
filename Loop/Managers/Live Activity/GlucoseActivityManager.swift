@@ -266,6 +266,7 @@ class GlucoseActivityManager {
                 initEmptyActivity(settings: newSettings)
                 
             } else if
+                newSettings.mode != self.settings.mode ||
                 newSettings.addPredictiveLine != self.settings.addPredictiveLine ||
                 newSettings.useLimits != self.settings.useLimits ||
                 newSettings.lowerLimitChartMmol != self.settings.lowerLimitChartMmol ||
@@ -320,6 +321,7 @@ class GlucoseActivityManager {
             if let dynamicState = dynamicState {
                 self.activity = try Activity.request(
                     attributes: GlucoseActivityAttributes(
+                        mode: self.settings.mode,
                         addPredictiveLine: self.settings.addPredictiveLine,
                         useLimits: self.settings.useLimits,
                         upperLimitChartMmol: self.settings.upperLimitChartMmol,
@@ -407,37 +409,40 @@ class GlucoseActivityManager {
         return self.settings.bottomRowConfiguration.map { type in
             switch(type) {
             case .iob:
-                return BottomRowItem(label: type.name(), value: getInsulinOnBoard(), unit: "U")
+                return BottomRowItem.generic(label: type.name(), value: getInsulinOnBoard(), unit: "U")
                 
             case .cob:
                 var cob: String = "0"
                 if let cobValue = statusContext?.carbsOnBoard {
                     cob = self.cobFormatter.string(from: cobValue) ?? "??"
                 }
-                return BottomRowItem(label: type.name(), value: cob, unit: "g")
+                return BottomRowItem.generic(label: type.name(), value: cob, unit: "g")
                 
             case .basal:
                 guard let netBasalContext = statusContext?.netBasal else {
-                    return BottomRowItem(rate: 0, percentage: 0)
+                    return BottomRowItem.basal(rate: 0, percentage: 0)
                 }
 
-                return BottomRowItem(rate: netBasalContext.rate, percentage: netBasalContext.percentage)
+                return BottomRowItem.basal(rate: netBasalContext.rate, percentage: netBasalContext.percentage)
                 
             case .currentBg:
-                return BottomRowItem(label: type.name(), value: "\(glucoseFormatter.string(from: currentGlucose) ?? "??")", trend: statusContext?.glucoseDisplay?.trendType)
+                return BottomRowItem.currentBg(label: type.name(), value: "\(glucoseFormatter.string(from: currentGlucose) ?? "??")", trend: statusContext?.glucoseDisplay?.trendType)
                 
             case .eventualBg:
                 guard let eventual = statusContext?.predictedGlucose?.values.last else {
-                    return BottomRowItem(label: type.name(), value: "??", unit: "")
+                    return BottomRowItem.generic(label: type.name(), value: "??", unit: "")
                 }
                 
-                return BottomRowItem(label: type.name(), value: glucoseFormatter.string(from: eventual) ?? "??", unit: "")
+                return BottomRowItem.generic(label: type.name(), value: glucoseFormatter.string(from: eventual) ?? "??", unit: "")
                 
             case .deltaBg:
-                return BottomRowItem(label: type.name(), value: delta, unit: "")
+                return BottomRowItem.generic(label: type.name(), value: delta, unit: "")
+                
+            case .loopCircle:
+                return BottomRowItem.loopIcon()
                 
             case .updatedAt:
-                return BottomRowItem(label: type.name(), value: timeFormatter.string(from: Date.now), unit: "")
+                return BottomRowItem.generic(label: type.name(), value: timeFormatter.string(from: Date.now), unit: "")
             }
        }
     }
@@ -464,6 +469,7 @@ class GlucoseActivityManager {
             
             self.activity = try Activity.request(
                 attributes: GlucoseActivityAttributes(
+                    mode: settings.mode,
                     addPredictiveLine: settings.addPredictiveLine,
                     useLimits: settings.useLimits,
                     upperLimitChartMmol: settings.upperLimitChartMmol,

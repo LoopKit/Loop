@@ -15,6 +15,8 @@ struct LiveActivityManagementView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     
     @State private var enabled: Bool
+    @State private var mode: LiveActivityMode
+    @State var isEditingMode = false
     @State private var addPredictiveLine: Bool
     @State private var useLimits: Bool
     @State private var upperLimitMmol: Double
@@ -26,6 +28,7 @@ struct LiveActivityManagementView: View {
         let liveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
         
         self.enabled = liveActivitySettings.enabled
+        self.mode = liveActivitySettings.mode
         self.addPredictiveLine = liveActivitySettings.addPredictiveLine
         self.useLimits = liveActivitySettings.useLimits
         self.upperLimitMmol = liveActivitySettings.upperLimitChartMmol
@@ -36,40 +39,70 @@ struct LiveActivityManagementView: View {
    
     var body: some View {
         List {
-            Toggle(NSLocalizedString("Enabled", comment: "Title for enable live activity toggle"), isOn: $enabled)
-                .onChange(of: enabled) { newValue in
-                    self.mutate { settings in
-                        settings.enabled = newValue
+            Section {
+                Toggle(NSLocalizedString("Enabled", comment: "Title for enable live activity toggle"), isOn: $enabled)
+                    .onChange(of: enabled) { newValue in
+                        self.mutate { settings in
+                            settings.enabled = newValue
+                        }
                     }
-                }
-            
-            Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: $addPredictiveLine)
-                .onChange(of: addPredictiveLine) { newValue in
-                    self.mutate { settings in
-                        settings.addPredictiveLine = newValue
+                
+                ExpandableSetting(
+                    isEditing: $isEditingMode,
+                    leadingValueContent: {
+                        Text(NSLocalizedString("Mode", comment: "Title for mode live activity toggle"))
+                            .foregroundStyle(isEditingMode ? .blue : .primary)
+                    },
+                    trailingValueContent: {
+                        Text(self.mode.name())
+                            .foregroundStyle(isEditingMode ? .blue : .primary)
+                    },
+                    expandedContent: {
+                        ResizeablePicker(selection: self.$mode.animation(),
+                                         data: LiveActivityMode.all,
+                                         formatter: { $0.name() })
                     }
-                }
-            Toggle(NSLocalizedString("Use BG coloring", comment: "Title for cBG coloring"), isOn: $useLimits)
-                .onChange(of: useLimits) { newValue in
+                )
+                .onChange(of: self.mode) { newValue in
                     self.mutate { settings in
-                        settings.useLimits = newValue
+                        settings.mode = newValue
                     }
-                }
-            
-            if useLimits {
-                if self.displayGlucosePreference.unit == .millimolesPerLiter {
-                    TextInput(label: "Upper limit chart", value: $upperLimitMmol)
-                        .transition(.move(edge: useLimits ? .top : .bottom))
-                    TextInput(label: "Lower limit chart", value: $lowerLimitMmol)
-                        .transition(.move(edge: useLimits ? .top : .bottom))
-                } else {
-                    TextInput(label: "Upper limit chart", value: $upperLimitMg)
-                        .transition(.move(edge: useLimits ? .top : .bottom))
-                    TextInput(label: "Lower limit chart", value: $lowerLimitMg)
-                        .transition(.move(edge: useLimits ? .top : .bottom))
                 }
             }
             
+            if mode == .large {
+                Section {
+                    Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: $addPredictiveLine)
+                        .transition(.move(edge: mode == .large ? .top : .bottom))
+                        .onChange(of: addPredictiveLine) { newValue in
+                            self.mutate { settings in
+                                settings.addPredictiveLine = newValue
+                            }
+                        }
+                    Toggle(NSLocalizedString("Use BG coloring", comment: "Title for BG coloring"), isOn: $useLimits)
+                        .transition(.move(edge: mode == .large ? .top : .bottom))
+                        .onChange(of: useLimits) { newValue in
+                            self.mutate { settings in
+                                settings.useLimits = newValue
+                            }
+                        }
+                    
+                    if useLimits {
+                        if self.displayGlucosePreference.unit == .millimolesPerLiter {
+                            TextInput(label: "Upper limit chart", value: $upperLimitMmol)
+                                .transition(.move(edge: useLimits ? .top : .bottom))
+                            TextInput(label: "Lower limit chart", value: $lowerLimitMmol)
+                                .transition(.move(edge: useLimits ? .top : .bottom))
+                        } else {
+                            TextInput(label: "Upper limit chart", value: $upperLimitMg)
+                                .transition(.move(edge: useLimits ? .top : .bottom))
+                            TextInput(label: "Lower limit chart", value: $lowerLimitMg)
+                                .transition(.move(edge: useLimits ? .top : .bottom))
+                        }
+                    }
+                }
+            }
+                
             Section {
                 NavigationLink(
                     destination: LiveActivityBottomRowManagerView(),

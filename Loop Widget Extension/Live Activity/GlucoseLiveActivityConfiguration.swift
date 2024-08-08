@@ -30,31 +30,33 @@ struct GlucoseLiveActivityConfiguration: Widget {
             // banner on the Home Screen of devices that don't support the Dynamic Island.
             ZStack {
                 VStack {
-                    HStack(spacing: 15) {
-                        loopIcon(context)
-                        if context.attributes.addPredictiveLine {
-                            ChartView(
-                                glucoseSamples: context.state.glucoseSamples,
-                                predicatedGlucose: context.state.predicatedGlucose,
-                                predicatedStartDate: context.state.predicatedStartDate,
-                                predicatedInterval: context.state.predicatedInterval,
-                                useLimits: context.attributes.useLimits,
-                                lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
-                                upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
-                                glucoseRanges: context.state.glucoseRanges,
-                                preset: context.state.preset
-                            )
-                            .frame(height: 85)
-                        } else {
-                            ChartView(
-                                glucoseSamples: context.state.glucoseSamples,
-                                useLimits: context.attributes.useLimits,
-                                lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
-                                upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
-                                glucoseRanges: context.state.glucoseRanges,
-                                preset: context.state.preset
-                            )
-                            .frame(height: 85)
+                    if context.attributes.mode == .large {
+                        HStack(spacing: 15) {
+                            loopIcon(context)
+                            if context.attributes.addPredictiveLine {
+                                ChartView(
+                                    glucoseSamples: context.state.glucoseSamples,
+                                    predicatedGlucose: context.state.predicatedGlucose,
+                                    predicatedStartDate: context.state.predicatedStartDate,
+                                    predicatedInterval: context.state.predicatedInterval,
+                                    useLimits: context.attributes.useLimits,
+                                    lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
+                                    upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
+                                    glucoseRanges: context.state.glucoseRanges,
+                                    preset: context.state.preset
+                                )
+                                .frame(height: 85)
+                            } else {
+                                ChartView(
+                                    glucoseSamples: context.state.glucoseSamples,
+                                    useLimits: context.attributes.useLimits,
+                                    lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
+                                    upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
+                                    glucoseRanges: context.state.glucoseRanges,
+                                    preset: context.state.preset
+                                )
+                                .frame(height: 85)
+                            }
                         }
                     }
                     
@@ -80,6 +82,9 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                     trend: item.trend,
                                     context: context
                                 )
+                                
+                            case .loopCircle:
+                                bottomItemLoopCircle(context: context)
                             }
                             
                             if index != endIndex {
@@ -207,6 +212,13 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     .fontWeight(.heavy)
                     .font(Font.body.leading(.tight))
             }
+        }
+    }
+    
+    @ViewBuilder
+    private func bottomItemLoopCircle(context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+        VStack(alignment: .center) {
+            loopIcon(context)
         }
     }
     
