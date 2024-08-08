@@ -1623,6 +1623,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           therapySettingsViewModelDelegate: deviceManager,
                                           delegate: self
         )
+        viewModel.favoriteFoodInsightsDelegate = loopManager
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucosePreference)

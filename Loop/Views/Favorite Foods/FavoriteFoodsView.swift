@@ -13,7 +13,11 @@ import LoopKitUI
 struct FavoriteFoodsView: View {
     @Environment(\.dismissAction) private var dismiss
     
-    @StateObject private var viewModel = FavoriteFoodsViewModel()
+    @StateObject private var viewModel: FavoriteFoodsViewModel
+    
+    init(insightsDelegate: FavoriteFoodInsightsViewModelDelegate? = nil) {
+        self._viewModel = StateObject(wrappedValue: FavoriteFoodsViewModel(insightsDelegate: insightsDelegate))
+    }
 
     @State private var foodToConfirmDeleteId: String? = nil
     @State private var editMode: EditMode = .inactive
@@ -47,12 +51,12 @@ struct FavoriteFoodsView: View {
                 }
                 .insetGroupedListStyle()
                 
-                
-                NavigationLink(destination: AddEditFavoriteFoodView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: $viewModel.isEditViewActive) {
+                let editViewIsActive = Binding(get: { viewModel.isEditViewActive && !viewModel.isDetailViewActive }, set: { viewModel.isEditViewActive = $0 })
+                NavigationLink(destination: FavoriteFoodAddEditView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: editViewIsActive) {
                     EmptyView()
                 }
                 
-                NavigationLink(destination: FavoriteFoodDetailView(food: viewModel.selectedFood, onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit), isActive: $viewModel.isDetailViewActive) {
+                NavigationLink(destination: FavoriteFoodDetailView(viewModel: viewModel), isActive: $viewModel.isDetailViewActive) {
                     EmptyView()
                 }
             }
@@ -64,7 +68,7 @@ struct FavoriteFoodsView: View {
             .navigationBarTitle("Favorite Foods", displayMode: .large)
         }
         .sheet(isPresented: $viewModel.isAddViewActive) {
-            AddEditFavoriteFoodView(onSave: viewModel.onFoodSave(_:))
+            FavoriteFoodAddEditView(onSave: viewModel.onFoodSave(_:))
         }
         .onChange(of: editMode) { newValue in
             if !newValue.isEditing {

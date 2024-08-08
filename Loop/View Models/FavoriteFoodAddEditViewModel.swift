@@ -1,5 +1,5 @@
 //
-//  AddEditFavoriteFoodViewModel.swift
+//  FavoriteFoodAddEditViewModel.swift
 //  Loop
 //
 //  Created by Noah Brauner on 7/31/23.
@@ -10,7 +10,7 @@ import SwiftUI
 import LoopKit
 import HealthKit
 
-final class AddEditFavoriteFoodViewModel: ObservableObject {
+final class FavoriteFoodAddEditViewModel: ObservableObject {
     enum Alert: Identifiable {
         var id: Self {
             return self
@@ -36,7 +36,7 @@ final class AddEditFavoriteFoodViewModel: ObservableObject {
         return minAbsorptionTime...maxAbsorptionTime
     }
     
-    @Published var alert: AddEditFavoriteFoodViewModel.Alert?
+    @Published var alert: FavoriteFoodAddEditViewModel.Alert?
     
     private let onSave: (NewFavoriteFood) -> ()
     
@@ -57,8 +57,14 @@ final class AddEditFavoriteFoodViewModel: ObservableObject {
     init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, onSave: @escaping (NewFavoriteFood) -> ()) {
         self.onSave = onSave
         self.carbsQuantity = carbsQuantity
-        self.foodType = foodType
         self.absorptionTime = absorptionTime
+        
+        // foodType of Apple 🍎 --> name: Apple, foodType: 🍎
+        var name = foodType
+        name.removeAll(where: \.isEmoji)
+        name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.foodType = foodType.filter(\.isEmoji)
+        self.name = name
     }
     
     var originalFavoriteFood: StoredFavoriteFood?

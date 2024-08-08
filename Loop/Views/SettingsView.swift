@@ -159,7 +159,7 @@ public struct SettingsView: View {
                     .environment(\.guidanceColors, self.guidanceColors)
                     .environment(\.insulinTintColor, self.insulinTintColor)
                 case .favoriteFoods:
-                    FavoriteFoodsView()
+                    FavoriteFoodsView(insightsDelegate: viewModel.favoriteFoodInsightsDelegate)
                 }
             }
         }
