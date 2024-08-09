@@ -29,7 +29,7 @@ struct SystemStatusWidgetEntryView : View {
             VStack(alignment: .center, spacing: 5) {
                 HStack(alignment: .center, spacing: 15) {
                     LoopCircleView(closedLoop: entry.closeLoop, freshness: freshness)
-                        .environment(\.guidanceColors, .default)
+                        .environment(\.loopStatusColorPalette, .loopStatus)
                         .disabled(entry.contextIsStale)
                     
                     GlucoseView(entry: entry)
