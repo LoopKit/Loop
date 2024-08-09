@@ -15,6 +15,12 @@
 		1452F4A92A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4A82A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift */; };
 		1452F4AB2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AA2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift */; };
 		1452F4AD2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */; };
+		1455ACA92C66665D004F44F2 /* StateColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428B217806A300FAB378 /* StateColorPalette.swift */; };
+		1455ACAB2C666F9C004F44F2 /* EventualGlucoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1455ACAA2C666F9C004F44F2 /* EventualGlucoseView.swift */; };
+		1455ACAD2C6675E1004F44F2 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1455ACAC2C6675DF004F44F2 /* Color.swift */; };
+		1455ACB02C667A1F004F44F2 /* DeeplinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1455ACAF2C667A1F004F44F2 /* DeeplinkView.swift */; };
+		1455ACB22C667BEE004F44F2 /* Deeplink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1455ACB12C667BEE004F44F2 /* Deeplink.swift */; };
+		1455ACB32C667C16004F44F2 /* Deeplink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1455ACB12C667BEE004F44F2 /* Deeplink.swift */; };
 		147EFE8E2A8BCC5500272438 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE8D2A8BCC5500272438 /* DefaultAssets.xcassets */; };
 		147EFE902A8BCD8000272438 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE8F2A8BCD8000272438 /* DerivedAssets.xcassets */; };
 		147EFE922A8BCD8A00272438 /* DerivedAssetsBase.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE912A8BCD8A00272438 /* DerivedAssetsBase.xcassets */; };
@@ -258,7 +264,6 @@
 		84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */; };
 		84AA81DB2A4A2973000B658B /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81DA2A4A2973000B658B /* Date.swift */; };
 		84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */; };
-		84AA81E32A4A36FB000B658B /* SystemActionLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E22A4A36FB000B658B /* SystemActionLink.swift */; };
 		84AA81E52A4A3981000B658B /* DeeplinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E42A4A3981000B658B /* DeeplinkManager.swift */; };
 		84AA81E72A4A4DEF000B658B /* PumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E62A4A4DEF000B658B /* PumpView.swift */; };
 		84DEB10D2C18FABA00170734 /* IOSFocusModesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DEB10C2C18FABA00170734 /* IOSFocusModesView.swift */; };
@@ -739,6 +744,10 @@
 		1452F4A82A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodAddEditViewModel.swift; sourceTree = "<group>"; };
 		1452F4AA2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodAddEditView.swift; sourceTree = "<group>"; };
 		1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowAbsorptionTimeWorksView.swift; sourceTree = "<group>"; };
+		1455ACAA2C666F9C004F44F2 /* EventualGlucoseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventualGlucoseView.swift; sourceTree = "<group>"; };
+		1455ACAC2C6675DF004F44F2 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		1455ACAF2C667A1F004F44F2 /* DeeplinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkView.swift; sourceTree = "<group>"; };
+		1455ACB12C667BEE004F44F2 /* Deeplink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deeplink.swift; sourceTree = "<group>"; };
 		147EFE8D2A8BCC5500272438 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		147EFE8F2A8BCD8000272438 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 		147EFE912A8BCD8A00272438 /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
@@ -1181,7 +1190,6 @@
 		84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelimeEntry.swift; sourceTree = "<group>"; };
 		84AA81DA2A4A2973000B658B /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 		84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelineProvider.swift; sourceTree = "<group>"; };
-		84AA81E22A4A36FB000B658B /* SystemActionLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemActionLink.swift; sourceTree = "<group>"; };
 		84AA81E42A4A3981000B658B /* DeeplinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkManager.swift; sourceTree = "<group>"; };
 		84AA81E62A4A4DEF000B658B /* PumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpView.swift; sourceTree = "<group>"; };
 		84DEB10C2C18FABA00170734 /* IOSFocusModesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSFocusModesView.swift; sourceTree = "<group>"; };
@@ -1956,6 +1964,7 @@
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
 				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
 				C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */,
+				1455ACB12C667BEE004F44F2 /* Deeplink.swift */,
 				DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */,
 				B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */,
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
@@ -2522,8 +2531,9 @@
 			isa = PBXGroup;
 			children = (
 				14B1736E28AEDBF6006CCD7C /* BasalView.swift */,
+				1455ACAF2C667A1F004F44F2 /* DeeplinkView.swift */,
+				1455ACAA2C666F9C004F44F2 /* EventualGlucoseView.swift */,
 				14B1737028AEDBF6006CCD7C /* GlucoseView.swift */,
-				84AA81E22A4A36FB000B658B /* SystemActionLink.swift */,
 				84AA81E62A4A4DEF000B658B /* PumpView.swift */,
 			);
 			path = Components;
@@ -2543,9 +2553,10 @@
 		84AA81D92A4A2966000B658B /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				1455ACAC2C6675DF004F44F2 /* Color.swift */,
+				8496F7302B5711C4003E672C /* ContentMargin.swift */,
 				84AA81DA2A4A2973000B658B /* Date.swift */,
 				84AA81D52A4A28AF000B658B /* WidgetBackground.swift */,
-				8496F7302B5711C4003E672C /* ContentMargin.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -3528,25 +3539,29 @@
 			buildActionMask = 2147483647;
 			files = (
 				14B1738128AEDC70006CCD7C /* StatusExtensionContext.swift in Sources */,
+				1455ACA92C66665D004F44F2 /* StateColorPalette.swift in Sources */,
 				14B1737628AEDC6C006CCD7C /* HKUnit.swift in Sources */,
 				14B1737728AEDC6C006CCD7C /* NSBundle.swift in Sources */,
 				84AA81D62A4A28AF000B658B /* WidgetBackground.swift in Sources */,
 				84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */,
 				84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */,
-				84AA81E32A4A36FB000B658B /* SystemActionLink.swift in Sources */,
 				14B1737828AEDC6C006CCD7C /* NSTimeInterval.swift in Sources */,
+				1455ACB32C667C16004F44F2 /* Deeplink.swift in Sources */,
 				14B1737928AEDC6C006CCD7C /* NSUserDefaults+StatusExtension.swift in Sources */,
 				14B1737A28AEDC6C006CCD7C /* NumberFormatter.swift in Sources */,
+				1455ACAB2C666F9C004F44F2 /* EventualGlucoseView.swift in Sources */,
 				14B1737B28AEDC6C006CCD7C /* OSLog.swift in Sources */,
 				14B1737C28AEDC6C006CCD7C /* PumpManager.swift in Sources */,
 				14B1737D28AEDC6C006CCD7C /* PumpManagerUI.swift in Sources */,
 				14B1737E28AEDC6C006CCD7C /* FeatureFlags.swift in Sources */,
 				84AA81E72A4A4DEF000B658B /* PumpView.swift in Sources */,
+				1455ACAD2C6675E1004F44F2 /* Color.swift in Sources */,
 				14B1737F28AEDC6C006CCD7C /* PluginManager.swift in Sources */,
 				14B1738028AEDC6C006CCD7C /* Debug.swift in Sources */,
 				84AA81DB2A4A2973000B658B /* Date.swift in Sources */,
 				14B1737228AEDBF6006CCD7C /* BasalView.swift in Sources */,
 				14B1737428AEDBF6006CCD7C /* GlucoseView.swift in Sources */,
+				1455ACB02C667A1F004F44F2 /* DeeplinkView.swift in Sources */,
 				14B1737328AEDBF6006CCD7C /* SystemStatusWidget.swift in Sources */,
 				84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */,
 				8496F7312B5711C4003E672C /* ContentMargin.swift in Sources */,
@@ -3738,6 +3753,7 @@
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
 				DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */,
 				4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */,
+				1455ACB22C667BEE004F44F2 /* Deeplink.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
 				A9FB75F1252BE320004C7D3F /* BolusDosingDecision.swift in Sources */,
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,

@@ -12,11 +12,10 @@ import LoopUI
 import SwiftUI
 import WidgetKit
 
-struct SystemStatusWidgetEntryView : View {
-    
+struct SystemStatusWidgetEntryView: View {
     @Environment(\.widgetFamily) private var widgetFamily
     
-    var entry: StatusWidgetTimelineProvider.Entry
+    var entry: StatusWidgetTimelimeEntry
     
     var freshness: LoopCompletionFreshness {
         let lastLoopCompleted = entry.lastLoopCompleted ?? Date().addingTimeInterval(.minutes(16))
@@ -27,50 +26,52 @@ struct SystemStatusWidgetEntryView : View {
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
             VStack(alignment: .center, spacing: 5) {
-                HStack(alignment: .center, spacing: 15) {
+                HStack(alignment: .center, spacing: 0) {
                     LoopCircleView(closedLoop: entry.closeLoop, freshness: freshness)
-                        .environment(\.guidanceColors, .default)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .environment(\.loopStatusColorPalette, .loopStatus)
                         .disabled(entry.contextIsStale)
                     
                     GlucoseView(entry: entry)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .padding(5)
-                .background(
-                    ContainerRelativeShape()
-                        .fill(Color("WidgetSecondaryBackground"))
-                )
+                .containerRelativeBackground()
                 
-                PumpView(entry: entry)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    .padding(5)
-                    .background(
-                        ContainerRelativeShape()
-                            .fill(Color("WidgetSecondaryBackground"))
-                    )
+                HStack(alignment: .center, spacing: 0) {
+                    PumpView(entry: entry)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                    EventualGlucoseView(entry: entry)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .frame(maxHeight: .infinity, alignment: .center)
+                .padding(.vertical, 5)
+                .containerRelativeBackground()
             }
             
             if widgetFamily != .systemSmall {
                 VStack(alignment: .center, spacing: 5) {
                     HStack(alignment: .center, spacing: 5) {
-                        SystemActionLink(to: .carbEntry)
+                        DeeplinkView(destination: .carbEntry)
                         
-                        SystemActionLink(to: .bolus)
+                        DeeplinkView(destination: .bolus)
                     }
                     
                     HStack(alignment: .center, spacing: 5) {
                         if entry.preMealPresetAllowed {
-                            SystemActionLink(to: .preMeal, active: entry.preMealPresetActive)
+                            DeeplinkView(destination: .preMeal, isActive: entry.preMealPresetActive)
                         }
                         
-                        SystemActionLink(to: .customPreset, active: entry.customPresetActive)
+                        DeeplinkView(destination: .customPresets, isActive: entry.customPresetActive)
                     }
                 }
                 .buttonStyle(.plain)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
         }
-        .foregroundColor(entry.contextIsStale ? Color(UIColor.systemGray3) : nil)
+        .foregroundColor(entry.contextIsStale ? .staleGray : nil)
         .padding(5)
         .widgetBackground()
     }
