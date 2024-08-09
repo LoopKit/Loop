@@ -16,6 +16,7 @@
 		1452F4AB2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AA2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift */; };
 		1452F4AD2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */; };
 		1455ACA92C66665D004F44F2 /* StateColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428B217806A300FAB378 /* StateColorPalette.swift */; };
+		1455ACAB2C666F9C004F44F2 /* EventualGlucoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1455ACAA2C666F9C004F44F2 /* EventualGlucoseView.swift */; };
 		147EFE8E2A8BCC5500272438 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE8D2A8BCC5500272438 /* DefaultAssets.xcassets */; };
 		147EFE902A8BCD8000272438 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE8F2A8BCD8000272438 /* DerivedAssets.xcassets */; };
 		147EFE922A8BCD8A00272438 /* DerivedAssetsBase.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 147EFE912A8BCD8A00272438 /* DerivedAssetsBase.xcassets */; };
@@ -740,6 +741,7 @@
 		1452F4A82A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodAddEditViewModel.swift; sourceTree = "<group>"; };
 		1452F4AA2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodAddEditView.swift; sourceTree = "<group>"; };
 		1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowAbsorptionTimeWorksView.swift; sourceTree = "<group>"; };
+		1455ACAA2C666F9C004F44F2 /* EventualGlucoseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventualGlucoseView.swift; sourceTree = "<group>"; };
 		147EFE8D2A8BCC5500272438 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		147EFE8F2A8BCD8000272438 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 		147EFE912A8BCD8A00272438 /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
@@ -2523,6 +2525,7 @@
 			isa = PBXGroup;
 			children = (
 				14B1736E28AEDBF6006CCD7C /* BasalView.swift */,
+				1455ACAA2C666F9C004F44F2 /* EventualGlucoseView.swift */,
 				14B1737028AEDBF6006CCD7C /* GlucoseView.swift */,
 				84AA81E22A4A36FB000B658B /* SystemActionLink.swift */,
 				84AA81E62A4A4DEF000B658B /* PumpView.swift */,
@@ -3539,6 +3542,7 @@
 				14B1737828AEDC6C006CCD7C /* NSTimeInterval.swift in Sources */,
 				14B1737928AEDC6C006CCD7C /* NSUserDefaults+StatusExtension.swift in Sources */,
 				14B1737A28AEDC6C006CCD7C /* NumberFormatter.swift in Sources */,
+				1455ACAB2C666F9C004F44F2 /* EventualGlucoseView.swift in Sources */,
 				14B1737B28AEDC6C006CCD7C /* OSLog.swift in Sources */,
 				14B1737C28AEDC6C006CCD7C /* PumpManager.swift in Sources */,
 				14B1737D28AEDC6C006CCD7C /* PumpManagerUI.swift in Sources */,

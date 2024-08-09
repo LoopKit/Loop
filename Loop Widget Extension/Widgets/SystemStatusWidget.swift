@@ -27,12 +27,14 @@ struct SystemStatusWidgetEntryView : View {
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
             VStack(alignment: .center, spacing: 5) {
-                HStack(alignment: .center, spacing: 15) {
+                HStack(alignment: .center, spacing: 0) {
                     LoopCircleView(closedLoop: entry.closeLoop, freshness: freshness)
+                        .frame(maxWidth: .infinity, alignment: .center)
                         .environment(\.loopStatusColorPalette, .loopStatus)
                         .disabled(entry.contextIsStale)
                     
                     GlucoseView(entry: entry)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .padding(5)
@@ -41,13 +43,19 @@ struct SystemStatusWidgetEntryView : View {
                         .fill(Color("WidgetSecondaryBackground"))
                 )
                 
-                PumpView(entry: entry)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    .padding(5)
-                    .background(
-                        ContainerRelativeShape()
-                            .fill(Color("WidgetSecondaryBackground"))
-                    )
+                HStack(alignment: .center, spacing: 0) {
+                    PumpView(entry: entry)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                    EventualGlucoseView(entry: entry)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .frame(maxHeight: .infinity, alignment: .center)
+                .padding(.vertical, 5)
+                .background(
+                    ContainerRelativeShape()
+                        .fill(Color("WidgetSecondaryBackground"))
+                )
             }
             
             if widgetFamily != .systemSmall {
