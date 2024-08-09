@@ -29,8 +29,9 @@ struct GlucoseView: View {
                         .font(.system(size: 24, weight: .heavy, design: .default))
                 }
                 
-                if let trendImageName = getArrowImage() {
-                    Image(systemName: trendImageName)
+                if let trendImage = entry.sensor?.trendType?.image {
+                    Image(uiImage: trendImage)
+                        .renderingMode(.template)
                 }
             }
             .foregroundColor(entry.glucoseStatusIsStale ? .staleGray : .primary)
@@ -50,27 +51,6 @@ struct GlucoseView: View {
                     .font(.footnote)
                     .foregroundColor(entry.glucoseStatusIsStale ? .staleGray : .secondary)
             }
-        }
-    }
-    
-    private func getArrowImage() -> String? {
-        switch entry.sensor?.trendType {
-        case .upUpUp:
-            return "arrow.double.up.circle"
-        case .upUp:
-            return "arrow.up.circle"
-        case .up:
-            return "arrow.up.right.circle"
-        case .flat:
-            return "arrow.right.circle"
-        case .down:
-            return "arrow.down.right.circle"
-        case .downDown:
-            return "arrow.down.circle"
-        case .downDownDown:
-            return "arrow.double.down.circle"
-        case .none:
-            return nil
         }
     }
 }
