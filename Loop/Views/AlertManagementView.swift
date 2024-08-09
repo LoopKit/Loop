@@ -7,8 +7,10 @@
 //
 
 import SwiftUI
+import LoopCore
 import LoopKit
 import LoopKitUI
+import HealthKit
 
 struct AlertManagementView: View {
     @Environment(\.appName) private var appName
@@ -156,6 +158,11 @@ struct AlertManagementView: View {
                             .foregroundColor(.critical)
                     }
                 }
+            }
+            
+            NavigationLink(destination: LiveActivityManagementView())
+            {
+                    Text(NSLocalizedString("Live activity", comment: "Alert Permissions live activity"))
             }
         }
     }
