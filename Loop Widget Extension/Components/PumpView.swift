@@ -21,7 +21,7 @@ struct PumpView: View {
             }
         }
         else if let netBasal = entry.netBasal {
-            BasalView(netBasal: netBasal, isOld: entry.contextIsStale)
+            BasalView(netBasal: netBasal, isStale: entry.contextIsStale)
         }
     }
 }

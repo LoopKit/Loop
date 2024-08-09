@@ -18,15 +18,15 @@ struct EventualGlucoseView: View {
                 VStack {
                     Text("Eventual")
                         .font(.footnote)
-                        .foregroundColor(entry.contextIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
-                    
+                        .foregroundColor(entry.contextIsStale ? .staleGray : .secondary)
+
                     Text("\(glucoseString)")
                         .font(.subheadline)
                         .fontWeight(.heavy)
                     
                     Text(eventualGlucose.unit.shortLocalizedUnitString())
                         .font(.footnote)
-                        .foregroundColor(entry.contextIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                        .foregroundColor(entry.contextIsStale ? .staleGray : .secondary)
                 }
             }
         }

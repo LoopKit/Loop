@@ -12,26 +12,17 @@ import HealthKit
 import LoopCore
 
 struct GlucoseView: View {
-
     var entry: StatusWidgetTimelimeEntry
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             HStack(spacing: 2) {
-                if let glucose = entry.currentGlucose,
-                   !entry.glucoseIsStale,
-                   let unit = entry.unit
-                {
-                    let quantity = glucose.quantity
-                    let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
-                    if let glucoseString = glucoseFormatter.string(from: quantity.doubleValue(for: unit)) {
-                        Text(glucoseString)
-                            .font(.system(size: 24, weight: .heavy, design: .default))
-                    }
-                    else {
-                        Text("??")
-                            .font(.system(size: 24, weight: .heavy, design: .default))
-                    }
+                if !entry.glucoseIsStale,
+                   let glucoseQuantity = entry.currentGlucose?.quantity,
+                   let unit = entry.unit,
+                   let glucoseString = NumberFormatter.glucoseFormatter(for: unit).string(from: glucoseQuantity.doubleValue(for: unit)) {
+                    Text(glucoseString)
+                        .font(.system(size: 24, weight: .heavy, design: .default))
                 }
                 else {
                     Text("---")
@@ -42,26 +33,22 @@ struct GlucoseView: View {
                     Image(systemName: trendImageName)
                 }
             }
-            // Prevent truncation of text
-            .fixedSize(horizontal: true, vertical: false)
-            .foregroundColor(entry.glucoseStatusIsStale ? Color(UIColor.systemGray3) : .primary)
+            .foregroundColor(entry.glucoseStatusIsStale ? .staleGray : .primary)
             
-            let unitString = entry.unit == nil ? "-" : entry.unit!.localizedShortUnitString
+            let unitString = entry.unit?.localizedShortUnitString ?? "-"
             if let delta = entry.delta, let unit = entry.unit {
                 let deltaValue = delta.doubleValue(for: unit)
                 let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
                 let deltaString = (deltaValue < 0 ? "-" : "+") + numberFormatter.string(from: abs(deltaValue))!
                 
                 Text(deltaString + " " + unitString)
-                // Dynamic text causes string to be cut off
-                    .font(.system(size: 13))
-                    .foregroundColor(entry.glucoseStatusIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
-                    .fixedSize(horizontal: true, vertical: true)
+                    .font(.footnote)
+                    .foregroundColor(entry.glucoseStatusIsStale ? .staleGray : .secondary)
             }
             else {
                 Text(unitString)
                     .font(.footnote)
-                    .foregroundColor(entry.glucoseStatusIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
+                    .foregroundColor(entry.glucoseStatusIsStale ? .staleGray : .secondary)
             }
         }
     }
