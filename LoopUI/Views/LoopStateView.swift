@@ -32,7 +32,7 @@ class WrappedLoopStateViewModel: ObservableObject {
 
 struct WrappedLoopCircleView: View {
     
-    @ObservedObject var viewModel: WrappedLoopStateViewModel
+    @StateObject var viewModel: WrappedLoopStateViewModel
     
     var body: some View {
         LoopCircleView(closedLoop: viewModel.closedLoop, freshness: viewModel.freshness, animating: viewModel.animating)
