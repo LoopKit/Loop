@@ -91,13 +91,33 @@ struct LiveActivityManagementView: View {
                         if self.displayGlucosePreference.unit == .millimolesPerLiter {
                             TextInput(label: "Upper limit chart", value: $upperLimitMmol)
                                 .transition(.move(edge: useLimits ? .top : .bottom))
+                                .onChange(of: upperLimitMmol) { newValue in
+                                    self.mutate { settings in
+                                        settings.upperLimitChartMmol = newValue
+                                    }
+                                }
                             TextInput(label: "Lower limit chart", value: $lowerLimitMmol)
                                 .transition(.move(edge: useLimits ? .top : .bottom))
+                                .onChange(of: lowerLimitMmol) { newValue in
+                                    self.mutate { settings in
+                                        settings.lowerLimitChartMmol = newValue
+                                    }
+                                }
                         } else {
                             TextInput(label: "Upper limit chart", value: $upperLimitMg)
                                 .transition(.move(edge: useLimits ? .top : .bottom))
+                                .onChange(of: upperLimitMg) { newValue in
+                                    self.mutate { settings in
+                                        settings.upperLimitChartMg = newValue
+                                    }
+                                }
                             TextInput(label: "Lower limit chart", value: $lowerLimitMg)
                                 .transition(.move(edge: useLimits ? .top : .bottom))
+                                .onChange(of: lowerLimitMg) { newValue in
+                                    self.mutate { settings in
+                                        settings.lowerLimitChartMg = newValue
+                                    }
+                                }
                         }
                     }
                 }

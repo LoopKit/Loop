@@ -149,7 +149,7 @@ class GlucoseActivityManager {
                 presetContext = Preset(
                     title: override.getTitle(),
                     startDate: max(override.startDate, start),
-                    endDate: override.duration.isInfinite ? endDateChart : min(Date.now + override.duration.timeInterval, endDateChart),
+                    endDate: override.duration.isInfinite ? endDateChart : min(override.actualEndDate, endDateChart),
                     minValue: override.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
                     maxValue: override.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
                 )
@@ -208,15 +208,7 @@ class GlucoseActivityManager {
             } else if newSettings.enabled && self.activity == nil {
                 initEmptyActivity(settings: newSettings)
                 
-            } else if
-                newSettings.mode != self.settings.mode ||
-                newSettings.addPredictiveLine != self.settings.addPredictiveLine ||
-                newSettings.useLimits != self.settings.useLimits ||
-                newSettings.lowerLimitChartMmol != self.settings.lowerLimitChartMmol ||
-                newSettings.upperLimitChartMmol != self.settings.upperLimitChartMmol ||
-                newSettings.lowerLimitChartMg != self.settings.lowerLimitChartMg ||
-                newSettings.upperLimitChartMg != self.settings.upperLimitChartMg
-            {
+            } else if newSettings != self.settings {
                 await self.activity?.end(nil, dismissalPolicy: .immediate)
                 self.activity = nil
                 
@@ -229,8 +221,13 @@ class GlucoseActivityManager {
     }
     
     @objc private func appMovedToForeground() {
+        guard self.settings.enabled else {
+            return
+        }
+        
         guard let activity = self.activity else {
-            print("ERROR: appMovedToForeground: No Live activity found...")
+            initEmptyActivity(settings: self.settings)
+            update()
             return
         }
         

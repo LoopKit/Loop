@@ -83,7 +83,7 @@ public enum LiveActivityMode: Codable, CustomStringConvertible {
     }
 }
 
-public struct LiveActivitySettings: Codable {
+public struct LiveActivitySettings: Codable, Equatable {
     public var enabled: Bool
     public var mode: LiveActivityMode
     public var addPredictiveLine: Bool
@@ -113,15 +113,16 @@ public struct LiveActivitySettings: Codable {
     
     public init(from decoder:Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        enabled = try values.decode(Bool.self, forKey: .enabled)
-        mode = try values.decodeIfPresent(LiveActivityMode.self, forKey: .mode) ?? .large
-        addPredictiveLine = try values.decode(Bool.self, forKey: .addPredictiveLine)
-        useLimits = try values.decodeIfPresent(Bool.self, forKey: .useLimits) ?? true
-        upperLimitChartMmol = try values.decode(Double?.self, forKey: .upperLimitChartMmol) ?? LiveActivitySettings.defaultUpperLimitMmol
-        lowerLimitChartMmol = try values.decode(Double?.self, forKey: .lowerLimitChartMmol) ?? LiveActivitySettings.defaultLowerLimitMmol
-        upperLimitChartMg = try values.decode(Double?.self, forKey: .upperLimitChartMg) ?? LiveActivitySettings.defaultUpperLimitMg
-        lowerLimitChartMg = try values.decode(Double?.self, forKey: .lowerLimitChartMg) ?? LiveActivitySettings.defaultLowerLimitMg
-        bottomRowConfiguration = try values.decode([BottomRowConfiguration].self, forKey: .bottomRowConfiguration)
+
+        self.enabled = try values.decode(Bool.self, forKey: .enabled)
+        self.mode = try values.decodeIfPresent(LiveActivityMode.self, forKey: .mode) ?? .large
+        self.addPredictiveLine = try values.decode(Bool.self, forKey: .addPredictiveLine)
+        self.useLimits = try values.decodeIfPresent(Bool.self, forKey: .useLimits) ?? true
+        self.upperLimitChartMmol = try values.decode(Double?.self, forKey: .upperLimitChartMmol) ?? LiveActivitySettings.defaultUpperLimitMmol
+        self.lowerLimitChartMmol = try values.decode(Double?.self, forKey: .lowerLimitChartMmol) ?? LiveActivitySettings.defaultLowerLimitMmol
+        self.upperLimitChartMg = try values.decode(Double?.self, forKey: .upperLimitChartMg) ?? LiveActivitySettings.defaultUpperLimitMg
+        self.lowerLimitChartMg = try values.decode(Double?.self, forKey: .lowerLimitChartMg) ?? LiveActivitySettings.defaultLowerLimitMg
+        self.bottomRowConfiguration = try values.decode([BottomRowConfiguration].self, forKey: .bottomRowConfiguration)
     }
     
     public init() {
@@ -134,5 +135,25 @@ public struct LiveActivitySettings: Codable {
         self.upperLimitChartMg = LiveActivitySettings.defaultUpperLimitMg
         self.lowerLimitChartMg = LiveActivitySettings.defaultLowerLimitMg
         self.bottomRowConfiguration = BottomRowConfiguration.defaults
+    }
+    
+    public static func == (lhs: LiveActivitySettings, rhs: LiveActivitySettings) -> Bool {
+        return lhs.addPredictiveLine == rhs.addPredictiveLine &&
+            lhs.mode == rhs.mode &&
+            lhs.useLimits == rhs.useLimits &&
+            lhs.lowerLimitChartMmol == rhs.lowerLimitChartMmol &&
+            lhs.upperLimitChartMmol == rhs.upperLimitChartMmol &&
+            lhs.lowerLimitChartMg == rhs.lowerLimitChartMg &&
+            lhs.upperLimitChartMg == rhs.upperLimitChartMg
+    }
+    
+    public static func != (lhs: LiveActivitySettings, rhs: LiveActivitySettings) -> Bool {
+        return lhs.addPredictiveLine != rhs.addPredictiveLine ||
+            lhs.mode != rhs.mode ||
+            lhs.useLimits != rhs.useLimits ||
+            lhs.lowerLimitChartMmol != rhs.lowerLimitChartMmol ||
+            lhs.upperLimitChartMmol != rhs.upperLimitChartMmol ||
+            lhs.lowerLimitChartMg != rhs.lowerLimitChartMg ||
+            lhs.upperLimitChartMg != rhs.upperLimitChartMg
     }
 }
