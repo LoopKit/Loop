@@ -19,10 +19,10 @@ struct LiveActivityManagementView: View {
     @State var isEditingMode = false
     @State private var addPredictiveLine: Bool
     @State private var useLimits: Bool
-    @State private var upperLimitMmol: Double
-    @State private var lowerLimitMmol: Double
-    @State private var upperLimitMg: Double
-    @State private var lowerLimitMg: Double
+    @State private var upperLimitChartMmol: Double
+    @State private var lowerLimitChartMmol: Double
+    @State private var upperLimitChartMg: Double
+    @State private var lowerLimitChartMg: Double
     
     init() {
         let liveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
@@ -31,107 +31,79 @@ struct LiveActivityManagementView: View {
         self.mode = liveActivitySettings.mode
         self.addPredictiveLine = liveActivitySettings.addPredictiveLine
         self.useLimits = liveActivitySettings.useLimits
-        self.upperLimitMmol = liveActivitySettings.upperLimitChartMmol
-        self.lowerLimitMmol = liveActivitySettings.lowerLimitChartMmol
-        self.upperLimitMg = liveActivitySettings.upperLimitChartMg
-        self.lowerLimitMg = liveActivitySettings.lowerLimitChartMg
+        self.upperLimitChartMmol = liveActivitySettings.upperLimitChartMmol
+        self.lowerLimitChartMmol = liveActivitySettings.lowerLimitChartMmol
+        self.upperLimitChartMg = liveActivitySettings.upperLimitChartMg
+        self.lowerLimitChartMg = liveActivitySettings.lowerLimitChartMg
     }
    
     var body: some View {
-        List {
-            Section {
-                Toggle(NSLocalizedString("Enabled", comment: "Title for enable live activity toggle"), isOn: $enabled)
-                    .onChange(of: enabled) { newValue in
-                        self.mutate { settings in
-                            settings.enabled = newValue
-                        }
-                    }
-                
-                ExpandableSetting(
-                    isEditing: $isEditingMode,
-                    leadingValueContent: {
-                        Text(NSLocalizedString("Mode", comment: "Title for mode live activity toggle"))
-                            .foregroundStyle(isEditingMode ? .blue : .primary)
-                    },
-                    trailingValueContent: {
-                        Text(self.mode.name())
-                            .foregroundStyle(isEditingMode ? .blue : .primary)
-                    },
-                    expandedContent: {
-                        ResizeablePicker(selection: self.$mode.animation(),
-                                         data: LiveActivityMode.all,
-                                         formatter: { $0.name() })
-                    }
-                )
-                .onChange(of: self.mode) { newValue in
-                    self.mutate { settings in
-                        settings.mode = newValue
-                    }
-                }
-            }
-            
-            if mode == .large {
+        VStack {
+            List {
                 Section {
-                    Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: $addPredictiveLine)
-                        .transition(.move(edge: mode == .large ? .top : .bottom))
-                        .onChange(of: addPredictiveLine) { newValue in
-                            self.mutate { settings in
-                                settings.addPredictiveLine = newValue
-                            }
+                    Toggle(NSLocalizedString("Enabled", comment: "Title for enable live activity toggle"), isOn: $enabled)
+                    
+                    ExpandableSetting(
+                        isEditing: $isEditingMode,
+                        leadingValueContent: {
+                            Text(NSLocalizedString("Mode", comment: "Title for mode live activity toggle"))
+                                .foregroundStyle(isEditingMode ? .blue : .primary)
+                        },
+                        trailingValueContent: {
+                            Text(self.mode.name())
+                                .foregroundStyle(isEditingMode ? .blue : .primary)
+                        },
+                        expandedContent: {
+                            ResizeablePicker(selection: self.$mode.animation(),
+                                             data: LiveActivityMode.all,
+                                             formatter: { $0.name() })
                         }
+                    )
+                }
+                
+                Section {
+                    if mode == .large {
+                        Toggle(NSLocalizedString("Add predictive line", comment: "Title for predictive line toggle"), isOn: $addPredictiveLine)
+                            .transition(.move(edge: mode == .large ? .top : .bottom))
+                    }
+                    
                     Toggle(NSLocalizedString("Use BG coloring", comment: "Title for BG coloring"), isOn: $useLimits)
                         .transition(.move(edge: mode == .large ? .top : .bottom))
-                        .onChange(of: useLimits) { newValue in
-                            self.mutate { settings in
-                                settings.useLimits = newValue
-                            }
-                        }
                     
                     if useLimits {
                         if self.displayGlucosePreference.unit == .millimolesPerLiter {
-                            TextInput(label: "Upper limit chart", value: $upperLimitMmol)
+                            TextInput(label: "Upper limit", value: $upperLimitChartMmol)
                                 .transition(.move(edge: useLimits ? .top : .bottom))
-                                .onChange(of: upperLimitMmol) { newValue in
-                                    self.mutate { settings in
-                                        settings.upperLimitChartMmol = newValue
-                                    }
-                                }
-                            TextInput(label: "Lower limit chart", value: $lowerLimitMmol)
+                            TextInput(label: "Lower limit", value: $lowerLimitChartMmol)
                                 .transition(.move(edge: useLimits ? .top : .bottom))
-                                .onChange(of: lowerLimitMmol) { newValue in
-                                    self.mutate { settings in
-                                        settings.lowerLimitChartMmol = newValue
-                                    }
-                                }
                         } else {
-                            TextInput(label: "Upper limit chart", value: $upperLimitMg)
+                            TextInput(label: "Upper limit", value: $upperLimitChartMg)
                                 .transition(.move(edge: useLimits ? .top : .bottom))
-                                .onChange(of: upperLimitMg) { newValue in
-                                    self.mutate { settings in
-                                        settings.upperLimitChartMg = newValue
-                                    }
-                                }
-                            TextInput(label: "Lower limit chart", value: $lowerLimitMg)
+                            TextInput(label: "Lower limit", value: $lowerLimitChartMg)
                                 .transition(.move(edge: useLimits ? .top : .bottom))
-                                .onChange(of: lowerLimitMg) { newValue in
-                                    self.mutate { settings in
-                                        settings.lowerLimitChartMg = newValue
-                                    }
-                                }
                         }
                     }
                 }
-            }
                 
-            Section {
-                NavigationLink(
-                    destination: LiveActivityBottomRowManagerView(),
-                    label: { Text(NSLocalizedString("Bottom row configuration", comment: "Title for Bottom row configuration")) }
-                )
+                Section {
+                    NavigationLink(
+                        destination: LiveActivityBottomRowManagerView(),
+                        label: { Text(NSLocalizedString("Bottom row configuration", comment: "Title for Bottom row configuration")) }
+                    )
+                }
+                
+                
             }
-        }
             .animation(.easeInOut, value: UUID())
             .insetGroupedListStyle()
+            
+            Spacer()
+            Button(action: save) {
+                Text(NSLocalizedString("Save", comment: ""))
+            }
+            .buttonStyle(ActionButtonStyle())
+            .padding([.bottom, .horizontal])
+        }
             .navigationBarTitle(Text(NSLocalizedString("Live activity", comment: "Live activity screen title")))
     }
     
@@ -146,10 +118,16 @@ struct LiveActivityManagementView: View {
         }
     }
     
-    private func mutate(_ updater: (inout LiveActivitySettings) -> Void) {
+    private func save() {
         var settings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-        
-        updater(&settings)
+        settings.enabled = self.enabled
+        settings.mode = self.mode
+        settings.addPredictiveLine = self.addPredictiveLine
+        settings.useLimits = self.useLimits
+        settings.upperLimitChartMmol = self.upperLimitChartMmol
+        settings.lowerLimitChartMmol = self.lowerLimitChartMmol
+        settings.upperLimitChartMg = self.upperLimitChartMg
+        settings.lowerLimitChartMg = self.lowerLimitChartMg
         
         UserDefaults.standard.liveActivity = settings
         NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: settings)
