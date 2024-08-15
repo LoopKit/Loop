@@ -271,6 +271,10 @@ struct GlucoseLiveActivityConfiguration: Widget {
     }
     
     private func getGlucoseColor(_ value: Double, context: ActivityViewContext<GlucoseActivityAttributes>) -> Color {
+        guard context.attributes.useLimits else {
+            return .primary
+        }
+        
         if
             context.state.isMmol && value < context.attributes.lowerLimitChartMmol ||
             !context.state.isMmol && value < context.attributes.lowerLimitChartMg
