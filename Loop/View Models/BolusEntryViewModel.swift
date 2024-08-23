@@ -269,41 +269,50 @@ final class BolusEntryViewModel: ObservableObject {
     
     private func observeBolusBreakdownChanges() {
         $carbBolusIncluded
-            .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+            .sink { [weak self] newValue in
+                if self?.carbBolusIncluded != newValue {
+                    self?.delegate?.withLoopState { [weak self] _ in
+                        self?.updateRecommendedBolusAndNoticeForBolusBreakdownChange()
+                    }
                 }
             }
             .store(in: &cancellables)
         $cobCorrectionBolusIncluded
-            .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+            .sink { [weak self] newValue in
+                if self?.cobCorrectionBolusIncluded != newValue {
+                    self?.delegate?.withLoopState { [weak self] _ in
+                        self?.updateRecommendedBolusAndNoticeForBolusBreakdownChange()
+                    }
                 }
             }
             .store(in: &cancellables)
         $bgCorrectionBolusIncluded
-            .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+            .sink { [weak self] newValue in
+                if self?.bgCorrectionBolusIncluded != newValue {
+                    self?.delegate?.withLoopState { [weak self] _ in
+                        self?.updateRecommendedBolusAndNoticeForBolusBreakdownChange()
+                    }
                 }
             }
             .store(in: &cancellables)
         $maxExcessBolusIncluded
-            .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+            .sink { [weak self] newValue in
+                if self?.maxExcessBolusIncluded != newValue {
+                    self?.delegate?.withLoopState { [weak self] _ in
+                        self?.updateRecommendedBolusAndNoticeForBolusBreakdownChange()
+                    }
                 }
             }
             .store(in: &cancellables)
         $safetyLimitBolusIncluded
-            .sink { [weak self] _ in
-                self?.delegate?.withLoopState { [weak self] state in
-                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+            .sink { [weak self] newValue in
+                if self?.safetyLimitBolusIncluded != newValue {
+                    self?.delegate?.withLoopState { [weak self] _ in
+                        self?.updateRecommendedBolusAndNoticeForBolusBreakdownChange()
+                    }
                 }
             }
             .store(in: &cancellables)
-
     }
 
     private func observeEnteredManualGlucoseChanges() {
@@ -720,6 +729,14 @@ final class BolusEntryViewModel: ObservableObject {
     }
     
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
+        updateRecommendedBolusAndNotice(recommendationSupplier: {try computeBolusRecommendation(from: state)}, isUpdatingFromUserInput: isUpdatingFromUserInput)
+    }
+    
+    private func updateRecommendedBolusAndNoticeForBolusBreakdownChange() {
+        updateRecommendedBolusAndNotice(recommendationSupplier: {self.dosingDecision.manualBolusRecommendation?.recommendation}, isUpdatingFromUserInput: true)
+    }
+        
+    private func updateRecommendedBolusAndNotice(recommendationSupplier: () throws -> ManualBolusRecommendation?, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
         guard let delegate = delegate else {
@@ -739,9 +756,8 @@ final class BolusEntryViewModel: ObservableObject {
         var safetyLimitBolus: HKQuantity? = nil
         let notice: Notice?
         do {
-            recommendation = try computeBolusRecommendation(from: state)
+            recommendation = try recommendationSupplier()
             
-            // capture the value now that the recommendation is completed
             bgCorrectionBolusIncluded = self.bgCorrectionBolusIncluded
             cobCorrectionBolusIncluded = self.cobCorrectionBolusIncluded
 
@@ -780,8 +796,6 @@ final class BolusEntryViewModel: ObservableObject {
                 }
                 
                 if let missingAmount = recommendation.missingAmount {
-                    var amount = missingAmount
-                    
                     if let maxBolus = maximumBolus?.doubleValue(for: .internationalUnit()) {
                         if missingAmount > maxBolus {
                             safetyLimitBolus = maximumBolus!
@@ -874,7 +888,7 @@ final class BolusEntryViewModel: ObservableObject {
             self.recommendedBolus = recommendedBolus
             self.dosingDecision.manualBolusRecommendation = recommendation.map { ManualBolusRecommendationWithDate(recommendation: $0, date: now) }
             self.activeNotice = notice
-
+            
             if priorRecommendedBolus != nil,
                priorRecommendedBolus != recommendedBolus,
                !self.enacting,
