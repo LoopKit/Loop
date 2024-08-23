@@ -1263,11 +1263,11 @@ struct CancelTempBasalFailedMaximumBasalRateChangedError: LocalizedError {
 //MARK: - RemoteDataServicesManagerDelegate protocol conformance
 
 extension DeviceDataManager : RemoteDataServicesManagerDelegate {
-    var shouldSyncToRemoteService: Bool {
+    var shouldSyncGlucoseToRemoteService: Bool {
         guard let cgmManager = cgmManager else {
-            return onboardingManager?.isComplete == true
+            return true
         }
-        return cgmManager.shouldSyncToRemoteService && (onboardingManager?.isComplete == true)
+        return cgmManager.shouldSyncToRemoteService
     }
 }
 

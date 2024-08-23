@@ -341,6 +341,8 @@ class LoopAppManager: NSObject {
 
         settingsManager.remoteDataServicesManager = remoteDataServicesManager
 
+        remoteDataServicesManager.triggerAllUploads()
+
         servicesManager = ServicesManager(
             pluginManager: pluginManager,
             alertManager: alertManager,

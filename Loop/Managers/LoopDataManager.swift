@@ -455,7 +455,8 @@ final class LoopDataManager: ObservableObject {
 
         var dosingDecision = StoredDosingDecision(
             date: loopBaseTime,
-            reason: "loop"
+            reason: "loop",
+            settings: StoredDosingDecision.Settings(settingsProvider.settings)
         )
 
         do {
