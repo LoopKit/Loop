@@ -475,9 +475,26 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertNil(dosingDecisionStore.dosingDecisions[0].manualBolusRequested)
         NotificationCenter.default.removeObserver(observer)
     }
+    
+    func dummyReplacementEntry() -> StoredCarbEntry{
+        StoredCarbEntry(startDate: now, quantity: HKQuantity(unit: .gram(), doubleValue: -1))
+    }
+    
+    func dummyCarbEntry() -> NewCarbEntry {
+        NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 1E-50), startDate: now.addingTimeInterval(TimeInterval(days: -2)),
+                     foodType: nil, absorptionTime: TimeInterval(hours: 3))
+    }
+    
+    func correctionRange(_ value: Double) -> GlucoseRangeSchedule {
+        correctionRange(value, value)
+    }
+
+    func correctionRange(_ minValue: Double, _ maxValue: Double) -> GlucoseRangeSchedule {
+        GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: minValue, maxValue: maxValue))])!
+    }
 
     func testLoopGetStateRecommendsManualBolus() {
-        setUp(for: .highAndStable)
+        setUp(for: .flatAndStable, correctionRanges: correctionRange(106.26136802382213 - 1.82 * 55), suspendThresholdValue: 0.0)
         let exp = expectation(description: #function)
         var recommendedBolus: ManualBolusRecommendation?
         loopDataManager.getLoopState { (_, loopState) in
@@ -493,7 +510,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     }
     
     func testLoopGetStateRecommendsManualBolusMaxBolusClamping() {
-        setUp(for: .highAndStable, maxBolus: 1)
+        setUp(for: .flatAndStable, maxBolus: 1, correctionRanges: correctionRange(106.26136802382213 - 1.82 * 55), suspendThresholdValue: 0.0)
         let exp = expectation(description: #function)
         var recommendedBolus: ManualBolusRecommendation?
         loopDataManager.getLoopState { (_, loopState) in
@@ -507,16 +524,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(recommendedBolus!.bolusBreakdown!.carbsAmount!, 0, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.missingAmount!, 0.82, accuracy: 0.01)
     }
-    
-    func dummyReplacementEntry() -> StoredCarbEntry{
-        StoredCarbEntry(startDate: now, quantity: HKQuantity(unit: .gram(), doubleValue: -1))
-    }
-    
-    func dummyCarbEntry() -> NewCarbEntry {
-        NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 1E-50), startDate: now.addingTimeInterval(TimeInterval(days: -2)),
-                     foodType: nil, absorptionTime: TimeInterval(hours: 3))
-    }
-    
+        
     func testLoopGetStateRecommendsManualBolusForCob() {
         // note that the default setup for .highAndStable has a _carb_effect file reflecting a 5g carb effect (with 45 ISF)
         // predicted glucose starts from 200 and goes down to 176.21882841682697 (taking into account _insulin_effect)
@@ -661,8 +669,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     }
     
     func testLoopGetStateRecommendsManualBolusForBeneathRange() {
-        setUp(for: .highAndStable, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
-            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 230, maxValue: 230))]))
+        setUp(for: .flatAndStable, correctionRanges: correctionRange(160))
         
         let exp = expectation(description: #function)
         var recommendedBolus: ManualBolusRecommendation?
@@ -672,15 +679,14 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         wait(for: [exp], timeout: 100000.0)
         XCTAssertEqual(recommendedBolus!.amount, 0, accuracy: 0.01)
-        XCTAssertEqual(recommendedBolus!.bolusBreakdown!.bgCorrectionAmount, (176.21882841682697 - 230) / 45, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bolusBreakdown!.bgCorrectionAmount, (106.21882841682697 - 160) / 55, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.bolusBreakdown!.cobCorrectionAmount, 0, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.bolusBreakdown!.carbsAmount!, 0, accuracy: 0.01)
         XCTAssertNil(recommendedBolus!.missingAmount)
     }
     
     func testLoopGetStateRecommendsManualBolusForInRangeAboveMidPoint() {
-        setUp(for: .flatAndStable, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
-            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 80, maxValue: 110))]))
+        setUp(for: .flatAndStable, correctionRanges: correctionRange(80, 110))
         
         let exp = expectation(description: #function)
         var recommendedBolus: ManualBolusRecommendation?
@@ -697,8 +703,27 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     }
     
     func testLoopGetStateRecommendsManualBolusForSuspendForCarbEntry() {
-        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
-            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 230, maxValue: 230))]), suspendThresholdValue: 180)
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: correctionRange(230), suspendThresholdValue: 220)
+        
+        let exp = expectation(description: #function)
+        var recommendedBolus: ManualBolusRecommendation?
+
+        let carbEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 15.0), startDate: now, foodType: nil, absorptionTime: TimeInterval(hours: 1.0))
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: carbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bolusBreakdown!.bgCorrectionAmount, (176.21882841682697 - 230) / 45, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bolusBreakdown!.cobCorrectionAmount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bolusBreakdown!.carbsAmount!, 1.5, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.missingAmount!, 1.5 + (176.21882841682697 - 230) / 45, accuracy: 0.01)
+    }
+    
+    func testLoopGetStateRecommendsManualBolusNoMissingForSuspendForCarbEntry() {
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: correctionRange(230), suspendThresholdValue: 220)
         
         let exp = expectation(description: #function)
         var recommendedBolus: ManualBolusRecommendation?
@@ -714,12 +739,11 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(recommendedBolus!.bolusBreakdown!.bgCorrectionAmount, (176.21882841682697 - 230) / 45, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.bolusBreakdown!.cobCorrectionAmount, 0, accuracy: 0.01)
         XCTAssertEqual(recommendedBolus!.bolusBreakdown!.carbsAmount!, 0.5, accuracy: 0.01)
-        XCTAssertEqual(recommendedBolus!.missingAmount!, 0.5 + (176.21882841682697 - 230) / 45, accuracy: 0.01)
+        XCTAssertNil(recommendedBolus!.missingAmount) // carbsAmount + bgCorrectionAmount < 0, so nothing is missing
     }
     
     func testLoopGetStateRecommendsManualBolusForSuspendNoCarbEntry() {
-        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
-            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 230, maxValue: 230))]), suspendThresholdValue: 180)
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: correctionRange(230), suspendThresholdValue: 180)
         
         let exp = expectation(description: #function)
         var recommendedBolus: ManualBolusRecommendation?
@@ -739,8 +763,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     }
     
     func testLoopGetStateRecommendsManualBolusForInRangeCarbEntry() {
-        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
-            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 170, maxValue: 210))]))
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: correctionRange(170, 210))
                         
         let exp1 = expectation(description: #function)
         var recommendedBolus1: ManualBolusRecommendation?

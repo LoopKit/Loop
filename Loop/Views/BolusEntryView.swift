@@ -311,6 +311,7 @@ struct BolusEntryView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             viewModel.cobCorrectionBolusIncluded.toggle()
+                            viewModel.userChangedCobCorrectionBolusIncluded = true
                         }
 
                     }
@@ -335,6 +336,7 @@ struct BolusEntryView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             viewModel.bgCorrectionBolusIncluded.toggle()
+                            viewModel.userChangedBgCorrectionBolusIncluded = true
                         }
                     }
                     if viewModel.maxExcessBolus != nil {
