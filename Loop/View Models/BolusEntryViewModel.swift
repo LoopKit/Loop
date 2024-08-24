@@ -780,6 +780,14 @@ final class BolusEntryViewModel: ObservableObject {
                         bgCorrectionBolusIncluded = false
                     }
                 }
+                
+                if !FeatureFlags.bgCorrectionWithCarbBolus, potentialCarbEntry != nil, !userChangedBgCorrectionBolusIncluded {
+                    let bgCorrectionAmount = recommendation.bolusBreakdown?.bgCorrectionAmount ?? 0.0
+                    
+                    if bgCorrectionAmount > 0 {
+                        bgCorrectionBolusIncluded = false
+                    }
+                }
 
                 if let cobCorrectionAmount = recommendation.bolusBreakdown?.cobCorrectionAmount {
                     cobCorrectionBolus = HKQuantity(unit: .internationalUnit(), doubleValue: cobCorrectionAmount)
@@ -812,11 +820,11 @@ final class BolusEntryViewModel: ObservableObject {
                     }
 
                     if let maxExcessAmount = maxExcessBolus?.doubleValue(for: .internationalUnit()) {
-                        totalRecommendation += maxExcessBolusIncluded ? -maxExcessAmount : 0
+                        totalRecommendation -= maxExcessBolusIncluded ? maxExcessAmount : 0
                     }
 
                     if let safetyLimitAmount = safetyLimitBolus?.doubleValue(for: .internationalUnit()) {
-                        totalRecommendation += safetyLimitBolusIncluded ? -safetyLimitAmount : 0
+                        totalRecommendation -= safetyLimitBolusIncluded ? safetyLimitAmount : 0
                     }
                 }
                 
@@ -827,7 +835,6 @@ final class BolusEntryViewModel: ObservableObject {
                 }
                 
                 recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: delegate.roundBolusVolume(units: max(0, totalRecommendation)))
-                //recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
                 
                 switch recommendation.notice {
                 case .glucoseBelowSuspendThreshold:

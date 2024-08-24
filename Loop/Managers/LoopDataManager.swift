@@ -1494,14 +1494,16 @@ extension LoopDataManager {
         
         let totalCarbBolus = carbBreakdownRecommendation.amount - noCarbsBreakdownRecommendation.amount
         
-        let flatPrediction = prediction.map{PredictedGlucoseValue(startDate: $0.startDate, quantity: prediction.last!.quantity)}
+        let cobPrediction = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
         
-        guard let maxCobAmount = try recommendBolusValidatingDataRecency(forPrediction: flatPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown)?.amount else {
+        let flatCobPrediction = cobPrediction.map{PredictedGlucoseValue(startDate: $0.startDate, quantity: cobPrediction.last!.quantity)}
+        
+        guard let maxCobAmount = try recommendBolusValidatingDataRecency(forPrediction: flatCobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown)?.amount else {
             
             return recommendation // unable to differentiate between correction amounts
         }
         
-        // totalCobAmount is the additional insulin needed for correcting carbs
+        // totalCobAmount is the additional insulin needed for correcting carbs (including potentialCarbEntry)
         let totalCobAmount = Swift.min(maxCobAmount, totalCarbBolus)
         
         guard potentialCarbEntry != nil else {
