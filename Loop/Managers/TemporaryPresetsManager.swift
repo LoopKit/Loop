@@ -36,8 +36,10 @@ class TemporaryPresetsManager {
 
         scheduleOverride = overrideHistory.activeOverride(at: Date())
 
-        // TODO: Pre-meal is not stored in overrideHistory yet. https://tidepool.atlassian.net/browse/LOOP-4759
-        //preMealOverride = overrideHistory.preMealOverride
+        if scheduleOverride?.context == .preMeal {
+            preMealOverride = scheduleOverride
+            scheduleOverride = nil
+        }
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(
             \.intentExtensionOverrideToSet,
@@ -79,6 +81,10 @@ class TemporaryPresetsManager {
                 return
             }
 
+            if scheduleOverride != nil {
+                preMealOverride = nil
+            }
+
             if let newValue = scheduleOverride, newValue.context == .preMeal {
                 preconditionFailure("The `scheduleOverride` field should not be used for a pre-meal target range override; use `preMealOverride` instead")
             }
@@ -98,10 +104,6 @@ class TemporaryPresetsManager {
                 }
             }
 
-            if scheduleOverride?.context == .legacyWorkout {
-                preMealOverride = nil
-            }
-
             notify(forChange: .preferences)
         }
     }
@@ -116,9 +118,11 @@ class TemporaryPresetsManager {
                 preconditionFailure("The `preMealOverride` field should be used only for a pre-meal target range override")
             }
 
-            if preMealOverride != nil, scheduleOverride?.context == .legacyWorkout {
+            if preMealOverride != nil {
                 scheduleOverride = nil
             }
+
+            overrideHistory.recordOverride(preMealOverride)
 
             notify(forChange: .preferences)
         }
