@@ -1478,33 +1478,28 @@ extension LoopDataManager {
         guard !prediction.isEmpty else {
             return recommendation // unable to differentiate between correction amounts,
         }
-                
-        guard let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown) else {
-            
-            return recommendation // unable to differentiate between correction amounts
-        }
-                
-        let noCarbsPrediction = try predictGlucose(using: .all.subtracting([.carbs]), potentialBolus: nil, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
+                                        
+        let carbAndInsulinPrediction = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
         
-       
-        guard let noCarbsBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: noCarbsPrediction, consideringPotentialCarbEntry: nil, usage: .carbBreakdown) else {
-            
+        guard !carbAndInsulinPrediction.isEmpty else {
             return recommendation // unable to differentiate between correction amounts
         }
         
-        let totalCarbBolus = carbBreakdownRecommendation.amount - noCarbsBreakdownRecommendation.amount
+        let carbOnlyPrediction = try predictGlucose(using: [.carbs], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
         
-        let cobPrediction = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
+        guard !carbOnlyPrediction.isEmpty else {
+            return recommendation // unable to differentiate between correction amounts
+        }
+        
+        // cobCorrection includes insulin when its effects are to reduce BG, but doesn't include it if it raises it (e.g., negative IOB)
+        let cobPrediction = carbAndInsulinPrediction.last!.quantity < carbOnlyPrediction.last!.quantity ? carbAndInsulinPrediction : carbOnlyPrediction
         
         let flatCobPrediction = cobPrediction.map{PredictedGlucoseValue(startDate: $0.startDate, quantity: cobPrediction.last!.quantity)}
         
-        guard let maxCobAmount = try recommendBolusValidatingDataRecency(forPrediction: flatCobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown)?.amount else {
+        guard let totalCobAmount = try recommendBolusValidatingDataRecency(forPrediction: flatCobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown)?.amount else {
             
             return recommendation // unable to differentiate between correction amounts
         }
-        
-        // totalCobAmount is the additional insulin needed for correcting carbs (including potentialCarbEntry)
-        let totalCobAmount = Swift.min(maxCobAmount, totalCarbBolus)
         
         guard potentialCarbEntry != nil else {
             var missingAmount = recommendation!.missingAmount
@@ -1524,6 +1519,11 @@ extension LoopDataManager {
             }
             
             return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, missingAmount: missingAmount, bolusBreakdown: BolusBreakdown(fullCarbsAmount: 0.0, fullCobCorrectionAmount: totalCobAmount, fullCorrectionAmount: correctionAmount))
+        }
+        
+        guard let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown) else {
+            
+            return recommendation // unable to differentiate between correction amounts
         }
         
         // the insulin needed to cover the zeroCarbEntry will underflow to 0 once added/subtracted
