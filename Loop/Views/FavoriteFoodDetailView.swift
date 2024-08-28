@@ -35,10 +35,10 @@ public struct FavoriteFoodDetailView: View {
                 Section("Information") {
                     VStack(spacing: 16) {
                         let rows: [(field: String, value: String)] = [
-                            ("Name", food.name),
-                            ("Carb Quantity", food.carbsString(formatter: carbFormatter)),
-                            ("Food Type", food.foodType),
-                            ("Absorption Time", food.absorptionTimeString(formatter: absorptionTimeFormatter))
+                            (NSLocalizedString("Name", comment: "Label for name in favorite food entry"), food.name),
+                            (NSLocalizedString("Carb Quantity", comment:"Label for carb quantity in favorite food entry"), food.carbsString(formatter: carbFormatter)),
+                            (NSLocalizedString("Food Type", comment:"Label for food type in favorite food entry"), food.foodType),
+                            (NSLocalizedString("Absorption Time", comment:"Label for absorption time in favorite food entry"), food.absorptionTimeString(formatter: absorptionTimeFormatter))
                         ]
                         ForEach(rows, id: \.field) { row in
                             HStack {
