@@ -369,8 +369,8 @@ extension SettingsView {
             LargeButton(action: { sheet = .favoriteFoods },
                         includeArrow: true,
                         imageView: Image("Favorite Foods Icon").renderingMode(.template).foregroundColor(carbTintColor),
-                        label: "Favorite Foods",
-                        descriptiveText: "Simplify Carb Entry")
+                        label: NSLocalizedString("Favorite Foods", comment: "Button title for entering Favorite Foods settings"),
+                        descriptiveText: NSLocalizedString("Simplify Carb Entry", comment: "Descriptive text for Favorite Foods setting button"))
         }
     }
     

@@ -311,7 +311,7 @@ struct BolusEntryView: View {
             let suspendThresholdString = displayGlucosePreference.format(suspendThreshold)
             return WarningView(
                 title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
-                caption: Text("Your glucose is below or predicted to go below your glucose safety limit, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit")
+                caption: Text(String(format: NSLocalizedString("Your glucose is below or predicted to go below your glucose safety limit, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below glucose safety limit")))
             )
         case .staleGlucoseData:
             return WarningView(

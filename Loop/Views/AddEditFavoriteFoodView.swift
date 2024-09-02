@@ -44,7 +44,7 @@ struct AddEditFavoriteFoodView: View {
                             saveButton
                         }
                     }
-                    .navigationBarTitle("New Favorite Food", displayMode: .inline)
+                    .navigationBarTitle(NSLocalizedString("New Favorite Food", comment: "Title of new favorite food screen"), displayMode: .inline)
                     .onAppear {
                         expandedRow = .name
                     }
@@ -92,20 +92,20 @@ struct AddEditFavoriteFoodView: View {
             let carbQuantityFocused: Binding<Bool> = Binding(get: { expandedRow == .carbQuantity }, set: { expandedRow = $0 ? .carbQuantity : nil })
             let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
             let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
-            
-            TextFieldRow(text: $viewModel.name, isFocused: nameFocused, title: "Name", placeholder: "Apple")
-            
+
+            TextFieldRow(text: $viewModel.name, isFocused: nameFocused, title: NSLocalizedString("Name", comment: "Label for name row on add favorite food screen"), placeholder: NSLocalizedString("Apple", comment: "Default name on add favorite food screen"))
+
             CardSectionDivider()
 
-            CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: carbQuantityFocused, title: "Carb Quantity", preferredCarbUnit: viewModel.preferredCarbUnit)
-            
-            CardSectionDivider()
-            
-            EmojiRow(text: $viewModel.foodType, isFocused: foodTypeFocused, emojiType: .food, title: "Food Type")
-            
+            CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: carbQuantityFocused, title: NSLocalizedString("Carb Quantity", comment: "Label for carb quantity row on add favorite food screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
+
             CardSectionDivider()
 
-            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
+            EmojiRow(text: $viewModel.foodType, isFocused: foodTypeFocused, emojiType: .food, title: NSLocalizedString("Food Type", comment: "Label for food type entry on add favorite food screen"))
+
+            CardSectionDivider()
+
+            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, title: NSLocalizedString("Absorption Time", comment: "Label for absorption time entry row on add favorite food screen"), validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
                 .padding(.bottom, 2)
         }
         .padding(.vertical, 12)
@@ -145,13 +145,13 @@ struct AddEditFavoriteFoodView: View {
 extension AddEditFavoriteFoodView {
     private var dismissButton: some View {
         Button(action: dismiss.callAsFunction) {
-            Text("Cancel")
+            Text(NSLocalizedString("Cancel", comment: "Favorite food cancel button"))
         }
     }
     
     private var saveActionButton: some View {
         Button(action: viewModel.save) {
-            Text("Save")
+            Text(NSLocalizedString("Save", comment: "Favorite food save button"))
         }
         .buttonStyle(ActionButtonStyle())
         .padding()
@@ -160,7 +160,7 @@ extension AddEditFavoriteFoodView {
     
     private var saveButton: some View {
         Button(action: viewModel.save) {
-            Text("Save")
+            Text(NSLocalizedString("Save", comment: "Favorite food save button"))
         }
         .disabled(viewModel.updatedFavoriteFood == nil)
     }
