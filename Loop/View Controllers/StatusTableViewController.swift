@@ -268,6 +268,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     var onscreen: Bool = false {
         didSet {
             updateHUDActive()
+            loopManager.startGlucoseValueStalenessTimerIfNeeded()
         }
     }
 
@@ -590,10 +591,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 hudView.cgmStatusHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: unit),
                                                         at: glucose.startDate,
                                                         unit: unit,
-                                                        staleGlucoseAge: LoopAlgorithm.inputDataRecencyInterval,
                                                         glucoseDisplay: self.deviceManager.glucoseDisplay(for: glucose),
                                                         wasUserEntered: glucose.wasUserEntered,
-                                                        isDisplayOnly: glucose.isDisplayOnly)
+                                                        isDisplayOnly: glucose.isDisplayOnly,
+                                                        isGlucoseValueStale: self.deviceManager.isGlucoseValueStale)
             }
             hudView.cgmStatusHUD.presentStatusHighlight(self.deviceManager.cgmStatusHighlight)
             hudView.cgmStatusHUD.presentStatusBadge(self.deviceManager.cgmStatusBadge)
@@ -751,8 +752,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         let hudIsVisible = self.shouldShowHUD
         let statusIsVisible = self.shouldShowStatus
-
+        
         hudView?.cgmStatusHUD?.isVisible = hudIsVisible
+        hudView?.cgmStatusHUD.isGlucoseValueStale = deviceManager.isGlucoseValueStale
 
         tableView.beginUpdates()
         
@@ -1833,8 +1835,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             present(alert, animated: true, completion: nil)
         }
     }
-
-
+    
     // MARK: - Debug Scenarios and Simulated Core Data
 
     var lastOrientation: UIDeviceOrientation?

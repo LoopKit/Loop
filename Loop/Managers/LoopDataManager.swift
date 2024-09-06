@@ -175,7 +175,7 @@ final class LoopDataManager: ObservableObject {
         self.analyticsServicesManager = analyticsServicesManager
         self.carbAbsorptionModel = carbAbsorptionModel
         self.usePositiveMomentumAndRCForManualBoluses = usePositiveMomentumAndRCForManualBoluses
-
+        
         // Required for device settings in stored dosing decisions
         UIDevice.current.isBatteryMonitoringEnabled = true
 
@@ -199,6 +199,7 @@ final class LoopDataManager: ObservableObject {
             ) { (note) in
                 Task { @MainActor in
                     self.logger.default("Received notification of glucose samples changing")
+                    self.restartGlucoseValueStalenessTimer()
                     await self.updateDisplayState()
                     self.notify(forChange: .glucose)
                 }
@@ -235,8 +236,6 @@ final class LoopDataManager: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-
-
     }
 
     // MARK: - Calculation state
@@ -643,9 +642,41 @@ final class LoopDataManager: ObservableObject {
             await self.dosingDecisionStore.storeDosingDecision(dosingDecision)
         }
     }
+    
+    // MARK: - Glucose Staleness
+
+    private var glucoseValueStalenessTimer: Timer?
+
+    private func restartGlucoseValueStalenessTimer() {
+        stopGlucoseValueStalenessTimer()
+        startGlucoseValueStalenessTimerIfNeeded()
+    }
+
+    private func stopGlucoseValueStalenessTimer() {
+        glucoseValueStalenessTimer?.invalidate()
+        glucoseValueStalenessTimer = nil
+    }
+       
+    func startGlucoseValueStalenessTimerIfNeeded() {
+        guard let fireDate = glucoseValueStaleDate,
+              glucoseValueStalenessTimer == nil
+        else { return }
+        
+        glucoseValueStalenessTimer = Timer(fire: fireDate, interval: 0, repeats: false) { (_) in
+            Task { @MainActor in
+                self.notify(forChange: .glucose)
+            }
+        }
+        RunLoop.main.add(glucoseValueStalenessTimer!, forMode: .default)
+    }
+
+    private var glucoseValueStaleDate: Date? {
+        guard let latestGlucoseDataDate = glucoseStore.latestGlucose?.startDate else { return nil }
+        return latestGlucoseDataDate.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval)
+    }
 }
 
-// MARK: Background task management
+// MARK: - Background task management
 extension LoopDataManager: PersistenceControllerDelegate {
     func persistenceControllerWillSave(_ controller: PersistenceController) {
         startBackgroundTask()
