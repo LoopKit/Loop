@@ -244,10 +244,7 @@
 		7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076651FE06EE4004AC8EA /* Localizable.strings */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
 		845C74352B7D686000F71F90 /* LoopUITestingKit in Frameworks */ = {isa = PBXBuildFile; productRef = 845C74342B7D686000F71F90 /* LoopUITestingKit */; };
-		845C74372B7D686700F71F90 /* LoopUITestingKit in Frameworks */ = {isa = PBXBuildFile; productRef = 845C74362B7D686700F71F90 /* LoopUITestingKit */; };
 		847434C82B7C17800084BE98 /* LoopUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847434C72B7C17800084BE98 /* LoopUITests.swift */; };
-		847434F62B7C41D30084BE98 /* DIYLoopUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847434F52B7C41D30084BE98 /* DIYLoopUITests.swift */; };
-		847435052B7C4F8D0084BE98 /* OnboardingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847435042B7C4F8D0084BE98 /* OnboardingScreen.swift */; };
 		8496F7312B5711C4003E672C /* ContentMargin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496F7302B5711C4003E672C /* ContentMargin.swift */; };
 		84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D22A4A27A3000B658B /* LoopWidgets.swift */; };
 		84AA81D62A4A28AF000B658B /* WidgetBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D52A4A28AF000B658B /* WidgetBackground.swift */; };
@@ -600,13 +597,6 @@
 			remoteInfo = LoopUI;
 		};
 		840B7A842B7BFF58000ED932 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 43776F8B1B8022E90074EA36;
-			remoteInfo = Loop;
-		};
-		847434F92B7C41D30084BE98 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
 			proxyType = 1;
@@ -1122,10 +1112,6 @@
 		840B7A7E2B7BFF58000ED932 /* LoopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		847434C72B7C17800084BE98 /* LoopUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopUITests.swift; sourceTree = "<group>"; };
 		847434DC2B7C34F70084BE98 /* LoopUITestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = LoopUITestPlan.xctestplan; sourceTree = "<group>"; };
-		847434F32B7C41D30084BE98 /* DIYLoopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DIYLoopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		847434F52B7C41D30084BE98 /* DIYLoopUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DIYLoopUITests.swift; sourceTree = "<group>"; };
-		847435022B7C42300084BE98 /* DIYLoopUITestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DIYLoopUITestPlan.xctestplan; sourceTree = "<group>"; };
-		847435042B7C4F8D0084BE98 /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
 		8496F7302B5711C4003E672C /* ContentMargin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentMargin.swift; sourceTree = "<group>"; };
 		84AA81D22A4A27A3000B658B /* LoopWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopWidgets.swift; sourceTree = "<group>"; };
 		84AA81D52A4A28AF000B658B /* WidgetBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBackground.swift; sourceTree = "<group>"; };
@@ -1719,14 +1705,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		847434F02B7C41D30084BE98 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				845C74372B7D686700F71F90 /* LoopUITestingKit in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E9B07F79253BBA6500BAD8F8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1920,7 +1898,6 @@
 				14B1736128AED9EC006CCD7C /* Loop Widget Extension */,
 				A900531928D60852000BC15B /* Shortcuts */,
 				840B7A7F2B7BFF58000ED932 /* LoopUITests */,
-				847434F42B7C41D30084BE98 /* DIYLoopUITests */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
@@ -1941,7 +1918,6 @@
 				E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */,
 				14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */,
 				840B7A7E2B7BFF58000ED932 /* LoopUITests.xctest */,
-				847434F32B7C41D30084BE98 /* DIYLoopUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2440,24 +2416,6 @@
 				847434DC2B7C34F70084BE98 /* LoopUITestPlan.xctestplan */,
 			);
 			path = LoopUITests;
-			sourceTree = "<group>";
-		};
-		847434F42B7C41D30084BE98 /* DIYLoopUITests */ = {
-			isa = PBXGroup;
-			children = (
-				847435032B7C4F7D0084BE98 /* Screens */,
-				847434F52B7C41D30084BE98 /* DIYLoopUITests.swift */,
-				847435022B7C42300084BE98 /* DIYLoopUITestPlan.xctestplan */,
-			);
-			path = DIYLoopUITests;
-			sourceTree = "<group>";
-		};
-		847435032B7C4F7D0084BE98 /* Screens */ = {
-			isa = PBXGroup;
-			children = (
-				847435042B7C4F8D0084BE98 /* OnboardingScreen.swift */,
-			);
-			path = Screens;
 			sourceTree = "<group>";
 		};
 		84AA81D12A4A2778000B658B /* Components */ = {
@@ -3048,27 +3006,6 @@
 			productReference = 840B7A7E2B7BFF58000ED932 /* LoopUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		847434F22B7C41D30084BE98 /* DIYLoopUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 847434FE2B7C41D30084BE98 /* Build configuration list for PBXNativeTarget "DIYLoopUITests" */;
-			buildPhases = (
-				847434EF2B7C41D30084BE98 /* Sources */,
-				847434F02B7C41D30084BE98 /* Frameworks */,
-				847434F12B7C41D30084BE98 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				847434FA2B7C41D30084BE98 /* PBXTargetDependency */,
-			);
-			name = DIYLoopUITests;
-			packageProductDependencies = (
-				845C74362B7D686700F71F90 /* LoopUITestingKit */,
-			);
-			productName = DIYLoopUITests;
-			productReference = 847434F32B7C41D30084BE98 /* DIYLoopUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 		E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E9B07F9A253BBA6500BAD8F8 /* Build configuration list for PBXNativeTarget "Loop Intent Extension" */;
@@ -3181,10 +3118,6 @@
 						LastSwiftMigration = 1520;
 						TestTargetID = 43776F8B1B8022E90074EA36;
 					};
-					847434F22B7C41D30084BE98 = {
-						CreatedOnToolsVersion = 15.2;
-						TestTargetID = 43776F8B1B8022E90074EA36;
-					};
 					E9B07F7B253BBA6500BAD8F8 = {
 						ProvisioningStyle = Automatic;
 					};
@@ -3241,7 +3174,6 @@
 				4F75288A1DFE1DC600C322D6 /* LoopUI */,
 				43E2D90A1D20C581004DA55F /* LoopTests */,
 				840B7A7D2B7BFF58000ED932 /* LoopUITests */,
-				847434F22B7C41D30084BE98 /* DIYLoopUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -3351,13 +3283,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		840B7A7C2B7BFF58000ED932 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		847434F12B7C41D30084BE98 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3976,15 +3901,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		847434EF2B7C41D30084BE98 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				847435052B7C4F8D0084BE98 /* OnboardingScreen.swift in Sources */,
-				847434F62B7C41D30084BE98 /* DIYLoopUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E9B07F78253BBA6500BAD8F8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -4042,11 +3958,6 @@
 			isa = PBXTargetDependency;
 			target = 43776F8B1B8022E90074EA36 /* Loop */;
 			targetProxy = 840B7A842B7BFF58000ED932 /* PBXContainerItemProxy */;
-		};
-		847434FA2B7C41D30084BE98 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 43776F8B1B8022E90074EA36 /* Loop */;
-			targetProxy = 847434F92B7C41D30084BE98 /* PBXContainerItemProxy */;
 		};
 		C117ED71232EDB3200DA57CD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4936,7 +4847,6 @@
 		43776FB71B8022E90074EA36 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
@@ -4966,7 +4876,6 @@
 		43776FB81B8022E90074EA36 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
@@ -5047,7 +4956,6 @@
 		43A9439A1B926B7B0051FA24 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
@@ -5071,7 +4979,6 @@
 		43A9439B1B926B7B0051FA24 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
@@ -5381,121 +5288,6 @@
 			};
 			name = Release;
 		};
-		847434FB2B7C41D30084BE98 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 75U4X84TEG;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.DIYLoopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Loop;
-			};
-			name = Debug;
-		};
-		847434FC2B7C41D30084BE98 /* Testflight */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 75U4X84TEG;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.DIYLoopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Loop;
-			};
-			name = Testflight;
-		};
-		847434FD2B7C41D30084BE98 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 75U4X84TEG;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.DIYLoopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Loop;
-			};
-			name = Release;
-		};
 		B4E7CF912AD00A39009B4DF2 /* Testflight */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 437D9BA11D7B5203007245E8 /* Loop.xcconfig */;
@@ -5615,7 +5407,6 @@
 		B4E7CF922AD00A39009B4DF2 /* Testflight */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
@@ -5645,7 +5436,6 @@
 		B4E7CF942AD00A39009B4DF2 /* Testflight */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
@@ -6009,16 +5799,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		847434FE2B7C41D30084BE98 /* Build configuration list for PBXNativeTarget "DIYLoopUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				847434FB2B7C41D30084BE98 /* Debug */,
-				847434FC2B7C41D30084BE98 /* Testflight */,
-				847434FD2B7C41D30084BE98 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		E9B07F9A253BBA6500BAD8F8 /* Build configuration list for PBXNativeTarget "Loop Intent Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -6068,11 +5848,6 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		845C74342B7D686000F71F90 /* LoopUITestingKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 845C74332B7D686000F71F90 /* XCRemoteSwiftPackageReference "LoopUITestingKit" */;
-			productName = LoopUITestingKit;
-		};
-		845C74362B7D686700F71F90 /* LoopUITestingKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 845C74332B7D686000F71F90 /* XCRemoteSwiftPackageReference "LoopUITestingKit" */;
 			productName = LoopUITestingKit;
