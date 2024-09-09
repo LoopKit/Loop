@@ -37,7 +37,6 @@ final class ManualEntryDoseViewModel: ObservableObject {
     // MARK: - State
 
     @Published var glucoseValues: [GlucoseValue] = [] // stored glucose values
-    private var storedGlucoseValues: [GlucoseValue] = []
     @Published var predictedGlucoseValues: [GlucoseValue] = []
     @Published var glucoseUnit: HKUnit = .milligramsPerDeciliter
     @Published var chartDateInterval: DateInterval
@@ -245,7 +244,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
 
 
         if let input = state.input {
-            self.storedGlucoseValues = input.glucoseHistory
+            self.glucoseValues = input.glucoseHistory
 
             do {
                 predictedGlucoseValues = try input
@@ -288,7 +287,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
         let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
 
         let insulinModel = delegate?.insulinModel(for: selectedInsulinType)
-        let futureHours = ceil((insulinModel?.effectDuration.hours ?? .hours(4)).hours)
+        let futureHours = ceil(insulinModel?.effectDuration.hours ?? 4)
         let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
 
         let date = Date(timeInterval: -TimeInterval(hours: historyHours), since: now())

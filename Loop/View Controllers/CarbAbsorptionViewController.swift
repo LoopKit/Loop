@@ -467,7 +467,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             let carbEntryView = CarbEntryView(viewModel: viewModel)
                 .environmentObject(deviceManager.displayGlucosePreference)
                 .environment(\.dismissAction, carbEditWasCanceled)
-            let hostingController = UIHostingController(rootView: carbEntryView)
+            let hostingController = DismissibleHostingController(rootView: carbEntryView)
             hostingController.title = "Edit Carb Entry"
             hostingController.navigationItem.largeTitleDisplayMode = .never
             let leftBarButton = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(carbEditWasCanceled))

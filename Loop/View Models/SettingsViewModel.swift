@@ -100,6 +100,8 @@ public class SettingsViewModel: ObservableObject {
            delegate?.dosingEnabledChanged(closedLoopPreference)
        }
     }
+    
+    weak var favoriteFoodInsightsDelegate: FavoriteFoodInsightsViewModelDelegate?
 
     var showDeleteTestData: Bool {
         availableSupports.contains(where: { $0.showsDeleteTestDataUI })

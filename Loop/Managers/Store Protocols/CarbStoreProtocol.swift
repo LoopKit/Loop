@@ -11,7 +11,7 @@ import HealthKit
 
 protocol CarbStoreProtocol: AnyObject {
 
-    func getCarbEntries(start: Date?, end: Date?, dateAscending: Bool, with favoriteFoodID: String?) async throws -> [StoredCarbEntry]
+    func getCarbEntries(start: Date?, end: Date?, dateAscending: Bool, fetchLimit: Int?, with favoriteFoodID: String?) async throws -> [StoredCarbEntry]
 
     func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: NewCarbEntry) async throws -> StoredCarbEntry
 
@@ -23,7 +23,7 @@ protocol CarbStoreProtocol: AnyObject {
 
 extension CarbStoreProtocol {
     func getCarbEntries(start: Date?, end: Date?) async throws -> [StoredCarbEntry] {
-        try await getCarbEntries(start: start, end: end, dateAscending: true, with: nil)
+        try await getCarbEntries(start: start, end: end, dateAscending: true, fetchLimit: nil, with: nil)
     }
 }
 
