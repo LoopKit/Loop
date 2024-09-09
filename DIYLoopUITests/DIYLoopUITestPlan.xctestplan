@@ -33,7 +33,6 @@
   },
   "testTargets" : [
     {
-      "enabled" : false,
       "target" : {
         "containerPath" : "container:..\/Loop\/Loop.xcodeproj",
         "identifier" : "847434F22B7C41D30084BE98",
