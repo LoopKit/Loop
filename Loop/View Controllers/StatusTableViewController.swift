@@ -313,6 +313,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let bolus = UIBarButtonItem(image: UIImage(named: "bolus"), style: .plain, target: self, action: #selector(presentBolusScreen))
         let settings = UIBarButtonItem(image: UIImage(named: "settings"), style: .plain, target: self, action: #selector(onSettingsTapped))
         
+        carbs.accessibilityIdentifier = "statusTableViewControllerCarbsButton"
+        bolus.accessibilityIdentifier = "statusTableViewControllerBolusButton"
+        settings.accessibilityIdentifier = "statusTableViewControllerSettingsButton"
+        
         let preMeal = createPreMealButtonItem(selected: false, isEnabled: true)
         let workout = createWorkoutButtonItem(selected: false, isEnabled: true)
         toolbarItems = [
@@ -1467,6 +1471,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         item.tintColor = UIColor.carbTintColor
         item.isEnabled = isEnabled
+        item.accessibilityIdentifier = isEnabled ? "statusTableViewPreMealButtonEnabled" : "statusTableViewPreMealButtonDisabled"
 
         return item
     }

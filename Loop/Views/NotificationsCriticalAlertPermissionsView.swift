@@ -97,12 +97,21 @@ extension NotificationsCriticalAlertPermissionsView {
         .accentColor(.primary)
     }
     
+    private var notificationsStatusIdentifier: String {
+        !checker.notificationCenterSettings.notificationsDisabled ? "settingsViewAlertManagementAlertPermissionsNotificationsEnabled" : "settingsViewAlertManagementAlertPermissionsNotificationsDisabled"
+    }
+    
     private var notificationsEnabledStatus: some View {
         HStack {
             Text("Notifications", comment: "Notifications Status text")
             Spacer()
             onOff(!checker.notificationCenterSettings.notificationsDisabled)
+                .accessibilityIdentifier(notificationsStatusIdentifier)
         }
+    }
+    
+    private var criticalAlertsStatusIdentifier: String {
+        !checker.notificationCenterSettings.criticalAlertsDisabled ? "settingsViewAlertManagementAlertPermissionsCriticalAlertsEnabled" : "settingsViewAlertManagementAlertPermissionsCriticalAlertsDisabled"
     }
         
     private var criticalAlertsStatus: some View {
@@ -110,6 +119,7 @@ extension NotificationsCriticalAlertPermissionsView {
             Text("Critical Alerts", comment: "Critical Alerts Status text")
             Spacer()
             onOff(!checker.notificationCenterSettings.criticalAlertsDisabled)
+                .accessibilityIdentifier(criticalAlertsStatusIdentifier)
         }
     }
 

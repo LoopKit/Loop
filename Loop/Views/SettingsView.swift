@@ -264,6 +264,7 @@ extension SettingsView {
                     }
                 }
             }
+            .accessibilityIdentifier("settingsViewClosedLoopToggle")
             .disabled(!viewModel.isOnboardingComplete || !viewModel.automaticDosingStatus.isAutomaticDosingAllowed)
             .padding(.vertical)
         }
@@ -296,6 +297,7 @@ extension SettingsView {
         if viewModel.alertPermissionsChecker.showWarning || viewModel.alertPermissionsChecker.notificationCenterSettings.scheduledDeliveryEnabled {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.critical)
+                .accessibilityIdentifier("settingsViewAlertManagementAlertWarning")
         } else if viewModel.alertMuter.configuration.shouldMute {
             Image(systemName: "speaker.slash.fill")
                 .resizable()
@@ -319,6 +321,7 @@ extension SettingsView {
                     label: NSLocalizedString("Alert Management", comment: "Alert Permissions button text"),
                     descriptiveText: NSLocalizedString("iOS Permissions and Mute All App Sounds", comment: "Alert Permissions descriptive text")
                 )
+                .accessibilityIdentifier("settingsViewAlertManagement")
             }
         }
     }
@@ -352,7 +355,10 @@ extension SettingsView {
     private var deviceSettingsSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Devices", comment: ""))) {
             pumpSection
+                .accessibilityIdentifier("settingsViewInsulinPump")
+            
             cgmSection
+                .accessibilityIdentifier("settingsViewCGM")
         }
     }
     
