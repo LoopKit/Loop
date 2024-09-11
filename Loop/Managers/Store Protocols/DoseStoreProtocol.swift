@@ -17,8 +17,6 @@ protocol DoseStoreProtocol: AnyObject {
 
     var lastReservoirValue: ReservoirValue? { get }
 
-    func getTotalUnitsDelivered(since startDate: Date) async throws -> InsulinValue
-
     var lastAddedPumpData: Date { get }
 }
 

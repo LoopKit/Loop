@@ -508,7 +508,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             doseEntries = loopManager.dosesRelativeToBasal.trimmed(from: startDate)
 
             iobValues = loopManager.iobValues.filterDateRange(startDate, nil)
-            totalDelivery = try? await loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())).value
+            totalDelivery = await loopManager.totalDeliveredToday()?.value
         }
 
         updatePresetModeAvailability(automaticDosingEnabled: automaticDosingEnabled)

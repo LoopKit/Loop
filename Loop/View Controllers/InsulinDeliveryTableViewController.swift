@@ -320,9 +320,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private func updateTotal() {
         Task { @MainActor in
             if case .display = state {
-                let midnight = Calendar.current.startOfDay(for: Date())
-
-                if let result = try? await doseStore?.getTotalUnitsDelivered(since: midnight) {
+                if let result = await loopDataManager.totalDeliveredToday() {
                     self.totalValueLabel.text = NumberFormatter.localizedString(from: NSNumber(value: result.value), number: .none)
                     self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), DateFormatter.localizedString(from: result.startDate, dateStyle: .none, timeStyle: .short))
                 } else {

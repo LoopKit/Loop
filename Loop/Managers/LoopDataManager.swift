@@ -276,18 +276,27 @@ final class LoopDataManager: ObservableObject {
 
     func fetchData(
         for baseTime: Date = Date(),
-        disablingPreMeal: Bool = false
+        disablingPreMeal: Bool = false,
+        ensureDosingCoverageStart: Date? = nil
     ) async throws -> StoredDataAlgorithmInput {
         // Need to fetch doses back as far as t - (DIA + DCA) for Dynamic carbs
         let dosesInputHistory = CarbMath.maximumAbsorptionTimeInterval + InsulinMath.defaultInsulinActivityDuration
 
         var dosesStart = baseTime.addingTimeInterval(-dosesInputHistory)
+
+        // Ensure dosing data goes back before ensureDosingCoverageStart, if specified
+        if let ensureDosingCoverageStart {
+            dosesStart = min(ensureDosingCoverageStart, dosesStart)
+        }
+
         let doses = try await doseStore.getNormalizedDoseEntries(
             start: dosesStart,
             end: baseTime
         )
 
-        dosesStart = doses.map { $0.startDate }.min() ?? dosesStart
+        // Doses that were included because they cover dosesStart might have a start time earlier than dosesStart
+        // This moves the start time back to ensure basal covers
+        dosesStart = min(dosesStart, doses.map { $0.startDate }.min() ?? dosesStart)
 
         let basal = try await settingsProvider.getBasalHistory(startDate: dosesStart, endDate: baseTime)
 
@@ -411,7 +420,9 @@ final class LoopDataManager: ObservableObject {
     func updateDisplayState() async {
         var newState = AlgorithmDisplayState()
         do {
-            var input = try await fetchData(for: now())
+            let midnight = Calendar.current.startOfDay(for: Date())
+
+            var input = try await fetchData(for: now(), ensureDosingCoverageStart: midnight)
             input.recommendationType = .manualBolus
             newState.input = input
             newState.output = LoopAlgorithm.run(input: input)
@@ -596,6 +607,24 @@ final class LoopDataManager: ObservableObject {
         case .failure(let error):
             throw error
         }
+    }
+
+    public func totalDeliveredToday() async -> InsulinValue?
+    {
+        guard let data = displayState.input else {
+            return nil
+        }
+
+        let now = data.predictionStart
+        let midnight = Calendar.current.startOfDay(for: now)
+
+        let annotatedDoses = data.doses.annotated(with: data.basal, fillBasalGaps: true)
+        let trimmed = annotatedDoses.map { $0.trimmed(from: midnight, to: now)}
+
+        return InsulinValue(
+            startDate: midnight,
+            value: trimmed.reduce(0.0) { $0 + $1.volume }
+        )
     }
 
     var iobValues: [InsulinValue] {
@@ -1123,7 +1152,7 @@ extension LoopDataManager: SimpleBolusViewModelDelegate {
     
 }
 
-extension LoopDataManager: BolusEntryViewModelDelegate {
+extension LoopDataManager: BolusEntryViewModelDelegate {    
     func saveGlucose(sample: LoopKit.NewGlucoseSample) async throws -> LoopKit.StoredGlucoseSample {
         let storedSamples = try await addGlucose([sample])
         return storedSamples.first!
