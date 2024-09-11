@@ -40,20 +40,6 @@
     },
     {
       "target" : {
-        "containerPath" : "container:..\/Common\/TidepoolService\/TidepoolService.xcodeproj",
-        "identifier" : "A9DAAD0622E7987800E76C9F",
-        "name" : "TidepoolServiceKitTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:..\/Common\/TidepoolService\/TidepoolService.xcodeproj",
-        "identifier" : "A9DAAD2222E7988900E76C9F",
-        "name" : "TidepoolServiceKitUITests"
-      }
-    },
-    {
-      "target" : {
         "containerPath" : "container:..\/Loop\/Loop.xcodeproj",
         "identifier" : "43E2D90A1D20C581004DA55F",
         "name" : "LoopTests"
