@@ -30,7 +30,7 @@ struct ChartAxisGenerator {
         ]
         
         let actualPoints = points + glucoseDisplayRange
-        let sortedChartPoints = points.sorted {(obj1, obj2) in
+        let sortedChartPoints = actualPoints.sorted {(obj1, obj2) in
             return obj1 < obj2
         }
         
