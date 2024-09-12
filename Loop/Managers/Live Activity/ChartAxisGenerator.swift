@@ -7,53 +7,44 @@
 //
 
 import Foundation
-import LoopKitUI
-import SwiftCharts
 import HealthKit
+import SwiftCharts
+import UIKit
 
 struct ChartAxisGenerator {
-    private static let axisLabelSettings = ChartLabelSettings(font: .systemFont(ofSize: 14), fontColor: UIColor.secondaryLabel)
+    private static let yAxisStepSizeMGDLOverride: Double? = FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil
+    private static let range = FeatureFlags.predictedGlucoseChartClampEnabled ? LoopConstants.glucoseChartDefaultDisplayBoundClamped : LoopConstants.glucoseChartDefaultDisplayBound
+    private static let predictedGlucoseSoftBoundsMinimum = FeatureFlags.predictedGlucoseChartClampEnabled ? HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 40) : nil
     
     private static let minSegmentCount: Double = 2
-    private static let yAxisStepSizeMGDLOverride: Double? = FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil
     private static let addPaddingSegmentIfEdge = false
-    private static let predictedGlucoseSoftBoundsMinimum: HKQuantity? = FeatureFlags.predictedGlucoseChartClampEnabled ? HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 40) : nil
+    private static let axisLabelSettings = ChartLabelSettings(font: .systemFont(ofSize: 14), fontColor: UIColor.secondaryLabel)
     
-    // Logic is copied/ported from generateYAxisValuesUsingLinearSegmentStep
-    public static func getYAxis(points: [Double], isMmol: Bool) -> [Double] {
-        let multiple: Double = !isMmol ? (yAxisStepSizeMGDLOverride ?? 25) : 1
-        
-        var range: ClosedRange<HKQuantity>
-        if FeatureFlags.predictedGlucoseChartClampEnabled {
-            range = LoopConstants.glucoseChartDefaultDisplayBoundClamped
-        } else {
-            range = LoopConstants.glucoseChartDefaultDisplayBound
-        }
-        
+    // This logic is copied/ported from generateYAxisValuesUsingLinearSegmentStep
+    static func getYAxis(points: [Double], isMmol: Bool) -> [Double] {
         let unit: HKUnit = isMmol ? .millimolesPerLiter : .milligramsPerDeciliter
-        let glucoseDisplayRange: [Double] = [
+
+        let glucoseDisplayRange = [
             range.lowerBound.doubleValue(for: unit),
             range.upperBound.doubleValue(for: unit)
         ]
         
         let actualPoints = points + glucoseDisplayRange
-        let sortedChartPoints = actualPoints.sorted {(obj1, obj2) in
+        let sortedChartPoints = points.sorted {(obj1, obj2) in
             return obj1 < obj2
         }
         
-        guard let firstChartPoint = sortedChartPoints.first, let lastChartPoint = sortedChartPoints.last else {
+        guard let first = sortedChartPoints.first, let lastPar = sortedChartPoints.last else {
             print("Trying to generate Y axis without datapoints, returning empty array")
             return []
         }
         
-        let first = firstChartPoint
-        let lastPar = lastChartPoint
-        
         let maxSegmentCount: Double = glucoseValueBelowSoftBoundsMinimum(first, unit) ? 5 : 4
         
         guard lastPar >=~ first else {fatalError("Invalid range generating axis values")}
+        let multiple: Double = !isMmol ? (yAxisStepSizeMGDLOverride ?? 25) : 1
         
-        let last = needsIncreaseByOne(lastPar, first) ? lastPar + 1 : lastPar
+        let last = needsToAddOne(lastPar, first) ? lastPar + 1 : lastPar
         
         /// The first axis value will be less than or equal to the first scalar value, aligned with the desired multiple
         var firstValue = first - (first.truncatingRemainder(dividingBy: multiple))
@@ -113,17 +104,17 @@ struct ChartAxisGenerator {
         }
     }
     
-    private static func glucoseValueBelowSoftBoundsMinimum(_ minimumValue: Double, _ unit: HKUnit) -> Bool {
+    private static func needsToAddOne(_ a: Double, _ b: Double) -> Bool {
+        return fabs(a - b) < Double.ulpOfOne
+    }
+    
+    private static func glucoseValueBelowSoftBoundsMinimum(_ glucoseMinimum: Double, _ unit: HKUnit) -> Bool {
         guard let predictedGlucoseSoftBoundsMinimum = predictedGlucoseSoftBoundsMinimum else
         {
             return false
         }
             
-        return HKQuantity(unit: unit, doubleValue: minimumValue) < predictedGlucoseSoftBoundsMinimum
-    }
-    
-    private static func needsIncreaseByOne(_ a: Double, _ b: Double) -> Bool {
-        return fabs(a - b) < Double.ulpOfOne
+        return HKQuantity(unit: unit, doubleValue: glucoseMinimum) < predictedGlucoseSoftBoundsMinimum
     }
 }
 
