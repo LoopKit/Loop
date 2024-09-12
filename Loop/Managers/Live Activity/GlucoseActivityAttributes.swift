@@ -37,6 +37,7 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
         public let predicatedGlucose: [Double]
         public let predicatedStartDate: Date?
         public let predicatedInterval: TimeInterval?
+        public let yAxisMarks: [Double]
     }
     
     public let mode: LiveActivityMode

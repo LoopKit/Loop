@@ -165,6 +165,12 @@ class GlucoseActivityManager {
                     unit: unit
                 )
             }
+            
+            let yAxisPoints = glucoseSamples.map{ item in item.quantity.doubleValue(for: unit) } + predicatedGlucose
+            let chartYAxis = ChartAxisGenerator.getYAxis(
+                points: yAxisPoints,
+                isMmol: unit == HKUnit.millimolesPerLiter
+            )
 
             let state = GlucoseActivityAttributes.ContentState(
                 date: currentGlucose.startDate,
@@ -185,7 +191,8 @@ class GlucoseActivityManager {
                 },
                 predicatedGlucose: predicatedGlucose,
                 predicatedStartDate: statusContext?.predictedGlucose?.startDate,
-                predicatedInterval: statusContext?.predictedGlucose?.interval
+                predicatedInterval: statusContext?.predictedGlucose?.interval,
+                yAxisMarks: chartYAxis
             )
             
             await self.activity?.update(ActivityContent(
@@ -474,7 +481,8 @@ class GlucoseActivityManager {
                 glucoseSamples: [],
                 predicatedGlucose: [],
                 predicatedStartDate: nil,
-                predicatedInterval: nil
+                predicatedInterval: nil,
+                yAxisMarks: []
             )
             
             self.activity = try Activity.request(

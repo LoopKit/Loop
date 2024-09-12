@@ -15,8 +15,9 @@ struct ChartView: View {
     private let predicatedData: [ChartValues]
     private let glucoseRanges: [GlucoseRangeValue]
     private let preset: Preset?
+    private let yAxisMarks: [Double]
     
-    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
+    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double]) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = ChartValues.convert(
             data: predicatedGlucose,
@@ -28,13 +29,15 @@ struct ChartView: View {
         )
         self.preset = preset
         self.glucoseRanges = glucoseRanges
+        self.yAxisMarks = yAxisMarks
     }
     
-    init(glucoseSamples: [GlucoseSampleAttributes], useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?) {
+    init(glucoseSamples: [GlucoseSampleAttributes], useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double]) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = []
         self.preset = preset
         self.glucoseRanges = glucoseRanges
+        self.yAxisMarks = yAxisMarks
     }
     
     var body: some View {
@@ -87,7 +90,9 @@ struct ChartView: View {
                 plotContent.background(.cyan.opacity(0.15))
             }
             .chartLegend(.hidden)
-            .chartYScale(domain: .automatic(includesZero: false))
+            .chartYAxis {
+                AxisMarks(values: yAxisMarks)
+            }
             .chartYAxis {
                 AxisMarks(position: .leading) { _ in
                     AxisValueLabel().foregroundStyle(Color.primary)

@@ -402,6 +402,7 @@
 		B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */; };
 		B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */; };
 		B82181F62C93628300478A91 /* LiveActivityManagementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82181F52C93628300478A91 /* LiveActivityManagementViewModel.swift */; };
+		B82182002C93716A00478A91 /* ChartAxisGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82181F92C936AD600478A91 /* ChartAxisGenerator.swift */; };
 		B851FFC52C37221800D738C1 /* LiveActivityManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B851FFC42C37221800D738C1 /* LiveActivityManagementView.swift */; };
 		B851FFCA2C3731DE00D738C1 /* LiveActivitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B851FFC62C37271E00D738C1 /* LiveActivitySettings.swift */; };
 		B851FFCB2C3731DE00D738C1 /* LiveActivitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B851FFC62C37271E00D738C1 /* LiveActivitySettings.swift */; };
@@ -741,6 +742,16 @@
 				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B82181FF2C9370F800478A91 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C1E3DC4828595FAA00CA19FF /* Embed Frameworks */ = {
@@ -1340,6 +1351,7 @@
 		B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
 		B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+DeviceStatus.swift"; sourceTree = "<group>"; };
 		B82181F52C93628300478A91 /* LiveActivityManagementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagementViewModel.swift; sourceTree = "<group>"; };
+		B82181F92C936AD600478A91 /* ChartAxisGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisGenerator.swift; sourceTree = "<group>"; };
 		B851FFC42C37221800D738C1 /* LiveActivityManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagementView.swift; sourceTree = "<group>"; };
 		B851FFC62C37271E00D738C1 /* LiveActivitySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivitySettings.swift; sourceTree = "<group>"; };
 		B87539C82C2B06CE0085A975 /* LocalizedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
@@ -2811,6 +2823,7 @@
 			children = (
 				B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */,
 				B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */,
+				B82181F92C936AD600478A91 /* ChartAxisGenerator.swift */,
 			);
 			path = "Live Activity";
 			sourceTree = "<group>";
@@ -3037,6 +3050,7 @@
 				14B1735828AED9EC006CCD7C /* Sources */,
 				14B1735928AED9EC006CCD7C /* Frameworks */,
 				14B1735A28AED9EC006CCD7C /* Resources */,
+				B82181FF2C9370F800478A91 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -3044,6 +3058,8 @@
 				1481F9BE28DA26F4004C5AEB /* PBXTargetDependency */,
 			);
 			name = "Loop Widget Extension";
+			packageProductDependencies = (
+			);
 			productName = SmallStatusWidgetExtension;
 			productReference = 14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -3888,6 +3904,7 @@
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
 				A9FB75F1252BE320004C7D3F /* BolusDosingDecision.swift in Sources */,
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
+				B82182002C93716A00478A91 /* ChartAxisGenerator.swift in Sources */,
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
 				1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsServicesManager.swift in Sources */,

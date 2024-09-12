@@ -43,7 +43,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                     lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                                     upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
                                     glucoseRanges: context.state.glucoseRanges,
-                                    preset: context.state.preset
+                                    preset: context.state.preset,
+                                    yAxisMarks: context.state.yAxisMarks
                                 )
                                 .frame(height: 85)
                             } else {
@@ -53,7 +54,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                     lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                                     upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
                                     glucoseRanges: context.state.glucoseRanges,
-                                    preset: context.state.preset
+                                    preset: context.state.preset,
+                                    yAxisMarks: context.state.yAxisMarks
                                 )
                                 .frame(height: 85)
                             }
@@ -149,7 +151,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                             upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
                             glucoseRanges: context.state.glucoseRanges,
-                            preset: context.state.preset
+                            preset: context.state.preset,
+                            yAxisMarks: context.state.yAxisMarks
                         )
                             .frame(height: 75)
                     } else {
@@ -159,7 +162,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             lowerLimit: context.state.isMmol ? context.attributes.lowerLimitChartMmol : context.attributes.lowerLimitChartMg,
                             upperLimit: context.state.isMmol ? context.attributes.upperLimitChartMmol : context.attributes.upperLimitChartMg,
                             glucoseRanges: context.state.glucoseRanges,
-                            preset: context.state.preset
+                            preset: context.state.preset,
+                            yAxisMarks: context.state.yAxisMarks
                         )
                             .frame(height: 75)
                     }
