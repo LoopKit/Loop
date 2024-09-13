@@ -296,6 +296,8 @@ struct StatusExtensionContext: RawRepresentable {
 
     var predictedGlucose: PredictedGlucoseContext?
     var lastLoopCompleted: Date?
+    var lastCGMComm: Date?
+    var lastPumpComm: Date?
     var createdAt: Date?
     var isClosedLoop: Bool?
     var preMealPresetAllowed: Bool?
@@ -328,6 +330,8 @@ struct StatusExtensionContext: RawRepresentable {
         }
 
         lastLoopCompleted = rawValue["lastLoopCompleted"] as? Date
+        lastCGMComm = rawValue["lastCGMComm"] as? Date
+        lastPumpComm = rawValue["lastPumpComm"] as? Date
         createdAt = rawValue["createdAt"] as? Date
         isClosedLoop = rawValue["isClosedLoop"] as? Bool
         preMealPresetAllowed = rawValue["preMealPresetAllowed"] as? Bool
@@ -369,6 +373,8 @@ struct StatusExtensionContext: RawRepresentable {
 
         raw["predictedGlucose"] = predictedGlucose?.rawValue
         raw["lastLoopCompleted"] = lastLoopCompleted
+        raw["lastCGMComm"] = lastCGMComm
+        raw["lastPumpComm"] = lastPumpComm
         raw["createdAt"] = createdAt
         raw["isClosedLoop"] = isClosedLoop
         raw["preMealPresetAllowed"] = preMealPresetAllowed

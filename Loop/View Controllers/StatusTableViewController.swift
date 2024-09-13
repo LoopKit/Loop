@@ -422,6 +422,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         dispatchPrecondition(condition: .onQueue(.main))
         // This should be kept up to date immediately
         hudView?.loopCompletionHUD.lastLoopCompleted = loopManager.lastLoopCompleted
+        hudView?.loopCompletionHUD.lastCGMComm = loopManager.mostRecentGlucoseDataDate
+        hudView?.loopCompletionHUD.lastPumpComm = loopManager.mostRecentPumpDataDate
 
         guard !reloading && !deviceManager.authorizationRequired else {
             return
@@ -1625,6 +1627,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           initialDosingEnabled: self.settingsManager.settings.dosingEnabled, automaticDosingStatus: self.automaticDosingStatus,
                                           automaticDosingStrategy: self.settingsManager.settings.automaticDosingStrategy,
                                           lastLoopCompletion: loopManager.$lastLoopCompleted,
+                                          lastCGMComm: { [weak self] in self?.loopManager.mostRecentGlucoseDataDate },
+                                          lastPumpComm: { [weak self] in self?.loopManager.mostRecentPumpDataDate },
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
@@ -1668,6 +1672,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
         updatePresetModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
         hudView?.loopCompletionHUD.loopIconClosed = automaticDosingEnabled
         hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
+        
+        if automaticDosingEnabled {
+            Task {
+                await loopManager.loop()
+            }
+        }
     }
 
     // MARK: - HUDs
@@ -1695,6 +1705,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             hudView.loopCompletionHUD.stateColors = .loopStatus
             hudView.loopCompletionHUD.loopIconClosed = automaticDosingStatus.automaticDosingEnabled
             hudView.loopCompletionHUD.lastLoopCompleted = loopManager.lastLoopCompleted
+            hudView.loopCompletionHUD.lastCGMComm = loopManager.mostRecentGlucoseDataDate
+            hudView.loopCompletionHUD.lastPumpComm = loopManager.mostRecentPumpDataDate
 
             hudView.cgmStatusHUD.stateColors = .cgmStatus
             hudView.cgmStatusHUD.tintColor = .label

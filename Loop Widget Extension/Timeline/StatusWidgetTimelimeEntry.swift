@@ -19,6 +19,8 @@ struct StatusWidgetTimelimeEntry: TimelineEntry {
     let contextUpdatedAt: Date
     
     let lastLoopCompleted: Date?
+    let lastCGMComm: Date?
+    let lastPumpComm: Date?
     let closeLoop: Bool
     
     let currentGlucose: GlucoseValue?

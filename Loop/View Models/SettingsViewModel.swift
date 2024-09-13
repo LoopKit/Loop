@@ -83,6 +83,8 @@ public class SettingsViewModel: ObservableObject {
     @Published private(set) var automaticDosingStatus: AutomaticDosingStatus
     
     @Published private(set) var lastLoopCompletion: Date?
+    let lastCGMComm: () -> Date?
+    let lastPumpComm: () -> Date?
 
     var closedLoopDescriptiveText: String? {
         return delegate?.closedLoopDescriptiveText
@@ -108,8 +110,17 @@ public class SettingsViewModel: ObservableObject {
     }
     
     var loopStatusCircleFreshness: LoopCompletionFreshness {
-        let lastLoopCompletion = lastLoopCompletion ?? Date().addingTimeInterval(.minutes(16))
-        let age = abs(min(0, lastLoopCompletion.timeIntervalSinceNow))
+        var age: TimeInterval
+        
+        if automaticDosingStatus.automaticDosingEnabled {
+            let lastLoopCompletion = lastLoopCompletion ?? Date().addingTimeInterval(.minutes(16))
+            age = abs(min(0, lastLoopCompletion.timeIntervalSinceNow))
+        } else {
+            let lastCGMComm = lastCGMComm() ?? Date().addingTimeInterval(.minutes(16))
+            let lastPumpComm = lastPumpComm() ?? Date().addingTimeInterval(.minutes(16))
+            age = abs(max(min(0, lastCGMComm.timeIntervalSinceNow), min(0, lastPumpComm.timeIntervalSinceNow)))
+        }
+        
         return LoopCompletionFreshness(age: age)
     }
     
@@ -128,6 +139,8 @@ public class SettingsViewModel: ObservableObject {
                 automaticDosingStatus: AutomaticDosingStatus,
                 automaticDosingStrategy: AutomaticDosingStrategy,
                 lastLoopCompletion: Published<Date?>.Publisher,
+                lastCGMComm: @escaping () -> Date?,
+                lastPumpComm: @escaping () -> Date?,
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
@@ -146,6 +159,8 @@ public class SettingsViewModel: ObservableObject {
         self.automaticDosingStatus = automaticDosingStatus
         self.automaticDosingStrategy = automaticDosingStrategy
         self.lastLoopCompletion = nil
+        self.lastCGMComm = lastCGMComm
+        self.lastPumpComm = lastPumpComm
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
@@ -200,6 +215,8 @@ extension SettingsViewModel {
                                  automaticDosingStatus: AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true),
                                  automaticDosingStrategy: .automaticBolus,
                                  lastLoopCompletion: FakeLastLoopCompletionPublisher().$mockLastLoopCompletion,
+                                 lastCGMComm: { nil },
+                                 lastPumpComm: { nil },
                                  availableSupports: [],
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,
