@@ -189,7 +189,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testUpdatePredictedGlucoseValues() async throws {
         do {
-            let input = try await delegate.fetchData(for: Self.exampleStartDate, disablingPreMeal: false)
+            let input = try await delegate.fetchData(for: Self.exampleStartDate, disablingPreMeal: false, ensureDosingCoverageStart: nil)
             let prediction = try input.predictGlucose()
             await bolusEntryViewModel.update()
             XCTAssertEqual(prediction, bolusEntryViewModel.predictedGlucoseValues.map { PredictedGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) })
@@ -200,7 +200,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testUpdatePredictedGlucoseValuesWithManual() async throws {
         do {
-            let input = try await delegate.fetchData(for: Self.exampleStartDate, disablingPreMeal: false)
+            let input = try await delegate.fetchData(for: Self.exampleStartDate, disablingPreMeal: false, ensureDosingCoverageStart: nil)
             let prediction = try input.predictGlucose()
             await bolusEntryViewModel.update()
             bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
@@ -870,7 +870,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         automaticBolusApplicationFactor: 0.4
     )
 
-    func fetchData(for baseTime: Date, disablingPreMeal: Bool) async throws -> StoredDataAlgorithmInput {
+    func fetchData(for baseTime: Date, disablingPreMeal: Bool, ensureDosingCoverageStart: Date?) async throws -> StoredDataAlgorithmInput {
         loopStateInput.predictionStart = baseTime
         return loopStateInput
     }

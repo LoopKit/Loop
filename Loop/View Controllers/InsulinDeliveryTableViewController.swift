@@ -362,37 +362,35 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         }
 
         let sheet = UIAlertController(deleteAllConfirmationMessage: confirmMessage) {
-            self.deleteAllObjects()
+            Task {
+                await self.deleteAllObjects()
+            }
         }
         present(sheet, animated: true)
     }
 
     private var deletionPending = false
 
-    private func deleteAllObjects() {
+    private func deleteAllObjects() async {
         guard !deletionPending else {
             return
         }
 
         deletionPending = true
 
-        let completion = { (_: DoseStore.DoseStoreError?) -> Void in
-            DispatchQueue.main.async {
-                self.deletionPending = false
-                self.setEditing(false, animated: true)
-            }
-        }
-
         let sinceDate = Date().addingTimeInterval(-InsulinDeliveryTableViewController.historicDataDisplayTimeInterval)
 
         switch DataSourceSegment(rawValue: dataSourceSegmentedControl.selectedSegmentIndex)! {
         case .reservoir:
-            doseStore?.deleteAllReservoirValues(completion)
+            try? await doseStore?.deleteAllReservoirValues()
         case .history:
-            doseStore?.deleteAllPumpEvents(completion)
+            try? await doseStore?.deleteAllPumpEvents()
         case .manualEntryDose:
-            doseStore?.deleteAllManuallyEnteredDoses(since: sinceDate, completion)
+            try? await doseStore?.deleteAllManuallyEnteredDoses(since: sinceDate)
         }
+        self.deletionPending = false
+        self.setEditing(false, animated: true)
+
     }
 
     // MARK: - Table view data source
