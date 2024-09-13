@@ -90,6 +90,7 @@ struct ChartView: View {
                 plotContent.background(.cyan.opacity(0.15))
             }
             .chartLegend(.hidden)
+            .chartYScale(domain: [yAxisMarks.first ?? 0, yAxisMarks.last ?? 0])
             .chartYAxis {
                 AxisMarks(values: yAxisMarks)
             }
