@@ -1055,6 +1055,7 @@ extension DeviceDataManager: PumpManagerDelegate {
             } catch {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
                 completion(error)
+                return
             }
             completion(nil)
             NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)

@@ -1009,6 +1009,7 @@ extension LoopAppManager: SimulatedData {
                                     try await self.doseStore.generateSimulatedHistoricalPumpEvents()
                                 } catch {
                                     completion(error)
+                                    return
                                 }
                                 self.deviceDataManager.deviceLog.generateSimulatedHistoricalDeviceLogEntries() { error in
                                     guard error == nil else {
