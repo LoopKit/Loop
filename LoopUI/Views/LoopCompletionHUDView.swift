@@ -50,8 +50,8 @@ public final class LoopCompletionHUDView: BaseHUDView {
         }
     }
     
-    public var lastCGMComm: Date?
-    public var lastPumpComm: Date?
+    public var mostRecentGlucoseDataDate: Date?
+    public var mostRecentPumpDataDate: Date?
 
     public var loopInProgress = false {
         didSet {
@@ -173,8 +173,8 @@ public final class LoopCompletionHUDView: BaseHUDView {
                 caption?.text = "–"
                 accessibilityLabel = nil
             }
-        } else if let lastPumpComm, let lastCGMComm {
-            let ago = abs(max(min(0, lastPumpComm.timeIntervalSinceNow), min(0, lastCGMComm.timeIntervalSinceNow)))
+        } else if let mostRecentPumpDataDate, let mostRecentGlucoseDataDate {
+            let ago = abs(max(min(0, mostRecentPumpDataDate.timeIntervalSinceNow), min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow)))
 
             freshness = LoopCompletionFreshness(age: ago)
             

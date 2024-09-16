@@ -24,9 +24,9 @@ struct SystemStatusWidgetEntryView: View {
             let lastLoopCompleted = entry.lastLoopCompleted ?? Date().addingTimeInterval(.minutes(16))
             age = abs(min(0, lastLoopCompleted.timeIntervalSinceNow))
         } else {
-            let lastCGMComm = entry.lastCGMComm ?? Date().addingTimeInterval(.minutes(16))
-            let lastPumpComm = entry.lastPumpComm ?? Date().addingTimeInterval(.minutes(16))
-            age = abs(max(min(0, lastCGMComm.timeIntervalSinceNow), min(0, lastPumpComm.timeIntervalSinceNow)))
+            let mostRecentGlucoseDataDate = entry.mostRecentGlucoseDataDate ?? Date().addingTimeInterval(.minutes(16))
+            let mostRecentPumpDataDate = entry.mostRecentPumpDataDate ?? Date().addingTimeInterval(.minutes(16))
+            age = abs(max(min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow), min(0, mostRecentPumpDataDate.timeIntervalSinceNow)))
         }
         
         return LoopCompletionFreshness(age: age)
