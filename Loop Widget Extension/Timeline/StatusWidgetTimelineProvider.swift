@@ -38,7 +38,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
     func placeholder(in context: Context) -> StatusWidgetTimelimeEntry {
         log.default("%{public}@: context=%{public}@", #function, String(describing: context))
 
-        return StatusWidgetTimelimeEntry(date: Date(), contextUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, glucoseFetchedAt: Date(), delta: nil, unit: .milligramsPerDeciliter, sensor: nil, pumpHighlight: nil, netBasal: nil, eventualGlucose: nil, preMealPresetAllowed: true, preMealPresetActive: false, customPresetActive: false)
+        return StatusWidgetTimelimeEntry(date: Date(), contextUpdatedAt: Date(), lastLoopCompleted: nil, mostRecentGlucoseDataDate: nil, mostRecentPumpDataDate: nil, closeLoop: true, currentGlucose: nil, glucoseFetchedAt: Date(), delta: nil, unit: .milligramsPerDeciliter, sensor: nil, pumpHighlight: nil, netBasal: nil, eventualGlucose: nil, preMealPresetAllowed: true, preMealPresetActive: false, customPresetActive: false)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StatusWidgetTimelimeEntry) -> ()) {
@@ -159,6 +159,8 @@ class StatusWidgetTimelineProvider: TimelineProvider {
                 date: updateDate,
                 contextUpdatedAt: contextUpdatedAt,
                 lastLoopCompleted: lastCompleted,
+                mostRecentGlucoseDataDate: context.mostRecentGlucoseDataDate,
+                mostRecentPumpDataDate: context.mostRecentPumpDataDate,
                 closeLoop: closeLoop,
                 currentGlucose: currentGlucose,
                 glucoseFetchedAt: updateDate,

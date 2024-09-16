@@ -49,6 +49,9 @@ public final class LoopCompletionHUDView: BaseHUDView {
             }
         }
     }
+    
+    public var mostRecentGlucoseDataDate: Date?
+    public var mostRecentPumpDataDate: Date?
 
     public var loopInProgress = false {
         didSet {
@@ -136,7 +139,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
         lastLoopMessage = ""
         let timeAgoToIncludeTimeStamp: TimeInterval = .minutes(20)
         let timeAgoToIncludeDate: TimeInterval = .hours(4)
-        if let date = lastLoopCompleted {
+        if loopIconClosed, let date = lastLoopCompleted {
             let ago = abs(min(0, date.timeIntervalSinceNow))
 
             freshness = LoopCompletionFreshness(age: ago)
@@ -170,6 +173,28 @@ public final class LoopCompletionHUDView: BaseHUDView {
                 caption?.text = "–"
                 accessibilityLabel = nil
             }
+        } else if let mostRecentPumpDataDate, let mostRecentGlucoseDataDate {
+            let ago = abs(max(min(0, mostRecentPumpDataDate.timeIntervalSinceNow), min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow)))
+
+            freshness = LoopCompletionFreshness(age: ago)
+            
+            if let timeString = timeAgoFormatter.string(from: ago) {
+                switch traitCollection.preferredContentSizeCategory {
+                case UIContentSizeCategory.extraSmall,
+                    UIContentSizeCategory.small,
+                    UIContentSizeCategory.medium,
+                    UIContentSizeCategory.large:
+                    // Use a longer form only for smaller text sizes
+                    caption?.text = String(format: LocalizedString("%@ ago", comment: "Format string describing the time interval since the last cgm or pump communication date. (1: The localized date components"), timeString)
+                default:
+                    caption?.text = timeString
+                }
+                
+                accessibilityLabel = String(format: LocalizedString("Last device communication ran %@ ago", comment: "Accessbility format label describing the time interval since the last device communication date. (1: The localized date components)"), timeString)
+            } else {
+                caption?.text = "–"
+                accessibilityLabel = nil
+            }
         } else {
             caption?.text = "–"
             accessibilityLabel = LocalizedString("Waiting for first run", comment: "Accessibility label describing completion HUD waiting for first run")
@@ -196,19 +221,97 @@ extension LoopCompletionHUDView {
         switch freshness {
         case .fresh:
             if loopStateView.open {
-                let reason = closedLoopDisallowedLocalizedDescription ?? LocalizedString("Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.", comment: "Instructions for user to close loop if it is allowed.")
-                return (title: LocalizedString("Closed Loop OFF", comment: "Title of green open loop OFF message"),
-                        message: String(format: LocalizedString("\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@", comment: "Green closed loop OFF message (1: app name)(2: reason for open loop)"), Bundle.main.bundleDisplayName, reason))
+                let reason = closedLoopDisallowedLocalizedDescription ?? LocalizedString(
+                    "Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.",
+                    comment: "Instructions for user to close loop if it is allowed."
+                )
+                
+                return (
+                    title: LocalizedString(
+                        "Closed Loop OFF",
+                        comment: "Title of fresh loop OFF message"
+                    ),
+                    message: String(
+                        format: LocalizedString(
+                            "\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@",
+                            comment: "Fresh closed loop OFF message (1: app name)(2: reason for open loop)"
+                        ),
+                        Bundle.main.bundleDisplayName,
+                        reason
+                    )
+                )
             } else {
-                return (title: LocalizedString("Closed Loop ON", comment: "Title of green closed loop ON message"),
-                        message: String(format: LocalizedString("\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position.", comment: "Green closed loop ON message (1: last loop string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
+                return (
+                    title: LocalizedString(
+                        "Closed Loop ON",
+                        comment: "Title of fresh closed loop ON message"
+                    ),
+                    message: String(
+                        format: LocalizedString(
+                            "\n%1$@\n\n%2$@ is operating with Closed Loop in the ON position.",
+                            comment: "Fresh closed loop ON message (1: last loop string) (2: app name)"
+                        ),
+                        lastLoopMessage,
+                        Bundle.main.bundleDisplayName
+                    )
+                )
             }
         case .aging:
-            return (title: LocalizedString("Loop Warning", comment: "Title of yellow loop message"),
-                    message: String(format: LocalizedString("\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM.", comment: "Yellow loop message (1: last loop string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
+            if loopStateView.open {
+                return (
+                    title: LocalizedString(
+                        "Caution",
+                        comment: "Title of aging open loop message"
+                    ),
+                    message: LocalizedString(
+                        "Tap your CGM and insulin pump status icons for more information. Check for potential communication issues with your pump and CGM.",
+                        comment: "Aging open loop message"
+                    )
+                )
+            } else {
+                return (
+                    title: LocalizedString(
+                        "Loop Warning",
+                        comment: "Title of aging closed loop message"
+                    ),
+                    message: String(
+                        format: LocalizedString(
+                            "\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM.",
+                            comment: "Aging loop message (1: last loop string) (2: app name)"
+                        ),
+                        lastLoopMessage,
+                        Bundle.main.bundleDisplayName
+                    )
+                )
+            }
         case .stale:
-            return (title: LocalizedString("Loop Failure", comment: "Title of red loop message"),
-                    message: String(format: LocalizedString("\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM.", comment: "Red loop message (1: last loop  string) (2: app name)"), lastLoopMessage, Bundle.main.bundleDisplayName))
+            if loopStateView.open {
+                return (
+                    title: LocalizedString(
+                        "Device Error",
+                        comment: "Title of stale loop message"
+                    ),
+                    message: LocalizedString(
+                        "Tap your CGM and insulin pump status icons for more information. Check for potential communication issues with your pump and CGM.",
+                        comment: "Stale open loop message"
+                    )
+                )
+            } else {
+                return (
+                    title: LocalizedString(
+                        "Loop Failure",
+                        comment: "Title of red loop message"
+                    ),
+                    message: String(
+                        format: LocalizedString(
+                            "\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but check for potential communication issues with your pump and CGM.",
+                            comment: "Red loop message (1: last loop  string) (2: app name)"
+                        ),
+                        lastLoopMessage,
+                        Bundle.main.bundleDisplayName
+                    )
+                )
+            }
         }
     }
 }

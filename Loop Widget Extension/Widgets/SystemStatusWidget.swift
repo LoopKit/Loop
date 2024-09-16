@@ -18,8 +18,17 @@ struct SystemStatusWidgetEntryView: View {
     var entry: StatusWidgetTimelimeEntry
     
     var freshness: LoopCompletionFreshness {
-        let lastLoopCompleted = entry.lastLoopCompleted ?? Date().addingTimeInterval(.minutes(16))
-        let age = abs(min(0, lastLoopCompleted.timeIntervalSinceNow))
+        var age: TimeInterval
+        
+        if entry.closeLoop {
+            let lastLoopCompleted = entry.lastLoopCompleted ?? Date().addingTimeInterval(.minutes(16))
+            age = abs(min(0, lastLoopCompleted.timeIntervalSinceNow))
+        } else {
+            let mostRecentGlucoseDataDate = entry.mostRecentGlucoseDataDate ?? Date().addingTimeInterval(.minutes(16))
+            let mostRecentPumpDataDate = entry.mostRecentPumpDataDate ?? Date().addingTimeInterval(.minutes(16))
+            age = abs(max(min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow), min(0, mostRecentPumpDataDate.timeIntervalSinceNow)))
+        }
+        
         return LoopCompletionFreshness(age: age)
     }
 

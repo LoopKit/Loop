@@ -118,6 +118,8 @@ final class ExtensionDataManager {
         #endif
 
         context.lastLoopCompleted = loopDataManager.lastLoopCompleted
+        context.mostRecentGlucoseDataDate = loopDataManager.mostRecentGlucoseDataDate
+        context.mostRecentPumpDataDate = loopDataManager.mostRecentPumpDataDate
 
         context.isClosedLoop = self.automaticDosingStatus.automaticDosingEnabled
 
