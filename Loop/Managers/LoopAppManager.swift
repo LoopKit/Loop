@@ -253,7 +253,6 @@ class LoopAppManager: NSObject {
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
             longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
-            basalProfile: settingsManager.settings.basalRateSchedule,
             lastPumpEventsReconciliation: nil // PumpManager is nil at this point. Will update this via addPumpEvents below
         )
 
@@ -499,21 +498,6 @@ class LoopAppManager: NSObject {
                 }
             }
             .store(in: &cancellables)
-
-        // DoseStore still needs to keep updated basal schedule for now
-        NotificationCenter.default.publisher(for: .LoopDataUpdated)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] note in
-                if let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopUpdateContext.RawValue,
-                   let context = LoopUpdateContext(rawValue: rawContext),
-                   let self,
-                   context == .preferences
-                {
-                    self.doseStore.basalProfile = self.settingsManager.settings.basalRateSchedule
-                }
-            }
-            .store(in: &cancellables)
-
     }
 
     private func loopCycleDidComplete() async {
@@ -1016,12 +1000,14 @@ extension LoopAppManager: SimulatedData {
                             return
                         }
                         self.dosingDecisionStore.generateSimulatedHistoricalDosingDecisionObjects() { error in
-                            guard error == nil else {
-                                completion(error)
-                                return
-                            }
-                            self.doseStore.generateSimulatedHistoricalPumpEvents() { error in
+                            Task {
                                 guard error == nil else {
+                                    completion(error)
+                                    return
+                                }
+                                do {
+                                    try await self.doseStore.generateSimulatedHistoricalPumpEvents()
+                                } catch {
                                     completion(error)
                                     return
                                 }
@@ -1056,28 +1042,28 @@ extension LoopAppManager: SimulatedData {
                     return
                 }
                 Task { @MainActor in
-                    self.doseStore.purgeHistoricalPumpEvents() { error in
+                    do {
+                        try await self.doseStore.purgeHistoricalPumpEvents()
+                    } catch {
+                        completion(error)
+                        return
+                    }
+                    self.dosingDecisionStore.purgeHistoricalDosingDecisionObjects() { error in
                         guard error == nil else {
                             completion(error)
                             return
                         }
-                        self.dosingDecisionStore.purgeHistoricalDosingDecisionObjects() { error in
+                        self.carbStore.purgeHistoricalCarbObjects() { error in
                             guard error == nil else {
                                 completion(error)
                                 return
                             }
-                            self.carbStore.purgeHistoricalCarbObjects() { error in
+                            self.glucoseStore.purgeHistoricalGlucoseObjects() { error in
                                 guard error == nil else {
                                     completion(error)
                                     return
                                 }
-                                self.glucoseStore.purgeHistoricalGlucoseObjects() { error in
-                                    guard error == nil else {
-                                        completion(error)
-                                        return
-                                    }
-                                    self.settingsManager.purgeHistoricalSettingsObjects(completion: completion)
-                                }
+                                self.settingsManager.purgeHistoricalSettingsObjects(completion: completion)
                             }
                         }
                     }

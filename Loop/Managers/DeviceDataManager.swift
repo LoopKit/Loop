@@ -308,7 +308,9 @@ final class DeviceDataManager {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
             // Update lastPumpEventsReconciliation on DoseStore
             if let lastSync = pumpManager?.lastSync {
-                doseStore.addPumpEvents([], lastReconciliation: lastSync) { _ in }
+                Task {
+                    try? await doseStore.addPumpEvents([], lastReconciliation: lastSync)
+                }
             }
             if let status = pumpManager?.status {
                 updatePumpIsAllowingAutomation(status: status)
@@ -1047,16 +1049,16 @@ extension DeviceDataManager: PumpManagerDelegate {
         dispatchPrecondition(condition: .onQueue(.main))
         log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
 
-        doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents) { (error) in
-            if let error = error {
+        Task {
+            do {
+                try await doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents)
+            } catch {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
+                completion(error)
+                return
             }
-
-            completion(error)
-
-            if error == nil {
-                NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
-            }
+            completion(nil)
+            NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
         }
     }
 
@@ -1131,6 +1133,10 @@ extension DeviceDataManager: CarbStoreDelegate {
 
 // MARK: - DoseStoreDelegate
 extension DeviceDataManager: DoseStoreDelegate {
+    func scheduledBasalHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Double>] {
+        try await settingsManager.getBasalHistory(startDate: start, endDate: end)
+    }
+    
     func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
         uploadEventListener.triggerUpload(for: .pumpEvent)
     }
@@ -1175,10 +1181,12 @@ extension DeviceDataManager {
 
         let devicePredicate = HKQuery.predicateForObjects(from: [testingPumpManager.testingDevice])
         let insulinDeliveryStore = doseStore.insulinDeliveryStore
-        
-        doseStore.resetPumpData { doseStoreError in
-            guard doseStoreError == nil else {
-                completion?(doseStoreError!)
+
+        Task {
+            do {
+                try await doseStore.resetPumpData()
+            } catch {
+                completion?(error)
                 return
             }
 
