@@ -290,8 +290,6 @@ class LoopAppManager: NSObject {
 
         loopDataManager = LoopDataManager(
             lastLoopCompleted: ExtensionDataManager.context?.lastLoopCompleted,
-            publishedMostRecentGlucoseDataDate: ExtensionDataManager.context?.mostRecentGlucoseDataDate,
-            publishedMostRecentPumpDataDate: ExtensionDataManager.context?.mostRecentPumpDataDate,
             temporaryPresetsManager: temporaryPresetsManager,
             settingsProvider: settingsManager,
             doseStore: doseStore,
