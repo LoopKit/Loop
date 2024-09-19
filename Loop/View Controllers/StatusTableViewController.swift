@@ -166,6 +166,27 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
             }
             .store(in: &cancellables)
+        
+        loopManager.$lastLoopCompleted
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] lastLoopCompleted in
+                self?.hudView?.loopCompletionHUD.lastLoopCompleted = lastLoopCompleted
+            }
+            .store(in: &cancellables)
+        
+        loopManager.$publishedMostRecentGlucoseDataDate
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mostRecentGlucoseDataDate in
+                self?.hudView?.loopCompletionHUD.mostRecentGlucoseDataDate = mostRecentGlucoseDataDate
+            }
+            .store(in: &cancellables)
+        
+        loopManager.$publishedMostRecentPumpDataDate
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mostRecentPumpDataDate in
+                self?.hudView?.loopCompletionHUD.mostRecentPumpDataDate = mostRecentPumpDataDate
+            }
+            .store(in: &cancellables)
 
         if let gestureRecognizer = charts.gestureRecognizer {
             tableView.addGestureRecognizer(gestureRecognizer)
@@ -1627,8 +1648,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           initialDosingEnabled: self.settingsManager.settings.dosingEnabled, automaticDosingStatus: self.automaticDosingStatus,
                                           automaticDosingStrategy: self.settingsManager.settings.automaticDosingStrategy,
                                           lastLoopCompletion: loopManager.$lastLoopCompleted,
-                                          mostRecentGlucoseDataDate: { [weak self] in self?.loopManager.mostRecentGlucoseDataDate },
-                                          mostRecentPumpDataDate: { [weak self] in self?.loopManager.mostRecentPumpDataDate },
+                                          mostRecentGlucoseDataDate: loopManager.$publishedMostRecentGlucoseDataDate,
+                                          mostRecentPumpDataDate: loopManager.$publishedMostRecentPumpDataDate,
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,

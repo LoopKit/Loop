@@ -173,8 +173,8 @@ public final class LoopCompletionHUDView: BaseHUDView {
                 caption?.text = "–"
                 accessibilityLabel = nil
             }
-        } else if let mostRecentPumpDataDate, let mostRecentGlucoseDataDate {
-            let ago = abs(max(min(0, mostRecentPumpDataDate.timeIntervalSinceNow), min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow)))
+        } else if !loopIconClosed, let mostRecentPumpDataDate, let mostRecentGlucoseDataDate {
+            let ago = max(abs(min(0, mostRecentPumpDataDate.timeIntervalSinceNow)), abs(min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow)))
 
             freshness = LoopCompletionFreshness(age: ago)
             
@@ -220,7 +220,7 @@ extension LoopCompletionHUDView {
     public var loopCompletionMessage: (title: String, message: String) {
         switch freshness {
         case .fresh:
-            if loopStateView.open {
+            if !loopIconClosed {
                 let reason = closedLoopDisallowedLocalizedDescription ?? LocalizedString(
                     "Tap Settings to toggle Closed Loop ON if you wish for the app to automate your insulin.",
                     comment: "Instructions for user to close loop if it is allowed."
@@ -257,7 +257,7 @@ extension LoopCompletionHUDView {
                 )
             }
         case .aging:
-            if loopStateView.open {
+            if !loopIconClosed {
                 return (
                     title: LocalizedString(
                         "Caution",
@@ -285,7 +285,7 @@ extension LoopCompletionHUDView {
                 )
             }
         case .stale:
-            if loopStateView.open {
+            if !loopIconClosed {
                 return (
                     title: LocalizedString(
                         "Device Error",

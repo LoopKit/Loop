@@ -99,6 +99,8 @@ final class LoopDataManager: ObservableObject {
     }
 
     @Published private(set) var lastLoopCompleted: Date?
+    @Published private(set) var publishedMostRecentGlucoseDataDate: Date?
+    @Published private(set) var publishedMostRecentPumpDataDate: Date?
 
     var deliveryDelegate: DeliveryDelegate?
 
@@ -148,6 +150,8 @@ final class LoopDataManager: ObservableObject {
 
     init(
         lastLoopCompleted: Date?,
+        publishedMostRecentGlucoseDataDate: Date?,
+        publishedMostRecentPumpDataDate: Date?,
         temporaryPresetsManager: TemporaryPresetsManager,
         settingsProvider: SettingsProvider,
         doseStore: DoseStoreProtocol,
@@ -163,6 +167,8 @@ final class LoopDataManager: ObservableObject {
     ) {
 
         self.lastLoopCompleted = lastLoopCompleted
+        self.publishedMostRecentGlucoseDataDate = publishedMostRecentGlucoseDataDate
+        self.publishedMostRecentPumpDataDate = publishedMostRecentPumpDataDate
         self.temporaryPresetsManager = temporaryPresetsManager
         self.settingsProvider = settingsProvider
         self.doseStore = doseStore
@@ -431,6 +437,8 @@ final class LoopDataManager: ObservableObject {
             logger.error("Error updating Loop state: %{public}@", String(describing: loopError))
         }
         displayState = newState
+        publishedMostRecentGlucoseDataDate = mostRecentGlucoseDataDate
+        publishedMostRecentPumpDataDate = mostRecentPumpDataDate
         await updateRemoteRecommendation()
     }
 

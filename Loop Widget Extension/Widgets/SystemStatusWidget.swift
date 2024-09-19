@@ -26,7 +26,7 @@ struct SystemStatusWidgetEntryView: View {
         } else {
             let mostRecentGlucoseDataDate = entry.mostRecentGlucoseDataDate ?? Date().addingTimeInterval(.minutes(16))
             let mostRecentPumpDataDate = entry.mostRecentPumpDataDate ?? Date().addingTimeInterval(.minutes(16))
-            age = abs(max(min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow), min(0, mostRecentPumpDataDate.timeIntervalSinceNow)))
+            age = max(abs(min(0, mostRecentPumpDataDate.timeIntervalSinceNow)), abs(min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow)))
         }
         
         return LoopCompletionFreshness(age: age)
