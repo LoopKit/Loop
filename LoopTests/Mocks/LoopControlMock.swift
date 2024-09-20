@@ -8,6 +8,7 @@
 
 import XCTest
 import Foundation
+import LoopAlgorithm
 @testable import Loop
 
 
@@ -24,5 +25,9 @@ class LoopControlMock: LoopControl {
     }    
 
     func loop() async {
+    }
+
+    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>] {
+        return []
     }
 }

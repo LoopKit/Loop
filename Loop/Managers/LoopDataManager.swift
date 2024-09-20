@@ -146,6 +146,12 @@ final class LoopDataManager: ObservableObject {
 
     var usePositiveMomentumAndRCForManualBoluses: Bool
 
+    var automationHistory: [AutomationHistoryEntry] {
+        didSet {
+            UserDefaults.standard.automationHistory = automationHistory
+        }
+    }
+
     lazy private var cancellables = Set<AnyCancellable>()
 
     init(
@@ -177,10 +183,10 @@ final class LoopDataManager: ObservableObject {
         self.analyticsServicesManager = analyticsServicesManager
         self.carbAbsorptionModel = carbAbsorptionModel
         self.usePositiveMomentumAndRCForManualBoluses = usePositiveMomentumAndRCForManualBoluses
-        
         self.publishedMostRecentGlucoseDataDate = glucoseStore.latestGlucose?.startDate
         self.publishedMostRecentPumpDataDate = mostRecentPumpDataDate
-        
+        self.automationHistory = UserDefaults.standard.automationHistory
+
         // Required for device settings in stored dosing decisions
         UIDevice.current.isBatteryMonitoringEnabled = true
 
@@ -228,8 +234,20 @@ final class LoopDataManager: ObservableObject {
         automaticDosingStatus.$automaticDosingEnabled
             .removeDuplicates()
             .dropFirst()
-            .sink {
-                if !$0 {
+            .sink { [weak self] enabled in
+                guard let self else {
+                    return
+                }
+                if self.automationHistory.last?.enabled != enabled {
+                    self.automationHistory.append(AutomationHistoryEntry(startDate: Date(), enabled: enabled))
+
+                    // Clean up entries older than 36 hours; we should not be interpolating basal data before then.
+                    let now = Date()
+                    self.automationHistory = self.automationHistory.filter({ entry in
+                        now.timeIntervalSince(entry.startDate) < .hours(36)
+                    })
+                }
+                if !enabled {
                     self.temporaryPresetsManager.clearOverride(matching: .preMeal)
                     Task {
                         try? await self.cancelActiveTempBasal(for: .automaticDosingDisabled)
@@ -436,7 +454,7 @@ final class LoopDataManager: ObservableObject {
             logger.error("Error updating Loop state: %{public}@", String(describing: loopError))
         }
         displayState = newState
-        publishedMostRecentGlucoseDataDate = mostRecentGlucoseDataDate
+        publishedMostRecentGlucoseDataDate = glucoseStore.latestGlucose?.startDate
         publishedMostRecentPumpDataDate = mostRecentPumpDataDate
         await updateRemoteRecommendation()
     }
@@ -1444,7 +1462,11 @@ extension LoopDataManager: DiagnosticReportGenerator {
     }
 }
 
-extension LoopDataManager: LoopControl { }
+extension LoopDataManager: LoopControl {
+    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>] {
+        return automationHistory.toTimeline(from: start, to: end)
+    }
+}
 
 extension CarbMath {
     public static let dateAdjustmentPast: TimeInterval = .hours(-12)

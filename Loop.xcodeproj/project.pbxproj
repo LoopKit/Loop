@@ -415,6 +415,8 @@
 		C138C6F82C1B8A2C00F08F1A /* GlucoseCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C138C6F72C1B8A2C00F08F1A /* GlucoseCondition.swift */; };
 		C13DA2B024F6C7690098BB29 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13DA2AF24F6C7690098BB29 /* UIViewController.swift */; };
 		C148CEE724FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */; };
+		C152B9F52C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */; };
+		C152B9F72C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C152B9F62C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift */; };
 		C159C82F286787EF00A86EC0 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C159C82E286787EF00A86EC0 /* LoopKit.framework */; };
 		C15A8C492A7305B1009D736B /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; };
 		C165756F2534C468004AE16E /* SimpleBolusViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165756E2534C468004AE16E /* SimpleBolusViewModelTests.swift */; };
@@ -1347,6 +1349,8 @@
 		C13DA2AF24F6C7690098BB29 /* UIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
 		C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliveryUncertaintyAlertManager.swift; sourceTree = "<group>"; };
 		C14952142995822A0095AA84 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationHistoryEntry.swift; sourceTree = "<group>"; };
+		C152B9F62C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationHistoryEntryTests.swift; sourceTree = "<group>"; };
 		C155A8F32986396E009BD257 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C155A8F42986396E009BD257 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C155A8F52986396E009BD257 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/ckcomplication.strings; sourceTree = "<group>"; };
@@ -1860,6 +1864,7 @@
 				A987CD4824A58A0100439ADC /* ZipArchive.swift */,
 				C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */,
 				C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */,
+				C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2603,13 +2608,14 @@
 		A9E6DFED246A0460005B1A1C /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				C152B9F62C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift */,
 				A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */,
 				A963B279252CEBAE0062AA12 /* SetBolusUserInfoTests.swift */,
-				A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */,
 				C19008FF252271BB00721625 /* SimpleBolusCalculatorTests.swift */,
-				A9C1719625366F780053BCBD /* WatchHistoricalGlucoseTest.swift */,
-				A9BD28E6272226B40071DF15 /* TestLocalizedError.swift */,
 				C129D3BE2B8697F100FEA6A9 /* TempBasalRecommendationTests.swift */,
+				A9BD28E6272226B40071DF15 /* TestLocalizedError.swift */,
+				A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */,
+				A9C1719625366F780053BCBD /* WatchHistoricalGlucoseTest.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3438,6 +3444,7 @@
 				4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */,
 				89E267FC2292456700A3F2AF /* FeatureFlags.swift in Sources */,
 				43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */,
+				C152B9F52C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift in Sources */,
 				1DA649A9244126DA00F61E75 /* InAppModalAlertScheduler.swift in Sources */,
 				43B260491ED248FB008CAA77 /* CarbEntryTableViewCell.swift in Sources */,
 				142CB75B2A60BFC30075748A /* FavoriteFoodsView.swift in Sources */,
@@ -3744,6 +3751,7 @@
 				C1777A6625A125F100595963 /* ManualEntryDoseViewModelTests.swift in Sources */,
 				C16B984026B4898800256B05 /* DoseEnactorTests.swift in Sources */,
 				A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */,
+				C152B9F72C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift in Sources */,
 				A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */,
 				A963B27A252CEBAE0062AA12 /* SetBolusUserInfoTests.swift in Sources */,
 				A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */,
