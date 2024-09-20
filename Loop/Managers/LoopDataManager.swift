@@ -183,9 +183,9 @@ final class LoopDataManager: ObservableObject {
         self.analyticsServicesManager = analyticsServicesManager
         self.carbAbsorptionModel = carbAbsorptionModel
         self.usePositiveMomentumAndRCForManualBoluses = usePositiveMomentumAndRCForManualBoluses
+        self.automationHistory = UserDefaults.standard.automationHistory
         self.publishedMostRecentGlucoseDataDate = glucoseStore.latestGlucose?.startDate
         self.publishedMostRecentPumpDataDate = mostRecentPumpDataDate
-        self.automationHistory = UserDefaults.standard.automationHistory
 
         // Required for device settings in stored dosing decisions
         UIDevice.current.isBatteryMonitoringEnabled = true
