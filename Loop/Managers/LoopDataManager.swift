@@ -1504,16 +1504,18 @@ extension LoopDataManager {
         guard potentialCarbEntry != nil else {
             var missingAmount = recommendation!.missingAmount
             
-            var correctionAmount = recommendation!.amount + Swift.max(missingAmount ?? 0, 0)
+            var initialCorrectionAmount = recommendation!.amount + Swift.max(missingAmount ?? 0, 0)
+            var correctionAmount = initialCorrectionAmount
             
-            if correctionAmount == 0 {
-                if let calcAmount = try calcCorrectionAmount(carbsAmount: 0, prediction: prediction, potentialCarbEntry: nil) {
-                    
-                    correctionAmount = calcAmount
-                    if recommendation!.notice == .predictedGlucoseInRange {
-                        correctionAmount = Swift.min(correctionAmount, 0) // ensure 0 if in range but above the mid-point
-                    } else if correctionAmount > 0, volumeRounder()(correctionAmount) != 0 {
-                        missingAmount = correctionAmount
+            if let calcAmount = try calcCorrectionAmount(carbsAmount: 0, prediction: prediction, potentialCarbEntry: nil) {
+                
+                correctionAmount = calcAmount
+                if recommendation!.notice == .predictedGlucoseInRange {
+                    correctionAmount = Swift.min(correctionAmount, 0) // ensure 0 if in range but above the mid-point
+                } else {
+                    let totalMissingAmount = calcAmount - initialCorrectionAmount
+                    if totalMissingAmount > 0, volumeRounder()(totalMissingAmount) != 0 {
+                        missingAmount = totalMissingAmount
                     }
                 }
             }
@@ -1539,16 +1541,30 @@ extension LoopDataManager {
         let carbsAmount = carbBreakdownRecommendation.amount - carbBreakdownRecommendationWithZeroCarbEntry.amount
 
         var missingAmount = recommendation!.missingAmount
-        let correctionAmount : Double
+        var correctionAmount : Double
 
-        if recommendation!.amount <= 0, recommendation!.notice != .predictedGlucoseInRange,
-           let calcAmount = try calcCorrectionAmount(carbsAmount: carbsAmount, prediction: prediction, potentialCarbEntry: potentialCarbEntry) {
-            
+        if let calcAmount = try calcCorrectionAmount(carbsAmount: carbsAmount, prediction: prediction, potentialCarbEntry: potentialCarbEntry) {
             correctionAmount = calcAmount
-            let amount = carbsAmount + correctionAmount
+            let extra = Swift.max(missingAmount ?? 0, 0)
+            let amount = carbsAmount + correctionAmount - (extra + recommendation!.amount)
             if amount > 0, volumeRounder()(amount) != 0 {
-                missingAmount = amount
+                missingAmount = amount + extra
             }
+
+            /*
+            if recommendation!.amount <= 0, recommendation!.notice != .predictedGlucoseInRange {
+                let amount = carbsAmount + correctionAmount
+                if amount > 0, volumeRounder()(amount) != 0 {
+                    missingAmount = amount
+                }
+            } else {
+                
+                let amount = carbsAmount + correctionAmount - (extra + recommendation!.amount)
+                if amount > 0, volumeRounder()(amount) != 0 {
+                    missingAmount = amount + extra
+                }
+            }
+             */
         } else {
             let extra = Swift.max(recommendation!.missingAmount ?? 0, 0)
             correctionAmount = recommendation!.amount + extra - carbsAmount
