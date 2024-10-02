@@ -13,7 +13,6 @@ import LoopAlgorithm
 @testable import Loop
 
 class MockSettingsProvider: SettingsProvider {
-
     var basalHistory: [AbsoluteScheduleValue<Double>]?
     func getBasalHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
         return basalHistory ?? settings.basalRateSchedule?.between(start: startDate, end: endDate) ?? []
@@ -40,6 +39,10 @@ class MockSettingsProvider: SettingsProvider {
             maxBolus: settings.maximumBolus,
             maxBasalRate: settings.maximumBasalRatePerHour
         )
+    }
+
+    func executeSettingsQuery(fromQueryAnchor queryAnchor: SettingsStore.QueryAnchor?, limit: Int, completion: @escaping (SettingsStore.SettingsQueryResult) -> Void) {
+        completion(.success(SettingsStore.QueryAnchor(), []))
     }
 
     var settings: StoredSettings

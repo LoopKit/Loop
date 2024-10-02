@@ -328,9 +328,14 @@ protocol SettingsProvider {
     func getInsulinSensitivityHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<HKQuantity>]
     func getTargetRangeHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<ClosedRange<HKQuantity>>]
     func getDosingLimits(at date: Date) async throws -> DosingLimits
+    func executeSettingsQuery(fromQueryAnchor queryAnchor: SettingsStore.QueryAnchor?, limit: Int, completion: @escaping (SettingsStore.SettingsQueryResult) -> Void)
 }
 
-extension SettingsManager: SettingsProvider {}
+extension SettingsManager: SettingsProvider {
+    func executeSettingsQuery(fromQueryAnchor queryAnchor: SettingsStore.QueryAnchor?, limit: Int, completion: @escaping (SettingsStore.SettingsQueryResult) -> Void) {
+        settingsStore.executeSettingsQuery(fromQueryAnchor: queryAnchor, limit: limit, completion: completion)
+    }
+}
 
 // MARK: - SettingsStoreDelegate
 extension SettingsManager: SettingsStoreDelegate {

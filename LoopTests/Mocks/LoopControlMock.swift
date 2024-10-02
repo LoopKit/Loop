@@ -27,7 +27,4 @@ class LoopControlMock: LoopControl {
     func loop() async {
     }
 
-    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>] {
-        return []
-    }
 }

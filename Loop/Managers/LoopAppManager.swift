@@ -332,10 +332,11 @@ class LoopAppManager: NSObject {
             dosingDecisionStore: dosingDecisionStore,
             glucoseStore: glucoseStore,
             cgmEventStore: cgmEventStore,
-            settingsStore: settingsManager.settingsStore,
+            settingsProvider: settingsManager,
             overrideHistory: temporaryPresetsManager.overrideHistory,
             insulinDeliveryStore: doseStore.insulinDeliveryStore,
-            deviceLog: deviceLog
+            deviceLog: deviceLog,
+            automationHistoryProvider: loopDataManager
         )
 
         settingsManager.remoteDataServicesManager = remoteDataServicesManager

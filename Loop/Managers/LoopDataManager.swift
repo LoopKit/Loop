@@ -321,7 +321,10 @@ final class LoopDataManager: ObservableObject {
         // This moves the start time back to ensure basal covers
         dosesStart = min(dosesStart, doses.map { $0.startDate }.min() ?? dosesStart)
 
-        let basal = try await settingsProvider.getBasalHistory(startDate: dosesStart, endDate: baseTime)
+        // Doses with a start time before baseTime might still end after baseTime
+        let dosesEnd = max(baseTime, doses.map { $0.endDate }.max() ?? baseTime)
+
+        let basal = try await settingsProvider.getBasalHistory(startDate: dosesStart, endDate: dosesEnd)
 
         guard !basal.isEmpty else {
             throw LoopError.configurationError(.basalRateSchedule)
@@ -1462,7 +1465,9 @@ extension LoopDataManager: DiagnosticReportGenerator {
     }
 }
 
-extension LoopDataManager: LoopControl {
+extension LoopDataManager: LoopControl {}
+
+extension LoopDataManager: AutomationHistoryProvider {
     func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>] {
         return automationHistory.toTimeline(from: start, to: end)
     }

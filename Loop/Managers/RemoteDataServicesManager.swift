@@ -8,6 +8,7 @@
 
 import os.log
 import Foundation
+import LoopAlgorithm
 import LoopKit
 import UIKit
 
@@ -36,6 +37,10 @@ struct UploadTaskKey: Hashable {
     var queueName: String {
         return "com.loopkit.Loop.RemoteDataServicesManager.\(serviceIdentifier).\(remoteDataType.rawValue)DispatchQueue"
     }
+}
+
+protocol AutomationHistoryProvider {
+    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>]
 }
 
 @MainActor
@@ -138,11 +143,13 @@ final class RemoteDataServicesManager {
 
     private let insulinDeliveryStore: InsulinDeliveryStore
 
-    private let settingsStore: SettingsStore
+    private let settingsProvider: SettingsProvider
 
     private let overrideHistory: TemporaryScheduleOverrideHistory
 
     private let deviceLog: PersistentDeviceLog
+
+    private let automationHistoryProvider: AutomationHistoryProvider
 
 
     init(
@@ -152,10 +159,11 @@ final class RemoteDataServicesManager {
         dosingDecisionStore: DosingDecisionStoreProtocol,
         glucoseStore: GlucoseStore,
         cgmEventStore: CgmEventStore,
-        settingsStore: SettingsStore,
+        settingsProvider: SettingsProvider,
         overrideHistory: TemporaryScheduleOverrideHistory,
         insulinDeliveryStore: InsulinDeliveryStore,
-        deviceLog: PersistentDeviceLog
+        deviceLog: PersistentDeviceLog,
+        automationHistoryProvider: AutomationHistoryProvider
     ) {
         self.alertStore = alertStore
         self.carbStore = carbStore
@@ -164,10 +172,11 @@ final class RemoteDataServicesManager {
         self.glucoseStore = glucoseStore
         self.cgmEventStore = cgmEventStore
         self.insulinDeliveryStore = insulinDeliveryStore
-        self.settingsStore = settingsStore
+        self.settingsProvider = settingsProvider
         self.overrideHistory = overrideHistory
         self.lockedFailedUploads = Locked([])
         self.deviceLog = deviceLog
+        self.automationHistoryProvider = automationHistoryProvider
     }
 
     private func uploadExistingData(to remoteDataService: RemoteDataService) {
@@ -343,9 +352,9 @@ extension RemoteDataServicesManager {
                 case .success(let queryAnchor, let created, let deleted):
                     Task {
                         do {
+                            continueUpload = queryAnchor != previousQueryAnchor
                             try await remoteDataService.uploadDoseData(created: created, deleted: deleted)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .dose, queryAnchor)
-                            continueUpload = queryAnchor != previousQueryAnchor
                             self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing dose data: %{public}@", String(describing: error))
@@ -506,7 +515,7 @@ extension RemoteDataServicesManager {
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .settings) ?? SettingsStore.QueryAnchor()
             var continueUpload = false
 
-            self.settingsStore.executeSettingsQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.settingsDataLimit ?? Int.max) { result in
+            self.settingsProvider.executeSettingsQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.settingsDataLimit ?? Int.max) { result in
                 switch result {
                 case .failure(let error):
                     self.log.error("Error querying settings data: %{public}@", String(describing: error))
@@ -612,7 +621,15 @@ extension RemoteDataServicesManager {
 
 // RemoteDataServiceDelegate
 extension RemoteDataServicesManager: RemoteDataServiceDelegate {
-    func fetchDeviceLogs(startDate: Date, endDate: Date) async throws -> [LoopKit.StoredDeviceLogEntry] {
+    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>] {
+        try await automationHistoryProvider.automationHistory(from: start, to: end)
+    }
+    
+    func getBasalHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
+        try await settingsProvider.getBasalHistory(startDate: startDate, endDate: endDate)
+    }
+    
+    func fetchDeviceLogs(startDate: Date, endDate: Date) async throws -> [StoredDeviceLogEntry] {
         return try await deviceLog.fetch(startDate: startDate, endDate: endDate)
     }
 }

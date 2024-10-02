@@ -153,6 +153,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         automaticDosingStatus.$automaticDosingEnabled
             .receive(on: DispatchQueue.main)
+            .dropFirst()
             .sink { self.automaticDosingStatusChanged($0) }
             .store(in: &cancellables)
 
@@ -1690,12 +1691,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func automaticDosingStatusChanged(_ automaticDosingEnabled: Bool) {
+        log.debug("automaticDosingStatusChanged -> %{public}@", String(describing: automaticDosingEnabled))
         updatePresetModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
         hudView?.loopCompletionHUD.loopIconClosed = automaticDosingEnabled
         hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
         
         if automaticDosingEnabled {
             Task {
+                log.debug("Triggering loop() from automatic dosing flag")
                 await loopManager.loop()
             }
         }

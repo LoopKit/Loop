@@ -19,7 +19,6 @@ protocol LoopControl {
     var lastLoopCompleted: Date? { get }
     func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) async throws
     func loop() async
-    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>]
 }
 
 protocol ActiveServicesProvider {
@@ -1141,11 +1140,6 @@ extension DeviceDataManager: DoseStoreDelegate {
     func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
         uploadEventListener.triggerUpload(for: .pumpEvent)
     }
-
-    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>] {
-        return try await loopControl.automationHistory(from: start, to: end)
-    }
-
 }
 
 // MARK: - DosingDecisionStoreDelegate
