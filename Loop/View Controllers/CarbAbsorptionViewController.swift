@@ -461,9 +461,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             
             let originalCarbEntry = carbStatuses[indexPath.row].entry
             
-            let viewModel = CarbEntryViewModel(delegate: loopDataManager, originalCarbEntry: originalCarbEntry)
-            viewModel.analyticsServicesManager = analyticsServicesManager
-            viewModel.deliveryDelegate = deviceManager
+            let viewModel = createCarbEntryViewModel(originalCarbEntry: originalCarbEntry)
             let carbEntryView = CarbEntryView(viewModel: viewModel)
                 .environmentObject(deviceManager.displayGlucosePreference)
                 .environment(\.dismissAction, carbEditWasCanceled)
@@ -476,6 +474,18 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         default:
             return
         }
+    }
+    
+    private func createCarbEntryViewModel(originalCarbEntry: StoredCarbEntry? = nil) -> CarbEntryViewModel {
+        let viewModel: CarbEntryViewModel
+        if let originalCarbEntry {
+            viewModel = CarbEntryViewModel(delegate: loopDataManager, originalCarbEntry: originalCarbEntry)
+        } else {
+            viewModel = CarbEntryViewModel(delegate: loopDataManager)
+        }
+        viewModel.analyticsServicesManager = analyticsServicesManager
+        viewModel.deliveryDelegate = deviceManager
+        return viewModel
     }
     
     @objc func carbEditWasCanceled() {
@@ -493,8 +503,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
             present(navigationWrapper, animated: true)
         } else {
-            let viewModel = CarbEntryViewModel(delegate: loopDataManager)
-            viewModel.analyticsServicesManager = analyticsServicesManager
+            let viewModel = createCarbEntryViewModel()
             let carbEntryView = CarbEntryView(viewModel: viewModel)
                 .environmentObject(deviceManager.displayGlucosePreference)
             let hostingController = DismissibleHostingController(rootView: carbEntryView, isModalInPresentation: false)
