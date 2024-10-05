@@ -7,6 +7,7 @@
 //
 
 import LoopKit
+import LoopAlgorithm
 
 struct BolusDosingDecision {
     enum Reason: String {

@@ -17,9 +17,10 @@ public protocol DeviceSupportDelegate {
     var pumpManagerStatus: LoopKit.PumpManagerStatus? { get }
     var cgmManagerStatus: LoopKit.CGMManagerStatus? { get }
 
-    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
+    func generateDiagnosticReport() async -> String
 }
 
+@MainActor
 public final class SupportManager {
     
     private lazy var log = DiagnosticLog(category: "SupportManager")
@@ -38,24 +39,17 @@ public final class SupportManager {
     private let alertIssuer: AlertIssuer
     private let deviceSupportDelegate: DeviceSupportDelegate
     private let pluginManager: PluginManager
-    private let staticSupportTypes: [SupportUI.Type]
-    private let staticSupportTypesByIdentifier: [String: SupportUI.Type]
 
     lazy private var cancellables = Set<AnyCancellable>()
 
     init(pluginManager: PluginManager,
          deviceSupportDelegate: DeviceSupportDelegate,
          servicesManager: ServicesManager? = nil,
-         staticSupportTypes: [SupportUI.Type]? = nil,
          alertIssuer: AlertIssuer) {
         
         self.alertIssuer = alertIssuer
         self.deviceSupportDelegate = deviceSupportDelegate
         self.pluginManager = pluginManager
-        self.staticSupportTypes = []
-        staticSupportTypesByIdentifier = self.staticSupportTypes.reduce(into: [:]) { (map, type) in
-            map[type.pluginIdentifier] = type
-        }
 
         restoreState()
 
@@ -86,8 +80,7 @@ public final class SupportManager {
         let availablePluginSupports = [SupportUI]()
         let availableDeviceSupports = deviceSupportDelegate.availableSupports
         let availableServiceSupports = servicesManager?.availableSupports ?? [SupportUI]()
-        let staticSupports = self.staticSupportTypes.map { $0.init(rawState: [:]) }.compactMap { $0 }
-        let allSupports = availablePluginSupports + availableDeviceSupports + availableServiceSupports + staticSupports
+        let allSupports = availablePluginSupports + availableDeviceSupports + availableServiceSupports
         allSupports.forEach {
             addSupport($0)
         }
@@ -99,7 +92,7 @@ public final class SupportManager {
             }
             .store(in: &cancellables)
         
-        NotificationCenter.default.publisher(for: .LoopCompleted)
+        NotificationCenter.default.publisher(for: .LoopCycleCompleted)
             .sink { [weak self] _ in
                 self?.performCheck()
             }
@@ -242,8 +235,8 @@ extension SupportManager: SupportUIDelegate {
         return Bundle.main.localizedNameAndVersion
     }
 
-    public func generateIssueReport(completion: @escaping (String) -> Void) {
-        deviceSupportDelegate.generateDiagnosticReport(completion)
+    public func generateIssueReport() async -> String {
+        await deviceSupportDelegate.generateDiagnosticReport()
     }
     
     public func issueAlert(_ alert: LoopKit.Alert) {
@@ -283,7 +276,7 @@ extension SupportManager {
 
     private func supportTypeFromRawValue(_ rawValue: [String: Any]) -> SupportUI.Type? {
         guard let supportIdentifier = rawValue["supportIdentifier"] as? String,
-              let supportType = pluginManager.getSupportUITypeByIdentifier(supportIdentifier) ?? staticSupportTypesByIdentifier[supportIdentifier]
+              let supportType = pluginManager.getSupportUITypeByIdentifier(supportIdentifier)
         else {
             return nil
         }
@@ -331,11 +324,10 @@ fileprivate extension UserDefaults {
 extension SupportUI {
     var rawValue: RawStateValue {
         return [
-            "supportIdentifier": Self.pluginIdentifier,
+            "supportIdentifier": pluginIdentifier,
             "state": rawState
         ]
     }
-
 }
 
 extension Bundle {

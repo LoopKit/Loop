@@ -59,7 +59,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         self._bolusPickerValues = Published(
             initialValue: BolusPickerValues(
                 supportedVolumes: loopManager.supportedBolusVolumes ?? Self.defaultSupportedBolusVolumes,
-                maxBolus: loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
+                maxBolus: loopManager.watchInfo.loopSettings.maximumBolus ?? Self.defaultMaxBolus
             )
         )
 
@@ -80,7 +80,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             
             self.bolusPickerValues = BolusPickerValues(
                 supportedVolumes: loopManager.supportedBolusVolumes ?? Self.defaultSupportedBolusVolumes,
-                maxBolus: loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
+                maxBolus: loopManager.watchInfo.loopSettings.maximumBolus ?? Self.defaultMaxBolus
             )
 
             switch self.configuration {

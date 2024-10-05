@@ -19,8 +19,9 @@ extension DoseStore {
     private var simulatedBasalStartDateInterval: TimeInterval { .minutes(5) }
     private var simulatedOtherPerDay: Int { 1 }
     private var simulatedLimit: Int { 10000 }
+    private var suspendDuration: TimeInterval { .minutes(30) }
 
-    func generateSimulatedHistoricalPumpEvents(completion: @escaping (Error?) -> Void) {
+    func generateSimulatedHistoricalPumpEvents() async throws {
         var startDate = Calendar.current.startOfDay(for: cacheStartDate)
         let endDate = Calendar.current.startOfDay(for: historicalEndDate)
         var index = 0
@@ -31,22 +32,32 @@ extension DoseStore {
 
             let basalEvent: PersistedPumpEvent?
 
-            // Suspends last for 30m
-            if let suspendedTime = suspendedAt, startDate.timeIntervalSince(suspendedTime) >= .minutes(30) {
-                basalEvent = PersistedPumpEvent.simulatedResume(date: startDate)
+            if let suspendedTime = suspendedAt, startDate.timeIntervalSince(suspendedTime) > suspendDuration {
+                // suspend is over, allow for other basal events
                 suspendedAt = nil
-            } else if Double.random(in: 0...1) > 0.98 { // 2% chance of this being a suspend
-                basalEvent = PersistedPumpEvent.simulatedSuspend(date: startDate)
-                suspendedAt = startDate
-            } else if Double.random(in: 0...1) < 0.98 { // 98% chance of a successful basal
-                let rate = [0, 0.5, 1, 1.5, 2, 6].randomElement()!
-                basalEvent = PersistedPumpEvent.simulatedTempBasal(date: startDate, duration: .minutes(5), rate: rate, scheduledRate: 1)
+            }
+            
+            if suspendedAt == nil { // if suspended, no other basal events
+                if Double.random(in: 0...1) > 0.98 { // 2% chance of this being a suspend
+                    basalEvent = PersistedPumpEvent.simulatedSuspend(date: startDate)
+                    suspendedAt = startDate
+                } else if suspendedAt == nil, Double.random(in: 0...1) < 0.98 { // 98% chance of a successful basal
+                    let rate = [0, 0.5, 1, 1.5, 2, 6].randomElement()!
+                    basalEvent = PersistedPumpEvent.simulatedTempBasal(date: startDate, duration: .minutes(5), rate: rate, scheduledRate: 1)
+                } else {
+                    basalEvent = nil
+                }
             } else {
                 basalEvent = nil
             }
 
             if let basalEvent = basalEvent {
                 simulated.append(basalEvent)
+                if basalEvent.type == .suspend {
+                    // Report the resume immediately to avoid reconcilation issues
+                    let resumeBasalEvent = PersistedPumpEvent.simulatedResume(date: basalEvent.date.addingTimeInterval(suspendDuration))
+                    simulated.append(resumeBasalEvent)
+                }
             }
 
             if Double.random(in: 0...1) > 0.98 { // 2% chance of some other event
@@ -68,10 +79,7 @@ extension DoseStore {
 
             // Process about a day's worth at a time
             if simulated.count >= 300 {
-                if let error = addPumpEvents(events: simulated) {
-                    completion(error)
-                    return
-                }
+                try await addPumpEvents(events: simulated)
                 simulated = []
             }
 
@@ -79,11 +87,11 @@ extension DoseStore {
             startDate = startDate.addingTimeInterval(simulatedBasalStartDateInterval)
         }
 
-        completion(addPumpEvents(events: simulated))
+        try await addPumpEvents(events: simulated)
     }
 
-    func purgeHistoricalPumpEvents(completion: @escaping (Error?) -> Void) {
-        purgePumpEventObjects(before: historicalEndDate, completion: completion)
+    func purgeHistoricalPumpEvents() async throws {
+        try await purgePumpEventObjects(before: historicalEndDate)
     }
 }
 

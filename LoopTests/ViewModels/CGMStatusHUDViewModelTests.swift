@@ -14,12 +14,9 @@ import LoopKit
 class CGMStatusHUDViewModelTests: XCTestCase {
 
     private var viewModel: CGMStatusHUDViewModel!
-    private var staleGlucoseValueHandlerWasCalled = false
-    private var testExpect: XCTestExpectation!
     
     override func setUpWithError() throws {
-        staleGlucoseValueHandlerWasCalled = false
-        viewModel = CGMStatusHUDViewModel(staleGlucoseValueHandler: staleGlucoseValueHandler)
+        viewModel = CGMStatusHUDViewModel()
     }
 
     override func tearDownWithError() throws {
@@ -45,14 +42,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
-        let staleGlucoseAge: TimeInterval = .minutes(15)
         viewModel.setGlucoseQuantity(90,
                                      at: glucoseStartDate,
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: false,
-                                     isDisplayOnly: false)
+                                     isDisplayOnly: false,
+                                     isGlucoseValueStale: false)
         
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertNil(viewModel.statusHighlight)
@@ -70,44 +66,14 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
-        let staleGlucoseAge: TimeInterval = .minutes(-1)
         viewModel.setGlucoseQuantity(90,
                                      at: glucoseStartDate,
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: false,
-                                     isDisplayOnly: false)
+                                     isDisplayOnly: false,
+                                     isGlucoseValueStale: true)
 
-        XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
-        XCTAssertNil(viewModel.statusHighlight)
-        XCTAssertEqual(viewModel.glucoseValueString, "– – –")
-        XCTAssertNil(viewModel.trend)
-        XCTAssertNotEqual(viewModel.glucoseTrendTintColor, glucoseDisplay.glucoseRangeCategory?.trendColor)
-        XCTAssertEqual(viewModel.glucoseTrendTintColor, .glucoseTintColor)
-        XCTAssertNotEqual(viewModel.glucoseValueTintColor, glucoseDisplay.glucoseRangeCategory?.glucoseColor)
-        XCTAssertEqual(viewModel.glucoseValueTintColor, .label)
-        XCTAssertEqual(viewModel.unitsString, HKUnit.milligramsPerDeciliter.localizedShortUnitString)
-    }
-    
-    func testSetGlucoseQuantityCGMStaleDelayed() {
-        testExpect = self.expectation(description: #function)
-        let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
-                                                trendType: .down,
-                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
-                                                isLocal: true,
-                                                glucoseRangeCategory: .urgentLow)
-        let glucoseStartDate = Date()
-        let staleGlucoseAge: TimeInterval = .seconds(0.01)
-        viewModel.setGlucoseQuantity(90,
-                                     at: glucoseStartDate,
-                                     unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
-                                     glucoseDisplay: glucoseDisplay,
-                                     wasUserEntered: false,
-                                     isDisplayOnly: false)
-        wait(for: [testExpect], timeout: 1.0)
-        XCTAssertTrue(staleGlucoseValueHandlerWasCalled)
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertNil(viewModel.statusHighlight)
         XCTAssertEqual(viewModel.glucoseValueString, "– – –")
@@ -126,14 +92,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
-        let staleGlucoseAge: TimeInterval = .minutes(15)
         viewModel.setGlucoseQuantity(90,
                                      at: glucoseStartDate,
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: true,
-                                     isDisplayOnly: false)
+                                     isDisplayOnly: false,
+                                     isGlucoseValueStale: false)
 
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertNil(viewModel.statusHighlight)
@@ -152,14 +117,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
-        let staleGlucoseAge: TimeInterval = .minutes(15)
         viewModel.setGlucoseQuantity(90,
                                      at: glucoseStartDate,
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: true,
-                                     isDisplayOnly: true)
+                                     isDisplayOnly: true,
+                                     isGlucoseValueStale: false)
 
         XCTAssertNil(viewModel.manualGlucoseTrendIconOverride)
         XCTAssertEqual(viewModel.glucoseValueString, "90")
@@ -191,14 +155,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
-        let staleGlucoseAge: TimeInterval = .minutes(15)
         viewModel.setGlucoseQuantity(90,
                                      at: glucoseStartDate,
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: true,
-                                     isDisplayOnly: false)
+                                     isDisplayOnly: false,
+                                     isGlucoseValueStale: false)
 
         XCTAssertEqual(viewModel.glucoseValueString, "90")
         XCTAssertNil(viewModel.trend)
@@ -222,14 +185,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
                                                 trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
-        let staleGlucoseAge: TimeInterval = .minutes(15)
         viewModel.setGlucoseQuantity(90,
                                      at: Date(),
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: true,
-                                     isDisplayOnly: false)
+                                     isDisplayOnly: false,
+                                     isGlucoseValueStale: false)
 
         // check that manual glucose is displayed
         XCTAssertEqual(viewModel.glucoseValueString, "90")
@@ -255,10 +217,10 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         viewModel.setGlucoseQuantity(95,
                                      at: Date(),
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: false,
-                                     isDisplayOnly: false)
+                                     isDisplayOnly: false,
+                                     isGlucoseValueStale: false)
 
         // check that status highlight is displayed
         XCTAssertEqual(viewModel.glucoseValueString, "95")
@@ -291,10 +253,10 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         viewModel.setGlucoseQuantity(100,
                                      at: Date(),
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: staleGlucoseAge,
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: true,
-                                     isDisplayOnly: false)
+                                     isDisplayOnly: false,
+                                     isGlucoseValueStale: false)
 
         // check that manual glucose is still displayed (again with status highlight icon)
         XCTAssertEqual(viewModel.glucoseValueString, "100")
@@ -307,10 +269,10 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         viewModel.setGlucoseQuantity(100,
                                      at: Date(),
                                      unit: .milligramsPerDeciliter,
-                                     staleGlucoseAge: .minutes(-1),
                                      glucoseDisplay: glucoseDisplay,
                                      wasUserEntered: true,
-                                     isDisplayOnly: false)
+                                     isDisplayOnly: false,
+                                     isGlucoseValueStale: true)
 
         // check that the status highlight is displayed
         XCTAssertEqual(viewModel.statusHighlight as! TestStatusHighlight, statusHighlight2)
@@ -319,11 +281,6 @@ class CGMStatusHUDViewModelTests: XCTestCase {
 }
 
 extension CGMStatusHUDViewModelTests {
-    func staleGlucoseValueHandler() {
-        self.staleGlucoseValueHandlerWasCalled = true
-        testExpect.fulfill()
-    }
-    
     struct TestStatusHighlight: DeviceStatusHighlight, Equatable {
         var localizedMessage: String
         

@@ -11,6 +11,7 @@ import LoopCore
 import LoopKit
 import OSLog
 import WidgetKit
+import LoopAlgorithm
 
 class StatusWidgetTimelineProvider: TimelineProvider {
     lazy var defaults = UserDefaults.appGroup
@@ -37,7 +38,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
     func placeholder(in context: Context) -> StatusWidgetTimelimeEntry {
         log.default("%{public}@: context=%{public}@", #function, String(describing: context))
 
-        return StatusWidgetTimelimeEntry(date: Date(), contextUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, glucoseFetchedAt: Date(), delta: nil, unit: .milligramsPerDeciliter, sensor: nil, pumpHighlight: nil, netBasal: nil, eventualGlucose: nil, preMealPresetAllowed: true, preMealPresetActive: false, customPresetActive: false)
+        return StatusWidgetTimelimeEntry(date: Date(), contextUpdatedAt: Date(), lastLoopCompleted: nil, mostRecentGlucoseDataDate: nil, mostRecentPumpDataDate: nil, closeLoop: true, currentGlucose: nil, glucoseFetchedAt: Date(), delta: nil, unit: .milligramsPerDeciliter, sensor: nil, pumpHighlight: nil, netBasal: nil, eventualGlucose: nil, preMealPresetAllowed: true, preMealPresetActive: false, customPresetActive: false)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StatusWidgetTimelimeEntry) -> ()) {
@@ -67,7 +68,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
 
             // Date glucose staleness changes
             if let lastBGTime = newEntry.currentGlucose?.startDate {
-                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval+1)
+                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval+1)
                 datesToRefreshWidget.append(staleBgRefreshTime)
             }
 
@@ -93,7 +94,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
 
         var glucose: [StoredGlucoseSample] = []
 
-        let startDate = Date(timeIntervalSinceNow: -LoopCoreConstants.inputDataRecencyInterval)
+        let startDate = Date(timeIntervalSinceNow: -LoopAlgorithm.inputDataRecencyInterval)
 
         group.enter()
         glucoseStore.getGlucoseSamples(start: startDate) { (result) in
@@ -158,6 +159,8 @@ class StatusWidgetTimelineProvider: TimelineProvider {
                 date: updateDate,
                 contextUpdatedAt: contextUpdatedAt,
                 lastLoopCompleted: lastCompleted,
+                mostRecentGlucoseDataDate: context.mostRecentGlucoseDataDate,
+                mostRecentPumpDataDate: context.mostRecentPumpDataDate,
                 closeLoop: closeLoop,
                 currentGlucose: currentGlucose,
                 glucoseFetchedAt: updateDate,

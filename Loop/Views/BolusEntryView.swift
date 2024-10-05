@@ -36,16 +36,12 @@ struct BolusEntryView: View {
                     self.chartSection
                     self.summarySection
                 }
-                // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
-                // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Bolus".
-                // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
-                // TODO: Fix this in Xcode 12 when we're building for iOS 14.
-                .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : -28)
+                .padding(.top, -28)
                 .insetGroupedListStyle()
                 
                 self.actionArea
-                    .frame(height: self.isKeyboardVisible ? 0 : nil)
-                    .opacity(self.isKeyboardVisible ? 0 : 1)
+                    .frame(height: self.isKeyboardVisible || shouldBolusEntryBecomeFirstResponder ? 0 : nil)
+                    .opacity(self.isKeyboardVisible || shouldBolusEntryBecomeFirstResponder ? 0 : 1)
             }
             .onKeyboardStateChange { state in
                 self.isKeyboardVisible = state.height > 0
@@ -73,6 +69,9 @@ struct BolusEntryView: View {
                     enteredBolusStringBinding.wrappedValue = newEnteredBolusString
                 }
             }
+            .task {
+                await self.viewModel.generateRecommendationAndStartObserving()
+            }
         }
     }
     
@@ -81,12 +80,6 @@ struct BolusEntryView: View {
             return Text("Bolus", comment: "Title for bolus entry screen")
         }
         return Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
-    }
-
-    private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
-        // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
-        // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
-        return shouldBolusEntryBecomeFirstResponder && geometry.size.height > 640
     }
     
     private var chartSection: some View {
@@ -268,7 +261,6 @@ struct BolusEntryView: View {
                 bolusUnitsLabel
             }
         }
-        .accessibilityElement(children: .combine)
     }
 
     private var bolusUnitsLabel: some View {
@@ -428,11 +420,6 @@ struct BolusEntryView: View {
                 title: Text("Unable to Save Manual Glucose Entry", comment: "Alert title for a manual glucose entry persistence error"),
                 message: Text("An error occurred while trying to save your manual glucose entry.", comment: "Alert message for a manual glucose entry persistence error")
             )
-        case .glucoseNoLongerStale:
-            return SwiftUI.Alert(
-                title: Text("Glucose Data Now Available", comment: "Alert title when glucose data returns while on bolus screen"),
-                message: Text("An updated bolus recommendation is available.", comment: "Alert message when glucose data returns while on bolus screen")
-            )
         case .forecastInfo:
             return SwiftUI.Alert(
                 title: Text("Forecasted Glucose", comment: "Title for forecast explanation modal on bolus view"),
@@ -478,17 +465,5 @@ struct LabeledQuantity: View {
         }
 
         return Text(string)
-    }
-}
-
-struct LabelBackground: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color(.systemGray6))
-            )
     }
 }

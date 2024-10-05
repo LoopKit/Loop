@@ -27,6 +27,12 @@ class PluginManager {
                             log.debug("Found loop plugin: %{public}@", pluginURL.absoluteString)
                             bundles.append(bundle)
                         }
+                        
+                        // extensions are always instantiated
+                        if bundle.isLoopExtension {
+                            log.debug("Found loop extension: %{public}@", pluginURL.absoluteString)
+                            _ = try? bundle.loadAndInstantiateExtension()
+                        }
                     }
                 }
             } catch let error {
@@ -35,8 +41,6 @@ class PluginManager {
         }
         self.pluginBundles = bundles
     }
-
-    
 
     func getPumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
         for bundle in pluginBundles {
@@ -248,4 +252,14 @@ extension Bundle {
     var isLoopExtension: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.extensionIdentifier.rawValue) as? String != nil }
 
     var isSimulator: Bool { object(forInfoDictionaryKey: LoopPluginBundleKey.pluginIsSimulator.rawValue) as? Bool == true }
+    
+    fileprivate func loadAndInstantiateExtension() throws -> NSObject? {
+        try loadAndReturnError()
+
+        guard let principalClass = principalClass as? NSObject.Type else {
+            return nil
+        }
+
+        return principalClass.init()
+    }
 }

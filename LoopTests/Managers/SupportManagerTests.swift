@@ -12,6 +12,7 @@ import LoopKitUI
 import SwiftUI
 @testable import Loop
 
+@MainActor
 class SupportManagerTests: XCTestCase {
     enum MockError: Error { case nothing }
 
@@ -34,7 +35,7 @@ class SupportManagerTests: XCTestCase {
         weak var delegate: SupportUIDelegate?
     }
     class MockSupport: Mixin, SupportUI {
-        static var pluginIdentifier: String { "SupportManagerTestsMockSupport" }
+        var pluginIdentifier: String { "SupportManagerTestsMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
@@ -46,7 +47,7 @@ class SupportManagerTests: XCTestCase {
     }
 
     class AnotherMockSupport: Mixin, SupportUI {
-        static var pluginIdentifier: String { "SupportManagerTestsAnotherMockSupport" }
+        var pluginIdentifier: String { "SupportManagerTestsAnotherMockSupport" }
         override init() { super.init() }
         required init?(rawState: RawStateValue) { super.init() }
         var rawState: RawStateValue = [:]
@@ -66,14 +67,15 @@ class SupportManagerTests: XCTestCase {
     }
 
     class MockDeviceSupportDelegate: DeviceSupportDelegate {
+
         var availableSupports: [LoopKitUI.SupportUI] = []
 
         var pumpManagerStatus: LoopKit.PumpManagerStatus?
 
         var cgmManagerStatus: LoopKit.CGMManagerStatus?
 
-        func generateDiagnosticReport(_ completion: @escaping (String) -> Void) {
-            completion("Mock Issue Report")
+        func generateDiagnosticReport() async -> String {
+            "Mock Issue Report"
         }
     }
     
@@ -86,7 +88,7 @@ class SupportManagerTests: XCTestCase {
 
     override func setUp() {
         mockAlertIssuer = MockAlertIssuer()
-        supportManager = SupportManager(pluginManager: pluginManager, deviceSupportDelegate: mocKDeviceSupportDelegate,  staticSupportTypes: [], alertIssuer: mockAlertIssuer)
+        supportManager = SupportManager(pluginManager: pluginManager, deviceSupportDelegate: mocKDeviceSupportDelegate, alertIssuer: mockAlertIssuer)
         mockSupport = SupportManagerTests.MockSupport()
         supportManager.addSupport(mockSupport)
     }

@@ -64,6 +64,8 @@ public class StatusHighlightHUDView: UIView, NibLoadable {
             stackView.widthAnchor.constraint(equalTo: widthAnchor),
             stackView.heightAnchor.constraint(equalTo: heightAnchor),
         ])
+        
+        accessibilityValue = messageLabel.text
     }
     
     public func setIconPosition(_ iconPosition: IconPosition) {

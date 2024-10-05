@@ -14,7 +14,6 @@ import LoopCore
 protocol ApplicationFactorStrategy {
     func calculateDosingFactor(
         for glucose: HKQuantity,
-        correctionRangeSchedule: GlucoseRangeSchedule,
-        settings: LoopSettings
+        correctionRange: ClosedRange<HKQuantity>
     ) -> Double
 }

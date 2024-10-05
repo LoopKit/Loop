@@ -1,0 +1,99 @@
+{
+  "configurations" : [
+    {
+      "id" : "72E4773C-B5CB-4058-99B1-BFC87A45A4FF",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:..\/Loop\/Loop.xcodeproj",
+      "identifier" : "43776F8B1B8022E90074EA36",
+      "name" : "Loop"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:..\/Common\/LoopKit\/LoopKit.xcodeproj",
+        "identifier" : "43D8FDD41C728FDF0073BE78",
+        "name" : "LoopKitTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:CGMBLEKit\/CGMBLEKit.xcodeproj",
+        "identifier" : "43CABDFC1C3506F100005705",
+        "name" : "CGMBLEKitTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:NightscoutService\/NightscoutService.xcodeproj",
+        "identifier" : "A91BAC2322BC691A00ABF1BB",
+        "name" : "NightscoutServiceKitTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/Loop\/Loop.xcodeproj",
+        "identifier" : "43E2D90A1D20C581004DA55F",
+        "name" : "LoopTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/Common\/LoopKit\/LoopKit.xcodeproj",
+        "identifier" : "1DEE226824A676A300693C32",
+        "name" : "LoopKitHostedTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/Common\/LoopKit\/LoopKit.xcodeproj",
+        "identifier" : "B4CEE2DF257129780093111B",
+        "name" : "MockKitTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:OmniBLE\/OmniBLE.xcodeproj",
+        "identifier" : "84752E8A26ED0FFE009FD801",
+        "name" : "OmniBLETests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:rileylink_ios\/RileyLinkKit.xcodeproj",
+        "identifier" : "431CE7761F98564200255374",
+        "name" : "RileyLinkBLEKitTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:G7SensorKit\/G7SensorKit.xcodeproj",
+        "identifier" : "C17F50CD291EAC3800555EB5",
+        "name" : "G7SensorKitTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:MinimedKit\/MinimedKit.xcodeproj",
+        "identifier" : "C13CC34029C7B73A007F25DE",
+        "name" : "MinimedKitTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:OmniKit\/OmniKit.xcodeproj",
+        "identifier" : "C12ED9C929C7DBA900435701",
+        "name" : "OmniKitTests"
+      }
+    }
+  ],
+  "version" : 1
+}

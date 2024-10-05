@@ -21,12 +21,10 @@ struct GlucoseBasedApplicationFactorStrategy: ApplicationFactorStrategy {
 
     func calculateDosingFactor(
         for glucose: HKQuantity,
-        correctionRangeSchedule: GlucoseRangeSchedule,
-        settings: LoopSettings
+        correctionRange: ClosedRange<HKQuantity>
     ) -> Double {
         // Calculate current glucose and lower bound target
         let currentGlucose = glucose.doubleValue(for: .milligramsPerDeciliter)
-        let correctionRange = correctionRangeSchedule.quantityRange(at: Date())
         let lowerBoundTarget = correctionRange.lowerBound.doubleValue(for: .milligramsPerDeciliter)
 
         // Calculate minimum glucose sliding scale and scaling fraction
