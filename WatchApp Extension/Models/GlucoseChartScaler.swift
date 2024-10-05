@@ -11,6 +11,7 @@ import CoreGraphics
 import HealthKit
 import LoopKit
 import WatchKit
+import LoopAlgorithm
 
 
 enum CoordinateSystem {

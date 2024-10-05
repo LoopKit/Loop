@@ -12,11 +12,19 @@ extension View {
     @ViewBuilder
     func widgetBackground() -> some View {
         if #available(iOSApplicationExtension 17.0, *) {
-            self.containerBackground(for: .widget) {
-                Color("WidgetBackground")
+            containerBackground(for: .widget) {
+                background { Color.widgetBackground }
             }
         } else {
-            self.background { Color("WidgetBackground") }
+            background { Color.widgetBackground }
         }
+    }
+    
+    @ViewBuilder
+    func containerRelativeBackground(color: Color = .widgetSecondaryBackground) -> some View {
+        background(
+            ContainerRelativeShape()
+                .fill(color)
+        )
     }
 }

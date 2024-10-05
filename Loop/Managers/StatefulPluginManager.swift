@@ -11,12 +11,12 @@ import LoopKitUI
 import LoopCore
 import Combine
 
+@MainActor
 class StatefulPluginManager: StatefulPluggableProvider {
 
     private let pluginManager: PluginManager
     
     private let servicesManager: ServicesManager
-    
     private var statefulPlugins = [StatefulPluggable]()
 
     private let statefulPluginLock = UnfairLock()
@@ -123,3 +123,5 @@ extension StatefulPluginManager: StatefulPluggableDelegate {
         removeActiveStatefulPlugin(plugin)
     }
 }
+
+extension StatefulPluginManager: ActiveStatefulPluginsProvider { }

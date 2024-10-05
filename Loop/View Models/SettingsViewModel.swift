@@ -79,8 +79,12 @@ public class SettingsViewModel: ObservableObject {
     let sensitivityOverridesEnabled: Bool
     let isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
-
-    @Published var isClosedLoopAllowed: Bool
+    
+    @Published private(set) var automaticDosingStatus: AutomaticDosingStatus
+    
+    @Published private(set) var lastLoopCompletion: Date?
+    @Published private(set) var mostRecentGlucoseDataDate: Date?
+    @Published private(set) var mostRecentPumpDataDate: Date?
 
     var closedLoopDescriptiveText: String? {
         return delegate?.closedLoopDescriptiveText
@@ -93,14 +97,31 @@ public class SettingsViewModel: ObservableObject {
         }
     }
 
-    var closedLoopPreference: Bool {
+    @Published var closedLoopPreference: Bool {
        didSet {
            delegate?.dosingEnabledChanged(closedLoopPreference)
        }
     }
+    
+    weak var favoriteFoodInsightsDelegate: FavoriteFoodInsightsViewModelDelegate?
 
     var showDeleteTestData: Bool {
         availableSupports.contains(where: { $0.showsDeleteTestDataUI })
+    }
+    
+    var loopStatusCircleFreshness: LoopCompletionFreshness {
+        var age: TimeInterval
+        
+        if automaticDosingStatus.automaticDosingEnabled {
+            let lastLoopCompletion = lastLoopCompletion ?? Date().addingTimeInterval(.minutes(16))
+            age = abs(min(0, lastLoopCompletion.timeIntervalSinceNow))
+        } else {
+            let mostRecentGlucoseDataDate = mostRecentGlucoseDataDate ?? Date().addingTimeInterval(.minutes(16))
+            let mostRecentPumpDataDate = mostRecentPumpDataDate ?? Date().addingTimeInterval(.minutes(16))
+            age = max(abs(min(0, mostRecentPumpDataDate.timeIntervalSinceNow)), abs(min(0, mostRecentGlucoseDataDate.timeIntervalSinceNow)))
+        }
+        
+        return LoopCompletionFreshness(age: age)
     }
     
     lazy private var cancellables = Set<AnyCancellable>()
@@ -115,8 +136,11 @@ public class SettingsViewModel: ObservableObject {
                 therapySettings: @escaping () -> TherapySettings,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
-                isClosedLoopAllowed: Published<Bool>.Publisher,
+                automaticDosingStatus: AutomaticDosingStatus,
                 automaticDosingStrategy: AutomaticDosingStrategy,
+                lastLoopCompletion: Published<Date?>.Publisher,
+                mostRecentGlucoseDataDate: Published<Date?>.Publisher,
+                mostRecentPumpDataDate: Published<Date?>.Publisher,
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
@@ -132,8 +156,11 @@ public class SettingsViewModel: ObservableObject {
         self.therapySettings = therapySettings
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.closedLoopPreference = initialDosingEnabled
-        self.isClosedLoopAllowed = false
+        self.automaticDosingStatus = automaticDosingStatus
         self.automaticDosingStrategy = automaticDosingStrategy
+        self.lastLoopCompletion = nil
+        self.mostRecentGlucoseDataDate = nil
+        self.mostRecentPumpDataDate = nil
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
@@ -156,23 +183,33 @@ public class SettingsViewModel: ObservableObject {
             self?.objectWillChange.send()
         }
         .store(in: &cancellables)
-        
-        isClosedLoopAllowed
-            .assign(to: \.isClosedLoopAllowed, on: self)
+        automaticDosingStatus.objectWillChange.sink { [weak self] in
+            self?.objectWillChange.send()
+        }
+        .store(in: &cancellables)
+        lastLoopCompletion
+            .assign(to: \.lastLoopCompletion, on: self)
+            .store(in: &cancellables)
+        mostRecentGlucoseDataDate
+            .assign(to: \.mostRecentGlucoseDataDate, on: self)
+            .store(in: &cancellables)
+        mostRecentPumpDataDate
+            .assign(to: \.mostRecentPumpDataDate, on: self)
             .store(in: &cancellables)
     }
 }
 
 // For previews only
+@MainActor
 extension SettingsViewModel {
-    fileprivate class FakeClosedLoopAllowedPublisher {
-        @Published var mockIsClosedLoopAllowed: Bool = false
+    fileprivate class FakeLastLoopCompletionPublisher {
+        @Published var mockLastLoopCompletion: Date? = nil
     }
 
     static var preview: SettingsViewModel {
         return SettingsViewModel(alertPermissionsChecker: AlertPermissionsChecker(),
                                  alertMuter: AlertMuter(),
-                                 versionUpdateViewModel: VersionUpdateViewModel(supportManager: nil, guidanceColors: GuidanceColors()),
+                                 versionUpdateViewModel: VersionUpdateViewModel(supportManager: nil, guidanceColors: .default),
                                  pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
                                  cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
                                  servicesViewModel: ServicesViewModel.preview,
@@ -180,11 +217,15 @@ extension SettingsViewModel {
                                  therapySettings: { TherapySettings() },
                                  sensitivityOverridesEnabled: false,
                                  initialDosingEnabled: true,
-                                 isClosedLoopAllowed: FakeClosedLoopAllowedPublisher().$mockIsClosedLoopAllowed,
+                                 automaticDosingStatus: AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true),
                                  automaticDosingStrategy: .automaticBolus,
+                                 lastLoopCompletion: FakeLastLoopCompletionPublisher().$mockLastLoopCompletion,
+                                 mostRecentGlucoseDataDate: FakeLastLoopCompletionPublisher().$mockLastLoopCompletion,
+                                 mostRecentPumpDataDate: FakeLastLoopCompletionPublisher().$mockLastLoopCompletion,
                                  availableSupports: [],
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,
-                                 delegate: nil)
+                                 delegate: nil
+        )
     }
 }

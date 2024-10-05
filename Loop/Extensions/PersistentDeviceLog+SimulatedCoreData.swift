@@ -14,7 +14,7 @@ import LoopKit
 extension PersistentDeviceLog {
     private var historicalEndDate: Date { Date(timeIntervalSinceNow: -.hours(24)) }
 
-    private var simulatedPerHour: Int { 250 }
+    private var simulatedPerHour: Int { 60 }
     private var simulatedLimit: Int { 10000 }
 
     func generateSimulatedHistoricalDeviceLogEntries(completion: @escaping (Error?) -> Void) {

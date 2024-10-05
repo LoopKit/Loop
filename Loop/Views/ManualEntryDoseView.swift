@@ -197,7 +197,8 @@ struct ManualEntryDoseView: View {
                     textAlignment: .right,
                     keyboardType: .decimalPad,
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
-                    maxLength: 5
+                    maxLength: 5,
+                    doneButtonColor: .loopAccent
                 )
                 bolusUnitsLabel
             }
@@ -239,7 +240,13 @@ struct ManualEntryDoseView: View {
     private var actionButton: some View {
         Button<Text>(
             action: {
-                self.viewModel.saveManualDose(onSuccess: self.dismiss)
+                Task {
+                    do {
+                        try await self.viewModel.saveManualDose()
+                        self.dismiss()
+                    } catch {
+                    }
+                }
             },
             label: {
                 return Text("Log Dose", comment: "Button text to log a dose")

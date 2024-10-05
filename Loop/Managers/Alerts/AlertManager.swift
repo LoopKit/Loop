@@ -24,6 +24,7 @@ public enum AlertUserNotificationUserInfoKey: String {
 /// - managing the different responders that might acknowledge the alert
 /// - serializing alerts to storage
 /// - etc.
+@MainActor
 public final class AlertManager {
     private static let soundsDirectoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).last!.appendingPathComponent("Sounds")
 
@@ -36,6 +37,7 @@ public final class AlertManager {
 
     // Defer issuance of new alerts until playback is done
     private var deferredAlerts: [Alert] = []
+    private var deferredRetractions: [Alert.Identifier] = []
     private var playbackFinished: Bool
 
     private let fileManager: FileManager
@@ -58,14 +60,14 @@ public final class AlertManager {
     var getCurrentDate = { return Date() }
     
     init(alertPresenter: AlertPresenter,
-                modalAlertScheduler: InAppModalAlertScheduler? = nil,
-                userNotificationAlertScheduler: UserNotificationAlertScheduler,
-                fileManager: FileManager = FileManager.default,
-                alertStore: AlertStore? = nil,
-                expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
-                bluetoothProvider: BluetoothProvider,
-                analyticsServicesManager: AnalyticsServicesManager,
-                preventIssuanceBeforePlayback: Bool = true
+         modalAlertScheduler: InAppModalAlertScheduler? = nil,
+         userNotificationAlertScheduler: UserNotificationAlertScheduler,
+         fileManager: FileManager = FileManager.default,
+         alertStore: AlertStore? = nil,
+         expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */,
+         bluetoothProvider: BluetoothProvider,
+         analyticsServicesManager: AnalyticsServicesManager,
+         preventIssuanceBeforePlayback: Bool = true
     ) {
         self.fileManager = fileManager
         self.analyticsServicesManager = analyticsServicesManager
@@ -88,10 +90,12 @@ public final class AlertManager {
 
         bluetoothProvider.addBluetoothObserver(self, queue: .main)
 
-        NotificationCenter.default.publisher(for: .LoopCompleted)
+        NotificationCenter.default.publisher(for: .LoopCycleCompleted)
             .sink { [weak self] publisher in
                 if let loopDataManager = publisher.object as? LoopDataManager {
-                    self?.loopDidComplete(loopDataManager.lastLoopCompleted)
+                    Task { @MainActor in
+                        self?.loopDidComplete(loopDataManager.lastLoopCompleted)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -367,19 +371,18 @@ extension AlertManager: AlertIssuer {
     }
 
     public func retractAlert(identifier: Alert.Identifier) {
+        guard playbackFinished else {
+            deferredRetractions.append(identifier)
+            return
+        }
         unscheduleAlertWithSchedulers(identifier: identifier)
         alertStore.recordRetraction(of: identifier)
     }
 
     private func replayAlert(_ alert: Alert) {
-        guard alert.identifier != AlertPermissionsChecker.unsafeNotificationPermissionsAlertIdentifier else {
-            // this alert does not replay through the alert system, since it provides a button to navigate to settings
-            presentUnsafeNotificationPermissionsInAppAlert()
-            return
-        }
-
-        // Only alerts with foreground content are replayed
-        if alert.foregroundContent != nil {
+        if let unsafeNotificationPermissionsAlert = AlertPermissionsChecker.UnsafeNotificationPermissionAlert.allCases.first(where: { $0.alertIdentifier == alert.identifier }) {
+            presentUnsafeNotificationPermissionsInAppAlert(unsafeNotificationPermissionsAlert)
+        } else if alert.foregroundContent != nil {
             modalAlertScheduler.scheduleAlert(alert)
         }
     }
@@ -404,10 +407,12 @@ extension AlertManager: AlertIssuer {
 
 extension AlertManager {
 
+    nonisolated
     public static func soundURL(for alert: Alert) -> URL? {
         return soundURL(managerIdentifier: alert.identifier.managerIdentifier, sound: alert.sound)
     }
 
+    nonisolated
     private static func soundURL(managerIdentifier: String, sound: Alert.Sound?) -> URL? {
         guard let soundFileName = sound?.filename else { return nil }
 
@@ -440,6 +445,7 @@ extension AlertManager {
 extension AlertManager {
 
     func playbackAlertsFromPersistence() {
+        guard !playbackFinished else { return }
         playbackAlertsFromAlertStore()
     }
 
@@ -486,6 +492,9 @@ extension AlertManager {
             for alert in self.deferredAlerts {
                 self.issueAlert(alert)
             }
+            for identifier in self.deferredRetractions {
+                self.retractAlert(identifier: identifier)
+            }
         }
     }
 
@@ -494,31 +503,35 @@ extension AlertManager {
 // MARK: Alert storage access
 extension AlertManager {
 
-    func getStoredEntries(startDate: Date, completion: @escaping (_ report: String) -> Void) {
-        alertStore.executeQuery(since: startDate, limit: 100) { result in
-            switch result {
-            case .failure(let error):
-                completion("Error: \(error)")
-            case .success(_, let objects):
-                let encoder = JSONEncoder()
-                let report = "## Alerts\n" + objects.map { object in
-                    return """
-                    **\(object.title ?? "??")**
+    func generateDiagnosticReport() async -> String {
+        await withCheckedContinuation { continuation in
+            let startDate = Date() - .days(3.5) // Report the last 3 and half days of alerts
+            let header = "## Alerts\n"
+            alertStore.executeQuery(since: startDate, limit: 100, ascending: false) { result in
+                switch result {
+                case .failure:
+                    continuation.resume(returning: header)
+                case .success(_, let objects):
+                    let encoder = JSONEncoder()
+                    let report = header + objects.map { object in
+                        return """
+                        **\(object.title ?? "??")**
 
-                    * identifier: \(object.identifier.value)
-                    * issued: \(object.issuedDate)
-                    * acknowledged: \(object.acknowledgedDate?.description ?? "n/a")
-                    * retracted: \(object.retractedDate?.description ?? "n/a")
-                    * trigger: \(object.trigger)
-                    * interruptionLevel: \(object.interruptionLevel)
-                    * foregroundContent: \((try? encoder.encodeToStringIfPresent(object.foregroundContent)) ?? "n/a")
-                    * backgroundContent: \((try? encoder.encodeToStringIfPresent(object.backgroundContent)) ?? "n/a")
-                    * sound: \((try? encoder.encodeToStringIfPresent(object.sound)) ?? "n/a")
-                    * metadata: \((try? encoder.encodeToStringIfPresent(object.metadata)) ?? "n/a")
+                        * identifier: \(object.identifier.value)
+                        * issued: \(object.issuedDate)
+                        * acknowledged: \(object.acknowledgedDate?.description ?? "n/a")
+                        * retracted: \(object.retractedDate?.description ?? "n/a")
+                        * trigger: \(object.trigger)
+                        * interruptionLevel: \(object.interruptionLevel)
+                        * foregroundContent: \((try? encoder.encodeToStringIfPresent(object.foregroundContent)) ?? "n/a")
+                        * backgroundContent: \((try? encoder.encodeToStringIfPresent(object.backgroundContent)) ?? "n/a")
+                        * sound: \((try? encoder.encodeToStringIfPresent(object.sound)) ?? "n/a")
+                        * metadata: \((try? encoder.encodeToStringIfPresent(object.metadata)) ?? "n/a")
 
-                    """
-                }.joined(separator: "\n")
-                completion(report)
+                        """
+                    }.joined(separator: "\n")
+                    continuation.resume(returning: report)
+                }
             }
         }
     }
@@ -716,28 +729,47 @@ extension AlertManager: PresetActivationObserver {
 
 // MARK: - Issue/Retract Alert Permissions Warning
 extension AlertManager: AlertPermissionsCheckerDelegate {
-    func notificationsPermissions(requiresRiskMitigation: Bool, scheduledDeliveryEnabled: Bool) {
-        if !issueOrRetract(alert: AlertPermissionsChecker.unsafeNotificationPermissionsAlert,
-                           condition: requiresRiskMitigation,
-                           alreadyIssued: UserDefaults.standard.hasIssuedNotificationPermissionsAlert,
-                           setAlreadyIssued: { UserDefaults.standard.hasIssuedNotificationPermissionsAlert = $0 },
-                           issueHandler: { alert in
-            // in-app modal is presented with a button to navigate to settings
-            self.presentUnsafeNotificationPermissionsInAppAlert()
-            self.userNotificationAlertScheduler.scheduleAlert(alert, muted: self.alertMuter.shouldMuteAlert(alert))
-            self.recordIssued(alert: alert)
-        },
-                           retractionHandler: { alert in
-            // need to dismiss the in-app alert outside of the alert system
-            self.recordRetractedAlert(alert, at: Date())
-            self.dismissUnsafeNotificationPermissionsInAppAlert()
-        }) {
-            _ = issueOrRetract(alert: AlertPermissionsChecker.scheduledDeliveryEnabledAlert,
-                               condition: scheduledDeliveryEnabled,
-                               alreadyIssued: UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert,
-                               setAlreadyIssued: { UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert = $0 },
-                               issueHandler: { alert in self.issueAlert(alert) },
-                               retractionHandler: { alert in self.retractAlert(identifier: alert.identifier) })
+    func notificationsPermissions(requiresRiskMitigation: Bool, scheduledDeliveryEnabled: Bool, permissions: NotificationCenterSettingsFlags) {
+        guard let unsafeNotificationAlert = AlertPermissionsChecker.UnsafeNotificationPermissionAlert(permissions: permissions) else {
+            return
+        }
+        
+        if !issueOrRetract(
+            alert: unsafeNotificationAlert.alert,
+            condition: requiresRiskMitigation,
+            alreadyIssued: UserDefaults.standard.hasIssuedNotificationPermissionsAlert,
+            setAlreadyIssued: {
+                UserDefaults.standard.hasIssuedNotificationPermissionsAlert = $0
+            },
+            issueHandler: { alert in
+                // in-app modal is presented with a button to navigate to settings
+                self.presentUnsafeNotificationPermissionsInAppAlert(unsafeNotificationAlert)
+                self.userNotificationAlertScheduler.scheduleAlert(
+                    alert,
+                    muted: self.alertMuter.shouldMuteAlert(alert)
+                )
+                self.recordIssued(alert: alert)
+            },
+            retractionHandler: { alert in
+                // need to dismiss the in-app alert outside of the alert system
+                self.recordRetractedAlert(alert, at: Date())
+                self.dismissUnsafeNotificationPermissionsInAppAlert()
+            }
+        ) {
+            _ = issueOrRetract(
+                alert: AlertPermissionsChecker.scheduledDeliveryEnabledAlert,
+                condition: scheduledDeliveryEnabled,
+                alreadyIssued: UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert,
+                setAlreadyIssued: {
+                    UserDefaults.standard.hasIssuedScheduledDeliveryEnabledAlert = $0
+                },
+                issueHandler: {
+                    alert in self.issueAlert(alert)
+                },
+                retractionHandler: {
+                    alert in self.retractAlert(identifier: alert.identifier)
+                }
+            )
         }
     }
 
@@ -763,11 +795,17 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
         }
     }
 
-    private func presentUnsafeNotificationPermissionsInAppAlert() {
+    private func presentUnsafeNotificationPermissionsInAppAlert(_ alert: AlertPermissionsChecker.UnsafeNotificationPermissionAlert) {
         DispatchQueue.main.async {
-            let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert() { [weak self] in
-                self?.acknowledgeAlert(identifier: AlertPermissionsChecker.unsafeNotificationPermissionsAlertIdentifier)
+            let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert(alert: alert) { [weak self] in
+                AlertPermissionsChecker.UnsafeNotificationPermissionAlert.allCases.forEach { [weak self] in
+                    UserDefaults.standard.hasIssuedNotificationPermissionsAlert = false
+                    self?.acknowledgeAlert(
+                        identifier: $0.alertIdentifier
+                    )
+                }
             }
+            
             self.alertPresenter.present(alertController, animated: true) { [weak self] in
                 // the completion is called after the alert is presented
                 self?.unsafeNotificationPermissionsAlertController = alertController

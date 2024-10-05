@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopAlgorithm
 
 struct WatchHistoricalGlucose {
     let samples: [StoredGlucoseSample]

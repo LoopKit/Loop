@@ -7,6 +7,7 @@
 
 import HealthKit
 import LoopKit
+import LoopAlgorithm
 
 
 extension GlucoseEffectVelocity: RawRepresentable {

@@ -10,8 +10,7 @@ import SwiftUI
 
 struct BasalView: View {
     let netBasal: NetBasalContext
-    let isOld: Bool
-
+    let isStale: Bool
     
     var body: some View {
         let percent = netBasal.percentage
@@ -21,20 +20,20 @@ struct BasalView: View {
             BasalRateView(percent: percent)
                 .overlay(
                     BasalRateView(percent: percent)
-                        .stroke(isOld ? Color(UIColor.systemGray3) : Color("insulin"), lineWidth: 2)
+                        .stroke(isStale ? Color.staleGray : Color.insulin, lineWidth: 2)
                 )
-                .foregroundColor((isOld ? Color(UIColor.systemGray3) : Color("insulin")).opacity(0.5))
+                .foregroundColor((isStale ? Color.staleGray : Color.insulin).opacity(0.5))
                 .frame(width: 44, height: 22)
 
             if let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
                 Text("\(rateString) U")
                     .font(.footnote)
-                    .foregroundColor(Color(isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
+                    .foregroundColor(isStale ? .staleGray : .secondary)
             }
             else {
                 Text("-U")
                     .font(.footnote)
-                    .foregroundColor(Color(isOld ? UIColor.systemGray3 : UIColor.secondaryLabel))
+                    .foregroundColor(isStale ? .staleGray : .secondary)
             }
         }
     }

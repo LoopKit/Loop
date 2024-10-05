@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import HealthKit
+import LoopAlgorithm
 
 
 extension BolusRecommendationNotice {
@@ -34,42 +35,6 @@ extension BolusRecommendationNotice {
         case .predictedGlucoseInRange:
             return NSLocalizedString("Predicted glucose is in range.", comment: "Notice when predicted glucose for bolus recommendation is in range")
         }
-    }
-}
-
-extension BolusRecommendationNotice: Equatable {
-    public static func ==(lhs: BolusRecommendationNotice, rhs: BolusRecommendationNotice) -> Bool {
-        switch (lhs, rhs) {
-        case (.glucoseBelowSuspendThreshold, .glucoseBelowSuspendThreshold):
-            return true
-
-        case (.currentGlucoseBelowTarget, .currentGlucoseBelowTarget):
-            return true
-
-        case (let .predictedGlucoseBelowTarget(minGlucose1), let .predictedGlucoseBelowTarget(minGlucose2)):
-            // GlucoseValue is not equatable
-            return
-                minGlucose1.startDate == minGlucose2.startDate &&
-                minGlucose1.endDate == minGlucose2.endDate &&
-                minGlucose1.quantity == minGlucose2.quantity
-
-        case (.predictedGlucoseInRange, .predictedGlucoseInRange):
-            return true
-
-        default:
-            return false
-        }
-    }
-}
-
-
-extension ManualBolusRecommendation: Comparable {
-    public static func ==(lhs: ManualBolusRecommendation, rhs: ManualBolusRecommendation) -> Bool {
-        return lhs.amount == rhs.amount
-    }
-
-    public static func <(lhs: ManualBolusRecommendation, rhs: ManualBolusRecommendation) -> Bool {
-        return lhs.amount < rhs.amount
     }
 }
 

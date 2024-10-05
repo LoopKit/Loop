@@ -10,10 +10,14 @@ import SwiftUI
 import LoopKit
 import HealthKit
 import Combine
+import LoopCore
+import LoopAlgorithm
+import os.log
 
-protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate {
-    var analyticsServicesManager: AnalyticsServicesManager { get }
-    var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes { get }
+protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate, FavoriteFoodInsightsViewModelDelegate {
+    var defaultAbsorptionTimes: DefaultAbsorptionTimes { get }
+    func scheduleOverrideEnabled(at date: Date) -> Bool
+    func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample]
 }
 
 final class CarbEntryViewModel: ObservableObject {
@@ -37,11 +41,14 @@ final class CarbEntryViewModel: ObservableObject {
                 return 1
             case .overrideInProgress:
                 return 2
+            case .glucoseRisingRapidly:
+                return 3
             }
         }
         
         case entryIsMissedMeal
         case overrideInProgress
+        case glucoseRisingRapidly
     }
     
     @Published var alert: CarbEntryViewModel.Alert?
@@ -72,7 +79,7 @@ final class CarbEntryViewModel: ObservableObject {
     private var absorptionEditIsProgrammatic = false // needed for when absorption time is changed due to favorite food selection, so that absorptionTimeWasEdited does not get set to true
 
     @Published var absorptionTime: TimeInterval
-    let defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes
+    let defaultAbsorptionTimes: DefaultAbsorptionTimes
     let minAbsorptionTime = LoopConstants.minCarbAbsorptionTime
     let maxAbsorptionTime = LoopConstants.maxCarbAbsorptionTime
     var absorptionRimesRange: ClosedRange<TimeInterval> {
@@ -80,10 +87,29 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     @Published var favoriteFoods = UserDefaults.standard.favoriteFoods
-    @Published var selectedFavoriteFoodIndex = -1
+    @Published var selectedFavoriteFoodIndex = -1 {
+        willSet {
+            self.selectedFavoriteFoodLastEaten = nil
+        }
+    }
+    var selectedFavoriteFood: StoredFavoriteFood? {
+        let foodExistsForIndex = 0..<favoriteFoods.count ~= selectedFavoriteFoodIndex
+        return foodExistsForIndex ? favoriteFoods[selectedFavoriteFoodIndex] : nil
+    }
+    // Favorite Food Insights
+    @Published var selectedFavoriteFoodLastEaten: Date? = nil
+    lazy var relativeDateFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter
+    }()
+    
+    private let log = OSLog(category: "CarbEntryViewModel")
     
     weak var delegate: CarbEntryViewModelDelegate?
-    
+    weak var analyticsServicesManager: AnalyticsServicesManager?
+    weak var deliveryDelegate: DeliveryDelegate?
+
     private lazy var cancellables = Set<AnyCancellable>()
     
     /// Initalizer for when`CarbEntryView` is presented from the home screen
@@ -113,15 +139,22 @@ final class CarbEntryViewModel: ObservableObject {
         self.usesCustomFoodType = true
         self.shouldBeginEditingQuantity = false
         
+        if let favoriteFoodIndex = favoriteFoods.firstIndex(where: { $0.id == originalCarbEntry.favoriteFoodID }) {
+            self.selectedFavoriteFoodIndex = favoriteFoodIndex
+            updateFavoriteFoodLastEatenDate(for: favoriteFoods[favoriteFoodIndex])
+        }
+        
+        observeFavoriteFoodIndexChange()
         observeLoopUpdates()
     }
     
     var originalCarbEntry: StoredCarbEntry? = nil
-    private var favoriteFood: FavoriteFood? = nil
     
     private var updatedCarbEntry: NewCarbEntry? {
         if let quantity = carbsQuantity, quantity != 0 {
-            if let o = originalCarbEntry, o.quantity.doubleValue(for: preferredCarbUnit) == quantity && o.startDate == time && o.foodType == foodType && o.absorptionTime == absorptionTime {
+            let favoriteFoodID = selectedFavoriteFoodIndex == -1 ? nil : favoriteFoods[selectedFavoriteFoodIndex].id
+
+            if let o = originalCarbEntry, o.quantity.doubleValue(for: preferredCarbUnit) == quantity && o.startDate == time && o.foodType == foodType && o.absorptionTime == absorptionTime, o.favoriteFoodID == favoriteFoodID {
                 return nil  // No changes were made
             }
             
@@ -130,7 +163,8 @@ final class CarbEntryViewModel: ObservableObject {
                 quantity: HKQuantity(unit: preferredCarbUnit, doubleValue: quantity),
                 startDate: time,
                 foodType: usesCustomFoodType ? foodType : selectedDefaultAbsorptionTimeEmoji,
-                absorptionTime: absorptionTime
+                absorptionTime: absorptionTime,
+                favoriteFoodID: favoriteFoodID
             )
         }
         else {
@@ -189,14 +223,12 @@ final class CarbEntryViewModel: ObservableObject {
             potentialCarbEntry: updatedCarbEntry,
             selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
         )
-        Task {
-            await viewModel.generateRecommendationAndStartObserving()
-        }
         
-        viewModel.analyticsServicesManager = delegate?.analyticsServicesManager
+        viewModel.analyticsServicesManager = analyticsServicesManager
+        viewModel.deliveryDelegate = deliveryDelegate
         bolusViewModel = viewModel
         
-        delegate?.analyticsServicesManager.didDisplayBolusScreen()
+        analyticsServicesManager?.didDisplayBolusScreen()
     }
     
     func clearAlert() {
@@ -239,12 +271,15 @@ final class CarbEntryViewModel: ObservableObject {
 
     private func favoriteFoodSelected(at index: Int) {
         self.absorptionEditIsProgrammatic = true
+        // only updates carb entry fields if on new carb entry screen
         if index == -1 {
-            self.carbsQuantity = 0
+            if originalCarbEntry == nil {
+                self.carbsQuantity = 0
+                self.absorptionTime = defaultAbsorptionTimes.medium
+                self.absorptionTimeWasEdited = false
+                self.usesCustomFoodType = false
+            }
             self.foodType = ""
-            self.absorptionTime = defaultAbsorptionTimes.medium
-            self.absorptionTimeWasEdited = false
-            self.usesCustomFoodType = false
         }
         else {
             let food = favoriteFoods[index]
@@ -253,6 +288,23 @@ final class CarbEntryViewModel: ObservableObject {
             self.absorptionTime = food.absorptionTime
             self.absorptionTimeWasEdited = true
             self.usesCustomFoodType = true
+            updateFavoriteFoodLastEatenDate(for: food)
+        }
+    }
+    
+    private func updateFavoriteFoodLastEatenDate(for food: StoredFavoriteFood) {
+        // Update favorite food insights last eaten date
+        Task { @MainActor in
+            do {
+                if let lastEaten = try await delegate?.selectedFavoriteFoodLastEaten(food) {
+                    withAnimation(.default) {
+                        self.selectedFavoriteFoodLastEaten = lastEaten
+                    }
+                }
+            }
+            catch {
+                log.error("Failed to fetch last eaten date for favorite food: %{public}@, %{public}@", String(describing: selectedFavoriteFood), String(describing: error))
+            }
         }
     }
     
@@ -279,28 +331,72 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     private func observeLoopUpdates() {
-        self.checkIfOverrideEnabled()
+        checkIfOverrideEnabled()
+        checkGlucoseRisingRapidly()
         NotificationCenter.default
             .publisher(for: .LoopDataUpdated)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.checkIfOverrideEnabled()
+                self?.checkGlucoseRisingRapidly()
             }
             .store(in: &cancellables)
     }
     
     private func checkIfOverrideEnabled() {
-        if let managerSettings = delegate?.settings,
-           managerSettings.scheduleOverrideEnabled(at: Date()),
-           let overrideSettings = managerSettings.scheduleOverride?.settings,
-           overrideSettings.effectiveInsulinNeedsScaleFactor != 1.0 {
-            self.warnings.insert(.overrideInProgress)
+        guard let delegate else {
+            return
         }
-        else {
+
+        if delegate.scheduleOverrideEnabled(at: Date()),
+           let overrideSettings = delegate.scheduleOverride?.settings,
+           overrideSettings.effectiveInsulinNeedsScaleFactor != 1.0 
+        {
+            self.warnings.insert(.overrideInProgress)
+        } else {
             self.warnings.remove(.overrideInProgress)
         }
     }
     
+    private func checkGlucoseRisingRapidly() {
+        guard let delegate else {
+            warnings.remove(.glucoseRisingRapidly)
+            return
+        }
+        
+        let now = Date()
+        let startDate = now.addingTimeInterval(-LoopConstants.missedMealWarningGlucoseRecencyWindow)
+        
+        Task { @MainActor in
+            let glucoseSamples = try? await delegate.getGlucoseSamples(start: startDate, end: nil)
+            guard let glucoseSamples else {
+                warnings.remove(.glucoseRisingRapidly)
+                return
+            }
+            
+            let filteredGlucoseSamples = glucoseSamples.filterDateRange(startDate, now)
+            guard let startSample = filteredGlucoseSamples.first, let endSample = filteredGlucoseSamples.last else {
+                warnings.remove(.glucoseRisingRapidly)
+                return
+            }
+            
+            let duration = endSample.startDate.timeIntervalSince(startSample.startDate)
+            guard duration >= LoopConstants.missedMealWarningVelocitySampleMinDuration else {
+                warnings.remove(.glucoseRisingRapidly)
+                return
+            }
+            
+            let delta = endSample.quantity.doubleValue(for: .milligramsPerDeciliter) - startSample.quantity.doubleValue(for: .milligramsPerDeciliter)
+            let velocity = delta / duration.minutes // Unit = mg/dL/m
+            
+            if velocity >= LoopConstants.missedMealWarningGlucoseRiseThreshold {
+                warnings.insert(.glucoseRisingRapidly)
+            } else {
+                warnings.remove(.glucoseRisingRapidly)
+            }
+        }
+    }
+
     private func observeAbsorptionTimeChange() {
         $absorptionTime
             .receive(on: RunLoop.main)

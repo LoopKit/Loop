@@ -19,6 +19,7 @@ enum NotificationManager {
     }
 }
 
+@MainActor
 extension NotificationManager {
     private static var notificationCategories: Set<UNNotificationCategory> {
         var categories = [UNNotificationCategory]()
@@ -115,7 +116,6 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    @MainActor
     static func sendRemoteBolusNotification(amount: Double) {
         let notification = UNMutableNotificationContent()
         let quantityFormatter = QuantityFormatter(for: .internationalUnit())
@@ -138,7 +138,6 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    @MainActor
     static func sendRemoteBolusFailureNotification(for error: Error, amountInUnits: Double) {
         let notification = UNMutableNotificationContent()
         let quantityFormatter = QuantityFormatter(for: .internationalUnit())
@@ -159,7 +158,6 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    @MainActor
     static func sendRemoteCarbEntryNotification(amountInGrams: Double) {
         let notification = UNMutableNotificationContent()
 
@@ -180,7 +178,6 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    @MainActor
     static func sendRemoteCarbEntryFailureNotification(for error: Error, amountInGrams: Double) {
         let notification = UNMutableNotificationContent()
         

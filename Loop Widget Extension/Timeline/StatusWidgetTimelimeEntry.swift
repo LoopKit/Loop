@@ -10,6 +10,8 @@ import HealthKit
 import LoopCore
 import LoopKit
 import WidgetKit
+import LoopAlgorithm
+
 
 struct StatusWidgetTimelimeEntry: TimelineEntry {
     var date: Date
@@ -17,6 +19,8 @@ struct StatusWidgetTimelimeEntry: TimelineEntry {
     let contextUpdatedAt: Date
     
     let lastLoopCompleted: Date?
+    let mostRecentGlucoseDataDate: Date?
+    let mostRecentPumpDataDate: Date?
     let closeLoop: Bool
     
     let currentGlucose: GlucoseValue?
@@ -53,6 +57,6 @@ struct StatusWidgetTimelimeEntry: TimelineEntry {
         }
         let glucoseAge = date - glucoseDate
 
-        return glucoseAge >= LoopCoreConstants.inputDataRecencyInterval
+        return glucoseAge >= LoopAlgorithm.inputDataRecencyInterval
     }
 }

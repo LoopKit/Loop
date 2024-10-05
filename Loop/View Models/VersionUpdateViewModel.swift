@@ -12,6 +12,7 @@ import LoopKit
 import SwiftUI
 import LoopKitUI
 
+@MainActor
 public class VersionUpdateViewModel: ObservableObject {
     
     @Published var versionUpdate: VersionUpdate?

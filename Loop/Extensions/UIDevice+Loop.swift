@@ -37,7 +37,7 @@ extension UIDevice {
 }
 
 extension UIDevice {
-    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
+    func generateDiagnosticReport() -> String {
         var report: [String] = [
             "## Device",
             "",
@@ -53,7 +53,7 @@ extension UIDevice {
                 "* batteryState: \(String(describing: batteryState))",
             ]
         }
-        completion(report.joined(separator: "\n"))
+        return report.joined(separator: "\n")
     }
 }
 

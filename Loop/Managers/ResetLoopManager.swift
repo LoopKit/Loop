@@ -102,12 +102,14 @@ class ResetLoopManager {
     private func resetLoopUserDefaults() {
         // Store values to persist
         let allowDebugFeatures = UserDefaults.appGroup?.allowDebugFeatures
+        let defaultEnvironment = UserDefaults.appGroup?.defaultEnvironment
 
         // Wipe away whole domain
         UserDefaults.appGroup?.removePersistentDomain(forName: Bundle.main.appGroupSuiteName)
 
         // Restore values to persist
         UserDefaults.appGroup?.allowDebugFeatures = allowDebugFeatures ?? false
+        UserDefaults.appGroup?.defaultEnvironment = defaultEnvironment
     }
     
     private func resetLoopDocuments() {

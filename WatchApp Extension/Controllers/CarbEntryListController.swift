@@ -10,6 +10,7 @@ import LoopCore
 import LoopKit
 import os.log
 import WatchKit
+import LoopAlgorithm
 
 class CarbEntryListController: WKInterfaceController, IdentifiableClass {
     @IBOutlet private var table: WKInterfaceTable!
@@ -79,7 +80,7 @@ extension CarbEntryListController {
     }
 
     private func reloadCarbEntries() {
-        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -loopManager.carbStore.maximumAbsorptionTimeInterval))
+        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
 
         loopManager.carbStore.getCarbEntries(start: start) { (result) in
             switch result {

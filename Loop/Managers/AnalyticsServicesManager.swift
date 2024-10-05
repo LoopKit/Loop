@@ -143,10 +143,6 @@ final class AnalyticsServicesManager {
             logEvent("Therapy schedule time zone change")
         }
 
-        if newValue.scheduleOverride != oldValue.scheduleOverride {
-            logEvent("Temporary schedule override change")
-        }
-
         if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
             logEvent("Glucose target range change")
         }
@@ -170,8 +166,8 @@ final class AnalyticsServicesManager {
         logEvent("CGM Added", withProperties: ["identifier" : identifier])
     }
 
-    func didAddCarbs(source: String, amount: Double, inSession: Bool = false) {
-        logEvent("Carb entry created", withProperties: ["source" : source, "amount": "\(amount)"], outOfSession: inSession)
+    func didAddCarbs(source: String, amount: Double, isFavoriteFood: Bool = false, inSession: Bool = false) {
+        logEvent("Carb entry created", withProperties: ["source" : source, "amount": "\(amount)", "isFavoriteFood": isFavoriteFood], outOfSession: inSession)
     }
 
     func didRetryBolus() {

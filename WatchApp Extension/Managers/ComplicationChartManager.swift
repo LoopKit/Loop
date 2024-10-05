@@ -11,6 +11,7 @@ import UIKit
 import HealthKit
 import WatchKit
 import LoopKit
+import LoopAlgorithm
 
 private let textInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
 

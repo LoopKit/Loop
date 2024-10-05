@@ -9,14 +9,13 @@
 import Foundation
 import LoopKit
 
+public typealias DefaultAbsorptionTimes = (fast: TimeInterval, medium: TimeInterval, slow: TimeInterval)
+
 public enum LoopCoreConstants {
-    /// The amount of time since a given date that input data should be considered valid
-    public static let inputDataRecencyInterval = TimeInterval(minutes: 15)
-    
     /// The amount of time in the future a glucose value should be considered valid
     public static let futureGlucoseDataInterval = TimeInterval(minutes: 5)
 
-    public static let defaultCarbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .minutes(30), medium: .hours(3), slow: .hours(5))
+    public static let defaultCarbAbsorptionTimes: DefaultAbsorptionTimes = (fast: .minutes(30), medium: .hours(3), slow: .hours(5))
 
     /// How much historical glucose to include in a dosing decision
     /// Somewhat arbitrary, but typical maximum visible in bolus glucose preview

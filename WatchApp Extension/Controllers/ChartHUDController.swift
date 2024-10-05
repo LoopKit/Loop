@@ -13,6 +13,7 @@ import HealthKit
 import SpriteKit
 import os.log
 import LoopCore
+import LoopAlgorithm
 
 final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     private enum TableRow: Int, CaseIterable {
@@ -162,7 +163,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             cell.setIsLastRow(row.isLast)
             cell.setContentInset(systemMinimumLayoutMargins)
 
-            let isActiveContextStale = Date().timeIntervalSince(activeContext.creationDate) > LoopCoreConstants.inputDataRecencyInterval
+            let isActiveContextStale = Date().timeIntervalSince(activeContext.creationDate) > LoopAlgorithm.inputDataRecencyInterval
 
             switch row {
             case .iob:

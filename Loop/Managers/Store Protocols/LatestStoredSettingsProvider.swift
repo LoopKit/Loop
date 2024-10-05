@@ -9,7 +9,7 @@
 import LoopKit
 
 protocol LatestStoredSettingsProvider: AnyObject {
-    var latestSettings: StoredSettings { get }
+    var settings: StoredSettings { get }
 }
 
 extension SettingsManager: LatestStoredSettingsProvider { }

@@ -10,7 +10,6 @@ import SwiftUI
 
 @main
 struct LoopWidgets: WidgetBundle {
-
     @WidgetBundleBuilder
     var body: some Widget {
         SystemStatusWidget()

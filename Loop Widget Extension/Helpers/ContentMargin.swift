@@ -2,8 +2,8 @@
 //  ContentMargin.swift
 //  Loop Widget Extension
 //
-//  Created by Cameron Ingham on 9/29/23.
-//  Copyright © 2023 LoopKit Authors. All rights reserved.
+//  Created by Cameron Ingham on 1/16/24.
+//  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
 import SwiftUI

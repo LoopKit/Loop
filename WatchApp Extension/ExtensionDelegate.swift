@@ -219,9 +219,9 @@ extension ExtensionDelegate: WCSessionDelegate {
 
         switch name {
         case LoopSettingsUserInfo.name:
-            if let settings = LoopSettingsUserInfo(rawValue: userInfo)?.settings {
+            if let loopSettings = LoopSettingsUserInfo(rawValue: userInfo) {
                 DispatchQueue.main.async {
-                    self.loopManager.settings = settings
+                    self.loopManager.watchInfo = loopSettings
                 }
             } else {
                 log.error("Could not decode LoopSettingsUserInfo: %{public}@", userInfo)

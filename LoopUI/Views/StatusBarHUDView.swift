@@ -59,6 +59,9 @@ public class StatusBarHUDView: UIView, NibLoadable {
             containerView.heightAnchor.constraint(equalTo: heightAnchor),
         ])
         
+        self.cgmStatusHUD.accessibilityIdentifier = "glucoseHUDView"
+        self.pumpStatusHUD.accessibilityIdentifier = "pumpHUDView"
+        
         self.backgroundColor = UIColor.secondarySystemBackground
     }
         

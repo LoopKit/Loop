@@ -8,21 +8,6 @@
 
 import UIKit
 
-enum Deeplink: String, CaseIterable {
-    case carbEntry = "carb-entry"
-    case bolus = "manual-bolus"
-    case preMeal = "pre-meal-preset"
-    case customPresets = "custom-presets"
-    
-    init?(url: URL?) {
-        guard let url, let host = url.host, let deeplink = Deeplink.allCases.first(where: { $0.rawValue == host }) else {
-            return nil
-        }
-        
-        self = deeplink
-    }
-}
-
 class DeeplinkManager {
     
     private weak var rootViewController: UIViewController?

@@ -23,7 +23,7 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
     @IBOutlet private var table: WKInterfaceTable!
 
     private let loopManager = ExtensionDelegate.shared().loopManager
-    private lazy var presets = loopManager.settings.overridePresets
+    private lazy var presets = loopManager.watchInfo.loopSettings.overridePresets
 
     weak var delegate: OverrideSelectionControllerDelegate?
     

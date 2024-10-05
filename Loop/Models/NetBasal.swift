@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import LoopAlgorithm
 
 /// Max basal should generally be set, but in those cases where it isn't just use 3.0U/hr as a default top of scale, so we can show *something*.
 fileprivate let defaultMaxBasalForScale = 3.0

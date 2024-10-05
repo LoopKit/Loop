@@ -12,7 +12,7 @@ import LoopKit
 import SwiftUI
 
 protocol AlertPermissionsCheckerDelegate: AnyObject {
-    func notificationsPermissions(requiresRiskMitigation: Bool, scheduledDeliveryEnabled: Bool)
+    func notificationsPermissions(requiresRiskMitigation: Bool, scheduledDeliveryEnabled: Bool, permissions: NotificationCenterSettingsFlags)
 }
 
 public class AlertPermissionsChecker: ObservableObject {
@@ -34,7 +34,7 @@ public class AlertPermissionsChecker: ObservableObject {
 
     init() {
         // Check on loop complete, but only while in the background.
-        NotificationCenter.default.publisher(for: .LoopCompleted)
+        NotificationCenter.default.publisher(for: .LoopCycleCompleted)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
@@ -75,7 +75,7 @@ public class AlertPermissionsChecker: ObservableObject {
                 }
                 if #available(iOS 15.0, *) {
                     newSettings.scheduledDeliveryEnabled = settings.scheduledDeliverySetting == .enabled
-                    newSettings.timeSensitiveNotificationsDisabled = settings.alertSetting != .disabled && settings.timeSensitiveSetting == .disabled
+                    newSettings.timeSensitiveDisabled = settings.alertSetting != .disabled && settings.timeSensitiveSetting == .disabled
                 }
                 self.notificationCenterSettings = newSettings
                 completion?()
@@ -106,44 +106,151 @@ extension AlertPermissionsChecker {
     }
 
     // MARK: Unsafe Notification Permissions Alert
-    static let unsafeNotificationPermissionsAlertIdentifier = Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeNotificationPermissionsAlert")
+    
+    enum UnsafeNotificationPermissionAlert: Hashable, CaseIterable {
+        case notificationsDisabled
+        case criticalAlertsDisabled
+        case timeSensitiveDisabled
+        case criticalAlertsAndNotificationDisabled
+        case criticalAlertsAndTimeSensitiveDisabled
+        
+        var alertTitle: String {
+            switch self {
+            case .criticalAlertsAndNotificationDisabled, .criticalAlertsAndTimeSensitiveDisabled:
+                NSLocalizedString("Turn On Critical Alerts and Time Sensitive Notifications", comment: "Both Critical Alerts and Time Sensitive Notifications disabled alert title")
+            case .criticalAlertsDisabled:
+                NSLocalizedString("Turn On Critical Alerts", comment: "Critical alerts disabled alert title")
+            case .timeSensitiveDisabled, .notificationsDisabled:
+                NSLocalizedString("Turn On Time Sensitive Notifications ", comment: "Time sensitive notifications disabled alert title")
+            }
+        }
+        
+        var notificationTitle: String {
+            switch self {
+            case .criticalAlertsAndNotificationDisabled, .criticalAlertsAndTimeSensitiveDisabled:
+                NSLocalizedString("Turn On Critical Alerts and Time Sensitive Notifications", comment: "Both Critical Alerts and Time Sensitive Notifications disabled notification title")
+            case .criticalAlertsDisabled:
+                NSLocalizedString("Turn On Critical Alerts", comment: "Critical alerts disabled notification title")
+            case .timeSensitiveDisabled, .notificationsDisabled:
+                NSLocalizedString("Turn On Time Sensitive Notifications", comment: "Time sensitive notifications disabled alert title")
+            }
+        }
+        
+        var bannerTitle: String {
+            switch self {
+            case .criticalAlertsAndNotificationDisabled, .criticalAlertsAndTimeSensitiveDisabled:
+                NSLocalizedString("Critical Alerts and Time Sensitive Notifications are turned OFF", comment: "Both Critical Alerts and Time Sensitive Notifications disabled banner title")
+            case .criticalAlertsDisabled:
+                NSLocalizedString("Critical Alerts are turned OFF", comment: "Critical alerts disabled banner title")
+            case .timeSensitiveDisabled, .notificationsDisabled:
+                NSLocalizedString("Time Sensitive Notifications are turned OFF", comment: "Time sensitive notifications disabled banner title")
+            }
+        }
+        
+        var alertBody: String {
+            switch self {
+            case .notificationsDisabled:
+                NSLocalizedString("Time Sensitive Notifications are turned OFF. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications are turned ON.", comment: "Notifications disabled alert body")
+            case .criticalAlertsAndNotificationDisabled:
+                NSLocalizedString("Critical Alerts and Time Sensitive Notifications are turned off. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications and Critical Alerts are turned ON.", comment: "Both Notifications and Critical Alerts disabled alert body")
+            case .criticalAlertsAndTimeSensitiveDisabled:
+                NSLocalizedString("Critical Alerts and Time Sensitive Notifications are turned off. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Critical Alerts and Time Sensitive Notifications are turned ON.", comment: "Both Critical Alerts and Time Sensitive Notifications disabled alert body")
+            case .criticalAlertsDisabled:
+                NSLocalizedString("Critical Alerts are turned off. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Critical Alerts are turned ON.", comment: "Critical alerts disabled alert body")
+            case .timeSensitiveDisabled:
+                NSLocalizedString("Time Sensitive Notifications are turned OFF. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Time Sensitive Notifications are turned ON.", comment: "Time sensitive notifications disabled alert body")
+            }
+        }
+        
+        var notificationBody: String {
+            switch self {
+            case .criticalAlertsAndNotificationDisabled, .criticalAlertsAndTimeSensitiveDisabled:
+                NSLocalizedString("Critical Alerts and Time Sensitive Notifications are turned OFF. Go to the App to fix the issue now.", comment: "Both Critical Alerts and Time Sensitive Notifications disabled notification body")
+            case .criticalAlertsDisabled:
+                NSLocalizedString("Critical Alerts are turned OFF. Go to the App to fix the issue now.", comment: "Critical alerts disabled notification body")
+            case .timeSensitiveDisabled, .notificationsDisabled:
+                NSLocalizedString("Time Sensitive notifications are turned OFF. Go to the App to fix the issue now.", comment: "Time sensitive notifications disabled notification body")
+            }
+        }
+        
+        var bannerBody: String {
+            switch self {
+            case .notificationsDisabled:
+                NSLocalizedString("Fix now by turning Notifications ON.", comment: "Notifications disabled banner body")
+            case .criticalAlertsAndNotificationDisabled:
+                NSLocalizedString("Fix now by turning Notifications and Critical Alerts ON.", comment: "Both Critical Alerts and Notifications disabled banner body")
+            case .criticalAlertsAndTimeSensitiveDisabled:
+                NSLocalizedString("Fix now by turning Critical Alerts and Time Sensitive Notifications ON.", comment: "Both Critical Alerts and Time Sensitive Notifications disabled banner body")
+            case .criticalAlertsDisabled:
+                NSLocalizedString("Fix now by turning Critical Alerts ON.", comment: "Critical alerts disabled banner body")
+            case .timeSensitiveDisabled:
+                NSLocalizedString("Fix now by turning Time Sensitive Notifications ON.", comment: "Time sensitive notifications disabled banner body")
+            }
+        }
+        
+        var alertIdentifier: LoopKit.Alert.Identifier {
+            switch self {
+            case .notificationsDisabled:
+                Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeNotificationPermissionsAlert")
+            case .criticalAlertsAndNotificationDisabled:
+                Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeCriticalAlertAndNotificationPermissionsAlert")
+            case .criticalAlertsAndTimeSensitiveDisabled:
+                Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeCriticalAlertAndTimeSensitivePermissionsAlert")
+            case .criticalAlertsDisabled:
+                Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeCrititalAlertPermissionsAlert")
+            case .timeSensitiveDisabled:
+                Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeTimeSensitiveNotificationPermissionsAlert")
+            }
+        }
+        
+        var alertContent: LoopKit.Alert.Content {
+            Alert.Content(
+                title: alertTitle,
+                body: alertBody,
+                acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Notifications permissions disabled alert button")
+            )
+        }
+        
+        var alert: LoopKit.Alert {
+            Alert(
+                identifier: alertIdentifier,
+                foregroundContent: nil,
+                backgroundContent: alertContent,
+                trigger: .immediate
+            )
+        }
+        
+        init?(permissions: NotificationCenterSettingsFlags) {
+            switch permissions {
+            case .notificationsDisabled:
+                self = .notificationsDisabled
+            case .timeSensitiveDisabled, NotificationCenterSettingsFlags(rawValue: 5):
+                self = .timeSensitiveDisabled
+            case .criticalAlertsDisabled:
+                self = .criticalAlertsDisabled
+            case NotificationCenterSettingsFlags(rawValue: 3):
+                self = .criticalAlertsAndNotificationDisabled
+            case NotificationCenterSettingsFlags(rawValue: 6):
+                self = .criticalAlertsAndTimeSensitiveDisabled
+            default:
+                return nil
+            }
+        }
+    }
 
-    private static let unsafeNotificationPermissionsAlertContent = Alert.Content(
-        title: NSLocalizedString("Warning! Safety notifications are turned OFF",
-                                 comment: "Alert Permissions Need Attention alert title"),
-        body: String(format: NSLocalizedString("You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications, Critical Alerts and Time Sensitive Notifications are turned ON.",
-                                               comment: "Format for Notifications permissions disabled alert body. (1: app name)"),
-                     Bundle.main.bundleDisplayName),
-        acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Notifications permissions disabled alert button")
-    )
-
-    static let unsafeNotificationPermissionsAlert = Alert(identifier: unsafeNotificationPermissionsAlertIdentifier,
-                                                          foregroundContent: nil,
-                                                          backgroundContent: unsafeNotificationPermissionsAlertContent,
-                                                          trigger: .immediate)
-
-    static func constructUnsafeNotificationPermissionsInAppAlert(acknowledgementCompletion: @escaping () -> Void ) -> UIAlertController {
+    static func constructUnsafeNotificationPermissionsInAppAlert(alert: UnsafeNotificationPermissionAlert, acknowledgementCompletion: @escaping () -> Void ) -> UIAlertController {
         dispatchPrecondition(condition: .onQueue(.main))
-        let alertController = UIAlertController(title: Self.unsafeNotificationPermissionsAlertContent.title,
-                                                message: Self.unsafeNotificationPermissionsAlertContent.body,
+        let alertController = UIAlertController(title: alert.alertTitle,
+                                                message: alert.alertBody,
                                                 preferredStyle: .alert)
         let titleImageAttachment = NSTextAttachment()
         titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.critical)
         titleImageAttachment.bounds = CGRect(x: titleImageAttachment.bounds.origin.x, y: -10, width: 40, height: 35)
         let titleWithImage = NSMutableAttributedString(attachment: titleImageAttachment)
         titleWithImage.append(NSMutableAttributedString(string: "\n\n", attributes: [.font: UIFont.systemFont(ofSize: 8)]))
-        titleWithImage.append(NSMutableAttributedString(string: Self.unsafeNotificationPermissionsAlertContent.title, attributes: [.font: UIFont.preferredFont(forTextStyle: .headline)]))
+        titleWithImage.append(NSMutableAttributedString(string: alert.alertTitle, attributes: [.font: UIFont.preferredFont(forTextStyle: .headline)]))
         alertController.setValue(titleWithImage, forKey: "attributedTitle")
-
-        let messageImageAttachment = NSTextAttachment()
-        messageImageAttachment.image = UIImage(named: "notification-permissions-on")
-        messageImageAttachment.bounds = CGRect(x: 0, y: -12, width: 228, height: 126)
-        let messageWithImageAttributed = NSMutableAttributedString(string: "\n", attributes: [.font: UIFont.systemFont(ofSize: 8)])
-        messageWithImageAttributed.append(NSMutableAttributedString(string: Self.unsafeNotificationPermissionsAlertContent.body, attributes: [.font: UIFont.preferredFont(forTextStyle: .footnote)]))
-        messageWithImageAttributed.append(NSMutableAttributedString(string: "\n\n", attributes: [.font: UIFont.systemFont(ofSize: 12)]))
-        messageWithImageAttributed.append(NSMutableAttributedString(attachment: messageImageAttachment))
-        alertController.setValue(messageWithImageAttributed, forKey: "attributedMessage")
-
+        
         alertController.addAction(UIAlertAction(title: NSLocalizedString("Settings", comment: "Label of button that navigation user to iOS Settings"),
                                                 style: .default,
                                                 handler: { _ in
@@ -178,7 +285,7 @@ extension AlertPermissionsChecker {
                                                      trigger: .immediate)
 
     private func notificationCenterSettingsChanged(_ newValue: NotificationCenterSettingsFlags) {
-        delegate?.notificationsPermissions(requiresRiskMitigation: newValue.requiresRiskMitigation, scheduledDeliveryEnabled: newValue.scheduledDeliveryEnabled)
+        delegate?.notificationsPermissions(requiresRiskMitigation: newValue.requiresRiskMitigation, scheduledDeliveryEnabled: newValue.scheduledDeliveryEnabled, permissions: newValue)
     }
 }
 
@@ -188,10 +295,10 @@ struct NotificationCenterSettingsFlags: OptionSet {
     static let none = NotificationCenterSettingsFlags([])
     static let notificationsDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 0)
     static let criticalAlertsDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 1)
-    static let timeSensitiveNotificationsDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 2)
+    static let timeSensitiveDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 2)
     static let scheduledDeliveryEnabled = NotificationCenterSettingsFlags(rawValue: 1 << 3)
 
-    static let requiresRiskMitigation: NotificationCenterSettingsFlags = [ .notificationsDisabled, .criticalAlertsDisabled, .timeSensitiveNotificationsDisabled ]
+    static let requiresRiskMitigation: NotificationCenterSettingsFlags = [ .notificationsDisabled, .criticalAlertsDisabled, .timeSensitiveDisabled ]
 }
 
 extension NotificationCenterSettingsFlags {
@@ -211,12 +318,12 @@ extension NotificationCenterSettingsFlags {
             update(.criticalAlertsDisabled, newValue)
         }
     }
-    var timeSensitiveNotificationsDisabled: Bool {
+    var timeSensitiveDisabled: Bool {
         get {
-            contains(.timeSensitiveNotificationsDisabled)
+            contains(.timeSensitiveDisabled)
         }
         set {
-            update(.timeSensitiveNotificationsDisabled, newValue)
+            update(.timeSensitiveDisabled, newValue)
         }
     }
     var scheduledDeliveryEnabled: Bool {

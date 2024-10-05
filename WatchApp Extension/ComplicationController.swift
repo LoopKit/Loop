@@ -8,8 +8,9 @@
 
 import ClockKit
 import WatchKit
-import LoopCore
+import LoopKit
 import os.log
+import LoopAlgorithm
 
 final class ComplicationController: NSObject, CLKComplicationDataSource {
     
@@ -88,7 +89,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                 let template = CLKComplicationTemplate.templateForFamily(complication.family,
                                                                          from: context,
                                                                          at: timelineDate,
-                                                                         recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
+                                                                         recencyInterval: LoopAlgorithm.inputDataRecencyInterval,
                                                                          chartGenerator: self.makeChart)
             {
                 switch complication.family {
@@ -119,7 +120,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             
             var futureChangeDates: [Date] = [
                 // Stale glucose date: just a second after glucose expires
-                glucoseDate + LoopCoreConstants.inputDataRecencyInterval + 1,
+                glucoseDate + LoopAlgorithm.inputDataRecencyInterval + 1,
             ]
             
             if let loopLastRunDate = context.loopLastRunDate {
@@ -135,7 +136,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                 if let template = CLKComplicationTemplate.templateForFamily(complication.family,
                                                                             from: context,
                                                                             at: futureChangeDate,
-                                                                            recencyInterval: LoopCoreConstants.inputDataRecencyInterval,
+                                                                            recencyInterval: LoopAlgorithm.inputDataRecencyInterval,
                                                                             chartGenerator: self.makeChart)
                 {
                     template.tintColor = UIColor.tintColor
