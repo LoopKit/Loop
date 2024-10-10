@@ -1501,76 +1501,49 @@ extension LoopDataManager {
             return recommendation // unable to differentiate between correction amounts
         }
         
-        guard potentialCarbEntry != nil else {
-            var missingAmount = recommendation!.missingAmount
-            
-            var initialCorrectionAmount = recommendation!.amount + Swift.max(missingAmount ?? 0, 0)
-            var correctionAmount = initialCorrectionAmount
-            
-            if let calcAmount = try calcCorrectionAmount(carbsAmount: 0, prediction: prediction, potentialCarbEntry: nil) {
+        var carbsAmount = 0.0
+        
+        if potentialCarbEntry != nil {
+            guard let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown) else {
                 
-                correctionAmount = calcAmount
-                if recommendation!.notice == .predictedGlucoseInRange {
-                    correctionAmount = Swift.min(correctionAmount, 0) // ensure 0 if in range but above the mid-point
-                } else {
-                    let totalMissingAmount = calcAmount - initialCorrectionAmount
-                    if totalMissingAmount > 0, volumeRounder()(totalMissingAmount) != 0 {
-                        missingAmount = totalMissingAmount
-                    }
-                }
+                return recommendation // unable to differentiate between correction amounts
             }
             
-            return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, missingAmount: missingAmount, bolusBreakdown: BolusBreakdown(fullCarbsAmount: 0.0, fullCobCorrectionAmount: totalCobAmount, fullCorrectionAmount: correctionAmount))
-        }
-        
-        guard let carbBreakdownRecommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .carbBreakdown) else {
+            // the insulin needed to cover the zeroCarbEntry will underflow to 0 once added/subtracted
+            let zeroCarbEntry = replacedCarbEntry == nil ? nil : NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 1E-50), startDate: potentialCarbEntry!.startDate, foodType: nil, absorptionTime: potentialCarbEntry!.absorptionTime)
             
-            return recommendation // unable to differentiate between correction amounts
+            let predictionWithZeroCarbEntry = try predictGlucose(using: .all, potentialBolus: nil, potentialCarbEntry: zeroCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
+            
+            guard let carbBreakdownRecommendationWithZeroCarbEntry = try recommendBolusValidatingDataRecency(forPrediction: predictionWithZeroCarbEntry, consideringPotentialCarbEntry: zeroCarbEntry, usage: .carbBreakdown) else {
+            
+                return recommendation // unable to directly calculate carbsAmount
+            }
+            
+            carbsAmount = carbBreakdownRecommendation.amount - carbBreakdownRecommendationWithZeroCarbEntry.amount
         }
         
-        // the insulin needed to cover the zeroCarbEntry will underflow to 0 once added/subtracted
-        let zeroCarbEntry = replacedCarbEntry == nil ? nil : NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 1E-50), startDate: potentialCarbEntry!.startDate, foodType: nil, absorptionTime: potentialCarbEntry!.absorptionTime)
-        
-        let predictionWithZeroCarbEntry = try predictGlucose(using: .all, potentialBolus: nil, potentialCarbEntry: zeroCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
-        
-        guard let carbBreakdownRecommendationWithZeroCarbEntry = try recommendBolusValidatingDataRecency(forPrediction: predictionWithZeroCarbEntry, consideringPotentialCarbEntry: zeroCarbEntry, usage: .carbBreakdown) else {
-        
-            return recommendation // unable to directly calculate carbsAmount
-        }
-        
-        let carbsAmount = carbBreakdownRecommendation.amount - carbBreakdownRecommendationWithZeroCarbEntry.amount
-
         var missingAmount = recommendation!.missingAmount
+        let extra = Swift.max(missingAmount ?? 0, 0)
         var correctionAmount : Double
-
+        
         if let calcAmount = try calcCorrectionAmount(carbsAmount: carbsAmount, prediction: prediction, potentialCarbEntry: potentialCarbEntry) {
             correctionAmount = calcAmount
-            let extra = Swift.max(missingAmount ?? 0, 0)
-            let amount = carbsAmount + correctionAmount - (extra + recommendation!.amount)
-            if amount > 0, volumeRounder()(amount) != 0 {
-                missingAmount = amount + extra
-            }
-
-            /*
-            if recommendation!.amount <= 0, recommendation!.notice != .predictedGlucoseInRange {
-                let amount = carbsAmount + correctionAmount
-                if amount > 0, volumeRounder()(amount) != 0 {
-                    missingAmount = amount
-                }
+            
+            if recommendation!.notice == .predictedGlucoseInRange {
+                correctionAmount = Swift.min(correctionAmount, 0) // ensure 0 if in range but above the mid-point
             } else {
-                
-                let amount = carbsAmount + correctionAmount - (extra + recommendation!.amount)
-                if amount > 0, volumeRounder()(amount) != 0 {
-                    missingAmount = amount + extra
+                let totalMissingAmount = carbsAmount + correctionAmount - recommendation!.amount
+                if totalMissingAmount > 0, volumeRounder()(totalMissingAmount) != 0 {
+                    missingAmount = totalMissingAmount
+                } else {
+                    missingAmount = nil
                 }
             }
-             */
         } else {
-            let extra = Swift.max(recommendation!.missingAmount ?? 0, 0)
             correctionAmount = recommendation!.amount + extra - carbsAmount
         }
                 
-        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, missingAmount: missingAmount, bolusBreakdown: BolusBreakdown(fullCarbsAmount: carbsAmount, fullCobCorrectionAmount: totalCobAmount, fullCorrectionAmount: correctionAmount))
+        return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, missingAmount: missingAmount, bolusBreakdown: BolusBreakdown(fullCarbsAmount: carbsAmount, fullCobCorrectionAmount: totalCobAmount, fullCorrectionAmount: correctionAmount))        
     }
     
     fileprivate func calcCorrectionAmount(carbsAmount: Double,
