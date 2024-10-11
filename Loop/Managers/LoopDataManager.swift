@@ -1532,11 +1532,11 @@ extension LoopDataManager {
                 correctionAmount = Swift.min(correctionAmount, calcAmount, 0) // ensure 0 if in range but above the mid-point
                 missingAmount = carbsAmount + correctionAmount - recommendation!.amount
                 if missingAmount! <= 0 || volumeRounder()(missingAmount!) == 0 {
-                    missingAmount = nil
+                    missingAmount = nil // this MUST be the case since extra should be 0, and missingAmount <= extra by construction
                 }
             } else {
                 let totalMissingAmount = carbsAmount + calcAmount - recommendation!.amount
-                if totalMissingAmount > extra, volumeRounder()(totalMissingAmount - extra) != 0 {
+                if totalMissingAmount > extra, volumeRounder()(totalMissingAmount - extra) > 0 {
                     correctionAmount = calcAmount
                     missingAmount = totalMissingAmount
                 } else if recommendation!.amount == 0 && calcAmount < 0 {
