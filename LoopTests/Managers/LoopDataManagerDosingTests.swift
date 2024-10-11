@@ -722,6 +722,27 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(recommendedBolus!.missingAmount!, 1.5 + (176.21882841682697 - 230) / 45, accuracy: 0.01)
     }
     
+    func testLoopGetStateRecommendsManualBolusForBigAndSlowCarbEntry() {
+        setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: correctionRange(176.2188), suspendThresholdValue: 176.218)
+        
+        let exp = expectation(description: #function)
+        var recommendedBolus: ManualBolusRecommendation?
+
+        let carbEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 100.0), startDate: now, foodType: nil, absorptionTime: TimeInterval(hours: 4.0))
+        loopDataManager.getLoopState { (_, loopState) in
+            recommendedBolus = try? loopState.recommendBolus(consideringPotentialCarbEntry: carbEntry, replacingCarbEntry: nil, considerPositiveVelocityAndRC: false)
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 100000.0)
+        XCTAssertEqual(recommendedBolus!.amount, 7.27, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bolusBreakdown!.bgCorrectionAmount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bolusBreakdown!.cobCorrectionAmount, 0, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.bolusBreakdown!.carbsAmount!, 9.99, accuracy: 0.01) // 9.99 and not 10 since there is 10 minute delay, leaving 0.01 remaining
+        XCTAssertEqual(recommendedBolus!.missingAmount!, 9.99 - 7.27, accuracy: 0.01)
+    }
+
+    
     func testLoopGetStateRecommendsManualBolusNoMissingForSuspendForCarbEntry() {
         setUp(for: .highAndStable, predictCarbGlucoseEffects: true, correctionRanges: correctionRange(230), suspendThresholdValue: 220)
         
