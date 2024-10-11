@@ -34,7 +34,7 @@ final class DeviceDataManagerTests: XCTestCase {
         }
     }
 
-    override func setUpWithError() throws {
+    override func setUp() async throws {
         let mockUserNotificationCenter = MockUserNotificationCenter()
         let mockBluetoothProvider = MockBluetoothProvider()
         let alertPresenter = MockPresenter()
@@ -56,7 +56,7 @@ final class DeviceDataManagerTests: XCTestCase {
             cacheLength: .days(1)
         )
 
-        let doseStore = DoseStore(
+        let doseStore = await DoseStore(
             cacheStore: persistenceController
         )
 
@@ -72,8 +72,7 @@ final class DeviceDataManagerTests: XCTestCase {
         }
         let deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"))
 
-
-        let glucoseStore = GlucoseStore(cacheStore: persistenceController)
+        let glucoseStore = await GlucoseStore(cacheStore: persistenceController)
 
         let cgmEventStore = CgmEventStore(cacheStore: persistenceController)
 

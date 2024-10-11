@@ -18,7 +18,7 @@ import LoopAlgorithm
 class LoopDataManager {
     let carbStore: CarbStore
 
-    let glucoseStore: GlucoseStore
+    var glucoseStore: GlucoseStore!
 
     @PersistedProperty(key: "Settings")
     private var rawWatchInfo: LoopSettingsUserInfo.RawValue?
@@ -69,16 +69,19 @@ class LoopDataManager {
             cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
             syncVersion: 0
         )
-        glucoseStore = GlucoseStore(
-            cacheStore: cacheStore,
-            cacheLength: .hours(4)
-        )
 
         self.watchInfo = LoopSettingsUserInfo(
             loopSettings: LoopSettings(),
             scheduleOverride: nil,
             preMealOverride: nil
         )
+        
+        Task {
+            glucoseStore = await GlucoseStore(
+                cacheStore: cacheStore,
+                cacheLength: .hours(4)
+            )
+        }
 
         if let rawWatchInfo = rawWatchInfo, let watchInfo = LoopSettingsUserInfo(rawValue: rawWatchInfo) {
             self.watchInfo = watchInfo
@@ -96,7 +99,9 @@ extension LoopDataManager {
 
         if activeContext == nil || context.shouldReplace(activeContext!) {
             if let newGlucoseSample = context.newGlucoseSample {
-                self.glucoseStore.addGlucoseSamples([newGlucoseSample]) { (_) in }
+                Task {
+                    try? await self.glucoseStore.addGlucoseSamples([newGlucoseSample])
+                }
             }
             activeContext = context
         }
@@ -153,8 +158,10 @@ extension LoopDataManager {
         WCSession.default.sendGlucoseBackfillRequestMessage(userInfo) { (result) in
             switch result {
             case .success(let context):
-                self.glucoseStore.setSyncGlucoseSamples(context.samples) { (error) in
-                    if let error = error {
+                Task {
+                    do {
+                        try await self.glucoseStore.setSyncGlucoseSamples(context.samples)
+                    } catch {
                         self.log.error("Failure setting sync glucose samples: %{public}@", String(describing: error))
                     }
                 }
@@ -198,14 +205,12 @@ extension LoopDataManager {
             return
         }
 
-        glucoseStore.getGlucoseSamples(start: .earliestGlucoseCutoff) { result in
+        Task {
             var historicalGlucose: [StoredGlucoseSample]?
-            switch result {
-            case .failure(let error):
+            do {
+                historicalGlucose = try await glucoseStore.getGlucoseSamples(start: .earliestGlucoseCutoff)
+            } catch {
                 self.log.error("Failure getting glucose samples: %{public}@", String(describing: error))
-                historicalGlucose = nil
-            case .success(let samples):
-                historicalGlucose = samples
             }
             let chartData = GlucoseChartData(
                 unit: activeContext.displayGlucoseUnit,

@@ -431,24 +431,22 @@ extension RemoteDataServicesManager {
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose) ?? GlucoseStore.QueryAnchor()
             var continueUpload = false
 
-            self.glucoseStore.executeGlucoseQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.glucoseDataLimit ?? Int.max) { result in
-                switch result {
-                case .failure(let error):
+            Task {
+                do {
+                    let (queryAnchor, data) = try await self.glucoseStore.executeGlucoseQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.glucoseDataLimit ?? Int.max)
+                    do {
+                        try await remoteDataService.uploadGlucoseData(data)
+                        UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose, queryAnchor)
+                        continueUpload = queryAnchor != previousQueryAnchor
+                        await self.uploadSucceeded(key)
+                    } catch {
+                        self.log.error("Error synchronizing glucose data: %{public}@", String(describing: error))
+                        await self.uploadFailed(key)
+                    }
+                    semaphore.signal()
+                } catch {
                     self.log.error("Error querying glucose data: %{public}@", String(describing: error))
                     semaphore.signal()
-                case .success(let queryAnchor, let data):
-                    Task {
-                        do {
-                            try await remoteDataService.uploadGlucoseData(data)
-                            UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose, queryAnchor)
-                            continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
-                        } catch {
-                            self.log.error("Error synchronizing glucose data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        }
-                        semaphore.signal()
-                    }
                 }
             }
 
@@ -472,25 +470,22 @@ extension RemoteDataServicesManager {
             let semaphore = DispatchSemaphore(value: 0)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent) ?? DoseStore.QueryAnchor()
             var continueUpload = false
-
-            self.doseStore.executePumpEventQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.pumpEventDataLimit ?? Int.max) { result in
-                switch result {
-                case .failure(let error):
+            Task {
+                do {
+                    let (queryAnchor, data) = try await self.doseStore.executePumpEventQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.pumpEventDataLimit ?? Int.max)
+                    do {
+                        try await remoteDataService.uploadPumpEventData(data)
+                        UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent, queryAnchor)
+                        continueUpload = queryAnchor != previousQueryAnchor
+                        self.uploadSucceeded(key)
+                    } catch {
+                        self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
+                        self.uploadFailed(key)
+                    }
+                    semaphore.signal()
+                } catch {
                     self.log.error("Error querying pump event data: %{public}@", String(describing: error))
                     semaphore.signal()
-                case .success(let queryAnchor, let data):
-                    Task {
-                        do {
-                            try await remoteDataService.uploadPumpEventData(data)
-                            UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent, queryAnchor)
-                            continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
-                        } catch {
-                            self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        }
-                        semaphore.signal()
-                    }
                 }
             }
 

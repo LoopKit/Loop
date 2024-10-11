@@ -199,16 +199,6 @@ public class CriticalEventLogExportManager {
         calendar.timeZone = TimeZone(identifier: "UTC")!
         return calendar
     }()
-
-    // MARK: - Background Tasks
-
-    func registerBackgroundTasks() {
-        if Self.registerCriticalEventLogHistoricalExportBackgroundTask({ self.handleCriticalEventLogHistoricalExportBackgroundTask($0) }) {
-            log.debug("Critical event log export background task registered")
-        } else {
-            log.error("Critical event log export background task not registered")
-        }
-    }
 }
 
 // MARK: - CriticalEventLogBaseExporter
@@ -567,11 +557,7 @@ fileprivate extension FileManager {
 // MARK: - Critical Event Log Export
 
 extension CriticalEventLogExportManager {
-    private static var criticalEventLogHistoricalExportBackgroundTaskIdentifier: String { "com.loopkit.background-task.critical-event-log.historical-export" }
-
-    public static func registerCriticalEventLogHistoricalExportBackgroundTask(_ handler: @escaping (BGProcessingTask) -> Void) -> Bool {
-        return BGTaskScheduler.shared.register(forTaskWithIdentifier: criticalEventLogHistoricalExportBackgroundTaskIdentifier, using: nil) { handler($0 as! BGProcessingTask) }
-    }
+    static var historicalExportBackgroundTaskIdentifier: String { "com.loopkit.background-task.critical-event-log.historical-export" }
 
     public func handleCriticalEventLogHistoricalExportBackgroundTask(_ task: BGProcessingTask) {
         dispatchPrecondition(condition: .notOnQueue(.main))
@@ -602,7 +588,7 @@ extension CriticalEventLogExportManager {
     public func scheduleCriticalEventLogHistoricalExportBackgroundTask(isRetry: Bool = false) {
         do {
             let earliestBeginDate = isRetry ? retryExportHistoricalDate() : nextExportHistoricalDate()
-            let request = BGProcessingTaskRequest(identifier: Self.criticalEventLogHistoricalExportBackgroundTaskIdentifier)
+            let request = BGProcessingTaskRequest(identifier: Self.historicalExportBackgroundTaskIdentifier)
             request.earliestBeginDate = earliestBeginDate
             request.requiresExternalPower = true
 

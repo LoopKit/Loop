@@ -435,7 +435,8 @@ final class LoopDataManager: ObservableObject {
             carbAbsorptionModel: carbAbsorptionModel,
             recommendationInsulinModel: insulinModel(for: deliveryDelegate?.pumpInsulinType ?? .novolog),
             recommendationType: .manualBolus,
-            automaticBolusApplicationFactor: effectiveBolusApplicationFactor)
+            automaticBolusApplicationFactor: effectiveBolusApplicationFactor,
+            useMidAbsorptionISF: false)
     }
 
     func loopingReEnabled() async {

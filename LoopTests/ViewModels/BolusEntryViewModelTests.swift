@@ -867,7 +867,8 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         carbAbsorptionModel: .piecewiseLinear,
         recommendationInsulinModel: ExponentialInsulinModelPreset.rapidActingAdult,
         recommendationType: .manualBolus,
-        automaticBolusApplicationFactor: 0.4
+        automaticBolusApplicationFactor: 0.4,
+        useMidAbsorptionISF: false
     )
 
     func fetchData(for baseTime: Date, disablingPreMeal: Bool, ensureDosingCoverageStart: Date?) async throws -> StoredDataAlgorithmInput {
