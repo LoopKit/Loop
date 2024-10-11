@@ -1524,23 +1524,26 @@ extension LoopDataManager {
         
         var missingAmount = recommendation!.missingAmount
         let extra = Swift.max(missingAmount ?? 0, 0)
-        var correctionAmount : Double
+        var correctionAmount = recommendation!.amount + extra - carbsAmount
         
         if let calcAmount = try calcCorrectionAmount(carbsAmount: carbsAmount, prediction: prediction, potentialCarbEntry: potentialCarbEntry) {
-            correctionAmount = calcAmount
-            
+
             if recommendation!.notice == .predictedGlucoseInRange {
-                correctionAmount = Swift.min(correctionAmount, 0) // ensure 0 if in range but above the mid-point
+                correctionAmount = Swift.min(correctionAmount, calcAmount, 0) // ensure 0 if in range but above the mid-point
+                missingAmount = carbsAmount + correctionAmount - recommendation!.amount
+                if missingAmount! <= 0 || volumeRounder()(missingAmount!) == 0 {
+                    missingAmount = nil
+                }
             } else {
-                let totalMissingAmount = carbsAmount + correctionAmount - recommendation!.amount
-                if totalMissingAmount > 0, volumeRounder()(totalMissingAmount) != 0 {
+                let totalMissingAmount = carbsAmount + calcAmount - recommendation!.amount
+                if totalMissingAmount > extra, volumeRounder()(totalMissingAmount - extra) != 0 {
+                    correctionAmount = calcAmount
                     missingAmount = totalMissingAmount
-                } else {
+                } else if recommendation!.amount == 0 && calcAmount < 0 {
+                    correctionAmount = calcAmount
                     missingAmount = nil
                 }
             }
-        } else {
-            correctionAmount = recommendation!.amount + extra - carbsAmount
         }
                 
         return ManualBolusRecommendation(amount: recommendation!.amount, pendingInsulin: recommendation!.pendingInsulin, notice: recommendation!.notice, missingAmount: missingAmount, bolusBreakdown: BolusBreakdown(fullCarbsAmount: carbsAmount, fullCobCorrectionAmount: totalCobAmount, fullCorrectionAmount: correctionAmount))        
