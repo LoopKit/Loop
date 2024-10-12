@@ -18,7 +18,7 @@ extension Notification.Name {
 }
 
 @available(iOS 16.2, *)
-class GlucoseActivityManager {
+class LiveActivityManager {
     private let activityInfo = ActivityAuthorizationInfo()
     private var activity: Activity<GlucoseActivityAttributes>?
     private let healthStore = HKHealthStore()
@@ -72,8 +72,10 @@ class GlucoseActivityManager {
             return
         }
         
-        initEmptyActivity(settings: self.settings)
-        update()
+        if self.settings.alwaysEnabled {
+            initEmptyActivity(settings: self.settings)
+            update()
+        }
         
         Task {
             await self.endUnknownActivities()
@@ -89,10 +91,7 @@ class GlucoseActivityManager {
         Task {
             if self.needsRecreation(), await UIApplication.shared.applicationState == .active {
                 // activity is no longer visible or old. End it and try to push the update again
-                print("INFO: Live Activities needs recreation")
                 await endActivity()
-                update()
-                return
             }
             
             guard let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) else {
@@ -100,6 +99,7 @@ class GlucoseActivityManager {
                 return
             }
             
+            let isMmol = unit == HKUnit.millimolesPerLiter
             await self.endUnknownActivities()
 
             let statusContext = UserDefaults.appGroup?.statusExtensionContext
@@ -109,6 +109,23 @@ class GlucoseActivityManager {
             guard let currentGlucose = glucoseSamples.last else {
                 print("ERROR: No glucose sample found...")
                 return
+            }
+            
+            var predicatedGlucose: [Double] = []
+            if let samples = statusContext?.predictedGlucose?.values {
+                predicatedGlucose = samples
+            }
+            
+            let lowerLimit = isMmol ? self.settings.lowerLimitChartMmol : self.settings.lowerLimitChartMg
+            let upperLimit = isMmol ? self.settings.upperLimitChartMmol : self.settings.upperLimitChartMg
+            let reason: LiveActivityReasonEnum = getLAReason(predictedGlucose: predicatedGlucose, lowerLimit: lowerLimit, upperLimit: upperLimit)
+            if reason == .unknown {
+                await endActivity()
+                return
+            }
+            
+            if !settings.addPredictiveLine {
+                predicatedGlucose = []
             }
             
             let current = currentGlucose.quantity.doubleValue(for: unit)
@@ -127,11 +144,6 @@ class GlucoseActivityManager {
                 statusContext: statusContext,
                 glucoseFormatter: glucoseFormatter
             )
-            
-            var predicatedGlucose: [Double] = []
-            if let samples = statusContext?.predictedGlucose?.values, settings.addPredictiveLine {
-                predicatedGlucose = samples
-            }
             
             var endDateChart: Date? = nil
             if predicatedGlucose.count == 0 {
@@ -177,10 +189,11 @@ class GlucoseActivityManager {
                 ended: false,
                 preset: presetContext,
                 glucoseRanges: glucoseRanges,
+                reason: reason,
                 currentGlucose: current,
                 trendType: statusContext?.glucoseDisplay?.trendType,
                 delta: delta,
-                isMmol: unit == HKUnit.millimolesPerLiter,
+                isMmol: isMmol,
                 isCloseLoop: statusContext?.isClosedLoop ?? false,
                 lastCompleted: statusContext?.lastLoopCompleted,
                 bottomRow: bottomRow,
@@ -257,29 +270,32 @@ class GlucoseActivityManager {
     }
     
     private func endActivity() async {
-        let dynamicState = self.activity?.content.state
+        guard let activity = self.activity else {
+            await endUnknownActivities()
+            return
+        }
         
-        await self.activity?.end(nil, dismissalPolicy: .immediate)
+        let dynamicState = activity.content.state
+        
+        await activity.end(nil, dismissalPolicy: .immediate)
         for unknownActivity in Activity<GlucoseActivityAttributes>.activities {
             await unknownActivity.end(nil, dismissalPolicy: .immediate)
         }
         
         do {
-            if let dynamicState = dynamicState {
-                self.activity = try Activity.request(
-                    attributes: GlucoseActivityAttributes(
-                        mode: self.settings.mode,
-                        addPredictiveLine: self.settings.addPredictiveLine,
-                        useLimits: self.settings.useLimits,
-                        upperLimitChartMmol: self.settings.upperLimitChartMmol,
-                        lowerLimitChartMmol: self.settings.lowerLimitChartMmol,
-                        upperLimitChartMg: self.settings.upperLimitChartMg,
-                        lowerLimitChartMg: self.settings.lowerLimitChartMg
-                    ),
-                    content: .init(state: dynamicState, staleDate: nil),
-                    pushType: .token
-                )
-            }
+            self.activity = try Activity.request(
+                attributes: GlucoseActivityAttributes(
+                    mode: self.settings.mode,
+                    addPredictiveLine: self.settings.addPredictiveLine,
+                    useLimits: self.settings.useLimits,
+                    upperLimitChartMmol: self.settings.upperLimitChartMmol,
+                    lowerLimitChartMmol: self.settings.lowerLimitChartMmol,
+                    upperLimitChartMg: self.settings.upperLimitChartMg,
+                    lowerLimitChartMg: self.settings.lowerLimitChartMg
+                ),
+                content: .init(state: dynamicState, staleDate: nil),
+                pushType: .token
+            )
             self.startDate = Date.now
         } catch {
             print("ERROR: Error while ending live activity: \(error.localizedDescription)")
@@ -471,6 +487,7 @@ class GlucoseActivityManager {
                 ended: true,
                 preset: nil,
                 glucoseRanges: [],
+                reason: .unknown,
                 currentGlucose: 0,
                 trendType: nil,
                 delta: "",
@@ -501,6 +518,22 @@ class GlucoseActivityManager {
         } catch {
             print("ERROR: Error while creating empty live activity: \(error.localizedDescription)")
         }
+    }
+    
+    func getLAReason(predictedGlucose: [Double], lowerLimit: Double, upperLimit: Double) -> LiveActivityReasonEnum {
+        if self.settings.alwaysEnabled {
+            return .alwaysOn
+        }
+        
+        if predictedGlucose.contains(where: { $0 > upperLimit }) {
+            return .predictedHigh
+        }
+        
+        if predictedGlucose.contains(where: { $0 < lowerLimit }) {
+            return .predictedLow
+        }
+        
+        return .unknown
     }
 }
 

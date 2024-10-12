@@ -69,7 +69,7 @@ final class LoopDataManager {
 
     private var insulinOnBoard: InsulinValue?
     
-    private var liveActivityManager: GlucoseActivityManager?
+    private var liveActivityManager: LiveActivityManager?
 
     deinit {
         for observer in notificationObservers {
@@ -127,7 +127,7 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
         
-        self.liveActivityManager = GlucoseActivityManager(
+        self.liveActivityManager = LiveActivityManager(
             glucoseStore: self.glucoseStore,
             doseStore: self.doseStore,
             loopSettings: self.settings

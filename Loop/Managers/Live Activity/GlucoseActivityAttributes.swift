@@ -18,6 +18,7 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
         public let ended: Bool
         public let preset: Preset?
         public let glucoseRanges: [GlucoseRangeValue]
+        public let reason: LiveActivityReasonEnum
         
         // Dynamic island data
         public let currentGlucose: Double
@@ -63,6 +64,13 @@ public struct GlucoseRangeValue: Identifiable, Codable, Hashable {
     public let maxValue: Double
     public let startDate: Date
     public let endDate: Date
+}
+
+public enum LiveActivityReasonEnum: Codable, Hashable {
+    case alwaysOn
+    case predictedLow
+    case predictedHigh
+    case unknown
 }
 
 public struct BottomRowItem: Codable, Hashable {

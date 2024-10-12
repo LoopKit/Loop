@@ -401,6 +401,8 @@
 		B4E96D5D248A82A2002DABAD /* StatusBarHUDView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */; };
 		B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */; };
 		B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */; };
+		B813C5682C9C30B400306DAF /* QuickStatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B813C5672C9C30B400306DAF /* QuickStatsViewModel.swift */; };
+		B813C56C2C9C30DC00306DAF /* QuickStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B813C56B2C9C30DC00306DAF /* QuickStatsView.swift */; };
 		B82181F62C93628300478A91 /* LiveActivityManagementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82181F52C93628300478A91 /* LiveActivityManagementViewModel.swift */; };
 		B82182002C93716A00478A91 /* ChartAxisGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82181F92C936AD600478A91 /* ChartAxisGenerator.swift */; };
 		B851FFC52C37221800D738C1 /* LiveActivityManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B851FFC42C37221800D738C1 /* LiveActivityManagementView.swift */; };
@@ -412,7 +414,7 @@
 		B87539CF2C2DCB770085A975 /* BasalViewActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87539CE2C2DCB770085A975 /* BasalViewActivity.swift */; };
 		B87D411D2C28A69600120877 /* GlucoseLiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B87D411C2C28A69600120877 /* GlucoseLiveActivityConfiguration.swift */; };
 		B87D411F2C28A85F00120877 /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B87D411E2C28A85F00120877 /* ActivityKit.framework */; };
-		B8A937B82C29BA5900E38645 /* GlucoseActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */; };
+		B8A937B82C29BA5900E38645 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937B72C29BA5900E38645 /* LiveActivityManager.swift */; };
 		B8A937C32C29C3B400E38645 /* GlucoseActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */; };
 		B8A937C42C29C43B00E38645 /* GlucoseActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */; };
 		B8FD0B522C39CA3E003FB72B /* LiveActivityBottomRowManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FD0B512C39CA3E003FB72B /* LiveActivityBottomRowManagerView.swift */; };
@@ -1350,6 +1352,8 @@
 		B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = StatusBarHUDView.xib; sourceTree = "<group>"; };
 		B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
 		B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+DeviceStatus.swift"; sourceTree = "<group>"; };
+		B813C5672C9C30B400306DAF /* QuickStatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickStatsViewModel.swift; sourceTree = "<group>"; };
+		B813C56B2C9C30DC00306DAF /* QuickStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickStatsView.swift; sourceTree = "<group>"; };
 		B82181F52C93628300478A91 /* LiveActivityManagementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagementViewModel.swift; sourceTree = "<group>"; };
 		B82181F92C936AD600478A91 /* ChartAxisGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisGenerator.swift; sourceTree = "<group>"; };
 		B851FFC42C37221800D738C1 /* LiveActivityManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagementView.swift; sourceTree = "<group>"; };
@@ -1360,7 +1364,7 @@
 		B87539CE2C2DCB770085A975 /* BasalViewActivity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalViewActivity.swift; sourceTree = "<group>"; };
 		B87D411C2C28A69600120877 /* GlucoseLiveActivityConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseLiveActivityConfiguration.swift; sourceTree = "<group>"; };
 		B87D411E2C28A85F00120877 /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
-		B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseActivityManager.swift; sourceTree = "<group>"; };
+		B8A937B72C29BA5900E38645 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseActivityAttributes.swift; sourceTree = "<group>"; };
 		B8FD0B512C39CA3E003FB72B /* LiveActivityBottomRowManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityBottomRowManagerView.swift; sourceTree = "<group>"; };
 		C1004DEF2981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -2821,7 +2825,7 @@
 		B8A937C52C29C44600E38645 /* Live Activity */ = {
 			isa = PBXGroup;
 			children = (
-				B8A937B72C29BA5900E38645 /* GlucoseActivityManager.swift */,
+				B8A937B72C29BA5900E38645 /* LiveActivityManager.swift */,
 				B8A937C02C29C29300E38645 /* GlucoseActivityAttributes.swift */,
 				B82181F92C936AD600478A91 /* ChartAxisGenerator.swift */,
 			);
@@ -3898,7 +3902,7 @@
 				A97F250825E056D500F0EE19 /* OnboardingManager.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
-				B8A937B82C29BA5900E38645 /* GlucoseActivityManager.swift in Sources */,
+				B8A937B82C29BA5900E38645 /* LiveActivityManager.swift in Sources */,
 				DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */,
 				4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
