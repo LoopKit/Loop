@@ -25,17 +25,12 @@ info() {
 }
 
 info_plist_path="${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/BuildDetails.plist"
-provisioning_profile_path="${HOME}/Library/MobileDevice/Provisioning Profiles/${EXPANDED_PROVISIONING_PROFILE}.mobileprovision"
 xcode_build_version=${XCODE_PRODUCT_BUILD_VERSION:-$(xcodebuild -version | grep version | cut -d ' ' -f 3)}
 while [[ $# -gt 0 ]]
 do
   case $1 in
     -i|--info-plist-path)
       info_plist_path="${2}"
-      shift 2
-      ;;
-    -p|--provisioning-profile-path)
-      provisioning_profile_path="${2}"
       shift 2
       ;;
   esac
@@ -66,15 +61,6 @@ fi
 plutil -replace com-loopkit-Loop-srcroot -string "${PWD}" "${info_plist_path}"
 plutil -replace com-loopkit-Loop-build-date -string "$(date)" "${info_plist_path}"
 plutil -replace com-loopkit-Loop-xcode-version -string "${xcode_build_version}" "${info_plist_path}"
-
-if [ -e "${provisioning_profile_path}" ]; then
-  profile_expire_date=$(security cms -D -i "${provisioning_profile_path}" | plutil -p - | grep ExpirationDate | cut -b 23-)
-  # Convert to plutil format
-  profile_expire_date=$(date -j -f "%Y-%m-%d %H:%M:%S" "${profile_expire_date}" +"%Y-%m-%dT%H:%M:%SZ")
-  plutil -replace com-loopkit-Loop-profile-expiration -date "${profile_expire_date}" "${info_plist_path}"
-else
-  warn "Invalid provisioning profile path ${provisioning_profile_path}"
-fi
 
 # determine if this is a workspace build
 # if so, fill out the git revision and branch
