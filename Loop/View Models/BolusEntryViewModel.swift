@@ -803,22 +803,22 @@ final class BolusEntryViewModel: ObservableObject {
                     bgCorrectionBolus = nil
                 }
                 
-                if let missingAmount = recommendation.missingAmount {
+                if let missingAmount = recommendation.missingAmount, missingAmount > 0 {
                     if let maxBolus = maximumBolus?.doubleValue(for: .internationalUnit()) {
-                        if missingAmount > maxBolus {
-                            safetyLimitBolus = maximumBolus!
-                            maxExcessBolus = HKQuantity(unit: .internationalUnit(), doubleValue: missingAmount - maxBolus)
-                        }
-                    }
-                    
-                    if safetyLimitBolus == nil {
-                        if recommendation.amount != 0 {
+                        if recommendation.amount >= maxBolus {
+                            // while it is technically possible for some safetyLimitBolus too, this isn't identifiable, nor parituclarly relevant
                             maxExcessBolus = HKQuantity(unit: .internationalUnit(), doubleValue: missingAmount)
+                        } else if recommendation.amount + missingAmount > maxBolus {
+                            safetyLimitBolus = HKQuantity(unit: .internationalUnit(), doubleValue: maxBolus - recommendation.amount)
+                            maxExcessBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount + missingAmount - maxBolus)
                         } else {
                             safetyLimitBolus = HKQuantity(unit: .internationalUnit(), doubleValue: missingAmount)
                         }
+                    } else {
+                        // generally we shouldn't be here, but if we don't know maxBolus we have to treat it all as safety limit
+                        safetyLimitBolus = HKQuantity(unit: .internationalUnit(), doubleValue: missingAmount)
                     }
-
+                    
                     if let maxExcessAmount = maxExcessBolus?.doubleValue(for: .internationalUnit()) {
                         totalRecommendation -= maxExcessBolusIncluded ? maxExcessAmount : 0
                     }
