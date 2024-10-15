@@ -191,7 +191,7 @@ struct BolusEntryView: View {
             if viewModel.isManualGlucoseEntryEnabled && viewModel.potentialCarbEntry != nil {
                 potentialCarbEntryRow
             }
-
+                        
             if viewModel.isManualGlucoseEntryEnabled || viewModel.potentialCarbEntry != nil {
                 recommendedBolusRow
             }
@@ -226,20 +226,174 @@ struct BolusEntryView: View {
             }
         }
     }
-
+    
+    private func displayRecommendationBreakdown() -> Bool {
+        if viewModel.potentialCarbEntry != nil {
+            return viewModel.bgCorrectionBolus != nil && (viewModel.carbBolus != nil || viewModel.cobCorrectionBolus != nil)
+        } else {
+            return viewModel.bgCorrectionBolus != nil
+        }
+    }
+    
+    @State
+    private var recommendationBreakdownExpanded = false
+        
+    @ViewBuilder
     private var recommendedBolusRow: some View {
-        HStack {
-            Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
-            Spacer()
+        let breakdownFont = Font.subheadline
+        Section {
             HStack(alignment: .firstTextBaseline) {
-                Text(viewModel.recommendedBolusString)
-                    .font(.title)
-                    .foregroundColor(Color(.label))
-                bolusUnitsLabel
+                Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
+                if displayRecommendationBreakdown() {
+                    Image(systemName: "chevron.forward.circle")
+                        .imageScale(.small)
+                        .foregroundColor(.accentColor)
+                        .rotationEffect(.degrees(recommendationBreakdownExpanded ? 90 : 0))
+                }
+                Spacer()
+                HStack(alignment: .firstTextBaseline) {
+                    Text(viewModel.recommendedBolusString)
+                        .font(.title)
+                        .foregroundColor(Color(.label))
+                    bolusUnitsLabel
+                }
+            }
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
+            .onTapGesture {
+                if displayRecommendationBreakdown() {
+                    recommendationBreakdownExpanded.toggle()
+                }
+            }
+            if recommendationBreakdownExpanded {
+                VStack {
+                    if viewModel.potentialCarbEntry != nil, viewModel.carbBolus != nil {
+                        HStack {
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.carbBolusIncluded ? 1 : 0)
+                            Text("Carb Entry", comment: "Label for carb bolus row on bolus screen")
+                                .font(breakdownFont)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.carbBolusString)
+                                    .font(.subheadline)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.carbBolusIncluded.toggle()
+                        }
+                    }
+                    if viewModel.cobCorrectionBolus != nil {
+                        HStack {
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.cobCorrectionBolusIncluded ? 1 : 0)
+                            Text("COB Correction", comment: "Label for COB correction bolus row on bolus screen")
+                                .font(breakdownFont)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.cobCorrectionBolusString)
+                                    .font(breakdownFont)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.cobCorrectionBolusIncluded.toggle()
+                            viewModel.userChangedCobCorrectionBolusIncluded = true
+                        }
+
+                    }
+                    if viewModel.bgCorrectionBolus != nil {
+                        HStack {
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.bgCorrectionBolusIncluded ? 1 : 0)
+                            Text("BG Correction", comment: "Label for BG correction bolus row on bolus screen")
+                                .font(breakdownFont)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.bgCorrectionBolusString)
+                                    .font(breakdownFont)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.bgCorrectionBolusIncluded.toggle()
+                            viewModel.userChangedBgCorrectionBolusIncluded = true
+                        }
+                    }
+                    if viewModel.maxExcessBolus != nil {
+                        HStack {
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.maxExcessBolusIncluded ? 1 : 0)
+                            Text("Max Bolus Limit", comment: "Label for max bolus row on bolus screen")
+                                .font(breakdownFont)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.negativeMaxExcessBolusString)
+                                    .font(breakdownFont)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.maxExcessBolusIncluded.toggle()
+                        }
+                    }
+                    if viewModel.safetyLimitBolus != nil {
+                        HStack {
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.safetyLimitBolusIncluded ? 1 : 0)
+                            Text("Glucose Safety Limit", comment: "Label for glucose safety limit row on bolus screen")
+                                .font(breakdownFont)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.negativeSafetyLimitString)
+                                    .font(breakdownFont)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.safetyLimitBolusIncluded.toggle()
+                        }
+                    }
+                }
+                .accessibilityElement(children: .combine)
+                .transition(.slide)
+                .animation(.smooth, value: recommendationBreakdownExpanded)
             }
         }
-        .accessibilityElement(children: .combine)
+        
     }
+    
 
     private func didBeginEditing() {
         if !editedBolusAmount {
@@ -273,6 +427,12 @@ struct BolusEntryView: View {
 
     private var bolusUnitsLabel: some View {
         Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+            .foregroundColor(Color(.secondaryLabel))
+    }
+    
+    private var breakdownBolusUnitsLabel: some View {
+        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+            .font(.footnote)
             .foregroundColor(Color(.secondaryLabel))
     }
 
