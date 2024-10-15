@@ -225,6 +225,19 @@ final class LoopDataManager: ObservableObject {
                     await self.updateDisplayState()
                     self.notify(forChange: .insulin)
                 }
+            },
+            NotificationCenter.default.addObserver(
+                forName: .LoopDataUpdated,
+                object: nil,
+                queue: nil
+            ) { (note) in
+                let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopUpdateContext.RawValue
+                if case .preferences = LoopUpdateContext(rawValue: context) {
+                    Task { @MainActor in
+                        self.logger.default("Received notification of settings changing")
+                        await self.updateDisplayState()
+                    }
+                }
             }
         ]
 
@@ -435,8 +448,7 @@ final class LoopDataManager: ObservableObject {
             carbAbsorptionModel: carbAbsorptionModel,
             recommendationInsulinModel: insulinModel(for: deliveryDelegate?.pumpInsulinType ?? .novolog),
             recommendationType: .manualBolus,
-            automaticBolusApplicationFactor: effectiveBolusApplicationFactor,
-            useMidAbsorptionISF: false)
+            automaticBolusApplicationFactor: effectiveBolusApplicationFactor)
     }
 
     func loopingReEnabled() async {

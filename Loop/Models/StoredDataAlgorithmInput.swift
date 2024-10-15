@@ -52,5 +52,5 @@ struct StoredDataAlgorithmInput: AlgorithmInput {
     
     var automaticBolusApplicationFactor: Double?
 
-    var useMidAbsorptionISF: Bool
+    let useMidAbsorptionISF: Bool = true
 }
