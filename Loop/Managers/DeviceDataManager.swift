@@ -857,14 +857,17 @@ extension DeviceDataManager: PersistedAlertStore {
 // MARK: - CGMManagerDelegate
 extension DeviceDataManager: CGMManagerDelegate {
     nonisolated
-    func cgmManagerWantsDeletion(_ manager: CGMManager) {
-        DispatchQueue.main.async {
-            self.log.default("CGM manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
-            if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
-                self.displayGlucoseUnitBroadcaster?.removeDisplayGlucoseUnitObserver(cgmManagerUI)
+    func cgmManagerWantsDeletion(_ manager: CGMManager) async {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async {
+                self.log.default("CGM manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
+                if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
+                    self.displayGlucoseUnitBroadcaster?.removeDisplayGlucoseUnitObserver(cgmManagerUI)
+                }
+                self.cgmManager = nil
+                self.settingsManager.storeSettings()
+                continuation.resume()
             }
-            self.cgmManager = nil
-            self.settingsManager.storeSettings()
         }
     }
 
@@ -1177,60 +1180,38 @@ extension DeviceDataManager: CgmEventStoreDelegate {
 
 // MARK: - TestingPumpManager
 extension DeviceDataManager {
-    func deleteTestingPumpData(completion: ((Error?) -> Void)? = nil) {
+    func deleteTestingPumpData() async throws {
         guard let testingPumpManager = pumpManager as? TestingPumpManager else {
-            completion?(nil)
             return
         }
 
         let insulinDeliveryStore = doseStore.insulinDeliveryStore
 
-        Task {
-            do {
-                try await doseStore.resetPumpData()
+        try await doseStore.resetPumpData()
 
-                let insulinSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .sharingDenied
-                guard !insulinSharingDenied else {
-                    // only clear cache since access to health kit is denied
-                    await insulinDeliveryStore.purgeCachedInsulinDeliveryObjects()
-                    completion?(nil)
-                    return
-                }
-
-                try await insulinDeliveryStore.purgeDoseEntriesForDevice(testingPumpManager.testingDevice)
-                completion?(nil)
-            } catch {
-                completion?(error)
-                return
-            }
-        }
-    }
-
-    func deleteTestingCGMData(completion: ((Error?) -> Void)? = nil) {
-        guard let testingCGMManager = cgmManager as? TestingCGMManager else {
-            completion?(nil)
+        let insulinSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .sharingDenied
+        guard !insulinSharingDenied else {
+            // only clear cache since access to health kit is denied
+            await insulinDeliveryStore.purgeCachedInsulinDeliveryObjects()
             return
         }
 
-        Task {
-            let glucoseSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .sharingDenied
-            guard !glucoseSharingDenied else {
-                // only clear cache since access to health kit is denied
-                do {
-                    try await glucoseStore.purgeCachedGlucoseObjects()
-                } catch {
-                    completion?(error)
-                }
-                return
-            }
+        try await insulinDeliveryStore.purgeDoseEntriesForDevice(testingPumpManager.testingDevice)
+    }
 
-            do {
-                try await glucoseStore.purgeAllGlucose(for: testingCGMManager.testingDevice)
-                completion?(nil)
-            } catch {
-                completion?(error)
-            }
+    func deleteTestingCGMData() async throws {
+        guard let testingCGMManager = cgmManager as? TestingCGMManager else {
+            return
         }
+
+        let glucoseSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .sharingDenied
+        guard !glucoseSharingDenied else {
+            // only clear cache since access to health kit is denied
+            try await glucoseStore.purgeCachedGlucoseObjects()
+            return
+        }
+
+        try await glucoseStore.purgeAllGlucose(for: testingCGMManager.testingDevice)
     }
 }
 

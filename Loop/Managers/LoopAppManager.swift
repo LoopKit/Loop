@@ -908,8 +908,16 @@ extension LoopAppManager: ResetLoopManagerDelegate {
     }
     
     func resetTestingData(completion: @escaping () -> Void) {
-        deviceDataManager.deleteTestingCGMData { [weak deviceDataManager] _ in
-            deviceDataManager?.deleteTestingPumpData { _ in
+        Task { [weak self] in
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    try? await self?.deviceDataManager.deleteTestingCGMData()
+                }
+                group.addTask {
+                    try? await self?.deviceDataManager?.deleteTestingPumpData()
+                }
+                
+                await group.waitForAll()
                 completion()
             }
         }

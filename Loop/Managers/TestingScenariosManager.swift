@@ -230,67 +230,68 @@ extension TestingScenariosManager {
             completion(error)
         }
         
-        Task {
-            guard FeatureFlags.scenariosEnabled else {
-                fatalError("\(#function) should be invoked only when scenarios are enabled")
-            }
-            
-            let instance = scenario.instantiate()
-            
-            var testingCGMManager: TestingCGMManager?
-            var testingPumpManager: TestingPumpManager?
-            
-            if instance.hasCGMData {
-                if let cgmManager = deviceManager.cgmManager as? TestingCGMManager {
-                    if instance.shouldReloadManager?.cgm == true {
-                            testingCGMManager = await reloadCGMManager(withIdentifier: cgmManager.pluginIdentifier)
-                    } else {
-                        testingCGMManager = cgmManager
-                    }
-                } else {
-                    bail(with: ScenarioLoadingError.noTestingCGMManagerEnabled)
-                    return
-                }
-            }
-            
-            if instance.hasPumpData {
-                if let pumpManager = deviceManager.pumpManager as? TestingPumpManager {
-                    if instance.shouldReloadManager?.pump == true {
-                        testingPumpManager = reloadPumpManager(withIdentifier: pumpManager.pluginIdentifier)
-                    } else {
-                        testingPumpManager = pumpManager
-                    }
-                } else {
-                    bail(with: ScenarioLoadingError.noTestingPumpManagerEnabled)
-                    return
-                }
-            }
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
 
-            wipeExistingData { error in
-                guard error == nil else {
-                    bail(with: error!)
-                    return
+        Task { [weak self] in
+            do {
+                try await self?.wipeExistingData()
+                let instance = scenario.instantiate()
+                
+                let _: Void = try await withCheckedThrowingContinuation { continuation in
+                    self?.carbStore.addNewCarbEntries(entries: instance.carbEntries, completion: { error in
+                        if let error {
+                            continuation.resume(throwing: error)
+                        } else {
+                            continuation.resume()
+                        }
+                    })
                 }
-
-                self.carbStore.addNewCarbEntries(entries: instance.carbEntries) { error in
-                    if let error {
-                        bail(with: error)
+                
+                var testingCGMManager: TestingCGMManager?
+                var testingPumpManager: TestingPumpManager?
+                
+                if instance.hasCGMData {
+                    if let cgmManager = self?.deviceManager.cgmManager as? TestingCGMManager {
+                        if instance.shouldReloadManager?.cgm == true {
+                            testingCGMManager = await self?.reloadCGMManager(withIdentifier: cgmManager.pluginIdentifier)
+                        } else {
+                            testingCGMManager = cgmManager
+                        }
                     } else {
-                        testingPumpManager?.reservoirFillFraction = 1.0
-                        testingPumpManager?.injectPumpEvents(instance.pumpEvents)
-                        testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
-                        self.activeScenario = scenario
-                        completion(nil)
+                        bail(with: ScenarioLoadingError.noTestingCGMManagerEnabled)
+                        return
                     }
                 }
-            }
-            
-            instance.deviceActions.forEach { [testingCGMManager, testingPumpManager] action in
-                if testingCGMManager?.pluginIdentifier == action.managerIdentifier {
+                
+                if instance.hasPumpData {
+                    if let pumpManager = self?.deviceManager.pumpManager as? TestingPumpManager {
+                        if instance.shouldReloadManager?.pump == true {
+                            testingPumpManager = self?.reloadPumpManager(withIdentifier: pumpManager.pluginIdentifier)
+                        } else {
+                            testingPumpManager = pumpManager
+                        }
+                    } else {
+                        bail(with: ScenarioLoadingError.noTestingPumpManagerEnabled)
+                        return
+                    }
+                }
+                
+                testingPumpManager?.reservoirFillFraction = 1.0
+                testingPumpManager?.injectPumpEvents(instance.pumpEvents)
+                testingCGMManager?.injectGlucoseSamples(instance.pastGlucoseSamples, futureSamples: instance.futureGlucoseSamples)
+                
+                self?.activeScenario = scenario
+                
+                instance.deviceActions.forEach { [testingCGMManager, testingPumpManager] action in
                     testingCGMManager?.trigger(action: action)
-                } else if testingPumpManager?.pluginIdentifier == action.managerIdentifier {
                     testingPumpManager?.trigger(action: action)
                 }
+                
+                completion(nil)
+            } catch {
+                bail(with: error)
             }
         }
     }
@@ -343,32 +344,21 @@ extension TestingScenariosManager {
         }
     }
 
-    private func wipeExistingData(completion: @escaping (Error?) -> Void) {
+    private func wipeExistingData() async throws {
         guard FeatureFlags.scenariosEnabled else {
             fatalError("\(#function) should be invoked only when scenarios are enabled")
         }
         
-        deviceManager.deleteTestingPumpData { error in
-            guard error == nil else {
-                completion(error!)
-                return
-            }
-
-            self.deviceManager.deleteTestingCGMData { error in
-                guard error == nil else {
-                    completion(error!)
-                    return
-                }
-
-                self.carbStore.deleteAllCarbEntries() { error in
-                    guard error == nil else {
-                        completion(error!)
-                        return
-                    }
-                    
-                    self.deviceManager.alertManager.alertStore.purge(before: Date(), completion: completion)
-                }
-            }
+        try await deviceManager.deleteTestingPumpData()
+        
+        try await deviceManager.deleteTestingCGMData()
+        
+        try await carbStore.deleteAllCarbEntries()
+        
+        await withCheckedContinuation { [weak alertStore = deviceManager.alertManager.alertStore] continuation in
+            alertStore?.purge(before: Date(), completion: { _ in
+                continuation.resume()
+            })
         }
     }
 }
@@ -377,13 +367,17 @@ extension TestingScenariosManager {
 private extension CarbStore {
 
     /// Errors if getting carb entries errors, or if deleting any individual entry errors.
-    func deleteAllCarbEntries(completion: @escaping (Error?) -> Void) {
-        getCarbEntries() { result in
-            switch result {
-            case .success(let entries):
-                self.deleteCarbEntries(entries[...], completion: completion)
-            case .failure(let error):
-                completion(error)
+    func deleteAllCarbEntries() async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            getCarbEntries() { result in
+                switch result {
+                case .success(let entries):
+                    self.deleteCarbEntries(entries[...], completion: { _ in
+                        continuation.resume()
+                    })
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
             }
         }
     }
