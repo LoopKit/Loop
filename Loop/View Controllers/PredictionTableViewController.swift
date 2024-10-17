@@ -197,9 +197,16 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
     private var eventualGlucoseDescription: String?
 
-    private var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection, .suspend]
+    private var availableInputs: [PredictionInputEffect] = getAvailableInputs()
 
     private var selectedInputs = PredictionInputEffect.all
+    
+    private static func getAvailableInputs() -> [PredictionInputEffect] {
+        if UserDefaults.standard.negativeInsulinDamperEnabled {
+            return [.carbs, .insulin, .damper, .momentum, .retrospection, .suspend]
+        }
+        return [.carbs, .insulin, .momentum, .retrospection, .suspend]
+    }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         return Section.allCases.count
