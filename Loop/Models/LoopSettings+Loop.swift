@@ -15,6 +15,9 @@ extension LoopSettings {
         if !LoopConstants.retrospectiveCorrectionEnabled {
             inputs.remove(.retrospection)
         }
+        if !UserDefaults.standard.negativeInsulinDamperEnabled {
+            inputs.remove(.damper)
+        }
         return inputs
     }    
 }
