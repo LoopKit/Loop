@@ -1199,7 +1199,7 @@ extension LoopDataManager {
         // All outstanding potential insulin delivery
         return pendingTempBasalInsulin + pendingBolusAmount
     }
-
+    
     /// - Throws:
     ///     - LoopError.missingDataError
     ///     - LoopError.configurationError
@@ -1314,60 +1314,6 @@ extension LoopDataManager {
                 effects.append(bolusEffect)
             }
         }
-        
-        if inputs.contains(.damper) {
-            let computationInsulinEffect: [GlucoseEffect]?
-            if insulinEffectOverride != nil {
-                computationInsulinEffect = insulinEffectOverride
-            } else {
-                computationInsulinEffect = includingPendingInsulin ? self.insulinEffectIncludingPendingInsulin : self.insulinEffect
-            }
-
-            if let insulinEffect = computationInsulinEffect {
-                var posDeltas = [Double]()
-                var posDeltaSum = 0.0
-                insulinEffect.enumerated().forEach{
-                    let delta : Double
-                    if $0.offset == 0 {
-                        delta = 0
-                    } else {
-                        delta = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter) - insulinEffect[$0.offset - 1].quantity.doubleValue(for: .milligramsPerDeciliter)
-                    }
-                    posDeltaSum += max(0, delta)
-                    posDeltas.append(max(0, delta))
-                }
-                
-                // when NID is added to insulinEffect, the end result is alpha * insulinEffect, where alpha is dependent on posDeltaSum
-                // the long term slope will be marginalSlope
-                // in the initial linear scaling region alpha will be anchorAlpha at anchorPoint
-                let marginalSlope = 0.1
-                let anchorPoint = 50.0
-                let anchorAlpha = 0.75
-                
-                let linearScaleSlope = (1.0 - anchorAlpha)/anchorPoint // how alpha scales down in the linear scale region
-                
-                // the slope in the linear scale region of alpha * posDeltaSum is 1 - 2*linearScaleSlope*posDeltaSum.
-                // the transitionPoint is where we transition from linear scale region to marginalSlope. The slope is continuous at this point
-                let transitionPoint = (1 - marginalSlope) / (2 * linearScaleSlope)
-                
-                let alpha : Double
-                if posDeltaSum < transitionPoint { // linear scaling region
-                    alpha = 1 - linearScaleSlope * posDeltaSum
-                } else { // marginal slope region
-                    let transitionValue = (1 - linearScaleSlope * transitionPoint) * transitionPoint
-                    alpha = (transitionValue + marginalSlope * (posDeltaSum - transitionPoint)) / posDeltaSum
-                }
-                
-                var damperEffects = [GlucoseEffect]()
-                var value = 0.0
-                insulinEffect.enumerated().forEach{
-                    value += (alpha - 1) * posDeltas[$0.offset]
-                    damperEffects.append(GlucoseEffect(startDate: $0.element.startDate, quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: value)))
-                }
-                
-                effects.append(damperEffects)
-            }
-        }
 
         if inputs.contains(.momentum), let momentumEffect = self.glucoseMomentumEffect {
             if !includingPositiveVelocityAndRC, let netMomentum = momentumEffect.netEffect(), netMomentum.quantity.doubleValue(for: .milligramsPerDeciliter) > 0 {
@@ -1391,6 +1337,95 @@ extension LoopDataManager {
         }
 
         var prediction = LoopMath.predictGlucose(startingAt: glucose, momentum: momentum, effects: effects)
+        
+        if inputs.contains(.damper) {
+            let computationInsulinEffect: [GlucoseEffect]?
+            if insulinEffectOverride != nil {
+                computationInsulinEffect = insulinEffectOverride
+            } else {
+                computationInsulinEffect = includingPendingInsulin ? self.insulinEffectIncludingPendingInsulin : self.insulinEffect
+            }
+
+            if let insulinEffect = computationInsulinEffect {
+                var posDeltaSum = 0.0
+                insulinEffect.enumerated().forEach{
+                    let delta : Double
+                    if $0.offset == 0 {
+                        delta = 0
+                    } else {
+                        delta = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter) - insulinEffect[$0.offset - 1].quantity.doubleValue(for: .milligramsPerDeciliter)
+                    }
+                    posDeltaSum += max(0, delta)
+                }
+                
+                let insulinSensitivity = settings.insulinSensitivitySchedule!.quantity(at: glucose.startDate)
+                let basalRate = settings.basalRateSchedule!.value(at: glucose.startDate)
+                
+                // NID will change the final prediction so that positive changes will be multiplied by weight alpha
+                // the long term slope will be marginalSlope
+                // in the initial linear scaling region alpha will be anchorAlpha at anchorPoint
+                // note that anchorPoint is unaffected by overrides (the changes cancel out)
+                let marginalSlope = 0.1
+                let anchorPoint = basalRate * insulinSensitivity.doubleValue(for: .milligramsPerDeciliter)
+                let anchorAlpha = 0.75
+                
+                let linearScaleSlope = (1.0 - anchorAlpha)/anchorPoint // how alpha scales down in the linear scale region
+                
+                // the slope in the linear scale region of alpha * posDeltaSum is 1 - 2*linearScaleSlope*posDeltaSum.
+                // the transitionPoint is where we transition from linear scale region to marginalSlope. The slope is continuous at this point
+                let transitionPoint = (1 - marginalSlope) / (2 * linearScaleSlope)
+                
+                let alpha : Double
+                if posDeltaSum < transitionPoint { // linear scaling region
+                    alpha = 1 - linearScaleSlope * posDeltaSum
+                } else { // marginal slope region
+                    let transitionValue = (1 - linearScaleSlope * transitionPoint) * transitionPoint
+                    alpha = (transitionValue + marginalSlope * (posDeltaSum - transitionPoint)) / posDeltaSum
+                }
+                
+                let damperOnly = inputs.isSubset(of: [.damper])
+                if damperOnly {
+                    prediction = try predictGlucose(
+                        startingAt: startingGlucoseOverride,
+                        using: settings.enabledEffects.subtracting(.damper),
+                        historicalInsulinEffect: insulinEffectOverride,
+                        insulinCounteractionEffects: insulinCounteractionEffectsOverride,
+                        historicalCarbEffect: carbEffectOverride,
+                        potentialBolus: potentialBolus,
+                        potentialCarbEntry: potentialCarbEntry,
+                        replacingCarbEntry: replacedCarbEntry,
+                        includingPendingInsulin: includingPendingInsulin,
+                        includingPositiveVelocityAndRC: includingPositiveVelocityAndRC)
+                }
+                
+                var dampedPrediction = [PredictedGlucoseValue]()
+                var value = 0.0
+                prediction.enumerated().forEach{
+                    
+                    if $0.offset == 0 {
+                        value = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter)
+                        dampedPrediction.append($0.element)
+                        return
+                    }
+                    let delta = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter) - prediction[$0.offset - 1].quantity.doubleValue(for: .milligramsPerDeciliter)
+
+                    if damperOnly {
+                        // we just want to display the effects of damper relative to everything else
+                        if delta > 0 {
+                            value += (alpha - 1) * delta
+                        }
+                    } else if delta > 0 {
+                        value += alpha * delta
+                    } else {
+                        value += delta
+                    }
+                    dampedPrediction.append(PredictedGlucoseValue(startDate: $0.element.startDate, quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: value)))
+                }
+                
+                prediction = dampedPrediction
+            }
+        }
+
 
         // Dosing requires prediction entries at least as long as the insulin model duration.
         // If our prediction is shorter than that, then extend it here.

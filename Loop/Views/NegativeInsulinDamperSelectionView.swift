@@ -22,7 +22,7 @@ struct NegativeInsulinDamperSelectionView: View {
 
                Divider()
 
-               Text(NSLocalizedString("Negative Insulin Damper (NID) is used to mitigate the effects negative insulin have on predicted glucose levels. After spending significant time beneath the correction range, there may be a build up of negative insulin which will result in larger predicted glucose values, and subsequently may result in too much insulin being given by Loop. NID reduces the magnitude of these predictions. The larger the total predicted rise in glucose due to negative insulin, the greater the reduction will be.", comment: "Description of Negative Insulin Damper toggle."))
+               Text(NSLocalizedString("Negative Insulin Damper (NID) is used to mitigate the effects of temporarily increased insulin sensitivity. Such increases can result in spending significant times beneath target and eventually going low. Loop may erroneously predict glucose going too high, resulting in excess insulin being delivered. To counteract this, NID acts as a dynamic damper on positive prediced glucose changes. The strength of this damper is controlled by the total predicted rise in glucose due to negative insulin. The greater the amount of negative insulin, the stronger the damper and the bigger the reduction in positive predicted glucose changes.", comment: "Description of Negative Insulin Damper toggle."))
                    .foregroundColor(.secondary)
                Divider()
 
