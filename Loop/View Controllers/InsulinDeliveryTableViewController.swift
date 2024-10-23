@@ -201,7 +201,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         case manualEntryDoses([DoseEntry])
     }
     
-    private enum HistorySection: Int {
+    fileprivate enum HistorySection: Int {
         case today
         case yesterday
     }
@@ -401,7 +401,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             return 0
         case .display:
             switch self.values {
-            case .history(let values): return values.valuesBeforeToday.isEmpty ? 1 : 2
+            case .history(let pumpEvents): return pumpEvents.pumpEventsBeforeToday.isEmpty ? 1 : 2
             default: return 1
             }
         }
@@ -411,10 +411,10 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         switch values {
         case .reservoir(let values):
             return values.count
-        case .history(let values):
+        case .history(let pumpEvents):
             switch HistorySection(rawValue: section) {
-            case .today: return values.valuesFromToday.count
-            case .yesterday: return values.valuesBeforeToday.count
+            case .today: return pumpEvents.pumpEventsFromToday.count
+            case .yesterday: return pumpEvents.pumpEventsBeforeToday.count
             case .none: return 0
             }
         case .manualEntryDoses(let values):
@@ -426,13 +426,13 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         switch state {
         case .display:
             switch self.values {
-            case .history(let values):
+            case .history(let pumpEvents):
                 switch HistorySection(rawValue: section) {
                 case .today:
-                    guard let firstValue = values.valuesFromToday.first else { return nil }
+                    guard let firstValue = pumpEvents.pumpEventsFromToday.first else { return nil }
                     return dateFormatter.string(from: firstValue.date).uppercased()
                 case .yesterday:
-                    guard let firstValue = values.valuesBeforeToday.first else { return nil }
+                    guard let firstValue = pumpEvents.pumpEventsBeforeToday.first else { return nil }
                     return dateFormatter.string(from: firstValue.date).uppercased()
                 case .none: return nil
                 }
@@ -457,24 +457,18 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 cell.detailTextLabel?.text = time
                 cell.accessoryType = .none
                 cell.selectionStyle = .none
-            case .history(let values):
-                let filterValues: [PersistedPumpEvent]
-                if HistorySection(rawValue: indexPath.section) == .today {
-                    filterValues = values.valuesFromToday
-                } else {
-                    filterValues = values.valuesBeforeToday
-                }
-                let entry = filterValues[indexPath.row]
-                let time = timeFormatter.string(from: entry.date)
+            case .history(let pumpEvents):
+                let pumpEvent = pumpEvents.pumpEventForIndexPath(indexPath)
+                let time = timeFormatter.string(from: pumpEvent.date)
 
-                if let attributedText = entry.localizedAttributedDescription {
+                if let attributedText = pumpEvent.localizedAttributedDescription {
                     cell.textLabel?.attributedText = attributedText
                 } else {
                     cell.textLabel?.text = NSLocalizedString("Unknown", comment: "The default description to use when an entry has no dose description")
                 }
                 
                 cell.detailTextLabel?.text = time
-                cell.accessoryType = entry.isUploaded ? .checkmark : .none
+                cell.accessoryType = pumpEvent.isUploaded ? .checkmark : .none
                 cell.selectionStyle = .default
             case .manualEntryDoses(let values):
                 let entry = values[indexPath.row]
@@ -517,14 +511,13 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                         }
                     }
                 }
-            case .history(let historyValues):
-                var historyValues = historyValues
-                let value = historyValues.remove(at: indexPath.row)
-                self.values = .history(historyValues)
+            case .history(let pumpEvents):
+                let pumpEvent = pumpEvents.pumpEventForIndexPath(indexPath)
+                self.values = .history(pumpEvents.filter { $0.dose != pumpEvent.dose })
 
                 tableView.deleteRows(at: [indexPath], with: .automatic)
 
-                doseStore?.deletePumpEvent(value) { (error) -> Void in
+                doseStore?.deletePumpEvent(pumpEvent) { (error) -> Void in
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
@@ -555,23 +548,23 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     }
 
     public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if case .display = state, case .history(let history) = values {
-            let entry = history[indexPath.row]
+        if case .display = state, case .history(let pumpEvents) = values {
+            let pumpEvent = pumpEvents.pumpEventForIndexPath(indexPath)
 
             let vc = CommandResponseViewController(command: { (completionHandler) -> String in
                 var description = [String]()
 
-                description.append(self.timeFormatter.string(from: entry.date))
+                description.append(self.timeFormatter.string(from: pumpEvent.date))
 
-                if let title = entry.title {
+                if let title = pumpEvent.title {
                     description.append(title)
                 }
 
-                if let dose = entry.dose {
+                if let dose = pumpEvent.dose {
                     description.append(String(describing: dose))
                 }
 
-                if let raw = entry.raw {
+                if let raw = pumpEvent.raw {
                     description.append(raw.hexadecimalString)
                 }
 
@@ -688,13 +681,23 @@ extension PersistedPumpEvent {
 extension InsulinDeliveryTableViewController: IdentifiableClass { }
 
 fileprivate extension Array where Element == PersistedPumpEvent {
-    var valuesFromToday: [PersistedPumpEvent] {
+    var pumpEventsFromToday: [PersistedPumpEvent] {
         let startOfDay = Calendar.current.startOfDay(for: Date())
         return self.filter({ $0.date >= startOfDay})
     }
     
-    var valuesBeforeToday: [PersistedPumpEvent] {
+    var pumpEventsBeforeToday: [PersistedPumpEvent] {
         let startOfDay = Calendar.current.startOfDay(for: Date())
         return self.filter({ $0.date < startOfDay})
+    }
+    
+    func pumpEventForIndexPath(_ indexPath: IndexPath) -> PersistedPumpEvent {
+        let filterPumpEvents: [PersistedPumpEvent]
+        if InsulinDeliveryTableViewController.HistorySection(rawValue: indexPath.section) == .today {
+            filterPumpEvents = self.pumpEventsFromToday
+        } else {
+            filterPumpEvents = self.pumpEventsBeforeToday
+        }
+        return filterPumpEvents[indexPath.row]
     }
 }
