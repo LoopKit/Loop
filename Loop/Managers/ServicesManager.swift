@@ -259,31 +259,20 @@ extension ServicesManager: StatefulPluggableDelegate {
     }
 }
 
+// MARK: - PluginHost
+extension ServicesManager: PluginHost {
+    nonisolated var hostIdentifier: String {
+        return Bundle.main.hostIdentifier
+    }
+
+    nonisolated var hostVersion: String {
+        return Bundle.main.hostVersion
+    }
+}
+
 // MARK: - ServiceDelegate
 
 extension ServicesManager: ServiceDelegate {
-    var hostIdentifier: String {
-        var identifier = Bundle.main.bundleIdentifier ?? "com.loopkit.Loop"
-        let components = identifier.components(separatedBy: ".")
-        // DIY Loop has bundle identifiers like com.UY653SP37Q.loopkit.Loop
-        if components[2] == "loopkit" && components[3] == "Loop" {
-            identifier = "com.loopkit.Looo"
-        }
-        return identifier
-    }
-
-    var hostVersion: String {
-        var semanticVersion = Bundle.main.shortVersionString
-
-        while semanticVersion.split(separator: ".").count < 3 {
-            semanticVersion += ".0"
-        }
-
-        semanticVersion += "+\(Bundle.main.version)"
-
-        return semanticVersion
-    }
-    
     func enactRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
         
         var duration: TemporaryScheduleOverride.Duration? = nil
