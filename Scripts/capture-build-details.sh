@@ -25,8 +25,8 @@ info() {
 }
 
 info_plist_path="${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/BuildDetails.plist"
-provisioning_profile_path="${HOME}/Library/MobileDevice/Provisioning Profiles/${EXPANDED_PROVISIONING_PROFILE}.mobileprovision"
 xcode_build_version=${XCODE_PRODUCT_BUILD_VERSION:-$(xcodebuild -version | grep version | cut -d ' ' -f 3)}
+
 while [[ $# -gt 0 ]]
 do
   case $1 in
@@ -47,7 +47,6 @@ fi
 
 if [ "${info_plist_path}" == "/" -o ! -e "${info_plist_path}" ]; then
   error "File does not exist: ${info_plist_path}"
-  #error "Must provide valid --info-plist-path, or have valid \${BUILT_PRODUCTS_DIR} and \${INFOPLIST_PATH} set."
 fi
 
 info "Gathering build details in ${PWD}"
@@ -66,6 +65,17 @@ fi
 plutil -replace com-loopkit-Loop-srcroot -string "${PWD}" "${info_plist_path}"
 plutil -replace com-loopkit-Loop-build-date -string "$(date)" "${info_plist_path}"
 plutil -replace com-loopkit-Loop-xcode-version -string "${xcode_build_version}" "${info_plist_path}"
+
+# Determine the provisioning profile path
+if [ -z "${provisioning_profile_path}" ]; then
+  if [ -e "${HOME}/Library/MobileDevice/Provisioning Profiles/${EXPANDED_PROVISIONING_PROFILE}.mobileprovision" ]; then
+    provisioning_profile_path="${HOME}/Library/MobileDevice/Provisioning Profiles/${EXPANDED_PROVISIONING_PROFILE}.mobileprovision"
+  elif [ -e "${HOME}/Library/Developer/Xcode/UserData/Provisioning Profiles/${EXPANDED_PROVISIONING_PROFILE}.mobileprovision" ]; then
+    provisioning_profile_path="${HOME}/Library/Developer/Xcode/UserData/Provisioning Profiles/${EXPANDED_PROVISIONING_PROFILE}.mobileprovision"
+  else
+    warn "Provisioning profile not found in expected locations"
+  fi
+fi
 
 if [ -e "${provisioning_profile_path}" ]; then
   profile_expire_date=$(security cms -D -i "${provisioning_profile_path}" | plutil -p - | grep ExpirationDate | cut -b 23-)

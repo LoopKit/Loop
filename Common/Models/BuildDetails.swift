@@ -16,8 +16,8 @@ class BuildDetails {
 
     init() {
         guard let url = Bundle.main.url(forResource: "BuildDetails", withExtension: ".plist"),
-           let data = try? Data(contentsOf: url),
-           let parsed = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] else
+              let data = try? Data(contentsOf: url),
+              let parsed = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] else
         {
             dict = [:]
             return
@@ -63,7 +63,7 @@ class BuildDetails {
     }
 
     var workspaceGitBranch: String? {
-       return dict["com-loopkit-LoopWorkspace-git-branch"] as? String
-   }
+        return dict["com-loopkit-LoopWorkspace-git-branch"] as? String
+    }
 }
 
