@@ -60,5 +60,27 @@ extension Bundle {
         }
         return .days(localCacheDurationDays)
     }
+
+    var hostIdentifier: String {
+        var identifier = bundleIdentifier ?? "com.loopkit.Loop"
+        let components = identifier.components(separatedBy: ".")
+        // DIY Loop has bundle identifiers like com.UY653SP37Q.loopkit.Loop
+        if components[2] == "loopkit" && components[3] == "Loop" {
+            identifier = "com.loopkit.Loop"
+        }
+        return identifier
+    }
+
+    var hostVersion: String {
+        var semanticVersion = shortVersionString
+
+        while semanticVersion.split(separator: ".").count < 3 {
+            semanticVersion += ".0"
+        }
+
+        semanticVersion += "+\(Bundle.main.version)"
+
+        return semanticVersion
+    }
 }
 

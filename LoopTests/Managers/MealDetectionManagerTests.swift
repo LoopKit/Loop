@@ -234,8 +234,7 @@ class MealDetectionManagerTests: XCTestCase {
             includePositiveVelocityAndRC: true,
             carbAbsorptionModel: .piecewiseLinear,
             recommendationInsulinModel: ExponentialInsulinModelPreset.rapidActingAdult.model,
-            recommendationType: .automaticBolus
-        )
+            recommendationType: .automaticBolus)
 
         // These tests don't actually run the loop algorithm directly; they were written to take ICE from fixtures, compute carb effects, and subtract them.
         let counteractionEffects = counteractionEffects(for: testType)

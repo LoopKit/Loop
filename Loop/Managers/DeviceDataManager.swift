@@ -288,7 +288,11 @@ final class DeviceDataManager {
         glucoseStore.delegate = self
         cgmEventStore.delegate = self
         doseStore.insulinDeliveryStore.delegate = self
-        
+
+        Task {
+            await cgmStalenessMonitor.checkCGMStaleness()
+        }
+
         setupPump()
         setupCGM()
 
@@ -855,14 +859,17 @@ extension DeviceDataManager: PersistedAlertStore {
 // MARK: - CGMManagerDelegate
 extension DeviceDataManager: CGMManagerDelegate {
     nonisolated
-    func cgmManagerWantsDeletion(_ manager: CGMManager) {
-        DispatchQueue.main.async {
-            self.log.default("CGM manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
-            if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
-                self.displayGlucoseUnitBroadcaster?.removeDisplayGlucoseUnitObserver(cgmManagerUI)
+    func cgmManagerWantsDeletion(_ manager: CGMManager) async {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async {
+                self.log.default("CGM manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
+                if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
+                    self.displayGlucoseUnitBroadcaster?.removeDisplayGlucoseUnitObserver(cgmManagerUI)
+                }
+                self.cgmManager = nil
+                self.settingsManager.storeSettings()
+                continuation.resume()
             }
-            self.cgmManager = nil
-            self.settingsManager.storeSettings()
         }
     }
 
@@ -1175,57 +1182,38 @@ extension DeviceDataManager: CgmEventStoreDelegate {
 
 // MARK: - TestingPumpManager
 extension DeviceDataManager {
-    func deleteTestingPumpData(completion: ((Error?) -> Void)? = nil) {
+    func deleteTestingPumpData() async throws {
         guard let testingPumpManager = pumpManager as? TestingPumpManager else {
-            completion?(nil)
             return
         }
 
-        let devicePredicate = HKQuery.predicateForObjects(from: [testingPumpManager.testingDevice])
         let insulinDeliveryStore = doseStore.insulinDeliveryStore
 
-        Task {
-            do {
-                try await doseStore.resetPumpData()
-            } catch {
-                completion?(error)
-                return
-            }
+        try await doseStore.resetPumpData()
 
-            let insulinSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .sharingDenied
-            guard !insulinSharingDenied else {
-                // only clear cache since access to health kit is denied
-                insulinDeliveryStore.purgeCachedInsulinDeliveryObjects() { error in
-                    completion?(error)
-                }
-                return
-            }
-            
-            insulinDeliveryStore.purgeAllDoseEntries(healthKitPredicate: devicePredicate) { error in
-                completion?(error)
-            }
-        }
-    }
-
-    func deleteTestingCGMData(completion: ((Error?) -> Void)? = nil) {
-        guard let testingCGMManager = cgmManager as? TestingCGMManager else {
-            completion?(nil)
+        let insulinSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .sharingDenied
+        guard !insulinSharingDenied else {
+            // only clear cache since access to health kit is denied
+            await insulinDeliveryStore.purgeCachedInsulinDeliveryObjects()
             return
         }
-        
+
+        try await insulinDeliveryStore.purgeDoseEntriesForDevice(testingPumpManager.testingDevice)
+    }
+
+    func deleteTestingCGMData() async throws {
+        guard let testingCGMManager = cgmManager as? TestingCGMManager else {
+            return
+        }
+
         let glucoseSharingDenied = self.healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .sharingDenied
         guard !glucoseSharingDenied else {
             // only clear cache since access to health kit is denied
-            glucoseStore.purgeCachedGlucoseObjects() { error in
-                completion?(error)
-            }
+            try await glucoseStore.purgeCachedGlucoseObjects()
             return
         }
 
-        let predicate = HKQuery.predicateForObjects(from: [testingCGMManager.testingDevice])
-        glucoseStore.purgeAllGlucoseSamples(healthKitPredicate: predicate) { error in
-            completion?(error)
-        }
+        try await glucoseStore.purgeAllGlucose(for: testingCGMManager.testingDevice)
     }
 }
 

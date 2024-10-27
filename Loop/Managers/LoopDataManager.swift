@@ -225,6 +225,19 @@ final class LoopDataManager: ObservableObject {
                     await self.updateDisplayState()
                     self.notify(forChange: .insulin)
                 }
+            },
+            NotificationCenter.default.addObserver(
+                forName: .LoopDataUpdated,
+                object: nil,
+                queue: nil
+            ) { (note) in
+                let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopUpdateContext.RawValue
+                if case .preferences = LoopUpdateContext(rawValue: context) {
+                    Task { @MainActor in
+                        self.logger.default("Received notification of settings changing")
+                        await self.updateDisplayState()
+                    }
+                }
             }
         ]
 
@@ -330,7 +343,7 @@ final class LoopDataManager: ObservableObject {
             throw LoopError.configurationError(.basalRateSchedule)
         }
 
-        let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(.minutes(GlucoseMath.defaultDelta))
+        let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(GlucoseMath.defaultDelta)
 
         let carbsStart = baseTime.addingTimeInterval(CarbMath.dateAdjustmentPast + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
 
@@ -353,9 +366,24 @@ final class LoopDataManager: ObservableObject {
 
         let glucose = try await glucoseStore.getGlucoseSamples(start: carbsStart, end: baseTime)
 
-        let sensitivityStart = min(carbsStart, dosesStart)
+        let dosesWithModel = doses.map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
 
-        let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(startDate: sensitivityStart, endDate: forecastEndTime)
+        let recommendationInsulinModel = insulinModel(for: deliveryDelegate?.pumpInsulinType ?? .novolog)
+
+        let recommendationEffectInterval = DateInterval(
+            start: baseTime,
+            duration: recommendationInsulinModel.effectDuration
+        )
+        let neededSensitivityTimeline = LoopAlgorithm.timelineIntervalForSensitivity(
+            doses: dosesWithModel,
+            glucoseHistoryStart: glucose.first?.startDate ?? baseTime,
+            recommendationEffectInterval: recommendationEffectInterval
+        )
+
+        let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(
+            startDate: neededSensitivityTimeline.start,
+            endDate: neededSensitivityTimeline.end
+        )
 
         let target = try await settingsProvider.getTargetRangeHistory(startDate: baseTime, endDate: forecastEndTime)
 
@@ -369,7 +397,7 @@ final class LoopDataManager: ObservableObject {
             throw LoopError.configurationError(.maximumBasalRatePerHour)
         }
 
-        var overrides = temporaryPresetsManager.overrideHistory.getOverrideHistory(startDate: sensitivityStart, endDate: forecastEndTime)
+        var overrides = temporaryPresetsManager.overrideHistory.getOverrideHistory(startDate: neededSensitivityTimeline.start, endDate: forecastEndTime)
 
         // Bug (https://tidepool.atlassian.net/browse/LOOP-4759) pre-meal is not recorded in override history
         // So currently we handle automatic forecast by manually adding it in, and when meal bolusing, we do not do this.
@@ -420,7 +448,7 @@ final class LoopDataManager: ObservableObject {
 
         return StoredDataAlgorithmInput(
             glucoseHistory: glucose,
-            doses: doses.map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) },
+            doses: dosesWithModel,
             carbEntries: carbEntries,
             predictionStart: baseTime,
             basal: basalWithOverrides,
@@ -433,7 +461,7 @@ final class LoopDataManager: ObservableObject {
             useIntegralRetrospectiveCorrection: UserDefaults.standard.integralRetrospectiveCorrectionEnabled,
             includePositiveVelocityAndRC: true,
             carbAbsorptionModel: carbAbsorptionModel,
-            recommendationInsulinModel: insulinModel(for: deliveryDelegate?.pumpInsulinType ?? .novolog),
+            recommendationInsulinModel: recommendationInsulinModel,
             recommendationType: .manualBolus,
             automaticBolusApplicationFactor: effectiveBolusApplicationFactor)
     }
@@ -1012,6 +1040,7 @@ extension StoredDataAlgorithmInput {
             carbRatio: carbRatio,
             algorithmEffectsOptions: effectsOptions,
             useIntegralRetrospectiveCorrection: self.useIntegralRetrospectiveCorrection,
+            useMidAbsorptionISF: true,
             carbAbsorptionModel: self.carbAbsorptionModel.model
         )
         return prediction.glucose

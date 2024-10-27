@@ -205,12 +205,14 @@ final class WatchDataManager: NSObject {
             return
         }
 
+        log.default("*** sendWatchContextIfNeeded")
+
         guard case .activated = session.activationState else {
             session.activate()
             return
         }
 
-        Task { @MainActor in
+        Task {
             let context = await createWatchContext()
             self.sendWatchContext(context)
         }
@@ -464,13 +466,13 @@ extension WatchDataManager: WCSessionDelegate {
             }
         case GlucoseBackfillRequestUserInfo.name?:
             if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message) {
-                glucoseStore.getSyncGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1)) { (result) in
-                    switch result {
-                    case .failure(let error):
+                Task {
+                    do {
+                        let samples = try await glucoseStore.getSyncGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1))
+                        replyHandler(WatchHistoricalGlucose(samples: samples).rawValue)
+                    } catch {
                         self.log.error("Failure getting sync glucose objects: %{public}@", String(describing: error))
                         replyHandler([:])
-                    case .success(let samples):
-                        replyHandler(WatchHistoricalGlucose(samples: samples).rawValue)
                     }
                 }
             } else {

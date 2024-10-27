@@ -12,7 +12,7 @@ import LoopCore
 import LoopAlgorithm
 
 protocol CGMStalenessMonitorDelegate: AnyObject {
-    func getLatestCGMGlucose(since: Date, completion: @escaping (_ result: Swift.Result<StoredGlucoseSample?, Error>) -> Void)
+    func getLatestCGMGlucose(since: Date) async throws -> StoredGlucoseSample?
 }
 
 class CGMStalenessMonitor {
@@ -21,13 +21,7 @@ class CGMStalenessMonitor {
     
     private var cgmStalenessTimer: Timer?
     
-    weak var delegate: CGMStalenessMonitorDelegate? = nil {
-        didSet {
-            if delegate != nil {
-                checkCGMStaleness()
-            }
-        }
-    }
+    weak var delegate: CGMStalenessMonitorDelegate?
 
     @Published var cgmDataIsStale: Bool = true {
         didSet {
@@ -57,29 +51,27 @@ class CGMStalenessMonitor {
         cgmStalenessTimer?.invalidate()
         cgmStalenessTimer = Timer.scheduledTimer(withTimeInterval: expiration.timeIntervalSinceNow, repeats: false) { [weak self] _ in
             self?.log.debug("cgmStalenessTimer fired")
-            self?.checkCGMStaleness()
+            Task {
+                await self?.checkCGMStaleness()
+            }
         }
         cgmStalenessTimer?.tolerance = CGMStalenessMonitor.cgmStalenessTimerTolerance
     }
     
-    private func checkCGMStaleness() {
-        delegate?.getLatestCGMGlucose(since: Date(timeIntervalSinceNow: -LoopAlgorithm.inputDataRecencyInterval)) { (result) in
-            DispatchQueue.main.async {
-                self.log.debug("Fetched latest CGM Glucose for checkCGMStaleness: %{public}@", String(describing: result))
-                switch result {
-                case .success(let sample):
-                    if let sample = sample {
-                        self.cgmDataIsStale = false
-                        self.updateCGMStalenessTimer(expiration: sample.startDate.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval + CGMStalenessMonitor.cgmStalenessTimerTolerance))
-                    } else {
-                        self.cgmDataIsStale = true
-                    }
-                case .failure(let error):
-                    self.log.error("Unable to get latest CGM clucose: %{public}@ ", String(describing: error))
-                    // Some kind of system error; check again in 5 minutes
-                    self.updateCGMStalenessTimer(expiration: Date(timeIntervalSinceNow: .minutes(5)))
-                }
+    func checkCGMStaleness() async {
+        do {
+            let sample = try await delegate?.getLatestCGMGlucose(since: Date(timeIntervalSinceNow: -LoopAlgorithm.inputDataRecencyInterval))
+            self.log.debug("Fetched latest CGM Glucose for checkCGMStaleness: %{public}@", String(describing: sample))
+            if let sample = sample {
+                self.cgmDataIsStale = false
+                self.updateCGMStalenessTimer(expiration: sample.startDate.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval + CGMStalenessMonitor.cgmStalenessTimerTolerance))
+            } else {
+                self.cgmDataIsStale = true
             }
+        } catch {
+            self.log.error("Unable to get latest CGM clucose: %{public}@ ", String(describing: error))
+            // Some kind of system error; check again in 5 minutes
+            self.updateCGMStalenessTimer(expiration: Date(timeIntervalSinceNow: .minutes(5)))
         }
     }
 }

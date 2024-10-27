@@ -51,4 +51,6 @@ struct StoredDataAlgorithmInput: AlgorithmInput {
     var recommendationType: DoseRecommendationType
     
     var automaticBolusApplicationFactor: Double?
+
+    let useMidAbsorptionISF: Bool = true
 }

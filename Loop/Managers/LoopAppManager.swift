@@ -8,6 +8,7 @@
 
 import UIKit
 import Intents
+import BackgroundTasks
 import Combine
 import LoopKit
 import LoopKitUI
@@ -133,8 +134,26 @@ class LoopAppManager: NSObject {
         self.state = state.next
     }
 
+    func registerBackgroundTasks() {
+        let taskIdentifier = CriticalEventLogExportManager.historicalExportBackgroundTaskIdentifier
+        let registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { task in
+            guard let criticalEventLogExportManager = self.criticalEventLogExportManager else {
+                self.log.error("Critical event log export launch handler called before initialization complete!")
+                return
+            }
+            criticalEventLogExportManager.handleCriticalEventLogHistoricalExportBackgroundTask(task as! BGProcessingTask)
+        }
+        if registered {
+            log.debug("Critical event log export background task registered")
+        } else {
+            log.error("Critical event log export background task not registered")
+        }
+    }
+
     func launch() {
         precondition(isLaunchPending)
+
+        registerBackgroundTasks()
 
         Task {
             await resumeLaunch()
@@ -248,7 +267,7 @@ class LoopAppManager: NSObject {
             observationStart: Date().addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
         )
 
-        self.doseStore = DoseStore(
+        self.doseStore = await DoseStore(
             healthKitSampleStore: insulinHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
@@ -263,7 +282,7 @@ class LoopAppManager: NSObject {
             observationStart: Date().addingTimeInterval(-.hours(24))
         )
 
-        self.glucoseStore = GlucoseStore(
+        self.glucoseStore = await GlucoseStore(
             healthKitSampleStore: glucoseHealthStore,
             cacheStore: cacheStore,
             cacheLength: localCacheDuration,
@@ -389,9 +408,6 @@ class LoopAppManager: NSObject {
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
                                                                       directory: FileManager.default.exportsDirectoryURL,
                                                                       historicalDuration: localCacheDuration)
-
-        criticalEventLogExportManager.registerBackgroundTasks()
-
 
         statusExtensionManager = ExtensionDataManager(
             deviceDataManager: deviceDataManager,
@@ -892,8 +908,16 @@ extension LoopAppManager: ResetLoopManagerDelegate {
     }
     
     func resetTestingData(completion: @escaping () -> Void) {
-        deviceDataManager.deleteTestingCGMData { [weak deviceDataManager] _ in
-            deviceDataManager?.deleteTestingPumpData { _ in
+        Task { [weak self] in
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    try? await self?.deviceDataManager.deleteTestingCGMData()
+                }
+                group.addTask {
+                    try? await self?.deviceDataManager?.deleteTestingPumpData()
+                }
+                
+                await group.waitForAll()
                 completion()
             }
         }
@@ -1045,6 +1069,7 @@ extension LoopAppManager: SimulatedData {
                 Task { @MainActor in
                     do {
                         try await self.doseStore.purgeHistoricalPumpEvents()
+                        try await self.glucoseStore.purgeHistoricalGlucoseObjects()
                     } catch {
                         completion(error)
                         return
@@ -1059,13 +1084,7 @@ extension LoopAppManager: SimulatedData {
                                 completion(error)
                                 return
                             }
-                            self.glucoseStore.purgeHistoricalGlucoseObjects() { error in
-                                guard error == nil else {
-                                    completion(error)
-                                    return
-                                }
-                                self.settingsManager.purgeHistoricalSettingsObjects(completion: completion)
-                            }
+                            self.settingsManager.purgeHistoricalSettingsObjects(completion: completion)
                         }
                     }
                 }

@@ -429,22 +429,6 @@ extension OnboardingManager: ServiceProvider {
     var activeServices: [Service] { servicesManager.activeServices }
 
     var availableServices: [ServiceDescriptor] { servicesManager.availableServices }
-
-    func onboardService(withIdentifier identifier: String) -> Swift.Result<OnboardingResult<ServiceViewController, Service>, Error> {
-        guard let service = activeServices.first(where: { $0.pluginIdentifier == identifier }) else {
-            return servicesManager.setupService(withIdentifier: identifier)
-        }
-
-        if service.isOnboarded {
-            return .success(.createdAndOnboarded(service))
-        }
-
-        guard let serviceUI = service as? ServiceUI else {
-            return .failure(OnboardingError.invalidState)
-        }
-
-        return .success(.userInteractionRequired(serviceUI.settingsViewController(colorPalette: .default)))
-    }
 }
 
 // MARK: - TherapySettingsProvider
@@ -455,10 +439,22 @@ extension OnboardingManager: TherapySettingsProvider {
     }
 }
 
+// MARK: - PluginHost
+
+extension OnboardingManager: PluginHost {
+    nonisolated var hostIdentifier: String {
+        return Bundle.main.hostIdentifier
+    }
+
+    nonisolated var hostVersion: String {
+        return Bundle.main.hostVersion
+    }
+}
+
 // MARK: - OnboardingProvider
 
 extension OnboardingManager: OnboardingProvider {
-    var allowDebugFeatures: Bool { FeatureFlags.allowDebugFeatures }   // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
+    nonisolated var allowDebugFeatures: Bool { FeatureFlags.allowDebugFeatures }   // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
 }
 
 // MARK: - SupportProvider

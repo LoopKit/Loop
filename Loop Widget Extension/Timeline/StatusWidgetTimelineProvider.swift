@@ -30,10 +30,16 @@ class StatusWidgetTimelineProvider: TimelineProvider {
         store: cacheStore,
         expireAfter: localCacheDuration)
 
-    lazy var glucoseStore = GlucoseStore(
-        cacheStore: cacheStore,
-        provenanceIdentifier: HKSource.default().bundleIdentifier
-    )
+    var glucoseStore: GlucoseStore!
+
+    init() {
+        Task {
+            glucoseStore = await GlucoseStore(
+                cacheStore: cacheStore,
+                provenanceIdentifier: HKSource.default().bundleIdentifier
+            )
+        }
+    }
 
     func placeholder(in context: Context) -> StatusWidgetTimelimeEntry {
         log.default("%{public}@: context=%{public}@", #function, String(describing: context))
@@ -90,29 +96,22 @@ class StatusWidgetTimelineProvider: TimelineProvider {
     }
     
     func update(completion: @escaping (StatusWidgetTimelimeEntry) -> Void) {
-        let group = DispatchGroup()
-
-        var glucose: [StoredGlucoseSample] = []
 
         let startDate = Date(timeIntervalSinceNow: -LoopAlgorithm.inputDataRecencyInterval)
 
-        group.enter()
-        glucoseStore.getGlucoseSamples(start: startDate) { (result) in
-            switch result {
-            case .failure:
+        Task {
+
+            var glucose: [StoredGlucoseSample] = []
+
+            do {
+                glucose = try await glucoseStore.getGlucoseSamples(start: startDate)
+                self.log.default("Fetched glucose: last = %{public}@, %{public}@", String(describing: glucose.last?.startDate), String(describing: glucose.last?.quantity))
+            } catch {
                 self.log.error("Failed to fetch glucose after %{public}@", String(describing: startDate))
-                glucose = []
-            case .success(let samples):
-                self.log.default("Fetched glucose: last = %{public}@, %{public}@", String(describing: samples.last?.startDate), String(describing: samples.last?.quantity))
-                glucose = samples
             }
-            group.leave()
-        }
-        group.wait()
 
-        let finalGlucose = glucose
+            let finalGlucose = glucose
 
-        Task { @MainActor in
             guard let defaults = self.defaults,
                   let context = defaults.statusExtensionContext,
                   let contextUpdatedAt = context.createdAt,

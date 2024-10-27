@@ -82,8 +82,8 @@ extension GlucoseStore {
         return addError
     }
 
-    func purgeHistoricalGlucoseObjects(completion: @escaping (Error?) -> Void) {
-        purgeCachedGlucoseObjects(before: historicalEndDate, completion: completion)
+    func purgeHistoricalGlucoseObjects() async throws {
+        try await purgeCachedGlucoseObjects(before: historicalEndDate)
     }
 }
 

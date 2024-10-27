@@ -1599,13 +1599,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private func presentSettings() {
         let deletePumpDataFunc: () -> PumpManagerViewModel.DeleteTestingDataFunc? = { [weak self] in
             (self?.deviceManager.pumpManager is TestingPumpManager) ? {
-                [weak self] in self?.deviceManager.deleteTestingPumpData()
-                } : nil
+                Task { [weak self] in try? await self?.deviceManager.deleteTestingPumpData()
+                }} : nil
         }
         let deleteCGMDataFunc: () -> CGMManagerViewModel.DeleteTestingDataFunc? = { [weak self] in
             (self?.deviceManager.cgmManager is TestingCGMManager) ? {
-                [weak self] in self?.deviceManager.deleteTestingCGMData()
-                } : nil
+                Task { [weak self] in try? await self?.deviceManager.deleteTestingCGMData()
+                }} : nil
         }
         let pumpViewModel = PumpManagerViewModel(
             image: { [weak self] in (self?.deviceManager.pumpManager as? PumpManagerUI)?.smallImage },
