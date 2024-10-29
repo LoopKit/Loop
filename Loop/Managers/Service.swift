@@ -16,6 +16,12 @@ let staticServicesByIdentifier: [String: Service.Type] = [
     MockService.serviceIdentifier: MockService.self
 ]
 
-let availableStaticServices: [ServiceDescriptor] = [
-    ServiceDescriptor(identifier: MockService.serviceIdentifier, localizedTitle: MockService.localizedTitle)
-]
+var availableStaticServices: [ServiceDescriptor] {
+    if FeatureFlags.allowSimulators {
+        return [
+            ServiceDescriptor(identifier: MockService.serviceIdentifier, localizedTitle: MockService.localizedTitle)
+        ]
+    } else {
+        return []
+    }
+}
