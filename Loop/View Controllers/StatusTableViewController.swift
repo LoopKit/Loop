@@ -2304,7 +2304,7 @@ extension StatusTableViewController: ServicesViewModelDelegate {
     }
 
     fileprivate func showServiceSettings(_ serviceUI: ServiceUI) {
-        var settingsViewController = serviceUI.settingsViewController(colorPalette: .default)
+        var settingsViewController = serviceUI.settingsViewController(colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
         settingsViewController.serviceOnboardingDelegate = servicesManager
         settingsViewController.completionDelegate = self
         show(settingsViewController, sender: self)
