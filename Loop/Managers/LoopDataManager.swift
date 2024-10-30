@@ -1007,7 +1007,7 @@ extension LoopDataManager {
             self.logger.debug("Recomputing negative insulin damper")
             updateGroup.enter()
             let lastInsulinStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-10))
-            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: lastInsulinStartDate) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: lastInsulinStartDate, end: nil, doseEnd: lastInsulinStartDate, basalDosingEnd: now()) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects for damper: %{public}@", error.localizedDescription)
@@ -1016,6 +1016,9 @@ extension LoopDataManager {
                 case .success(let effects):
                     var posDeltaSum = 0.0
                     effects.enumerated().forEach{
+                        guard $0.element.startDate >= insulinEffectStartDate else {
+                            return
+                        }
                         let delta : Double
                         if $0.offset == 0 {
                             delta = 0
@@ -1085,7 +1088,7 @@ extension LoopDataManager {
         if updateInsulinEffectNeeded {
             self.logger.debug("Recomputing insulin effects")
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: now()) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: nil, basalDosingEnd: now()) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects: %{public}@", error.localizedDescription)
@@ -1101,7 +1104,7 @@ extension LoopDataManager {
 
         if insulinEffectIncludingPendingInsulin == nil {
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: nil, basalDosingEnd: nil) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects including pending insulin: %{public}@", error.localizedDescription)
@@ -1483,7 +1486,7 @@ extension LoopDataManager {
         var insulinEffect: [GlucoseEffect]?
         let basalDosingEnd = includingPendingInsulin ? nil : now()
         updateGroup.enter()
-        doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: basalDosingEnd) { result in
+        doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: nil, basalDosingEnd: basalDosingEnd) { result in
             switch result {
             case .failure(let error):
                 effectCalculationError.mutate { $0 = error }
