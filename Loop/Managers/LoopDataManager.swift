@@ -1016,9 +1016,8 @@ extension LoopDataManager {
                 case .success(let effects):
                     var posDeltaSum = 0.0
                     effects.enumerated().forEach{
-                        let delta : Double
                         if $0.offset > 0 {
-                            delta = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter) - effects[$0.offset - 1].quantity.doubleValue(for: .milligramsPerDeciliter)
+                            let delta = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter) - effects[$0.offset - 1].quantity.doubleValue(for: .milligramsPerDeciliter)
                             posDeltaSum += max(0, delta)
                         }
                     }
