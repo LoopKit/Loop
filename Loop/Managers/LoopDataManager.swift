@@ -1006,8 +1006,8 @@ extension LoopDataManager {
         if negativeInsulinDamper == nil || updateInsulinEffectNeeded {
             self.logger.debug("Recomputing negative insulin damper")
             updateGroup.enter()
-            let lastInsulinStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-10))
-            doseStore.getGlucoseEffects(start: lastInsulinStartDate, end: nil, doseEnd: lastInsulinStartDate, basalDosingEnd: now()) { (result) -> Void in
+            let lastDoseStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-10))
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: lastDoseStartDate, basalDosingEnd: now()) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects for damper: %{public}@", error.localizedDescription)
@@ -1016,16 +1016,11 @@ extension LoopDataManager {
                 case .success(let effects):
                     var posDeltaSum = 0.0
                     effects.enumerated().forEach{
-                        guard $0.element.startDate >= insulinEffectStartDate else {
-                            return
-                        }
                         let delta : Double
-                        if $0.offset == 0 {
-                            delta = 0
-                        } else {
+                        if $0.offset > 0 {
                             delta = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter) - effects[$0.offset - 1].quantity.doubleValue(for: .milligramsPerDeciliter)
+                            posDeltaSum += max(0, delta)
                         }
-                        posDeltaSum += max(0, delta)
                     }
                     
                     let insulinSensitivity = latestSettings.insulinSensitivitySchedule!.quantity(at: lastGlucoseDate)
