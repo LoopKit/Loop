@@ -87,7 +87,7 @@ class ServicesManager {
             return .failure(UnknownServiceIdentifierError())
         }
 
-        let result = serviceUIType.setupViewController(colorPalette: .default, pluginHost: self)
+        let result = serviceUIType.setupViewController(colorPalette: .default, pluginHost: self, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
         if case .createdAndOnboarded(let serviceUI) = result {
             serviceOnboarding(didCreateService: serviceUI)
             serviceOnboarding(didOnboardService: serviceUI)
