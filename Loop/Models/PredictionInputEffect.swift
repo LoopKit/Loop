@@ -48,7 +48,7 @@ struct PredictionInputEffect: OptionSet {
         case [.insulin]:
             return String(format: NSLocalizedString("Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)", comment: "Description of the prediction input effect for insulin"), unit.localizedShortUnitString)
         case [.damper]:
-            return String(format: NSLocalizedString("A damper which reduces increases in glucose. The damper is stronger when there is more negative insulin", comment: "Description of the prediction input effect for negative insulin damper"), unit.localizedShortUnitString)
+            return String(format: NSLocalizedString("Reduces increases in glucose. The damper is stronger when there is more negative insulin", comment: "Description of the prediction input effect for negative insulin damper"), unit.localizedShortUnitString)
         case [.momentum]:
             return NSLocalizedString("15 min glucose regression coefficient (b₁), continued with decay over 30 min", comment: "Description of the prediction input effect for glucose momentum")
         case [.retrospection]:

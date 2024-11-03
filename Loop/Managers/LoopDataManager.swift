@@ -1007,7 +1007,7 @@ extension LoopDataManager {
             self.logger.debug("Recomputing negative insulin damper")
             updateGroup.enter()
             let lastDoseStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-10))
-            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: lastDoseStartDate, basalDosingEnd: now()) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: lastDoseStartDate, basalDosingEnd: lastDoseStartDate) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects for damper: %{public}@", error.localizedDescription)
@@ -1056,7 +1056,7 @@ extension LoopDataManager {
                         alpha = (transitionValue + marginalSlope * (posDeltaSum - transitionPoint)) / posDeltaSum
                     }
 
-                    self.negativeInsulinDamper = 1 - alpha
+                    self.negativeInsulinDamper = max(0, min(1, 1 - alpha))
                 }
 
                 updateGroup.leave()
