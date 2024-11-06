@@ -177,6 +177,12 @@ class SettingsManager {
     ///
     /// - Parameter timeZone: The time zone
     func setScheduleTimeZone(_ timeZone: TimeZone) {
+        let shouldUpdate = settings.basalRateSchedule?.timeZone != timeZone ||
+        settings.carbRatioSchedule?.timeZone != timeZone ||
+        settings.insulinSensitivitySchedule?.timeZone != timeZone ||
+        settings.glucoseTargetRangeSchedule?.timeZone != timeZone
+        guard shouldUpdate else { return }
+
         self.mutateLoopSettings { settings in
             settings.basalRateSchedule?.timeZone = timeZone
             settings.carbRatioSchedule?.timeZone = timeZone

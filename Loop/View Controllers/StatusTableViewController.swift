@@ -293,7 +293,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             loopManager.startGlucoseValueStalenessTimerIfNeeded()
         }
     }
-
+    
     private var bolusState: PumpManagerStatus.BolusState = .noBolus {
         didSet {
             if oldValue != bolusState {
@@ -306,10 +306,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     }
                 default:
                     break
-                }
-                Task { @MainActor in
-                    refreshContext.update(with: .status)
-                    await reloadData(animated: true)
                 }
             }
         }
@@ -611,7 +607,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             self.currentCOBDescription = nil
         }
 
-        self.tableView.beginUpdates()
         if let hudView = self.hudView {
             // CGM Status
             if let glucose = self.loopManager.latestGlucose {
@@ -640,8 +635,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         updateBannerAndHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
 
         redrawCharts()
-
-        tableView.endUpdates()
 
         reloading = false
         let reloadNow = !self.refreshContext.isEmpty
@@ -2120,14 +2113,8 @@ extension StatusTableViewController: CompletionDelegate {
 extension StatusTableViewController: PumpManagerStatusObserver {
     func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
         log.default("PumpManager:%{public}@ did update status", String(describing: type(of: pumpManager)))
-        Task { @MainActor in
-
-            basalDeliveryState = status.basalDeliveryState
-            bolusState = status.bolusState
-
-            refreshContext.update(with: .status)
-            await self.reloadData(animated: true)
-        }
+        basalDeliveryState = status.basalDeliveryState
+        bolusState = status.bolusState
     }
 }
 
