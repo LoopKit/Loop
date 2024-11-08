@@ -1006,7 +1006,7 @@ extension LoopDataManager {
         if negativeInsulinDamper == nil || updateInsulinEffectNeeded {
             self.logger.debug("Recomputing negative insulin damper")
             updateGroup.enter()
-            let lastDoseStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-10))
+            let lastDoseStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-15))
             doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: lastDoseStartDate, basalDosingEnd: lastDoseStartDate) { (result) -> Void in
                 switch result {
                 case .failure(let error):
