@@ -300,8 +300,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 switch bolusState {
                 case .inProgress(_):
                     guard case .inProgress = oldValue else {
-                        // Bolus starting
-                        bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
+                        guard case .canceling = oldValue else {
+                            // Bolus starting
+                            bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
+                            break
+                        }
                         break
                     }
                 default:
