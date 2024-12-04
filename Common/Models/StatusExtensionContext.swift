@@ -8,7 +8,7 @@
 //  This class allows Loop to pass context data to the Loop Status Extension.
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 import LoopAlgorithm
@@ -25,24 +25,24 @@ struct GlucoseDisplayableContext: GlucoseDisplayable {
     let isStateValid: Bool
     let stateDescription: String
     let trendType: GlucoseTrend?
-    let trendRate: HKQuantity?
+    let trendRate: LoopQuantity?
     let isLocal: Bool
     let glucoseRangeCategory: GlucoseRangeCategory?
 }
 
 struct GlucoseContext: GlucoseValue {
     let value: Double
-    let unit: HKUnit
+    let unit: LoopUnit
     let startDate: Date
 
-    var quantity: HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: value)
+    var quantity: LoopQuantity {
+        return LoopQuantity(unit: unit, doubleValue: value)
     }
 }
 
 struct PredictedGlucoseContext {
     let values: [Double]
-    let unit: HKUnit
+    let unit: LoopUnit
     let startDate: Date
     let interval: TimeInterval
 
@@ -162,7 +162,7 @@ extension GlucoseDisplayableContext: RawRepresentable {
         }
         
         if let trendRateValue = rawValue["trendRateValue"] as? Double {
-            trendRate = HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: trendRateValue)
+            trendRate = LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: trendRateValue)
         } else {
             trendRate = nil
         }
@@ -182,7 +182,7 @@ extension GlucoseDisplayableContext: RawRepresentable {
         ]
         raw["trendType"] = trendType?.rawValue
         if let trendRate = trendRate {
-            raw["trendRateValue"] = trendRate.doubleValue(for: HKUnit.milligramsPerDeciliterPerMinute)
+            raw["trendRateValue"] = trendRate.doubleValue(for: LoopUnit.milligramsPerDeciliterPerMinute)
         }
         raw["glucoseRangeCategory"] = glucoseRangeCategory?.rawValue
 
@@ -204,7 +204,7 @@ extension PredictedGlucoseContext: RawRepresentable {
         }
 
         self.values = values
-        self.unit = HKUnit(from: unitString)
+        self.unit = LoopUnit(from: unitString)
         self.startDate = startDate
         self.interval = interval
     }

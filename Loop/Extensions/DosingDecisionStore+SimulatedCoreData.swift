@@ -102,10 +102,10 @@ fileprivate extension StoredDosingDecision {
         var historicalGlucose = [HistoricalGlucoseValue]()
         for minutes in stride(from: -120.0, to: 0.0, by: 5.0) {
             historicalGlucose.append(HistoricalGlucoseValue(startDate: date.addingTimeInterval(.minutes(minutes)),
-                                                            quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 125 + minutes / 5)))
+                                                            quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 125 + minutes / 5)))
         }
         let originalCarbEntry = StoredCarbEntry(startDate: date.addingTimeInterval(-.minutes(15)),
-                                                quantity: HKQuantity(unit: .gram(), doubleValue: 15),
+                                                quantity: LoopQuantity(unit: .gram, doubleValue: 15),
                                                 uuid: UUID(uuidString: "C86DEB61-68E9-464E-9DD5-96A9CB445FD3")!,
                                                 provenanceIdentifier: Bundle.main.bundleIdentifier!,
                                                 syncIdentifier: "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
@@ -116,7 +116,7 @@ fileprivate extension StoredDosingDecision {
                                                 userCreatedDate: date.addingTimeInterval(-.minutes(15)),
                                                 userUpdatedDate: date.addingTimeInterval(-.minutes(1)))
         let carbEntry = StoredCarbEntry(startDate: date.addingTimeInterval(-.minutes(1)),
-                                        quantity: HKQuantity(unit: .gram(), doubleValue: 25),
+                                        quantity: LoopQuantity(unit: .gram, doubleValue: 25),
                                         uuid: UUID(uuidString: "71B699D7-0E8F-4B13-B7A1-E7751EB78E74")!,
                                         provenanceIdentifier: Bundle.main.bundleIdentifier!,
                                         syncIdentifier: "2B03D96C-6F5D-4140-99CD-80C3E64D6010",
@@ -131,10 +131,10 @@ fileprivate extension StoredDosingDecision {
                                                       syncIdentifier: "2A67A303-1234-4CB8-8263-79498265368E",
                                                       syncVersion: 1,
                                                       startDate: date.addingTimeInterval(-.minutes(1)),
-                                                      quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 123.45),
+                                                      quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 123.45),
                                                       condition: nil,
                                                       trend: .up,
-                                                      trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: 3.4),
+                                                      trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: 3.4),
                                                       isDisplayOnly: false,
                                                       wasUserEntered: true,
                                                       device: HKDevice(name: "Device Name",
@@ -163,14 +163,14 @@ fileprivate extension StoredDosingDecision {
         var predictedGlucose = [PredictedGlucoseValue]()
         for minutes in stride(from: 5.0, to: 360.0, by: 5.0) {
             predictedGlucose.append(PredictedGlucoseValue(startDate: date.addingTimeInterval(.minutes(minutes)),
-                                                          quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 125 + minutes / 5)))
+                                                          quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 125 + minutes / 5)))
         }
         let automaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 0.75,
                                                                                                                duration: .minutes(30)),
                                                                       bolusUnits: 1.25)
         let manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 0.2,
                                                                                                                     notice: .predictedGlucoseBelowTarget(minGlucose: SimpleGlucoseValue(startDate: date.addingTimeInterval(.minutes(30)),
-                                                                                                                                                                                           quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 95.0)))),
+                                                                                                                                                                                           quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 95.0)))),
                                                                           date: date.addingTimeInterval(-.minutes(1)))
         let manualBolusRequested = 0.5
         let warnings: [Issue] = [Issue(id: "one"),

@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import HealthKit
 import SwiftUI
 import Intents
 import LoopCore
@@ -30,10 +29,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private let log = OSLog(category: "StatusTableViewController")
 
-    lazy var carbFormatter: QuantityFormatter = QuantityFormatter(for: .gram())
+    lazy var carbFormatter: QuantityFormatter = QuantityFormatter(for: .gram)
     
     lazy var insulinFormatter: QuantityFormatter = {
-        let formatter = QuantityFormatter(for: .internationalUnit())
+        let formatter = QuantityFormatter(for: .internationalUnit)
         formatter.numberFormatter.maximumFractionDigits = 2
         return formatter
     }()
@@ -480,7 +479,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var doseEntries: [BasalRelativeDose]?
         var totalDelivery: Double?
         var cobValues: [CarbValue]?
-        var carbsOnBoard: HKQuantity?
+        var carbsOnBoard: LoopQuantity?
         let startDate = charts.startDate
         let basalDeliveryState = self.basalDeliveryState
         let automaticDosingEnabled = automaticDosingStatus.automaticDosingEnabled

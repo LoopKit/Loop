@@ -8,7 +8,7 @@
 
 import WatchKit
 import WatchConnectivity
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopCore
 import SwiftUI
@@ -224,7 +224,7 @@ final class ActionHUDController: HUDInterfaceController {
         }
     }
 
-    private func formattedGlucoseRangeString(from range: ClosedRange<HKQuantity>) -> String {
+    private func formattedGlucoseRangeString(from range: ClosedRange<LoopQuantity>) -> String {
         let unit = loopManager.displayGlucoseUnit
         glucoseFormatter.updateUnit(to: unit)
         let rangeDouble = range.doubleRange(for: unit)

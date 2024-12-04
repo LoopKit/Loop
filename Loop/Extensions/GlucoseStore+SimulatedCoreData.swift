@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 // MARK: - Simulated Core Data
@@ -52,9 +52,9 @@ extension GlucoseStore {
                 }
             }()
             simulated.append(NewGlucoseSample.simulated(date: startDate,
-                                                        quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: new),
+                                                        quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: new),
                                                         trend: trend,
-                                                        trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: trendRateValue)))
+                                                        trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: trendRateValue)))
 
             if simulated.count >= simulatedLimit {
                 if let error = addSimulatedHistoricalGlucoseObjects(samples: simulated) {
@@ -88,7 +88,7 @@ extension GlucoseStore {
 }
 
 fileprivate extension NewGlucoseSample {
-    static func simulated(date: Date, quantity: HKQuantity, trend: GlucoseTrend?, trendRate: HKQuantity?) -> NewGlucoseSample {
+    static func simulated(date: Date, quantity: LoopQuantity, trend: GlucoseTrend?, trendRate: LoopQuantity?) -> NewGlucoseSample {
         return NewGlucoseSample(date: date,
                                 quantity: quantity,
                                 condition: nil,

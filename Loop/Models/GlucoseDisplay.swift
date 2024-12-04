@@ -7,19 +7,19 @@
 //
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 struct GlucoseDisplay: GlucoseDisplayable {
     let isStateValid: Bool
     let trendType: GlucoseTrend?
-    let trendRate: HKQuantity?
+    let trendRate: LoopQuantity?
     let isLocal: Bool
     var glucoseRangeCategory: GlucoseRangeCategory?
         
     init(isStateValid: Bool,
          trendType: GlucoseTrend?,
-         trendRate: HKQuantity?,
+         trendRate: LoopQuantity?,
          isLocal: Bool,
          glucoseRangeCategory: GlucoseRangeCategory?)
     {
@@ -45,7 +45,7 @@ struct GlucoseDisplay: GlucoseDisplayable {
 struct ManualGlucoseDisplay: GlucoseDisplayable {
     let isStateValid: Bool
     let trendType: GlucoseTrend?
-    let trendRate: HKQuantity?
+    let trendRate: LoopQuantity?
     let isLocal: Bool
     let glucoseRangeCategory: GlucoseRangeCategory?
     

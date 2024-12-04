@@ -298,7 +298,8 @@ class LoopAppManager: NSObject {
             }
 
             Task { @MainActor in
-                if let unit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) {
+                if let hkUnit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) {
+                    let unit = LoopUnit(from: hkUnit)
                     self.displayGlucosePreference.unitDidChange(to: unit)
                     self.notifyObserversOfDisplayGlucoseUnitChange(to: unit)
                 }
@@ -764,7 +765,7 @@ extension LoopAppManager: AlertPresenter {
 protocol DisplayGlucoseUnitBroadcaster: AnyObject {
     func addDisplayGlucoseUnitObserver(_ observer: DisplayGlucoseUnitObserver)
     func removeDisplayGlucoseUnitObserver(_ observer: DisplayGlucoseUnitObserver)
-    func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: HKUnit)
+    func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: LoopUnit)
 }
 
 extension LoopAppManager: DisplayGlucoseUnitBroadcaster {
@@ -781,7 +782,7 @@ extension LoopAppManager: DisplayGlucoseUnitBroadcaster {
         displayGlucoseUnitObservers.cleanupDeallocatedElements()
     }
 
-    func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: HKUnit) {
+    func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: LoopUnit) {
         self.displayGlucoseUnitObservers.forEach {
             $0.unitDidChange(to: displayGlucoseUnit)
         }
@@ -852,7 +853,7 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                 let mealTime = userInfo[LoopNotificationUserInfoKey.missedMealTime.rawValue] as? Date,
                 let carbAmount = userInfo[LoopNotificationUserInfoKey.missedMealCarbAmount.rawValue] as? Double
             {
-                let missedEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(),
+                let missedEntry = NewCarbEntry(quantity: LoopQuantity(unit: .gram,
                                                                          doubleValue: carbAmount),
                                                     startDate: mealTime,
                                                     foodType: nil,

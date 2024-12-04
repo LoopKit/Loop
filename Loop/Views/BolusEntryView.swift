@@ -7,7 +7,7 @@
 //
 
 import Combine
-import HealthKit
+import LoopAlgorithm
 import SwiftUI
 import LoopKit
 import LoopKitUI
@@ -58,7 +58,7 @@ struct BolusEntryView: View {
             .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
             .onReceive(self.viewModel.$recommendedBolus) { recommendation in
                 // If the recommendation changes, and the user has not edited the bolus amount, update the bolus amount
-                let amount = recommendation?.doubleValue(for: .internationalUnit()) ?? 0
+                let amount = recommendation?.doubleValue(for: .internationalUnit) ?? 0
                 if !editedBolusAmount {
                     var newEnteredBolusString: String
                     if amount == 0 {
@@ -136,7 +136,7 @@ struct BolusEntryView: View {
         LabeledQuantity(
             label: Text("Active Carbs", comment: "Title describing quantity of still-absorbing carbohydrates"),
             quantity: viewModel.activeCarbs,
-            unit: .gram()
+            unit: .gram
         )
     }
     
@@ -145,7 +145,7 @@ struct BolusEntryView: View {
         LabeledQuantity(
             label: Text("Active Insulin", comment: "Title describing quantity of still-absorbing insulin"),
             quantity: viewModel.activeInsulin,
-            unit: .internationalUnit(),
+            unit: .internationalUnit,
             maxFractionDigits: 2
         )
     }
@@ -264,7 +264,7 @@ struct BolusEntryView: View {
     }
 
     private var bolusUnitsLabel: some View {
-        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+        Text(QuantityFormatter(for: .internationalUnit).localizedUnitStringWithPlurality())
             .foregroundColor(Color(.secondaryLabel))
     }
 
@@ -431,8 +431,8 @@ struct BolusEntryView: View {
 
 struct LabeledQuantity: View {
     var label: Text
-    var quantity: HKQuantity?
-    var unit: HKUnit
+    var quantity: LoopQuantity?
+    var unit: LoopUnit
     var maxFractionDigits: Int?
 
     var body: some View {

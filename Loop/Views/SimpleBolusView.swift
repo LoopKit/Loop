@@ -9,7 +9,6 @@
 import SwiftUI
 import LoopKit
 import LoopKitUI
-import HealthKit
 import LoopCore
 import LoopAlgorithm
 
@@ -68,7 +67,7 @@ struct SimpleBolusView: View {
         .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
     }
     
-    private func formatGlucose(_ quantity: HKQuantity) -> String {
+    private func formatGlucose(_ quantity: LoopQuantity) -> String {
         return displayGlucosePreference.format(quantity)
     }
     
@@ -211,7 +210,7 @@ struct SimpleBolusView: View {
     }
 
     private var carbUnitsLabel: some View {
-        Text(QuantityFormatter(for: .gram()).localizedUnitStringWithPlurality())
+        Text(QuantityFormatter(for: .gram).localizedUnitStringWithPlurality())
             .foregroundColor(Color(.secondaryLabel))
     }
     
@@ -222,7 +221,7 @@ struct SimpleBolusView: View {
     }
 
     private var bolusUnitsLabel: Text {
-        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+        Text(QuantityFormatter(for: .internationalUnit).localizedUnitStringWithPlurality())
             .foregroundColor(Color(.secondaryLabel))
     }
 
@@ -334,7 +333,7 @@ struct SimpleBolusView: View {
                 title: Text("Recommended Bolus Exceeds Maximum Bolus", comment: "Title for bolus screen warning when recommended bolus exceeds max bolus"),
                 caption: Text(String(format: NSLocalizedString("Your recommended bolus exceeds your maximum bolus amount of %1$@.", comment: "Warning for simple bolus when recommended bolus exceeds max bolus. (1: maximum bolus)"), viewModel.maximumBolusAmountString )))
         case .carbohydrateEntryTooLarge:
-            let maximumCarbohydrateString = QuantityFormatter(for: .gram()).string(from: LoopConstants.maxCarbEntryQuantity)!
+            let maximumCarbohydrateString = QuantityFormatter(for: .gram).string(from: LoopConstants.maxCarbEntryQuantity)!
             return WarningView(
                 title: Text("Carbohydrate Entry Too Large", comment: "Title for bolus screen warning when carbohydrate entry is too large"),
                 caption: Text(String(format: NSLocalizedString("The maximum amount allowed is %1$@.", comment: "Warning for simple bolus when carbohydrate entry is too large. (1: maximum carbohydrate entry)"), maximumCarbohydrateString)))
@@ -383,7 +382,7 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             completion(.success(InsulinValue(startDate: date, value: 2.0)))
         }
         
-        func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
+        func computeSimpleBolusRecommendation(at date: Date, mealCarbs: LoopQuantity?, manualGlucose: LoopQuantity?) -> BolusDosingDecision? {
             var decision = BolusDosingDecision(for: .simpleBolus)
             decision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: 3),
                                                                                    date: Date())
@@ -401,8 +400,8 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             return 6
         }
         
-        var suspendThreshold: HKQuantity? {
-            return HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 75)
+        var suspendThreshold: LoopQuantity? {
+            return LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 75)
         }
     }
 

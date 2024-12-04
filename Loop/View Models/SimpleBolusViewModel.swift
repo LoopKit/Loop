@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import HealthKit
 import LoopKit
 import LoopKitUI
 import os.log
@@ -29,11 +28,11 @@ protocol SimpleBolusViewModelDelegate: AnyObject {
 
     func insulinOnBoard(at date: Date) async -> InsulinValue?
 
-    func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision?
+    func computeSimpleBolusRecommendation(at date: Date, mealCarbs: LoopQuantity?, manualGlucose: LoopQuantity?) -> BolusDosingDecision?
 
     var maximumBolus: Double? { get }
 
-    var suspendThreshold: HKQuantity? { get }
+    var suspendThreshold: LoopQuantity? { get }
 }
 
 @MainActor
@@ -75,7 +74,7 @@ class SimpleBolusViewModel: ObservableObject {
     @Published var enteredCarbString: String = "" {
         didSet {
             if let enteredCarbs = Self.carbAmountFormatter.number(from: enteredCarbString)?.doubleValue, enteredCarbs > 0 {
-                carbQuantity = HKQuantity(unit: .gram(), doubleValue: enteredCarbs)
+                carbQuantity = LoopQuantity(unit: .gram, doubleValue: enteredCarbs)
             } else {
                 carbQuantity = nil
             }
@@ -87,7 +86,7 @@ class SimpleBolusViewModel: ObservableObject {
 
 
     // needed to detect change in display glucose unit when returning to the app
-    private var cachedDisplayGlucoseUnit: HKUnit
+    private var cachedDisplayGlucoseUnit: LoopUnit
 
     var manualGlucoseString: String {
         get  {
@@ -121,14 +120,14 @@ class SimpleBolusViewModel: ObservableObject {
         }
         
         if let bolus = bolus {
-            guard bolus.doubleValue(for: .internationalUnit()) <= maxBolus else {
+            guard bolus.doubleValue(for: .internationalUnit) <= maxBolus else {
                 activeNotice = .maxBolusExceeded
                 return
             }
         }
 
         let isAddingCarbs: Bool
-        if let carbQuantity = carbQuantity, carbQuantity.doubleValue(for: .gram()) > 0 {
+        if let carbQuantity = carbQuantity, carbQuantity.doubleValue(for: .gram) > 0 {
             isAddingCarbs = true
         } else {
             isAddingCarbs = false
@@ -170,7 +169,7 @@ class SimpleBolusViewModel: ObservableObject {
             if manualGlucoseQuantity == nil ||
                 _manualGlucoseString != displayGlucosePreference.format(manualGlucoseQuantity!, includeUnit: false)
             {
-                manualGlucoseQuantity = HKQuantity(unit: cachedDisplayGlucoseUnit, doubleValue: manualGlucoseValue)
+                manualGlucoseQuantity = LoopQuantity(unit: cachedDisplayGlucoseUnit, doubleValue: manualGlucoseValue)
                 updateNotice()
             }
         }
@@ -179,7 +178,7 @@ class SimpleBolusViewModel: ObservableObject {
     @Published var enteredBolusString: String {
         didSet {
             if let enteredBolusAmount = Self.doseAmountFormatter.number(from: enteredBolusString)?.doubleValue, enteredBolusAmount > 0 {
-                bolus = HKQuantity(unit: .internationalUnit(), doubleValue: enteredBolusAmount)
+                bolus = LoopQuantity(unit: .internationalUnit, doubleValue: enteredBolusAmount)
             } else {
                 bolus = nil
             }
@@ -187,18 +186,18 @@ class SimpleBolusViewModel: ObservableObject {
         }
     }
     
-    private var carbQuantity: HKQuantity? = nil
+    private var carbQuantity: LoopQuantity? = nil
 
-    private var manualGlucoseQuantity: HKQuantity? = nil {
+    private var manualGlucoseQuantity: LoopQuantity? = nil {
         didSet {
             updateRecommendation()
         }
     }
 
-    private var bolus: HKQuantity? = nil
+    private var bolus: LoopQuantity? = nil
     
     var bolusRecommended: Bool {
-        if let bolus = bolus, bolus.doubleValue(for: .internationalUnit()) > 0 {
+        if let bolus = bolus, bolus.doubleValue(for: .internationalUnit) > 0 {
             return true
         }
         return false
@@ -206,9 +205,9 @@ class SimpleBolusViewModel: ObservableObject {
 
     let displayGlucosePreference: DisplayGlucosePreference
 
-    var displayGlucoseUnit: HKUnit { return displayGlucosePreference.unit }
+    var displayGlucoseUnit: LoopUnit { return displayGlucosePreference.unit }
     
-    var suspendThreshold: HKQuantity? { return delegate.suspendThreshold }
+    var suspendThreshold: LoopQuantity? { return delegate.suspendThreshold }
 
     private var recommendation: Double? = nil {
         didSet {
@@ -234,7 +233,7 @@ class SimpleBolusViewModel: ObservableObject {
     }()
     
     private static let carbAmountFormatter: NumberFormatter = {
-        let quantityFormatter = QuantityFormatter(for: .gram())
+        let quantityFormatter = QuantityFormatter(for: .gram)
         return quantityFormatter.numberFormatter
     }()
 
@@ -278,13 +277,13 @@ class SimpleBolusViewModel: ObservableObject {
     private let delegate: SimpleBolusViewModelDelegate
     private let log = OSLog(category: "SimpleBolusViewModel")
     
-    private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit())
+    private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit)
 
     var maximumBolusAmountString: String {
         guard let maxBolus = delegate.maximumBolus else {
             return ""
         }
-        let maxBolusQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: maxBolus)
+        let maxBolusQuantity = LoopQuantity(unit: .internationalUnit, doubleValue: maxBolus)
         return bolusVolumeFormatter.string(from: maxBolusQuantity)!
     }
 
@@ -342,7 +341,7 @@ class SimpleBolusViewModel: ObservableObject {
         let saveDate = Date()
 
         // Authenticate if needed
-        if let bolus = bolus, bolus.doubleValue(for: .internationalUnit()) > 0 {
+        if let bolus = bolus, bolus.doubleValue(for: .internationalUnit) > 0 {
             let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusString)
             let authenticated = await withCheckedContinuation { continuation in
                 authenticate(message) {
@@ -396,7 +395,7 @@ class SimpleBolusViewModel: ObservableObject {
             }
         }
 
-        if let bolusVolume = bolus?.doubleValue(for: .internationalUnit()), bolusVolume > 0 {
+        if let bolusVolume = bolus?.doubleValue(for: .internationalUnit), bolusVolume > 0 {
             do {
                 try await delegate.enactBolus(units: bolusVolume, activationType: .activationTypeFor(recommendedAmount: recommendation, bolusAmount: bolusVolume))
                 dosingDecision?.manualBolusRequested = bolusVolume

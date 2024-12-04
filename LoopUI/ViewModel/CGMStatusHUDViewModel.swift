@@ -6,7 +6,7 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 public class CGMStatusHUDViewModel {
@@ -73,7 +73,7 @@ public class CGMStatusHUDViewModel {
 
     func setGlucoseQuantity(_ glucoseQuantity: Double,
                             at glucoseStartDate: Date,
-                            unit: HKUnit,
+                            unit: LoopUnit,
                             glucoseDisplay: GlucoseDisplayable?,
                             wasUserEntered: Bool,
                             isDisplayOnly: Bool,

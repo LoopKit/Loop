@@ -6,7 +6,6 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import HealthKit
 import LoopCore
 import LoopKit
 import LoopKitUI
@@ -76,7 +75,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
     private var retrospectiveGlucoseDiscrepancies: [GlucoseChange]?
 
-    private var totalRetrospectiveCorrection: HKQuantity?
+    private var totalRetrospectiveCorrection: LoopQuantity?
 
     private var refreshContext = RefreshContext.all
 
@@ -115,7 +114,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         chartStartDate = calendar.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
         var glucoseSamples: [StoredGlucoseSample]?
-        var totalRetrospectiveCorrection: HKQuantity?
+        var totalRetrospectiveCorrection: LoopQuantity?
 
         // For now, do this every time
         _ = self.refreshContext.remove(.status)
@@ -259,7 +258,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             let currentGlucose = loopDataManager.latestGlucose
         {
             let formatter = QuantityFormatter(for: glucoseChart.glucoseUnit)
-            let predicted = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: currentGlucose.quantity.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit))
+            let predicted = LoopQuantity(unit: glucoseChart.glucoseUnit, doubleValue: currentGlucose.quantity.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit))
             var values = [predicted, currentGlucose.quantity].map { formatter.string(from: $0) ?? "?" }
             formatter.numberFormatter.positivePrefix = formatter.numberFormatter.plusSign
             values.append(formatter.string(from: lastDiscrepancy.quantity) ?? "?")
@@ -275,7 +274,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
                 var totalEffectDisplay = "?"
                 if let totalEffect = self.totalRetrospectiveCorrection {
                     let integralEffectValue = totalEffect.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit)
-                    let integralEffect = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: integralEffectValue)
+                    let integralEffect = LoopQuantity(unit: glucoseChart.glucoseUnit, doubleValue: integralEffectValue)
                     integralEffectDisplay = formatter.string(from: integralEffect) ?? "?"
                     totalEffectDisplay = formatter.string(from: totalEffect) ?? "?"
                 }

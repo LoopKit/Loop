@@ -7,16 +7,16 @@
 //
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 import UIKit
 
 final class GlucoseThresholdTableViewController: TextFieldTableViewController {
     
-    public let glucoseUnit: HKUnit
+    public let glucoseUnit: LoopUnit
     
-    init(threshold: Double?, glucoseUnit: HKUnit) {
+    init(threshold: Double?, glucoseUnit: LoopUnit) {
         self.glucoseUnit = glucoseUnit
         
         super.init(style: .grouped)

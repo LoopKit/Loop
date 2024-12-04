@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import HealthKit
 import WatchKit
 import LoopKit
 import LoopAlgorithm
@@ -46,7 +45,7 @@ final class ComplicationChartManager {
     private var renderedChartImage: UIImage?
     private var visibleInterval: TimeInterval = .hours(4)
 
-    private var unit: HKUnit {
+    private var unit: LoopUnit {
         return data?.unit ?? .milligramsPerDeciliter
     }
 

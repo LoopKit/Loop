@@ -85,7 +85,7 @@ class SimpleBolusViewModelTests: XCTestCase {
         
         let _ = await viewModel.saveAndDeliver()
 
-        XCTAssertEqual(20, addedCarbEntry?.quantity.doubleValue(for: .gram()))
+        XCTAssertEqual(20, addedCarbEntry?.quantity.doubleValue(for: .gram))
         XCTAssertEqual(180, addedGlucose.first?.quantity.doubleValue(for: .milligramsPerDeciliter))
         
         XCTAssertEqual(2.5, enactedBolus?.units)
@@ -112,7 +112,7 @@ class SimpleBolusViewModelTests: XCTestCase {
 
         let _ = await viewModel.saveAndDeliver()
 
-        XCTAssertEqual(20, addedCarbEntry?.quantity.doubleValue(for: .gram()))
+        XCTAssertEqual(20, addedCarbEntry?.quantity.doubleValue(for: .gram))
         
         XCTAssertEqual(0.1, enactedBolus?.units)
         
@@ -299,7 +299,7 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
     }
 
 
-    func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
+    func computeSimpleBolusRecommendation(at date: Date, mealCarbs: LoopQuantity?, manualGlucose: LoopQuantity?) -> BolusDosingDecision? {
         var decision = BolusDosingDecision(for: .simpleBolus)
         decision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: ManualBolusRecommendation(amount: currentRecommendation, notice: .none),
                                                                                date: date)
@@ -312,7 +312,7 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         return 3.0
     }
     
-    var suspendThreshold: HKQuantity? {
-        return HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80)
+    var suspendThreshold: LoopQuantity? {
+        return LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 80)
     }
 }

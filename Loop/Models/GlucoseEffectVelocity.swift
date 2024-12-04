@@ -5,7 +5,6 @@
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
 import LoopKit
 import LoopAlgorithm
 
@@ -13,7 +12,7 @@ import LoopAlgorithm
 extension GlucoseEffectVelocity: RawRepresentable {
     public typealias RawValue = [String: Any]
 
-    static let unit = HKUnit.milligramsPerDeciliter.unitDivided(by: .minute())
+    static let unit = LoopUnit.milligramsPerDeciliterPerMinute
 
     public init?(rawValue: RawValue) {
         guard let startDate = rawValue["startDate"] as? Date,
@@ -25,7 +24,7 @@ extension GlucoseEffectVelocity: RawRepresentable {
         self.init(
             startDate: startDate,
             endDate: rawValue["endDate"] as? Date ?? startDate,
-            quantity: HKQuantity(unit: type(of: self).unit, doubleValue: doubleValue)
+            quantity: LoopQuantity(unit: type(of: self).unit, doubleValue: doubleValue)
         )
     }
 

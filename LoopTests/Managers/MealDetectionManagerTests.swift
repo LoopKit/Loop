@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import HealthKit
 import LoopCore
 import LoopKit
 import LoopAlgorithm
@@ -20,10 +19,10 @@ fileprivate class MockGlucoseSample: GlucoseSampleValue {
     let isDisplayOnly: Bool
     let wasUserEntered: Bool
     let condition: GlucoseCondition? = nil
-    let trendRate: HKQuantity? = nil
+    let trendRate: LoopQuantity? = nil
     var trend: LoopKit.GlucoseTrend?
     var syncIdentifier: String?
-    let quantity: HKQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)
+    let quantity: LoopQuantity = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)
     let startDate: Date
     
     init(startDate: Date, isDisplayOnly: Bool = false, wasUserEntered: Bool = false) {
@@ -112,33 +111,33 @@ extension MissedMealTestType {
         switch self {
         case .missedMealWithCOB:
             return [
-                NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 30),
+                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T15:41:36")!,
                              foodType: nil,
                              absorptionTime: nil),
-                NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 10),
+                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 10),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T17:36:58")!,
                              foodType: nil,
                              absorptionTime: nil)
             ]
         case .noMealWithCOB:
             return [
-                NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 30),
+                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30),
                              startDate: Self.dateFormatter.date(from: "2022-10-17T22:40:00")!,
                              foodType: nil,
                              absorptionTime: nil)
             ]
         case .manyMeals:
             return [
-                NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 30),
+                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T15:41:36")!,
                              foodType: nil,
                              absorptionTime: nil),
-                NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 10),
+                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 10),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T17:36:58")!,
                              foodType: nil,
                              absorptionTime: nil),
-                NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: 40),
+                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 40),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T19:11:43")!,
                              foodType: nil,
                              absorptionTime: nil)
@@ -150,7 +149,7 @@ extension MissedMealTestType {
     
     var carbSchedule: CarbRatioSchedule {
         CarbRatioSchedule(
-            unit: .gram(),
+            unit: .gram,
             dailyItems: [
                 RepeatingScheduleValue(startTime: 0.0, value: 15.0),
             ],
@@ -163,16 +162,16 @@ extension MissedMealTestType {
         switch self {
         case .mmolUser:
             return InsulinSensitivitySchedule(
-                unit: HKUnit.millimolesPerLiter,
+                unit: LoopUnit.millimolesPerLiter,
                 dailyItems: [
                     RepeatingScheduleValue(startTime: 0.0,
-                                           value: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: value).doubleValue(for: .millimolesPerLiter))
+                                           value: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: value).doubleValue(for: .millimolesPerLiter))
                 ],
                 timeZone: .utcTimeZone
             )!
         default:
             return InsulinSensitivitySchedule(
-                unit: HKUnit.milligramsPerDeciliter,
+                unit: .milligramsPerDeciliter,
                 dailyItems: [
                     RepeatingScheduleValue(startTime: 0.0, value: value)
                 ],
@@ -227,7 +226,7 @@ class MealDetectionManagerTests: XCTestCase {
             sensitivity: testType.insulinSensitivitySchedule.quantitiesBetween(start: historyStart, end: date),
             carbRatio: testType.carbSchedule.between(start: historyStart, end: date),
             target: glucoseTarget!.quantityBetween(start: historyStart, end: date),
-            suspendThreshold: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 65),
+            suspendThreshold: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 65),
             maxBolus: maximumBolus!,
             maxBasalRate: maximumBasalRatePerHour,
             useIntegralRetrospectiveCorrection: false,
@@ -287,7 +286,7 @@ class MealDetectionManagerTests: XCTestCase {
         return fixture.map {
             GlucoseEffectVelocity(startDate: dateFormatter.date(from: $0["startDate"] as! String)!,
                                   endDate: dateFormatter.date(from: $0["endDate"] as! String)!,
-                                  quantity: HKQuantity(unit: HKUnit(from: $0["unit"] as! String),
+                                  quantity: LoopQuantity(unit: LoopUnit(from: $0["unit"] as! String),
                                                        doubleValue:$0["value"] as! Double))
         }
     }

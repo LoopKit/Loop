@@ -11,7 +11,6 @@ import LoopKitUI
 import LoopAlgorithm
 import os.log
 import Combine
-import HealthKit
 
 protocol FavoriteFoodInsightsViewModelDelegate: AnyObject {
     func selectedFavoriteFoodLastEaten(_ favoriteFood: StoredFavoriteFood) async throws -> Date?
@@ -56,7 +55,7 @@ class FavoriteFoodInsightsViewModel: ObservableObject {
     }
     var now = Date()
     
-    var preferredCarbUnit = HKUnit.gram()
+    var preferredCarbUnit = LoopUnit.gram
     lazy var carbFormatter = QuantityFormatter(for: preferredCarbUnit)
     lazy var absorptionTimeFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()

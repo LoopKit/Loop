@@ -7,14 +7,13 @@
 //
 
 import SwiftUI
-import HealthKit
 import LoopKit
 import LoopKitUI
 import LoopAlgorithm
 
 struct CarbEffectChartView: View {
     let chartManager: ChartsManager
-    var glucoseUnit: HKUnit
+    var glucoseUnit: LoopUnit
     var carbAbsorptionReview: CarbAbsorptionReview?
     var dateInterval: DateInterval
     

@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import HealthKit
 import LoopKit
 import LoopAlgorithm
 
@@ -19,19 +18,19 @@ final class WatchContext: RawRepresentable {
 
     var creationDate = Date()
 
-    var displayGlucoseUnit: HKUnit?
+    var displayGlucoseUnit: LoopUnit?
 
-    var glucose: HKQuantity?
+    var glucose: LoopQuantity?
     var glucoseCondition: GlucoseCondition?
     var glucoseTrend: GlucoseTrend?
-    var glucoseTrendRate: HKQuantity?
+    var glucoseTrendRate: LoopQuantity?
     var glucoseDate: Date?
     var glucoseIsDisplayOnly: Bool?
     var glucoseWasUserEntered: Bool?
     var glucoseSyncIdentifier: String?
 
     var predictedGlucose: WatchPredictedGlucose?
-    var eventualGlucose: HKQuantity? {
+    var eventualGlucose: LoopQuantity? {
         return predictedGlucose?.values.last?.quantity
     }
 
@@ -63,11 +62,11 @@ final class WatchContext: RawRepresentable {
         isClosedLoop = rawValue["cl"] as? Bool
 
         if let unitString = rawValue["gu"] as? String {
-            displayGlucoseUnit = HKUnit(from: unitString)
+            displayGlucoseUnit = LoopUnit(from: unitString)
         }
         let unit = displayGlucoseUnit ?? .milligramsPerDeciliter
         if let glucoseValue = rawValue["gv"] as? Double {
-            glucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
+            glucose = LoopQuantity(unit: unit, doubleValue: glucoseValue)
         }
 
         if let rawGlucoseCondition = rawValue["gc"] as? GlucoseCondition.RawValue {
@@ -77,7 +76,7 @@ final class WatchContext: RawRepresentable {
             glucoseTrend = GlucoseTrend(rawValue: rawGlucoseTrend)
         }
         if let glucoseTrendRateValue = rawValue["gtrv"] as? Double {
-            glucoseTrendRate = HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: glucoseTrendRateValue)
+            glucoseTrendRate = LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: glucoseTrendRateValue)
         }
         glucoseDate = rawValue["gd"] as? Date
         glucoseIsDisplayOnly = rawValue["gdo"] as? Bool
@@ -126,7 +125,7 @@ final class WatchContext: RawRepresentable {
         raw["gc"] = glucoseCondition?.rawValue
         raw["gt"] = glucoseTrend?.rawValue
         if let glucoseTrendRate = glucoseTrendRate {
-            let unitPerMinute = unit.unitDivided(by: .minute())
+            let unitPerMinute = unit.glucose(per: .minutes)
             raw["gtru"] = unitPerMinute.unitString
             raw["gtrv"] = glucoseTrendRate.doubleValue(for: unitPerMinute)
         }

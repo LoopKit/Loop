@@ -7,7 +7,6 @@
 //
 
 import ClockKit
-import HealthKit
 import LoopKit
 import Foundation
 import LoopCore
@@ -43,12 +42,12 @@ extension CLKComplicationTemplate {
 
     static func templateForFamily(
         _ family: CLKComplicationFamily,
-        glucose: HKQuantity,
-        unit: HKUnit,
+        glucose: LoopQuantity,
+        unit: LoopUnit,
         glucoseDate: Date?,
         trend: GlucoseTrend?,
         glucoseCondition: GlucoseCondition?,
-        eventualGlucose: HKQuantity?,
+        eventualGlucose: LoopQuantity?,
         at date: Date,
         loopLastRunDate: Date?,
         recencyInterval: TimeInterval,

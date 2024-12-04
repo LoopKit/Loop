@@ -193,7 +193,7 @@ extension LoopDataManager {
 }
 
 extension LoopDataManager {
-    var displayGlucoseUnit: HKUnit {
+    var displayGlucoseUnit: LoopUnit {
         activeContext?.displayGlucoseUnit ?? .milligramsPerDeciliter
     }
 }

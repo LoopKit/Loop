@@ -7,7 +7,6 @@
 //
 
 import Combine
-import HealthKit
 import LocalAuthentication
 import Intents
 import os.log
@@ -38,18 +37,18 @@ final class ManualEntryDoseViewModel: ObservableObject {
 
     @Published var glucoseValues: [GlucoseValue] = [] // stored glucose values
     @Published var predictedGlucoseValues: [GlucoseValue] = []
-    @Published var glucoseUnit: HKUnit = .milligramsPerDeciliter
+    @Published var glucoseUnit: LoopUnit = .milligramsPerDeciliter
     @Published var chartDateInterval: DateInterval
 
-    @Published var activeCarbs: HKQuantity?
-    @Published var activeInsulin: HKQuantity?
+    @Published var activeCarbs: LoopQuantity?
+    @Published var activeInsulin: LoopQuantity?
 
     @Published var targetGlucoseSchedule: GlucoseRangeSchedule?
     @Published var preMealOverride: TemporaryScheduleOverride?
     private var savedPreMealOverride: TemporaryScheduleOverride?
     @Published var scheduleOverride: TemporaryScheduleOverride?
 
-    @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+    @Published var enteredBolus = LoopQuantity(unit: .internationalUnit, doubleValue: 0)
     private var isInitiatingSaveOrBolus = false
 
     private let log = OSLog(category: "ManualEntryDoseViewModel")
@@ -171,7 +170,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
     // MARK: - View API
 
     func saveManualDose() async throws {
-        guard enteredBolus.doubleValue(for: .internationalUnit()) > 0 else {
+        guard enteredBolus.doubleValue(for: .internationalUnit) > 0 else {
             return
         }
 
@@ -185,7 +184,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
     }
     
     private func continueSaving() async {
-        let doseVolume = enteredBolus.doubleValue(for: .internationalUnit())
+        let doseVolume = enteredBolus.doubleValue(for: .internationalUnit)
         guard doseVolume > 0 else {
             return
         }
@@ -193,7 +192,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
         await delegate?.addManuallyEnteredDose(startDate: selectedDoseDate, units: doseVolume, insulinType: selectedInsulinType)
     }
 
-    private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit())
+    private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit)
 
     private lazy var absorptionTimeFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -205,7 +204,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
     }()
 
     var enteredBolusAmountString: String {
-        let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
+        let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit)
         return bolusVolumeFormatter.numberFormatter.string(from: bolusVolume) ?? String(bolusVolume)
     }
 
@@ -235,7 +234,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
             deliveryType: .bolus,
             startDate: selectedDoseDate,
             endDate: selectedDoseDate,
-            volume: enteredBolus.doubleValue(for: .internationalUnit()),
+            volume: enteredBolus.doubleValue(for: .internationalUnit),
             insulinModel: insulinModel
         )
 

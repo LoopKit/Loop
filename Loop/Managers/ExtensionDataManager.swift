@@ -6,7 +6,7 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import HealthKit
+import LoopAlgorithm
 import UIKit
 import LoopKit
 
@@ -87,7 +87,7 @@ final class ExtensionDataManager {
         return info
     }
 
-    private func createStatusContext(glucoseUnit: HKUnit) async -> StatusExtensionContext? {
+    private func createStatusContext(glucoseUnit: LoopUnit) async -> StatusExtensionContext? {
 
         let basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
 
@@ -112,7 +112,7 @@ final class ExtensionDataManager {
             )
             context.predictedGlucose = PredictedGlucoseContext(
                 values: (1...36).map { 89.123 + Double($0 * 5) }, // 3 hours of linear data
-                unit: HKUnit.milligramsPerDeciliter,
+                unit: LoopUnit.milligramsPerDeciliter,
                 startDate: Date(),
                 interval: TimeInterval(minutes: 5))
         #endif

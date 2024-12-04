@@ -8,7 +8,6 @@
 
 import Foundation
 import LoopKit
-import HealthKit
 import LoopAlgorithm
 @testable import Loop
 
@@ -23,13 +22,13 @@ class MockSettingsProvider: SettingsProvider {
         return carbRatioHistory ?? settings.carbRatioSchedule?.between(start: startDate, end: endDate) ?? []
     }
     
-    var insulinSensitivityHistory: [AbsoluteScheduleValue<HKQuantity>]?
-    func getInsulinSensitivityHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<HKQuantity>] {
+    var insulinSensitivityHistory: [AbsoluteScheduleValue<LoopQuantity>]?
+    func getInsulinSensitivityHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<LoopQuantity>] {
         return insulinSensitivityHistory ?? settings.insulinSensitivitySchedule?.quantitiesBetween(start: startDate, end: endDate) ?? []
     }
     
-    var targetRangeHistory: [AbsoluteScheduleValue<ClosedRange<HKQuantity>>]?
-    func getTargetRangeHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<ClosedRange<HKQuantity>>] {
+    var targetRangeHistory: [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]?
+    func getTargetRangeHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>] {
         return targetRangeHistory ?? settings.glucoseTargetRangeSchedule?.quantityBetween(start: startDate, end: endDate) ?? []
     }
     

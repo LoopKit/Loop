@@ -6,14 +6,14 @@
 //
 
 import LoopKit
-import HealthKit
+import LoopAlgorithm
 
 
 extension GlucoseRangeSchedule {
-    func minQuantity(at date: Date) -> HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: value(at: date).minValue)
+    func minQuantity(at date: Date) -> LoopQuantity {
+        return LoopQuantity(unit: unit, doubleValue: value(at: date).minValue)
     }
-    func maxQuantity(at date: Date) -> HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: value(at: date).maxValue)
+    func maxQuantity(at date: Date) -> LoopQuantity {
+        return LoopQuantity(unit: unit, doubleValue: value(at: date).maxValue)
     }
 }

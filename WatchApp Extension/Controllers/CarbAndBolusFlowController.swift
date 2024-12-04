@@ -8,7 +8,6 @@
 
 import WatchKit
 import SwiftUI
-import HealthKit
 import LoopCore
 import LoopKit
 

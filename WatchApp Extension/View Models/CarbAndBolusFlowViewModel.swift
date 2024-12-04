@@ -8,7 +8,7 @@
 
 import Foundation
 import Combine
-import HealthKit
+import LoopAlgorithm
 import WatchKit
 import WatchConnectivity
 import LoopKit
@@ -115,13 +115,13 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     func recommendBolus(forGrams grams: Int, eatenAt carbEntryDate: Date, absorptionTime carbAbsorptionTime: CarbAbsorptionTime, lastEntryDate: Date) {
         let entry = NewCarbEntry(
             date: lastEntryDate,
-            quantity: HKQuantity(unit: .gram(), doubleValue: Double(grams)),
+            quantity: LoopQuantity(unit: .gram, doubleValue: Double(grams)),
             startDate: carbEntryDate,
             foodType: nil,
             absorptionTime: absorptionTime(for: carbAbsorptionTime)
         )
 
-        guard entry.quantity.doubleValue(for: .gram()) > 0 else {
+        guard entry.quantity.doubleValue(for: .gram) > 0 else {
             return
         }
 

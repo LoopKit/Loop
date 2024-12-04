@@ -6,15 +6,14 @@
 //
 
 import LoopKit
-import HealthKit
 import LoopAlgorithm
 
 
 protocol GlucoseChartValueHashable {
     var start: Date { get }
     var end: Date { get }
-    var min: HKQuantity { get }
-    var max: HKQuantity { get }
+    var min: LoopQuantity { get }
+    var max: LoopQuantity { get }
 
     var chartHashValue: Int { get }
 }
@@ -59,7 +58,7 @@ extension SampleValue {
 }
 
 
-extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == ClosedRange<HKQuantity> {
+extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == ClosedRange<LoopQuantity> {
     var start: Date {
         return startDate
     }
@@ -68,11 +67,11 @@ extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == ClosedRang
         return endDate
     }
 
-    var min: HKQuantity {
+    var min: LoopQuantity {
         return value.lowerBound
     }
 
-    var max: HKQuantity {
+    var max: LoopQuantity {
         return value.upperBound
     }
 }
@@ -95,11 +94,11 @@ struct TemporaryScheduleOverrideHashable: GlucoseChartValueHashable {
         return override.activeInterval.end
     }
 
-    var min: HKQuantity {
+    var min: LoopQuantity {
         return override.settings.targetRange!.lowerBound
     }
 
-    var max: HKQuantity {
+    var max: LoopQuantity {
         return override.settings.targetRange!.upperBound
     }
 }

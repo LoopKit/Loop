@@ -103,7 +103,7 @@ fileprivate extension StoredSettings {
                                                                                  RepeatingScheduleValue(startTime: .hours(18), value: 45.0),
                                                                                  RepeatingScheduleValue(startTime: .hours(21), value: 50.0)],
                                                                     timeZone: scheduleTimeZone)
-        let carbRatioSchedule = CarbRatioSchedule(unit: .gram(),
+        let carbRatioSchedule = CarbRatioSchedule(unit: .gram,
                                                   dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: 10.0),
                                                                RepeatingScheduleValue(startTime: .hours(8), value: 12.0),
                                                                RepeatingScheduleValue(startTime: .hours(10), value: 9.0),

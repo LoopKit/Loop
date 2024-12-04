@@ -10,7 +10,6 @@ import LoopKit
 import LoopKitUI
 import MockKit
 import SwiftUI
-import HealthKit
 import LoopUI
 
 

@@ -9,7 +9,6 @@
 import XCTest
 import Foundation
 import LoopKit
-import HealthKit
 import LoopAlgorithm
 
 @testable import Loop

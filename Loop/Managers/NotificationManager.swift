@@ -118,7 +118,7 @@ extension NotificationManager {
     
     static func sendRemoteBolusNotification(amount: Double) {
         let notification = UNMutableNotificationContent()
-        let quantityFormatter = QuantityFormatter(for: .internationalUnit())
+        let quantityFormatter = QuantityFormatter(for: .internationalUnit)
         guard let amountDescription = quantityFormatter.numberFormatter.string(from: amount) else {
             return
         }
@@ -140,7 +140,7 @@ extension NotificationManager {
     
     static func sendRemoteBolusFailureNotification(for error: Error, amountInUnits: Double) {
         let notification = UNMutableNotificationContent()
-        let quantityFormatter = QuantityFormatter(for: .internationalUnit())
+        let quantityFormatter = QuantityFormatter(for: .internationalUnit)
         guard let amountDescription = quantityFormatter.numberFormatter.string(from: amountInUnits) else {
             return
         }

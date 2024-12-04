@@ -9,7 +9,7 @@
 import Foundation
 import LoopKit
 import LoopUI
-import HealthKit
+import LoopAlgorithm
 import MKRingProgressView
 
 
@@ -46,7 +46,7 @@ public class BolusProgressTableViewCell: UITableViewCell {
     }
 
     lazy var insulinFormatter: QuantityFormatter = {
-        let formatter = QuantityFormatter(for: .internationalUnit())
+        let formatter = QuantityFormatter(for: .internationalUnit)
         formatter.numberFormatter.minimumFractionDigits = 2
         return formatter
     }()
@@ -99,11 +99,11 @@ public class BolusProgressTableViewCell: UITableViewCell {
             activityIndicator.isHidden = true
             tapToStopLabel.isHidden = false
             
-            let totalUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: totalVolume)
+            let totalUnitsQuantity = LoopQuantity(unit: .internationalUnit, doubleValue: totalVolume)
             let totalUnitsString = insulinFormatter.string(from: totalUnitsQuantity) ?? ""
             
             if let delivered {
-                let deliveredUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: delivered)
+                let deliveredUnitsQuantity = LoopQuantity(unit: .internationalUnit, doubleValue: delivered)
                 let deliveredUnitsString = insulinFormatter.string(from: deliveredUnitsQuantity, includeUnit: false) ?? ""
                 
                 progressLabel.text = String(format: NSLocalizedString("Bolused %1$@ of %2$@", comment: "The format string for bolus progress. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)
@@ -127,10 +127,10 @@ public class BolusProgressTableViewCell: UITableViewCell {
             activityIndicator.isHidden = true
             tapToStopLabel.isHidden = true
             
-            let totalUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: totalVolume)
+            let totalUnitsQuantity = LoopQuantity(unit: .internationalUnit, doubleValue: totalVolume)
             let totalUnitsString = insulinFormatter.string(from: totalUnitsQuantity) ?? ""
             
-            let deliveredUnitsQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: delivered)
+            let deliveredUnitsQuantity = LoopQuantity(unit: .internationalUnit, doubleValue: delivered)
             let deliveredUnitsString = insulinFormatter.string(from: deliveredUnitsQuantity, includeUnit: false) ?? ""
             
             progressLabel.text = String(format: NSLocalizedString("Bolus Canceled: Delivered %1$@ of %2$@", comment: "The title of the cell indicating a bolus has been canceled. (1: delivered volume)(2: total volume)"), deliveredUnitsString, totalUnitsString)

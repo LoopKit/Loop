@@ -9,7 +9,7 @@
 import Foundation
 import LoopKit
 import LoopCore
-import HealthKit
+import LoopAlgorithm
 
 final class AnalyticsServicesManager {
 
@@ -202,7 +202,7 @@ final class AnalyticsServicesManager {
         logEvent("Alert Issued", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue])
     }
 
-    func didEnactOverride(name: String, symbol: String, duration: TemporaryScheduleOverride.Duration, insulinSensitivityMultiplier: Double = 1.0, targetRange: ClosedRange<HKQuantity>? = nil)
+    func didEnactOverride(name: String, symbol: String, duration: TemporaryScheduleOverride.Duration, insulinSensitivityMultiplier: Double = 1.0, targetRange: ClosedRange<LoopQuantity>? = nil)
     {
         let combinedName = "\(symbol) - \(name)"
 
@@ -213,10 +213,10 @@ final class AnalyticsServicesManager {
             "nameWithEmoji": combinedName
         ]
 
-        if let targetUpperBound = targetRange?.upperBound.doubleValue(for: HKUnit.milligramsPerDeciliter) {
+        if let targetUpperBound = targetRange?.upperBound.doubleValue(for: LoopUnit.milligramsPerDeciliter) {
             properties["targetUpperBound"] = targetUpperBound
         }
-        if let targetLowerBound = targetRange?.lowerBound.doubleValue(for: HKUnit.milligramsPerDeciliter) {
+        if let targetLowerBound = targetRange?.lowerBound.doubleValue(for: LoopUnit.milligramsPerDeciliter) {
             properties["targetLowerBound"] = targetLowerBound
         }
 

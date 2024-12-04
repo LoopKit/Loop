@@ -6,7 +6,6 @@
 //  Copyright © 2023 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
 import LoopCore
 import LoopKit
 import WidgetKit
@@ -25,8 +24,8 @@ struct StatusWidgetTimelimeEntry: TimelineEntry {
     
     let currentGlucose: GlucoseValue?
     let glucoseFetchedAt: Date?
-    let delta: HKQuantity?
-    let unit: HKUnit?
+    let delta: LoopQuantity?
+    let unit: LoopUnit?
     let sensor: GlucoseDisplayableContext?
 
     let pumpHighlight: DeviceStatusHighlightContext?

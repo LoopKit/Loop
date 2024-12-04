@@ -8,7 +8,6 @@
 
 import Foundation
 import LoopKit
-import HealthKit
 import LoopAlgorithm
 
 
@@ -47,7 +46,7 @@ extension WatchPredictedGlucose: RawRepresentable {
 
         self.values = values.enumerated().map { tuple in
             PredictedGlucoseValue(startDate: firstDate + Double(tuple.0) * interval,
-                                  quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: Double(tuple.1)))
+                                  quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: Double(tuple.1)))
         }
     }
 }

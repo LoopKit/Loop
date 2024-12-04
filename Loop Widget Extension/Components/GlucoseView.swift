@@ -8,7 +8,6 @@
 
 import SwiftUI
 import LoopKit
-import HealthKit
 import LoopCore
 
 struct GlucoseView: View {

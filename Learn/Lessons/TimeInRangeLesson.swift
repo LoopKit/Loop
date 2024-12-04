@@ -10,7 +10,6 @@ import LoopCore
 import LoopKit
 import LoopKitUI
 import LoopUI
-import HealthKit
 import os.log
 
 

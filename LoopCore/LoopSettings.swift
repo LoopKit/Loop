@@ -5,7 +5,6 @@
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
 import LoopKit
 import LoopAlgorithm
 
@@ -31,9 +30,9 @@ public struct LoopSettings: Equatable {
 
     public var carbRatioSchedule: CarbRatioSchedule?
 
-    public var preMealTargetRange: ClosedRange<HKQuantity>?
+    public var preMealTargetRange: ClosedRange<LoopQuantity>?
 
-    public var legacyWorkoutTargetRange: ClosedRange<HKQuantity>?
+    public var legacyWorkoutTargetRange: ClosedRange<LoopQuantity>?
 
     public var overridePresets: [TemporaryScheduleOverridePreset] = []
 
@@ -47,7 +46,7 @@ public struct LoopSettings: Equatable {
 
     public var defaultRapidActingModel: ExponentialInsulinModelPreset?
     
-    public var glucoseUnit: HKUnit? {
+    public var glucoseUnit: LoopUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
 
@@ -57,8 +56,8 @@ public struct LoopSettings: Equatable {
         insulinSensitivitySchedule: InsulinSensitivitySchedule? = nil,
         basalRateSchedule: BasalRateSchedule? = nil,
         carbRatioSchedule: CarbRatioSchedule? = nil,
-        preMealTargetRange: ClosedRange<HKQuantity>? = nil,
-        legacyWorkoutTargetRange: ClosedRange<HKQuantity>? = nil,
+        preMealTargetRange: ClosedRange<LoopQuantity>? = nil,
+        legacyWorkoutTargetRange: ClosedRange<LoopQuantity>? = nil,
         overridePresets: [TemporaryScheduleOverridePreset]? = nil,
         maximumBasalRatePerHour: Double? = nil,
         maximumBolus: Double? = nil,
@@ -85,7 +84,7 @@ public struct LoopSettings: Equatable {
 extension LoopSettings: RawRepresentable {
     public typealias RawValue = [String: Any]
     private static let version = 1
-    fileprivate static let codingGlucoseUnit = HKUnit.milligramsPerDeciliter
+    fileprivate static let codingGlucoseUnit = LoopUnit.milligramsPerDeciliter
 
     public init?(rawValue: RawValue) {
         guard

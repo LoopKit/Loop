@@ -26,12 +26,12 @@ struct BolusInput: View {
     }
 
     private static let amountFormatter: NumberFormatter = {
-        let formatter = QuantityFormatter(for: .internationalUnit())
+        let formatter = QuantityFormatter(for: .internationalUnit)
         return formatter.numberFormatter
     }()
 
     private static let recommendedAmountFormatter: NumberFormatter = {
-        let formatter = QuantityFormatter(for: .internationalUnit())
+        let formatter = QuantityFormatter(for: .internationalUnit)
         return formatter.numberFormatter
     }()
 

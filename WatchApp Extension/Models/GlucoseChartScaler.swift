@@ -8,7 +8,6 @@
 
 import Foundation
 import CoreGraphics
-import HealthKit
 import LoopKit
 import WatchKit
 import LoopAlgorithm
@@ -49,14 +48,14 @@ struct GlucoseChartScaler {
         return CGPoint(x: xCoordinate(for: date), y: yCoordinate(for: glucose))
     }
 
-    func point(for glucose: SampleValue, unit: HKUnit) -> CGPoint {
+    func point(for glucose: SampleValue, unit: LoopUnit) -> CGPoint {
         return point(glucose.startDate, glucose.quantity.doubleValue(for: unit))
     }
 
     // By default enforce a minimum height so that the range is visible
     func rect(
         for range: GlucoseChartValueHashable,
-        unit: HKUnit,
+        unit: LoopUnit,
         minHeight: CGFloat = 2,
         alignedToScreenScale screenScale: CGFloat = WKInterfaceDevice.current().screenScale
     ) -> CGRect {
@@ -80,7 +79,7 @@ struct GlucoseChartScaler {
 }
 
 extension GlucoseChartScaler {
-    init(size: CGSize, dateInterval: DateInterval, glucoseRange: ClosedRange<HKQuantity>, unit: HKUnit, coordinateSystem: CoordinateSystem = .standard) {
+    init(size: CGSize, dateInterval: DateInterval, glucoseRange: ClosedRange<LoopQuantity>, unit: LoopUnit, coordinateSystem: CoordinateSystem = .standard) {
         self.dates = dateInterval
         self.glucoseMin = glucoseRange.lowerBound.doubleValue(for: unit)
         self.glucoseMax = glucoseRange.upperBound.doubleValue(for: unit)
@@ -90,8 +89,8 @@ extension GlucoseChartScaler {
     }
 }
 
-extension ClosedRange where Bound == HKQuantity {
-    fileprivate func span(with unit: HKUnit) -> Double {
+extension ClosedRange where Bound == LoopQuantity {
+    fileprivate func span(with unit: LoopUnit) -> Double {
         return upperBound.doubleValue(for: unit) - lowerBound.doubleValue(for: unit)
     }
 }

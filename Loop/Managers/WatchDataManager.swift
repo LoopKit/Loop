@@ -9,6 +9,7 @@
 import HealthKit
 import UIKit
 import WatchConnectivity
+import LoopAlgorithm
 import LoopKit
 import LoopCore
 
@@ -139,7 +140,7 @@ final class WatchDataManager: NSObject {
     private var lastComplicationContext: WatchContext?
 
     private let minTrendDrift: Double = 20
-    private lazy var minTrendUnit = HKUnit.milligramsPerDeciliter
+    private lazy var minTrendUnit = LoopUnit.milligramsPerDeciliter
 
     private func sendSettingsIfNeeded() {
         let userInfo = LoopSettingsUserInfo(
@@ -272,7 +273,7 @@ final class WatchDataManager: NSObject {
         let context = WatchContext(glucose: glucose, glucoseUnit: self.deviceManager.displayGlucosePreference.unit)
         context.reservoir = reservoir?.unitVolume
         context.loopLastRunDate = loopDataManager.lastLoopCompleted
-        context.cob = carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
+        context.cob = carbsOnBoard?.quantity.doubleValue(for: .gram)
 
         if let glucoseDisplay = self.deviceManager.glucoseDisplay(for: glucose) {
             context.glucoseTrend = glucoseDisplay.trendType
@@ -388,7 +389,7 @@ final class WatchDataManager: NSObject {
         if let carbEntry = bolus.carbEntry {
             let storedCarbEntry = try await loopDataManager.addCarbEntry(carbEntry)
             dosingDecision.carbEntry = storedCarbEntry
-            self.analyticsServicesManager?.didAddCarbs(source: "Watch", amount: storedCarbEntry.quantity.doubleValue(for: .gram()))
+            self.analyticsServicesManager?.didAddCarbs(source: "Watch", amount: storedCarbEntry.quantity.doubleValue(for: .gram))
         } else {
             dosingDecision.carbEntry = nil
         }

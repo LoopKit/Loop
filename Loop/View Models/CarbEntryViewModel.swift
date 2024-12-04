@@ -8,7 +8,6 @@
 
 import SwiftUI
 import LoopKit
-import HealthKit
 import Combine
 import LoopCore
 import LoopAlgorithm
@@ -59,7 +58,7 @@ final class CarbEntryViewModel: ObservableObject {
     let shouldBeginEditingQuantity: Bool
     
     @Published var carbsQuantity: Double? = nil
-    var preferredCarbUnit = HKUnit.gram()
+    var preferredCarbUnit = LoopUnit.gram
     var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
     var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
     
@@ -160,7 +159,7 @@ final class CarbEntryViewModel: ObservableObject {
             
             return NewCarbEntry(
                 date: date,
-                quantity: HKQuantity(unit: preferredCarbUnit, doubleValue: quantity),
+                quantity: LoopQuantity(unit: preferredCarbUnit, doubleValue: quantity),
                 startDate: time,
                 foodType: usesCustomFoodType ? foodType : selectedDefaultAbsorptionTimeEmoji,
                 absorptionTime: absorptionTime,
@@ -200,7 +199,7 @@ final class CarbEntryViewModel: ObservableObject {
         }
         
         guard let carbsQuantity, carbsQuantity > 0 else { return }
-        let quantity = HKQuantity(unit: preferredCarbUnit, doubleValue: carbsQuantity)
+        let quantity = LoopQuantity(unit: preferredCarbUnit, doubleValue: carbsQuantity)
         if quantity.compare(maxCarbEntryQuantity) == .orderedDescending {
             self.alert = .maxQuantityExceded
             return

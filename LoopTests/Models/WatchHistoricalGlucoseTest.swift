@@ -8,6 +8,7 @@
 
 import XCTest
 import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 @testable import Loop
@@ -20,7 +21,7 @@ class WatchHistoricalGlucoseTests: XCTestCase {
                                     syncIdentifier: UUID().uuidString,
                                     syncVersion: 4,
                                     startDate: Date(timeIntervalSinceReferenceDate: .hours(100)),
-                                    quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 123.45),
+                                    quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 123.45),
                                     condition: nil,
                                     trend: nil,
                                     trendRate: nil,
@@ -33,10 +34,10 @@ class WatchHistoricalGlucoseTests: XCTestCase {
                                     syncIdentifier: UUID().uuidString,
                                     syncVersion: 2,
                                     startDate: Date(timeIntervalSinceReferenceDate: .hours(99)),
-                                    quantity: HKQuantity(unit: .millimolesPerLiter, doubleValue: 7.2),
+                                    quantity: LoopQuantity(unit: .millimolesPerLiter, doubleValue: 7.2),
                                     condition: nil,
                                     trend: .up,
-                                    trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: 1.0),
+                                    trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: 1.0),
                                     isDisplayOnly: true,
                                     wasUserEntered: false,
                                     device: device,
@@ -46,10 +47,10 @@ class WatchHistoricalGlucoseTests: XCTestCase {
                                     syncIdentifier: nil,
                                     syncVersion: nil,
                                     startDate: Date(timeIntervalSinceReferenceDate: .hours(98)),
-                                    quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 187.65),
+                                    quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 187.65),
                                     condition: .aboveRange,
                                     trend: .downDownDown,
-                                    trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -4.0),
+                                    trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -4.0),
                                     isDisplayOnly: false,
                                     wasUserEntered: false,
                                     device: nil,

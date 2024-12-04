@@ -7,7 +7,6 @@
 //
 
 import LoopKitUI
-import HealthKit
 
 
 /// Convenience static constructors used to contain common configuration

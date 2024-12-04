@@ -7,7 +7,7 @@
 //
 
 import Combine
-import HealthKit
+import LoopAlgorithm
 import SwiftUI
 import LoopKit
 import LoopKitUI
@@ -103,7 +103,7 @@ struct ManualEntryDoseView: View {
         LabeledQuantity(
             label: Text("Active Carbs", comment: "Title describing quantity of still-absorbing carbohydrates"),
             quantity: viewModel.activeCarbs,
-            unit: .gram()
+            unit: .gram
         )
     }
     
@@ -112,7 +112,7 @@ struct ManualEntryDoseView: View {
         LabeledQuantity(
             label: Text("Active Insulin", comment: "Title describing quantity of still-absorbing insulin"),
             quantity: viewModel.activeInsulin,
-            unit: .internationalUnit(),
+            unit: .internationalUnit,
             maxFractionDigits: 2
         )
     }
@@ -157,7 +157,7 @@ struct ManualEntryDoseView: View {
     }
 
     private static let doseAmountFormatter: NumberFormatter = {
-        let quantityFormatter = QuantityFormatter(for: .internationalUnit())
+        let quantityFormatter = QuantityFormatter(for: .internationalUnit)
         return quantityFormatter.numberFormatter
     }()
     
@@ -207,7 +207,7 @@ struct ManualEntryDoseView: View {
     }
 
     private var bolusUnitsLabel: some View {
-        Text(QuantityFormatter(for: .internationalUnit()).localizedUnitStringWithPlurality())
+        Text(QuantityFormatter(for: .internationalUnit).localizedUnitStringWithPlurality())
             .foregroundColor(Color(.secondaryLabel))
     }
 
@@ -215,7 +215,7 @@ struct ManualEntryDoseView: View {
         Binding(
             get: { self.enteredBolusString },
             set: { newValue in
-                self.viewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: Self.doseAmountFormatter.number(from: newValue)?.doubleValue ?? 0)
+                self.viewModel.enteredBolus = LoopQuantity(unit: .internationalUnit, doubleValue: Self.doseAmountFormatter.number(from: newValue)?.doubleValue ?? 0)
                 self.enteredBolusString = newValue
             }
         )

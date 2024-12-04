@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 @testable import LoopUI
 
@@ -38,7 +38,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
     func testSetGlucoseQuantityCGM() {
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
-                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
+                                                trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -56,13 +56,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.trend, .down)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, glucoseDisplay.glucoseRangeCategory?.trendColor)
         XCTAssertEqual(viewModel.glucoseValueTintColor, glucoseDisplay.glucoseRangeCategory?.glucoseColor)
-        XCTAssertEqual(viewModel.unitsString, HKUnit.milligramsPerDeciliter.localizedShortUnitString)
+        XCTAssertEqual(viewModel.unitsString, LoopUnit.milligramsPerDeciliter.localizedShortUnitString)
     }
     
     func testSetGlucoseQuantityCGMStale() {
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
-                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
+                                                trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -82,13 +82,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.glucoseTrendTintColor, .glucoseTintColor)
         XCTAssertNotEqual(viewModel.glucoseValueTintColor, glucoseDisplay.glucoseRangeCategory?.glucoseColor)
         XCTAssertEqual(viewModel.glucoseValueTintColor, .label)
-        XCTAssertEqual(viewModel.unitsString, HKUnit.milligramsPerDeciliter.localizedShortUnitString)
+        XCTAssertEqual(viewModel.unitsString, LoopUnit.milligramsPerDeciliter.localizedShortUnitString)
     }
     
     func testSetGlucoseQuantityManualGlucose() {
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
-                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
+                                                trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -107,13 +107,13 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         XCTAssertNotEqual(viewModel.glucoseTrendTintColor, glucoseDisplay.glucoseRangeCategory?.trendColor)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, .glucoseTintColor)
         XCTAssertEqual(viewModel.glucoseValueTintColor, glucoseDisplay.glucoseRangeCategory?.glucoseColor)
-        XCTAssertEqual(viewModel.unitsString, HKUnit.milligramsPerDeciliter.localizedShortUnitString)
+        XCTAssertEqual(viewModel.unitsString, LoopUnit.milligramsPerDeciliter.localizedShortUnitString)
     }
     
     func testSetGlucoseQuantityCalibrationDoesNotShow() {
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
-                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
+                                                trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -130,7 +130,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.trend, .down)
         XCTAssertEqual(viewModel.glucoseTrendTintColor, glucoseDisplay.glucoseRangeCategory?.trendColor)
         XCTAssertEqual(viewModel.glucoseValueTintColor, glucoseDisplay.glucoseRangeCategory?.glucoseColor)
-        XCTAssertEqual(viewModel.unitsString, HKUnit.milligramsPerDeciliter.localizedShortUnitString)
+        XCTAssertEqual(viewModel.unitsString, LoopUnit.milligramsPerDeciliter.localizedShortUnitString)
     }
     
     func testSetManualGlucoseIconOverride() {
@@ -151,7 +151,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         // when there is a manual glucose override icon, the status highlight isn't returned to be presented
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
-                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
+                                                trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         let glucoseStartDate = Date()
@@ -182,7 +182,7 @@ class CGMStatusHUDViewModelTests: XCTestCase {
         // add manual glucose
         let glucoseDisplay = TestGlucoseDisplay(isStateValid: true,
                                                 trendType: .down,
-                                                trendRate: HKQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
+                                                trendRate: LoopQuantity(unit: .milligramsPerDeciliterPerMinute, doubleValue: -1.0),
                                                 isLocal: true,
                                                 glucoseRangeCategory: .urgentLow)
         viewModel.setGlucoseQuantity(90,
@@ -294,7 +294,7 @@ extension CGMStatusHUDViewModelTests {
         
         var trendType: GlucoseTrend?
 
-        var trendRate: HKQuantity?
+        var trendRate: LoopQuantity?
         
         var isLocal: Bool
         

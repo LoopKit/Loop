@@ -5,15 +5,14 @@
 //  Copyright © 2018 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
 import LoopKit
 import LoopAlgorithm
 
 extension Collection where Element == SampleValue {
     /// O(n)
-    var quantityRange: ClosedRange<HKQuantity>? {
-        var lowest: HKQuantity?
-        var highest: HKQuantity?
+    var quantityRange: ClosedRange<LoopQuantity>? {
+        var lowest: LoopQuantity?
+        var highest: LoopQuantity?
 
         for sample in self {
             if let l = lowest {

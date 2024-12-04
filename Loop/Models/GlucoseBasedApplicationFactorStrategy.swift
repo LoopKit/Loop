@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopCore
 
@@ -20,8 +20,8 @@ struct GlucoseBasedApplicationFactorStrategy: ApplicationFactorStrategy {
     static let maxGlucoseSlidingScale = 200.0 // mg/dL
 
     func calculateDosingFactor(
-        for glucose: HKQuantity,
-        correctionRange: ClosedRange<HKQuantity>
+        for glucose: LoopQuantity,
+        correctionRange: ClosedRange<LoopQuantity>
     ) -> Double {
         // Calculate current glucose and lower bound target
         let currentGlucose = glucose.doubleValue(for: .milligramsPerDeciliter)

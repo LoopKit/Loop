@@ -9,7 +9,6 @@
 import SwiftUI
 import LoopKit
 import LoopKitUI
-import HealthKit
 
 public struct FavoriteFoodDetailView: View {
     @ObservedObject var viewModel: FavoriteFoodsViewModel

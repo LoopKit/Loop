@@ -8,7 +8,7 @@
 
 import SwiftUI
 import LoopKit
-import HealthKit
+import LoopAlgorithm
 
 final class FavoriteFoodAddEditViewModel: ObservableObject {
     enum Alert: Identifiable {
@@ -23,7 +23,7 @@ final class FavoriteFoodAddEditViewModel: ObservableObject {
     @Published var name = ""
     
     @Published var carbsQuantity: Double? = nil
-    var preferredCarbUnit = HKUnit.gram()
+    var preferredCarbUnit = LoopUnit.gram
     var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
     var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
     
@@ -76,7 +76,7 @@ final class FavoriteFoodAddEditViewModel: ObservableObject {
             
             return NewFavoriteFood(
                 name: name,
-                carbsQuantity: HKQuantity(unit: preferredCarbUnit, doubleValue: quantity),
+                carbsQuantity: LoopQuantity(unit: preferredCarbUnit, doubleValue: quantity),
                 foodType: foodType,
                 absorptionTime: absorptionTime
             )
@@ -90,7 +90,7 @@ final class FavoriteFoodAddEditViewModel: ObservableObject {
         guard let updatedFavoriteFood, absorptionTime <= maxAbsorptionTime else { return }
 
         guard let carbsQuantity, carbsQuantity > 0 else { return }
-        let quantity = HKQuantity(unit: preferredCarbUnit, doubleValue: carbsQuantity)
+        let quantity = LoopQuantity(unit: preferredCarbUnit, doubleValue: carbsQuantity)
         if quantity.compare(maxCarbEntryQuantity) == .orderedDescending {
             self.alert = .maxQuantityExceded
             return

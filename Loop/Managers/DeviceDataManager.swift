@@ -763,9 +763,9 @@ extension DeviceDataManager {
         
         guard FeatureFlags.cgmManagerCategorizeManualGlucoseRangeEnabled else {
             // Using Dexcom default glucose thresholds to categorize a glucose range
-            let urgentLowGlucoseThreshold = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 55)
-            let lowGlucoseThreshold = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80)
-            let highGlucoseThreshold = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
+            let urgentLowGlucoseThreshold = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 55)
+            let lowGlucoseThreshold = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 80)
+            let highGlucoseThreshold = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
             
             let glucoseRangeCategory: GlucoseRangeCategory
             switch glucose.quantity {

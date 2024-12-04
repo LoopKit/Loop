@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 // MARK: - Simulated Core Data
@@ -63,7 +63,7 @@ extension CarbStore {
 fileprivate extension NewCarbEntry {
     static func simulated(startDate: Date, grams: Double, absorptionTime: TimeInterval) -> NewCarbEntry {
         return NewCarbEntry(date: startDate,
-                            quantity: HKQuantity(unit: .gram(), doubleValue: grams),
+                            quantity: LoopQuantity(unit: .gram, doubleValue: grams),
                             startDate: startDate,
                             foodType: "Simulated",
                             absorptionTime: absorptionTime)

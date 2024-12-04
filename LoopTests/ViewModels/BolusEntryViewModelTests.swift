@@ -24,25 +24,25 @@ class BolusEntryViewModelTests: XCTestCase {
     static let exampleStartDate = now - .hours(2)
     static let exampleEndDate = now - .hours(1)
     static fileprivate let exampleGlucoseValue = SimpleGlucoseValue(startDate: exampleStartDate, quantity: exampleManualGlucoseQuantity)
-    static let exampleManualGlucoseQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 123.4)
+    static let exampleManualGlucoseQuantity = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 123.4)
     static let exampleManualGlucoseSample =
         HKQuantitySample(type: HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
-                         quantity: exampleManualGlucoseQuantity,
+                         quantity: exampleManualGlucoseQuantity.hkQuantity,
                          start: exampleStartDate,
                          end: exampleEndDate)
     static let exampleManualStoredGlucoseSample = StoredGlucoseSample(sample: exampleManualGlucoseSample)
 
-    static let exampleCGMGlucoseQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100.4)
+    static let exampleCGMGlucoseQuantity = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 100.4)
     static let exampleCGMGlucoseSample =
-        HKQuantitySample(type: HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
-                         quantity: exampleCGMGlucoseQuantity,
+    HKQuantitySample(type: HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
+                         quantity: exampleCGMGlucoseQuantity.hkQuantity,
                          start: exampleStartDate,
                          end: exampleEndDate)
 
-    static let exampleCarbQuantity = HKQuantity(unit: .gram(), doubleValue: 234.5)
+    static let exampleCarbQuantity = LoopQuantity(unit: .gram, doubleValue: 234.5)
     
-    static let exampleBolusQuantity = HKQuantity(unit: .internationalUnit(), doubleValue: 1.0)
-    static let noBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
+    static let exampleBolusQuantity = LoopQuantity(unit: .internationalUnit, doubleValue: 1.0)
+    static let noBolus = LoopQuantity(unit: .internationalUnit, doubleValue: 0.0)
 
     static let exampleGlucoseRangeSchedule = GlucoseRangeSchedule(unit: .milligramsPerDeciliter, dailyItems: [
         RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 100, maxValue: 110)),
@@ -115,7 +115,7 @@ class BolusEntryViewModelTests: XCTestCase {
                                                   selectedCarbAbsorptionTimeEmoji: selectedCarbAbsorptionTimeEmoji)
         bolusEntryViewModel.authenticationHandler = { _ in return true }
         
-        bolusEntryViewModel.maximumBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 10)
+        bolusEntryViewModel.maximumBolus = LoopQuantity(unit: .internationalUnit, doubleValue: 10)
 
         bolusEntryViewModel.deliveryDelegate = mockDeliveryDelegate
 
@@ -134,8 +134,8 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertFalse(bolusEntryViewModel.isManualGlucoseEntryEnabled)
 
         XCTAssertNil(bolusEntryViewModel.manualGlucoseQuantity)
-        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 0), bolusEntryViewModel.recommendedBolus)
-        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 0), bolusEntryViewModel.enteredBolus)
+        XCTAssertEqual(LoopQuantity(unit: .internationalUnit, doubleValue: 0), bolusEntryViewModel.recommendedBolus)
+        XCTAssertEqual(LoopQuantity(unit: .internationalUnit, doubleValue: 0), bolusEntryViewModel.enteredBolus)
 
         XCTAssertNil(bolusEntryViewModel.activeAlert)
         XCTAssertNil(bolusEntryViewModel.activeNotice)
@@ -184,7 +184,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testManualEntryClearsEnteredBolus() throws {
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
         bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
-        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 0), bolusEntryViewModel.enteredBolus)
+        XCTAssertEqual(LoopQuantity(unit: .internationalUnit, doubleValue: 0), bolusEntryViewModel.enteredBolus)
     }
     
     func testUpdatePredictedGlucoseValues() async throws {
@@ -275,11 +275,11 @@ class BolusEntryViewModelTests: XCTestCase {
         delegate.activeInsulin = InsulinValue(startDate: Self.exampleStartDate, value: 1.5)
         XCTAssertNil(bolusEntryViewModel.activeInsulin)
         await bolusEntryViewModel.update()
-        XCTAssertEqual(HKQuantity(unit: .internationalUnit(), doubleValue: 1.5), bolusEntryViewModel.activeInsulin)
+        XCTAssertEqual(LoopQuantity(unit: .internationalUnit, doubleValue: 1.5), bolusEntryViewModel.activeInsulin)
     }
     
     func testUpdateCarbsOnBoard() async throws {
-        delegate.activeCarbs = CarbValue(startDate: Self.exampleStartDate, endDate: Self.exampleEndDate, value: Self.exampleCarbQuantity.doubleValue(for: .gram()))
+        delegate.activeCarbs = CarbValue(startDate: Self.exampleStartDate, endDate: Self.exampleEndDate, value: Self.exampleCarbQuantity.doubleValue(for: .gram))
         XCTAssertNil(bolusEntryViewModel.activeCarbs)
         await bolusEntryViewModel.update()
         XCTAssertEqual(Self.exampleCarbQuantity, bolusEntryViewModel.activeCarbs)
@@ -308,7 +308,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit))
 
         XCTAssertEqual(delegate.originalCarbEntryForBolusRecommendation?.quantity, originalCarbEntry.quantity)
         XCTAssertEqual(delegate.potentialCarbEntryForBolusRecommendation?.quantity, editedCarbEntry.quantity)
@@ -329,7 +329,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit))
         XCTAssertEqual(BolusEntryViewModel.Notice.predictedGlucoseBelowSuspendThreshold(suspendThreshold: Self.exampleCGMGlucoseQuantity), bolusEntryViewModel.activeNotice)
     }
     
@@ -342,7 +342,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit))
         XCTAssertNil(bolusEntryViewModel.activeNotice)
     }
 
@@ -354,7 +354,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit))
         XCTAssertNil(bolusEntryViewModel.activeNotice)
     }
         
@@ -416,7 +416,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
         await setUpViewModel(originalCarbEntry: originalCarbEntry, potentialCarbEntry: editedCarbEntry)
 
-        let manualGlucoseQuantity = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 123)
+        let manualGlucoseQuantity = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 123)
 
         bolusEntryViewModel.manualGlucoseQuantity = manualGlucoseQuantity
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
@@ -428,7 +428,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
         XCTAssertNotNil(recommendedBolus)
-        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit()))
+        XCTAssertEqual(recommendation.amount, recommendedBolus?.doubleValue(for: .internationalUnit))
 
         XCTAssertEqual(delegate.potentialCarbEntryForBolusRecommendation, editedCarbEntry)
         XCTAssertEqual(delegate.originalCarbEntryForBolusRecommendation, originalCarbEntry)
@@ -456,7 +456,7 @@ class BolusEntryViewModelTests: XCTestCase {
     }
 
     func testBolusTooSmall() async throws {
-        bolusEntryViewModel.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0.01)
+        bolusEntryViewModel.enteredBolus = LoopQuantity(unit: .internationalUnit, doubleValue: 0.01)
         let success = await bolusEntryViewModel.saveAndDeliver()
         XCTAssertEqual(.bolusTooSmall, bolusEntryViewModel.activeAlert)
         XCTAssertNil(delegate.enactedBolusUnits)
@@ -516,7 +516,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(delegate.bolusDosingDecisionsAdded.isEmpty)
     }
     
-    private func saveAndDeliver(_ bolus: HKQuantity, file: StaticString = #file, line: UInt = #line) async throws {
+    private func saveAndDeliver(_ bolus: LoopQuantity, file: StaticString = #file, line: UInt = #line) async throws {
         bolusEntryViewModel.enteredBolus = bolus
 
         self.saveAndDeliverSuccess = await bolusEntryViewModel.saveAndDeliver()
@@ -830,7 +830,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         glucoseTargetRangeSchedule: BolusEntryViewModelTests.exampleGlucoseRangeSchedule,
         maximumBasalRatePerHour: 3.0,
         maximumBolus: 10.0,
-        suspendThreshold: GlucoseThreshold(unit: .internationalUnit(), value: 75))
+        suspendThreshold: GlucoseThreshold(unit: .internationalUnit, value: 75))
     {
         didSet {
             NotificationCenter.default.post(name: .LoopDataUpdated, object: nil, userInfo: [
@@ -970,7 +970,7 @@ fileprivate struct MockInsulinModel: InsulinModel {
 }
 
 fileprivate struct MockGlucoseValue: GlucoseValue {
-    var quantity: HKQuantity
+    var quantity: LoopQuantity
     var startDate: Date
 }
 
@@ -1025,7 +1025,7 @@ extension LoopAlgorithmEffects {
 extension NewCarbEntry {
     static func mock(_ grams: Double, at date: Date) -> NewCarbEntry {
         NewCarbEntry(
-            quantity: .init(unit: .gram(), doubleValue: grams),
+            quantity: .init(unit: .gram, doubleValue: grams),
             startDate: date,
             foodType: nil,
             absorptionTime: nil
@@ -1035,7 +1035,7 @@ extension NewCarbEntry {
 
 extension StoredCarbEntry {
     static func mock(_ grams: Double, at date: Date) -> StoredCarbEntry {
-        StoredCarbEntry(startDate: date, quantity: .init(unit: .gram(), doubleValue: grams))
+        StoredCarbEntry(startDate: date, quantity: .init(unit: .gram, doubleValue: grams))
     }
 }
 

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 import LoopCore
 import LoopKit
 import os.log

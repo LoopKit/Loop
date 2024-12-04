@@ -8,12 +8,11 @@
 
 import Foundation
 import LoopKit
-import HealthKit
 import LoopAlgorithm
 
 
 extension BolusRecommendationNotice {
-    public func description(using unit: HKUnit) -> String {
+    public func description(using unit: LoopUnit) -> String {
         switch self {
         case .glucoseBelowSuspendThreshold(minGlucose: let minGlucose):
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)

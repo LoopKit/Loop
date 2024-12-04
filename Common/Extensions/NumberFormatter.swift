@@ -7,11 +7,11 @@
 //
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 
 
 extension NumberFormatter {
-    static func glucoseFormatter(for unit: HKUnit) -> NumberFormatter {
+    static func glucoseFormatter(for unit: LoopUnit) -> NumberFormatter {
         let numberFormatter = NumberFormatter()
         
         numberFormatter.numberStyle = .decimal
@@ -24,11 +24,11 @@ extension NumberFormatter {
         return string(from: NSNumber(value: number))
     }
 
-    func string(from quantity: HKQuantity, unit: HKUnit) -> String? {
+    func string(from quantity: LoopQuantity, unit: LoopUnit) -> String? {
         return string(from: quantity.doubleValue(for: unit), unit: unit)
     }
 
-    func string(from number: Double, unit: HKUnit) -> String? {
+    func string(from number: Double, unit: LoopUnit) -> String? {
         return string(from: number, unit: unit.localizedShortUnitString)
     }
 

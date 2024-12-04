@@ -5,7 +5,6 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
 import LoopCore
 import LoopKit
 import os.log
@@ -26,7 +25,7 @@ class CarbEntryListController: WKInterfaceController, IdentifiableClass {
     private lazy var loopManager = ExtensionDelegate.shared().loopManager
 
     private lazy var carbFormatter: QuantityFormatter = {
-        let formatter = QuantityFormatter(for: .gram())
+        let formatter = QuantityFormatter(for: .gram)
         formatter.numberFormatter.numberStyle = .none
         return formatter
     }()
@@ -105,7 +104,7 @@ extension CarbEntryListController {
         timeFormatter.dateStyle = .none
         timeFormatter.timeStyle = .short
 
-        let unit = loopManager.carbStore.preferredUnit ?? .gram()
+        let unit = loopManager.carbStore.preferredUnit ?? .gram
 
         for (index, entry) in entries.reversed().enumerated() {
             guard let row = table.rowController(at: index) as? TextRowController else {
@@ -118,6 +117,6 @@ extension CarbEntryListController {
             row.detailTextLabel.setText(carbFormatter.string(from: entry.quantity))
         }
 
-        totalLabel.setText(carbFormatter.string(from: HKQuantity(unit: unit, doubleValue: total)))
+        totalLabel.setText(carbFormatter.string(from: LoopQuantity(unit: unit, doubleValue: total)))
     }
 }

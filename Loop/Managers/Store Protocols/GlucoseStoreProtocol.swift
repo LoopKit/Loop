@@ -7,7 +7,6 @@
 //
 
 import LoopKit
-import HealthKit
 import LoopAlgorithm
 
 protocol GlucoseStoreProtocol: AnyObject {

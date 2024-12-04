@@ -7,31 +7,31 @@
 //
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 extension WatchContext {
-    var activeInsulin: HKQuantity? {
+    var activeInsulin: LoopQuantity? {
         guard let value = iob else {
             return nil
         }
 
-        return HKQuantity(unit: .internationalUnit(), doubleValue: value)
+        return LoopQuantity(unit: .internationalUnit, doubleValue: value)
     }
 
-    var activeCarbohydrates: HKQuantity? {
+    var activeCarbohydrates: LoopQuantity? {
         guard let value = cob else {
             return nil
         }
 
-        return HKQuantity(unit: .gram(), doubleValue: value)
+        return LoopQuantity(unit: .gram, doubleValue: value)
     }
 
-    var reservoirVolume: HKQuantity? {
+    var reservoirVolume: LoopQuantity? {
         guard let value = reservoir else {
             return nil
         }
 
-        return HKQuantity(unit: .internationalUnit(), doubleValue: value)
+        return LoopQuantity(unit: .internationalUnit, doubleValue: value)
     }
 }

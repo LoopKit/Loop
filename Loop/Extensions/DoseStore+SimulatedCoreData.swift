@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 // MARK: - Simulated Core Data
@@ -144,7 +144,7 @@ fileprivate extension PersistedPumpEvent {
                                          value: rate,
                                          unit: .unitsPerHour,
                                          deliveredUnits: rate * duration / .hours(1),
-                                         scheduledBasalRate: HKQuantity(unit: .internationalUnitsPerHour, doubleValue: scheduledRate)))
+                                         scheduledBasalRate: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: scheduledRate)))
     }
 
     private static func simulated(date: Date, type: PumpEventType, alarmType: PumpAlarmType? = nil) -> PersistedPumpEvent {

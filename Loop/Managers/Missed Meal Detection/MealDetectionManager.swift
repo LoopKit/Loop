@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import HealthKit
 import OSLog
 import LoopCore
 import LoopKit
@@ -32,7 +31,7 @@ class MealDetectionManager {
     private let log = OSLog(category: "MealDetectionManager")
 
     // All math for meal detection occurs in mg/dL, with settings being converted if in mmol/L
-    private let unit = HKUnit.milligramsPerDeciliter
+    private let unit = LoopUnit.milligramsPerDeciliter
     
     /// The last missed meal notification that was sent
     /// Internal for unit testing
@@ -325,7 +324,7 @@ class MealDetectionManager {
             return
         }
         
-        let currentCarbRatio = settingsProvider.carbRatioSchedule!.quantity(at: now).doubleValue(for: .gram())
+        let currentCarbRatio = settingsProvider.carbRatioSchedule!.quantity(at: now).doubleValue(for: .gram)
         let maxAllowedCarbAutofill = settingsProvider.maximumBolus! * currentCarbRatio
         let clampedCarbAmount = min(carbAmount, maxAllowedCarbAutofill)
 
@@ -406,7 +405,7 @@ extension GlucoseEffectVelocity {
 
         return GlucoseEffect(
             startDate: end,
-            quantity: HKQuantity(
+            quantity: LoopQuantity(
                 unit: .milligramsPerDeciliter,
                 doubleValue: velocityPerSecond * duration
             )

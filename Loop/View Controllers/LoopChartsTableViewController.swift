@@ -8,7 +8,6 @@
 import UIKit
 import LoopUI
 import LoopKitUI
-import HealthKit
 import os.log
 
 

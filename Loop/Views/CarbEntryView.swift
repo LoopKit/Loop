@@ -9,7 +9,6 @@
 import SwiftUI
 import LoopKit
 import LoopKitUI
-import HealthKit
 
 struct CarbEntryView: View, HorizontalSizeClassOverride {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference

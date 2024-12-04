@@ -7,7 +7,6 @@
 //
 
 import LoopKit
-import HealthKit
 
 protocol CarbStoreProtocol: AnyObject {
 

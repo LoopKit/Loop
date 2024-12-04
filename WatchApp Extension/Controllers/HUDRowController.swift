@@ -5,7 +5,7 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
+import LoopAlgorithm
 import LoopCore
 import LoopKit
 import WatchKit
@@ -36,14 +36,14 @@ extension HUDRowController {
 }
 
 extension HUDRowController {
-    func setActiveInsulin(_ activeInsulin: HKQuantity?) {
+    func setActiveInsulin(_ activeInsulin: LoopQuantity?) {
         guard let activeInsulin = activeInsulin else {
             setDetail(nil)
             return
         }
 
         let insulinFormatter: QuantityFormatter = {
-            let insulinFormatter = QuantityFormatter(for: .internationalUnit())
+            let insulinFormatter = QuantityFormatter(for: .internationalUnit)
             insulinFormatter.numberFormatter.minimumFractionDigits = 1
             insulinFormatter.numberFormatter.maximumFractionDigits = 1
 
@@ -53,13 +53,13 @@ extension HUDRowController {
         setDetail(insulinFormatter.string(from: activeInsulin))
     }
 
-    func setActiveCarbohydrates(_ activeCarbohydrates: HKQuantity?) {
+    func setActiveCarbohydrates(_ activeCarbohydrates: LoopQuantity?) {
         guard let activeCarbohydrates = activeCarbohydrates else {
             setDetail(nil)
             return
         }
 
-        let carbFormatter = QuantityFormatter(for: .gram())
+        let carbFormatter = QuantityFormatter(for: .gram)
         carbFormatter.numberFormatter.maximumFractionDigits = 0
 
         setDetail(carbFormatter.string(from: activeCarbohydrates))
@@ -85,14 +85,14 @@ extension HUDRowController {
         setDetail(basalFormatter.string(from: tempBasal, unit: unit))
     }
 
-    func setReservoirVolume(_ reservoirVolume: HKQuantity?) {
+    func setReservoirVolume(_ reservoirVolume: LoopQuantity?) {
         guard let reservoirVolume = reservoirVolume else {
             setDetail(nil)
             return
         }
 
         let insulinFormatter: QuantityFormatter = {
-            let insulinFormatter = QuantityFormatter(for: .internationalUnit())
+            let insulinFormatter = QuantityFormatter(for: .internationalUnit)
             insulinFormatter.unitStyle = .long
             insulinFormatter.numberFormatter.minimumFractionDigits = 0
             insulinFormatter.numberFormatter.maximumFractionDigits = 0

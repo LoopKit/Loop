@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 
@@ -127,7 +127,7 @@ public final class GlucoseHUDView: BaseHUDView {
         }
     }
 
-    public func setGlucoseQuantity(_ glucoseQuantity: Double, at glucoseStartDate: Date, unit: HKUnit, staleGlucoseAge: TimeInterval, sensor: GlucoseDisplayable?) {
+    public func setGlucoseQuantity(_ glucoseQuantity: Double, at glucoseStartDate: Date, unit: LoopUnit, staleGlucoseAge: TimeInterval, sensor: GlucoseDisplayable?) {
         var accessibilityStrings = [String]()
 
         let time = timeFormatter.string(from: glucoseStartDate)

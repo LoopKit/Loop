@@ -8,17 +8,17 @@
 
 import Foundation
 import LoopCore
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 struct SimpleBolusCalculator {
     
-    public static func recommendedInsulin(mealCarbs: HKQuantity?, manualGlucose: HKQuantity?, activeInsulin: HKQuantity, carbRatioSchedule: CarbRatioSchedule, correctionRangeSchedule: GlucoseRangeSchedule, sensitivitySchedule: InsulinSensitivitySchedule, at date: Date = Date()) -> HKQuantity {
+    public static func recommendedInsulin(mealCarbs: LoopQuantity?, manualGlucose: LoopQuantity?, activeInsulin: LoopQuantity, carbRatioSchedule: CarbRatioSchedule, correctionRangeSchedule: GlucoseRangeSchedule, sensitivitySchedule: InsulinSensitivitySchedule, at date: Date = Date()) -> LoopQuantity {
         var recommendedBolus: Double = 0
         
         if let mealCarbs = mealCarbs {
             let carbRatio = carbRatioSchedule.quantity(at: date)
-            recommendedBolus += mealCarbs.doubleValue(for: .gram()) / carbRatio.doubleValue(for: .gram())
+            recommendedBolus += mealCarbs.doubleValue(for: .gram) / carbRatio.doubleValue(for: .gram)
         }
         
         if let manualGlucose = manualGlucose {
@@ -28,7 +28,7 @@ struct SimpleBolusCalculator {
                 let correctionTarget = correctionRange.averageValue(for: .milligramsPerDeciliter)
                 let correctionBolus = (manualGlucose.doubleValue(for: .milligramsPerDeciliter) - correctionTarget) / sensitivity
                 if correctionBolus >= 0 {
-                    let activeInsulin = max(0, activeInsulin.doubleValue(for: .internationalUnit()))
+                    let activeInsulin = max(0, activeInsulin.doubleValue(for: .internationalUnit))
                     let correctionBolusMinusActiveInsulin = correctionBolus - activeInsulin
                     recommendedBolus += max(0, correctionBolusMinusActiveInsulin)
                 } else {
@@ -46,6 +46,6 @@ struct SimpleBolusCalculator {
         // No negative recommendation
         recommendedBolus = max(0, recommendedBolus)
         
-        return HKQuantity(unit: .internationalUnit(), doubleValue: recommendedBolus)
+        return LoopQuantity(unit: .internationalUnit, doubleValue: recommendedBolus)
     }
 }

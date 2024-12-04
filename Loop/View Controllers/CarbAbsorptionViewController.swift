@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import HealthKit
 import Intents
 import LoopCore
 import LoopKit
@@ -235,7 +234,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         static let count = 1
     }
 
-    private lazy var carbFormatter: QuantityFormatter = QuantityFormatter(for: .gram())
+    private lazy var carbFormatter: QuantityFormatter = QuantityFormatter(for: .gram)
 
     private lazy var absorptionFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -292,7 +291,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
             return cell
         case .entries:
-            let unit = HKUnit.gram()
+            let unit = LoopUnit.gram
             let cell = tableView.dequeueReusableCell(withIdentifier: CarbEntryTableViewCell.className, for: indexPath) as! CarbEntryTableViewCell
 
             // Entry value
@@ -323,7 +322,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
             if let absorption = status.absorption {
                 // Absorbed value
-                let observedProgress = Float(absorption.observedProgress.doubleValue(for: .percent()))
+                let observedProgress = Float(absorption.observedProgress.doubleValue(for: .percent))
                 let observedCarbs = absorption.observed
 
                 if let observedCarbsText = carbFormatter.string(from: observedCarbs) {
@@ -342,7 +341,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 }
 
                 cell.observedProgress = observedProgress
-                cell.clampedProgress = Float(absorption.observedProgress.doubleValue(for: .percent()))
+                cell.clampedProgress = Float(absorption.observedProgress.doubleValue(for: .percent))
                 cell.observedDateText = absorptionFormatter.string(from: absorption.estimatedDate.duration)
 
                 // Absorbed time
@@ -366,7 +365,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     }
 
     private func updateCell(_ cell: HeaderValuesTableViewCell) {
-        let unit = HKUnit.gram()
+        let unit = LoopUnit.gram
 
         if let carbsOnBoard = carbsOnBoard, carbsOnBoard.quantity.doubleValue(for: unit) > 0 {
             cell.COBDateLabel.text = String(
@@ -389,7 +388,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             cell.COBDateLabel.textColor = textColor
         } else {
             cell.COBDateLabel.text = nil
-            cell.COBValueLabel.text = carbFormatter.string(from: HKQuantity(unit: .gram(), doubleValue: 0), includeUnit: false)
+            cell.COBValueLabel.text = carbFormatter.string(from: LoopQuantity(unit: .gram, doubleValue: 0), includeUnit: false)
         }
 
         if let carbTotal = carbTotal {
@@ -400,7 +399,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             cell.totalValueLabel.text = carbFormatter.string(from: carbTotal.quantity, includeUnit: false)
         } else {
             cell.totalDateLabel.text = nil
-            cell.totalValueLabel.text = carbFormatter.string(from: HKQuantity(unit: .gram(), doubleValue: 0), includeUnit: false)
+            cell.totalValueLabel.text = carbFormatter.string(from: LoopQuantity(unit: .gram, doubleValue: 0), includeUnit: false)
         }
     }
 

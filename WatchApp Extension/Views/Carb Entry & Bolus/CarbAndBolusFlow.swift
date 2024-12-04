@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import HealthKit
 import LoopKit
 
 
@@ -62,7 +61,7 @@ struct CarbAndBolusFlow: View {
             if let entry = entry {
                 _carbEntryDate = State(initialValue: entry.startDate)
                 
-                let initialCarbAmount = entry.quantity.doubleValue(for: .gram())
+                let initialCarbAmount = entry.quantity.doubleValue(for: .gram)
                 _carbAmount = State(initialValue: Int(initialCarbAmount))                
             }
         case .manualBolus:

@@ -8,6 +8,7 @@
 
 import XCTest
 import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 import LoopCore
@@ -120,7 +121,7 @@ final class DeviceDataManagerTests: XCTestCase {
         pumpManager.status.basalDeliveryState = .tempBasal(dose)
 
         let newLimits = DeliveryLimits(
-            maximumBasalRate: HKQuantity(unit: .internationalUnitsPerHour, doubleValue: 5),
+            maximumBasalRate: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: 5),
             maximumBolus: nil
         )
         let limits = try await deviceDataManager.syncDeliveryLimits(deliveryLimits: newLimits)
@@ -141,7 +142,7 @@ final class DeviceDataManagerTests: XCTestCase {
         pumpManager.status.basalDeliveryState = .tempBasal(dose)
 
         let newLimits = DeliveryLimits(
-            maximumBasalRate: HKQuantity(unit: .internationalUnitsPerHour, doubleValue: 3),
+            maximumBasalRate: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: 3),
             maximumBolus: nil
         )
         let limits = try await deviceDataManager.syncDeliveryLimits(deliveryLimits: newLimits)
@@ -205,6 +206,6 @@ extension DeviceDataManagerTests: DisplayGlucoseUnitBroadcaster {
     func removeDisplayGlucoseUnitObserver(_ observer: LoopKitUI.DisplayGlucoseUnitObserver) {
     }
     
-    func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: HKUnit) {
+    func notifyObserversOfDisplayGlucoseUnitChange(to displayGlucoseUnit: LoopUnit) {
     }
 }

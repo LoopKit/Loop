@@ -7,7 +7,6 @@
 //
 
 import Combine
-import HealthKit
 import LocalAuthentication
 import Intents
 import os.log
@@ -66,7 +65,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     enum Notice: Equatable {
         case predictedGlucoseInRange
-        case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
+        case predictedGlucoseBelowSuspendThreshold(suspendThreshold: LoopQuantity)
         case glucoseBelowTarget
         case staleGlucoseData
         case futureGlucoseData
@@ -93,26 +92,26 @@ final class BolusEntryViewModel: ObservableObject {
     @Published var predictedGlucoseValues: [GlucoseValue] = []
     @Published var chartDateInterval: DateInterval
 
-    @Published var activeCarbs: HKQuantity?
-    @Published var activeInsulin: HKQuantity?
+    @Published var activeCarbs: LoopQuantity?
+    @Published var activeInsulin: LoopQuantity?
 
     @Published var targetGlucoseSchedule: GlucoseRangeSchedule?
     @Published var preMealOverride: TemporaryScheduleOverride?
     private var savedPreMealOverride: TemporaryScheduleOverride?
     @Published var scheduleOverride: TemporaryScheduleOverride?
-    var maximumBolus: HKQuantity?
+    var maximumBolus: LoopQuantity?
 
     let originalCarbEntry: StoredCarbEntry?
     let potentialCarbEntry: NewCarbEntry?
     let selectedCarbAbsorptionTimeEmoji: String?
 
-    @Published var recommendedBolus: HKQuantity?
+    @Published var recommendedBolus: LoopQuantity?
     var recommendedBolusAmount: Double? {
-        recommendedBolus?.doubleValue(for: .internationalUnit())
+        recommendedBolus?.doubleValue(for: .internationalUnit)
     }
-    @Published var enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+    @Published var enteredBolus = LoopQuantity(unit: .internationalUnit, doubleValue: 0)
     var enteredBolusAmount: Double {
-        enteredBolus.doubleValue(for: .internationalUnit())
+        enteredBolus.doubleValue(for: .internationalUnit)
     }
     private var userChangedBolusAmount = false
     @Published var isInitiatingSaveOrBolus = false
@@ -138,7 +137,7 @@ final class BolusEntryViewModel: ObservableObject {
     }()
 
     @Published var isManualGlucoseEntryEnabled = false
-    @Published var manualGlucoseQuantity: HKQuantity?
+    @Published var manualGlucoseQuantity: LoopQuantity?
 
     var manualGlucoseSample: NewGlucoseSample?
 
@@ -240,7 +239,7 @@ final class BolusEntryViewModel: ObservableObject {
                 guard let self = self else { return }
 
                 // Clear out any entered bolus whenever the glucose entry changes
-                self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+                self.enteredBolus = LoopQuantity(unit: .internationalUnit, doubleValue: 0)
 
                 Task {
                     await self.updatePredictedGlucoseValues()
@@ -324,7 +323,7 @@ final class BolusEntryViewModel: ObservableObject {
             return false
         }
 
-        guard enteredBolusAmount <= maximumBolus.doubleValue(for: .internationalUnit()) else {
+        guard enteredBolusAmount <= maximumBolus.doubleValue(for: .internationalUnit) else {
             presentAlert(.maxBolusExceeded)
             return false
         }
@@ -368,7 +367,7 @@ final class BolusEntryViewModel: ObservableObject {
             self.dosingDecision.manualGlucoseSample = nil
         }
 
-        let activationType = BolusActivationType.activationTypeFor(recommendedAmount: recommendedBolus?.doubleValue(for: .internationalUnit()), bolusAmount: amountToDeliver)
+        let activationType = BolusActivationType.activationTypeFor(recommendedAmount: recommendedBolus?.doubleValue(for: .internationalUnit), bolusAmount: amountToDeliver)
 
         if let carbEntry = potentialCarbEntry {
             if originalCarbEntry == nil {
@@ -382,7 +381,7 @@ final class BolusEntryViewModel: ObservableObject {
             }
             if let storedCarbEntry = await saveCarbEntry(carbEntry, replacingEntry: originalCarbEntry) {
                 self.dosingDecision.carbEntry = storedCarbEntry
-                self.analyticsServicesManager?.didAddCarbs(source: "Phone", amount: storedCarbEntry.quantity.doubleValue(for: .gram()), isFavoriteFood: storedCarbEntry.favoriteFoodID != nil)
+                self.analyticsServicesManager?.didAddCarbs(source: "Phone", amount: storedCarbEntry.quantity.doubleValue(for: .gram), isFavoriteFood: storedCarbEntry.favoriteFoodID != nil)
             } else {
                 self.presentAlert(.carbEntryPersistenceFailure)
                 return false
@@ -416,7 +415,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private lazy var bolusAmountFormatter: NumberFormatter = {
-        let formatter = QuantityFormatter(for: .internationalUnit())
+        let formatter = QuantityFormatter(for: .internationalUnit)
         formatter.numberFormatter.roundingMode = .down
         return formatter.numberFormatter
     }()
@@ -436,7 +435,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     var maximumBolusAmountString: String? {
-        guard let maxBolusAmount = maximumBolus?.doubleValue(for: .internationalUnit()) else {
+        guard let maxBolusAmount = maximumBolus?.doubleValue(for: .internationalUnit) else {
             return nil
         }
         return formatBolusAmount(maxBolusAmount)
@@ -445,7 +444,7 @@ final class BolusEntryViewModel: ObservableObject {
     var carbEntryAmountAndEmojiString: String? {
         guard
             let potentialCarbEntry = potentialCarbEntry,
-            let carbAmountString = QuantityFormatter(for: .gram()).string(from: potentialCarbEntry.quantity)
+            let carbAmountString = QuantityFormatter(for: .gram).string(from: potentialCarbEntry.quantity)
         else {
             return nil
         }
@@ -501,7 +500,7 @@ final class BolusEntryViewModel: ObservableObject {
 
         var chartGlucoseValues = storedGlucoseValues
         if let manualGlucoseSample = manualGlucoseSample {
-            chartGlucoseValues.append(manualGlucoseSample.quantitySample)
+            chartGlucoseValues.append(LoopQuantitySample(with: manualGlucoseSample.quantitySample))
         }
 
         self.glucoseValues = chartGlucoseValues
@@ -523,7 +522,7 @@ final class BolusEntryViewModel: ObservableObject {
                 deliveryType: .bolus,
                 startDate: startDate,
                 endDate: startDate,
-                volume: enteredBolus.doubleValue(for: .internationalUnit()),
+                volume: enteredBolus.doubleValue(for: .internationalUnit),
                 insulinModel: insulinModel
             )
 
@@ -554,13 +553,13 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         var recommendation: ManualBolusRecommendation?
-        let recommendedBolus: HKQuantity?
+        let recommendedBolus: LoopQuantity?
         let notice: Notice?
         do {
             recommendation = try await computeBolusRecommendation()
 
             if let recommendation, deliveryDelegate != nil {
-                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
+                recommendedBolus = LoopQuantity(unit: .internationalUnit, doubleValue: recommendation.amount)
 
                 switch recommendation.notice {
                 case .glucoseBelowSuspendThreshold:
@@ -577,7 +576,7 @@ final class BolusEntryViewModel: ObservableObject {
                     notice = nil
                 }
             } else {
-                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+                recommendedBolus = LoopQuantity(unit: .internationalUnit, doubleValue: 0)
                 notice = nil
             }
         } catch {
@@ -640,7 +639,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         maximumBolus = delegate.settings.maximumBolus.map { maxBolusAmount in
-            HKQuantity(unit: .internationalUnit(), doubleValue: maxBolusAmount)
+            LoopQuantity(unit: .internationalUnit, doubleValue: maxBolusAmount)
         }
 
         dosingDecision.scheduleOverride = scheduleOverride
@@ -690,7 +689,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     func updateEnteredBolus(_ enteredBolusAmount: Double?) {
-        enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: enteredBolusAmount ?? 0)
+        enteredBolus = LoopQuantity(unit: .internationalUnit, doubleValue: enteredBolusAmount ?? 0)
     }
 }
 
@@ -726,7 +725,7 @@ extension BolusEntryViewModel {
     }
     
     private var hasBolusEntryReadyToDeliver: Bool {
-        enteredBolus.doubleValue(for: .internationalUnit()) != 0
+        enteredBolus.doubleValue(for: .internationalUnit) != 0
     }
 
     private var hasDataToSave: Bool {

@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 
@@ -116,7 +116,7 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         
     public func setGlucoseQuantity(_ glucoseQuantity: Double,
                                    at glucoseStartDate: Date,
-                                   unit: HKUnit,
+                                   unit: LoopUnit,
                                    glucoseDisplay: GlucoseDisplayable?,
                                    wasUserEntered: Bool,
                                    isDisplayOnly: Bool,

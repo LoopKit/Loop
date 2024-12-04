@@ -9,7 +9,6 @@
 import WatchKit
 import WatchConnectivity
 import LoopKit
-import HealthKit
 import SpriteKit
 import os.log
 import LoopCore

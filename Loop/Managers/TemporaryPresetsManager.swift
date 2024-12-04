@@ -10,7 +10,6 @@ import Foundation
 import LoopKit
 import os.log
 import LoopCore
-import HealthKit
 
 protocol PresetActivationObserver: AnyObject {
     func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration)

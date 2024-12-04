@@ -6,7 +6,6 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
 import SwiftUI
 import LoopKit
 import LoopKitUI
@@ -14,7 +13,7 @@ import LoopAlgorithm
 
 struct PredictedGlucoseChartView: View {
     let chartManager: ChartsManager
-    var glucoseUnit: HKUnit
+    var glucoseUnit: LoopUnit
     var glucoseValues: [GlucoseValue]
     var predictedGlucoseValues: [GlucoseValue] = []
     var targetGlucoseSchedule: GlucoseRangeSchedule? = nil

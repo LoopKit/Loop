@@ -9,6 +9,7 @@
 import WatchConnectivity
 import WatchKit
 import HealthKit
+import LoopAlgorithm
 import Intents
 import os
 import os.log
@@ -165,11 +166,18 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         if context.displayGlucoseUnit == nil {
             let type = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
             loopManager.healthStore.preferredUnits(for: [type]) { (units, error) in
-                context.displayGlucoseUnit = units[type]
-
-                DispatchQueue.main.async {
-                    self.loopManager.updateContext(context)
+                defer {
+                    DispatchQueue.main.async {
+                        self.loopManager.updateContext(context)
+                    }
                 }
+                
+                guard let unit = units[type] else {
+                    context.displayGlucoseUnit = nil
+                    return
+                }
+                
+                context.displayGlucoseUnit = LoopUnit(from: unit)
             }
         } else {
             DispatchQueue.main.async {
@@ -262,7 +270,7 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
                 let mealTime = userInfo[LoopNotificationUserInfoKey.missedMealTime.rawValue] as? Date,
                 let carbAmount = userInfo[LoopNotificationUserInfoKey.missedMealCarbAmount.rawValue] as? Double
             {
-                let missedEntry = NewCarbEntry(quantity: HKQuantity(unit: .gram(),
+                let missedEntry = NewCarbEntry(quantity: LoopQuantity(unit: .gram,
                                                                          doubleValue: carbAmount),
                                                     startDate: mealTime,
                                                     foodType: nil,

@@ -8,17 +8,17 @@
 
 import Foundation
 import SwiftUI
+import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 import Combine
-import HealthKit
 
 struct ManualGlucoseEntryRow: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
 
     @State private var valueText = ""
 
-    @Binding var quantity: HKQuantity?
+    @Binding var quantity: LoopQuantity?
 
     @State private var isManualGlucoseEntryRowVisible = false
 
@@ -42,7 +42,7 @@ struct ManualGlucoseEntryRow: View {
                 )
                 .onChange(of: valueText, perform: { value in
                     if let manualGlucoseValue = displayGlucosePreference.formatter.numberFormatter.number(from: valueText)?.doubleValue {
-                        quantity = HKQuantity(unit: displayGlucosePreference.unit, doubleValue: manualGlucoseValue)
+                        quantity = LoopQuantity(unit: displayGlucosePreference.unit, doubleValue: manualGlucoseValue)
                     } else {
                         quantity = nil
                     }
