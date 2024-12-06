@@ -53,6 +53,7 @@ public struct SettingsView: View {
             
             case favoriteFoods
             case therapySettings
+            case presets
         }
     }
     
@@ -83,6 +84,7 @@ public struct SettingsView: View {
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         therapySection
                     }
+                    presetsSection
                     deviceSettingsSection
                     if FeatureFlags.allowExperimentalFeatures {
                         favoriteFoodsSection
@@ -138,32 +140,50 @@ public struct SettingsView: View {
                 }
             }
             .sheet(item: $sheet) { sheet in
-                switch sheet {
-                case .therapySettings:
-                    TherapySettingsView(
-                        mode: .settings,
-                        viewModel: TherapySettingsViewModel(
-                            therapySettings: viewModel.therapySettings(),
-                            sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
-                            adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
-                            delegate: viewModel.therapySettingsViewModelDelegate
+                Group {
+                    switch sheet {
+                    case .therapySettings:
+                        TherapySettingsView(
+                            mode: .settings,
+                            viewModel: TherapySettingsViewModel(
+                                therapySettings: viewModel.therapySettings(),
+                                sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
+                                adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
+                                delegate: viewModel.therapySettingsViewModelDelegate
+                            )
                         )
-                    )
-                    .environmentObject(displayGlucosePreference)
-                    .environment(\.dismissAction, self.dismiss)
-                    .environment(\.appName, self.appName)
-                    .environment(\.chartColorPalette, .primary)
-                    .environment(\.carbTintColor, self.carbTintColor)
-                    .environment(\.glucoseTintColor, self.glucoseTintColor)
-                    .environment(\.guidanceColors, self.guidanceColors)
-                    .environment(\.insulinTintColor, self.insulinTintColor)
-                case .favoriteFoods:
-                    FavoriteFoodsView(insightsDelegate: viewModel.favoriteFoodInsightsDelegate)
+                    case .presets:
+                        presetsView
+                    case .favoriteFoods:
+                        FavoriteFoodsView(insightsDelegate: viewModel.favoriteFoodInsightsDelegate)
+                    }
                 }
+                .environmentObject(displayGlucosePreference)
+                .environment(\.dismissAction, self.dismiss)
+                .environment(\.appName, self.appName)
+                .environment(\.chartColorPalette, .primary)
+                .environment(\.carbTintColor, self.carbTintColor)
+                .environment(\.glucoseTintColor, self.glucoseTintColor)
+                .environment(\.guidanceColors, self.guidanceColors)
+                .environment(\.insulinTintColor, self.insulinTintColor)
             }
         }
         .navigationViewStyle(.stack)
     }
+
+    public var presetsView: some View {
+        PresetsView(
+            viewModel: PresetsViewModel(
+                customPresets: viewModel.therapySettings().overridePresets ?? [],
+                correctionRangeOverrides: viewModel.therapySettings().correctionRangeOverrides,
+                presetsHistory: viewModel.presetHistory,
+                preMealGuardrail: viewModel.preMealGuardrail,
+                legacyWorkoutGuardrail: viewModel.legacyWorkoutPresetGuardrail
+            )
+        )
+    }
+
+
 
     private func menuItemsForSection(name: String) -> some View {
         Section(header: SectionHeader(label: name)) {
@@ -340,6 +360,18 @@ extension SettingsView {
             if FeatureFlags.allowAlgorithmExperiments {
                 algorithmExperimentsSection
             }
+        }
+    }
+    
+    private var presetsSection: some View {
+        Section {
+            LargeButton(
+                action: { sheet = .presets },
+                includeArrow: true,
+                imageView: Image("Presets Icon"),
+                label: NSLocalizedString("Presets", comment: "Title text for button to Preset Settings"),
+                descriptiveText: NSLocalizedString("Temporary Settings Adjustments", comment: "Descriptive text for Preset Settings")
+            )
         }
     }
 

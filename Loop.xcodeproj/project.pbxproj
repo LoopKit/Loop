@@ -251,7 +251,23 @@
 		84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */; };
 		84AA81E52A4A3981000B658B /* DeeplinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E42A4A3981000B658B /* DeeplinkManager.swift */; };
 		84AA81E72A4A4DEF000B658B /* PumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81E62A4A4DEF000B658B /* PumpView.swift */; };
+		84C170ED2CCA362A0098E52F /* ImpactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C170EC2CCA361F0098E52F /* ImpactView.swift */; };
+		84C170EF2CCA37680098E52F /* PresetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C170EE2CCA37680098E52F /* PresetCard.swift */; };
 		84DEB10D2C18FABA00170734 /* IOSFocusModesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DEB10C2C18FABA00170734 /* IOSFocusModesView.swift */; };
+		84E8BBAE2CC9791E0078E6CF /* PresetsTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBAD2CC9791E0078E6CF /* PresetsTrainingViewModel.swift */; };
+		84E8BBB12CC979820078E6CF /* PresetsTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBB02CC9793C0078E6CF /* PresetsTrainingView.swift */; };
+		84E8BBB32CC97C480078E6CF /* CreatingYourOwnPresetsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBB22CC97C480078E6CF /* CreatingYourOwnPresetsContentView.swift */; };
+		84E8BBB52CC98C3F0078E6CF /* PresetsTrainingContentContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBB42CC98C3F0078E6CF /* PresetsTrainingContentContainerView.swift */; };
+		84E8BBB82CC9924B0078E6CF /* HowTheyWorkContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBB72CC9924B0078E6CF /* HowTheyWorkContentView.swift */; };
+		84E8BBBA2CC9925C0078E6CF /* PresetsAndExerciseContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBB92CC9925C0078E6CF /* PresetsAndExerciseContentView.swift */; };
+		84E8BBBC2CC992660078E6CF /* PresetsAndIllnessContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBBB2CC992660078E6CF /* PresetsAndIllnessContentView.swift */; };
+		84E8BBC42CC9B9890078E6CF /* AdjustedGlucoseRangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBC32CC9B9800078E6CF /* AdjustedGlucoseRangeView.swift */; };
+		84E8BBC62CC9BF830078E6CF /* PercentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBC52CC9BF830078E6CF /* PercentPickerView.swift */; };
+		84E8BBC82CC9D34B0078E6CF /* TherapySettingsExampleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBC72CC9D34B0078E6CF /* TherapySettingsExampleView.swift */; };
+		84E8BBCA2CCA16290078E6CF /* PresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBC92CCA16290078E6CF /* PresetsView.swift */; };
+		84E8BBCC2CCA16B30078E6CF /* PresetsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBCB2CCA16B30078E6CF /* PresetsViewModel.swift */; };
+		84E8BBCE2CCA1E070078E6CF /* PresetsTrainingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBCD2CCA1E070078E6CF /* PresetsTrainingCard.swift */; };
+		84E8BBD02CCA279B0078E6CF /* Image+Exists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E8BBCF2CCA27960078E6CF /* Image+Exists.swift */; };
 		84EC162E2C9115CA00D220C5 /* DIYLoopUnitTestPlan.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 84EC162D2C9115CA00D220C5 /* DIYLoopUnitTestPlan.xctestplan */; };
 		891B508524342BE1005DA578 /* CarbAndBolusFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 891B508424342BE1005DA578 /* CarbAndBolusFlowViewModel.swift */; };
 		892A5D59222F0A27008961AB /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
@@ -1111,7 +1127,23 @@
 		84AA81DC2A4A2999000B658B /* StatusWidgetTimelineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelineProvider.swift; sourceTree = "<group>"; };
 		84AA81E42A4A3981000B658B /* DeeplinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkManager.swift; sourceTree = "<group>"; };
 		84AA81E62A4A4DEF000B658B /* PumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpView.swift; sourceTree = "<group>"; };
+		84C170EC2CCA361F0098E52F /* ImpactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpactView.swift; sourceTree = "<group>"; };
+		84C170EE2CCA37680098E52F /* PresetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetCard.swift; sourceTree = "<group>"; };
 		84DEB10C2C18FABA00170734 /* IOSFocusModesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSFocusModesView.swift; sourceTree = "<group>"; };
+		84E8BBAD2CC9791E0078E6CF /* PresetsTrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsTrainingViewModel.swift; sourceTree = "<group>"; };
+		84E8BBB02CC9793C0078E6CF /* PresetsTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsTrainingView.swift; sourceTree = "<group>"; };
+		84E8BBB22CC97C480078E6CF /* CreatingYourOwnPresetsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingYourOwnPresetsContentView.swift; sourceTree = "<group>"; };
+		84E8BBB42CC98C3F0078E6CF /* PresetsTrainingContentContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsTrainingContentContainerView.swift; sourceTree = "<group>"; };
+		84E8BBB72CC9924B0078E6CF /* HowTheyWorkContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowTheyWorkContentView.swift; sourceTree = "<group>"; };
+		84E8BBB92CC9925C0078E6CF /* PresetsAndExerciseContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsAndExerciseContentView.swift; sourceTree = "<group>"; };
+		84E8BBBB2CC992660078E6CF /* PresetsAndIllnessContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsAndIllnessContentView.swift; sourceTree = "<group>"; };
+		84E8BBC32CC9B9800078E6CF /* AdjustedGlucoseRangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdjustedGlucoseRangeView.swift; sourceTree = "<group>"; };
+		84E8BBC52CC9BF830078E6CF /* PercentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PercentPickerView.swift; sourceTree = "<group>"; };
+		84E8BBC72CC9D34B0078E6CF /* TherapySettingsExampleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapySettingsExampleView.swift; sourceTree = "<group>"; };
+		84E8BBC92CCA16290078E6CF /* PresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsView.swift; sourceTree = "<group>"; };
+		84E8BBCB2CCA16B30078E6CF /* PresetsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsViewModel.swift; sourceTree = "<group>"; };
+		84E8BBCD2CCA1E070078E6CF /* PresetsTrainingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsTrainingCard.swift; sourceTree = "<group>"; };
+		84E8BBCF2CCA27960078E6CF /* Image+Exists.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+Exists.swift"; sourceTree = "<group>"; };
 		84EC162D2C9115CA00D220C5 /* DIYLoopUnitTestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DIYLoopUnitTestPlan.xctestplan; sourceTree = "<group>"; };
 		891B508424342BE1005DA578 /* CarbAndBolusFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAndBolusFlowViewModel.swift; sourceTree = "<group>"; };
 		892A5D29222EF60A008961AB /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = MockKit.framework; path = Carthage/Build/iOS/MockKit.framework; sourceTree = SOURCE_ROOT; };
@@ -2082,6 +2114,7 @@
 		43E344A01B9E144300C85C07 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				84E8BBCF2CCA27960078E6CF /* Image+Exists.swift */,
 				A98556842493F901000FD662 /* AlertStore+SimulatedCoreData.swift */,
 				C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */,
 				C1F2CAAB2B7A980600D7F581 /* BasalRelativeDose.swift */,
@@ -2169,6 +2202,7 @@
 				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
 				438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */,
 				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
+				84E8BBAF2CC979300078E6CF /* Presets */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
 				DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */,
 				C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */,
@@ -2446,6 +2480,42 @@
 			path = Widgets;
 			sourceTree = "<group>";
 		};
+		84E8BBAF2CC979300078E6CF /* Presets */ = {
+			isa = PBXGroup;
+			children = (
+				84E8BBC92CCA16290078E6CF /* PresetsView.swift */,
+				84E8BBB02CC9793C0078E6CF /* PresetsTrainingView.swift */,
+				84E8BBC22CC9B9780078E6CF /* Components */,
+				84E8BBB62CC990480078E6CF /* Training Content */,
+			);
+			path = Presets;
+			sourceTree = "<group>";
+		};
+		84E8BBB62CC990480078E6CF /* Training Content */ = {
+			isa = PBXGroup;
+			children = (
+				84E8BBB22CC97C480078E6CF /* CreatingYourOwnPresetsContentView.swift */,
+				84E8BBB72CC9924B0078E6CF /* HowTheyWorkContentView.swift */,
+				84E8BBB92CC9925C0078E6CF /* PresetsAndExerciseContentView.swift */,
+				84E8BBBB2CC992660078E6CF /* PresetsAndIllnessContentView.swift */,
+			);
+			path = "Training Content";
+			sourceTree = "<group>";
+		};
+		84E8BBC22CC9B9780078E6CF /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				84C170EC2CCA361F0098E52F /* ImpactView.swift */,
+				84E8BBC32CC9B9800078E6CF /* AdjustedGlucoseRangeView.swift */,
+				84E8BBCD2CCA1E070078E6CF /* PresetsTrainingCard.swift */,
+				84E8BBC52CC9BF830078E6CF /* PercentPickerView.swift */,
+				84E8BBC72CC9D34B0078E6CF /* TherapySettingsExampleView.swift */,
+				84E8BBB42CC98C3F0078E6CF /* PresetsTrainingContentContainerView.swift */,
+				84C170EE2CCA37680098E52F /* PresetCard.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		891B508324342BCA005DA578 /* View Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -2519,6 +2589,8 @@
 				1D49795724E7289700948F05 /* ServicesViewModel.swift */,
 				C174233B259BEB0F00399C9D /* ManualEntryDoseViewModel.swift */,
 				1DB619AB270BAD3D006C9D07 /* VersionUpdateViewModel.swift */,
+				84E8BBAD2CC9791E0078E6CF /* PresetsTrainingViewModel.swift */,
+				84E8BBCB2CCA16B30078E6CF /* PresetsViewModel.swift */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";
@@ -3411,6 +3483,7 @@
 				142CB7592A60BF2E0075748A /* EditMode.swift in Sources */,
 				14C9706E2C5A83AF00E8A01B /* IOBChartView.swift in Sources */,
 				E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */,
+				84E8BBCE2CCA1E070078E6CF /* PresetsTrainingCard.swift in Sources */,
 				B470F5842AB22B5100049695 /* StatefulPluggable.swift in Sources */,
 				E98A55ED24EDD6380008715D /* LatestStoredSettingsProvider.swift in Sources */,
 				C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */,
@@ -3428,6 +3501,7 @@
 				1452F4AD2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift in Sources */,
 				C16575712538A36B004AE16E /* CGMStalenessMonitor.swift in Sources */,
 				14C970822C5C2EC100E8A01B /* FavoriteFoodInsightsView.swift in Sources */,
+				84E8BBB12CC979820078E6CF /* PresetsTrainingView.swift in Sources */,
 				1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */,
 				C11BD0552523CFED00236B08 /* SimpleBolusViewModel.swift in Sources */,
 				C1F2CAAA2B76B3EE00D7F581 /* TempBasalRecommendation.swift in Sources */,
@@ -3438,6 +3512,7 @@
 				89D6953E23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift in Sources */,
 				89CA2B30226C0161004D9350 /* DirectoryObserver.swift in Sources */,
 				C18859AC2AF29BE50010F21F /* TemporaryPresetsManager.swift in Sources */,
+				84E8BBC62CC9BF830078E6CF /* PercentPickerView.swift in Sources */,
 				1DA649A7244126CD00F61E75 /* UserNotificationAlertScheduler.swift in Sources */,
 				439A7942211F631C0041B75F /* RootNavigationController.swift in Sources */,
 				149A28BD2A853E6C00052EDF /* CarbEntryView.swift in Sources */,
@@ -3450,8 +3525,10 @@
 				142CB75B2A60BFC30075748A /* FavoriteFoodsView.swift in Sources */,
 				A9D5C5B625DC6C6A00534873 /* LoopAppManager.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
+				84E8BBBA2CC9925C0078E6CF /* PresetsAndExerciseContentView.swift in Sources */,
 				C16F51192B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift in Sources */,
 				1452F4AB2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift in Sources */,
+				84E8BBAE2CC9791E0078E6CF /* PresetsTrainingViewModel.swift in Sources */,
 				C1742332259BEADC00399C9D /* ManualEntryDoseView.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
 				43FCEEA9221A615B0013DD30 /* StatusChartsManager.swift in Sources */,
@@ -3460,6 +3537,7 @@
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
 				B42D124328D371C400E43D22 /* AlertMuter.swift in Sources */,
 				A96DAC242838325900D94E38 /* DiagnosticLog.swift in Sources */,
+				84C170ED2CCA362A0098E52F /* ImpactView.swift in Sources */,
 				A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */,
 				A9C62D8A2331703100535612 /* ServicesManager.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
@@ -3468,6 +3546,7 @@
 				C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */,
 				4372E487213C86240068E043 /* SampleValue.swift in Sources */,
 				14C970682C5991CD00E8A01B /* LoopChartView.swift in Sources */,
+				84E8BBB52CC98C3F0078E6CF /* PresetsTrainingContentContainerView.swift in Sources */,
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
 				C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */,
 				1D49795824E7289700948F05 /* ServicesViewModel.swift in Sources */,
@@ -3479,6 +3558,7 @@
 				C191D2A125B3ACAA00C26C0B /* DosingStrategySelectionView.swift in Sources */,
 				A977A2F424ACFECF0059C207 /* CriticalEventLogExportManager.swift in Sources */,
 				89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */,
+				84E8BBCC2CCA16B30078E6CF /* PresetsViewModel.swift in Sources */,
 				43E93FB71E469A5100EAB8DB /* HKUnit.swift in Sources */,
 				43C05CAF21EB2C24006FB252 /* NSBundle.swift in Sources */,
 				B455C7332BD14E25002B847E /* Comparable.swift in Sources */,
@@ -3495,6 +3575,7 @@
 				E98A55EF24EDD6E60008715D /* DosingDecisionStoreProtocol.swift in Sources */,
 				B4001CEE28CBBC82002FB414 /* AlertManagementView.swift in Sources */,
 				E9C00EF524C623EF00628F35 /* LoopSettings+Loop.swift in Sources */,
+				84E8BBD02CCA279B0078E6CF /* Image+Exists.swift in Sources */,
 				4389916B1E91B689000EEF90 /* ChartSettings+Loop.swift in Sources */,
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
 				C1F2CAAC2B7A980600D7F581 /* BasalRelativeDose.swift in Sources */,
@@ -3503,6 +3584,7 @@
 				DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */,
 				A9347F3124E7521800C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */,
 				A9CBE458248AB564008E7BA2 /* DoseStore+SimulatedCoreData.swift in Sources */,
+				84E8BBBC2CC992660078E6CF /* PresetsAndIllnessContentView.swift in Sources */,
 				897A5A9924C22DE800C4E71D /* BolusEntryViewModel.swift in Sources */,
 				4374B5EF209D84BF00D17AA8 /* OSLog.swift in Sources */,
 				1DB619AC270BAD3D006C9D07 /* VersionUpdateViewModel.swift in Sources */,
@@ -3535,6 +3617,7 @@
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
 				B43CF07E29434EC4008A520B /* HowMuteAlertWorkView.swift in Sources */,
 				14C970842C5C2FB400E8A01B /* HowCarbEffectsWorksView.swift in Sources */,
+				84E8BBB32CC97C480078E6CF /* CreatingYourOwnPresetsContentView.swift in Sources */,
 				84AA81E52A4A3981000B658B /* DeeplinkManager.swift in Sources */,
 				1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */,
 				C16F511B2B89363A00EFD7A1 /* SimpleInsulinDose.swift in Sources */,
@@ -3571,6 +3654,7 @@
 				4372E490213CFCE70068E043 /* LoopSettingsUserInfo.swift in Sources */,
 				14ED83F62C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift in Sources */,
 				C174233C259BEB0F00399C9D /* ManualEntryDoseViewModel.swift in Sources */,
+				84E8BBC82CC9D34B0078E6CF /* TherapySettingsExampleView.swift in Sources */,
 				1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */,
 				E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */,
 				C1E3862628247C6100F561A4 /* StoredLoopNotRunningNotification.swift in Sources */,
@@ -3585,6 +3669,7 @@
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
 				1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */,
+				84E8BBB82CC9924B0078E6CF /* HowTheyWorkContentView.swift in Sources */,
 				14C9706A2C5A833100E8A01B /* CarbEffectChartView.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsServicesManager.swift in Sources */,
 				14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */,
@@ -3593,10 +3678,13 @@
 				895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */,
 				C1EF747228D6A44A00C8C083 /* CrashRecoveryManager.swift in Sources */,
 				A9F66FC3247F451500096EA7 /* UIDevice+Loop.swift in Sources */,
+				84E8BBCA2CCA16290078E6CF /* PresetsView.swift in Sources */,
 				439706E622D2E84900C81566 /* PredictionSettingTableViewCell.swift in Sources */,
 				430D85891F44037000AF2D4F /* HUDViewTableViewCell.swift in Sources */,
 				43A51E211EB6DBDD000736CC /* LoopChartsTableViewController.swift in Sources */,
 				8968B1122408B3520074BB48 /* UIFont.swift in Sources */,
+				84E8BBC42CC9B9890078E6CF /* AdjustedGlucoseRangeView.swift in Sources */,
+				84C170EF2CCA37680098E52F /* PresetCard.swift in Sources */,
 				1452F4A92A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift in Sources */,
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,
 				89A1B66E24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift in Sources */,
@@ -4483,6 +4571,7 @@
 				INFOPLIST_FILE = "Loop Widget Extension/Bootstrap/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Loop Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4531,6 +4620,7 @@
 				INFOPLIST_FILE = "Loop Widget Extension/Bootstrap/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Loop Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4788,6 +4878,7 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4816,6 +4907,7 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4991,6 +5083,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5012,6 +5105,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5030,6 +5124,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5048,6 +5143,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5069,6 +5165,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5089,6 +5186,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5224,6 +5322,7 @@
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5317,6 +5416,7 @@
 				INFOPLIST_FILE = "Loop Widget Extension/Bootstrap/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Loop Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 LoopKit Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5348,6 +5448,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5374,6 +5475,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5419,6 +5521,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5437,6 +5540,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = LoopTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5459,6 +5563,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5486,6 +5591,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Loop Intent Extension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

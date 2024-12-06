@@ -10,13 +10,15 @@ import SwiftUI
 
 // MARK: - Color palette for common elements
 extension Color {
-    static let carbs = Color("carbs")
+    public static let carbs = Color("carbs")
     
-    static let fresh = Color("fresh")
+    public static let fresh = Color("fresh")
 
-    static let glucose = Color("glucose")
-    
-    static let insulin = Color("insulin")
+    public static let glucose = Color("glucose")
+
+    public static let insulin = Color("insulin")
+
+    public static let presets = Color("presets")
 
     // The loopAccent color is intended to be use as the app accent color.
     public static let loopAccent = Color("accent")

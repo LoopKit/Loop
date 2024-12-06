@@ -78,7 +78,8 @@ public class SettingsViewModel: ObservableObject {
     let sensitivityOverridesEnabled: Bool
     let isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
-    
+    let presetHistory: TemporaryScheduleOverrideHistory
+
     @Published private(set) var automaticDosingStatus: AutomaticDosingStatus
     
     @Published private(set) var lastLoopCompletion: Date?
@@ -101,7 +102,30 @@ public class SettingsViewModel: ObservableObject {
            delegate?.dosingEnabledChanged(closedLoopPreference)
        }
     }
-    
+
+    var preMealGuardrail: Guardrail<HKQuantity>? {
+        guard let scheduleRange = therapySettings().glucoseTargetRangeSchedule?.scheduleRange() else {
+            return nil
+        }
+        return Guardrail.correctionRangeOverride(
+            for: .preMeal,
+            correctionRangeScheduleRange: scheduleRange,
+            suspendThreshold: therapySettings().suspendThreshold
+        )
+    }
+
+    var legacyWorkoutPresetGuardrail: Guardrail<HKQuantity>? {
+        guard let scheduleRange = therapySettings().glucoseTargetRangeSchedule?.scheduleRange() else {
+            return nil
+        }
+        return Guardrail.correctionRangeOverride(
+            for: .workout,
+            correctionRangeScheduleRange: scheduleRange,
+            suspendThreshold: therapySettings().suspendThreshold
+        )
+    }
+
+
     weak var favoriteFoodInsightsDelegate: FavoriteFoodInsightsViewModelDelegate?
 
     var showDeleteTestData: Bool {
@@ -143,6 +167,7 @@ public class SettingsViewModel: ObservableObject {
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
+                presetHistory: TemporaryScheduleOverrideHistory,
                 delegate: SettingsViewModelDelegate?
     ) {
         self.alertPermissionsChecker = alertPermissionsChecker
@@ -163,6 +188,7 @@ public class SettingsViewModel: ObservableObject {
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
+        self.presetHistory = presetHistory
         self.delegate = delegate
 
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
@@ -224,6 +250,7 @@ extension SettingsViewModel {
                                  availableSupports: [],
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,
+                                 presetHistory: TemporaryScheduleOverrideHistory(),
                                  delegate: nil
         )
     }

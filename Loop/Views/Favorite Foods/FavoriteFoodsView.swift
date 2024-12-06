@@ -50,7 +50,7 @@ struct FavoriteFoodsView: View {
                     }
                 }
                 .insetGroupedListStyle()
-                
+
                 let editViewIsActive = Binding(get: { viewModel.isEditViewActive && !viewModel.isDetailViewActive }, set: { viewModel.isEditViewActive = $0 })
                 NavigationLink(destination: FavoriteFoodAddEditView(originalFavoriteFood: viewModel.selectedFood, onSave: viewModel.onFoodSave(_:)), isActive: editViewIsActive) {
                     EmptyView()

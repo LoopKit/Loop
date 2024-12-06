@@ -1650,6 +1650,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
+                                          presetHistory: temporaryPresetsManager.overrideHistory,
                                           delegate: self
         )
         viewModel.favoriteFoodInsightsDelegate = loopManager

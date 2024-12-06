@@ -1,0 +1,244 @@
+//
+//  PresetsViewModel.swift
+//  Loop
+//
+//  Created by Cameron Ingham on 10/23/24.
+//  Copyright © 2024 LoopKit Authors. All rights reserved.
+//
+
+import SwiftUI
+import LoopKit
+import HealthKit
+
+enum PresetDurationType {
+    case untilCarbsEntered
+    case duration(TimeInterval)
+    case indefinite
+}
+
+enum PresetExpectedEndTime {
+    case untilCarbsEntered
+    case scheduled(Date)
+    case indefinite
+}
+
+extension TemporaryScheduleOverride {
+    var expectedEndTime: PresetExpectedEndTime? {
+        switch context {
+        case .preMeal: return .untilCarbsEntered
+        case .legacyWorkout: return .indefinite
+        case .custom, .preset:
+            switch duration {
+            case .indefinite: return .indefinite
+            case .finite: return .scheduled(scheduledEndDate)
+            }
+        }
+    }
+
+    var presetId: String {
+        switch context {
+        case .preMeal: return "premeal"
+        case .legacyWorkout: return "legacyworkout"
+        case .custom: return self.syncIdentifier.uuidString
+        case .preset(let preset): return preset.id.uuidString
+        }
+    }
+}
+
+enum PresetIcon {
+    case emoji(String)
+    case image(String, Color)
+}
+
+typealias RangeSafetyClassification = (lower: SafetyClassification, upper: SafetyClassification)
+
+enum SelectablePreset: Hashable, Identifiable {
+
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .custom(let preset):
+            hasher.combine(preset)
+        case .legacyWorkout(let range, _):
+            hasher.combine("legacyworkout")
+            hasher.combine(range)
+        case .preMeal(let range, _):
+            hasher.combine("premeal")
+            hasher.combine(range)
+        }
+    }
+
+    static func == (lhs: SelectablePreset, rhs: SelectablePreset) -> Bool {
+        switch (lhs, rhs) {
+        case (.custom(let lhsPreset), .custom(let rhsPreset)):
+            return lhsPreset == rhsPreset
+        case (.legacyWorkout(let lhsRange, _), .legacyWorkout(let rhsRange, _)):
+            return lhsRange == rhsRange
+        case (.preMeal(let lhsRange, _), .legacyWorkout(let rhsRange, _)):
+            return lhsRange == rhsRange
+        default:
+            return false
+        }
+    }
+    
+    var id: String {
+        switch self {
+        case .custom(let preset): return preset.id.uuidString
+        case .legacyWorkout: return "legacyWorkout"
+        case .preMeal: return "preMeal"
+        }
+    }
+
+    case custom(TemporaryScheduleOverridePreset)
+    case preMeal(range: ClosedRange<HKQuantity>, guardrail: Guardrail<HKQuantity>?)
+    case legacyWorkout(range: ClosedRange<HKQuantity>, guardrail: Guardrail<HKQuantity>?)
+
+    var icon: PresetIcon {
+        switch self {
+        case .custom(let preset): return .emoji(preset.symbol)
+        case .preMeal: return .image("Pre-Meal", .carbTintColor)
+        case .legacyWorkout: return .image("workout", .insulinTintColor)
+        }
+    }
+
+    var duration: PresetDurationType {
+        switch self {
+        case .custom(let preset):
+            switch preset.duration {
+            case .indefinite:
+                return .indefinite
+            case .finite(let duration):
+                return .duration(duration)
+            }
+        case .preMeal: return .untilCarbsEntered
+        case .legacyWorkout: return .indefinite
+        }
+    }
+
+    var name: String {
+        switch self {
+            case .custom(let preset): return preset.name
+            case .preMeal: return "Pre-Meal"
+            case .legacyWorkout: return "Workout"
+        }
+    }
+
+    var correctionRange: ClosedRange<HKQuantity>? {
+        switch self {
+        case .custom(let preset): return preset.settings.targetRange
+        case .preMeal(let range, _): return range
+        case .legacyWorkout(let range, _): return range
+        }
+    }
+
+    var insulinSensitivityMultiplier: Double? {
+        if case .custom(let preset) = self {
+            return preset.settings.insulinSensitivityMultiplier
+        } else {
+            return nil
+        }
+    }
+
+    var guardrail: Guardrail<HKQuantity>? {
+        switch self {
+        case .custom:
+            return nil
+        case .preMeal(_, let guardrail):
+            return guardrail
+        case .legacyWorkout(_, let guardrail):
+            return guardrail
+        }
+    }
+
+    var dateCreated: Date {
+        switch self {
+        case .custom:
+            return .distantPast // TODO
+        case .preMeal:
+            return .distantPast.addingTimeInterval(1)
+        case .legacyWorkout:
+            return .distantPast
+        }
+    }
+}
+
+class PresetsViewModel: ObservableObject {
+
+    // MARK: Training
+    @AppStorage("hasCompletedPresetsTraining") var hasCompletedTraining: Bool = false
+    @AppStorage("presetsSortOrder") var selectedSortOption: PresetSortOption = .name
+    @AppStorage("presetsSortDirectionReversed") var presetsSortAscending: Bool = true
+
+    var correctionRangeOverrides: CorrectionRangeOverrides?
+
+    @Published var customPresets: [TemporaryScheduleOverridePreset]
+    @Published var activeOverride: TemporaryScheduleOverride?
+
+    let preMealGuardrail: Guardrail<HKQuantity>?
+    let legacyWorkoutGuardrail: Guardrail<HKQuantity>?
+
+    private var presetHistory: TemporaryScheduleOverrideHistory
+
+    var activePreset: SelectablePreset? {
+        return allPresets.first(where: { $0.id == activeOverride?.presetId })
+    }
+
+    var allPresets: [SelectablePreset] {
+        var presets: [SelectablePreset] = []
+
+        if let preMealTargetRange = correctionRangeOverrides?.preMeal {
+            presets.append(.preMeal(
+                range: preMealTargetRange,
+                guardrail: preMealGuardrail
+            ))
+        }
+
+        if let legacyWorkoutTargetRange = correctionRangeOverrides?.workout {
+            presets.append(.legacyWorkout(
+                range: legacyWorkoutTargetRange,
+                guardrail: legacyWorkoutGuardrail
+            ))
+        }
+
+        presets.append(contentsOf: customPresets.map { .custom($0)} )
+
+        return presets
+    }
+
+    var lastUsed: [String: Date]?
+
+    func lastUsed(id: String) -> Date? {
+        if lastUsed == nil {
+            let enacts = presetHistory.getOverrideHistory(startDate: .distantPast, endDate: Date())
+            lastUsed = [:]
+            for enact in enacts {
+                var id: String
+                switch enact.context {
+                    case .preMeal: id = "preMeal"
+                    case .legacyWorkout: id = "legacyWorkout"
+                    case .preset(let preset): id = preset.id.uuidString
+                    case .custom: continue
+                }
+                lastUsed![id] = max(lastUsed![id] ?? .distantPast, enact.startDate)
+            }
+        }
+        return lastUsed![id]
+    }
+
+    init(
+        customPresets: [TemporaryScheduleOverridePreset],
+        correctionRangeOverrides: CorrectionRangeOverrides?,
+        presetsHistory: TemporaryScheduleOverrideHistory,
+        preMealGuardrail: Guardrail<HKQuantity>?,
+        legacyWorkoutGuardrail: Guardrail<HKQuantity>?
+    ) {
+        self.customPresets = customPresets
+        self.correctionRangeOverrides = correctionRangeOverrides
+        self.presetHistory = presetsHistory
+        self.preMealGuardrail = preMealGuardrail
+        self.legacyWorkoutGuardrail = legacyWorkoutGuardrail
+
+        // TODO: If active preset changes, data store should update us.
+        activeOverride = presetsHistory.activeOverride(at: Date())
+    }
+
+}
