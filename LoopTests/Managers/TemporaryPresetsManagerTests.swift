@@ -30,7 +30,7 @@ class TemporaryPresetsManagerTests: XCTestCase {
 
     override func setUp() async throws {
         let settingsProvider = MockSettingsProvider(settings: settings)
-        manager = TemporaryPresetsManager(settingsProvider: settingsProvider)
+        manager = await TemporaryPresetsManager(settingsProvider: settingsProvider)
     }
 
     func testPreMealOverride() {

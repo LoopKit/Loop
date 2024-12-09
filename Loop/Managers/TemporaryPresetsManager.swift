@@ -22,16 +22,18 @@ class TemporaryPresetsManager {
 
     private var settingsProvider: SettingsProvider
 
-    var overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
+    var overrideHistory: TemporaryScheduleOverrideHistory
 
     private var presetActivationObservers: [PresetActivationObserver] = []
 
     private var overrideIntentObserver: NSKeyValueObservation? = nil
 
+    @MainActor
     init(settingsProvider: SettingsProvider) {
         self.settingsProvider = settingsProvider
-
-        self.overrideHistory.relevantTimeWindow = LoopCoreConstants.defaultCarbAbsorptionTimes.slow * 2
+        
+        self.overrideHistory = TemporaryScheduleOverrideHistoryContainer.shared.fetch()
+        TemporaryScheduleOverrideHistory.relevantTimeWindow = Bundle.main.localCacheDuration
 
         scheduleOverride = overrideHistory.activeOverride(at: Date())
 

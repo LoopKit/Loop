@@ -77,18 +77,6 @@ extension UserDefaults {
         }
     }
 
-    public var overrideHistory: TemporaryScheduleOverrideHistory? {
-        get {
-            if let rawValue = object(forKey: Key.overrideHistory.rawValue) as? TemporaryScheduleOverrideHistory.RawValue {
-                return TemporaryScheduleOverrideHistory(rawValue: rawValue)
-            } else {
-                return nil
-            }
-        }
-        set {
-            set(newValue?.rawValue, forKey: Key.overrideHistory.rawValue)
-        }
-    }
     
     public var lastBedtimeQuery: Date? {
         get {
