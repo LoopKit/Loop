@@ -7,8 +7,8 @@
 //
 
 import SwiftUI
+import LoopAlgorithm
 import LoopKit
-import HealthKit
 
 enum PresetDurationType {
     case untilCarbsEntered
@@ -89,8 +89,8 @@ enum SelectablePreset: Hashable, Identifiable {
     }
 
     case custom(TemporaryScheduleOverridePreset)
-    case preMeal(range: ClosedRange<HKQuantity>, guardrail: Guardrail<HKQuantity>?)
-    case legacyWorkout(range: ClosedRange<HKQuantity>, guardrail: Guardrail<HKQuantity>?)
+    case preMeal(range: ClosedRange<LoopQuantity>, guardrail: Guardrail<LoopQuantity>?)
+    case legacyWorkout(range: ClosedRange<LoopQuantity>, guardrail: Guardrail<LoopQuantity>?)
 
     var icon: PresetIcon {
         switch self {
@@ -122,7 +122,7 @@ enum SelectablePreset: Hashable, Identifiable {
         }
     }
 
-    var correctionRange: ClosedRange<HKQuantity>? {
+    var correctionRange: ClosedRange<LoopQuantity>? {
         switch self {
         case .custom(let preset): return preset.settings.targetRange
         case .preMeal(let range, _): return range
@@ -138,7 +138,7 @@ enum SelectablePreset: Hashable, Identifiable {
         }
     }
 
-    var guardrail: Guardrail<HKQuantity>? {
+    var guardrail: Guardrail<LoopQuantity>? {
         switch self {
         case .custom:
             return nil
@@ -173,8 +173,8 @@ class PresetsViewModel: ObservableObject {
     @Published var customPresets: [TemporaryScheduleOverridePreset]
     @Published var activeOverride: TemporaryScheduleOverride?
 
-    let preMealGuardrail: Guardrail<HKQuantity>?
-    let legacyWorkoutGuardrail: Guardrail<HKQuantity>?
+    let preMealGuardrail: Guardrail<LoopQuantity>?
+    let legacyWorkoutGuardrail: Guardrail<LoopQuantity>?
 
     private var presetHistory: TemporaryScheduleOverrideHistory
 
@@ -228,8 +228,8 @@ class PresetsViewModel: ObservableObject {
         customPresets: [TemporaryScheduleOverridePreset],
         correctionRangeOverrides: CorrectionRangeOverrides?,
         presetsHistory: TemporaryScheduleOverrideHistory,
-        preMealGuardrail: Guardrail<HKQuantity>?,
-        legacyWorkoutGuardrail: Guardrail<HKQuantity>?
+        preMealGuardrail: Guardrail<LoopQuantity>?,
+        legacyWorkoutGuardrail: Guardrail<LoopQuantity>?
     ) {
         self.customPresets = customPresets
         self.correctionRangeOverrides = correctionRangeOverrides

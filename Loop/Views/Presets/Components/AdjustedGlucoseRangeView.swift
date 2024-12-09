@@ -6,7 +6,7 @@
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
+import LoopAlgorithm
 import LoopKitUI
 import SwiftUI
 
@@ -14,8 +14,8 @@ struct AdjustedGlucoseRangeView: View {
     
     @EnvironmentObject var displayGlucosePreference: DisplayGlucosePreference
 
-    @State var lowerBound: HKQuantity
-    @State var upperBound: HKQuantity
+    @State var lowerBound: LoopQuantity
+    @State var upperBound: LoopQuantity
     
     var body: some View {
         ZStack {

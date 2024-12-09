@@ -6,7 +6,7 @@
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
+import LoopAlgorithm
 import LoopKitUI
 import SwiftUI
 import LoopKit
@@ -20,8 +20,8 @@ struct PresetCard: View {
     let presetName: String
     let duration: PresetDurationType
     let insulinSensitivityMultiplier: Double?
-    let correctionRange: ClosedRange<HKQuantity>?
-    let guardrail: Guardrail<HKQuantity>?
+    let correctionRange: ClosedRange<LoopQuantity>?
+    let guardrail: Guardrail<LoopQuantity>?
     let expectedEndTime: PresetExpectedEndTime?
 
     private var numberFormatter: NumberFormatter {
@@ -86,7 +86,7 @@ struct PresetCard: View {
         }
     }
 
-    func annotatedRangeText(target: ClosedRange<HKQuantity>) -> some View {
+    func annotatedRangeText(target: ClosedRange<LoopQuantity>) -> some View {
 
         let lowerColor = guardrail?.color(for: target.lowerBound, guidanceColors: guidanceColors) ?? .primary
         let upperColor = guardrail?.color(for: target.upperBound, guidanceColors: guidanceColors) ?? .primary

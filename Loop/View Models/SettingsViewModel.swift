@@ -7,6 +7,7 @@
 //
 
 import Combine
+import LoopAlgorithm
 import LoopCore
 import LoopKit
 import LoopKitUI
@@ -103,7 +104,7 @@ public class SettingsViewModel: ObservableObject {
        }
     }
 
-    var preMealGuardrail: Guardrail<HKQuantity>? {
+    var preMealGuardrail: Guardrail<LoopQuantity>? {
         guard let scheduleRange = therapySettings().glucoseTargetRangeSchedule?.scheduleRange() else {
             return nil
         }
@@ -114,7 +115,7 @@ public class SettingsViewModel: ObservableObject {
         )
     }
 
-    var legacyWorkoutPresetGuardrail: Guardrail<HKQuantity>? {
+    var legacyWorkoutPresetGuardrail: Guardrail<LoopQuantity>? {
         guard let scheduleRange = therapySettings().glucoseTargetRangeSchedule?.scheduleRange() else {
             return nil
         }

@@ -6,7 +6,7 @@
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 import SwiftUI
@@ -38,8 +38,8 @@ struct PresetsAndIllnessContentView: View {
         }
     }
     
-    private let lowerBound = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 130)
-    private let upperBound = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 140)
+    private let lowerBound = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 130)
+    private let upperBound = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 140)
     
     private let basalRateFormatter = QuantityFormatter(for: .internationalUnitsPerHour)
     
@@ -74,7 +74,7 @@ struct PresetsAndIllnessContentView: View {
         PercentPickerView(value: .constant(110))
         
         ImpactView {
-            if let string = try? AttributedString(markdown: "**Basal** Rate was \(basalRateFormatter.string(from: HKQuantity(unit: .internationalUnitsPerHour, doubleValue: 0.5)) ?? "0") and will be \(basalRateFormatter.string(from: HKQuantity(unit: .internationalUnitsPerHour, doubleValue: 0.6)) ?? "0")\n**Carb Ratio** was 13 g and will be 11.7 g\n**ISF** was \(displayGlucosePreference.format(HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 50))) and will be \(displayGlucosePreference.format(HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 45)))", options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
+            if let string = try? AttributedString(markdown: "**Basal** Rate was \(basalRateFormatter.string(from: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: 0.5)) ?? "0") and will be \(basalRateFormatter.string(from: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: 0.6)) ?? "0")\n**Carb Ratio** was 13 g and will be 11.7 g\n**ISF** was \(displayGlucosePreference.format(LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 50))) and will be \(displayGlucosePreference.format(LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 45)))", options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
                 Text(string)
                     .font(.subheadline)
                     .fixedSize(horizontal: false, vertical: true)
@@ -88,7 +88,7 @@ struct PresetsAndIllnessContentView: View {
             Text("Correction Range", comment: "Presets and illness training content, correction range, subtitle")
                 .font(.title2.bold())
             
-            Text("Paloma’s normal correction range is set to \(displayGlucosePreference.format(lowerQuantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 105), higherQuantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 110))).", comment: "Presets and illness training content, correction range, paragraph 1")
+            Text("Paloma’s normal correction range is set to \(displayGlucosePreference.format(lowerQuantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 105), higherQuantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 110))).", comment: "Presets and illness training content, correction range, paragraph 1")
         }
         
         if let string = try? AttributedString(markdown: "In this scenario, Paloma will increase her correction range to **\(displayGlucosePreference.format(lowerQuantity: lowerBound, higherQuantity: upperBound))** to prevent drops due to eating less or not absorbing what she eats while sick.") {

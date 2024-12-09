@@ -6,7 +6,7 @@
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
+import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 import SwiftUI
@@ -46,13 +46,13 @@ struct TherapySettingsExampleView: View {
                     .fontWeight(.semibold)
                     
                     VStack(alignment: .leading, spacing: 6) {
-                        if let basalRateValue = basalRateFormatter.string(from: HKQuantity(unit: .internationalUnitsPerHour, doubleValue: basalRate)) {
+                        if let basalRateValue = basalRateFormatter.string(from: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: basalRate)) {
                             Text(basalRateValue)
                         }
                         
                         Text("\(numberFormatter.string(from: carbRatio) ?? "0") g/U")
                         
-                        Text(displayGlucosePreference.format(HKQuantity(unit: .milligramsPerDeciliter, doubleValue: isf)))
+                        Text(displayGlucosePreference.format(LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: isf)))
                     }
                 }
                 .font(.subheadline)

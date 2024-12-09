@@ -6,7 +6,7 @@
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import HealthKit
+import LoopAlgorithm
 import LoopKitUI
 import SwiftUI
 
@@ -37,8 +37,8 @@ struct PresetsAndExerciseContentView: View {
         }
     }
     
-    private let lowerBound = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 140)
-    private let upperBound = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 160)
+    private let lowerBound = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 140)
+    private let upperBound = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 160)
     
     @ViewBuilder
     var stepOneView: some View {
@@ -143,8 +143,8 @@ struct PresetsAndExerciseContentView: View {
             insulinSensitivityMultiplier: 1.0,
             correctionRange: ClosedRange(
                 uncheckedBounds: (
-                    HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 140),
-                    HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 260))
+                    LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 140),
+                    LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 260))
             ),
             guardrail: nil,
             expectedEndTime: .indefinite
