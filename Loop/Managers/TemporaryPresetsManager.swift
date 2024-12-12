@@ -16,17 +16,18 @@ protocol PresetActivationObserver: AnyObject {
     func presetDeactivated(context: TemporaryScheduleOverride.Context)
 }
 
+@Observable
 class TemporaryPresetsManager {
 
-    private let log = OSLog(category: "TemporaryPresetsManager")
+    @ObservationIgnored private let log = OSLog(category: "TemporaryPresetsManager")
 
-    private var settingsProvider: SettingsProvider
+    @ObservationIgnored private var settingsProvider: SettingsProvider
 
     var overrideHistory: TemporaryScheduleOverrideHistory
 
-    private var presetActivationObservers: [PresetActivationObserver] = []
+    @ObservationIgnored private var presetActivationObservers: [PresetActivationObserver] = []
 
-    private var overrideIntentObserver: NSKeyValueObservation? = nil
+    @ObservationIgnored private var overrideIntentObserver: NSKeyValueObservation? = nil
 
     @MainActor
     init(settingsProvider: SettingsProvider) {
@@ -87,7 +88,7 @@ class TemporaryPresetsManager {
             }
 
             if let newValue = scheduleOverride, newValue.context == .preMeal {
-                preconditionFailure("The `scheduleOverride` field should not be used for a pre-meal target range override; use `preMealOverride` instead")
+//                preconditionFailure("The `scheduleOverride` field should not be used for a pre-meal target range override; use `preMealOverride` instead")
             }
 
             if scheduleOverride != oldValue {
@@ -198,12 +199,12 @@ class TemporaryPresetsManager {
         )
     }
 
-    public func enableLegacyWorkoutOverride(at date: Date = Date(), for duration: TimeInterval) {
+    public func enableLegacyWorkoutOverride(at date: Date = Date(), for duration: TemporaryScheduleOverride.Duration) {
         scheduleOverride = legacyWorkoutOverride(beginningAt: date, for: duration)
         preMealOverride = nil
     }
 
-    public func legacyWorkoutOverride(beginningAt date: Date = Date(), for duration: TimeInterval) -> TemporaryScheduleOverride? {
+    public func legacyWorkoutOverride(beginningAt date: Date = Date(), for duration: TemporaryScheduleOverride.Duration) -> TemporaryScheduleOverride? {
         guard let legacyWorkoutTargetRange = settingsProvider.settings.workoutTargetRange else {
             return nil
         }
@@ -212,7 +213,7 @@ class TemporaryPresetsManager {
             context: .legacyWorkout,
             settings: TemporaryScheduleOverrideSettings(targetRange: legacyWorkoutTargetRange),
             startDate: date,
-            duration: duration.isInfinite ? .indefinite : .finite(duration),
+            duration: duration,
             enactTrigger: .local,
             syncIdentifier: UUID()
         )

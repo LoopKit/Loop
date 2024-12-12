@@ -25,7 +25,7 @@ class TitleSubtitleTableViewCell: UITableViewCell {
         gradient.frame = bounds
     }
 
-    private lazy var gradient = CAGradientLayer()
+    private(set) lazy var gradient = CAGradientLayer()
 
     override func awakeFromNib() {
         super.awakeFromNib()

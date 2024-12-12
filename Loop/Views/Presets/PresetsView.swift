@@ -6,8 +6,9 @@
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import Foundation
+import LoopAlgorithm
 import LoopKit
+import LoopKitUI
 import SwiftUI
 
 enum PresetSortOption: Int, CaseIterable {
@@ -29,19 +30,19 @@ enum PresetSortOption: Int, CaseIterable {
 
 struct PresetsView: View {
     
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismiss) private var dismiss
     
-    @StateObject private var viewModel: PresetsViewModel
+    @State private var viewModel: PresetsViewModel
 
     @State private var editMode: EditMode = .inactive
     @State private var showingMenu: Bool = false
     @State var showTraining: Bool = false
 
-
     var isDescending: Bool { !viewModel.presetsSortAscending }
 
     init(viewModel: PresetsViewModel) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     var presetsSorted: [SelectablePreset] {
@@ -73,6 +74,9 @@ struct PresetsView: View {
                             activePreset,
                             expectedEndTime: viewModel.activeOverride?.expectedEndTime
                         )
+//                        .onTapGesture {
+//                            viewModel.pendingPreset = activePreset
+//                        }
                     }
 
                     // All Presets Section
@@ -99,6 +103,9 @@ struct PresetsView: View {
                                 PresetCard(preset)
                                     .background(Color.white)
                                     .cornerRadius(12)
+//                                    .onTapGesture {
+//                                        viewModel.pendingPreset = preset
+//                                    }
                             }
                         }
                     }
@@ -154,14 +161,16 @@ struct PresetsView: View {
             .navigationTitle(Text("Presets", comment: "Presets screen title"))
             .navigationBarItems(trailing: dismissButton)
         }
-
+        .sheet(item: $viewModel.pendingPreset) { preset in
+            PresetDetentView(
+                viewModel: viewModel,
+                preset: preset
+            )
+        }
         .sheet(isPresented: $showTraining) {
             PresetsTrainingView {
                 viewModel.hasCompletedTraining = true
             }
-        }
-        .onAppear { // TODO: Remove this
-            viewModel.hasCompletedTraining = false
         }
     }
 

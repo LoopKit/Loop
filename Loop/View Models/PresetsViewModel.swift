@@ -37,8 +37,8 @@ extension TemporaryScheduleOverride {
 
     var presetId: String {
         switch context {
-        case .preMeal: return "premeal"
-        case .legacyWorkout: return "legacyworkout"
+        case .preMeal: return "preMeal"
+        case .legacyWorkout: return "legacyWorkout"
         case .custom: return self.syncIdentifier.uuidString
         case .preset(let preset): return preset.id.uuidString
         }
@@ -59,10 +59,10 @@ enum SelectablePreset: Hashable, Identifiable {
         case .custom(let preset):
             hasher.combine(preset)
         case .legacyWorkout(let range, _):
-            hasher.combine("legacyworkout")
+            hasher.combine("legacyWorkout")
             hasher.combine(range)
         case .preMeal(let range, _):
-            hasher.combine("premeal")
+            hasher.combine("preMeal")
             hasher.combine(range)
         }
     }
@@ -161,22 +161,30 @@ enum SelectablePreset: Hashable, Identifiable {
     }
 }
 
-class PresetsViewModel: ObservableObject {
+@MainActor
+@Observable
+public class PresetsViewModel {
 
     // MARK: Training
-    @AppStorage("hasCompletedPresetsTraining") var hasCompletedTraining: Bool = false
-    @AppStorage("presetsSortOrder") var selectedSortOption: PresetSortOption = .name
-    @AppStorage("presetsSortDirectionReversed") var presetsSortAscending: Bool = true
+    @ObservationIgnored @AppStorage("hasCompletedPresetsTraining") var hasCompletedTraining: Bool = false
+    @ObservationIgnored @AppStorage("presetsSortOrder") var selectedSortOption: PresetSortOption = .name
+    @ObservationIgnored @AppStorage("presetsSortDirectionReversed") var presetsSortAscending: Bool = true
 
-    var correctionRangeOverrides: CorrectionRangeOverrides?
+    @ObservationIgnored var correctionRangeOverrides: CorrectionRangeOverrides?
+    
+    let temporaryPresetsManager: TemporaryPresetsManager
 
-    @Published var customPresets: [TemporaryScheduleOverridePreset]
-    @Published var activeOverride: TemporaryScheduleOverride?
+    var customPresets: [TemporaryScheduleOverridePreset]
+    var pendingPreset: SelectablePreset?
 
-    let preMealGuardrail: Guardrail<LoopQuantity>?
-    let legacyWorkoutGuardrail: Guardrail<LoopQuantity>?
+    public private(set) var preMealGuardrail: Guardrail<LoopQuantity>?
+    public private(set) var legacyWorkoutGuardrail: Guardrail<LoopQuantity>?
 
     private var presetHistory: TemporaryScheduleOverrideHistory
+
+    var activeOverride: TemporaryScheduleOverride? {
+        temporaryPresetsManager.preMealOverride ?? temporaryPresetsManager.scheduleOverride
+    }
 
     var activePreset: SelectablePreset? {
         return allPresets.first(where: { $0.id == activeOverride?.presetId })
@@ -229,16 +237,33 @@ class PresetsViewModel: ObservableObject {
         correctionRangeOverrides: CorrectionRangeOverrides?,
         presetsHistory: TemporaryScheduleOverrideHistory,
         preMealGuardrail: Guardrail<LoopQuantity>?,
-        legacyWorkoutGuardrail: Guardrail<LoopQuantity>?
+        legacyWorkoutGuardrail: Guardrail<LoopQuantity>?,
+        temporaryPresetsManager: TemporaryPresetsManager
     ) {
         self.customPresets = customPresets
         self.correctionRangeOverrides = correctionRangeOverrides
         self.presetHistory = presetsHistory
         self.preMealGuardrail = preMealGuardrail
         self.legacyWorkoutGuardrail = legacyWorkoutGuardrail
-
-        // TODO: If active preset changes, data store should update us.
-        activeOverride = presetsHistory.activeOverride(at: Date())
+        self.temporaryPresetsManager = temporaryPresetsManager
     }
-
+    
+    func startPreset(_ preset: SelectablePreset) {
+        switch preset {
+        case .custom(let temporaryScheduleOverridePreset):
+            temporaryPresetsManager.scheduleOverride = temporaryScheduleOverridePreset.createOverride(enactTrigger: .local)
+        case .preMeal:
+            temporaryPresetsManager.enablePreMealOverride(for: .hours(2)) // FIX TIME
+        case .legacyWorkout:
+            temporaryPresetsManager.enableLegacyWorkoutOverride(for: .indefinite) // FIX TIME
+        }
+    }
+    
+    func endPreset() {
+        if case .preMeal(_, _) = activePreset {
+            temporaryPresetsManager.preMealOverride = nil
+        } else {
+            temporaryPresetsManager.scheduleOverride = nil
+        }
+    }
 }

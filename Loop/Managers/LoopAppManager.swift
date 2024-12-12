@@ -17,6 +17,7 @@ import HealthKit
 import WidgetKit
 import LoopCore
 import LoopAlgorithm
+import SwiftUI
 
 #if targetEnvironment(simulator)
 enum SimulatorError: Error {
@@ -544,26 +545,27 @@ class LoopAppManager: NSObject {
         dispatchPrecondition(condition: .onQueue(.main))
         precondition(state == .launchHomeScreen)
 
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle(for: Self.self))
-        let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
-        statusTableViewController.alertPermissionsChecker = alertPermissionsChecker
-        statusTableViewController.alertMuter = alertManager.alertMuter
-        statusTableViewController.automaticDosingStatus = automaticDosingStatus
-        statusTableViewController.deviceManager = deviceDataManager
-        statusTableViewController.onboardingManager = onboardingManager
-        statusTableViewController.supportManager = supportManager
-        statusTableViewController.testingScenariosManager = testingScenariosManager
-        statusTableViewController.settingsManager = settingsManager
-        statusTableViewController.temporaryPresetsManager = temporaryPresetsManager
-        statusTableViewController.loopManager = loopDataManager
-        statusTableViewController.diagnosticReportGenerator = self
-        statusTableViewController.simulatedData = self
-        statusTableViewController.analyticsServicesManager = analyticsServicesManager
-        statusTableViewController.servicesManager = servicesManager
-        statusTableViewController.carbStore = carbStore
-        statusTableViewController.doseStore = doseStore
-        statusTableViewController.criticalEventLogExportManager = criticalEventLogExportManager
-        bluetoothStateManager.addBluetoothObserver(statusTableViewController)
+        let statusTableView = StatusTableView(
+            displayGlucosePreference: displayGlucosePreference,
+            alertPermissionsChecker: alertPermissionsChecker,
+            alertMuter: alertManager.alertMuter,
+            automaticDosingStatus: automaticDosingStatus,
+            deviceDataManager: deviceDataManager,
+            onboardingManager: onboardingManager,
+            supportManager: supportManager,
+            testingScenariosManager: testingScenariosManager,
+            settingsManager: settingsManager,
+            temporaryPresetsManager: temporaryPresetsManager,
+            loopDataManager: loopDataManager,
+            diagnosticReportGenerator: self,
+            simulatedData: self,
+            analyticsServicesManager: analyticsServicesManager,
+            servicesManager: servicesManager,
+            carbStore: carbStore,
+            doseStore: doseStore,
+            criticalEventLogExportManager: criticalEventLogExportManager,
+            bluetoothStateManager: bluetoothStateManager
+        ).edgesIgnoringSafeArea(.top)
 
         var rootNavigationController = rootViewController as? RootNavigationController
         if rootNavigationController == nil {
@@ -571,7 +573,7 @@ class LoopAppManager: NSObject {
             rootViewController = rootNavigationController
         }
 
-        rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
+        rootNavigationController?.setViewControllers([UIHostingController(rootView: statusTableView)], animated: true)
 
         await deviceDataManager.refreshDeviceData()
 
@@ -837,7 +839,7 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
             }
         case NotificationManager.Action.acknowledgeAlert.rawValue:
             let userInfo = response.notification.request.content.userInfo
-            if let alertIdentifier = userInfo[LoopNotificationUserInfoKey.alertTypeID.rawValue] as? Alert.AlertIdentifier,
+            if let alertIdentifier = userInfo[LoopNotificationUserInfoKey.alertTypeID.rawValue] as? LoopKit.Alert.AlertIdentifier,
                let managerIdentifier = userInfo[LoopNotificationUserInfoKey.managerIDForAlert.rawValue] as? String {
                 alertManager?.acknowledgeAlert(identifier: Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier))
             }

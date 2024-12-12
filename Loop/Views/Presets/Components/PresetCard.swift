@@ -23,12 +23,6 @@ struct PresetCard: View {
     let correctionRange: ClosedRange<LoopQuantity>?
     let guardrail: Guardrail<LoopQuantity>?
     let expectedEndTime: PresetExpectedEndTime?
-
-    private var numberFormatter: NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .percent
-        return formatter
-    }
     
     var presetTitle: some View {
         HStack(spacing: 6) {
@@ -53,90 +47,6 @@ struct PresetCard: View {
             .font(.footnote)
             .foregroundColor(.secondary)
             .accessibilityLabel(Text(duration.accessibilityLabel))
-    }
-
-    var overallInsulinView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Overall Insulin")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .accessibilitySortPriority(2)
-
-            let percent = numberFormatter.string(from: insulinSensitivityMultiplier ?? 1)!
-            Group { Text(percent).bold() + Text(" of scheduled") }
-                .font(.subheadline)
-                .accessibilitySortPriority(1)
-        }
-        .accessibilityElement(children: .contain)
-    }
-
-    func guidanceColor(for classification: SafetyClassification?) -> Color? {
-        guard let classification else { return nil }
-
-        switch classification {
-        case .outsideRecommendedRange(let threshold):
-            switch threshold {
-            case .aboveRecommended, .belowRecommended:
-                return guidanceColors.warning
-            case .maximum, .minimum:
-                return guidanceColors.critical
-            }
-        case .withinRecommendedRange:
-            return nil
-        }
-    }
-
-    func annotatedRangeText(target: ClosedRange<LoopQuantity>) -> some View {
-
-        let lowerColor = guardrail?.color(for: target.lowerBound, guidanceColors: guidanceColors) ?? .primary
-        let upperColor = guardrail?.color(for: target.upperBound, guidanceColors: guidanceColors) ?? .primary
-
-        let units = Text(" \(displayGlucosePreference.unit.localizedUnitString(in: .medium) ?? displayGlucosePreference.unit.unitString)")
-            .foregroundStyle(upperColor)
-        let lower = Text(displayGlucosePreference.format(target.lowerBound, includeUnit: false))
-            .foregroundStyle(lowerColor)
-            .bold()
-        let upper = Text(displayGlucosePreference.format(target.upperBound, includeUnit: false))
-            .foregroundStyle(upperColor)
-            .bold()
-        let warningSymbol = Text("\(Image(systemName: "exclamationmark.triangle.fill"))")
-
-        let lowerClassification = guardrail?.classification(for: target.lowerBound) ?? .withinRecommendedRange
-        let upperClassification = guardrail?.classification(for: target.upperBound) ?? .withinRecommendedRange
-
-        return Group {
-            switch (lowerClassification, upperClassification) {
-            case (.withinRecommendedRange, .withinRecommendedRange):
-                lower + Text(" - ") + upper + units
-            case (.withinRecommendedRange, .outsideRecommendedRange):
-                lower + Text(" - ") + warningSymbol.foregroundStyle(upperColor) + upper + units
-            case (.outsideRecommendedRange, .outsideRecommendedRange):
-                warningSymbol.foregroundStyle(lowerColor) + lower + Text("-").foregroundStyle(lowerColor) + upper + units
-            case (.outsideRecommendedRange, .withinRecommendedRange):
-                warningSymbol.foregroundStyle(lowerColor) + lower + Text("-") + upper + units
-            }
-        }
-    }
-
-    var correctionRangeView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Correction Range")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .accessibilitySortPriority(2)
-            
-            Group {
-                if let target = correctionRange {
-                    annotatedRangeText(target: target)
-                } else {
-                    Text("Scheduled Range")
-                        .bold()
-                }
-            }
-                .font(.subheadline)
-                .accessibilitySortPriority(1)
-        }
-        .accessibilityElement(children: .contain)
     }
     
     var body: some View {
@@ -184,21 +94,11 @@ struct PresetCard: View {
             Divider()
                 .padding(.horizontal, -10)
             
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 0) {
-                    overallInsulinView
-                    
-                    Spacer()
-                    
-                    correctionRangeView
-                }
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    overallInsulinView
-                    
-                    correctionRangeView
-                }
-            }
+            PresetStatsView(
+                insulinSensitivityMultiplier: insulinSensitivityMultiplier,
+                correctionRange: correctionRange,
+                guardrail: guardrail
+            )
         }
         .padding(10)
         .background(RoundedRectangle(cornerRadius: 8)

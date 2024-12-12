@@ -12,8 +12,7 @@ import MockKit
 import SwiftUI
 import LoopUI
 
-
-public struct SettingsView: View {
+struct SettingsView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.dismissAction) private var dismiss
     @Environment(\.appName) private var appName
@@ -23,7 +22,7 @@ public struct SettingsView: View {
     @Environment(\.insulinTintColor) private var insulinTintColor
     @Environment(\.isInvestigationalDevice) private var isInvestigationalDevice
 
-    @ObservedObject var viewModel: SettingsViewModel
+    @State var viewModel: SettingsViewModel
     @ObservedObject var versionUpdateViewModel: VersionUpdateViewModel
 
     enum Destination {
@@ -63,7 +62,7 @@ public struct SettingsView: View {
     
     var localizedAppNameAndVersion: String
 
-    public init(viewModel: SettingsViewModel, localizedAppNameAndVersion: String) {
+    init(viewModel: SettingsViewModel, localizedAppNameAndVersion: String) {
         self.viewModel = viewModel
         self.versionUpdateViewModel = viewModel.versionUpdateViewModel
         self.localizedAppNameAndVersion = localizedAppNameAndVersion
@@ -172,18 +171,8 @@ public struct SettingsView: View {
     }
 
     public var presetsView: some View {
-        PresetsView(
-            viewModel: PresetsViewModel(
-                customPresets: viewModel.therapySettings().overridePresets ?? [],
-                correctionRangeOverrides: viewModel.therapySettings().correctionRangeOverrides,
-                presetsHistory: viewModel.presetHistory,
-                preMealGuardrail: viewModel.preMealGuardrail,
-                legacyWorkoutGuardrail: viewModel.legacyWorkoutPresetGuardrail
-            )
-        )
+        PresetsView(viewModel: viewModel.presetsViewModel)
     }
-
-
 
     private func menuItemsForSection(name: String) -> some View {
         Section(header: SectionHeader(label: name)) {

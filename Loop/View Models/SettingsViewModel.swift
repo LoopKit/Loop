@@ -56,7 +56,8 @@ public protocol SettingsViewModelDelegate: AnyObject {
     var closedLoopDescriptiveText: String? { get }
 }
 
-public class SettingsViewModel: ObservableObject {
+@Observable
+class SettingsViewModel {
     
     let alertPermissionsChecker: AlertPermissionsChecker
 
@@ -81,53 +82,36 @@ public class SettingsViewModel: ObservableObject {
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
     let presetHistory: TemporaryScheduleOverrideHistory
 
-    @Published private(set) var automaticDosingStatus: AutomaticDosingStatus
+    private(set) var automaticDosingStatus: AutomaticDosingStatus
     
-    @Published private(set) var lastLoopCompletion: Date?
-    @Published private(set) var mostRecentGlucoseDataDate: Date?
-    @Published private(set) var mostRecentPumpDataDate: Date?
+    private(set) var lastLoopCompletion: Date?
+    private(set) var mostRecentGlucoseDataDate: Date?
+    private(set) var mostRecentPumpDataDate: Date?
+    
+    var presetsViewModel: PresetsViewModel
 
     var closedLoopDescriptiveText: String? {
         return delegate?.closedLoopDescriptiveText
     }
 
 
-    @Published var automaticDosingStrategy: AutomaticDosingStrategy {
+    var automaticDosingStrategy: AutomaticDosingStrategy {
         didSet {
             delegate?.dosingStrategyChanged(automaticDosingStrategy)
         }
     }
 
-    @Published var closedLoopPreference: Bool {
+    var closedLoopPreference: Bool {
        didSet {
            delegate?.dosingEnabledChanged(closedLoopPreference)
        }
     }
 
-    var preMealGuardrail: Guardrail<LoopQuantity>? {
-        guard let scheduleRange = therapySettings().glucoseTargetRangeSchedule?.scheduleRange() else {
-            return nil
-        }
-        return Guardrail.correctionRangeOverride(
-            for: .preMeal,
-            correctionRangeScheduleRange: scheduleRange,
-            suspendThreshold: therapySettings().suspendThreshold
-        )
-    }
+    
+    var preMealGuardrail: Guardrail<LoopQuantity>?
+    var legacyWorkoutPresetGuardrail: Guardrail<LoopQuantity>?
 
-    var legacyWorkoutPresetGuardrail: Guardrail<LoopQuantity>? {
-        guard let scheduleRange = therapySettings().glucoseTargetRangeSchedule?.scheduleRange() else {
-            return nil
-        }
-        return Guardrail.correctionRangeOverride(
-            for: .workout,
-            correctionRangeScheduleRange: scheduleRange,
-            suspendThreshold: therapySettings().suspendThreshold
-        )
-    }
-
-
-    weak var favoriteFoodInsightsDelegate: FavoriteFoodInsightsViewModelDelegate?
+    @ObservationIgnored weak var favoriteFoodInsightsDelegate: FavoriteFoodInsightsViewModelDelegate?
 
     var showDeleteTestData: Bool {
         availableSupports.contains(where: { $0.showsDeleteTestDataUI })
@@ -148,8 +132,9 @@ public class SettingsViewModel: ObservableObject {
         return LoopCompletionFreshness(age: age)
     }
     
-    lazy private var cancellables = Set<AnyCancellable>()
+    @ObservationIgnored lazy private var cancellables = Set<AnyCancellable>()
 
+    @MainActor
     public init(alertPermissionsChecker: AlertPermissionsChecker,
                 alertMuter: AlertMuter,
                 versionUpdateViewModel: VersionUpdateViewModel,
@@ -169,6 +154,7 @@ public class SettingsViewModel: ObservableObject {
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
                 presetHistory: TemporaryScheduleOverrideHistory,
+                temporaryPresetsManager: TemporaryPresetsManager,
                 delegate: SettingsViewModelDelegate?
     ) {
         self.alertPermissionsChecker = alertPermissionsChecker
@@ -191,28 +177,29 @@ public class SettingsViewModel: ObservableObject {
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
         self.presetHistory = presetHistory
         self.delegate = delegate
+        
+        var preMealGuardrail: Guardrail<LoopQuantity>?
+        var legacyWorkoutPresetGuardrail: Guardrail<LoopQuantity>?
+        if let scheduleRange = therapySettings().glucoseTargetRangeSchedule?.scheduleRange() {
+            preMealGuardrail = Guardrail.correctionRangeOverride(
+                for: .preMeal,
+                correctionRangeScheduleRange: scheduleRange,
+                suspendThreshold: therapySettings().suspendThreshold
+            )
+            self.preMealGuardrail = preMealGuardrail
+            self.legacyWorkoutPresetGuardrail = legacyWorkoutPresetGuardrail
+        }
+        
+        self.presetsViewModel = PresetsViewModel(
+            customPresets: therapySettings().overridePresets ?? [],
+            correctionRangeOverrides: therapySettings().correctionRangeOverrides,
+            presetsHistory: presetHistory,
+            preMealGuardrail: preMealGuardrail,
+            legacyWorkoutGuardrail: legacyWorkoutPresetGuardrail,
+            temporaryPresetsManager: temporaryPresetsManager
+        )
 
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
-        alertPermissionsChecker.objectWillChange.sink { [weak self] in
-            self?.objectWillChange.send()
-        }
-        .store(in: &cancellables)
-        alertMuter.objectWillChange.sink { [weak self] in
-            self?.objectWillChange.send()
-        }
-        .store(in: &cancellables)
-        pumpManagerSettingsViewModel.objectWillChange.sink { [weak self] in
-            self?.objectWillChange.send()
-        }
-        .store(in: &cancellables)
-        cgmManagerSettingsViewModel.objectWillChange.sink { [weak self] in
-            self?.objectWillChange.send()
-        }
-        .store(in: &cancellables)
-        automaticDosingStatus.objectWillChange.sink { [weak self] in
-            self?.objectWillChange.send()
-        }
-        .store(in: &cancellables)
         lastLoopCompletion
             .assign(to: \.lastLoopCompletion, on: self)
             .store(in: &cancellables)
@@ -230,6 +217,34 @@ public class SettingsViewModel: ObservableObject {
 extension SettingsViewModel {
     fileprivate class FakeLastLoopCompletionPublisher {
         @Published var mockLastLoopCompletion: Date? = nil
+    }
+    
+    fileprivate class FakeSettingsProvider: SettingsProvider {
+        let settings = StoredSettings()
+        
+        func getBasalHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
+            []
+        }
+        
+        func getCarbRatioHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
+            []
+        }
+        
+        func getInsulinSensitivityHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<LoopQuantity>] {
+            []
+        }
+        
+        func getTargetRangeHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>] {
+            []
+        }
+        
+        func getDosingLimits(at date: Date) async throws -> DosingLimits {
+            DosingLimits()
+        }
+        
+        func executeSettingsQuery(fromQueryAnchor queryAnchor: SettingsStore.QueryAnchor?, limit: Int, completion: @escaping (SettingsStore.SettingsQueryResult) -> Void) {}
+        
+        
     }
 
     static var preview: SettingsViewModel {
@@ -252,6 +267,7 @@ extension SettingsViewModel {
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,
                                  presetHistory: TemporaryScheduleOverrideHistory(),
+                                 temporaryPresetsManager: TemporaryPresetsManager(settingsProvider: FakeSettingsProvider()),
                                  delegate: nil
         )
     }
