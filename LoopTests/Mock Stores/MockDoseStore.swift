@@ -90,11 +90,11 @@ class MockDoseStore: DoseStoreProtocol {
         completion(.failure(.configurationError))
     }
     
-    func getGlucoseEffects(start: Date, end: Date? = nil, basalDosingEnd: Date? = Date(), completion: @escaping (_ result: DoseStoreResult<[GlucoseEffect]>) -> Void) {
+    func getGlucoseEffects(start: Date, end: Date? = nil, doseEnd: Date? = nil, basalDosingEnd: Date? = Date(), completion: @escaping (_ result: DoseStoreResult<[GlucoseEffect]>) -> Void) {
         if let doseHistory, let sensitivitySchedule, let basalProfile = basalProfileApplyingOverrideHistory {
             // To properly know glucose effects at startDate, we need to go back another DIA hours
             let doseStart = start.addingTimeInterval(-longestEffectDuration)
-            let doses = doseHistory.filterDateRange(doseStart, end)
+            let doses = doseHistory.filterDateRange(doseStart, doseEnd ?? end)
             let trimmedDoses = doses.map { (dose) -> DoseEntry in
                 guard dose.type != .bolus else {
                     return dose
