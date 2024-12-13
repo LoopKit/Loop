@@ -1427,10 +1427,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                 case .failure(let error):
                                     self.canceledDose = nil
                                     self.presentErrorCancelingBolus(error)
-                                    if case .inProgress(let dose) = self.bolusState {
-                                        self.updateBannerAndHUDandStatusRows(statusRowMode: .bolusing(dose: dose), newSize: nil, animated: true)
-                                    } else {
+                                    if case .noBolus = self.bolusState {
                                         self.updateBannerAndHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
+                                    } else {
+                                        self.updateBannerAndHUDandStatusRows(statusRowMode: .bolusing(dose: dose), newSize: nil, animated: true)
                                     }
                                 }
                             }
