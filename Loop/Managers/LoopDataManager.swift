@@ -1056,7 +1056,8 @@ extension LoopDataManager {
                         alpha = (transitionValue + marginalSlope * (posDeltaSum - transitionPoint)) / posDeltaSum
                     }
 
-                    self.negativeInsulinDamper = max(0, min(1, 1 - alpha))
+                    // alpha should never be less than marginalSlope
+                    self.negativeInsulinDamper = max(0, 1 - max(marginalSlope, alpha))
                 }
 
                 updateGroup.leave()
