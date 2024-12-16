@@ -68,75 +68,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
     var doseStore: DoseStore!
 
     var criticalEventLogExportManager: CriticalEventLogExportManager!
-
-    lazy var settingsViewModel: SettingsViewModel = {
-        let deletePumpDataFunc: () -> PumpManagerViewModel.DeleteTestingDataFunc? = { [weak self] in
-            (self?.deviceManager.pumpManager is TestingPumpManager) ? {
-                Task { [weak self] in try? await self?.deviceManager.deleteTestingPumpData()
-                }} : nil
-        }
-        let deleteCGMDataFunc: () -> CGMManagerViewModel.DeleteTestingDataFunc? = { [weak self] in
-            (self?.deviceManager.cgmManager is TestingCGMManager) ? {
-                Task { [weak self] in try? await self?.deviceManager.deleteTestingCGMData()
-                }} : nil
-        }
-        let pumpViewModel = PumpManagerViewModel(
-            image: { [weak self] in (self?.deviceManager.pumpManager as? PumpManagerUI)?.smallImage },
-            name: { [weak self] in self?.deviceManager.pumpManager?.localizedTitle ?? "" },
-            isSetUp: { [weak self] in self?.deviceManager.pumpManager?.isOnboarded == true },
-            availableDevices: deviceManager.availablePumpManagers,
-            deleteTestingDataFunc: deletePumpDataFunc,
-            onTapped: { [weak self] in
-                self?.onPumpTapped()
-            },
-            didTapAddDevice: { [weak self] in
-                self?.addPumpManager(withIdentifier: $0.identifier)
-        })
-
-        let cgmViewModel = CGMManagerViewModel(
-            image: {[weak self] in (self?.deviceManager.cgmManager as? DeviceManagerUI)?.smallImage },
-            name: {[weak self] in self?.deviceManager.cgmManager?.localizedTitle ?? "" },
-            isSetUp: {[weak self] in self?.deviceManager.cgmManager?.isOnboarded == true },
-            availableDevices: deviceManager.availableCGMManagers,
-            deleteTestingDataFunc: deleteCGMDataFunc,
-            onTapped: { [weak self] in
-                self?.onCGMTapped()
-            },
-            didTapAddDevice: { [weak self] in
-                self?.addCGMManager(withIdentifier: $0.identifier)
-        })
-        let servicesViewModel = ServicesViewModel(showServices: FeatureFlags.includeServicesInSettingsEnabled,
-                                                  availableServices: { [weak self] in self?.servicesManager.availableServices ?? [] },
-                                                  activeServices: { [weak self] in self?.servicesManager.activeServices ?? [] },
-                                                  delegate: self)
-        let versionUpdateViewModel = VersionUpdateViewModel(supportManager: supportManager, guidanceColors: .default)
-        
-        let viewModel = SettingsViewModel(alertPermissionsChecker: alertPermissionsChecker,
-                                          alertMuter: alertMuter,
-                                          versionUpdateViewModel: versionUpdateViewModel,
-                                          pumpManagerSettingsViewModel: pumpViewModel,
-                                          cgmManagerSettingsViewModel: cgmViewModel,
-                                          servicesViewModel: servicesViewModel,
-                                          criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: criticalEventLogExportManager),
-                                          therapySettings: { [weak self] in self?.settingsManager.therapySettings ?? TherapySettings() },
-                                          sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
-                                          initialDosingEnabled: self.settingsManager.settings.dosingEnabled, automaticDosingStatus: self.automaticDosingStatus,
-                                          automaticDosingStrategy: self.settingsManager.settings.automaticDosingStrategy,
-                                          lastLoopCompletion: loopManager.$lastLoopCompleted,
-                                          mostRecentGlucoseDataDate: loopManager.$publishedMostRecentGlucoseDataDate,
-                                          mostRecentPumpDataDate: loopManager.$publishedMostRecentPumpDataDate,
-                                          availableSupports: supportManager.availableSupports,
-                                          isOnboardingComplete: onboardingManager.isComplete,
-                                          therapySettingsViewModelDelegate: deviceManager,
-                                          presetHistory: temporaryPresetsManager.overrideHistory,
-                                          temporaryPresetsManager: temporaryPresetsManager,
-                                          delegate: self
-        )
-        
-        viewModel.favoriteFoodInsightsDelegate = loopManager
-        
-        return viewModel
-    }()
+    
+    var settingsViewModel: SettingsViewModel!
+    var statusTableViewModel: StatusTableViewModel!
     
     lazy private var cancellables = Set<AnyCancellable>()
     
@@ -147,10 +81,21 @@ final class StatusTableViewController: LoopChartsTableViewController {
         super.viewDidLoad()
         
         setupToolbarItems()
-        
+        statusTableViewModel.settingsViewModel.delegate = self
+        statusTableViewModel.settingsViewModel.pumpManagerSettingsViewModel.didTap = { [weak self] in
+            self?.onPumpTapped()
+        }
+        statusTableViewModel.settingsViewModel.pumpManagerSettingsViewModel.didTapAdd = { [weak self] in
+            self?.addPumpManager(withIdentifier: $0.identifier)
+        }
+        statusTableViewModel.settingsViewModel.cgmManagerSettingsViewModel.didTap = { [weak self] in
+            self?.onCGMTapped()
+        }
+        statusTableViewModel.settingsViewModel.cgmManagerSettingsViewModel.didTapAdd = { [weak self] in
+            self?.addCGMManager(withIdentifier: $0.identifier)
+        }
+
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
-        tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
-        tableView.register(MuteAlertsWarningCell.self, forCellReuseIdentifier: MuteAlertsWarningCell.className)
 
         if FeatureFlags.predictedGlucoseChartClampEnabled {
             statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
@@ -1029,93 +974,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return shouldShowStatus ? StatusRow.allCases.count : 0
         }
     }
-
-    private class AlertPermissionsDisabledWarningCell: UITableViewCell {
-        
-        var alert: AlertPermissionsChecker.UnsafeNotificationPermissionAlert?
-        
-        override func updateConfiguration(using state: UICellConfigurationState) {
-            guard let alert else {
-                return
-            }
-            
-            super.updateConfiguration(using: state)
-
-            let adjustViewForNarrowDisplay = bounds.width < 350
-
-            var contentConfig = defaultContentConfiguration().updated(for: state)
-            let titleImageAttachment = NSTextAttachment()
-            titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.white)
-            let title = NSMutableAttributedString(string: alert.bannerTitle)
-            let titleWithImage = NSMutableAttributedString(attachment: titleImageAttachment)
-            titleWithImage.append(title)
-            contentConfig.attributedText = titleWithImage
-            contentConfig.textProperties.color = .white
-            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
-            contentConfig.textProperties.adjustsFontSizeToFitWidth = true
-            contentConfig.secondaryText = alert.bannerBody
-            contentConfig.secondaryTextProperties.color = .white
-            contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
-            contentConfiguration = contentConfig
-
-            var backgroundConfig = backgroundConfiguration?.updated(for: state)
-            backgroundConfig?.backgroundColor = .critical
-            backgroundConfiguration = backgroundConfig
-            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10)
-            backgroundConfiguration?.cornerRadius = 10
-
-            let disclosureIndicator = UIImage(systemName: "chevron.right")?.withTintColor(.white)
-            let imageView = UIImageView(image: disclosureIndicator)
-            imageView.tintColor = .white
-            accessoryView = imageView
-
-            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
-        }
-    }
-
-    private class MuteAlertsWarningCell: UITableViewCell {
-        var formattedAlertMuteEndTime: String = NSLocalizedString("Unknown", comment: "label for when the alert mute end time is unknown")
-
-        fileprivate class GradientView: UIView {
-            override static var layerClass: AnyClass { CAGradientLayer.self }
-        }
-        
-        override func updateConfiguration(using state: UICellConfigurationState) {
-            super.updateConfiguration(using: state)
-
-            let adjustViewForNarrowDisplay = bounds.width < 350
-
-            var contentConfig = defaultContentConfiguration().updated(for: state)
-            let title = NSMutableAttributedString(string: NSLocalizedString("All App Sounds Muted", comment: "Warning text for when alerts are muted"))
-            let image = UIImage(systemName: "speaker.slash.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 25, weight: .thin, scale: .large))
-            contentConfig.image = image
-            contentConfig.imageProperties.tintColor = .white
-            contentConfig.attributedText = title
-            contentConfig.textProperties.color = .white
-            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .semibold)
-            contentConfig.textProperties.adjustsFontSizeToFitWidth = true
-            contentConfig.secondaryText = String(format: NSLocalizedString("Until %1$@", comment: "indication of when alerts will be unmuted (1: time when alerts unmute)"), formattedAlertMuteEndTime)
-            contentConfig.secondaryTextProperties.color = .white
-            contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
-            contentConfiguration = contentConfig
-
-            let backgroundGradient = GradientView()
-            (backgroundGradient.layer as? CAGradientLayer)?.colors = [UIColor.warning.cgColor, UIColor.warning.withAlphaComponent(0.9).cgColor]
-            
-            var backgroundConfig = backgroundConfiguration?.updated(for: state)
-            backgroundConfig?.customView = backgroundGradient
-            backgroundConfiguration = backgroundConfig
-            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 5, trailing: 5)
-            backgroundConfiguration?.cornerRadius = 10
-
-            let unmuteIndicator = UIImage(systemName: "stop.circle")?.withTintColor(.white)
-            let imageView = UIImageView(image: unmuteIndicator)
-            imageView.tintColor = .white
-            imageView.frame.size = CGSize(width: 30, height: 30)
-            accessoryView = imageView
-
-            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
-        }
+    
+    private class GradientView: UIView {
+        override static var layerClass: AnyClass { CAGradientLayer.self }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -1164,12 +1025,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
 
                 if override.isActive() {
-                    switch override.duration {
-                    case .finite:
-                        let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
-                        cell.subtitleLabel.text = String(format: NSLocalizedString("on until %@", comment: "The format for the description of a custom preset end date"), endTimeText)
-                    case .indefinite:
-                        cell.subtitleLabel.text = nil
+                    if let preset = settingsViewModel.presetsViewModel.allPresets.first(where: { $0.id == override.presetId }), case .preMeal(_, _) = preset {
+                        cell.subtitleLabel.text = NSLocalizedString("on until carbs added", comment: "The format for the description of a premeal preset end date")
+                    } else {
+                        switch override.duration {
+                        case .finite:
+                            let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
+                            cell.subtitleLabel.text = String(format: NSLocalizedString("on until %@", comment: "The format for the description of a custom preset end date"), endTimeText)
+                        case .indefinite:
+                            cell.subtitleLabel.text = nil
+                        }
                     }
                 } else {
                     let startTimeText = DateFormatter.localizedString(from: override.startDate, dateStyle: .none, timeStyle: .short)
@@ -1179,16 +1044,59 @@ final class StatusTableViewController: LoopChartsTableViewController {
             
             return cell
         case .alertWarning:
-            if alertPermissionsChecker.showWarning {
-                var cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
-                cell.alert = AlertPermissionsChecker.UnsafeNotificationPermissionAlert(permissions: alertPermissionsChecker.notificationCenterSettings)
-                return cell
-            } else {
-                let cell = tableView.dequeueReusableCell(withIdentifier: MuteAlertsWarningCell.className, for: indexPath) as! MuteAlertsWarningCell
-                cell.formattedAlertMuteEndTime = alertMuter.formattedEndTime
-                cell.selectionStyle = .none
-                return cell
+            let cell = UITableViewCell()
+            let alert = AlertPermissionsChecker.UnsafeNotificationPermissionAlert(permissions: alertPermissionsChecker.notificationCenterSettings)
+    
+            cell.contentConfiguration = UIHostingConfiguration  {
+                if alertPermissionsChecker.showWarning {
+                    if let alert {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(Image(systemName: "exclamationmark.triangle.fill")) + Text(" ") + Text(alert.bannerTitle)
+                                    .font(.headline.bold())
+                                
+                                Text(alert.bannerBody)
+                                    .font(.subheadline)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            
+                            Spacer()
+                            
+                            Text(Image(systemName: "chevron.right"))
+                                .font(.headline)
+                        }
+                        .foregroundStyle(Color.white)
+                        .padding(8)
+                        .background(Color.critical.cornerRadius(10))
+                        .padding([.top, .horizontal], 8)
+                    }
+                } else {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(Image(systemName: "speaker.slash.fill")) + Text(" ") + Text(NSLocalizedString("All App Sounds Muted", comment: "Warning text for when alerts are muted"))
+                                .font(.headline.bold())
+                            
+                            Text(String(format: NSLocalizedString("Until %1$@", comment: "indication of when alerts will be unmuted (1: time when alerts unmute)"), alertMuter.formattedEndTime))
+                                .font(.subheadline)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        
+                        Spacer()
+                        
+                        Text(Image(systemName: "stop.circle"))
+                            .font(.title)
+                    }
+                    .foregroundStyle(Color.white)
+                    .padding(8)
+                    .background(Color.warning.cornerRadius(10))
+                    .padding([.top, .horizontal], 8)
+                }
             }
+            .margins(.all, 0)
+            
+            cell.backgroundColor = .secondarySystemBackground
+            
+            return cell
         case .hud:
             let cell = tableView.dequeueReusableCell(withIdentifier: HUDViewTableViewCell.className, for: indexPath) as! HUDViewTableViewCell
             hudView = cell.hudView
@@ -1363,7 +1271,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case .iob, .dose, .cob:
                 return max(106, 0.21 * availableSize)
             }
-        case .presets, .hud, .status, .alertWarning:
+        case .alertWarning:
+            return UITableView.automaticDimension
+        case .presets, .hud, .status:
             return UITableView.automaticDimension
         }
     }
@@ -1371,7 +1281,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section)! {
         case .presets:
-            settingsViewModel.presetsViewModel.pendingPreset = settingsViewModel.presetsViewModel.allPresets.first(where: { $0.id == (temporaryPresetsManager.scheduleOverride ?? temporaryPresetsManager.preMealOverride)?.presetId })
+            statusTableViewModel.pendingPreset = settingsViewModel.presetsViewModel.allPresets.first(where: { $0.id == (temporaryPresetsManager.scheduleOverride ?? temporaryPresetsManager.preMealOverride)?.presetId })
         case .alertWarning:
             if alertPermissionsChecker.showWarning {
                 tableView.deselectRow(at: indexPath, animated: true)

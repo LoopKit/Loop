@@ -33,12 +33,10 @@ public class ServicesViewModel: ObservableObject {
     
     init(showServices: Bool,
          availableServices: @escaping () -> [ServiceDescriptor],
-         activeServices: @escaping () -> [Service],
-         delegate: ServicesViewModelDelegate? = nil) {
+         activeServices: @escaping () -> [Service]) {
         self.showServices = showServices
         self.activeServices = activeServices
         self.availableServices = availableServices
-        self.delegate = delegate
     }
     
     func didTapService(_ index: Int) {

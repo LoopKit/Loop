@@ -159,6 +159,25 @@ enum SelectablePreset: Hashable, Identifiable {
             return .distantPast
         }
     }
+    
+    func title(font: Font, iconSize: Double) -> some View {
+        HStack(spacing: 6) {
+            switch icon {
+            case .emoji(let emoji):
+                Text(emoji)
+            case .image(let name, let iconColor):
+                Image(name)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundColor(iconColor)
+                    .frame(width: UIFontMetrics.default.scaledValue(for: iconSize), height: UIFontMetrics.default.scaledValue(for: iconSize))
+            }
+
+            Text(name)
+                .font(font)
+                .fontWeight(.semibold)
+        }
+    }
 }
 
 @MainActor
@@ -253,9 +272,9 @@ public class PresetsViewModel {
         case .custom(let temporaryScheduleOverridePreset):
             temporaryPresetsManager.scheduleOverride = temporaryScheduleOverridePreset.createOverride(enactTrigger: .local)
         case .preMeal:
-            temporaryPresetsManager.enablePreMealOverride(for: .hours(2)) // FIX TIME
+            temporaryPresetsManager.enablePreMealOverride(for: .hours(1))
         case .legacyWorkout:
-            temporaryPresetsManager.enableLegacyWorkoutOverride(for: .indefinite) // FIX TIME
+            temporaryPresetsManager.enableLegacyWorkoutOverride(for: .indefinite)
         }
     }
     

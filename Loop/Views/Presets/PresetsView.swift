@@ -74,9 +74,9 @@ struct PresetsView: View {
                             activePreset,
                             expectedEndTime: viewModel.activeOverride?.expectedEndTime
                         )
-//                        .onTapGesture {
-//                            viewModel.pendingPreset = activePreset
-//                        }
+                        .onTapGesture {
+                            viewModel.pendingPreset = activePreset
+                        }
                     }
 
                     // All Presets Section
@@ -103,9 +103,9 @@ struct PresetsView: View {
                                 PresetCard(preset)
                                     .background(Color.white)
                                     .cornerRadius(12)
-//                                    .onTapGesture {
-//                                        viewModel.pendingPreset = preset
-//                                    }
+                                    .onTapGesture {
+                                        viewModel.pendingPreset = preset
+                                    }
                             }
                         }
                     }
@@ -115,7 +115,7 @@ struct PresetsView: View {
                         Text("Support")
                             .font(.title2.bold())
 
-                        NavigationLink(destination: PresetsHistoryView()) {
+                        NavigationLink(destination: PresetsHistoryView(viewModel: viewModel)) {
                             HStack {
                                 Image(systemName: "list.bullet")
                                     .foregroundColor(.white)
@@ -137,7 +137,9 @@ struct PresetsView: View {
                             .frame(maxWidth: .infinity))
 
                         if viewModel.hasCompletedTraining {
-                            NavigationLink(destination: PresetsTrainingView { viewModel.hasCompletedTraining = true }) {
+                            Button {
+                                showTraining = true
+                            } label: {
                                 HStack {
                                     Text("Review Presets Training")
                                     Spacer()
@@ -156,6 +158,8 @@ struct PresetsView: View {
                     }
                 }
                 .padding()
+                .animation(.default, value: viewModel.hasCompletedTraining)
+                .animation(.default, value: viewModel.activeOverride)
             }
             .background(Color(UIColor.secondarySystemBackground))
             .navigationTitle(Text("Presets", comment: "Presets screen title"))

@@ -20,8 +20,8 @@ public class DeviceViewModel<T>: ObservableObject {
     let image: () -> UIImage?
     let name: () -> String
     let deleteTestingDataFunc: () -> DeleteTestingDataFunc?
-    let didTap: () -> Void
-    let didTapAdd: (_ device: T) -> Void
+    var didTap: () -> Void
+    var didTapAdd: (_ device: T) -> Void
     var isTestingDevice: Bool {
         return deleteTestingDataFunc() != nil
     }
@@ -65,7 +65,7 @@ class SettingsViewModel {
 
     let versionUpdateViewModel: VersionUpdateViewModel
     
-    private weak var delegate: SettingsViewModelDelegate?
+    weak var delegate: SettingsViewModelDelegate?
 
     func didTapIssueReport() {
         delegate?.didTapIssueReport()
@@ -154,8 +154,7 @@ class SettingsViewModel {
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
                 presetHistory: TemporaryScheduleOverrideHistory,
-                temporaryPresetsManager: TemporaryPresetsManager,
-                delegate: SettingsViewModelDelegate?
+                temporaryPresetsManager: TemporaryPresetsManager
     ) {
         self.alertPermissionsChecker = alertPermissionsChecker
         self.alertMuter = alertMuter
@@ -176,7 +175,6 @@ class SettingsViewModel {
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
         self.presetHistory = presetHistory
-        self.delegate = delegate
         
         var preMealGuardrail: Guardrail<LoopQuantity>?
         var legacyWorkoutPresetGuardrail: Guardrail<LoopQuantity>?
@@ -267,8 +265,7 @@ extension SettingsViewModel {
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,
                                  presetHistory: TemporaryScheduleOverrideHistory(),
-                                 temporaryPresetsManager: TemporaryPresetsManager(settingsProvider: FakeSettingsProvider()),
-                                 delegate: nil
+                                 temporaryPresetsManager: TemporaryPresetsManager(settingsProvider: FakeSettingsProvider())
         )
     }
 }

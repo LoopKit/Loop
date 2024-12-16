@@ -10,6 +10,7 @@ import UIKit
 import Intents
 import BackgroundTasks
 import Combine
+import LoopTestingKit
 import LoopKit
 import LoopKitUI
 import MockKit
@@ -540,13 +541,69 @@ class LoopAppManager: NSObject {
             }
         }
     }
+    
+    private lazy var settingsViewModel: SettingsViewModel = {
+        let deletePumpDataFunc: () -> PumpManagerViewModel.DeleteTestingDataFunc? = { [weak self] in
+            (self?.deviceDataManager.pumpManager is TestingPumpManager) ? {
+                Task { [weak self] in try? await self?.deviceDataManager.deleteTestingPumpData()
+                }} : nil
+        }
+        let deleteCGMDataFunc: () -> CGMManagerViewModel.DeleteTestingDataFunc? = { [weak self] in
+            (self?.deviceDataManager.cgmManager is TestingCGMManager) ? {
+                Task { [weak self] in try? await self?.deviceDataManager.deleteTestingCGMData()
+                }} : nil
+        }
+        let pumpViewModel = PumpManagerViewModel(
+            image: { [weak self] in (self?.deviceDataManager.pumpManager as? PumpManagerUI)?.smallImage },
+            name: { [weak self] in self?.deviceDataManager.pumpManager?.localizedTitle ?? "" },
+            isSetUp: { [weak self] in self?.deviceDataManager.pumpManager?.isOnboarded == true },
+            availableDevices: deviceDataManager.availablePumpManagers,
+            deleteTestingDataFunc: deletePumpDataFunc
+        )
+
+        let cgmViewModel = CGMManagerViewModel(
+            image: {[weak self] in (self?.deviceDataManager.cgmManager as? DeviceManagerUI)?.smallImage },
+            name: {[weak self] in self?.deviceDataManager.cgmManager?.localizedTitle ?? "" },
+            isSetUp: {[weak self] in self?.deviceDataManager.cgmManager?.isOnboarded == true },
+            availableDevices: deviceDataManager.availableCGMManagers,
+            deleteTestingDataFunc: deleteCGMDataFunc
+        )
+        let servicesViewModel = ServicesViewModel(showServices: FeatureFlags.includeServicesInSettingsEnabled,
+                                                  availableServices: { [weak self] in self?.servicesManager.availableServices ?? [] },
+                                                  activeServices: { [weak self] in self?.servicesManager.activeServices ?? [] })
+        let versionUpdateViewModel = VersionUpdateViewModel(supportManager: supportManager, guidanceColors: .default)
+        
+        let viewModel = SettingsViewModel(alertPermissionsChecker: alertPermissionsChecker,
+                                          alertMuter: alertManager.alertMuter,
+                                          versionUpdateViewModel: versionUpdateViewModel,
+                                          pumpManagerSettingsViewModel: pumpViewModel,
+                                          cgmManagerSettingsViewModel: cgmViewModel,
+                                          servicesViewModel: servicesViewModel,
+                                          criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: criticalEventLogExportManager),
+                                          therapySettings: { [weak self] in self?.settingsManager.therapySettings ?? TherapySettings() },
+                                          sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
+                                          initialDosingEnabled: self.settingsManager.settings.dosingEnabled, automaticDosingStatus: self.automaticDosingStatus,
+                                          automaticDosingStrategy: self.settingsManager.settings.automaticDosingStrategy,
+                                          lastLoopCompletion: loopDataManager.$lastLoopCompleted,
+                                          mostRecentGlucoseDataDate: loopDataManager.$publishedMostRecentGlucoseDataDate,
+                                          mostRecentPumpDataDate: loopDataManager.$publishedMostRecentPumpDataDate,
+                                          availableSupports: supportManager.availableSupports,
+                                          isOnboardingComplete: onboardingManager.isComplete,
+                                          therapySettingsViewModelDelegate: deviceDataManager,
+                                          presetHistory: temporaryPresetsManager.overrideHistory,
+                                          temporaryPresetsManager: temporaryPresetsManager
+        )
+        
+        viewModel.favoriteFoodInsightsDelegate = loopDataManager
+        
+        return viewModel
+    }()
 
     private func launchHomeScreen() async {
         dispatchPrecondition(condition: .onQueue(.main))
         precondition(state == .launchHomeScreen)
-
-        let statusTableView = StatusTableView(
-            displayGlucosePreference: displayGlucosePreference,
+        
+        let viewModel = StatusTableViewModel(
             alertPermissionsChecker: alertPermissionsChecker,
             alertMuter: alertManager.alertMuter,
             automaticDosingStatus: automaticDosingStatus,
@@ -564,8 +621,16 @@ class LoopAppManager: NSObject {
             carbStore: carbStore,
             doseStore: doseStore,
             criticalEventLogExportManager: criticalEventLogExportManager,
-            bluetoothStateManager: bluetoothStateManager
-        ).edgesIgnoringSafeArea(.top)
+            bluetoothStateManager: bluetoothStateManager,
+            settingsViewModel: settingsViewModel
+        )
+
+        let statusTableView = StatusTableView(viewModel: viewModel)
+            .environmentObject(deviceDataManager.displayGlucosePreference)
+            .environment(\.appName, Bundle.main.bundleDisplayName)
+            .environment(\.isInvestigationalDevice, FeatureFlags.isInvestigationalDevice)
+            .environment(\.loopStatusColorPalette, .loopStatus)
+            .edgesIgnoringSafeArea(.top)
 
         var rootNavigationController = rootViewController as? RootNavigationController
         if rootNavigationController == nil {

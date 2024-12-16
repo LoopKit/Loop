@@ -11,42 +11,100 @@ import SwiftUI
 
 struct PresetsHistoryView: View {
     
+    let viewModel: PresetsViewModel
     @State var history: TemporaryScheduleOverrideHistory
     
-    init () {
+    init (viewModel: PresetsViewModel) {
+        self.viewModel = viewModel
         self.history = TemporaryScheduleOverrideHistoryContainer.shared.fetch()
     }
     
     let formatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
-        formatter.unitsStyle = .short
+        formatter.unitsStyle = .abbreviated
         return formatter
     }()
     
+    var overridesByDate: Dictionary<String, [TemporaryScheduleOverride]> {
+        Dictionary(
+            grouping: history.recentEvents
+                .map(\.override)
+                .filter({ !$0.isActive() })
+                .sorted(by: { $0.actualEndDate > $1.actualEndDate })
+        ) { override in
+            override.startDate.formatted(date: .abbreviated, time: .omitted)
+        }
+    }
+    
     var body: some View {
         List {
-            Section("Recent Events") {
-                ForEach(history.recentEvents.sorted(by: { $0.override.actualEndDate > $1.override.actualEndDate }), id: \.self) { recentEvent in
-                    
-                    let scheduledDuration = recentEvent.override.duration.timeInterval
-                    let actualDuration = recentEvent.override.actualDuration.timeInterval
-                    
-                    let value = scheduledDuration == actualDuration ? "\(formatter.string(from: scheduledDuration) ?? "")" : "\(formatter.string(from: actualDuration) ?? "") / \(formatter.string(from: scheduledDuration) ?? "")"
-                
-                    LabeledContent {
-                        Text(value)
-                    } label: {
-                        Text(recentEvent.override.presetId)
-                        
-                        Text(recentEvent.override.startDate.formatted(date: .abbreviated, time: .shortened))
+            ForEach(Array(overridesByDate.keys)) { date in
+                Section(date) {
+                    ForEach(overridesByDate[date] ?? [], id: \.self) { override in
+                        LabeledContent {
+                            VStack(alignment: .trailing, spacing: 8) {
+                                Text("Duration")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                
+                                durationText(for: override)
+                            }
+                        } label: {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(override.startDate.formatted(date: .omitted, time: .shortened))
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                
+                                if let preset = viewModel.allPresets.first(where: { $0.id == override.presetId }) {
+                                    HStack(spacing: 4) {
+                                        switch preset.icon {
+                                        case .emoji(let emoji):
+                                            Text(emoji)
+                                        case .image(let name, let iconColor):
+                                            Image(name)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                                .foregroundColor(iconColor)
+                                                .frame(width: UIFontMetrics.default.scaledValue(for: 22), height: UIFontMetrics.default.scaledValue(for: 22))
+                                        }
+                                        
+                                        Text(preset.name)
+                                            .fontWeight(.semibold)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+        .navigationTitle("Recent Events")
     }
-}
-
-#Preview {
-    PresetsHistoryView()
+    
+    @ViewBuilder
+    func durationText(for override: TemporaryScheduleOverride) -> some View {
+        switch override.duration {
+        case let .finite(scheduledDuration):
+            let actualDuration = override.actualDuration.timeInterval
+            if let scheduledDurationString = formatter.string(from: scheduledDuration), let actualDurationString = formatter.string(from: actualDuration) {
+                if scheduledDuration <= actualDuration {
+                    Text(actualDurationString)
+                        .foregroundStyle(.primary)
+                } else {
+                    Text(actualDurationString)
+                        .foregroundStyle(.primary)
+                        .fontWeight(.semibold)
+                    + Text(" / ")
+                    + Text(scheduledDurationString)
+                }
+            }
+        case .indefinite:
+            if let durationString = formatter.string(from: override.actualDuration.timeInterval) {
+                Text(durationString)
+                    .foregroundStyle(.primary)
+                    .fontWeight(.semibold)
+            }
+        }
+    }
 }
