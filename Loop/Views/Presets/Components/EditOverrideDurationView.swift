@@ -12,18 +12,39 @@ import SwiftUI
 
 struct EditOverrideDurationView: View {
     
+    @Environment(\.dismiss) private var dismiss
+    
     let viewModel: PresetsViewModel
     let override: TemporaryScheduleOverride
+    
     @State var dateSelection: Date
+
+    private let currentDate: Date
     
     init(override: TemporaryScheduleOverride, viewModel: PresetsViewModel) {
         self.override = override
         self.viewModel = viewModel
-        dateSelection = override.actualEndDate
+        self.currentDate = Date()
+        
+        if case let .duration(timeInterval) = viewModel.activePreset?.duration {
+            dateSelection = override.startDate.addingTimeInterval(timeInterval)
+        } else {
+            dateSelection = currentDate
+        }
     }
     
     var preset: SelectablePreset? {
         viewModel.allPresets.first(where: { $0.id == override.presetId })
+    }
+    
+    var buttonDisabled: Bool {
+        if case .duration = viewModel.activePreset?.duration {
+            return dateSelection == override.actualEndDate
+        } else if case .indefinite = viewModel.activePreset?.duration {
+            return false
+        } else {
+            return dateSelection == currentDate
+        }
     }
     
     var body: some View {
@@ -47,13 +68,14 @@ struct EditOverrideDurationView: View {
                 .padding(.horizontal)
                 
                 Button("Save") {
-                    //
+                    viewModel.updateActivePresetDuration(newEndDate: dateSelection)
+                    dismiss()
                 }
                 .buttonStyle(ActionButtonStyle())
                 .padding([.top, .horizontal])
                 .background(Color.white)
                 .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: -4)
-                .disabled(dateSelection == override.actualEndDate)
+                .disabled(buttonDisabled)
             }
         }
     }

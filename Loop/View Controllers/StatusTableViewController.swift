@@ -849,7 +849,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case (true, false):
             tableView.deleteRows(at: [IndexPath(row: 0, section: Section.presets.rawValue)], with: animated ? .top : .none)
         default:
-            break
+            tableView.reloadRows(at: [IndexPath(row: 0, section: Section.presets.rawValue)], with: animated ? .automatic : .none)
         }
         
         switch (hudWasVisible, hudIsVisible) {
@@ -1031,9 +1031,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         switch override.duration {
                         case .finite:
                             let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
-                            cell.subtitleLabel.text = String(format: NSLocalizedString("on until %@", comment: "The format for the description of a custom preset end date"), endTimeText)
+                            cell.subtitleLabel.text = String(format: NSLocalizedString("on until %@", comment: "The format for the description of a finite custom preset end date"), endTimeText)
                         case .indefinite:
-                            cell.subtitleLabel.text = nil
+                            cell.subtitleLabel.text = NSLocalizedString("on indefinitely", comment: "The format for the description of an indefinite custom preset end date")
                         }
                     }
                 } else {

@@ -86,11 +86,7 @@ class TemporaryPresetsManager {
             if scheduleOverride != nil {
                 preMealOverride = nil
             }
-
-            if let newValue = scheduleOverride, newValue.context == .preMeal {
-//                preconditionFailure("The `scheduleOverride` field should not be used for a pre-meal target range override; use `preMealOverride` instead")
-            }
-
+            
             if scheduleOverride != oldValue {
                 overrideHistory.recordOverride(scheduleOverride)
 
@@ -269,7 +265,18 @@ class TemporaryPresetsManager {
             ]
         )
     }
-
+    
+    func updateActiveOverrideDuration(newEndDate: Date) {
+        if var scheduleOverride {
+            if newEndDate > Date() {
+                scheduleOverride.scheduledEndDate = newEndDate
+            } else {
+                scheduleOverride.scheduledEndDate = newEndDate.addingTimeInterval(.days(1))
+            }
+            
+            self.scheduleOverride = scheduleOverride
+        }
+    }
 }
 
 public protocol SettingsWithOverridesProvider {

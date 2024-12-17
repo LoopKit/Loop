@@ -7,6 +7,7 @@
 //
 
 import LoopAlgorithm
+import LoopKit
 import LoopKitUI
 import SwiftUI
 
@@ -137,17 +138,22 @@ struct PresetsAndExerciseContentView: View {
         Text("Once saved, Omar’s completed preset will display in his Presets lists.", comment: "Presets and exercise training content, scheduling preset, paragraph 2")
         
         PresetCard(
-            icon: .emoji("🚶"),
-            presetName: NSLocalizedString("Walk to Work", comment: "Presets and exercise training content, scheduling preset, preset example, title"),
-            duration: .duration(.seconds(1800)),
-            insulinSensitivityMultiplier: 1.0,
-            correctionRange: ClosedRange(
-                uncheckedBounds: (
-                    LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 140),
-                    LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 260))
-            ),
-            guardrail: nil,
-            expectedEndTime: .indefinite
+            SelectablePreset.custom(
+                TemporaryScheduleOverridePreset(
+                    symbol: "🚶",
+                    name: NSLocalizedString("Walk to Work", comment: "Presets and exercise training content, scheduling preset, preset example, title"),
+                    settings: TemporaryScheduleOverrideSettings(
+                        targetRange: ClosedRange(
+                            uncheckedBounds: (
+                                LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 140),
+                                LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 160)
+                            )
+                        ),
+                        insulinNeedsScaleFactor: 1.0
+                    ),
+                    duration: TemporaryScheduleOverride.Duration.finite(1800)
+                )
+            )
         )
     }
 }

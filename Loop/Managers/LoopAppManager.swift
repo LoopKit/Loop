@@ -944,8 +944,6 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
 
 extension LoopAppManager: TemporaryScheduleOverrideHistoryDelegate {
     func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
-        TemporaryScheduleOverrideHistoryContainer.shared.deleteAll()
-        TemporaryScheduleOverrideHistoryContainer.shared.context.insert(history)
         remoteDataServicesManager.triggerUpload(for: .overrides)
     }
 }
