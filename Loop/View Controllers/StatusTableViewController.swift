@@ -79,9 +79,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func viewDidLoad() {
 
         super.viewDidLoad()
-        
+
         setupToolbarItems()
         statusTableViewModel.settingsViewModel.delegate = self
+        statusTableViewModel.settingsViewModel.servicesViewModel.delegate = self
         statusTableViewModel.settingsViewModel.pumpManagerSettingsViewModel.didTap = { [weak self] in
             self?.onPumpTapped()
         }
