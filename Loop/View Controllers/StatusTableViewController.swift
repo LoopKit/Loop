@@ -79,8 +79,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func viewDidLoad() {
 
         super.viewDidLoad()
-
-        setupToolbarItems()
+      
         statusTableViewModel.settingsViewModel.delegate = self
         statusTableViewModel.settingsViewModel.servicesViewModel.delegate = self
         statusTableViewModel.settingsViewModel.pumpManagerSettingsViewModel.didTap = { [weak self] in
@@ -148,14 +147,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 Task { @MainActor [weak self] in
                     self?.registerPumpManager()
                     self?.configurePumpManagerHUDViews()
-                    self?.updateToolbarItems()
                 }
             },
             notificationCenter.addObserver(forName: .CGMManagerChanged, object: deviceManager, queue: nil) { (notification: Notification) in
                 Task { @MainActor [weak self] in
                     self?.registerCGMManager()
                     self?.configureCGMManagerHUDViews()
-                    self?.updateToolbarItems()
                 }
             },
             notificationCenter.addObserver(forName: .PumpEventsAdded, object: deviceManager, queue: nil) { (notification: Notification) in
@@ -227,6 +224,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private var appearedOnce = false
+    
+    func presentLegacyPresets() {
+        performSegue(withIdentifier: OverrideSelectionViewController.className, sender: view)
+    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -234,8 +235,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         navigationController?.setToolbarHidden(false, animated: animated)
         
-        updateToolbarItems()
-
         alertPermissionsChecker.checkNow()
 
         updateBolusProgress()
@@ -246,7 +245,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 Task { @MainActor in
                     self?.refreshContext.update(with: .status)
                     await self?.reloadData(animated: true)
-                    self?.updateToolbarItems()
                 }
             }
             .store(in: &cancellables)
@@ -351,47 +349,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private func updateHUDActive() {
         deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
-    }
-
-    private func setupToolbarItems() {
-        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
-        let carbs = UIBarButtonItem(image: UIImage(named: "carbs"), style: .plain, target: self, action: #selector(userTappedAddCarbs))
-        let bolus = UIBarButtonItem(image: UIImage(named: "bolus"), style: .plain, target: self, action: #selector(presentBolusScreen))
-        let settings = UIBarButtonItem(image: UIImage(named: "settings"), style: .plain, target: self, action: #selector(onSettingsTapped))
-        
-        carbs.accessibilityIdentifier = "statusTableViewControllerCarbsButton"
-        bolus.accessibilityIdentifier = "statusTableViewControllerBolusButton"
-        settings.accessibilityIdentifier = "statusTableViewControllerSettingsButton"
-        
-        let preMeal = createPreMealButtonItem(selected: false, isEnabled: true)
-        let workout = createWorkoutButtonItem(selected: false, isEnabled: true)
-        toolbarItems = [
-            carbs,
-            space,
-            preMeal,
-            space,
-            bolus,
-            space,
-            workout,
-            space,
-            settings
-        ]
-    }
-        
-    private func updateToolbarItems() {
-        let isPumpOnboarded = onboardingManager.isComplete || deviceManager.pumpManager?.isOnboarded == true
-
-        toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
-        toolbarItems![0].isEnabled = isPumpOnboarded
-        toolbarItems![0].tintColor = UIColor.carbTintColor
-        toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
-        toolbarItems![4].isEnabled = isPumpOnboarded
-        toolbarItems![4].tintColor = UIColor.insulinTintColor
-        toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
-        toolbarItems![8].tintColor = UIColor.secondaryLabel
-        
-        toolbarItems![2] = createPreMealButtonItem(selected: preMealMode == true && preMealModeAllowed, isEnabled: preMealModeAllowed)
-        toolbarItems![6] = createWorkoutButtonItem(selected: workoutMode == true && workoutModeAllowed, isEnabled: workoutModeAllowed)
     }
 
     public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil {
@@ -561,20 +518,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             iobValues = loopManager.iobValues.filterDateRange(startDate, nil)
             totalDelivery = await loopManager.totalDeliveredToday()?.value
-        }
-
-        updatePresetModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
-
-        if settingsManager.settings.preMealTargetRange == nil {
-            preMealMode = nil
-        } else {
-            preMealMode = temporaryPresetsManager.preMealTargetEnabled()
-        }
-
-        if !FeatureFlags.sensitivityOverridesEnabled, settingsManager.settings.workoutTargetRange == nil {
-            workoutMode = nil
-        } else {
-            workoutMode = temporaryPresetsManager.nonPreMealOverrideEnabled()
         }
 
         /// Update the chart data
@@ -918,43 +861,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.endUpdates()
     }
 
-    // MARK: - Toolbar data
-
-    private var preMealMode: Bool? = nil {
-        didSet {
-            guard oldValue != preMealMode else {
-                return
-            }
-            updatePresetModeAvailability(automaticDosingEnabled: automaticDosingStatus.automaticDosingEnabled)
-        }
-    }
-    private lazy var preMealModeAllowed: Bool = {
-        onboardingManager.isComplete &&
-        (automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
-        && settingsManager.settings.preMealTargetRange != nil
-    }()
-
-    private func updatePresetModeAvailability(automaticDosingEnabled: Bool) {
-        preMealModeAllowed = onboardingManager.isComplete &&
-        (automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled)
-        && settingsManager.settings.preMealTargetRange != nil
-        workoutModeAllowed = onboardingManager.isComplete && workoutMode != nil
-        updateToolbarItems()
-    }
-
-    private(set) var workoutMode: Bool? = nil {
-        didSet {
-            guard oldValue != workoutMode else {
-                return
-            }
-            workoutModeAllowed = workoutMode != nil && onboardingManager.isComplete
-            updateToolbarItems()
-        }
-    }
-    private lazy var workoutModeAllowed: Bool = {
-        workoutMode != nil && onboardingManager.isComplete
-    }()
-
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -1282,7 +1188,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section)! {
         case .presets:
-            statusTableViewModel.pendingPreset = settingsViewModel.presetsViewModel.allPresets.first(where: { $0.id == (temporaryPresetsManager.scheduleOverride ?? temporaryPresetsManager.preMealOverride)?.presetId })
+            statusTableViewModel.pendingPreset = settingsViewModel.presetsViewModel.activePreset
         case .alertWarning:
             if alertPermissionsChecker.showWarning {
                 tableView.deselectRow(at: indexPath, animated: true)
@@ -1527,116 +1433,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         present(navigationWrapper, animated: true)
         analyticsServicesManager?.didDisplayBolusScreen()
     }
-
-    private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
-        item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
-
-        if selected {
-            item.accessibilityTraits.insert(.selected)
-            item.accessibilityHint = NSLocalizedString("Disables", comment: "The action hint of the workout mode toggle button when enabled")
-        } else {
-            item.accessibilityHint = NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
-        }
-
-        item.tintColor = UIColor.carbTintColor
-        item.isEnabled = isEnabled
-        item.accessibilityIdentifier = isEnabled ? "statusTableViewPreMealButtonEnabled" : "statusTableViewPreMealButtonDisabled"
-
-        return item
-    }
-    
-    private func createWorkoutButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage.workoutImage(selected: selected), style: .plain, target: self, action: #selector(toggleWorkoutMode(_:)))
-        item.accessibilityLabel = NSLocalizedString("Workout Targets", comment: "The label of the workout mode toggle button")
-
-        if selected {
-            item.accessibilityTraits.insert(.selected)
-            item.accessibilityHint = NSLocalizedString("Disables", comment: "The action hint of the workout mode toggle button when enabled")
-        } else {
-            item.accessibilityHint = NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
-        }
-
-        item.tintColor = UIColor.glucoseTintColor
-        item.isEnabled = isEnabled
-
-        return item
-    }
-
-    @IBAction func premealButtonTapped(_ sender: UIBarButtonItem? = nil) {
-        togglePreMealMode()
-    }
-    
-    func togglePreMealMode() {
-        if preMealMode == true {
-            let alert = UIAlertController(title: "Disable Pre-Meal Preset?", message: "This will remove any currently applied pre-meal preset.", preferredStyle: .alert)
-            alert.addCancelAction()
-            alert.addAction(UIAlertAction(title: "Disable", style: .destructive, handler: { [weak self] _ in
-                self?.temporaryPresetsManager.preMealOverride = nil
-            }))
-            present(alert, animated: true)
-        } else {
-            presentPreMealModeAlertController()
-        }
-    }
-    
-    func presentPreMealModeAlertController() {
-        let vc = UIAlertController(premealDurationSelectionHandler: { duration in
-            let startDate = Date()
-
-            guard self.workoutMode != true else {
-                // allow cell animation when switching between presets
-                self.temporaryPresetsManager.scheduleOverride = nil
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    self.temporaryPresetsManager.enablePreMealOverride(at: startDate, for: duration)
-                }
-                return
-            }
-            self.temporaryPresetsManager.enablePreMealOverride(at: startDate, for: duration)
-        })
-
-        present(vc, animated: true, completion: nil)
-    }
-
-    func presentCustomPresets() {
-        if workoutMode == true {
-            let alert = UIAlertController(title: "Disable Preset?", message: "This will remove any currently applied preset.", preferredStyle: .alert)
-            alert.addCancelAction()
-            alert.addAction(UIAlertAction(title: "Disable", style: .destructive, handler: { [weak self] _ in
-                self?.temporaryPresetsManager.scheduleOverride = nil
-            }))
-            present(alert, animated: true)
-        } else {
-            if FeatureFlags.sensitivityOverridesEnabled {
-                performSegue(withIdentifier: OverrideSelectionViewController.className, sender: toolbarItems![6])
-            } else {
-                presentWorkoutModeAlertController()
-            }
-        }
-    }
-    
-    func presentWorkoutModeAlertController() {
-        let vc = UIAlertController(workoutDurationSelectionHandler: { duration in
-            let startDate = Date()
-
-            guard self.preMealMode != true else {
-                // allow cell animation when switching between presets
-                self.temporaryPresetsManager.clearOverride(matching: .preMeal)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    self.temporaryPresetsManager.enableLegacyWorkoutOverride(at: startDate, for: .finite(duration))
-                }
-                return
-            }
-
-            self.temporaryPresetsManager.enableLegacyWorkoutOverride(at: startDate, for: .finite(duration))
-        })
-
-        present(vc, animated: true, completion: nil)
-    }
-
-    @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
-        presentCustomPresets()
-    }
     
     private(set) var isShowingPresets: Bool = false
     
@@ -1693,7 +1489,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private func automaticDosingStatusChanged(_ automaticDosingEnabled: Bool) {
         log.debug("automaticDosingStatusChanged -> %{public}@", String(describing: automaticDosingEnabled))
-        updatePresetModeAvailability(automaticDosingEnabled: automaticDosingEnabled)
         hudView?.loopCompletionHUD.loopIconClosed = automaticDosingEnabled
         hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
         

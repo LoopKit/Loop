@@ -22,11 +22,11 @@ class RootNavigationController: UINavigationController {
         case .carbEntry:
             statusTableViewController.presentCarbEntryScreen(nil)
         case .preMeal:
-            statusTableViewController.togglePreMealMode()
+            statusTableViewController.presentPresets()
         case .bolus:
             statusTableViewController.presentBolusScreen()
         case .customPresets:
-            statusTableViewController.presentCustomPresets()
+            statusTableViewController.presentPresets()
         }
     }
 

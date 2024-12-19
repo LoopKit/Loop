@@ -121,7 +121,9 @@ class StatusTableViewModel {
         }
     }
     
-    init(alertPermissionsChecker: AlertPermissionsChecker, alertMuter: AlertMuter, automaticDosingStatus: AutomaticDosingStatus, deviceDataManager: DeviceDataManager, onboardingManager: OnboardingManager, supportManager: SupportManager, testingScenariosManager: TestingScenariosManager?, settingsManager: SettingsManager, temporaryPresetsManager: TemporaryPresetsManager, loopDataManager: LoopDataManager, diagnosticReportGenerator: DiagnosticReportGenerator, simulatedData: SimulatedData, analyticsServicesManager: AnalyticsServicesManager, servicesManager: ServicesManager, carbStore: CarbStore, doseStore: DoseStore, criticalEventLogExportManager: CriticalEventLogExportManager, bluetoothStateManager: BluetoothStateManager, settingsViewModel: SettingsViewModel) {
+    let legacyPresetsEnabled: Bool
+    
+    init(alertPermissionsChecker: AlertPermissionsChecker, alertMuter: AlertMuter, automaticDosingStatus: AutomaticDosingStatus, deviceDataManager: DeviceDataManager, onboardingManager: OnboardingManager, supportManager: SupportManager, testingScenariosManager: TestingScenariosManager?, settingsManager: SettingsManager, temporaryPresetsManager: TemporaryPresetsManager, loopDataManager: LoopDataManager, diagnosticReportGenerator: DiagnosticReportGenerator, simulatedData: SimulatedData, analyticsServicesManager: AnalyticsServicesManager, servicesManager: ServicesManager, carbStore: CarbStore, doseStore: DoseStore, criticalEventLogExportManager: CriticalEventLogExportManager, bluetoothStateManager: BluetoothStateManager, settingsViewModel: SettingsViewModel, legacyPresetsEnabled: Bool = false) {
         self.alertPermissionsChecker = alertPermissionsChecker
         self.alertMuter = alertMuter
         self.automaticDosingStatus = automaticDosingStatus
@@ -141,6 +143,7 @@ class StatusTableViewModel {
         self.criticalEventLogExportManager = criticalEventLogExportManager
         self.bluetoothStateManager = bluetoothStateManager
         self.settingsViewModel = settingsViewModel
+        self.legacyPresetsEnabled = legacyPresetsEnabled
     }
 }
 
@@ -189,7 +192,7 @@ struct StatusTableView: View {
         case .addCarbs, .bolus, .settings: // No active states for these actions
             return false
         case .presets:
-            return viewModel.settingsViewModel.presetsViewModel.activeOverride != nil
+            return viewModel.settingsViewModel.presetsViewModel.activePreset != nil
         }
     }
     
@@ -211,7 +214,7 @@ struct StatusTableView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .bottomBar) {
-                    HStack(alignment: .bottom) {
+                    HStack(alignment: .bottom, spacing: 0) {
                         ForEach(ToolbarAction.allCases) { action in
                             action.button(
                                 showTitle: true,
@@ -224,16 +227,17 @@ struct StatusTableView: View {
                                 case .bolus:
                                     viewController.presentBolusScreen()
                                 case .presets:
-                                    viewController.presentPresets()
+                                    if viewModel.legacyPresetsEnabled {
+                                        viewController.presentLegacyPresets()
+                                    } else {
+                                        viewController.presentPresets()
+                                    }
                                 case .settings:
                                     viewController.presentSettings()
                                 }
                             }
-                            .frame(maxWidth: .infinity)
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, -8)
                 }
             }
     }
@@ -286,8 +290,8 @@ enum ToolbarAction: String, Identifiable, CaseIterable {
                     .foregroundStyle(Color(UIColor.secondaryLabel))
             }
         }
-        .frame(width: 32, height: 32)
         .aspectRatio(contentMode: .fit)
+        .frame(width: showCompactToolbar ? 24 : 32, height: showCompactToolbar ? 24 : 32)
     }
     
     @ViewBuilder
@@ -304,26 +308,47 @@ enum ToolbarAction: String, Identifiable, CaseIterable {
                 Text("Settings", comment: "The label of the settings button")
             }
         }
+        .frame(maxWidth: .infinity)
         .foregroundStyle(.secondary)
         .font(.footnote)
     }
     
     @ViewBuilder
-    func button(showTitle: Bool, isActive: Bool, disabled: Bool, action: @escaping () -> Void) -> some View {
+    func button(
+        showTitle: Bool,
+        isActive: Bool,
+        disabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            VStack(spacing: showCompactToolbar ? 2 : 4) {
                 icon(isActive: isActive)
                 
                 if showTitle {
                     title
                 }
             }
-            .animation(.default, value: isActive)
-            .padding(.vertical)
+            .padding(.bottom, showCompactToolbar ? 0 : -12)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .animation(.default, value: isActive)
         .disabled(disabled)
-        .contentShape(Rectangle())
         .accessibilityIdentifier(accessibilityIdentifier)
     }
+}
+
+private var showCompactToolbar: Bool {
+    let window = UIApplication
+        .shared
+        .connectedScenes
+        .compactMap { $0 as? UIWindowScene }
+        .flatMap { $0.windows }
+        .first { $0.isKeyWindow }
+    
+    guard let safeAreaBottom = window?.safeAreaInsets.bottom else {
+        return true
+    }
+    
+    return safeAreaBottom <= 0
 }

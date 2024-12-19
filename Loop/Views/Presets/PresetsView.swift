@@ -47,7 +47,7 @@ struct PresetsView: View {
 
     var presetsSorted: [SelectablePreset] {
         viewModel.allPresets
-            .filter { $0.id != viewModel.activeOverride?.presetId }
+            .filter { $0.id != viewModel.temporaryPresetsManager.activeOverride?.presetId }
             .sorted(by: {
             switch (viewModel.selectedSortOption) {
             case .name:
@@ -72,7 +72,7 @@ struct PresetsView: View {
                     if let activePreset = viewModel.activePreset {
                         PresetCard(
                             activePreset,
-                            expectedEndTime: viewModel.activeOverride?.expectedEndTime
+                            expectedEndTime: viewModel.temporaryPresetsManager.activeOverride?.expectedEndTime
                         )
                         .onTapGesture {
                             viewModel.pendingPreset = activePreset
@@ -159,7 +159,7 @@ struct PresetsView: View {
                 }
                 .padding()
                 .animation(.default, value: viewModel.hasCompletedTraining)
-                .animation(.default, value: viewModel.activeOverride)
+                .animation(.default, value: viewModel.temporaryPresetsManager.activeOverride)
             }
             .background(Color(UIColor.secondarySystemBackground))
             .navigationTitle(Text("Presets", comment: "Presets screen title"))

@@ -99,6 +99,8 @@ class TemporaryPresetsManager {
                     for observer in self.presetActivationObservers {
                         observer.presetActivated(context: newPreset.context, duration: newPreset.duration)
                     }
+                    
+                    scheduleClearOverride(override: newPreset)
                 }
             }
 
@@ -111,21 +113,42 @@ class TemporaryPresetsManager {
             guard oldValue != preMealOverride else {
                 return
             }
-
+            
             if let newValue = preMealOverride, newValue.context != .preMeal || newValue.settings.insulinNeedsScaleFactor != nil {
                 preconditionFailure("The `preMealOverride` field should be used only for a pre-meal target range override")
             }
-
+            
             if preMealOverride != nil {
                 scheduleOverride = nil
             }
-
+            
             overrideHistory.recordOverride(preMealOverride)
-
+            
             notify(forChange: .preferences)
         }
     }
+    
+    public var activeOverride: TemporaryScheduleOverride? {
+        let override = (preMealOverride ?? scheduleOverride)
+        if override?.isActive() == true {
+            return override
+        } else {
+            return nil
+        }
+    }
 
+    var clearOverrideTimer: Timer?
+    public func scheduleClearOverride(override: TemporaryScheduleOverride) {
+        clearOverrideTimer?.invalidate()
+        clearOverrideTimer = Timer.scheduledTimer(withTimeInterval: override.scheduledEndDate.timeIntervalSince(Date()), repeats: false, block: { [weak self] _ in
+            if override == self?.scheduleOverride {
+                self?.clearOverride()
+            } else if override == self?.preMealOverride {
+                self?.clearOverride(matching: .preMeal)
+            }
+        })
+    }
+    
     public var isScheduleOverrideInfiniteWorkout: Bool {
         guard let scheduleOverride = scheduleOverride else { return false }
         return scheduleOverride.context == .legacyWorkout && scheduleOverride.duration.isInfinite
@@ -137,7 +160,7 @@ class TemporaryPresetsManager {
             return nil
         }
 
-        let preMealOverride = presumingMealEntry ? nil : self.preMealOverride
+        let preMealOverride = presumingMealEntry ? nil : (self.scheduleOverride?.context == .preMeal ? self.scheduleOverride : nil)
 
         let currentEffectiveOverride: TemporaryScheduleOverride?
         switch (preMealOverride, scheduleOverride) {
@@ -160,16 +183,16 @@ class TemporaryPresetsManager {
         }
     }
 
-    public func scheduleOverrideEnabled(at date: Date = Date()) -> Bool {
+    public func isScheduleOverrideActive(at date: Date = Date()) -> Bool {
         return scheduleOverride?.isActive(at: date) == true
     }
 
-    public func nonPreMealOverrideEnabled(at date: Date = Date()) -> Bool {
-        return scheduleOverride?.isActive(at: date) == true
+    public func isNonPreMealOverrideActive(at date: Date = Date()) -> Bool {
+        return isScheduleOverrideActive(at: date) == true && scheduleOverride?.context != .preMeal
     }
 
-    public func preMealTargetEnabled(at date: Date = Date()) -> Bool {
-        return preMealOverride?.isActive(at: date) == true
+    public func isPreMealTargetActive(at date: Date = Date()) -> Bool {
+        return isScheduleOverrideActive(at: date) == true && scheduleOverride?.context == .preMeal
     }
 
     public func futureOverrideEnabled(relativeTo date: Date = Date()) -> Bool {
@@ -178,7 +201,7 @@ class TemporaryPresetsManager {
     }
 
     public func enablePreMealOverride(at date: Date = Date(), for duration: TimeInterval) {
-        preMealOverride = makePreMealOverride(beginningAt: date, for: duration)
+        scheduleOverride = makePreMealOverride(beginningAt: date, for: duration)
     }
 
     private func makePreMealOverride(beginningAt date: Date = Date(), for duration: TimeInterval) -> TemporaryScheduleOverride? {
@@ -275,6 +298,7 @@ class TemporaryPresetsManager {
             }
             
             self.scheduleOverride = scheduleOverride
+            self.scheduleClearOverride(override: scheduleOverride)
         }
     }
 }

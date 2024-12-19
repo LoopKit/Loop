@@ -124,8 +124,8 @@ final class ExtensionDataManager {
         context.isClosedLoop = self.automaticDosingStatus.automaticDosingEnabled
 
         context.preMealPresetAllowed = self.automaticDosingStatus.automaticDosingEnabled && self.settingsManager.settings.preMealTargetRange != nil
-        context.preMealPresetActive = self.temporaryPresetsManager.preMealTargetEnabled()
-        context.customPresetActive = self.temporaryPresetsManager.nonPreMealOverrideEnabled()
+        context.preMealPresetActive = self.temporaryPresetsManager.isPreMealTargetActive()
+        context.customPresetActive = self.temporaryPresetsManager.isNonPreMealOverrideActive()
 
         // Drop the first element in predictedGlucose because it is the currentGlucose
         // and will have a different interval to the next element

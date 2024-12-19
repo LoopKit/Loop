@@ -26,21 +26,21 @@ struct PresetsHistoryView: View {
         return formatter
     }()
     
-    var overridesByDate: Dictionary<String, [TemporaryScheduleOverride]> {
+    var overridesByDate: Dictionary<Date, [TemporaryScheduleOverride]> {
         Dictionary(
             grouping: history.recentEvents
                 .map(\.override)
                 .filter({ !$0.isActive() })
                 .sorted(by: { $0.actualEndDate > $1.actualEndDate })
         ) { override in
-            override.startDate.formatted(date: .abbreviated, time: .omitted)
+            Calendar.current.startOfDay(for: override.startDate)
         }
     }
     
     var body: some View {
         List {
-            ForEach(Array(overridesByDate.keys)) { date in
-                Section(date) {
+            ForEach(Array(overridesByDate.keys.sorted(by: >)), id: \.self) { date in
+                Section(date.formatted(date: .abbreviated, time: .omitted)) {
                     ForEach(overridesByDate[date] ?? [], id: \.self) { override in
                         LabeledContent {
                             VStack(alignment: .trailing, spacing: 8) {

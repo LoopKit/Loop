@@ -1237,8 +1237,8 @@ extension LoopDataManager: BolusEntryViewModelDelegate {
 
 
 extension LoopDataManager: CarbEntryViewModelDelegate {
-    func scheduleOverrideEnabled(at date: Date) -> Bool {
-        temporaryPresetsManager.scheduleOverrideEnabled(at: date)
+    func isScheduleOverrideActive(at date: Date) -> Bool {
+        temporaryPresetsManager.isScheduleOverrideActive(at: date)
     }
     
     var defaultAbsorptionTimes: DefaultAbsorptionTimes {

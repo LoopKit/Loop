@@ -15,7 +15,7 @@ import os.log
 
 protocol CarbEntryViewModelDelegate: AnyObject, BolusEntryViewModelDelegate, FavoriteFoodInsightsViewModelDelegate {
     var defaultAbsorptionTimes: DefaultAbsorptionTimes { get }
-    func scheduleOverrideEnabled(at date: Date) -> Bool
+    func isScheduleOverrideActive(at date: Date) -> Bool
     func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample]
 }
 
@@ -347,7 +347,7 @@ final class CarbEntryViewModel: ObservableObject {
             return
         }
 
-        if delegate.scheduleOverrideEnabled(at: Date()),
+        if delegate.isScheduleOverrideActive(at: Date()),
            let overrideSettings = delegate.scheduleOverride?.settings,
            overrideSettings.effectiveInsulinNeedsScaleFactor != 1.0 
         {
