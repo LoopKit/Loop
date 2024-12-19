@@ -30,24 +30,6 @@ struct GlucoseLiveActivityConfiguration: Widget {
             // banner on the Home Screen of devices that don't support the Dynamic Island.
             ZStack {
                 VStack {
-                    if context.state.reason == .predictedHigh {
-                        HStack(spacing: 10) {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .foregroundStyle(.red)
-                            Text(NSLocalizedString("Predicted HIGH!", comment: ""))
-                            Spacer()
-                        }
-                        .padding(.top, 5)
-                    } else if context.state.reason == .predictedLow {
-                        HStack(spacing: 10) {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .foregroundStyle(.red)
-                            Text(NSLocalizedString("Predicted LOW!", comment: ""))
-                            Spacer()
-                        }
-                        .padding(.top, 5)
-                    }
-                    
                     if context.attributes.mode == .large {
                         HStack(spacing: 15) {
                             loopIcon(context)
@@ -64,7 +46,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                     preset: context.state.preset,
                                     yAxisMarks: context.state.yAxisMarks
                                 )
-                                .frame(height: getChartHeight(reason: context.state.reason))
+                                .frame(height: 85)
                             } else {
                                 ChartView(
                                     glucoseSamples: context.state.glucoseSamples,
@@ -75,7 +57,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                     preset: context.state.preset,
                                     yAxisMarks: context.state.yAxisMarks
                                 )
-                                .frame(height: getChartHeight(reason: context.state.reason))
+                                .frame(height: 85)
                             }
                         }
                     }
@@ -172,7 +154,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             preset: context.state.preset,
                             yAxisMarks: context.state.yAxisMarks
                         )
-                            .frame(height: getChartHeight(reason: context.state.reason) - 10)
+                            .frame(height: 75)
                     } else {
                         ChartView(
                             glucoseSamples: context.state.glucoseSamples,
@@ -183,7 +165,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             preset: context.state.preset,
                             yAxisMarks: context.state.yAxisMarks
                         )
-                            .frame(height: getChartHeight(reason: context.state.reason) - 10)
+                            .frame(height: 75)
                     }
                 }
             } compactLeading: {
@@ -312,13 +294,5 @@ struct GlucoseLiveActivityConfiguration: Widget {
         }
         
         return .green
-    }
-    
-    private func getChartHeight(reason: LiveActivityReasonEnum) -> CGFloat {
-        if reason == .alwaysOn || reason == .unknown {
-            return 85
-        }
-        
-        return 70
     }
 }

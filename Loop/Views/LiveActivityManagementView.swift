@@ -67,21 +67,6 @@ struct LiveActivityManagementView: View {
                         label: { Text(NSLocalizedString("Bottom row configuration", comment: "Title for Bottom row configuration")) }
                     )
                 }
-                
-                Section {
-                    Toggle(NSLocalizedString("Always enabled", comment: "Title for always enabled live activity toggle"), isOn: $viewModel.alwaysEnabled)
-                    if !viewModel.alwaysEnabled {
-                        Toggle(NSLocalizedString("Show when low is predicted", comment: "Title for show when low is predicted toggle"), isOn: $viewModel.showWhenLowIsPredicted)
-                            .transition(.move(edge: viewModel.alwaysEnabled ? .top : .bottom))
-                        Toggle(NSLocalizedString("Show when high is predicted", comment: "Title for show when high is predicted toggle"), isOn: $viewModel.showWhenHighIsPredicted)
-                            .transition(.move(edge: viewModel.alwaysEnabled ? .top : .bottom))
-                    }
-                } footer: {
-                    Text(NSLocalizedString("Here you can setup how the Live Activity behaves. Low and High values are based on the upper and lower limits", comment: "Body for always enabled live activity toggle"))
-                        .font(.footnote)
-                }
-                
-                
             }
             .animation(.easeInOut, value: UUID())
             .insetGroupedListStyle()
@@ -113,9 +98,6 @@ struct LiveActivityManagementView: View {
         settings.mode = viewModel.mode
         settings.addPredictiveLine = viewModel.addPredictiveLine
         settings.useLimits = viewModel.useLimits
-        settings.alwaysEnabled = viewModel.alwaysEnabled
-        settings.showWhenLowIsPredicted = viewModel.showWhenLowIsPredicted
-        settings.showWhenHighIsPredicted = viewModel.showWhenHighIsPredicted
         settings.upperLimitChartMmol = viewModel.upperLimitChartMmol
         settings.lowerLimitChartMmol = viewModel.lowerLimitChartMmol
         settings.upperLimitChartMg = viewModel.upperLimitChartMg
