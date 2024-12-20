@@ -201,7 +201,7 @@ class TemporaryPresetsManager {
     }
 
     public func enablePreMealOverride(at date: Date = Date(), for duration: TimeInterval) {
-        scheduleOverride = makePreMealOverride(beginningAt: date, for: duration)
+        preMealOverride = makePreMealOverride(beginningAt: date, for: duration)
     }
 
     private func makePreMealOverride(beginningAt date: Date = Date(), for duration: TimeInterval) -> TemporaryScheduleOverride? {
