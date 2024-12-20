@@ -160,7 +160,7 @@ class TemporaryPresetsManager {
             return nil
         }
 
-        let preMealOverride = presumingMealEntry ? nil : (self.scheduleOverride?.context == .preMeal ? self.scheduleOverride : nil)
+        let preMealOverride = presumingMealEntry ? nil : self.preMealOverride
 
         let currentEffectiveOverride: TemporaryScheduleOverride?
         switch (preMealOverride, scheduleOverride) {
