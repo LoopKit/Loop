@@ -340,6 +340,8 @@ final class LoopDataManager {
     }
 
     private var insulinEffect: [GlucoseEffect]?
+    private var insulinEffectCachedBaseDate: Date = .distantPast
+    private var insulinEffectCachedBasalDosingEnd: Date = .distantPast
 
     private var insulinEffectIncludingPendingInsulin: [GlucoseEffect]? {
         didSet {
@@ -364,6 +366,7 @@ final class LoopDataManager {
             predictedGlucose = nil
         }
     }
+    private var negativeInsulinDamperCachedBaseDate: Date = .distantPast
 
     /// When combining retrospective glucose discrepancies, extend the window slightly as a buffer.
     private let retrospectiveCorrectionGroupingIntervalMultiplier = 1.01
@@ -1003,7 +1006,7 @@ extension LoopDataManager {
         let insulinEffectStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-5))
         let updateInsulinEffectNeeded = insulinEffect == nil || insulinEffect?.first?.startDate ?? .distantFuture > insulinEffectStartDate
         
-        if negativeInsulinDamper == nil || updateInsulinEffectNeeded {
+        if negativeInsulinDamper == nil || updateInsulinEffectNeeded, nextCounteractionEffectDate != negativeInsulinDamperCachedBaseDate {
             self.logger.debug("Recomputing negative insulin damper")
             updateGroup.enter()
             let lastDoseStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-15))
@@ -1012,6 +1015,7 @@ extension LoopDataManager {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects for damper: %{public}@", error.localizedDescription)
                     self.insulinEffect = nil
+                    self.negativeInsulinDamperCachedBaseDate = .distantPast
                     warnings.append(.fetchDataWarning(.insulinEffect(error: error)))
                 case .success(let effects):
                     var posDeltaSum = 0.0
@@ -1058,6 +1062,7 @@ extension LoopDataManager {
 
                     // alpha should never be less than marginalSlope
                     self.negativeInsulinDamper = max(0, 1 - max(marginalSlope, alpha))
+                    self.negativeInsulinDamperCachedBaseDate = nextCounteractionEffectDate
                 }
 
                 updateGroup.leave()
@@ -1080,17 +1085,22 @@ extension LoopDataManager {
             }
         }
 
-        if updateInsulinEffectNeeded {
+        if updateInsulinEffectNeeded, (insulinEffectStartDate != insulinEffectCachedBaseDate || now().addingTimeInterval(.minutes(-1)) > insulinEffectCachedBasalDosingEnd) {
             self.logger.debug("Recomputing insulin effects")
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: nil, basalDosingEnd: now()) { (result) -> Void in
+            let basalDosingEnd = now()
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: nil, basalDosingEnd: basalDosingEnd) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects: %{public}@", error.localizedDescription)
                     self.insulinEffect = nil
+                    self.insulinEffectCachedBaseDate = .distantPast
+                    self.insulinEffectCachedBasalDosingEnd = .distantPast
                     warnings.append(.fetchDataWarning(.insulinEffect(error: error)))
                 case .success(let effects):
                     self.insulinEffect = effects
+                    self.insulinEffectCachedBaseDate = insulinEffectStartDate
+                    self.insulinEffectCachedBasalDosingEnd = basalDosingEnd
                 }
 
                 updateGroup.leave()
