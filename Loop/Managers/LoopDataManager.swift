@@ -340,8 +340,6 @@ final class LoopDataManager {
     }
 
     private var insulinEffect: [GlucoseEffect]?
-    private var insulinEffectCachedBaseDate: Date = .distantPast
-    private var insulinEffectCachedBasalDosingEnd: Date = .distantPast
 
     private var insulinEffectIncludingPendingInsulin: [GlucoseEffect]? {
         didSet {
@@ -1004,9 +1002,8 @@ extension LoopDataManager {
         let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
         let nextCounteractionEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
         let insulinEffectStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-5))
-        let updateInsulinEffectNeeded = insulinEffect == nil || insulinEffect?.first?.startDate ?? .distantFuture > insulinEffectStartDate
         
-        if negativeInsulinDamper == nil || updateInsulinEffectNeeded, nextCounteractionEffectDate != negativeInsulinDamperCachedBaseDate {
+        if negativeInsulinDamper == nil || nextCounteractionEffectDate != negativeInsulinDamperCachedBaseDate {
             self.logger.debug("Recomputing negative insulin damper")
             updateGroup.enter()
             let lastDoseStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-15))
@@ -1085,7 +1082,7 @@ extension LoopDataManager {
             }
         }
 
-        if updateInsulinEffectNeeded, (insulinEffectStartDate != insulinEffectCachedBaseDate || now().addingTimeInterval(.minutes(-1)) > insulinEffectCachedBasalDosingEnd) {
+        if insulinEffect == nil || insulinEffect?.first?.startDate ?? .distantFuture > insulinEffectStartDate {
             self.logger.debug("Recomputing insulin effects")
             updateGroup.enter()
             let basalDosingEnd = now()
@@ -1094,13 +1091,9 @@ extension LoopDataManager {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects: %{public}@", error.localizedDescription)
                     self.insulinEffect = nil
-                    self.insulinEffectCachedBaseDate = .distantPast
-                    self.insulinEffectCachedBasalDosingEnd = .distantPast
                     warnings.append(.fetchDataWarning(.insulinEffect(error: error)))
                 case .success(let effects):
                     self.insulinEffect = effects
-                    self.insulinEffectCachedBaseDate = insulinEffectStartDate
-                    self.insulinEffectCachedBasalDosingEnd = basalDosingEnd
                 }
 
                 updateGroup.leave()
