@@ -2076,7 +2076,7 @@ extension LoopDataManager {
             
             dosingRecommendation = getDosingRecommendation(dosingStrategy: dosingStrategty, glucose: glucose, predictedGlucose: predictedGlucose, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivity, basalRateSchedule: basalRateSchedule, startDate: startDate, bolusApplicationFactor: bolusApplicationFactor)
             
-            if dosingRecommendation?.bolusUnits != nil, autoBolusCarbsAmount > dosingRecommendation!.bolusUnits! {
+            if autoBolusCarbsAmount > dosingRecommendation?.bolusUnits ?? 0.0 {
                 logger.info("Recommendation is to auto-bolus carbs as it will give more insulin")
                 dosingRecommendation = AutomaticDoseRecommendation(basalAdjustment: dosingRecommendation?.basalAdjustment, bolusUnits: autoBolusCarbsAmount)
             } else {

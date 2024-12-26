@@ -213,6 +213,25 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(4.63, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
     
+    func testBeneathRangeForAutoBolusCarbs() {
+        // this scenario starts beneath the correction range
+        setUp(for: .highAndRisingWithCOB, correctionRanges: correctionRange(135.0), autoBolusCarbs: true)
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var recommendedBolus: Double?
+        var manualBolusRecommendation: ManualBolusRecommendation?
+        self.loopDataManager.getLoopState { _, state in
+            recommendedBolus = state.recommendedAutomaticDose?.recommendation.bolusUnits
+            manualBolusRecommendation = try? state.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses)
+            updateGroup.leave()
+        }
+        // We need to wait until the task completes to get outputs
+        updateGroup.wait()
+        
+        XCTAssertNotNil(recommendedBolus)
+        XCTAssertEqual(min(manualBolusRecommendation!.amount, manualBolusRecommendation!.bolusBreakdown!.cobCorrectionAmount), recommendedBolus!, accuracy: defaultAccuracy)
+    }
+    
     func testHighAndStableWithAutoBolusCarbsForAutoBolusResult() {
         // note that the default setup for .highAndStable has a _carb_effect file reflecting a 5g carb effect (with 45 ISF)
         // predicted glucose starts from 200 and goes down to 176.21882841682697 (taking into account _insulin_effect)
@@ -243,6 +262,38 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
 
         XCTAssertNotNil(recommendedBolus)
         XCTAssertEqual(0.4 * (expectedCobCorrectionAmount + expectedBgCorrectionAmount), recommendedBolus!, accuracy: defaultAccuracy)
+    }
+    
+    func testHighAndStableWithAutoBolusCarbsForABCResultVsAutoBolus() {
+        // note that the default setup for .highAndStable has a _carb_effect file reflecting a 5g carb effect (with 45 ISF)
+        // predicted glucose starts from 200 and goes down to 176.21882841682697 (taking into account _insulin_effect)
+        let isf = 45.0
+        let cir = 10.0
+        
+        let expectedBgCorrectionAmount = 1.82 + (200 - 176.21882841682697) / isf // COB correction is to 200. BG correction is the rest
+        
+        // 0.4*(cobCorrection + bgCorrection) will be the dosage compared against
+        // for this test we want cobCorrection < 0.4*(cobCorrection + bgCorrection)
+        // in other words we need cobCorrection < 2/3 * bgCorrection
+        let expectedCobCorrectionAmount = 0.7 * expectedBgCorrectionAmount
+        
+        let carbValue = 5.0 + cir * ((200 - 176.21882841682697) / isf + expectedCobCorrectionAmount)
+        
+        setUp(for: .highAndStable, dosingStrategy: .automaticBolus, predictCarbGlucoseEffects: true,
+              carbHistorySupplier: {[StoredCarbEntry(startDate: $0, quantity: HKQuantity(unit: .gram(), doubleValue: carbValue))]}, autoBolusCarbs: true)
+        
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var recommendedBolus: Double?
+        self.loopDataManager.getLoopState { _, state in
+            recommendedBolus = state.recommendedAutomaticDose?.recommendation.bolusUnits
+            updateGroup.leave()
+        }
+        // We need to wait until the task completes to get outputs
+        updateGroup.wait()
+
+        XCTAssertNotNil(recommendedBolus)
+        XCTAssertEqual(expectedCobCorrectionAmount, recommendedBolus!, accuracy: defaultAccuracy)
     }
     
     func testHighAndStableWithAutoBolusCarbsForTempBasalResult() {
@@ -277,7 +328,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(1.0 + 2*(expectedBgCorrectionAmount + expectedCobCorrectionAmount), recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
     
-    func testHighAndStableWithAutoBolusCarbsForCarbBolusResult() {
+    func testHighAndStableWithAutoBolusCarbsForABCResultvsTempBasal() {
         // note that the default setup for .highAndStable has a _carb_effect file reflecting a 5g carb effect (with 45 ISF)
         // predicted glucose starts from 200 and goes down to 176.21882841682697 (taking into account _insulin_effect)
         let isf = 45.0
