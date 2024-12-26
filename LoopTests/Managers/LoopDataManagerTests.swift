@@ -133,7 +133,8 @@ class LoopDataManagerTests: XCTestCase {
                suspendThresholdValue: Double? = nil,
                // note that carbHistory is independent from carb effects;
                // one can use dummy replacement carb entry to force recalculation when getting a manual bolus recommendation
-               carbHistorySupplier: ((Date) -> [StoredCarbEntry]?)? = nil
+               carbHistorySupplier: ((Date) -> [StoredCarbEntry]?)? = nil,
+               autoBolusCarbs: Bool = false
     )
     {
         let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
@@ -201,10 +202,17 @@ class LoopDataManagerTests: XCTestCase {
             automaticDosingStatus: automaticDosingStatus,
             trustedTimeOffset: { 0 }
         )
+        
+        if autoBolusCarbs {
+            UserDefaults.standard.autoBolusCarbsEnabled = true
+            UserDefaults.standard.autoBolusCarbsActiveByDefault = true
+        }
     }
     
     override func tearDownWithError() throws {
         loopDataManager = nil
+        UserDefaults.standard.autoBolusCarbsEnabled = false
+        UserDefaults.standard.autoBolusCarbsActiveByDefault = false
     }
 }
 

@@ -601,6 +601,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             } else {
                 self.currentCOBDescription = nil
             }
+            // FIXME need to trigger an update of this value when the UserDefaults are changed
+            self.currentAutoBolusCarbsActive = self.deviceManager.loopManager.autoBolusCarbsEnabledAndActive
 
             self.tableView.beginUpdates()
             if let hudView = self.hudView {
@@ -677,6 +679,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     // MARK: COB
 
     private var currentCOBDescription: String?
+    
+    private var currentAutoBolusCarbsActive = false
 
     // MARK: - Loop Status Section Data
 
@@ -1003,7 +1007,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.cobChart(withFrame: frame)?.view
                 })
-                cell.setTitleLabelText(label: NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph"))
+                
+                let label = NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph");
+                
+                // FIXME need to put in place a proper image indicating AutoBolusCarbs
+                if currentAutoBolusCarbsActive {
+                    cell.setTitleLabelText(label: String(format: "%@ %@", label, "🔸"))
+                } else {
+                    cell.setTitleLabelText(label: label)
+                }
             }
 
             self.tableView(tableView, updateSubtitleFor: cell, at: indexPath)
@@ -1165,6 +1177,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 } else {
                     cell.setSubtitleLabel(label: nil)
                 }
+                
+                let label = NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph");
+                
+                // FIXME need to put in place a proper image indicating AutoBolusCarbs
+                if currentAutoBolusCarbsActive {
+                    cell.setTitleLabelText(label: String(format: "%@ %@", label, "🔸"))
+                } else {
+                    cell.setTitleLabelText(label: label)
+                }
             }
         case .hud, .status, .alertWarning:
             break
@@ -1233,7 +1254,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     case .preMeal, .legacyWorkout:
                         break
                     default:
-                        let vc = AddEditOverrideTableViewController(glucoseUnit: statusCharts.glucose.glucoseUnit)
+                        let vc = AddEditOverrideTableViewController(glucoseUnit: statusCharts.glucose.glucoseUnit, autoBolusCarbsEnabled: UserDefaults.standard.autoBolusCarbsEnabled)
                         vc.inputMode = .editOverride(override)
                         vc.delegate = self
                         show(vc, sender: tableView.cellForRow(at: indexPath))
@@ -1342,6 +1363,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.overrideHistory = deviceManager.loopManager.overrideHistory.getEvents()
             vc.delegate = self
+            vc.autoBolusCarbsEnabled = UserDefaults.standard.autoBolusCarbsEnabled
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
         default:

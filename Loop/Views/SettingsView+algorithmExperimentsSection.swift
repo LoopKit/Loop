@@ -41,6 +41,9 @@ public struct ExperimentRow: View {
 public struct ExperimentsSettingsView: View {
     @State private var isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
     @State private var isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+    @State private var isAutoBolusCarbsAvailable = UserDefaults.standard.autoBolusCarbsEnabled
+    @State private var autoBolusCarbsActiveByDefault = UserDefaults.standard.autoBolusCarbsActiveByDefault
+    
     var automaticDosingStrategy: AutomaticDosingStrategy
 
     public var body: some View {
@@ -70,6 +73,11 @@ public struct ExperimentsSettingsView: View {
                         name: NSLocalizedString("Integral Retrospective Correction", comment: "Title of integral retrospective correction experiment"),
                         enabled: isIntegralRetrospectiveCorrectionEnabled)
                 }
+                NavigationLink(destination: AutoBolusCarbsSelectionView(isAutoBolusCarbsEnabled: $isAutoBolusCarbsAvailable, autoBolusCarbsActiveByDefault: $autoBolusCarbsActiveByDefault)) {
+                    ExperimentRow(
+                        name: NSLocalizedString("Auto-Bolus Carbs", comment: "Title of auto-bolus carbs experiment"),
+                        enabled: isAutoBolusCarbsAvailable)
+                }
                 Spacer()
             }
             .padding()
@@ -83,6 +91,8 @@ extension UserDefaults {
     private enum Key: String {
         case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
         case IntegralRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.integralRetrospectiveCorrectionEnabled"
+        case AutoBolusCarbsEnabled = "com.loopkit.algorithmExperiments.autoBolusCarbsEnabled"
+        case AutoBolusCarbsActiveByDefault = "com.loopkit.algorithmExperiments.autoBolusCarbsActiveByDefault"
     }
 
     var glucoseBasedApplicationFactorEnabled: Bool {
@@ -102,5 +112,22 @@ extension UserDefaults {
             set(newValue, forKey: Key.IntegralRetrospectiveCorrectionEnabled.rawValue)
         }
     }
+    
+    var autoBolusCarbsEnabled: Bool {
+        get {
+            bool(forKey: Key.AutoBolusCarbsEnabled.rawValue) as Bool
+        }
+        set {
+            set(newValue, forKey: Key.AutoBolusCarbsEnabled.rawValue)
+        }
+    }
 
+    var autoBolusCarbsActiveByDefault: Bool {
+        get {
+            bool(forKey: Key.AutoBolusCarbsActiveByDefault.rawValue) as Bool
+        }
+        set {
+            set(newValue, forKey: Key.AutoBolusCarbsActiveByDefault.rawValue)
+        }
+    }
 }
