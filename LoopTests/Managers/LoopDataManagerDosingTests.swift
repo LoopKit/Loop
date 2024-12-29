@@ -52,6 +52,38 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         let url = bundle.url(forResource: name, withExtension: "json")!
         return try! decoder.decode([PredictedGlucoseValue].self, from: try! Data(contentsOf: url))
     }
+    
+    func testNegativeInsulinDamper() {
+        let marginalSlope = 0.05
+        let anchorAlpha = 0.75
+        let anchorPoint = 50.0
+
+        XCTAssertEqual(1.0, LoopDataManager.calculateNegativeInsulinDamperAlpha(anchorAlpha, anchorPoint, marginalSlope, 0))
+
+        XCTAssertEqual(anchorAlpha, LoopDataManager.calculateNegativeInsulinDamperAlpha(anchorAlpha, anchorPoint, marginalSlope, anchorPoint), accuracy: 1E-6)
+        
+        let linearScaleSlope = (1 - anchorAlpha)/anchorPoint
+        let transitionPoint = (1 - marginalSlope) / (2 * linearScaleSlope)
+        let transitionValue = (1 - linearScaleSlope * transitionPoint) * transitionPoint
+        
+        XCTAssertEqual(marginalSlope, LoopDataManager.calculateNegativeInsulinDamperAlpha(anchorAlpha, anchorPoint, marginalSlope, 1E12), accuracy: 1E-6)
+        
+        var prevAlpha = 1.1
+        for i in 0...1_000_000 {
+            let iVal = Double(i)
+            let alpha = LoopDataManager.calculateNegativeInsulinDamperAlpha(anchorAlpha, anchorPoint, marginalSlope, iVal)
+            
+            XCTAssertLessThan(alpha, prevAlpha)
+            XCTAssertGreaterThan(alpha, marginalSlope)
+            
+            if Double(i) <= transitionPoint {
+                XCTAssertEqual(alpha, 1.0 - iVal * linearScaleSlope, accuracy: 1E-6)
+            } else {
+                XCTAssertEqual(alpha * iVal, transitionValue + marginalSlope * (iVal - transitionPoint), accuracy: 1E-6)
+            }
+            prevAlpha = alpha
+        }
+    }
 
     // MARK: Tests
     func testForecastFromLiveCaptureInputData() {

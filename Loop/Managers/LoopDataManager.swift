@@ -461,6 +461,7 @@ final class LoopDataManager {
         insulinEffect = nil
         insulinEffectIncludingPendingInsulin = nil
         predictedGlucose = nil
+        negativeInsulinDamper = nil
     }
 
     // MARK: - Background task management
@@ -1011,9 +1012,9 @@ extension LoopDataManager {
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects for damper: %{public}@", error.localizedDescription)
-                    self.insulinEffect = nil
+                    self.negativeInsulinDamper = nil
                     self.negativeInsulinDamperCachedBaseDate = .distantPast
-                    warnings.append(.fetchDataWarning(.insulinEffect(error: error)))
+                    warnings.append(.fetchDataWarning(.negativeInsulinDamper(error: error)))
                 case .success(let effects):
                     var posDeltaSum = 0.0
                     effects.enumerated().forEach{
@@ -1023,8 +1024,14 @@ extension LoopDataManager {
                         }
                     }
                     
-                    let insulinSensitivity = latestSettings.insulinSensitivitySchedule!.quantity(at: lastGlucoseDate)
-                    let basalRate = latestSettings.basalRateSchedule!.value(at: lastGlucoseDate)
+                    guard let insulinSensitivity = latestSettings.insulinSensitivitySchedule?.quantity(at: lastGlucoseDate),                    let basalRate = latestSettings.basalRateSchedule?.value(at: lastGlucoseDate) else {
+                        
+                        self.logger.error("Could not fetch ISF and/or basal rates for damper")
+                        self.negativeInsulinDamper = nil
+                        self.negativeInsulinDamperCachedBaseDate = .distantPast
+
+                        break
+                    }
                     let model = self.doseStore.insulinModelProvider.model(for: self.pumpInsulinType)
                     
                     // anchorScale is set to 1 hour for rapid acting adult, and 44 minutes for ultra-rapid insulins
@@ -1043,19 +1050,7 @@ extension LoopDataManager {
                     let anchorPoint = anchorScale * basalRate * insulinSensitivity.doubleValue(for: .milligramsPerDeciliter)
                     let anchorAlpha = 0.75
                     
-                    let linearScaleSlope = (1.0 - anchorAlpha)/anchorPoint // how alpha scales down in the linear scale region
-                    
-                    // the slope in the linear scale region of alpha * posDeltaSum is 1 - 2*linearScaleSlope*posDeltaSum.
-                    // the transitionPoint is where we transition from linear scale region to marginalSlope. The slope is continuous at this point
-                    let transitionPoint = (1 - marginalSlope) / (2 * linearScaleSlope)
-                    
-                    let alpha : Double
-                    if posDeltaSum < transitionPoint { // linear scaling region
-                        alpha = 1 - linearScaleSlope * posDeltaSum
-                    } else { // marginal slope region
-                        let transitionValue = (1 - linearScaleSlope * transitionPoint) * transitionPoint
-                        alpha = (transitionValue + marginalSlope * (posDeltaSum - transitionPoint)) / posDeltaSum
-                    }
+                    let alpha = LoopDataManager.calculateNegativeInsulinDamperAlpha(anchorAlpha, anchorPoint, marginalSlope, posDeltaSum)
 
                     // alpha should never be less than marginalSlope
                     self.negativeInsulinDamper = max(0, 1 - max(marginalSlope, alpha))
@@ -1229,6 +1224,21 @@ extension LoopDataManager {
         }
 
         return updatePredictedGlucoseAndRecommendedDose(with: dosingDecision)
+    }
+    
+    static func calculateNegativeInsulinDamperAlpha(_ anchorAlpha: Double, _ anchorPoint: Double, _ marginalSlope: Double, _ posDeltaSum: Double) -> Double {
+        let linearScaleSlope = (1.0 - anchorAlpha)/anchorPoint // how alpha scales down in the linear scale region
+        
+        // the slope in the linear scale region of alpha * posDeltaSum is 1 - 2*linearScaleSlope*posDeltaSum.
+        // the transitionPoint is where we transition from linear scale region to marginalSlope. The slope is continuous at this point
+        let transitionPoint = (1 - marginalSlope) / (2 * linearScaleSlope)
+        
+        if posDeltaSum < transitionPoint { // linear scaling region
+            return 1 - linearScaleSlope * posDeltaSum
+        } else { // marginal slope region
+            let transitionValue = (1 - linearScaleSlope * transitionPoint) * transitionPoint
+            return (transitionValue + marginalSlope * (posDeltaSum - transitionPoint)) / posDeltaSum
+        }
     }
 
     private func notify(forChange context: LoopUpdateContext) {
