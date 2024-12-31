@@ -39,9 +39,9 @@ public struct ExperimentRow: View {
 }
 
 public struct ExperimentsSettingsView: View {
-    @State private var isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
-    @State private var isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
-    @State private var isNegativeInsulinDamperEnabled = UserDefaults.standard.negativeInsulinDamperEnabled
+    @State private var isGlucoseBasedApplicationFactorEnabled = false
+    @State private var isIntegralRetrospectiveCorrectionEnabled = false
+    @State private var isNegativeInsulinDamperEnabled = false
 
     var automaticDosingStrategy: AutomaticDosingStrategy
 
@@ -82,6 +82,17 @@ public struct ExperimentsSettingsView: View {
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { // force loading the values from UserDefaults
+            if isGlucoseBasedApplicationFactorEnabled != UserDefaults.standard.glucoseBasedApplicationFactorEnabled {
+                isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
+            }
+            if isIntegralRetrospectiveCorrectionEnabled != UserDefaults.standard.integralRetrospectiveCorrectionEnabled {
+                isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+            }
+            if isNegativeInsulinDamperEnabled != UserDefaults.standard.negativeInsulinDamperEnabled {
+                isNegativeInsulinDamperEnabled = UserDefaults.standard.negativeInsulinDamperEnabled
+            }
+        }
     }
 }
 
