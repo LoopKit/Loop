@@ -83,15 +83,9 @@ public struct ExperimentsSettingsView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { // force loading the values from UserDefaults
-            if isGlucoseBasedApplicationFactorEnabled != UserDefaults.standard.glucoseBasedApplicationFactorEnabled {
-                isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
-            }
-            if isIntegralRetrospectiveCorrectionEnabled != UserDefaults.standard.integralRetrospectiveCorrectionEnabled {
-                isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
-            }
-            if isNegativeInsulinDamperEnabled != UserDefaults.standard.negativeInsulinDamperEnabled {
-                isNegativeInsulinDamperEnabled = UserDefaults.standard.negativeInsulinDamperEnabled
-            }
+            isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
+            isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+            isNegativeInsulinDamperEnabled = UserDefaults.standard.negativeInsulinDamperEnabled
         }
     }
 }
