@@ -215,7 +215,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func testBeneathRangeForAutoBolusCarbs() {
         // this scenario starts beneath the correction range
-        setUp(for: .highAndRisingWithCOB, correctionRanges: correctionRange(135.0), autoBolusCarbs: true)
+        setUp(for: .highAndRisingWithCOB, correctionRanges: correctionRange(150.0), autoBolusCarbs: true)
         let updateGroup = DispatchGroup()
         updateGroup.enter()
         var recommendedBolus: Double?
@@ -230,6 +230,24 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         
         XCTAssertNotNil(recommendedBolus)
         XCTAssertEqual(min(manualBolusRecommendation!.amount, manualBolusRecommendation!.bolusBreakdown!.cobCorrectionAmount), recommendedBolus!, accuracy: defaultAccuracy)
+    }
+    
+    func testBeneathRangeForAutoBolusCarbsAutoIobMax() {
+        // this scenario starts beneath the correction range
+        // autoIobMax = 2*maxBolus and mockDoseStore has IOB of 9.5 - so headroom is 0.1
+        setUp(for: .highAndRisingWithCOB, maxBolus: 4.8, correctionRanges: correctionRange(150.0), autoBolusCarbs: true)
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var recommendedBolus: Double?
+        self.loopDataManager.getLoopState { _, state in
+            recommendedBolus = state.recommendedAutomaticDose?.recommendation.bolusUnits
+            updateGroup.leave()
+        }
+        // We need to wait until the task completes to get outputs
+        updateGroup.wait()
+        
+        XCTAssertNotNil(recommendedBolus)
+        XCTAssertEqual(0.1, recommendedBolus!, accuracy: defaultAccuracy)
     }
     
     func testHighAndStableWithAutoBolusCarbsForAutoBolusResult() {

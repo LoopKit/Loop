@@ -1847,7 +1847,7 @@ extension LoopDataManager {
         suspendInsulinDeliveryEffect = suspendDoses.glucoseEffects(insulinModelProvider: doseStore.insulinModelProvider, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: insulinSensitivity).filterDateRange(startSuspend, endSuspend)
     }
 
-    fileprivate func getDosingRecommendation(dosingStrategy: AutomaticDosingStrategy, glucose: any GlucoseSampleValue, predictedGlucose: [PredictedGlucoseValue], glucoseTargetRange: GlucoseRangeSchedule?, insulinSensitivity: InsulinSensitivitySchedule?, basalRateSchedule: BasalRateSchedule?, startDate: Date, bolusApplicationFactor: Double? = nil) -> AutomaticDoseRecommendation? {
+    fileprivate func getDosingRecommendation(dosingStrategy: AutomaticDosingStrategy, glucose: any GlucoseSampleValue, predictedGlucose: [PredictedGlucoseValue], iobHeadroom: Double, glucoseTargetRange: GlucoseRangeSchedule?, insulinSensitivity: InsulinSensitivitySchedule?, basalRateSchedule: BasalRateSchedule?, startDate: Date, bolusApplicationFactor: Double? = nil) -> AutomaticDoseRecommendation? {
         
         let rateRounder = { (_ rate: Double) in
             return self.delegate?.roundBasalRate(unitsPerHour: rate) ?? rate
@@ -1863,10 +1863,6 @@ extension LoopDataManager {
         
         let maxBolus = settings.maximumBolus!
         let maxBasal = settings.maximumBasalRatePerHour!
-
-        // automaticDosingIOBLimit calculated from the user entered maxBolus
-        let automaticDosingIOBLimit = maxBolus * 2.0
-        let iobHeadroom = automaticDosingIOBLimit - self.insulinOnBoard!.value
         
         switch dosingStrategy {
         case .automaticBolus:
@@ -2044,11 +2040,15 @@ extension LoopDataManager {
 
             var autoBolusCarbsAmount = -Double.infinity
             
+            // automaticDosingIOBLimit calculated from the user entered maxBolus
+            let automaticDosingIOBLimit = maxBolus! * 2.0
+            let iobHeadroom = automaticDosingIOBLimit - self.insulinOnBoard!.value
+            
             if autoBolusCarbsEnabledAndActive {
                 do {
                     if let bolusRecommendation = try recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses), let breakdown = bolusRecommendation.bolusBreakdown {
                         
-                        let amount = min(bolusRecommendation.amount, volumeRounder()(breakdown.cobCorrectionAmount))
+                        let amount = min(bolusRecommendation.amount, volumeRounder()(min(iobHeadroom, breakdown.cobCorrectionAmount)))
                         
                         if amount > 0 {
                             autoBolusCarbsAmount = amount
@@ -2073,8 +2073,8 @@ extension LoopDataManager {
             }
                 
             let dosingStrategty = autoBolusCarbsAmount > 0 ? .automaticBolus : settings.automaticDosingStrategy
-            
-            dosingRecommendation = getDosingRecommendation(dosingStrategy: dosingStrategty, glucose: glucose, predictedGlucose: predictedGlucose, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivity, basalRateSchedule: basalRateSchedule, startDate: startDate, bolusApplicationFactor: bolusApplicationFactor)
+                        
+            dosingRecommendation = getDosingRecommendation(dosingStrategy: dosingStrategty, glucose: glucose, predictedGlucose: predictedGlucose, iobHeadroom: iobHeadroom, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivity, basalRateSchedule: basalRateSchedule, startDate: startDate, bolusApplicationFactor: bolusApplicationFactor)
             
             if autoBolusCarbsAmount > dosingRecommendation?.bolusUnits ?? 0.0 {
                 logger.info("Recommendation is to auto-bolus carbs as it will give more insulin")
@@ -2084,7 +2084,7 @@ extension LoopDataManager {
                 case .tempBasalOnly:
                     if autoBolusCarbsAmount > 0 {
                         // we used automaticBolus before so now we need to switch over to the standard tempBasal recommendation
-                        dosingRecommendation = getDosingRecommendation(dosingStrategy: .tempBasalOnly, glucose: glucose, predictedGlucose: predictedGlucose, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivity, basalRateSchedule: basalRateSchedule, startDate: startDate)
+                        dosingRecommendation = getDosingRecommendation(dosingStrategy: .tempBasalOnly, glucose: glucose, predictedGlucose: predictedGlucose, iobHeadroom: iobHeadroom, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivity, basalRateSchedule: basalRateSchedule, startDate: startDate)
                     }
                 default:
                     break
