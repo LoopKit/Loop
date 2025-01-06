@@ -39,8 +39,8 @@ public struct ExperimentRow: View {
 }
 
 public struct ExperimentsSettingsView: View {
-    @State private var isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
-    @State private var isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+    @State private var isGlucoseBasedApplicationFactorEnabled = false
+    @State private var isIntegralRetrospectiveCorrectionEnabled = false
     var automaticDosingStrategy: AutomaticDosingStrategy
 
     public var body: some View {
@@ -75,6 +75,11 @@ public struct ExperimentsSettingsView: View {
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // force reloading of data from UserDefaults
+            isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
+            isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
+        }
     }
 }
 
