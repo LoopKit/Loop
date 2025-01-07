@@ -1469,38 +1469,21 @@ extension LoopDataManager {
         return try recommendManualBolus(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
     }
     
-    /// - Throws: LoopError.missingDataError
-    fileprivate func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, considerPositiveVelocityAndRC: Bool) throws -> ManualBolusRecommendation? {
-        guard lastRequestedBolus == nil else {
-            // Don't recommend changes if a bolus was just requested.
-            // Sending additional pump commands is not going to be
-            // successful in any case.
-            return nil
-        }
-        
-        let pendingInsulin = try getPendingInsulin()
-        let shouldIncludePendingInsulin = pendingInsulin > 0
-        let prediction = try predictGlucose(using: .all, potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
-        let recommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
-        
-        guard recommendation != nil else {
-            return nil
-        }
+    
+    fileprivate func getTotalCobCorrectionAmount(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry? = nil, replacingCarbEntry replacedCarbEntry: StoredCarbEntry? = nil, considerPositiveVelocityAndRC: Bool, pendingInsulin: Double) throws -> Double? {
                 
-        guard !prediction.isEmpty else {
-            return recommendation // unable to differentiate between correction amounts,
-        }
-                                        
+        let shouldIncludePendingInsulin = pendingInsulin > 0
+        
         let carbAndInsulinPrediction = try predictGlucose(using: [.carbs, .insulin], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
         
         guard !carbAndInsulinPrediction.isEmpty else {
-            return recommendation // unable to differentiate between correction amounts
+            return nil
         }
         
         let carbOnlyPrediction = try predictGlucose(using: [.carbs], potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: false)
         
         guard !carbOnlyPrediction.isEmpty else {
-            return recommendation // unable to differentiate between correction amounts
+            return nil
         }
         
         // cobCorrection includes insulin when its effects are to reduce BG, but doesn't include it if it raises it (e.g., negative IOB)
@@ -1508,7 +1491,36 @@ extension LoopDataManager {
         
         let flatCobPrediction = cobPrediction.map{PredictedGlucoseValue(startDate: $0.startDate, quantity: cobPrediction.last!.quantity)}
         
-        guard let totalCobAmount = try recommendBolusValidatingDataRecency(forPrediction: flatCobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown)?.amount else {
+        return try recommendBolusValidatingDataRecency(forPrediction: flatCobPrediction, consideringPotentialCarbEntry: potentialCarbEntry, usage: .cobBreakdown)?.amount
+    }
+
+    
+    /// - Throws: LoopError.missingDataError
+    fileprivate func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry? = nil, replacingCarbEntry replacedCarbEntry: StoredCarbEntry? = nil, considerPositiveVelocityAndRC: Bool, pendingInsulin: Double, provideBreakdown: Bool) throws -> ManualBolusRecommendation? {
+        guard lastRequestedBolus == nil else {
+            // Don't recommend changes if a bolus was just requested.
+            // Sending additional pump commands is not going to be
+            // successful in any case.
+            return nil
+        }
+        
+        let shouldIncludePendingInsulin = pendingInsulin > 0
+        let prediction = try predictGlucose(using: .all, potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
+        let recommendation = try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
+        
+        guard recommendation != nil else {
+            return nil
+        }
+        
+        guard provideBreakdown else {
+            return recommendation
+        }
+
+        guard !prediction.isEmpty else {
+            return recommendation // unable to differentiate between correction amounts,
+        }
+        
+        guard let totalCobAmount = try getTotalCobCorrectionAmount(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, considerPositiveVelocityAndRC: considerPositiveVelocityAndRC, pendingInsulin: pendingInsulin) else {
             
             return recommendation // unable to differentiate between correction amounts
         }
@@ -2046,9 +2058,11 @@ extension LoopDataManager {
             
             if autoBolusCarbsEnabledAndActive {
                 do {
-                    if let bolusRecommendation = try recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: FeatureFlags.usePositiveMomentumAndRCForManualBoluses), let breakdown = bolusRecommendation.bolusBreakdown {
+                    let posVelocityAndRC = FeatureFlags.usePositiveMomentumAndRCForManualBoluses
+                    let pendingInsulin = try getPendingInsulin()
+                    if let recommendation = try recommendBolus(considerPositiveVelocityAndRC: posVelocityAndRC, pendingInsulin: pendingInsulin, provideBreakdown: false), let totalCobAmount = try getTotalCobCorrectionAmount(considerPositiveVelocityAndRC: posVelocityAndRC, pendingInsulin: pendingInsulin) {
                         
-                        let amount = min(bolusRecommendation.amount, volumeRounder()(min(iobHeadroom, breakdown.cobCorrectionAmount)))
+                        let amount = min(recommendation.amount, volumeRounder()(min(iobHeadroom, totalCobAmount)))
                         
                         if amount > 0 {
                             autoBolusCarbsAmount = amount
@@ -2345,7 +2359,7 @@ extension LoopDataManager {
 
         func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, considerPositiveVelocityAndRC: Bool) throws -> ManualBolusRecommendation? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
-            return try loopDataManager.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, considerPositiveVelocityAndRC: considerPositiveVelocityAndRC)
+            return try loopDataManager.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, considerPositiveVelocityAndRC: considerPositiveVelocityAndRC, pendingInsulin: loopDataManager.getPendingInsulin(), provideBreakdown: true)
         }
 
         func recommendBolusForManualGlucose(_ glucose: NewGlucoseSample, consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, considerPositiveVelocityAndRC: Bool) throws -> ManualBolusRecommendation? {
