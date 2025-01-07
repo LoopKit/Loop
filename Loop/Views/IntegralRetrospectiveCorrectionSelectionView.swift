@@ -27,9 +27,6 @@ public struct IntegralRetrospectiveCorrectionSelectionView: View {
                 Divider()
 
                 Toggle(NSLocalizedString("Enable Integral Retrospective Correction", comment: "Title for Integral Retrospective Correction toggle"), isOn: $isIntegralRetrospectiveCorrectionEnabled)
-                    .onChange(of: isIntegralRetrospectiveCorrectionEnabled) { newValue in
-                        UserDefaults.standard.integralRetrospectiveCorrectionEnabled = newValue
-                    }
                     .padding(.top, 20)
             }
             .padding()

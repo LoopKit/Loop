@@ -71,6 +71,8 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
     private var retrospectiveGlucoseDiscrepancies: [GlucoseChange]?
 
     private var totalRetrospectiveCorrection: HKQuantity?
+    
+    private var negativeInsulinDamper: Double?
 
     private var refreshContext = RefreshContext.all
 
@@ -111,6 +113,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         let reloadGroup = DispatchGroup()
         var glucoseSamples: [StoredGlucoseSample]?
         var totalRetrospectiveCorrection: HKQuantity?
+        var negativeInsulinDamper: Double?
 
         if self.refreshContext.remove(.glucose) != nil {
             reloadGroup.enter()
@@ -132,6 +135,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         deviceManager.loopManager.getLoopState { (manager, state) in
             self.retrospectiveGlucoseDiscrepancies = state.retrospectiveGlucoseDiscrepancies
             totalRetrospectiveCorrection = state.totalRetrospectiveCorrection
+            negativeInsulinDamper = state.negativeInsulinDamper
             self.glucoseChart.setPredictedGlucoseValues(state.predictedGlucoseIncludingPendingInsulin ?? [])
 
             do {
@@ -163,6 +167,9 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
             if let totalRetrospectiveCorrection = totalRetrospectiveCorrection {
                 self.totalRetrospectiveCorrection = totalRetrospectiveCorrection
+            }
+            if let negativeInsulinDamper = negativeInsulinDamper {
+                self.negativeInsulinDamper = negativeInsulinDamper
             }
 
             self.charts.prerender()
@@ -197,9 +204,16 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
     private var eventualGlucoseDescription: String?
 
-    private var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection, .suspend]
+    private var availableInputs: [PredictionInputEffect] = getAvailableInputs()
 
     private var selectedInputs = PredictionInputEffect.all
+    
+    private static func getAvailableInputs() -> [PredictionInputEffect] {
+        if UserDefaults.standard.negativeInsulinDamperEnabled {
+            return [.carbs, .insulin, .damper, .momentum, .retrospection, .suspend]
+        }
+        return [.carbs, .insulin, .momentum, .retrospection, .suspend]
+    }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         return Section.allCases.count
@@ -261,6 +275,20 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
         var subtitleText = input.localizedDescription(forGlucoseUnit: glucoseChart.glucoseUnit) ?? ""
 
+        if input == .damper, let negativeInsulinDamper = negativeInsulinDamper {
+            let formatter = NumberFormatter()
+            formatter.minimumIntegerDigits = 1
+            formatter.maximumFractionDigits = 1
+            formatter.maximumSignificantDigits = 2
+            
+            let damper = String(
+                format: NSLocalizedString("Damper Strength: %1$@%%", comment: "Format string describing damper strength. (1: damper strength percentage)"),
+                formatter.string(from: 100 * negativeInsulinDamper) ?? "?"
+            )
+            
+            subtitleText = String(format: "%@\n%@", subtitleText, damper)
+            
+        }
         if input == .retrospection,
             let lastDiscrepancy = retrospectiveGlucoseDiscrepancies?.last,
             let currentGlucose = deviceManager.glucoseStore.latestGlucose

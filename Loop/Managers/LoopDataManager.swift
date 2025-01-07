@@ -358,6 +358,13 @@ final class LoopDataManager {
             predictedGlucose = nil
         }
     }
+    
+    private var negativeInsulinDamper: Double? {
+        didSet {
+            predictedGlucose = nil
+        }
+    }
+    private var negativeInsulinDamperCachedBaseDate: Date = .distantPast
 
     /// When combining retrospective glucose discrepancies, extend the window slightly as a buffer.
     private let retrospectiveCorrectionGroupingIntervalMultiplier = 1.01
@@ -454,6 +461,7 @@ final class LoopDataManager {
         insulinEffect = nil
         insulinEffectIncludingPendingInsulin = nil
         predictedGlucose = nil
+        negativeInsulinDamper = nil
     }
 
     // MARK: - Background task management
@@ -995,6 +1003,64 @@ extension LoopDataManager {
         let earliestEffectDate = Date(timeInterval: .hours(-24), since: now())
         let nextCounteractionEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
         let insulinEffectStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-5))
+        
+        if negativeInsulinDamper == nil || nextCounteractionEffectDate != negativeInsulinDamperCachedBaseDate {
+            self.logger.debug("Recomputing negative insulin damper")
+            updateGroup.enter()
+            let lastDoseStartDate = nextCounteractionEffectDate.addingTimeInterval(.minutes(-15))
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: lastDoseStartDate, basalDosingEnd: lastDoseStartDate) { (result) -> Void in
+                switch result {
+                case .failure(let error):
+                    self.logger.error("Could not fetch insulin effects for damper: %{public}@", error.localizedDescription)
+                    self.negativeInsulinDamper = nil
+                    self.negativeInsulinDamperCachedBaseDate = .distantPast
+                    warnings.append(.fetchDataWarning(.negativeInsulinDamper(error: error)))
+                case .success(let effects):
+                    var posDeltaSum = 0.0
+                    effects.enumerated().forEach{
+                        if $0.offset > 0 {
+                            let delta = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter) - effects[$0.offset - 1].quantity.doubleValue(for: .milligramsPerDeciliter)
+                            posDeltaSum += max(0, delta)
+                        }
+                    }
+                    
+                    guard let insulinSensitivity = latestSettings.insulinSensitivitySchedule?.quantity(at: lastGlucoseDate),                    let basalRate = latestSettings.basalRateSchedule?.value(at: lastGlucoseDate) else {
+                        
+                        self.logger.error("Could not fetch ISF and/or basal rates for damper")
+                        self.negativeInsulinDamper = nil
+                        self.negativeInsulinDamperCachedBaseDate = .distantPast
+
+                        break
+                    }
+                    let model = self.doseStore.insulinModelProvider.model(for: self.pumpInsulinType)
+                    
+                    // anchorScale is set to 1 hour for rapid acting adult, and 44 minutes for ultra-rapid insulins
+                    let anchorScale: Double
+                    if let expModel = model as? ExponentialInsulinModel {
+                        anchorScale = 0.8 * expModel.peakActivityTime.hours
+                    } else {
+                        anchorScale = 1.0
+                    }
+                    
+                    // NID will change the final prediction so that positive changes will be multiplied by weight alpha
+                    // the long term slope will be marginalSlope
+                    // in the initial linear scaling region alpha will be anchorAlpha at anchorPoint
+                    // note that anchorPoint is unaffected by overrides (the changes cancel out)
+                    let marginalSlope = 0.05
+                    let anchorPoint = anchorScale * basalRate * insulinSensitivity.doubleValue(for: .milligramsPerDeciliter)
+                    let anchorAlpha = 0.75
+                    
+                    let alpha = LoopDataManager.calculateNegativeInsulinDamperAlpha(anchorAlpha, anchorPoint, marginalSlope, posDeltaSum)
+
+                    // alpha should never be less than marginalSlope
+                    self.negativeInsulinDamper = max(0, 1 - max(marginalSlope, alpha))
+                    self.negativeInsulinDamperCachedBaseDate = nextCounteractionEffectDate
+                }
+
+                updateGroup.leave()
+            }
+
+        }
 
         if glucoseMomentumEffect == nil {
             updateGroup.enter()
@@ -1014,7 +1080,8 @@ extension LoopDataManager {
         if insulinEffect == nil || insulinEffect?.first?.startDate ?? .distantFuture > insulinEffectStartDate {
             self.logger.debug("Recomputing insulin effects")
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: now()) { (result) -> Void in
+            let basalDosingEnd = now()
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: nil, basalDosingEnd: basalDosingEnd) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects: %{public}@", error.localizedDescription)
@@ -1030,7 +1097,7 @@ extension LoopDataManager {
 
         if insulinEffectIncludingPendingInsulin == nil {
             updateGroup.enter()
-            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
+            doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: nil, basalDosingEnd: nil) { (result) -> Void in
                 switch result {
                 case .failure(let error):
                     self.logger.error("Could not fetch insulin effects including pending insulin: %{public}@", error.localizedDescription)
@@ -1158,6 +1225,21 @@ extension LoopDataManager {
 
         return updatePredictedGlucoseAndRecommendedDose(with: dosingDecision)
     }
+    
+    static func calculateNegativeInsulinDamperAlpha(_ anchorAlpha: Double, _ anchorPoint: Double, _ marginalSlope: Double, _ posDeltaSum: Double) -> Double {
+        let linearScaleSlope = (1.0 - anchorAlpha)/anchorPoint // how alpha scales down in the linear scale region
+        
+        // the slope in the linear scale region of alpha * posDeltaSum is 1 - 2*linearScaleSlope*posDeltaSum.
+        // the transitionPoint is where we transition from linear scale region to marginalSlope. The slope is continuous at this point
+        let transitionPoint = (1 - marginalSlope) / (2 * linearScaleSlope)
+        
+        if posDeltaSum < transitionPoint { // linear scaling region
+            return 1 - linearScaleSlope * posDeltaSum
+        } else { // marginal slope region
+            let transitionValue = (1 - linearScaleSlope * transitionPoint) * transitionPoint
+            return (transitionValue + marginalSlope * (posDeltaSum - transitionPoint)) / posDeltaSum
+        }
+    }
 
     private func notify(forChange context: LoopUpdateContext) {
         NotificationCenter.default.post(name: .LoopDataUpdated,
@@ -1199,7 +1281,7 @@ extension LoopDataManager {
         // All outstanding potential insulin delivery
         return pendingTempBasalInsulin + pendingBolusAmount
     }
-
+    
     /// - Throws:
     ///     - LoopError.missingDataError
     ///     - LoopError.configurationError
@@ -1337,6 +1419,51 @@ extension LoopDataManager {
         }
 
         var prediction = LoopMath.predictGlucose(startingAt: glucose, momentum: momentum, effects: effects)
+        
+        if inputs.contains(.damper), let damper = negativeInsulinDamper {
+            let damperOnly = inputs.isSubset(of: [.damper])
+            if damperOnly {
+                prediction = try predictGlucose(
+                    startingAt: startingGlucoseOverride,
+                    using: settings.enabledEffects.subtracting(.damper),
+                    historicalInsulinEffect: insulinEffectOverride,
+                    insulinCounteractionEffects: insulinCounteractionEffectsOverride,
+                    historicalCarbEffect: carbEffectOverride,
+                    potentialBolus: potentialBolus,
+                    potentialCarbEntry: potentialCarbEntry,
+                    replacingCarbEntry: replacedCarbEntry,
+                    includingPendingInsulin: includingPendingInsulin,
+                    includingPositiveVelocityAndRC: includingPositiveVelocityAndRC)
+            }
+             
+            let alpha = 1 - damper
+            var dampedPrediction = [PredictedGlucoseValue]()
+            var value = 0.0
+            prediction.enumerated().forEach{
+                
+                if $0.offset == 0 {
+                    value = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter)
+                    dampedPrediction.append($0.element)
+                    return
+                }
+                let delta = $0.element.quantity.doubleValue(for: .milligramsPerDeciliter) - prediction[$0.offset - 1].quantity.doubleValue(for: .milligramsPerDeciliter)
+
+                if damperOnly {
+                    // we just want to display the effects of damper relative to everything else
+                    if delta > 0 {
+                        value -= damper * delta
+                    }
+                } else if delta > 0 {
+                    value += alpha * delta
+                } else {
+                    value += delta
+                }
+                dampedPrediction.append(PredictedGlucoseValue(startDate: $0.element.startDate, quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: value)))
+            }
+            
+            prediction = dampedPrediction
+        }
+
 
         // Dosing requires prediction entries at least as long as the insulin model duration.
         // If our prediction is shorter than that, then extend it here.
@@ -1367,7 +1494,7 @@ extension LoopDataManager {
         var insulinEffect: [GlucoseEffect]?
         let basalDosingEnd = includingPendingInsulin ? nil : now()
         updateGroup.enter()
-        doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, basalDosingEnd: basalDosingEnd) { result in
+        doseStore.getGlucoseEffects(start: insulinEffectStartDate, end: nil, doseEnd: nil, basalDosingEnd: basalDosingEnd) { result in
             switch result {
             case .failure(let error):
                 effectCalculationError.mutate { $0 = error }
@@ -1955,6 +2082,9 @@ protocol LoopState {
 
     /// The total corrective glucose effect from retrospective correction
     var totalRetrospectiveCorrection: HKQuantity? { get }
+    
+    /// The negative insulin damper - if present then is in the range [0,1]
+    var negativeInsulinDamper: Double? { get}
 
     /// Calculates a new prediction from the current data using the specified effect inputs
     ///
@@ -2078,6 +2208,11 @@ extension LoopDataManager {
         var totalRetrospectiveCorrection: HKQuantity? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return loopDataManager.retrospectiveCorrection.totalGlucoseCorrectionEffect
+        }
+        
+        var negativeInsulinDamper: Double? {
+            dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
+            return loopDataManager.negativeInsulinDamper
         }
 
         func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool) throws -> [PredictedGlucoseValue] {

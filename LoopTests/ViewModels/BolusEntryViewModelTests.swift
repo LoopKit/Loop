@@ -822,6 +822,8 @@ fileprivate class MockLoopState: LoopState {
     
     var totalRetrospectiveCorrection: HKQuantity?
     
+    var negativeInsulinDamper: Double?
+    
     var predictGlucoseValueResult: [PredictedGlucoseValue] = []
     func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool) throws -> [PredictedGlucoseValue] {
         return predictGlucoseValueResult
