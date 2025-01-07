@@ -39,9 +39,9 @@ public struct ExperimentRow: View {
 }
 
 public struct ExperimentsSettingsView: View {
-    @State private var isGlucoseBasedApplicationFactorEnabled = false
-    @State private var isIntegralRetrospectiveCorrectionEnabled = false
-    @State private var isNegativeInsulinDamperEnabled = false
+    @AppStorage(UserDefaults.Key.GlucoseBasedApplicationFactorEnabled.rawValue) private var isGlucoseBasedApplicationFactorEnabled = false
+    @AppStorage(UserDefaults.Key.IntegralRetrospectiveCorrectionEnabled.rawValue) private var isIntegralRetrospectiveCorrectionEnabled = false
+    @AppStorage(UserDefaults.Key.NegativeInsulinDamperEnabled.rawValue) private var isNegativeInsulinDamperEnabled = false
 
     var automaticDosingStrategy: AutomaticDosingStrategy
 
@@ -82,17 +82,12 @@ public struct ExperimentsSettingsView: View {
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear { // force loading the values from UserDefaults
-            isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
-            isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
-            isNegativeInsulinDamperEnabled = UserDefaults.standard.negativeInsulinDamperEnabled
-        }
     }
 }
 
 
 extension UserDefaults {
-    private enum Key: String {
+    fileprivate enum Key: String {
         case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
         case IntegralRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.integralRetrospectiveCorrectionEnabled"
         case NegativeInsulinDamperEnabled = "com.loopkit.algorithmExperiments.negativeInsulinDamperEnabled"

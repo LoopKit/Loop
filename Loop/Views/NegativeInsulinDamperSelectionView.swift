@@ -27,9 +27,6 @@ struct NegativeInsulinDamperSelectionView: View {
                Divider()
 
                Toggle(NSLocalizedString("Enable Negative Insulin Damper", comment: "Title for Negative Insulin Damper toggle"), isOn: $isNegativeInsulinDamperEnabled)
-                   .onChange(of: isNegativeInsulinDamperEnabled) { newValue in
-                       UserDefaults.standard.negativeInsulinDamperEnabled = newValue
-                   }
                    .padding(.top, 20)
            }
            .padding()
