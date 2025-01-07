@@ -1847,7 +1847,7 @@ extension LoopDataManager {
         suspendInsulinDeliveryEffect = suspendDoses.glucoseEffects(insulinModelProvider: doseStore.insulinModelProvider, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: insulinSensitivity).filterDateRange(startSuspend, endSuspend)
     }
 
-    fileprivate func getDosingRecommendation(dosingStrategy: AutomaticDosingStrategy, glucose: any GlucoseSampleValue, predictedGlucose: [PredictedGlucoseValue], iobHeadroom: Double, glucoseTargetRange: GlucoseRangeSchedule?, insulinSensitivity: InsulinSensitivitySchedule?, basalRateSchedule: BasalRateSchedule?, startDate: Date, bolusApplicationFactor: Double? = nil) -> AutomaticDoseRecommendation? {
+    fileprivate func getDosingRecommendation(dosingStrategy: AutomaticDosingStrategy, glucose: any GlucoseSampleValue, predictedGlucose: [PredictedGlucoseValue], iobHeadroom: Double, glucoseTargetRange: GlucoseRangeSchedule?, insulinSensitivity: InsulinSensitivitySchedule?, basalRateSchedule: BasalRateSchedule?, startDate: Date, bolusApplicationFactor: Double? = nil, volumeRounder: ((Double) -> Double)? = nil) -> AutomaticDoseRecommendation? {
         
         let rateRounder = { (_ rate: Double) in
             return self.delegate?.roundBasalRate(unitsPerHour: rate) ?? rate
@@ -1900,7 +1900,7 @@ extension LoopDataManager {
                 maxAutomaticBolus: maxAutomaticBolus,
                 partialApplicationFactor: effectiveBolusApplicationFactor * self.timeBasedDoseApplicationFactor,
                 lastTempBasal: lastTempBasal,
-                volumeRounder: volumeRounder(),
+                volumeRounder: volumeRounder ?? self.volumeRounder(),
                 rateRounder: rateRounder,
                 isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
             )
@@ -2060,21 +2060,27 @@ extension LoopDataManager {
             }
             
             let bolusApplicationFactor: Double?
+            let volumeRounder: ((Double) -> Double)?
 
             if autoBolusCarbsAmount > 0 {
                 switch settings.automaticDosingStrategy {
-                case .automaticBolus: bolusApplicationFactor = nil
+                case .automaticBolus:
+                    bolusApplicationFactor = nil
+                    volumeRounder = nil
                 case .tempBasalOnly:
                     // instead of temp basal, compare with automaticBolus with an adjusted bolusApplicationFactor reflecting 5 minutes of temp basal
+                    // we avoid rounding this value so we can accurately know whether the temp basal would give more or less insulin over 5 minutes
                     bolusApplicationFactor = 5.0/30.0
+                    volumeRounder = {$0}
                 }
             } else {
                 bolusApplicationFactor = nil
+                volumeRounder = nil
             }
                 
             let dosingStrategty = autoBolusCarbsAmount > 0 ? .automaticBolus : settings.automaticDosingStrategy
                         
-            dosingRecommendation = getDosingRecommendation(dosingStrategy: dosingStrategty, glucose: glucose, predictedGlucose: predictedGlucose, iobHeadroom: iobHeadroom, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivity, basalRateSchedule: basalRateSchedule, startDate: startDate, bolusApplicationFactor: bolusApplicationFactor)
+            dosingRecommendation = getDosingRecommendation(dosingStrategy: dosingStrategty, glucose: glucose, predictedGlucose: predictedGlucose, iobHeadroom: iobHeadroom, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivity, basalRateSchedule: basalRateSchedule, startDate: startDate, bolusApplicationFactor: bolusApplicationFactor, volumeRounder: volumeRounder)
             
             if autoBolusCarbsAmount > dosingRecommendation?.bolusUnits ?? 0.0 {
                 logger.info("Recommendation is to auto-bolus carbs as it will give more insulin")
