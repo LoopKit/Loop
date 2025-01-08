@@ -13,20 +13,20 @@ import LoopKitUI
 class RootNavigationController: UINavigationController {
 
     /// Its root view controller is always StatusTableViewController after loading
-    var statusTableViewController: StatusTableViewController! {
+    var statusTableViewController: StatusTableViewController? {
         return viewControllers.first as? StatusTableViewController
     }
     
     func navigate(to deeplink: Deeplink) {
         switch deeplink {
         case .carbEntry:
-            statusTableViewController.presentCarbEntryScreen(nil)
+            statusTableViewController?.presentCarbEntryScreen(nil)
         case .preMeal:
-            statusTableViewController.presentPresets()
+            statusTableViewController?.presentPresets()
         case .bolus:
-            statusTableViewController.presentBolusScreen()
+            statusTableViewController?.presentBolusScreen()
         case .customPresets:
-            statusTableViewController.presentPresets()
+            statusTableViewController?.presentPresets()
         }
     }
 
@@ -41,7 +41,7 @@ class RootNavigationController: UINavigationController {
                 popToRootViewController(animated: false)
             }
         default:
-            statusTableViewController.restoreUserActivityState(activity)
+            statusTableViewController?.restoreUserActivityState(activity)
         }
     }
 
