@@ -36,8 +36,8 @@ struct CreatingYourOwnPresetsContentView: View {
             
             Text("You can manage all presets by tapping the Presets button on the toolbar.", comment: "Creating your own presets training content, managing presets, paragraph 1")
             
-            if Image.imageExists("PresetsTraining1") {
-                Image("PresetsTraining1")
+            if let image = Image("PresetsTraining1") {
+                image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .accessibilityHidden(true)
@@ -53,8 +53,8 @@ struct CreatingYourOwnPresetsContentView: View {
                 Text("(if applicable) the glucose chart will show your adjusted correction range", comment: "Creating your own presets training content, managing presets, paragraph 2, bullet 3")
             }
             
-            if Image.imageExists("PresetsTraining2") {
-                Image("PresetsTraining2")
+            if let image = Image("PresetsTraining2") {
+                image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .accessibilityHidden(true)

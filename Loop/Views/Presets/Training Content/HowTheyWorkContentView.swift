@@ -47,8 +47,8 @@ struct HowTheyWorkContentView: View {
             Text("Adjusting Overall Insulin", comment: "How presets work training content, adjusting overall insulin, subtitle 1")
                 .font(.title2.bold())
             
-            if Image.imageExists("PresetsTraining3") {
-                Image("PresetsTraining3")
+            if let image = Image("PresetsTraining3") {
+                image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .accessibilityHidden(true)
@@ -93,8 +93,8 @@ struct HowTheyWorkContentView: View {
             Text("Adjusting the Correction Range", comment: "How presets work training content, adjusting correction range, subtitle 1")
                 .font(.title2.bold())
             
-            if Image.imageExists("PresetsTraining4") {
-                Image("PresetsTraining4")
+            if let image = Image("PresetsTraining4") {
+                image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .accessibilityHidden(true)

@@ -46,9 +46,11 @@ struct PresetsAndIllnessContentView: View {
     @ViewBuilder
     var stepOneView: some View {
         Text("Physical stressors can cause your glucose to rise and sickness is a common example. Your healthcare provider can help you make a personal plan for sickness. The following is one example of using presets to manage an illness.", comment: "Presets and illness training content, paragraph 1")
+            .fixedSize(horizontal: false, vertical: true)
             .bold()
         
         Text("Let’s imagine Paloma Porpoise notices her glucose is higher than usual and wants to create a preset to help keep her glucose in range while she is sick.", comment: "Presets and illness training content, paragraph 2")
+            .fixedSize(horizontal: false, vertical: true)
         
         TherapySettingsExampleView(
             title: NSLocalizedString("Paloma’s Therapy Settings", comment: "Presets and illness training content, therapy settings example, title"),
@@ -115,6 +117,7 @@ struct PresetsAndIllnessContentView: View {
                 .font(.title2.bold())
             
             Text("Let’s imagine Paloma decides to eat a meal of 31g carbs. How will her preset impact her bolus recommendation?", comment: "Presets and illness training content, impact on bolusing, paragraph 1")
+                .fixedSize(horizontal: false, vertical: true)
         }
         
         Text("While a preset is ON, the modified basal rates, carb ratio and insulin sensitivity factor (ISF) are applied for every bolus.", comment: "Presets and illness training content, impact on bolusing, paragraph 2")

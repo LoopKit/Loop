@@ -84,6 +84,7 @@ struct PresetDetentView: View {
             case .end:
                 Button("End Preset") {
                     viewModel.endPreset()
+                    dismiss()
                 }
                 .buttonStyle(ActionButtonStyle(.destructive))
                 
@@ -142,9 +143,6 @@ struct PresetDetentView: View {
             .padding(.top)
             .padding(16)
             .presentationHuggingDetent()
-        }
-        .onChange(of: viewModel.activePreset) { _, _ in
-            dismiss()
         }
     }
 }

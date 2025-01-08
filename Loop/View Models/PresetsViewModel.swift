@@ -184,11 +184,53 @@ enum SelectablePreset: Hashable, Identifiable {
 public class PresetsViewModel {
 
     // MARK: Training
-    @ObservationIgnored @AppStorage("hasCompletedPresetsTraining") var hasCompletedTraining: Bool = false
-    @ObservationIgnored @AppStorage("presetsSortOrder") var selectedSortOption: PresetSortOption = .name
-    @ObservationIgnored @AppStorage("presetsSortDirectionReversed") var presetsSortAscending: Bool = true
+    
+    // This double property is needed to allow AppStorage to be observed
+    @ObservationIgnored @AppStorage("hasCompletedPresetsTraining") private var _hasCompletedTraining: Bool = false
+    @ObservationIgnored
+    var hasCompletedTraining: Bool {
+        get {
+            access(keyPath: \.hasCompletedTraining)
+            return _hasCompletedTraining
+        }
+        set {
+            withMutation(keyPath: \.hasCompletedTraining) {
+                _hasCompletedTraining = newValue
+            }
+        }
+    }
+    
+    // This double property is needed to allow AppStorage to be observed
+    @ObservationIgnored @AppStorage("presetsSortOrder") private var _selectedSortOption: PresetSortOption = .name
+    @ObservationIgnored
+    var selectedSortOption: PresetSortOption {
+        get {
+            access(keyPath: \.selectedSortOption)
+            return _selectedSortOption
+        }
+        set {
+            withMutation(keyPath: \.selectedSortOption) {
+                _selectedSortOption = newValue
+            }
+        }
+    }
+    
+    // This double property is needed to allow AppStorage to be observed
+    @ObservationIgnored @AppStorage("presetsSortDirectionReversed") private var _presetsSortAscending: Bool = true
+    @ObservationIgnored
+    var presetsSortAscending: Bool {
+        get {
+            access(keyPath: \.selectedSortOption)
+            return _presetsSortAscending
+        }
+        set {
+            withMutation(keyPath: \.selectedSortOption) {
+                _presetsSortAscending = newValue
+            }
+        }
+    }
 
-    @ObservationIgnored var correctionRangeOverrides: CorrectionRangeOverrides?
+    var correctionRangeOverrides: CorrectionRangeOverrides?
     
     let temporaryPresetsManager: TemporaryPresetsManager
 

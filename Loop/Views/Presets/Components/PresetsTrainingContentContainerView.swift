@@ -55,7 +55,6 @@ struct PresetsTrainingContentContainerView: View {
         } message: {
             Text("Ending now will require you to restart training before creating new presets.\n\nDo you want to end training?", comment: "End presets training alert message")
         }
-
     }
     
     private func content(withSpacer: Bool = false) -> some View {
@@ -101,5 +100,6 @@ struct PresetsTrainingContentContainerView: View {
             }
         }
         .padding(.horizontal, 16)
+        .padding(.bottom)
     }
 }
