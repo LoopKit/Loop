@@ -82,12 +82,14 @@ struct PresetDetentView: View {
                 }
                 .buttonStyle(ActionButtonStyle())
                 .disabled(viewModel.activePreset != nil && preset.id != viewModel.activePreset?.id)
+                .accessibilityIdentifier("button_startPreset")
             case .end:
                 Button("End Preset") {
                     viewModel.endPreset()
                     dismiss()
                 }
                 .buttonStyle(ActionButtonStyle(.destructive))
+                .accessibilityIdentifier("button_endPreset")
                 
                 if preset.duration != .untilCarbsEntered {
                     NavigationLink("Adjust Preset Duration") {
@@ -96,6 +98,7 @@ struct PresetDetentView: View {
                         }
                     }
                     .buttonStyle(ActionButtonStyle(.tertiary))
+                    .accessibilityIdentifier("button_adjustPresetDuration")
                 }
             }
             
@@ -104,6 +107,7 @@ struct PresetDetentView: View {
             }
             .tint(.accentColor)
             .fontWeight(.semibold)
+            .accessibilityIdentifier("button_close")
         }
     }
     

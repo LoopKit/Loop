@@ -371,6 +371,7 @@ struct BolusEntryView: View {
         .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
         .disabled(viewModel.enacting)
         .padding()
+        .accessibilityIdentifier("button_bolusAction")
     }
 
     private func alert(for alert: BolusEntryViewModel.Alert) -> SwiftUI.Alert {
