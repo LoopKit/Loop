@@ -69,7 +69,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     var criticalEventLogExportManager: CriticalEventLogExportManager!
     
-    var settingsViewModel: SettingsViewModel!
     var statusTableViewModel: StatusTableViewModel!
     
     lazy private var cancellables = Set<AnyCancellable>()
@@ -241,8 +240,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         onboardingManager.$isComplete
             .merge(with: onboardingManager.$isSuspended)
-            .sink { [weak self] _ in
+            .sink { [weak self] isComplete in
                 Task { @MainActor in
+                    self?.statusTableViewModel.settingsViewModel.isOnboardingComplete = isComplete
                     self?.refreshContext.update(with: .status)
                     await self?.reloadData(animated: true)
                 }
@@ -932,7 +932,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
 
                 if override.isActive() {
-                    if let preset = settingsViewModel.presetsViewModel.allPresets.first(where: { $0.id == override.presetId }), case .preMeal(_, _) = preset {
+                    if let preset = statusTableViewModel.settingsViewModel.presetsViewModel.allPresets.first(where: { $0.id == override.presetId }), case .preMeal(_, _) = preset {
                         cell.subtitleLabel.text = NSLocalizedString("on until carbs added", comment: "The format for the description of a premeal preset end date")
                     } else {
                         switch override.duration {
@@ -1188,7 +1188,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section)! {
         case .presets:
-            statusTableViewModel.pendingPreset = settingsViewModel.presetsViewModel.activePreset
+            statusTableViewModel.pendingPreset = statusTableViewModel.settingsViewModel.presetsViewModel.activePreset
         case .alertWarning:
             if alertPermissionsChecker.showWarning {
                 tableView.deselectRow(at: indexPath, animated: true)
@@ -1438,7 +1438,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     func presentPresets() {
         let hostingController = DismissibleHostingController(
-            rootView: PresetsView(viewModel: settingsViewModel.presetsViewModel)
+            rootView: PresetsView(viewModel: statusTableViewModel.settingsViewModel.presetsViewModel)
                 .onAppear { self.isShowingPresets = true }
                 .onDisappear { self.isShowingPresets = false }
                 .environmentObject(deviceManager.displayGlucosePreference)
@@ -1455,7 +1455,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     func presentSettings() {
         let hostingController = DismissibleHostingController(
-            rootView: SettingsView(viewModel: settingsViewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
+            rootView: SettingsView(viewModel: statusTableViewModel.settingsViewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucosePreference)
                 .environment(\.appName, Bundle.main.bundleDisplayName)
                 .environment(\.isInvestigationalDevice, FeatureFlags.isInvestigationalDevice)

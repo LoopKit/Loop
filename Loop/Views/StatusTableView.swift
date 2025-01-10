@@ -32,12 +32,11 @@ private struct WrappedStatusTableViewController: UIViewControllerRepresentable {
     private let doseStore: DoseStore
     private let criticalEventLogExportManager: CriticalEventLogExportManager
     private let bluetoothStateManager: BluetoothStateManager
-    private let settingsViewModel: SettingsViewModel
     private let statusTableViewModel: StatusTableViewModel
     
     let viewController: StatusTableViewController
     
-    init(alertPermissionsChecker: AlertPermissionsChecker, alertMuter: AlertMuter, automaticDosingStatus: AutomaticDosingStatus, deviceDataManager: DeviceDataManager, onboardingManager: OnboardingManager, supportManager: SupportManager, testingScenariosManager: TestingScenariosManager?, settingsManager: SettingsManager, temporaryPresetsManager: TemporaryPresetsManager, loopDataManager: LoopDataManager, diagnosticReportGenerator: DiagnosticReportGenerator, simulatedData: SimulatedData, analyticsServicesManager: AnalyticsServicesManager, servicesManager: ServicesManager, carbStore: CarbStore, doseStore: DoseStore, criticalEventLogExportManager: CriticalEventLogExportManager, bluetoothStateManager: BluetoothStateManager, settingsViewModel: SettingsViewModel, statusTableViewModel: StatusTableViewModel) {
+    init(alertPermissionsChecker: AlertPermissionsChecker, alertMuter: AlertMuter, automaticDosingStatus: AutomaticDosingStatus, deviceDataManager: DeviceDataManager, onboardingManager: OnboardingManager, supportManager: SupportManager, testingScenariosManager: TestingScenariosManager?, settingsManager: SettingsManager, temporaryPresetsManager: TemporaryPresetsManager, loopDataManager: LoopDataManager, diagnosticReportGenerator: DiagnosticReportGenerator, simulatedData: SimulatedData, analyticsServicesManager: AnalyticsServicesManager, servicesManager: ServicesManager, carbStore: CarbStore, doseStore: DoseStore, criticalEventLogExportManager: CriticalEventLogExportManager, bluetoothStateManager: BluetoothStateManager, statusTableViewModel: StatusTableViewModel) {
         self.alertPermissionsChecker = alertPermissionsChecker
         self.alertMuter = alertMuter
         self.automaticDosingStatus = automaticDosingStatus
@@ -56,7 +55,6 @@ private struct WrappedStatusTableViewController: UIViewControllerRepresentable {
         self.doseStore = doseStore
         self.criticalEventLogExportManager = criticalEventLogExportManager
         self.bluetoothStateManager = bluetoothStateManager
-        self.settingsViewModel = settingsViewModel
         self.statusTableViewModel = statusTableViewModel
         
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle(for: StatusTableViewController.self))
@@ -78,7 +76,6 @@ private struct WrappedStatusTableViewController: UIViewControllerRepresentable {
         statusTableViewController.carbStore = carbStore
         statusTableViewController.doseStore = doseStore
         statusTableViewController.criticalEventLogExportManager = criticalEventLogExportManager
-        statusTableViewController.settingsViewModel = settingsViewModel
         statusTableViewController.statusTableViewModel = statusTableViewModel
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
         
@@ -182,7 +179,6 @@ struct StatusTableView: View {
             doseStore: viewModel.doseStore,
             criticalEventLogExportManager: viewModel.criticalEventLogExportManager,
             bluetoothStateManager: viewModel.bluetoothStateManager,
-            settingsViewModel: viewModel.settingsViewModel,
             statusTableViewModel: viewModel
         )
     }

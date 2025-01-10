@@ -78,7 +78,7 @@ class SettingsViewModel {
     let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     let therapySettings: () -> TherapySettings
     let sensitivityOverridesEnabled: Bool
-    let isOnboardingComplete: Bool
+    var isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
     let presetHistory: TemporaryScheduleOverrideHistory
 
