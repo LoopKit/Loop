@@ -368,7 +368,8 @@ class SimpleBolusViewModel: ObservableObject {
                                                        wasUserEntered: true,
                                                        syncIdentifier: UUID().uuidString)
             do {
-                self.dosingDecision?.manualGlucoseSample = try await delegate.saveGlucose(sample: manualGlucoseSample)
+                let storedManualGlucoseSample = try await delegate.saveGlucose(sample: manualGlucoseSample)
+                self.dosingDecision?.manualGlucoseSample = storedManualGlucoseSample
             } catch {
                 self.presentAlert(.manualGlucoseEntryPersistenceFailure)
                 self.log.error("Failed to add manual glucose entry: %{public}@", String(describing: error))
