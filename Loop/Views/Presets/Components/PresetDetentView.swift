@@ -78,6 +78,7 @@ struct PresetDetentView: View {
             case .start:
                 Button("Start Preset") {
                     viewModel.startPreset(preset)
+                    dismiss()
                 }
                 .buttonStyle(ActionButtonStyle())
                 .disabled(viewModel.activePreset != nil && preset.id != viewModel.activePreset?.id)
@@ -105,6 +106,8 @@ struct PresetDetentView: View {
             .fontWeight(.semibold)
         }
     }
+    
+    @State var sheetContentHeight: Double = 0
     
     var body: some View {
         NavigationStack {
@@ -142,7 +145,8 @@ struct PresetDetentView: View {
             .toolbar(.hidden)
             .padding(.top)
             .padding(16)
-            .presentationHuggingDetent()
+            .readContentHeight(to: $sheetContentHeight)
         }
+        .sheetDetent(height: sheetContentHeight)
     }
 }

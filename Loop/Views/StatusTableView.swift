@@ -194,15 +194,18 @@ struct StatusTableView: View {
     
     func isDisabled(action: ToolbarAction) -> Bool {
         switch action {
-        case .addCarbs, .bolus, .settings:
+        case .addCarbs, .bolus, .settings, .presets:
             false
-        case .presets:
-            !viewModel.onboardingManager.isComplete
         }
     }
     
     var body: some View {
         wrappedView
+            .onChange(of: viewModel.settingsViewModel.presetsViewModel.activePreset) { _, _ in
+                Task {
+                    await viewController.reloadData(animated: true)
+                }
+            }
             .sheet(item: $viewModel.pendingPreset) { _ in
                 PresetDetentView(
                     viewModel: viewModel.settingsViewModel.presetsViewModel

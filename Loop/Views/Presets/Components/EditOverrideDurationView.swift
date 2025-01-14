@@ -61,7 +61,7 @@ struct EditOverrideDurationView: View {
                     DatePicker("On until", selection: $dateSelection, displayedComponents: .hourAndMinute)
                         .padding(6)
                         .padding(.leading, 10)
-                        .background(Color.white.cornerRadius(10))
+                        .background(Color(UIColor.systemBackground).cornerRadius(10))
                     
                     Spacer()
                 }
@@ -73,8 +73,7 @@ struct EditOverrideDurationView: View {
                 }
                 .buttonStyle(ActionButtonStyle())
                 .padding([.top, .horizontal])
-                .background(Color.white)
-                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: -4)
+                .background(Color(UIColor.secondarySystemBackground))
                 .disabled(buttonDisabled)
             }
         }

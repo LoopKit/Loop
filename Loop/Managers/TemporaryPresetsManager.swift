@@ -123,6 +123,14 @@ class TemporaryPresetsManager {
             }
             
             overrideHistory.recordOverride(preMealOverride)
+
+            if let newPreset = preMealOverride {
+                for observer in self.presetActivationObservers {
+                    observer.presetActivated(context: newPreset.context, duration: newPreset.duration)
+                }
+                
+                scheduleClearOverride(override: newPreset)
+            }
             
             notify(forChange: .preferences)
         }

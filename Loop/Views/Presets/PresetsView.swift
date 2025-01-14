@@ -95,8 +95,7 @@ struct PresetsView: View {
                             Button(action: {}) {
                                 Image(systemName: "plus")
                             }
-//                            .disabled(!viewModel.hasCompletedTraining)
-                            .disabled(true) // [LOOP-5055] Revert this after phase 1 of presets 2.0. https://tidepool.atlassian.net/browse/LOOP-5055?focusedCommentId=61276
+                            .disabled(!viewModel.hasCompletedTraining)
                         }
 
                         LazyVStack(spacing: 12) {
