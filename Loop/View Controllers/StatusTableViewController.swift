@@ -240,11 +240,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         onboardingManager.$isComplete
             .merge(with: onboardingManager.$isSuspended)
-            .sink { [weak self] isComplete in
+            .sink { [weak self] _ in
+                guard let self else { return }
                 Task { @MainActor in
-                    self?.statusTableViewModel.settingsViewModel.isOnboardingComplete = isComplete
-                    self?.refreshContext.update(with: .status)
-                    await self?.reloadData(animated: true)
+                    self.statusTableViewModel.settingsViewModel.isOnboardingComplete = self.onboardingManager.isComplete
+                    self.refreshContext.update(with: .status)
+                    await self.reloadData(animated: true)
                 }
             }
             .store(in: &cancellables)
