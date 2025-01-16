@@ -1052,7 +1052,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 cell.selectionStyle = .none
                 cell.backgroundColor = .secondarySystemBackground
                 cell.titleLabel.text = nil
+                cell.titleLabel.textColor = .label
+                cell.titleLabel.font = .systemFont(ofSize: 15, weight: .bold)
                 cell.subtitleLabel.text = nil
+                cell.subtitleLabel.textColor = .secondaryLabel
+                cell.subtitleLabel.font = .systemFont(ofSize: 15, weight: .bold)
                 cell.accessoryView = nil
                 return cell
             }
@@ -1107,7 +1111,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     cell.iconImageView.contentMode = .scaleAspectFit
                     cell.iconImageView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 28)
                     cell.titleLabel.text = NSLocalizedString("Setup Incomplete", comment: "The title of the cell indicating that onboarding is suspended")
+                    cell.titleLabel.textColor = .label
+                    cell.titleLabel.font = .systemFont(ofSize: 15, weight: .bold)
                     cell.subtitleLabel.text = NSLocalizedString("Tap to Resume", comment: "The subtitle of the cell displaying an action to resume onboarding")
+                    cell.subtitleLabel.textColor = .secondaryLabel
+                    cell.subtitleLabel.font = .systemFont(ofSize: 15, weight: .bold)
                     cell.accessoryView = nil
                     return cell
                 case .recommendManualGlucoseEntry:
