@@ -30,18 +30,11 @@ public struct AutoBolusCarbsSelectionView: View {
                 Divider()
 
                 Toggle(NSLocalizedString("Auto-Bolus Carbs Enabled", comment: "Title for Auto-Bolus Carbs Enabled toggle"), isOn: $isAutoBolusCarbsEnabled)
-                    .onChange(of: isAutoBolusCarbsEnabled) { newValue in
-                        UserDefaults.standard.autoBolusCarbsEnabled = newValue
-                    }
                     .padding(.top, 20)
                 
                 Toggle(NSLocalizedString("Auto-Bolus Carbs Active by Default", comment: "Title for Auto-Bolus Carbs Active by Default toggle"), isOn: $autoBolusCarbsActiveByDefault)
-                    .onChange(of: autoBolusCarbsActiveByDefault) { newValue in
-                        UserDefaults.standard.autoBolusCarbsActiveByDefault = newValue
-                    }
                     .padding(.top, 20)
-                // in the future consider disabling unless available
-//                    .disabled(isAutoBolusCarbsAvailable)
+                    .disabled(!isAutoBolusCarbsEnabled)
             }
             .padding()
         }

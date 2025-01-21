@@ -2246,7 +2246,6 @@
 		43F5C2CF1B92A2ED003EB13D /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				12F04F002D197907002B2121 /* AutoBolusCarbsSelectionView.swift */,
 				1452F4AA2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift */,
 				B4001CED28CBBC82002FB414 /* AlertManagementView.swift */,
 				897A5A9524C2175B00C4E71D /* BolusEntryView.swift */,
@@ -2279,6 +2278,7 @@
 				C1AF062229426300002C1B19 /* ManualGlucoseEntryRow.swift */,
 				DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */,
 				DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */,
+				12F04F002D197907002B2121 /* AutoBolusCarbsSelectionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
