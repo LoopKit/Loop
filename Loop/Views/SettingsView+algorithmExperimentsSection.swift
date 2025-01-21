@@ -39,11 +39,11 @@ public struct ExperimentRow: View {
 }
 
 public struct ExperimentsSettingsView: View {
-    @State private var isGlucoseBasedApplicationFactorEnabled = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
-    @State private var isIntegralRetrospectiveCorrectionEnabled = UserDefaults.standard.integralRetrospectiveCorrectionEnabled
-    @State private var isAutoBolusCarbsAvailable = UserDefaults.standard.autoBolusCarbsEnabled
-    @State private var autoBolusCarbsActiveByDefault = UserDefaults.standard.autoBolusCarbsActiveByDefault
-    
+    @AppStorage(UserDefaults.Key.GlucoseBasedApplicationFactorEnabled.rawValue) private var isGlucoseBasedApplicationFactorEnabled = false
+    @AppStorage(UserDefaults.Key.IntegralRetrospectiveCorrectionEnabled.rawValue) private var isIntegralRetrospectiveCorrectionEnabled = false
+    @AppStorage(UserDefaults.Key.AutoBolusCarbsEnabled.rawValue) private var isAutoBolusCarbsAvailable = false
+    @AppStorage(UserDefaults.Key.AutoBolusCarbsActiveByDefault.rawValue) private var autoBolusCarbsActiveByDefault = false
+
     var automaticDosingStrategy: AutomaticDosingStrategy
 
     public var body: some View {
@@ -88,7 +88,7 @@ public struct ExperimentsSettingsView: View {
 
 
 extension UserDefaults {
-    private enum Key: String {
+    fileprivate enum Key: String {
         case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
         case IntegralRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.integralRetrospectiveCorrectionEnabled"
         case AutoBolusCarbsEnabled = "com.loopkit.algorithmExperiments.autoBolusCarbsEnabled"
