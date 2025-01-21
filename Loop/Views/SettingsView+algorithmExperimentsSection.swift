@@ -85,9 +85,24 @@ public struct ExperimentsSettingsView: View {
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: isGlucoseBasedApplicationFactorEnabled) { _ in
+            NotificationCenter.default.post(name: .AlgorithmExperimentsChanged, object: UserDefaults.standard, userInfo: nil)
+        }
+        .onChange(of: isIntegralRetrospectiveCorrectionEnabled) { _ in
+            NotificationCenter.default.post(name: .AlgorithmExperimentsChanged, object: UserDefaults.standard, userInfo: nil)
+        }
+        .onChange(of: isAutoBolusCarbsEnabled) { _ in
+            NotificationCenter.default.post(name: .AlgorithmExperimentsChanged, object: UserDefaults.standard, userInfo: nil)
+        }
+        .onChange(of: autoBolusCarbsActiveByDefault) { _ in
+            NotificationCenter.default.post(name: .AlgorithmExperimentsChanged, object: UserDefaults.standard, userInfo: nil)
+        }
     }
 }
 
+extension Notification.Name {
+    static let AlgorithmExperimentsChanged = Notification.Name(rawValue:  "com.loopKit.notification.AlgorithmExperimentsChanged")
+}
 
 extension UserDefaults {
     fileprivate enum Key: String {

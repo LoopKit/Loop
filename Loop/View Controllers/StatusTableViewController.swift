@@ -42,9 +42,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
     var alertMuter: AlertMuter!
 
     var supportManager: SupportManager!
-
+    
     lazy private var cancellables = Set<AnyCancellable>()
-
+    
     override func viewDidLoad() {
 
         super.viewDidLoad()
@@ -114,6 +114,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 DispatchQueue.main.async {
                     self?.refreshContext.update(with: .insulin)
                     self?.reloadData(animated: true)
+                }
+            },
+            
+            notificationCenter.addObserver(forName: .AlgorithmExperimentsChanged, object: UserDefaults.standard, queue: nil) { [weak self] (notification: Notification) in
+                DispatchQueue.main.async {
+                    self?.refreshContext.update(with: .status)
+                    self?.reloadData()
                 }
             },
         ]
@@ -601,7 +608,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             } else {
                 self.currentCOBDescription = nil
             }
-            // FIXME need to trigger an update of this value when the UserDefaults are changed
+            
             self.currentAutoBolusCarbsActive = self.deviceManager.loopManager.autoBolusCarbsEnabledAndActive
 
             self.tableView.beginUpdates()
@@ -991,7 +998,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.glucoseChart(withFrame: frame)?.view
                 })
-                cell.setTitleLabelText(label: NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
+                cell.setTitleLabelText(label:  NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
+
                 cell.doesNavigate = automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
@@ -1008,9 +1016,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     return self?.statusCharts.cobChart(withFrame: frame)?.view
                 })
                 
-                let label = NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph");
-                
-                // FIXME need to put in place a proper image indicating AutoBolusCarbs
+                let label = NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph")
+                                
                 if currentAutoBolusCarbsActive {
                     cell.setTitleLabelText(label: String(format: "%@ %@", label, "🔸"))
                 } else {
@@ -1154,6 +1161,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 } else {
                     cell.setSubtitleLabel(label: nil)
                 }
+                
                 cell.doesNavigate = automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 if let currentIOB = currentIOBDescription {
@@ -1180,7 +1188,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 
                 let label = NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph");
                 
-                // FIXME need to put in place a proper image indicating AutoBolusCarbs
                 if currentAutoBolusCarbsActive {
                     cell.setTitleLabelText(label: String(format: "%@ %@", label, "🔸"))
                 } else {
