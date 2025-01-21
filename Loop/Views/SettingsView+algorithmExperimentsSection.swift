@@ -21,15 +21,17 @@ extension SettingsView {
 
 public struct ExperimentRow: View {
     var name: String
-    var enabled: Bool
+    var enabled: Bool?
 
     public var body: some View {
         HStack {
             Text(name)
                 .foregroundColor(.primary)
             Spacer()
-            Text(enabled ? "On" : "Off")
-                .foregroundColor(enabled ? .red : .secondary)
+            if let enabled = enabled {
+                Text(enabled ? "On" : "Off")
+                    .foregroundColor(enabled ? .red : .secondary)
+            }
         }
         .padding()
         .background(Color(UIColor.secondarySystemBackground))
@@ -41,7 +43,7 @@ public struct ExperimentRow: View {
 public struct ExperimentsSettingsView: View {
     @AppStorage(UserDefaults.Key.GlucoseBasedApplicationFactorEnabled.rawValue) private var isGlucoseBasedApplicationFactorEnabled = false
     @AppStorage(UserDefaults.Key.IntegralRetrospectiveCorrectionEnabled.rawValue) private var isIntegralRetrospectiveCorrectionEnabled = false
-    @AppStorage(UserDefaults.Key.AutoBolusCarbsEnabled.rawValue) private var isAutoBolusCarbsAvailable = false
+    @AppStorage(UserDefaults.Key.AutoBolusCarbsEnabled.rawValue) private var isAutoBolusCarbsEnabled = false
     @AppStorage(UserDefaults.Key.AutoBolusCarbsActiveByDefault.rawValue) private var autoBolusCarbsActiveByDefault = false
 
     var automaticDosingStrategy: AutomaticDosingStrategy
@@ -73,10 +75,10 @@ public struct ExperimentsSettingsView: View {
                         name: NSLocalizedString("Integral Retrospective Correction", comment: "Title of integral retrospective correction experiment"),
                         enabled: isIntegralRetrospectiveCorrectionEnabled)
                 }
-                NavigationLink(destination: AutoBolusCarbsSelectionView(isAutoBolusCarbsEnabled: $isAutoBolusCarbsAvailable, autoBolusCarbsActiveByDefault: $autoBolusCarbsActiveByDefault)) {
+                NavigationLink(destination: AutoBolusCarbsSelectionView(isAutoBolusCarbsEnabled: $isAutoBolusCarbsEnabled, autoBolusCarbsActiveByDefault: $autoBolusCarbsActiveByDefault)) {
                     ExperimentRow(
                         name: NSLocalizedString("Auto-Bolus Carbs", comment: "Title of auto-bolus carbs experiment"),
-                        enabled: isAutoBolusCarbsAvailable)
+                        enabled: isAutoBolusCarbsEnabled)
                 }
                 Spacer()
             }
@@ -112,7 +114,7 @@ extension UserDefaults {
             set(newValue, forKey: Key.IntegralRetrospectiveCorrectionEnabled.rawValue)
         }
     }
-    
+            
     var autoBolusCarbsEnabled: Bool {
         get {
             bool(forKey: Key.AutoBolusCarbsEnabled.rawValue) as Bool

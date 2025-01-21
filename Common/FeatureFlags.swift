@@ -39,8 +39,6 @@ struct FeatureFlagConfiguration: Decodable {
     let profileExpirationSettingsViewEnabled: Bool
     let missedMealNotifications: Bool
     let allowAlgorithmExperiments: Bool
-    let correctionWithCarbBolus: Bool
-    let bgCorrectionWithCarbBolus: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -232,18 +230,6 @@ struct FeatureFlagConfiguration: Decodable {
         self.allowAlgorithmExperiments = true
         #else
         self.allowAlgorithmExperiments = false
-        #endif
-        
-        #if DISABLE_CORRECTION_WITH_CARB_BOLUS
-        self.correctionWithCarbBolus = false
-        #else
-        self.correctionWithCarbBolus = true
-        #endif
-        
-        #if DISABLE_BG_CORRECTION_WITH_CARB_BOLUS
-        self.bgCorrectionWithCarbBolus = false
-        #else
-        self.bgCorrectionWithCarbBolus = true
         #endif
     }
 }

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		12F04F012D19791B002B2121 /* AutoBolusCarbsSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F04F002D197907002B2121 /* AutoBolusCarbsSelectionView.swift */; };
+		12F4D9C82D4017D400FAEF5F /* SettingsView+underDevelopmentSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F4D9C72D4017D400FAEF5F /* SettingsView+underDevelopmentSection.swift */; };
+		12F4D9C92D4017D400FAEF5F /* CarbBolusSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F4D9C62D4017D400FAEF5F /* CarbBolusSelectionView.swift */; };
 		1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
@@ -745,6 +747,8 @@
 
 /* Begin PBXFileReference section */
 		12F04F002D197907002B2121 /* AutoBolusCarbsSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoBolusCarbsSelectionView.swift; sourceTree = "<group>"; };
+		12F4D9C62D4017D400FAEF5F /* CarbBolusSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBolusSelectionView.swift; sourceTree = "<group>"; };
+		12F4D9C72D4017D400FAEF5F /* SettingsView+underDevelopmentSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+underDevelopmentSection.swift"; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFavoriteFoodViewModel.swift; sourceTree = "<group>"; };
@@ -2272,6 +2276,7 @@
 				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
 				DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */,
+				12F4D9C72D4017D400FAEF5F /* SettingsView+underDevelopmentSection.swift */,
 				C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
@@ -2279,6 +2284,7 @@
 				DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */,
 				DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */,
 				12F04F002D197907002B2121 /* AutoBolusCarbsSelectionView.swift */,
+				12F4D9C62D4017D400FAEF5F /* CarbBolusSelectionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -3831,6 +3837,8 @@
 				1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsServicesManager.swift in Sources */,
 				14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */,
+				12F4D9C82D4017D400FAEF5F /* SettingsView+underDevelopmentSection.swift in Sources */,
+				12F4D9C92D4017D400FAEF5F /* CarbBolusSelectionView.swift in Sources */,
 				DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */,
 				A9C62D842331700E00535612 /* DiagnosticLog+Subsystem.swift in Sources */,
 				895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */,

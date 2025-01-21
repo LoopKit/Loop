@@ -240,7 +240,9 @@ struct BolusEntryView: View {
         
     @ViewBuilder
     private var recommendedBolusRow: some View {
+        let exclusionsApply = viewModel.exclusionsBolus != nil && viewModel.exclusionsBolusIncluded
         let breakdownFont = Font.subheadline
+        
         Section {
             HStack(alignment: .firstTextBaseline) {
                 Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
@@ -268,6 +270,7 @@ struct BolusEntryView: View {
             if recommendationBreakdownExpanded {
                 VStack {
                     if viewModel.potentialCarbEntry != nil, viewModel.carbBolus != nil {
+                        let excluded = exclusionsApply && UserDefaults.standard.carbBolusCarbEntryExcluded
                         HStack {
                             Text("  ")
                             Image(systemName: "checkmark")
@@ -276,11 +279,12 @@ struct BolusEntryView: View {
                                 .opacity(viewModel.carbBolusIncluded ? 1 : 0)
                             Text("Carb Entry", comment: "Label for carb bolus row on bolus screen")
                                 .font(breakdownFont)
+                                .foregroundStyle(excluded ? .secondary : .primary)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.carbBolusString)
                                     .font(.subheadline)
-                                    .foregroundColor(Color(.label))
+                                    .foregroundColor(Color(excluded ? .secondaryLabel : .label))
                                 breakdownBolusUnitsLabel
                             }
                         }
@@ -291,6 +295,7 @@ struct BolusEntryView: View {
                         }
                     }
                     if viewModel.cobCorrectionBolus != nil {
+                        let excluded = exclusionsApply && UserDefaults.standard.carbBolusCobCorrectionExcluded
                         HStack {
                             Text("  ")
                             Image(systemName: "checkmark")
@@ -299,11 +304,12 @@ struct BolusEntryView: View {
                                 .opacity(viewModel.cobCorrectionBolusIncluded ? 1 : 0)
                             Text("COB Correction", comment: "Label for COB correction bolus row on bolus screen")
                                 .font(breakdownFont)
+                                .foregroundStyle(excluded ? .secondary : .primary)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.cobCorrectionBolusString)
                                     .font(breakdownFont)
-                                    .foregroundColor(Color(.label))
+                                    .foregroundColor(Color(excluded ? .secondaryLabel : .label))
                                 breakdownBolusUnitsLabel
                             }
                         }
@@ -311,11 +317,10 @@ struct BolusEntryView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             viewModel.cobCorrectionBolusIncluded.toggle()
-                            viewModel.userChangedCobCorrectionBolusIncluded = true
                         }
-
                     }
                     if viewModel.bgCorrectionBolus != nil {
+                        let excluded = exclusionsApply && UserDefaults.standard.carbBolusBgCorrectionExcluded
                         HStack {
                             Text("  ")
                             Image(systemName: "checkmark")
@@ -324,11 +329,12 @@ struct BolusEntryView: View {
                                 .opacity(viewModel.bgCorrectionBolusIncluded ? 1 : 0)
                             Text("BG Correction", comment: "Label for BG correction bolus row on bolus screen")
                                 .font(breakdownFont)
+                                .foregroundStyle(excluded ? .secondary : .primary)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.bgCorrectionBolusString)
                                     .font(breakdownFont)
-                                    .foregroundColor(Color(.label))
+                                    .foregroundColor(Color(excluded ? .secondaryLabel : .label))
                                 breakdownBolusUnitsLabel
                             }
                         }
@@ -336,7 +342,6 @@ struct BolusEntryView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             viewModel.bgCorrectionBolusIncluded.toggle()
-                            viewModel.userChangedBgCorrectionBolusIncluded = true
                         }
                     }
                     if viewModel.maxExcessBolus != nil {
@@ -383,6 +388,29 @@ struct BolusEntryView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             viewModel.safetyLimitBolusIncluded.toggle()
+                        }
+                    }
+                    if viewModel.exclusionsBolus != nil {
+                        HStack {
+                            Text("  ")
+                            Image(systemName: "checkmark")
+                                .imageScale(.small)
+                                .foregroundColor(.accentColor)
+                                .opacity(viewModel.exclusionsBolusIncluded ? 1 : 0)
+                            Text("Exclusions", comment: "Label for exclusions row on bolus screen")
+                                .font(breakdownFont)
+                            Spacer()
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(viewModel.negativeCorrectLimitString)
+                                    .font(breakdownFont)
+                                    .foregroundColor(Color(.label))
+                                breakdownBolusUnitsLabel
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.exclusionsBolusIncluded.toggle()
                         }
                     }
                 }
