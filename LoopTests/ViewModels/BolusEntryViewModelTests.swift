@@ -699,17 +699,31 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertNil(bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
     }
     
+    func is24Hour() -> Bool {
+        let dateFormat = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: Locale.current)!
+
+        return dateFormat.firstIndex(of: "a") == nil
+    }
+    
     func testCarbEntryDateAndAbsorptionTimeString() async throws {
         await setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: mockPotentialCarbEntry)
 
-        XCTAssertEqual("12:00 PM + 0m", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+        if is24Hour() {
+            XCTAssertEqual("12:00 + 0m", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+        } else {
+            XCTAssertEqual("12:00 PM + 0m", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+        }
     }
     
     func testCarbEntryDateAndAbsorptionTimeString2() async throws {
         let potentialCarbEntry = NewCarbEntry(quantity: BolusEntryViewModelTests.exampleCarbQuantity, startDate: Self.exampleStartDate, foodType: nil, absorptionTime: nil)
         await setUpViewModel(originalCarbEntry: mockOriginalCarbEntry, potentialCarbEntry: potentialCarbEntry)
 
-        XCTAssertEqual("12:00 PM", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+        if is24Hour() {
+            XCTAssertEqual("12:00", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+        } else {
+            XCTAssertEqual("12:00 PM", bolusEntryViewModel.carbEntryDateAndAbsorptionTimeString)
+        }
     }
 
     func testIsManualGlucosePromptVisible() throws {

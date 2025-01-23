@@ -40,7 +40,6 @@ struct FeatureFlagConfiguration: Decodable {
     let missedMealNotifications: Bool
     let allowAlgorithmExperiments: Bool
 
-
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
         #if AUTOMATIC_BOLUS_DISABLED
