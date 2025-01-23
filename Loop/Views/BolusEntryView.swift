@@ -353,6 +353,7 @@ struct BolusEntryView: View {
                                 .opacity(viewModel.maxExcessBolusIncluded ? 1 : 0)
                             Text("Max Bolus Limit", comment: "Label for max bolus row on bolus screen")
                                 .font(breakdownFont)
+                                .foregroundStyle(exclusionsApply ? .secondary : .primary)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.negativeMaxExcessBolusString)
@@ -376,6 +377,7 @@ struct BolusEntryView: View {
                                 .opacity(viewModel.safetyLimitBolusIncluded ? 1 : 0)
                             Text("Glucose Safety Limit", comment: "Label for glucose safety limit row on bolus screen")
                                 .font(breakdownFont)
+                                .foregroundStyle(exclusionsApply ? .secondary : .primary)
                             Spacer()
                             HStack(alignment: .firstTextBaseline) {
                                 Text(viewModel.negativeSafetyLimitString)
