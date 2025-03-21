@@ -60,13 +60,13 @@ final class ActionHUDController: HUDInterfaceController {
         super.update()
 
         let activeOverrideContext: TemporaryScheduleOverride.Context?
-        if let override = loopManager.settings.scheduleOverride, override.isActive() {
+        if let override = loopManager.watchInfo.scheduleOverride, override.isActive() {
             activeOverrideContext = override.context
         } else {
             activeOverrideContext = nil
         }
 
-        updateForPreMeal(enabled: loopManager.settings.preMealOverride?.isActive() == true)
+        updateForPreMeal(enabled: loopManager.watchInfo.preMealOverride?.isActive() == true)
         updateForOverrideContext(activeOverrideContext)
 
         let isClosedLoop = loopManager.activeContext?.isClosedLoop ?? false
@@ -80,7 +80,7 @@ final class ActionHUDController: HUDInterfaceController {
             carbsButtonGroup.state = .off
             bolusButtonGroup.state = .off
             
-            if loopManager.settings.preMealTargetRange == nil {
+            if loopManager.watchInfo.loopSettings.preMealTargetRange == nil {
                 preMealButtonGroup.state = .disabled
             } else if preMealButtonGroup.state == .disabled {
                 preMealButtonGroup.state = .off
@@ -98,9 +98,9 @@ final class ActionHUDController: HUDInterfaceController {
     
     private var canEnableOverride: Bool {
         if FeatureFlags.sensitivityOverridesEnabled {
-            return !loopManager.settings.overridePresets.isEmpty
+            return !loopManager.watchInfo.loopSettings.overridePresets.isEmpty
         } else {
-            return loopManager.settings.legacyWorkoutTargetRange != nil
+            return loopManager.watchInfo.loopSettings.legacyWorkoutTargetRange != nil
         }
     }
 
@@ -133,11 +133,11 @@ final class ActionHUDController: HUDInterfaceController {
     private let glucoseFormatter = QuantityFormatter(for: .milligramsPerDeciliter)
 
     @IBAction func togglePreMealMode() {
-        guard let range = loopManager.settings.preMealTargetRange else {
+        guard let range = loopManager.watchInfo.loopSettings.preMealTargetRange else {
             return
         }
         
-        let buttonToSelect = loopManager.settings.preMealOverride?.isActive() == true ? SelectedButton.on : SelectedButton.off
+        let buttonToSelect = loopManager.watchInfo.preMealOverride?.isActive() == true ? SelectedButton.on : SelectedButton.off
         let viewModel = OnOffSelectionViewModel(
             title: NSLocalizedString("Pre-Meal", comment: "Title for sheet to enable/disable pre-meal on watch"),
             message: formattedGlucoseRangeString(from: range),
@@ -152,30 +152,29 @@ final class ActionHUDController: HUDInterfaceController {
         updateForPreMeal(enabled: isPreMealEnabled)
         pendingMessageResponses += 1
 
-        var settings = loopManager.settings
-        let overrideContext = settings.scheduleOverride?.context
+        var watchInfo = loopManager.watchInfo
+        let overrideContext = watchInfo.scheduleOverride?.context
         if isPreMealEnabled {
-            settings.enablePreMealOverride(for: .hours(1))
+            watchInfo.enablePreMealOverride(for: .hours(1))
 
             if !FeatureFlags.sensitivityOverridesEnabled {
-                settings.clearOverride(matching: .legacyWorkout)
+                watchInfo.clearOverride(matching: .legacyWorkout)
                 updateForOverrideContext(nil)
             }
         } else {
-            settings.clearOverride(matching: .preMeal)
+            watchInfo.clearOverride(matching: .preMeal)
         }
 
-        let userInfo = LoopSettingsUserInfo(settings: settings)
         do {
-            try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { (result) in
+            try WCSession.default.sendSettingsUpdateMessage(watchInfo, completionHandler: { (result) in
                 DispatchQueue.main.async {
                     self.pendingMessageResponses -= 1
 
                     switch result {
                     case .success(let context):
                         if self.pendingMessageResponses == 0 {
-                            self.loopManager.settings.preMealOverride = settings.preMealOverride
-                            self.loopManager.settings.scheduleOverride = settings.scheduleOverride
+                            self.loopManager.watchInfo.preMealOverride = watchInfo.preMealOverride
+                            self.loopManager.watchInfo.scheduleOverride = watchInfo.scheduleOverride
                         }
 
                         ExtensionDelegate.shared().loopManager.updateContext(context)
@@ -208,14 +207,14 @@ final class ActionHUDController: HUDInterfaceController {
             overrideButtonGroup.state == .on
                 ? sendOverride(nil)
                 : presentController(withName: OverrideSelectionController.className, context: self as OverrideSelectionControllerDelegate)
-        } else if let range = loopManager.settings.legacyWorkoutTargetRange {
-            let buttonToSelect = loopManager.settings.nonPreMealOverrideEnabled() == true ? SelectedButton.on : SelectedButton.off
-            
+        } else if let range = loopManager.watchInfo.loopSettings.legacyWorkoutTargetRange {
+            let buttonToSelect = loopManager.watchInfo.nonPreMealOverrideEnabled() == true ? SelectedButton.on : SelectedButton.off
+
             let viewModel = OnOffSelectionViewModel(
                 title: NSLocalizedString("Workout", comment: "Title for sheet to enable/disable workout mode on watch"),
                 message: formattedGlucoseRangeString(from: range),
                 onSelection: { isWorkoutEnabled in
-                    let override = isWorkoutEnabled ? self.loopManager.settings.legacyWorkoutOverride(for: .infinity) : nil
+                    let override = isWorkoutEnabled ? self.loopManager.watchInfo.legacyWorkoutOverride(for: .infinity) : nil
                     self.sendOverride(override)
                 },
                 selectedButton: buttonToSelect,
@@ -244,24 +243,23 @@ final class ActionHUDController: HUDInterfaceController {
         updateForOverrideContext(override?.context)
         pendingMessageResponses += 1
 
-        var settings = loopManager.settings
-        let isPreMealEnabled = settings.preMealOverride?.isActive() == true
+        var watchInfo = loopManager.watchInfo
+        let isPreMealEnabled = watchInfo.preMealOverride?.isActive() == true
         if override?.context == .legacyWorkout {
-            settings.preMealOverride = nil
+            watchInfo.preMealOverride = nil
         }
-        settings.scheduleOverride = override
+        watchInfo.scheduleOverride = override
 
-        let userInfo = LoopSettingsUserInfo(settings: settings)
         do {
-            try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { (result) in
+            try WCSession.default.sendSettingsUpdateMessage(watchInfo, completionHandler: { (result) in
                 DispatchQueue.main.async {
                     self.pendingMessageResponses -= 1
 
                     switch result {
                     case .success(let context):
                         if self.pendingMessageResponses == 0 {
-                            self.loopManager.settings.scheduleOverride = override
-                            self.loopManager.settings.preMealOverride = settings.preMealOverride
+                            self.loopManager.watchInfo.scheduleOverride = override
+                            self.loopManager.watchInfo.preMealOverride = watchInfo.preMealOverride
                         }
 
                         ExtensionDelegate.shared().loopManager.updateContext(context)

@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import HealthKit
+import LoopAlgorithm
 
 
 struct WatchPredictedGlucose: Equatable {
@@ -29,7 +30,7 @@ extension WatchPredictedGlucose: RawRepresentable {
     var rawValue: RawValue {
 
         return [
-            "v": values.map { Int16($0.quantity.doubleValue(for: .milligramsPerDeciliter)) },
+            "v": values.map { Int16($0.quantity.doubleValue(for: .milligramsPerDeciliter).clamped(to: Double(Int16.min)...Double(Int16.max))) },
             "d": values[0].startDate,
             "i": values[1].startDate.timeIntervalSince(values[0].startDate)
         ]

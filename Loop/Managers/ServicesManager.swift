@@ -12,6 +12,7 @@ import LoopKitUI
 import LoopCore
 import Combine
 
+@MainActor
 class ServicesManager {
 
     private let pluginManager: PluginManager
@@ -86,7 +87,7 @@ class ServicesManager {
             return .failure(UnknownServiceIdentifierError())
         }
 
-        let result = serviceUIType.setupViewController(colorPalette: .default, pluginHost: self)
+        let result = serviceUIType.setupViewController(colorPalette: .default, pluginHost: self, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
         if case .createdAndOnboarded(let serviceUI) = result {
             serviceOnboarding(didCreateService: serviceUI)
             serviceOnboarding(didOnboardService: serviceUI)
@@ -118,6 +119,10 @@ class ServicesManager {
     }
 
     public var activeServices: [Service] {
+        return servicesLock.withLock { services }
+    }
+
+    public func getServices() -> [Service] {
         return servicesLock.withLock { services }
     }
 
@@ -213,10 +218,10 @@ class ServicesManager {
     
     private func beginBackgroundTask(name: String) async -> UIBackgroundTaskIdentifier? {
         var backgroundTask: UIBackgroundTaskIdentifier?
-        backgroundTask = await UIApplication.shared.beginBackgroundTask(withName: name) {
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: name) {
             guard let backgroundTask = backgroundTask else {return}
             Task {
-                await UIApplication.shared.endBackgroundTask(backgroundTask)
+                UIApplication.shared.endBackgroundTask(backgroundTask)
             }
             
             self.log.error("Background Task Expired: %{public}@", name)
@@ -227,7 +232,7 @@ class ServicesManager {
     
     private func endBackgroundTask(_ backgroundTask: UIBackgroundTaskIdentifier?) async {
         guard let backgroundTask else {return}
-        await UIApplication.shared.endBackgroundTask(backgroundTask)
+        UIApplication.shared.endBackgroundTask(backgroundTask)
     }
 }
 
@@ -254,25 +259,20 @@ extension ServicesManager: StatefulPluggableDelegate {
     }
 }
 
+// MARK: - PluginHost
+extension ServicesManager: PluginHost {
+    nonisolated var hostIdentifier: String {
+        return Bundle.main.hostIdentifier
+    }
+
+    nonisolated var hostVersion: String {
+        return Bundle.main.hostVersion
+    }
+}
+
 // MARK: - ServiceDelegate
 
 extension ServicesManager: ServiceDelegate {
-    var hostIdentifier: String {
-        return "com.loopkit.Loop"
-    }
-
-    var hostVersion: String {
-        var semanticVersion = Bundle.main.shortVersionString
-
-        while semanticVersion.split(separator: ".").count < 3 {
-            semanticVersion += ".0"
-        }
-
-        semanticVersion += "+\(Bundle.main.version)"
-
-        return semanticVersion
-    }
-    
     func enactRemoteOverride(name: String, durationTime: TimeInterval?, remoteAddress: String) async throws {
         
         var duration: TemporaryScheduleOverride.Duration? = nil
@@ -294,7 +294,7 @@ extension ServicesManager: ServiceDelegate {
         }
         
         try await servicesManagerDelegate?.enactOverride(name: name, duration: duration, remoteAddress: remoteAddress)
-        await remoteDataServicesManager.triggerUpload(for: .overrides)
+        await remoteDataServicesManager.performUpload(for: .overrides)
     }
     
     enum OverrideActionError: LocalizedError {
@@ -314,17 +314,17 @@ extension ServicesManager: ServiceDelegate {
     
     func cancelRemoteOverride() async throws {
         try await servicesManagerDelegate?.cancelCurrentOverride()
-        await remoteDataServicesManager.triggerUpload(for: .overrides)
+        await remoteDataServicesManager.performUpload(for: .overrides)
     }
     
     func deliverRemoteCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
         do {
             try await servicesManagerDelegate?.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
-            await NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
-            await remoteDataServicesManager.triggerUpload(for: .carb)
+            NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
+            await remoteDataServicesManager.performUpload(for: .carb)
             analyticsServicesManager.didAddCarbs(source: "Remote", amount: amountInGrams)
         } catch {
-            await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
+            NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
             throw error
         }
     }
@@ -345,11 +345,11 @@ extension ServicesManager: ServiceDelegate {
             }
             
             try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits)
-            await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
-            await remoteDataServicesManager.triggerUpload(for: .dose)
+            NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
+            await remoteDataServicesManager.performUpload(for: .dose)
             analyticsServicesManager.didBolus(source: "Remote", units: amountInUnits)
         } catch {
-            await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
+            NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
             throw error
         }
     }
@@ -375,13 +375,19 @@ extension ServicesManager: ServiceDelegate {
 
 extension ServicesManager: AlertIssuer {
     func issueAlert(_ alert: Alert) {
-        alertManager.issueAlert(alert)
+        Task { @MainActor in
+            alertManager.issueAlert(alert)
+        }
     }
 
     func retractAlert(identifier: Alert.Identifier) {
-        alertManager.retractAlert(identifier: identifier)
+        Task { @MainActor in
+            alertManager.retractAlert(identifier: identifier)
+        }
     }
 }
+
+extension ServicesManager: ActiveServicesProvider { }
 
 // MARK: - ServiceOnboardingDelegate
 

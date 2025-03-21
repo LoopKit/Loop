@@ -8,9 +8,10 @@
 
 import LoopKit
 import LoopCore
+import LoopAlgorithm
 
 extension PumpManagerStatus.BasalDeliveryState {
-    func getNetBasal(basalSchedule: BasalRateSchedule, settings: LoopSettings) -> NetBasal? {
+    func getNetBasal(basalSchedule: BasalRateSchedule, maximumBasalRatePerHour: Double?) -> NetBasal? {
         func scheduledBasal(for date: Date) -> AbsoluteScheduleValue<Double>? {
             return basalSchedule.between(start: date, end: date).first
         }
@@ -20,7 +21,7 @@ extension PumpManagerStatus.BasalDeliveryState {
             if let scheduledBasal = scheduledBasal(for: dose.startDate) {
                 return NetBasal(
                     lastTempBasal: dose,
-                    maxBasal: settings.maximumBasalRatePerHour,
+                    maxBasal: maximumBasalRatePerHour,
                     scheduledBasal: scheduledBasal
                 )
             } else {
@@ -30,7 +31,7 @@ extension PumpManagerStatus.BasalDeliveryState {
             if let scheduledBasal = scheduledBasal(for: date) {
                 return NetBasal(
                     suspendedAt: date,
-                    maxBasal: settings.maximumBasalRatePerHour,
+                    maxBasal: maximumBasalRatePerHour,
                     scheduledBasal: scheduledBasal
                 )
             } else {

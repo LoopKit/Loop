@@ -47,13 +47,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     
     public var enableEntryDeletion: Bool = true
     
-    var deviceManager: DeviceDataManager? {
-        didSet {
-            doseStore = deviceManager?.doseStore
-        }
-    }
-
-    public var doseStore: DoseStore? {
+    var loopDataManager: LoopDataManager!
+    var doseStore: DoseStore! {
         didSet {
             if let doseStore = doseStore {
                 doseStoreObserver = NotificationCenter.default.addObserver(forName: nil, object: doseStore, queue: OperationQueue.main, using: { [weak self] (note) -> Void in
@@ -61,7 +56,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     switch note.name {
                     case DoseStore.valuesDidChange:
                         if self?.isViewLoaded == true {
-                            self?.reloadData()
+                            Task { @MainActor in
+                                await self?.reloadData()
+                            }
                         }
                     default:
                         break
@@ -159,13 +156,13 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     }
     
     @objc func didTapEnterDoseButton(sender: AnyObject){
-        guard let deviceManager = deviceManager else {
+        guard let loopDataManager = loopDataManager else {
             return
         }
 
         tableView.endEditing(true)
 
-        let viewModel = ManualEntryDoseViewModel(delegate: deviceManager)
+        let viewModel = ManualEntryDoseViewModel(delegate: loopDataManager)
         let bolusEntryView = ManualEntryDoseView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
@@ -185,7 +182,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private var state = State.unknown {
         didSet {
             if isViewLoaded {
-                reloadData()
+                Task { @MainActor in
+                    await reloadData()
+                }
             }
         }
     }
@@ -200,6 +199,11 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         case reservoir([ReservoirValue])
         case history([PersistedPumpEvent])
         case manualEntryDoses([DoseEntry])
+    }
+    
+    fileprivate enum HistorySection: Int {
+        case today
+        case yesterday
     }
 
     // Not thread-safe
@@ -222,7 +226,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         }
     }
 
-    private func reloadData() {
+    private func reloadData() async {
         let sinceDate = Date().addingTimeInterval(-InsulinDeliveryTableViewController.historicDataDisplayTimeInterval)
         switch state {
         case .unknown:
@@ -240,53 +244,32 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             self.tableView.tableHeaderView?.isHidden = false
             self.tableView.tableFooterView = nil
 
-            switch DataSourceSegment(rawValue: dataSourceSegmentedControl.selectedSegmentIndex)! {
-            case .reservoir:
-                doseStore?.getReservoirValues(since: sinceDate) { (result) in
-                    DispatchQueue.main.async { () -> Void in
-                        switch result {
-                        case .failure(let error):
-                            self.state = .unavailable(error)
-                        case .success(let reservoirValues):
-                            self.values = .reservoir(reservoirValues)
-                            self.tableView.reloadData()
-                        }
-                    }
+            guard let doseStore else {
+                return
+            }
 
-                    self.updateTimelyStats(nil)
-                    self.updateTotal()
+            do {
+                switch DataSourceSegment(rawValue: dataSourceSegmentedControl.selectedSegmentIndex)! {
+                case .reservoir:
+                    self.values = .reservoir(try await doseStore.getReservoirValues(since: sinceDate, limit: nil))
+                case .history:
+                    self.values = .history(try await self.getPumpEvents(since: sinceDate))
+                case .manualEntryDose:
+                    self.values = .manualEntryDoses(try await doseStore.getManuallyEnteredDoses(since: sinceDate))
                 }
-            case .history:
-                doseStore?.getPumpEventValues(since: sinceDate) { (result) in
-                    DispatchQueue.main.async { () -> Void in
-                        switch result {
-                        case .failure(let error):
-                            self.state = .unavailable(error)
-                        case .success(let pumpEventValues):
-                            self.values = .history(pumpEventValues)
-                            self.tableView.reloadData()
-                        }
-                    }
-
-                    self.updateTimelyStats(nil)
-                    self.updateTotal()
-                }
-            case .manualEntryDose:
-                doseStore?.getManuallyEnteredDoses(since: sinceDate) { (result) in
-                    DispatchQueue.main.async { () -> Void in
-                        switch result {
-                        case .failure(let error):
-                            self.state = .unavailable(error)
-                        case .success(let values):
-                            self.values = .manualEntryDoses(values)
-                            self.tableView.reloadData()
-                        }
-                    }
-                }
-
+                self.tableView.reloadData()
                 self.updateTimelyStats(nil)
                 self.updateTotal()
+            } catch {
+                self.state = .unavailable(error)
             }
+        }
+    }
+
+    private func getPumpEvents(since sinceDate: Date) async throws -> [PersistedPumpEvent] {
+        let events = try await doseStore.getPumpEventValues(since: sinceDate)
+        return events.filter { event in
+            return event.dose != nil
         }
     }
 
@@ -311,38 +294,38 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
         return formatter
     }()
+    
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+
+        formatter.dateStyle = .short
+        formatter.timeStyle = .none
+        formatter.doesRelativeDateFormatting = true
+
+        return formatter
+    }()
 
     private func updateIOB() {
         if case .display = state {
-            doseStore?.insulinOnBoard(at: Date()) { (result) -> Void in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .failure:
-                        self.iobValueLabel.text = "…"
-                        self.iobDateLabel.text = nil
-                    case .success(let iob):
-                        self.iobValueLabel.text = self.iobNumberFormatter.string(from: iob.value)
-                        self.iobDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.IOBDateLabel", value: "at %1$@", comment: "The format string describing the date of an IOB value. The first format argument is the localized date."), self.timeFormatter.string(from: iob.startDate))
-                    }
-                }
+            if let activeInsulin = loopDataManager.activeInsulin {
+                self.iobValueLabel.text = self.iobNumberFormatter.string(from: activeInsulin.value)
+                self.iobDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.IOBDateLabel", value: "at %1$@", comment: "The format string describing the date of an IOB value. The first format argument is the localized date."), self.timeFormatter.string(from: activeInsulin.startDate))
+            } else {
+                self.iobValueLabel.text = "…"
+                self.iobDateLabel.text = nil
             }
         }
     }
 
     private func updateTotal() {
-        if case .display = state {
-            let midnight = Calendar.current.startOfDay(for: Date())
-
-            doseStore?.getTotalUnitsDelivered(since: midnight) { (result) in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .failure:
-                        self.totalValueLabel.text = "…"
-                        self.totalDateLabel.text = nil
-                    case .success(let result):
-                        self.totalValueLabel.text = NumberFormatter.localizedString(from: NSNumber(value: result.value), number: .none)
-                        self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), DateFormatter.localizedString(from: result.startDate, dateStyle: .none, timeStyle: .short))
-                    }
+        Task { @MainActor in
+            if case .display = state {
+                if let result = await loopDataManager.totalDeliveredToday() {
+                    self.totalValueLabel.text = NumberFormatter.localizedString(from: NSNumber(value: result.value), number: .none)
+                    self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), DateFormatter.localizedString(from: result.startDate, dateStyle: .none, timeStyle: .short))
+                } else {
+                    self.totalValueLabel.text = "…"
+                    self.totalDateLabel.text = nil
                 }
             }
         }
@@ -357,7 +340,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     }
 
     @IBAction func selectedSegmentChanged(_ sender: Any) {
-        reloadData()
+        Task { @MainActor in
+            await reloadData()
+        }
     }
 
     @IBAction func confirmDeletion(_ sender: Any) {
@@ -377,37 +362,35 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         }
 
         let sheet = UIAlertController(deleteAllConfirmationMessage: confirmMessage) {
-            self.deleteAllObjects()
+            Task {
+                await self.deleteAllObjects()
+            }
         }
         present(sheet, animated: true)
     }
 
     private var deletionPending = false
 
-    private func deleteAllObjects() {
+    private func deleteAllObjects() async {
         guard !deletionPending else {
             return
         }
 
         deletionPending = true
 
-        let completion = { (_: DoseStore.DoseStoreError?) -> Void in
-            DispatchQueue.main.async {
-                self.deletionPending = false
-                self.setEditing(false, animated: true)
-            }
-        }
-
         let sinceDate = Date().addingTimeInterval(-InsulinDeliveryTableViewController.historicDataDisplayTimeInterval)
 
         switch DataSourceSegment(rawValue: dataSourceSegmentedControl.selectedSegmentIndex)! {
         case .reservoir:
-            doseStore?.deleteAllReservoirValues(completion)
+            try? await doseStore?.deleteAllReservoirValues()
         case .history:
-            doseStore?.deleteAllPumpEvents(completion)
+            try? await doseStore?.deleteAllPumpEvents()
         case .manualEntryDose:
-            doseStore?.deleteAllManuallyEnteredDoses(since: sinceDate, completion)
+            try? await doseStore?.deleteAllManuallyEnteredDoses(since: sinceDate)
         }
+        self.deletionPending = false
+        self.setEditing(false, animated: true)
+
     }
 
     // MARK: - Table view data source
@@ -417,7 +400,10 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         case .unknown, .unavailable:
             return 0
         case .display:
-            return 1
+            switch self.values {
+            case .history(let pumpEvents): return pumpEvents.pumpEventsBeforeToday.isEmpty ? 1 : 2
+            default: return 1
+            }
         }
     }
 
@@ -425,10 +411,34 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         switch values {
         case .reservoir(let values):
             return values.count
-        case .history(let values):
-            return values.count
+        case .history(let pumpEvents):
+            switch HistorySection(rawValue: section) {
+            case .today: return pumpEvents.pumpEventsFromToday.count
+            case .yesterday: return pumpEvents.pumpEventsBeforeToday.count
+            case .none: return 0
+            }
         case .manualEntryDoses(let values):
             return values.count
+        }
+    }
+
+    public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch state {
+        case .display:
+            switch self.values {
+            case .history(let pumpEvents):
+                switch HistorySection(rawValue: section) {
+                case .today:
+                    guard let firstValue = pumpEvents.pumpEventsFromToday.first else { return nil }
+                    return dateFormatter.string(from: firstValue.date).uppercased()
+                case .yesterday:
+                    guard let firstValue = pumpEvents.pumpEventsBeforeToday.first else { return nil }
+                    return dateFormatter.string(from: firstValue.date).uppercased()
+                case .none: return nil
+                }
+            default: return nil
+            }
+        default: return nil
         }
     }
 
@@ -447,18 +457,18 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 cell.detailTextLabel?.text = time
                 cell.accessoryType = .none
                 cell.selectionStyle = .none
-            case .history(let values):
-                let entry = values[indexPath.row]
-                let time = timeFormatter.string(from: entry.date)
+            case .history(let pumpEvents):
+                let pumpEvent = pumpEvents.pumpEventForIndexPath(indexPath)
+                let time = timeFormatter.string(from: pumpEvent.date)
 
-                if let attributedText = entry.localizedAttributedDescription {
+                if let attributedText = pumpEvent.localizedAttributedDescription {
                     cell.textLabel?.attributedText = attributedText
                 } else {
                     cell.textLabel?.text = NSLocalizedString("Unknown", comment: "The default description to use when an entry has no dose description")
                 }
                 
                 cell.detailTextLabel?.text = time
-                cell.accessoryType = entry.isUploaded ? .checkmark : .none
+                cell.accessoryType = pumpEvent.isUploaded ? .checkmark : .none
                 cell.selectionStyle = .default
             case .manualEntryDoses(let values):
                 let entry = values[indexPath.row]
@@ -495,22 +505,25 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
-                            self.reloadData()
+                            Task { @MainActor in
+                                await self.reloadData()
+                            }
                         }
                     }
                 }
-            case .history(let historyValues):
-                var historyValues = historyValues
-                let value = historyValues.remove(at: indexPath.row)
-                self.values = .history(historyValues)
+            case .history(let pumpEvents):
+                let pumpEvent = pumpEvents.pumpEventForIndexPath(indexPath)
+                self.values = .history(pumpEvents.filter { $0.dose != pumpEvent.dose })
 
                 tableView.deleteRows(at: [indexPath], with: .automatic)
 
-                doseStore?.deletePumpEvent(value) { (error) -> Void in
+                doseStore?.deletePumpEvent(pumpEvent) { (error) -> Void in
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
-                            self.reloadData()
+                            Task { @MainActor in
+                                await self.reloadData()
+                            }
                         }
                     }
                 }
@@ -524,7 +537,9 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     if let error = error {
                         DispatchQueue.main.async {
                             self.present(UIAlertController(with: error), animated: true)
-                            self.reloadData()
+                            Task { @MainActor in
+                                await self.reloadData()
+                            }
                         }
                     }
                 }
@@ -533,23 +548,23 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     }
 
     public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if case .display = state, case .history(let history) = values {
-            let entry = history[indexPath.row]
+        if case .display = state, case .history(let pumpEvents) = values {
+            let pumpEvent = pumpEvents.pumpEventForIndexPath(indexPath)
 
             let vc = CommandResponseViewController(command: { (completionHandler) -> String in
                 var description = [String]()
 
-                description.append(self.timeFormatter.string(from: entry.date))
+                description.append(self.timeFormatter.string(from: pumpEvent.date))
 
-                if let title = entry.title {
+                if let title = pumpEvent.title {
                     description.append(title)
                 }
 
-                if let dose = entry.dose {
+                if let dose = pumpEvent.dose {
                     description.append(String(describing: dose))
                 }
 
-                if let raw = entry.raw {
+                if let raw = pumpEvent.raw {
                     description.append(raw.hexadecimalString)
                 }
 
@@ -664,3 +679,25 @@ extension PersistedPumpEvent {
 }
 
 extension InsulinDeliveryTableViewController: IdentifiableClass { }
+
+fileprivate extension Array where Element == PersistedPumpEvent {
+    var pumpEventsFromToday: [PersistedPumpEvent] {
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        return self.filter({ $0.date >= startOfDay})
+    }
+    
+    var pumpEventsBeforeToday: [PersistedPumpEvent] {
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        return self.filter({ $0.date < startOfDay})
+    }
+    
+    func pumpEventForIndexPath(_ indexPath: IndexPath) -> PersistedPumpEvent {
+        let filterPumpEvents: [PersistedPumpEvent]
+        if InsulinDeliveryTableViewController.HistorySection(rawValue: indexPath.section) == .today {
+            filterPumpEvents = self.pumpEventsFromToday
+        } else {
+            filterPumpEvents = self.pumpEventsBeforeToday
+        }
+        return filterPumpEvents[indexPath.row]
+    }
+}

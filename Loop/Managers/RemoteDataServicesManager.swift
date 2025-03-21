@@ -8,7 +8,9 @@
 
 import os.log
 import Foundation
+import LoopAlgorithm
 import LoopKit
+import UIKit
 
 enum RemoteDataType: String, CaseIterable {
     case alert = "Alert"
@@ -37,6 +39,11 @@ struct UploadTaskKey: Hashable {
     }
 }
 
+protocol AutomationHistoryProvider {
+    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>]
+}
+
+@MainActor
 final class RemoteDataServicesManager {
 
     public typealias RawState = [String: Any]
@@ -51,6 +58,7 @@ final class RemoteDataServicesManager {
     private var unlockedRemoteDataServices = [RemoteDataService]()
 
     func addService(_ remoteDataService: RemoteDataService) {
+        remoteDataService.remoteDataServiceDelegate = self
         lock.withLock {
             unlockedRemoteDataServices.append(remoteDataService)
         }
@@ -58,6 +66,7 @@ final class RemoteDataServicesManager {
     }
 
     func restoreService(_ remoteDataService: RemoteDataService) {
+        remoteDataService.remoteDataServiceDelegate = self
         lock.withLock {
             unlockedRemoteDataServices.append(remoteDataService)
         }
@@ -126,7 +135,7 @@ final class RemoteDataServicesManager {
 
     private let doseStore: DoseStore
 
-    private let dosingDecisionStore: DosingDecisionStore
+    private let dosingDecisionStore: DosingDecisionStoreProtocol
 
     private let glucoseStore: GlucoseStore
 
@@ -134,20 +143,27 @@ final class RemoteDataServicesManager {
 
     private let insulinDeliveryStore: InsulinDeliveryStore
 
-    private let settingsStore: SettingsStore
+    private let settingsProvider: SettingsProvider
 
     private let overrideHistory: TemporaryScheduleOverrideHistory
+
+    private let deviceLog: PersistentDeviceLog
+
+    private let automationHistoryProvider: AutomationHistoryProvider
+
 
     init(
         alertStore: AlertStore,
         carbStore: CarbStore,
         doseStore: DoseStore,
-        dosingDecisionStore: DosingDecisionStore,
+        dosingDecisionStore: DosingDecisionStoreProtocol,
         glucoseStore: GlucoseStore,
         cgmEventStore: CgmEventStore,
-        settingsStore: SettingsStore,
+        settingsProvider: SettingsProvider,
         overrideHistory: TemporaryScheduleOverrideHistory,
-        insulinDeliveryStore: InsulinDeliveryStore
+        insulinDeliveryStore: InsulinDeliveryStore,
+        deviceLog: PersistentDeviceLog,
+        automationHistoryProvider: AutomationHistoryProvider
     ) {
         self.alertStore = alertStore
         self.carbStore = carbStore
@@ -156,9 +172,11 @@ final class RemoteDataServicesManager {
         self.glucoseStore = glucoseStore
         self.cgmEventStore = cgmEventStore
         self.insulinDeliveryStore = insulinDeliveryStore
-        self.settingsStore = settingsStore
+        self.settingsProvider = settingsProvider
         self.overrideHistory = overrideHistory
         self.lockedFailedUploads = Locked([])
+        self.deviceLog = deviceLog
+        self.automationHistoryProvider = automationHistoryProvider
     }
 
     private func uploadExistingData(to remoteDataService: RemoteDataService) {
@@ -179,7 +197,21 @@ final class RemoteDataServicesManager {
         }
     }
 
+    func triggerAllUploads() {
+        Task {
+            for type in RemoteDataType.allCases {
+                await performUpload(for: type)
+            }
+        }
+    }
+
     func triggerUpload(for triggeringType: RemoteDataType) {
+        Task {
+            await performUpload(for: triggeringType)
+        }
+    }
+
+    func performUpload(for triggeringType: RemoteDataType) {
         let uploadTypes = [triggeringType] + failedUploads.map { $0.remoteDataType }
 
         log.debug("RemoteDataType %{public}@ triggering uploads for: %{public}@", triggeringType.rawValue, String(describing: uploadTypes.map { $0.debugDescription}))
@@ -208,16 +240,16 @@ final class RemoteDataServicesManager {
         }
     }
     
-    func triggerUpload(for triggeringType: RemoteDataType, completion: @escaping () -> Void) {
-        triggerUpload(for: triggeringType)
+    func performUpload(for triggeringType: RemoteDataType, completion: @escaping () -> Void) {
+        performUpload(for: triggeringType)
         self.uploadGroup.notify(queue: DispatchQueue.main) {
             completion()
         }
     }
     
-    func triggerUpload(for triggeringType: RemoteDataType) async {
+    func performUpload(for triggeringType: RemoteDataType) async {
         return await withCheckedContinuation { continuation in
-            triggerUpload(for: triggeringType) {
+            performUpload(for: triggeringType) {
                 continuation.resume(returning: ())
             }
         }
@@ -240,14 +272,14 @@ extension RemoteDataServicesManager {
                     self.log.error("Error querying alert data: %{public}@", String(describing: error))
                     semaphore.signal()
                 case .success(let queryAnchor, let data):
-                    remoteDataService.uploadAlertData(data) { result in
-                        switch result {
-                        case .failure(let error):
-                            self.log.error("Error synchronizing alert data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        case .success:
+                    Task {
+                        do {
+                            try await remoteDataService.uploadAlertData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .alert, queryAnchor)
                             self.uploadSucceeded(key)
+                        } catch {
+                            self.log.error("Error synchronizing alert data: %{public}@", String(describing: error))
+                            self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -276,15 +308,15 @@ extension RemoteDataServicesManager {
                     self.log.error("Error querying carb data: %{public}@", String(describing: error))
                     semaphore.signal()
                 case .success(let queryAnchor, let created, let updated, let deleted):
-                    remoteDataService.uploadCarbData(created: created, updated: updated, deleted: deleted) { result in
-                        switch result {
-                        case .failure(let error):
-                            self.log.error("Error synchronizing carb data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        case .success:
+                    Task {
+                        do {
+                            try await remoteDataService.uploadCarbData(created: created, updated: updated, deleted: deleted)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .carb, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
                             self.uploadSucceeded(key)
+                        } catch {
+                            self.log.error("Error synchronizing carb data: %{public}@", String(describing: error))
+                            self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -318,15 +350,15 @@ extension RemoteDataServicesManager {
                     self.log.error("Error querying dose data: %{public}@", String(describing: error))
                     semaphore.signal()
                 case .success(let queryAnchor, let created, let deleted):
-                    remoteDataService.uploadDoseData(created: created, deleted: deleted) { result in
-                        switch result {
-                        case .failure(let error):
+                    Task {
+                        do {
+                            continueUpload = queryAnchor != previousQueryAnchor
+                            try await remoteDataService.uploadDoseData(created: created, deleted: deleted)
+                            UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .dose, queryAnchor)
+                            self.uploadSucceeded(key)
+                        } catch {
                             self.log.error("Error synchronizing dose data: %{public}@", String(describing: error))
                             self.uploadFailed(key)
-                        case .success:
-                            UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .dose, queryAnchor)
-                            continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
                         }
                         semaphore.signal()
                     }
@@ -360,15 +392,16 @@ extension RemoteDataServicesManager {
                     self.log.error("Error querying dosing decision data: %{public}@", String(describing: error))
                     semaphore.signal()
                 case .success(let queryAnchor, let data):
-                    remoteDataService.uploadDosingDecisionData(data) { result in
-                        switch result {
-                        case .failure(let error):
-                            self.log.error("Error synchronizing dosing decision data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        case .success:
+                    Task {
+                        do {
+                            try await remoteDataService.uploadDosingDecisionData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .dosingDecision, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
                             self.uploadSucceeded(key)
+
+                        } catch {
+                            self.log.error("Error synchronizing dosing decision data: %{public}@", String(describing: error))
+                            self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -387,11 +420,8 @@ extension RemoteDataServicesManager {
 
 extension RemoteDataServicesManager {
     private func uploadGlucoseData(to remoteDataService: RemoteDataService) {
-        
-        if delegate?.shouldSyncToRemoteService == false {
-            return
-        }
-        
+        guard delegate?.shouldSyncGlucoseToRemoteService != false else { return }
+
         uploadGroup.enter()
 
         let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .glucose)
@@ -401,24 +431,22 @@ extension RemoteDataServicesManager {
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose) ?? GlucoseStore.QueryAnchor()
             var continueUpload = false
 
-            self.glucoseStore.executeGlucoseQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.glucoseDataLimit ?? Int.max) { result in
-                switch result {
-                case .failure(let error):
+            Task {
+                do {
+                    let (queryAnchor, data) = try await self.glucoseStore.executeGlucoseQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.glucoseDataLimit ?? Int.max)
+                    do {
+                        try await remoteDataService.uploadGlucoseData(data)
+                        UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose, queryAnchor)
+                        continueUpload = queryAnchor != previousQueryAnchor
+                        await self.uploadSucceeded(key)
+                    } catch {
+                        self.log.error("Error synchronizing glucose data: %{public}@", String(describing: error))
+                        await self.uploadFailed(key)
+                    }
+                    semaphore.signal()
+                } catch {
                     self.log.error("Error querying glucose data: %{public}@", String(describing: error))
                     semaphore.signal()
-                case .success(let queryAnchor, let data):
-                    remoteDataService.uploadGlucoseData(data) { result in
-                        switch result {
-                        case .failure(let error):
-                            self.log.error("Error synchronizing glucose data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        case .success:
-                            UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose, queryAnchor)
-                            continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
-                        }
-                        semaphore.signal()
-                    }
                 }
             }
 
@@ -442,25 +470,22 @@ extension RemoteDataServicesManager {
             let semaphore = DispatchSemaphore(value: 0)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent) ?? DoseStore.QueryAnchor()
             var continueUpload = false
-
-            self.doseStore.executePumpEventQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.pumpEventDataLimit ?? Int.max) { result in
-                switch result {
-                case .failure(let error):
+            Task {
+                do {
+                    let (queryAnchor, data) = try await self.doseStore.executePumpEventQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.pumpEventDataLimit ?? Int.max)
+                    do {
+                        try await remoteDataService.uploadPumpEventData(data)
+                        UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent, queryAnchor)
+                        continueUpload = queryAnchor != previousQueryAnchor
+                        self.uploadSucceeded(key)
+                    } catch {
+                        self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
+                        self.uploadFailed(key)
+                    }
+                    semaphore.signal()
+                } catch {
                     self.log.error("Error querying pump event data: %{public}@", String(describing: error))
                     semaphore.signal()
-                case .success(let queryAnchor, let data):
-                    remoteDataService.uploadPumpEventData(data) { result in
-                        switch result {
-                        case .failure(let error):
-                            self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        case .success:
-                            UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent, queryAnchor)
-                            continueUpload = queryAnchor != previousQueryAnchor
-                            self.uploadSucceeded(key)
-                        }
-                        semaphore.signal()
-                    }
                 }
             }
 
@@ -485,21 +510,21 @@ extension RemoteDataServicesManager {
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .settings) ?? SettingsStore.QueryAnchor()
             var continueUpload = false
 
-            self.settingsStore.executeSettingsQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.settingsDataLimit ?? Int.max) { result in
+            self.settingsProvider.executeSettingsQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.settingsDataLimit ?? Int.max) { result in
                 switch result {
                 case .failure(let error):
                     self.log.error("Error querying settings data: %{public}@", String(describing: error))
                     semaphore.signal()
                 case .success(let queryAnchor, let data):
-                    remoteDataService.uploadSettingsData(data) { result in
-                        switch result {
-                        case .failure(let error):
-                            self.log.error("Error synchronizing settings data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        case .success:
+                    Task {
+                        do {
+                            try await remoteDataService.uploadSettingsData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .settings, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
                             self.uploadSucceeded(key)
+                        } catch {
+                            self.log.error("Error synchronizing settings data: %{public}@", String(describing: error))
+                            self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -529,14 +554,14 @@ extension RemoteDataServicesManager {
 
             let (overrides, deletedOverrides, newAnchor) = self.overrideHistory.queryByAnchor(queryAnchor)
 
-            remoteDataService.uploadTemporaryOverrideData(updated: overrides, deleted: deletedOverrides) { result in
-                switch result {
-                case .failure(let error):
-                    self.log.error("Error synchronizing temporary override data: %{public}@", String(describing: error))
-                    self.uploadFailed(key)
-                case .success:
+            Task {
+                do {
+                    try await remoteDataService.uploadTemporaryOverrideData(updated: overrides, deleted: deletedOverrides)
                     UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides, newAnchor)
                     self.uploadSucceeded(key)
+                } catch {
+                    self.log.error("Error synchronizing temporary override data: %{public}@", String(describing: error))
+                    self.uploadFailed(key)
                 }
                 semaphore.signal()
             }
@@ -564,15 +589,15 @@ extension RemoteDataServicesManager {
                     self.log.error("Error querying cgm event data: %{public}@", String(describing: error))
                     semaphore.signal()
                 case .success(let queryAnchor, let data):
-                    remoteDataService.uploadCgmEventData(data) { result in
-                        switch result {
-                        case .failure(let error):
-                            self.log.error("Error synchronizing cgm event data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
-                        case .success:
+                    Task {
+                        do {
+                            try await remoteDataService.uploadCgmEventData(data)
                             UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .cgmEvent, queryAnchor)
                             continueUpload = queryAnchor != previousQueryAnchor
                             self.uploadSucceeded(key)
+                        } catch {
+                            self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
+                            self.uploadFailed(key)
                         }
                         semaphore.signal()
                     }
@@ -586,6 +611,21 @@ extension RemoteDataServicesManager {
                 self.uploadPumpEventData(to: remoteDataService)
             }
         }
+    }
+}
+
+// RemoteDataServiceDelegate
+extension RemoteDataServicesManager: RemoteDataServiceDelegate {
+    func automationHistory(from start: Date, to end: Date) async throws -> [AbsoluteScheduleValue<Bool>] {
+        try await automationHistoryProvider.automationHistory(from: start, to: end)
+    }
+    
+    func getBasalHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
+        try await settingsProvider.getBasalHistory(startDate: startDate, endDate: endDate)
+    }
+    
+    func fetchDeviceLogs(startDate: Date, endDate: Date) async throws -> [StoredDeviceLogEntry] {
+        return try await deviceLog.fetch(startDate: startDate, endDate: endDate)
     }
 }
 
@@ -618,8 +658,10 @@ extension RemoteDataServicesManager {
     }
 }
 
+extension RemoteDataServicesManager: UploadEventListener { }
+
 protocol RemoteDataServicesManagerDelegate: AnyObject {
-    var shouldSyncToRemoteService: Bool {get}
+    var shouldSyncGlucoseToRemoteService: Bool { get }
 }
 
 

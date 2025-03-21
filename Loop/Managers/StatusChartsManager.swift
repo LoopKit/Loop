@@ -10,6 +10,7 @@ import LoopKit
 import LoopUI
 import LoopKitUI
 import SwiftCharts
+import LoopAlgorithm
 
 
 class StatusChartsManager: ChartsManager {
@@ -115,7 +116,7 @@ extension StatusChartsManager {
 
 
 extension StatusChartsManager {
-    func setDoseEntries(_ doseEntries: [DoseEntry]) {
+    func setDoseEntries(_ doseEntries: [BasalRelativeDose]) {
         dose.doseEntries = doseEntries
         invalidateChart(atIndex: ChartIndex.dose.rawValue)
     }

@@ -12,21 +12,16 @@ import MockKit
 
 let staticServices: [Service.Type] = [MockService.self]
 
-let staticServicesByIdentifier: [String: Service.Type] = staticServices.reduce(into: [:]) { (map, Type) in
-    map[Type.pluginIdentifier] = Type
-}
+let staticServicesByIdentifier: [String: Service.Type] = [
+    MockService.serviceIdentifier: MockService.self
+]
 
-let availableStaticServices = staticServices.map { (Type) -> ServiceDescriptor in
-    return ServiceDescriptor(identifier: Type.pluginIdentifier, localizedTitle: Type.localizedTitle)
-}
-
-func ServiceFromRawValue(_ rawValue: [String: Any]) -> Service? {
-    guard let serviceIdentifier = rawValue["serviceIdentifier"] as? String,
-        let rawState = rawValue["state"] as? Service.RawStateValue,
-        let ServiceType = staticServicesByIdentifier[serviceIdentifier]
-    else {
-        return nil
+var availableStaticServices: [ServiceDescriptor] {
+    if FeatureFlags.allowSimulators {
+        return [
+            ServiceDescriptor(identifier: MockService.serviceIdentifier, localizedTitle: MockService.localizedTitle)
+        ]
+    } else {
+        return []
     }
-
-    return ServiceType.init(rawState: rawState)
 }

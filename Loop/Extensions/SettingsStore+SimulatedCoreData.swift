@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopAlgorithm
 
 // MARK: - Simulated Core Data
 
@@ -154,9 +155,7 @@ fileprivate extension StoredSettings {
                               glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
                               preMealTargetRange: DoubleRange(minValue: 80.0, maxValue: 90.0).quantityRange(for: .milligramsPerDeciliter),
                               workoutTargetRange: DoubleRange(minValue: 150.0, maxValue: 160.0).quantityRange(for: .milligramsPerDeciliter),
-                              overridePresets: nil,
-                              scheduleOverride: nil,
-                              preMealOverride: preMealOverride,
+                              overridePresets: [],
                               maximumBasalRatePerHour: 3.5,
                               maximumBolus: 10.0,
                               suspendThreshold: GlucoseThreshold(unit: .milligramsPerDeciliter, value: 75.0),

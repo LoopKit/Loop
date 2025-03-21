@@ -73,7 +73,7 @@ extension WCSession {
         )
     }
 
-    func sendSettingsUpdateMessage(_ userInfo: LoopSettingsUserInfo, completionHandler: @escaping (Result<WatchContext>) -> Void) throws {
+    func sendSettingsUpdateMessage(_ userInfo: LoopSettingsUserInfo, completionHandler: @escaping (Result<WatchContext,Error>) -> Void) throws {
         guard activationState == .activated else {
             throw MessageError.activation
         }
@@ -159,7 +159,7 @@ extension WCSession {
         )
     }
     
-    func sendContextRequestMessage(_ userInfo: WatchContextRequestUserInfo, completionHandler: @escaping (Result<WatchContext>) -> Void) throws {
+    func sendContextRequestMessage(_ userInfo: WatchContextRequestUserInfo, completionHandler: @escaping (Result<WatchContext,Error>) -> Void) throws {
         guard activationState == .activated else {
             throw MessageError.activation
         }

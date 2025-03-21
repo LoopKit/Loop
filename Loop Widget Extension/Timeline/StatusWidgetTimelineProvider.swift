@@ -11,6 +11,7 @@ import LoopCore
 import LoopKit
 import OSLog
 import WidgetKit
+import LoopAlgorithm
 
 class StatusWidgetTimelineProvider: TimelineProvider {
     lazy var defaults = UserDefaults.appGroup
@@ -29,15 +30,21 @@ class StatusWidgetTimelineProvider: TimelineProvider {
         store: cacheStore,
         expireAfter: localCacheDuration)
 
-    lazy var glucoseStore = GlucoseStore(
-        cacheStore: cacheStore,
-        provenanceIdentifier: HKSource.default().bundleIdentifier
-    )
+    var glucoseStore: GlucoseStore!
+
+    init() {
+        Task {
+            glucoseStore = await GlucoseStore(
+                cacheStore: cacheStore,
+                provenanceIdentifier: HKSource.default().bundleIdentifier
+            )
+        }
+    }
 
     func placeholder(in context: Context) -> StatusWidgetTimelimeEntry {
         log.default("%{public}@: context=%{public}@", #function, String(describing: context))
 
-        return StatusWidgetTimelimeEntry(date: Date(), contextUpdatedAt: Date(), lastLoopCompleted: nil, closeLoop: true, currentGlucose: nil, glucoseFetchedAt: Date(), delta: nil, unit: .milligramsPerDeciliter, sensor: nil, pumpHighlight: nil, netBasal: nil, eventualGlucose: nil, preMealPresetAllowed: true, preMealPresetActive: false, customPresetActive: false)
+        return StatusWidgetTimelimeEntry(date: Date(), contextUpdatedAt: Date(), lastLoopCompleted: nil, mostRecentGlucoseDataDate: nil, mostRecentPumpDataDate: nil, closeLoop: true, currentGlucose: nil, glucoseFetchedAt: Date(), delta: nil, unit: .milligramsPerDeciliter, sensor: nil, pumpHighlight: nil, netBasal: nil, eventualGlucose: nil, preMealPresetAllowed: true, preMealPresetActive: false, customPresetActive: false)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StatusWidgetTimelimeEntry) -> ()) {
@@ -67,7 +74,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
 
             // Date glucose staleness changes
             if let lastBGTime = newEntry.currentGlucose?.startDate {
-                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval+1)
+                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval+1)
                 datesToRefreshWidget.append(staleBgRefreshTime)
             }
 
@@ -89,29 +96,22 @@ class StatusWidgetTimelineProvider: TimelineProvider {
     }
     
     func update(completion: @escaping (StatusWidgetTimelimeEntry) -> Void) {
-        let group = DispatchGroup()
 
-        var glucose: [StoredGlucoseSample] = []
+        let startDate = Date(timeIntervalSinceNow: -LoopAlgorithm.inputDataRecencyInterval)
 
-        let startDate = Date(timeIntervalSinceNow: -LoopCoreConstants.inputDataRecencyInterval)
+        Task {
 
-        group.enter()
-        glucoseStore.getGlucoseSamples(start: startDate) { (result) in
-            switch result {
-            case .failure:
+            var glucose: [StoredGlucoseSample] = []
+
+            do {
+                glucose = try await glucoseStore.getGlucoseSamples(start: startDate)
+                self.log.default("Fetched glucose: last = %{public}@, %{public}@", String(describing: glucose.last?.startDate), String(describing: glucose.last?.quantity))
+            } catch {
                 self.log.error("Failed to fetch glucose after %{public}@", String(describing: startDate))
-                glucose = []
-            case .success(let samples):
-                self.log.default("Fetched glucose: last = %{public}@, %{public}@", String(describing: samples.last?.startDate), String(describing: samples.last?.quantity))
-                glucose = samples
             }
-            group.leave()
-        }
-        group.wait()
 
-        let finalGlucose = glucose
+            let finalGlucose = glucose
 
-        Task { @MainActor in
             guard let defaults = self.defaults,
                   let context = defaults.statusExtensionContext,
                   let contextUpdatedAt = context.createdAt,
@@ -158,6 +158,8 @@ class StatusWidgetTimelineProvider: TimelineProvider {
                 date: updateDate,
                 contextUpdatedAt: contextUpdatedAt,
                 lastLoopCompleted: lastCompleted,
+                mostRecentGlucoseDataDate: context.mostRecentGlucoseDataDate,
+                mostRecentPumpDataDate: context.mostRecentPumpDataDate,
                 closeLoop: closeLoop,
                 currentGlucose: currentGlucose,
                 glucoseFetchedAt: updateDate,

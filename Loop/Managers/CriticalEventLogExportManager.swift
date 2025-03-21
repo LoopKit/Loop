@@ -9,6 +9,8 @@
 import os.log
 import UIKit
 import LoopKit
+import BackgroundTasks
+
 
 public enum CriticalEventLogExportError: Error {
     case exportInProgress
@@ -549,5 +551,80 @@ public class CriticalEventLogFullExporter: CriticalEventLogBaseExporter, Critica
 fileprivate extension FileManager {
     var temporaryFileURL: URL {
         return temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    }
+}
+
+// MARK: - Critical Event Log Export
+
+extension CriticalEventLogExportManager {
+    static var historicalExportBackgroundTaskIdentifier: String { "com.loopkit.background-task.critical-event-log.historical-export" }
+
+    public func handleCriticalEventLogHistoricalExportBackgroundTask(_ task: BGProcessingTask) {
+        dispatchPrecondition(condition: .notOnQueue(.main))
+
+        scheduleCriticalEventLogHistoricalExportBackgroundTask(isRetry: true)
+
+        let exporter = createHistoricalExporter()
+
+        task.expirationHandler = {
+            self.log.default("Invoked critical event log historical export background task expiration handler - cancelling exporter")
+            exporter.cancel()
+        }
+
+        DispatchQueue.global(qos: .background).async {
+            exporter.export() { error in
+                if let error = error {
+                    self.log.error("Critical event log historical export errored: %{public}@", String(describing: error))
+                }
+
+                self.scheduleCriticalEventLogHistoricalExportBackgroundTask(isRetry: error != nil && !exporter.isCancelled)
+                task.setTaskCompleted(success: error == nil)
+
+                self.log.default("Completed critical event log historical export background task")
+            }
+        }
+    }
+
+    public func scheduleCriticalEventLogHistoricalExportBackgroundTask(isRetry: Bool = false) {
+        do {
+            let earliestBeginDate = isRetry ? retryExportHistoricalDate() : nextExportHistoricalDate()
+            let request = BGProcessingTaskRequest(identifier: Self.historicalExportBackgroundTaskIdentifier)
+            request.earliestBeginDate = earliestBeginDate
+            request.requiresExternalPower = true
+
+            try BGTaskScheduler.shared.submit(request)
+
+            log.default("Scheduled critical event log historical export background task: %{public}@", ISO8601DateFormatter().string(from: earliestBeginDate))
+        } catch let error {
+            #if IOS_SIMULATOR
+            log.debug("Failed to schedule critical event log export background task due to running on simulator")
+            #else
+            log.error("Failed to schedule critical event log export background task: %{public}@", String(describing: error))
+            #endif
+        }
+    }
+
+    public func removeExportsDirectory() -> Error? {
+        let fileManager = FileManager.default
+        let exportsDirectoryURL = fileManager.exportsDirectoryURL
+
+        guard fileManager.fileExists(atPath: exportsDirectoryURL.path) else {
+            return nil
+        }
+
+        do {
+            try fileManager.removeItem(at: exportsDirectoryURL)
+        } catch let error {
+            return error
+        }
+
+        return nil
+    }
+}
+
+extension FileManager {
+    var exportsDirectoryURL: URL {
+        let applicationSupportDirectory = try! url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+        return applicationSupportDirectory.appendingPathComponent(Bundle.main.bundleIdentifier!).appendingPathComponent("Exports")
     }
 }
