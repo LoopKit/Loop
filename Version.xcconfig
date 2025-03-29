@@ -6,9 +6,6 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-// Version [DEFAULT]
-LOOP_MARKETING_VERSION = 3.5.0
-CURRENT_PROJECT_VERSION = 57
-
-// Optional override
-#include? "VersionOverride.xcconfig"
+// Loop is only built using LoopWorkspace, so read
+//   the version number from LoopWorkspace
+#include "../LoopVersion.xcconfig"
