@@ -11,11 +11,13 @@ import LoopKit
 @testable import Loop
 
 class MockCarbStore: CarbStoreProtocol {
+    var predictGlucose: Bool
     var carbHistory: [StoredCarbEntry]?
 
-    init(for scenario: DosingTestScenario = .flatAndStable) {
+    init(for scenario: DosingTestScenario = .flatAndStable, predictGlucose: Bool = false, carbHistory: [StoredCarbEntry]? = nil) {
         self.scenario = scenario // The store returns different effect values based on the scenario
-        self.carbHistory = loadHistoricCarbEntries(scenario: scenario)
+        self.predictGlucose = predictGlucose
+        self.carbHistory = carbHistory ?? loadHistoricCarbEntries(scenario: scenario)
     }
     
     var scenario: DosingTestScenario
@@ -52,14 +54,23 @@ class MockCarbStore: CarbStoreProtocol {
         return defaultAbsorptionTimes.slow * 2
     }
     
+    var delay: TimeInterval = .minutes(10)
     var delta: TimeInterval = .minutes(5)
     
     var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .minutes(30), medium: .hours(3), slow: .hours(5))
     
+    var absorptionTimeOverrun = CarbMath.defaultAbsorptionTimeOverrun
+    
+    // copied from CarbStore.CarbModelSettings defaults
+    var absorptionModel: CarbAbsorptionComputable = PiecewiseLinearAbsorption()
+    var initialAbsorptionTimeOverrun: Double = 1.5
+    var adaptiveAbsorptionRateEnabled: Bool = false
+    var adaptiveRateStandbyIntervalFraction: Double = 0.2
+    
     var authorizationRequired: Bool = false
     
     var sharingDenied: Bool = false
-    
+        
     func authorize(toShare: Bool, read: Bool, _ completion: @escaping (HealthKitSampleStoreResult<Bool>) -> Void) {
         completion(.success(true))
     }
@@ -81,7 +92,44 @@ class MockCarbStore: CarbStoreProtocol {
     }
     
     func glucoseEffects<Sample>(of samples: [Sample], startingAt start: Date, endingAt end: Date?, effectVelocities: [LoopKit.GlucoseEffectVelocity]) throws -> [LoopKit.GlucoseEffect] where Sample : LoopKit.CarbEntry {
-        return []
+        
+        guard predictGlucose && samples.count > 0 else {
+            return []
+        }
+        
+        // this is basically copied over from CarbStore
+
+        let carbDates = samples.map { $0.startDate }
+        let maxCarbDate = carbDates.max()!
+        let minCarbDate = carbDates.min()!
+
+        guard let carbRatio = self.carbRatioScheduleApplyingOverrideHistory?.between(start: minCarbDate, end: maxCarbDate),
+              let insulinSensitivity = self.insulinSensitivityScheduleApplyingOverrideHistory?.quantitiesBetween(start: minCarbDate, end: maxCarbDate) else
+        {
+            return []
+        }
+
+        return samples.map(
+            to: effectVelocities,
+            carbRatio: carbRatio,
+            insulinSensitivity: insulinSensitivity,
+            absorptionTimeOverrun: absorptionTimeOverrun,
+            defaultAbsorptionTime: defaultAbsorptionTimes.medium,
+            delay: delay,
+            initialAbsorptionTimeOverrun: initialAbsorptionTimeOverrun,
+            absorptionModel: absorptionModel,
+            adaptiveAbsorptionRateEnabled: adaptiveAbsorptionRateEnabled,
+            adaptiveRateStandbyIntervalFraction: adaptiveRateStandbyIntervalFraction
+        ).dynamicGlucoseEffects(
+            from: start,
+            to: end,
+            carbRatios: carbRatio,
+            insulinSensitivities: insulinSensitivity,
+            defaultAbsorptionTime: defaultAbsorptionTimes.medium,
+            absorptionModel: absorptionModel,
+            delay: delay,
+            delta: delta
+        )
     }
     
     func getCarbsOnBoardValues(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (CarbStoreResult<[CarbValue]>) -> Void) {

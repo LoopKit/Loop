@@ -302,6 +302,9 @@ extension SettingsView {
             if FeatureFlags.allowAlgorithmExperiments {
                 algorithmExperimentsSection
             }
+            if FeatureFlags.allowExperimentalFeatures {
+                underDevelopmentSection
+            }
         }
     }
 
