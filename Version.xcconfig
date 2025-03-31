@@ -12,3 +12,4 @@ CURRENT_PROJECT_VERSION = 57
 
 // Optional override
 #include? "VersionOverride.xcconfig"
+#include? "../VersionOverride.xcconfig"
