@@ -247,7 +247,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         // If there is an existing bolus progressCell, update its dose values now in case the app is currently in the
                         // background as otherwise these values won't get initialized and can contain stale data from some earlier bolus.
                         if let progressCell = tableView.cellForRow(at: IndexPath(row: StatusRow.status.rawValue, section: Section.status.rawValue)) as? BolusProgressTableViewCell {
-                            progressCell.configuration = .bolusing(delivered: 0, ofTotalVolume: dose.programmedUnits)
+                            progressCell.totalUnits = dose.programmedUnits
+                            progressCell.deliveredUnits = 0
                         }
                         break
                     }
