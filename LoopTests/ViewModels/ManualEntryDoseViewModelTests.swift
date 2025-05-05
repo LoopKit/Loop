@@ -75,6 +75,28 @@ class ManualEntryDoseViewModelTests: XCTestCase {
 }
 
 fileprivate class MockManualEntryDoseViewModelDelegate: ManualDoseViewModelDelegate {
+    func fetchData(for baseTime: Date, disablingPreMeal: Bool, ensureDosingCoverageStart: Date?) async throws -> Loop.StoredDataAlgorithmInput {
+        return StoredDataAlgorithmInput(
+            glucoseHistory: [],
+            doses: [],
+            carbEntries: [],
+            predictionStart: baseTime,
+            basal: [],
+            sensitivity: [],
+            carbRatio: [],
+            target: GlucoseRangeTimeline(),
+            suspendThreshold: nil,
+            maxBolus: 10.0,
+            maxBasalRate: 3.0,
+            useIntegralRetrospectiveCorrection: false,
+            includePositiveVelocityAndRC: false,
+            carbAbsorptionModel: .linear,
+            recommendationInsulinModel: ExponentialInsulinModelPreset.rapidActingAdult.model,
+            recommendationType: DoseRecommendationType.manualBolus,
+            automaticBolusApplicationFactor: nil
+        )
+    }
+
     var pumpInsulinType: InsulinType?
    
     var manualEntryBolusUnits: Double?
