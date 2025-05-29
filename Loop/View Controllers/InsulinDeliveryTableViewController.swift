@@ -314,7 +314,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
     private func updateIOB() {
         if case .display = state {
-            doseStore?.insulinOnBoard(at: Date()) { (result) -> Void in
+            doseStore?.insulinOnBoard(at: Date(), basalDosingEnd: Date()) { (result) -> Void in
                 DispatchQueue.main.async {
                     switch result {
                     case .failure:

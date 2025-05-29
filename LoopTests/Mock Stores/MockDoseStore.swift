@@ -62,7 +62,7 @@ class MockDoseStore: DoseStoreProtocol {
         completion(nil, nil, false, nil)
     }
     
-    func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
+    func insulinOnBoard(at date: Date, basalDosingEnd: Date? = nil, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
         completion(.success(.init(startDate: scenario.currentDate, value: 9.5)))
     }
     

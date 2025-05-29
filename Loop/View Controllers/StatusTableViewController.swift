@@ -416,6 +416,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var glucoseSamples: [StoredGlucoseSample]?
         var predictedGlucoseValues: [GlucoseValue]?
         var iobValues: [InsulinValue]?
+        var currentIOBValue: Double?
         var doseEntries: [DoseEntry]?
         var totalDelivery: Double?
         var cobValues: [CarbValue]?
@@ -543,6 +544,17 @@ final class StatusTableViewController: LoopChartsTableViewController {
             workoutMode = deviceManager.loopManager.settings.nonPreMealOverrideEnabled()
         }
 
+        deviceManager.doseStore.insulinOnBoard(at: Date(), basalDosingEnd: Date()) { (result) -> Void in
+            switch result {
+            case .failure(let error):
+                self.log.error("DoseStore failed to get current insulin on board value: %{public}@", String(describing: error))
+                retryContext.update(with: .insulin)
+                currentIOBValue = nil
+            case .success(let currentIOB):
+                currentIOBValue = currentIOB.value
+            }
+        }
+        
         reloadGroup.notify(queue: .main) {
             /// Update the chart data
 
@@ -579,11 +591,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 charts.setIOBValues(iobValues)
             }
 
-            // Show the larger of the value either before or after the current date
-            if let maxValue = charts.iob.iobPoints.allElementsAdjacent(to: Date()).max(by: {
-                return $0.y.scalar < $1.y.scalar
-            }) {
-                self.currentIOBDescription = String(describing: maxValue.y)
+            // Current IOB
+            if let currentIOBValue = currentIOBValue {
+                self.currentIOBDescription = String(format: "%.2f U", currentIOBValue)
             } else {
                 self.currentIOBDescription = nil
             }
