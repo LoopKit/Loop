@@ -19,7 +19,13 @@ struct PredictionInputEffect: OptionSet {
     static let retrospection    = PredictionInputEffect(rawValue: 1 << 3)
     static let suspend          = PredictionInputEffect(rawValue: 1 << 4)
 
-    static let all: PredictionInputEffect = [.carbs, .insulin, .momentum, .retrospection]
+    static var all: PredictionInputEffect {
+        var effects: PredictionInputEffect = [.carbs, .insulin, .momentum]
+        if !UserDefaults.standard.bool(forKey: "com.loopkit.algorithmExperiments.disableRetrospectiveCorrection") {
+            effects.insert(.retrospection)
+        }
+        return effects
+    }
 
     var localizedTitle: String? {
         switch self {
