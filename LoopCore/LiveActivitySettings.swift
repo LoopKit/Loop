@@ -24,15 +24,15 @@ public enum BottomRowConfiguration: Codable {
     public func name() -> String {
         switch self {
         case .iob:
-            return NSLocalizedString("IOB", comment: "")
+            return NSLocalizedString("Active Insulin", comment: "")
         case .cob:
-            return NSLocalizedString("COB", comment: "")
+            return NSLocalizedString("Active Carbs", comment: "")
         case .basal:
             return NSLocalizedString("Basal", comment: "")
         case .currentBg:
             return NSLocalizedString("Current BG", comment: "")
         case .eventualBg:
-            return NSLocalizedString("Event", comment: "")
+            return NSLocalizedString("Eventual BG", comment: "")
         case .deltaBg:
             return NSLocalizedString("Delta", comment: "")
         case .loopCircle:

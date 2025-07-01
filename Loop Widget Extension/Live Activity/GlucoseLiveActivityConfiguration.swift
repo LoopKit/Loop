@@ -197,12 +197,11 @@ struct GlucoseLiveActivityConfiguration: Widget {
     private func bottomItemGeneric(title: String, value: String, unit: String) -> some View {
         VStack(alignment: .center) {
             Text("\(value)\(unit)")
-                .font(.headline)
                 .foregroundStyle(.primary)
                 .fontWeight(.heavy)
                 .font(Font.body.leading(.tight))
             Text(title)
-                .font(.subheadline)
+                .font(.caption2)
         }
     }
     
