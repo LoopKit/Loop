@@ -173,7 +173,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 }
 
                 reloadGroup.enter()
-                self.deviceManager.carbStore.getGlucoseEffects(start: chartStartDate, end: nil, effectVelocities: insulinCounteractionEffects!) { (result) in
+                self.deviceManager.carbStore.getGlucoseEffects(start: chartStartDate, end: nil, effectVelocities: allInsulinCounteractionEffects) { (result) in
                     switch result {
                     case .success((_, let effects)):
                         carbEffects = effects

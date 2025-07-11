@@ -368,7 +368,7 @@ struct BolusEntryView: View {
                 case .saveWithoutBolusing:
                     return Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
                 case .saveAndDeliver:
-                    return Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
+                    return Text("Save Carbs & Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
                 case .enterBolus:
                     return Text("Enter Bolus", comment: "Button text to begin entering a bolus")
                 case .deliver:

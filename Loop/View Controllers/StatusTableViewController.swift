@@ -240,10 +240,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
         didSet {
             if oldValue != bolusState {
                 switch bolusState {
-                case .inProgress(_):
+                case .inProgress(let dose):
                     guard case .inProgress = oldValue else {
                         // Bolus starting
                         bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
+                        // If there is an existing bolus progressCell, update its dose values now in case the app is currently in the
+                        // background as otherwise these values won't get initialized and can contain stale data from some earlier bolus.
+                        if let progressCell = tableView.cellForRow(at: IndexPath(row: StatusRow.status.rawValue, section: Section.status.rawValue)) as? BolusProgressTableViewCell {
+                            progressCell.totalUnits = dose.programmedUnits
+                            progressCell.deliveredUnits = 0
+                        }
                         break
                     }
                 default:

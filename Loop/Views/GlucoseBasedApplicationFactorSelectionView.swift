@@ -44,9 +44,6 @@ public struct GlucoseBasedApplicationFactorSelectionView: View {
                 }
             }
             .padding()
-            .onChange(of: isGlucoseBasedApplicationFactorEnabled) { newValue in
-                UserDefaults.standard.glucoseBasedApplicationFactorEnabled = newValue
-            }
         }
         .navigationBarTitleDisplayMode(.inline)
     }

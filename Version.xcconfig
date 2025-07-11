@@ -6,9 +6,11 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-// Version [DEFAULT]
-LOOP_MARKETING_VERSION = 3.5.0
-CURRENT_PROJECT_VERSION = 57
+// Version
+//   [for DIY Loop] configure the version number in LoopWorkspace
+LOOP_MARKETING_VERSION = 1.0
+CURRENT_PROJECT_VERSION = 1
 
-// Optional override
+// Optional override (enables override of version)
+#include? "../VersionOverride.xcconfig"
 #include? "VersionOverride.xcconfig"
