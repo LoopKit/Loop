@@ -646,34 +646,6 @@
 			remoteGlobalIDString = 4F75288A1DFE1DC600C322D6;
 			remoteInfo = LoopUI;
 		};
-		608994B42E1562EC00D6F0F7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 432B0E881CDFC3C50045347B;
-			remoteInfo = LibreTransmitter;
-		};
-		608994B62E1562EC00D6F0F7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 43A8EC82210E664300A81379;
-			remoteInfo = LibreTransmitterUI;
-		};
-		608994B82E1562EC00D6F0F7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = B40BF25E23ABD47400A43CEE;
-			remoteInfo = LibreTransmitterPlugin;
-		};
-		608994BA2E1562EC00D6F0F7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = C1BDBAFA2A4397E200A787D1;
-			remoteInfo = LibreDemoPlugin;
-		};
 		C117ED70232EDB3200DA57CD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -1022,7 +994,6 @@
 		600E52952E1569C5004D0346 /* OpenFoodFactsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsModels.swift; sourceTree = "<group>"; };
 		600E52962E1569C5004D0346 /* VoiceSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSearchResult.swift; sourceTree = "<group>"; };
 		600E529A2E1569D3004D0346 /* OpenFoodFactsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsService.swift; sourceTree = "<group>"; };
-		60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LibreTransmitter.xcodeproj; path = ../LibreTransmitter/LibreTransmitter.xcodeproj; sourceTree = SOURCE_ROOT; };
 		60DAE6D12E15845B005972E0 /* BarcodeScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerTests.swift; sourceTree = "<group>"; };
 		60DAE6D22E15845B005972E0 /* FoodSearchIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchIntegrationTests.swift; sourceTree = "<group>"; };
 		60DAE6D32E15845B005972E0 /* OpenFoodFactsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsTests.swift; sourceTree = "<group>"; };
@@ -2031,7 +2002,6 @@
 		43776F831B8022E90074EA36 = {
 			isa = PBXGroup;
 			children = (
-				60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */,
 				C18A491122FCC20B00FDA733 /* Scripts */,
 				4FF4D0FA1E1834BD00846527 /* Common */,
 				43776F8E1B8022E90074EA36 /* Loop */,
@@ -2578,13 +2548,7 @@
 		608994AE2E1562EC00D6F0F7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				608994B52E1562EC00D6F0F7 /* LibreTransmitter.framework */,
-				608994B72E1562EC00D6F0F7 /* LibreTransmitterUI.framework */,
-				608994B92E1562EC00D6F0F7 /* LibreTransmitterPlugin.loopplugin */,
-				608994BB2E1562EC00D6F0F7 /* LibreDemoPlugin.loopplugin */,
 			);
-			name = Products;
-			sourceTree = "<group>";
 		};
 		7D23667B21250C5A0028B67D /* Common */ = {
 			isa = PBXGroup;
@@ -3419,12 +3383,6 @@
 			);
 			productRefGroup = 43776F8D1B8022E90074EA36 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 608994AE2E1562EC00D6F0F7 /* Products */;
-					ProjectRef = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				43776F8B1B8022E90074EA36 /* Loop */,
@@ -3440,37 +3398,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		608994B52E1562EC00D6F0F7 /* LibreTransmitter.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = LibreTransmitter.framework;
-			remoteRef = 608994B42E1562EC00D6F0F7 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		608994B72E1562EC00D6F0F7 /* LibreTransmitterUI.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = LibreTransmitterUI.framework;
-			remoteRef = 608994B62E1562EC00D6F0F7 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		608994B92E1562EC00D6F0F7 /* LibreTransmitterPlugin.loopplugin */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = LibreTransmitterPlugin.loopplugin;
-			remoteRef = 608994B82E1562EC00D6F0F7 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		608994BB2E1562EC00D6F0F7 /* LibreDemoPlugin.loopplugin */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = LibreDemoPlugin.loopplugin;
-			remoteRef = 608994BA2E1562EC00D6F0F7 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		14B1735A28AED9EC006CCD7C /* Resources */ = {
@@ -5308,7 +5235,6 @@
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				"FRAMEWORK_SEARCH_PATHS[arch=*]" = LibreTransmitter;
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
