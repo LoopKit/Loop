@@ -43,9 +43,6 @@
 /* Alert text for failing to cancel temp basal (1: reason description, 2: app name) */
 "%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@%2$@ konnte Deine aktuelle temporäre Basalrate nicht abbrechen, da diese höher ist als die neue maximale Basalrate, die Du festgelegt hast. Dies kann zu einer höheren Insulinabgabe, als erwünscht führen.\n\nErwäge, die Insulinabgabe manuell zu unterbrechen und dann sofort wieder aufzunehmen, um die Basalabgabe mit dem neuen Grenzwert zu initiieren.";
 
-/* Adds a full-stop to a statement (1: statement, 2: full stop character) */
-"%1@%2@" = "%1$@%2$@";
-
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
@@ -92,7 +89,7 @@
 "%1$@: %2$@" = "%1$@: %2$@";
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
-   Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
+Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* Description of the prediction input effect for glucose momentum */
@@ -164,11 +161,11 @@
 "Adjusted for" = "Angepasst für";
 
 /* Alert Permissions button text
-   Title of alert management screen */
+Title of alert management screen */
 "Alert Management" = "Alarm-Einstellungen";
 
 /* Alert Permissions button text
-   Notification & Critical Alert Permissions screen title */
+Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Benachrichtigungsberechtigungen";
 
 /* The title of the section containing algorithm settings */
@@ -343,7 +340,7 @@
 "Choose Favorite:" = "Wähle Favorit:";
 
 /* Button title to close view
-   The button label of the action used to dismiss the unsafe notification permission alert */
+The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Schließen";
 
 /* The title text for the looping enabled switch cell */
@@ -462,7 +459,7 @@
 "Disables" = "Deaktivieren";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "Schließen";
 
 /* No comment provided by engineer. */
@@ -577,7 +574,7 @@
 "Glucose Data Now Available" = "Blutzucker jetzt verfügbar";
 
 /* Alert title for a manual glucose entry out of range error
-   Title for bolus screen warning when glucose entry is out of range */
+Title for bolus screen warning when glucose entry is out of range */
 "Glucose Entry Out of Range" = "Blutzucker-Eingabe außerhalb des Bereichs";
 
 /* Title of the prediction input effect for glucose momentum */
@@ -634,7 +631,7 @@
 "Insulin Type" = "Insulintyp";
 
 /* Title for integral retrospective correction experiment description
-   Title of integral retrospective correction experiment */
+Title of integral retrospective correction experiment */
 "Integral Retrospective Correction" = "Integrale retrospektive Korrektur";
 
 /* Description of Integral Retrospective Correction toggle. */
@@ -680,7 +677,7 @@
 "Loading..." = "Laden…";
 
 /* Button text to log a dose
-   Title for dose logging screen */
+Title for dose logging screen */
 "Log Dose" = "Dosis speichern";
 
 /* The title of the screen displaying a manually entered insulin dose */
@@ -701,9 +698,6 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop wurde nicht erfolgreich abgeschlossen seit %@";
 
-/* Description of Glucose Based Partial Application toggle. */
-"Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for." = "Loop liefert normalerweise in jedem Dosierungszyklus 40%1$ Ihres vorhergesagten Insulinbedarfs. \n\nWenn das Experiment Glucose Based Partial Application aktiviert ist, variiert Loop den Prozentsatz des empfohlenen Bolus, der in jedem Zyklus abgegeben wird, mit dem Glukosespiegel. \n\nIn der Nähe des Korrekturbereichs werden 20%2$ verwendet (ähnlich wie bei Temp Basal) und bei hohem Glukosewert (200 mg/dL, 11,1 mmol/L) allmählich auf ein Maximum von 80%3$ erhöht. \n\nBitte beachte, dass diese Funktion bei schnell ansteigendem Blutzucker, z. B. nach einer unangekündigten Mahlzeit, in Kombination mit Geschwindigkeits- und retrospektiven Korrektureffekten zu einer höheren Dosis führen kann, als Dein ISF erfordern würde.";
-
 /* Description string for automatic bolus dosing strategy */
 "Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." = "Loop gibt automatisch einen Bolus ab, wenn der Insulinbedarf über der geplanten Basalrate liegt, und verwendet temporäre Basalraten, wenn dies erforderlich ist, um die Insulinabgabe unter die geplante Basalrate zu reduzieren.";
 
@@ -714,7 +708,7 @@
 "Loop will set temporary basal rates to increase and decrease insulin delivery." = "Loop stellt temporäre Basalraten ein, um die Insulinabgabe zu erhöhen oder zu verringern.";
 
 /* Title for bolus screen warning when glucose is below glucose warning limit.
-   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
 "Low Glucose" = "Niedriger Blutzucker";
 
 /* Manage Permissions in Settings button text */
@@ -753,8 +747,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum-Effekte";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Weitere Info";
 
 /* Label for button to mute all alerts */
@@ -770,8 +764,8 @@
 "Nightscout" = "Nightscout";
 
 /* Title for bolus screen notice when no bolus is recommended
-   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
-   Title for bolus screen warning when no bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+Title for bolus screen warning when no bolus is recommended */
 "No Bolus Recommended" = "Kein Bolus empfohlen";
 
 /* The error message displayed for device connection errors. */
@@ -820,12 +814,12 @@
 "Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "Oh nein! Loop ist während des Bolus abgestürzt und die Insulinanpassungen wurden angehalten, bis dieser Dialog geschlossen wird. Der Dosierung-Verlauf ist möglicherweise nicht korrekt. Bitte prüfe die Tabellen zur Insulinabgabe und überwache Deinen Blutzucker sorgfältig.";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
 /* Notification Setting Status is On */
@@ -913,7 +907,7 @@
 "Recommended Basal" = "Empfohlene Basalrate";
 
 /* Label for recommended bolus row on bolus screen
-   Label for recommended bolus row on simple bolus screen */
+Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "Empfohlener Bolus";
 
 /* Title for bolus screen warning when recommended bolus exceeds max bolus */
@@ -923,7 +917,7 @@
 "Recommended Bolus: %@ Units" = "Empfohlener Bolus: %@ IE";
 
 /* The notification title for a remote bolus. (1: Bolus amount)
-   The notification title for a remote failure. (1: Bolus amount) */
+The notification title for a remote failure. (1: Bolus amount) */
 "Remote Bolus Entry: %@ U" = "Entfernte Boluseingabe: %@ IE";
 
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
@@ -937,9 +931,6 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Wiederholen";
-
-/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Speichern und Bolus abgeben";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Speichern ohne Bolusgabe";
@@ -984,7 +975,7 @@
 "Starting Bolus" = "Starte Bolus";
 
 /* Section title for Support
-   The title of the support section in settings */
+The title of the support section in settings */
 "Support" = "Unterstützung";
 
 /* The title text in settings */
@@ -1069,9 +1060,9 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Der laufende Bolus kann nicht gestoppt werden. Bewegen Dein iPhone näher an die Pumpe und versuche es erneut. Überprüfe den Verlauf der Insulinabgabe auf Einzelheiten und überwache Deinen Blutzucker genau.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Unbekannt";
 
 /* The error message displayed for unknown errors. (1: unknown error) */

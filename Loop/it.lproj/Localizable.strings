@@ -43,9 +43,6 @@
 /* Alert text for failing to cancel temp basal (1: reason description, 2: app name) */
 "%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@%2$@ non sono stati in grado di cancellare la tua attuale basale temporanea, che è più elevata di quella impostata come nuovo limite massimo di basale. Questo potrebbe comportare una maggiore infusione d'insulina di quanto desiderato. \n\nConsidera di sospendere manualmente l'erogazione d'insulina e quindi di riattivarla immediatamente per attivare l'erogazione d'insulina basale con il corretto limite impostato.";
 
-/* Adds a full-stop to a statement (1: statement, 2: full stop character) */
-"%1@%2@" = "%1$@%2$@";
-
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
@@ -57,6 +54,9 @@
 
 /* Formats (1: carb start time) and (2: carb absorption duration) */
 "%1$@ + %2$@" = "%1$@ + %2$@";
+
+/* App sounds title text (1: app name) */
+"%1$@ APP SOUNDS" = "%1$@ SUONI DELL'APP";
 
 /* Alert message for closed loop off informational modal. (1: app name) */
 "%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically." = "%1$@ sta funzionando in modalità Loop chiuso spento. Il tuo microinfusore e il tuo sensore continueranno a funzionare, ma l'applicazione non regolerà la somministrazione d'insulina automaticamente.";
@@ -85,6 +85,9 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ contro %2$@";
 
+/* Format string for body for notification of upcoming expiration. (1: app name) (2: amount of time until expiration */
+"%1$@ will stop working in %2$@. You will need to rebuild before that." = "%1$@ smetterà di funzionare in %2$@ . Dovrai ricostruire prima.";
+
 /* Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration */
 "%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile." = "%1$@ smetterà di funzionare in %2$@. Dovrai aggiornare prima di tale data con un nuovo provisioning profile.";
 
@@ -92,7 +95,7 @@
 "%1$@: %2$@" = "%1$@ : %2$@";
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
-   Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
+Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@ : <b> %2$@ </b> %3$@";
 
 /* No comment provided by engineer. */
@@ -170,15 +173,18 @@
 "Adjusted for" = "Corretto per";
 
 /* Alert Permissions button text
-   Title of alert management screen */
+Title of alert management screen */
 "Alert Management" = "Gestione Avvisi";
 
 /* Alert Permissions button text
-   Notification & Critical Alert Permissions screen title */
+Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Avvisi";
 
+/* Alert Permissions descriptive text */
+"Alert Permissions and Mute Alerts" = "Autorizzazioni avvisi e avvisi disattivati";
+
 /* Navigation title for algorithms experiments screen
-   The title of the Algorithm Experiments section in settings */
+The title of the Algorithm Experiments section in settings */
 "Algorithm Experiments" = "Esperimenti sugli algoritmi";
 
 /* Algorithm Experiments description. */
@@ -359,7 +365,7 @@
 "Choose Favorite:" = "Scegli il preferito:";
 
 /* Button title to close view
-   The button label of the action used to dismiss the unsafe notification permission alert */
+The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Chiudi";
 
 /* The title text for the looping enabled switch cell */
@@ -481,7 +487,7 @@
 "Disables" = "Disabilita";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "OK";
 
 /* No comment provided by engineer. */
@@ -571,11 +577,17 @@
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Per %1$@";
 
+/* Description text for silencing time sensitive and non-critical alerts (1: app name) */
+"For safety purposes, you should allow Critical Alerts, Time Sensitive and Notification Permissions (non-critical alerts) on your device to continue using %1$@ and cannot turn off individual alarms." = "Per motivi di sicurezza, dovresti consentire gli avvisi critici, le autorizzazioni urgenti e di notifica (avvisi non critici) sul tuo dispositivo per continuare a utilizzare %1$@ e non puoi disattivare i singoli allarmi.";
+
 /* No comment provided by engineer. */
 "Forecasted blood glucose may still be higher than target range." = "La glicemia prevista potrebbe essere più elevata di quella impostata come obiettivo.";
 
 /* Title for forecast explanation modal on bolus view */
 "Forecasted Glucose" = "Glicemia prevista";
+
+/* Label for link to see frequently asked questions */
+"Frequently asked questions about alerts" = "Domande frequenti sugli avvisi";
 
 /* The short unit display string for grams */
 "g" = "g";
@@ -587,7 +599,7 @@
 "Glucose" = "Glicemia";
 
 /* Title for glucose based partial application experiment description
-   Title of glucose based partial application experiment */
+Title of glucose based partial application experiment */
 "Glucose Based Partial Application" = "Glucose Based Partial Application (GBPA)";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
@@ -603,7 +615,7 @@
 "Glucose effect of suspending insulin delivery" = "Effetto sulla glicemia della sospensione della somministrazione di insulina";
 
 /* Alert title for a manual glucose entry out of range error
-   Title for bolus screen warning when glucose entry is out of range */
+Title for bolus screen warning when glucose entry is out of range */
 "Glucose Entry Out of Range" = "Glicemia inserita fuori dall'intervallo";
 
 /* Title of the prediction input effect for glucose momentum */
@@ -612,8 +624,26 @@
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "Programma degli intervalli degli obiettivi glicemici";
 
+/* No comment provided by engineer. */
+"HARDWARE SOUNDS" = "SUONI HARDWARE";
+
+/* No comment provided by engineer. */
+"High Glucose" = "Glucosio alto";
+
+/* No comment provided by engineer. */
+"How can I silence non-Critical Alerts?" = "Come posso silenziare gli avvisi non critici?";
+
+/* No comment provided by engineer. */
+"How can I silence only Time Sensitive and Non-Critical alerts?" = "Come posso silenziare solo gli avvisi urgenti e non critici?";
+
+/* Title text for temporarily silencing all sounds (1: app name) */
+"How can I temporarily silence all %1$@ app sounds?" = "Come posso silenziare temporaneamente tutti i suoni dell'app %1$@ ?";
+
 /* The title text for how to update */
 "How to update (LoopDocs)" = "Come Aggiornare (LoopDocs)";
+
+/* Focus modes descriptive text (1: app name) */
+"If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered and non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App." = "Se la modalità Focus iOS è attiva e gli avvisi disattivati sono disattivati, gli avvisi critici verranno comunque inviati e gli avvisi non critici verranno silenziati finché %1$@ non verrà aggiunto a ciascuna modalità Focus come app consentita.";
 
 /* Immediate Delivery status text */
 "Immediate" = "Immediato";
@@ -660,7 +690,7 @@
 "Insulin Type" = "Tipo d'insulina";
 
 /* Title for integral retrospective correction experiment description
-   Title of integral retrospective correction experiment */
+Title of integral retrospective correction experiment */
 "Integral Retrospective Correction" = "Correzione retrospettiva Integrale";
 
 /* Description of Integral Retrospective Correction toggle. */
@@ -687,6 +717,12 @@
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Lettura del glucosio non valida con data e ora %1$@ nel futuro";
 
+/* No comment provided by engineer. */
+"iOS Critical Alerts and Time Sensitive Alerts are types of Apple notifications. They are used for high-priority events. Some examples include:" = "Gli avvisi critici per iOS e gli avvisi urgenti sono tipi di notifiche Apple. Vengono utilizzati per eventi ad alta priorità. Alcuni esempi includono:";
+
+/* No comment provided by engineer. */
+"IOS FOCUS MODES" = "MODALITÀ DI MESSA A FUOCO IOS";
+
 /* The title text for the issue report cell */
 "Issue Report" = "Report dei problemi";
 
@@ -709,7 +745,7 @@
 "Loading..." = "Caricamento...";
 
 /* Button text to log a dose
-   Title for dose logging screen */
+Title for dose logging screen */
 "Log Dose" = "Registra la dose";
 
 /* The title of the screen displaying a manually entered insulin dose */
@@ -730,9 +766,6 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop non ha funzionato correttamente per %@";
 
-/* Description of Glucose Based Partial Application toggle. */
-"Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for." = "Loop normalmente fornisce il 40%1$ del fabbisogno di insulina previsto per ogni ciclo di dosaggio. \n\n Quando l'esperimento di Applicazione Parziale Basata sul Glucosio (GBPA) è abilitato, il Loop varierà la percentuale del bolo consigliato erogato ad ogni ciclo con il livello di glucosio. \n\nVicino all'intervallo di correzione, utilizzerà il 20%2$ (simile alla basale temporanea) e aumenterà gradualmente fino a un massimo dell'80%3$ in caso di glicemia elevata (200 mg/dl, 11,1 mmol/l). \n\nTieni presente che durante un rapido aumento della glicemia, ad esempio dopo un pasto imprevisto, questa caratteristica, combinata con la velocità e gli effetti di correzione retrospettiva, può comportare una dose maggiore di quella richiesta dall'FSI.";
-
 /* Description string for automatic bolus dosing strategy */
 "Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." = "Loop eseguirà automaticamente il bolo quando il fabbisogno d'insulina è superiore alla basale programmata e utilizzerà velocità basali temporanee quando necessario per ridurre l'erogazione d'insulina al di sotto della basale programmata.";
 
@@ -743,11 +776,14 @@
 "Loop will set temporary basal rates to increase and decrease insulin delivery." = "Loop imposterà velocità basali temporanee per aumentare e diminuire l'erogazione d'insulina.";
 
 /* Title for bolus screen warning when glucose is below glucose warning limit.
-   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
 "Low Glucose" = "Glucosio basso";
 
 /* Manage Permissions in Settings button text */
 "Manage Permissions in Settings" = "Gestisci le autorizzazioni in Impostazioni";
+
+/* View title for how mute alerts work */
+"Managing Alerts" = "Gestione degli avvisi";
 
 /* Description of a bolus dose entry (1: value (? if no value) in bold, 2: unit) */
 "Manual Dose: <b>%1$@</b> %2$@" = "Dose manuale: <b> %1$@ </b> %2$@";
@@ -782,8 +818,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Effetto glicemico attuale";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Piu info";
 
 /* Label for button to mute all alerts */
@@ -805,8 +841,8 @@
 "No alerts or alarms will sound while muted. Select how long you would you like to mute for." = "Nessun avviso o allarme suonerà quando l'audio è disattivato. Seleziona per quanto tempo desideri disattivare l'audio.";
 
 /* Title for bolus screen notice when no bolus is recommended
-   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
-   Title for bolus screen warning when no bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+Title for bolus screen warning when no bolus is recommended */
 "No Bolus Recommended" = "Nessun bolo consigliato";
 
 /* The error message displayed for device connection errors. */
@@ -855,12 +891,12 @@
 "Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "Oh No! Loop si è chiuso mentre stava eseguendo un bolo e il dosaggio di insulina è stato messo in pausa, finchè la finestra sarà chiusa. L'elenco dell'infusione d'insulina potrebbe non essere accurato. Per favore rivedi con attenzione la tabella di infusione dell'insulina e sorveglia strettamente la tua glicemia";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
 /* Notification Setting Status is On */
@@ -917,6 +953,9 @@
 /* The title of the screen displaying a pump event */
 "Pump Event" = "Evento Microinfusore";
 
+/* No comment provided by engineer. */
+"Pump Expired" = "Microinfusore scaduto";
+
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Gestione Microinfusore";
 
@@ -951,7 +990,7 @@
 "Recommended Basal" = "Basale Raccomandata";
 
 /* Label for recommended bolus row on bolus screen
-   Label for recommended bolus row on simple bolus screen */
+Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "Bolo Raccomandato";
 
 /* Title for bolus screen warning when recommended bolus exceeds max bolus */
@@ -961,7 +1000,7 @@
 "Recommended Bolus: %@ Units" = "Bolo Raccomandato: %@ Unità";
 
 /* The notification title for a remote bolus. (1: Bolus amount)
-   The notification title for a remote failure. (1: Bolus amount) */
+The notification title for a remote failure. (1: Bolus amount) */
 "Remote Bolus Entry: %@ U" = "Inserimento di Bolo Remoto:%@ Unita'";
 
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
@@ -969,6 +1008,9 @@
 
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Serbatoio";
+
+/* No comment provided by engineer. */
+"Reservoir Empty" = "Serbatoio vuoto";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Correzione retrospettiva";
@@ -978,9 +1020,6 @@
 
 /* No comment provided by engineer. */
 "Save" = "Salva";
-
-/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Salva e Invia";
 
 /* No comment provided by engineer. */
 "Save as favorite food" = "Salva come cibo preferito";
@@ -993,6 +1032,9 @@
 
 /* No comment provided by engineer. */
 "Selecting a favorite food in the carb entry screen automatically fills in the carb quantity, food type, and absorption time fields! Tap the add button below to create your first favorite food!" = "Selezionando un alimento preferito nella schermata di immissione dei carboidrati si riempiono automaticamente i campi relativi alla quantità di carboidrati, al tipo di alimento e al tempo di assorbimento! Tocca il pulsante Aggiungi qui sotto per creare il tuo primo cibo preferito!";
+
+/* No comment provided by engineer. */
+"Sensor Failed" = "Sensore guasto";
 
 /* The title of the services section in settings */
 "Services" = "Servizi";
@@ -1031,7 +1073,7 @@
 "Starting Bolus" = "Avvio Bolo";
 
 /* Section title for Support
-   The title of the support section in settings */
+The title of the support section in settings */
 "Support" = "Supporto";
 
 /* The title text in settings */
@@ -1063,6 +1105,18 @@
 
 /* The alert body for unmute alert confirmation */
 "Tap Unmute to resume sound for your alerts and alarms." = "Tocca Riattiva per ripristinare l'audio per gli avvisi e le sveglie.";
+
+/* Settings app TestFlight section */
+"TestFlight" = "TestFlight";
+
+/* Settings TestFlight expiration view */
+"TestFlight Expiration" = "Scadenza di TestFlight";
+
+/* Time that build expires */
+"TestFlight expires " = "TestFlight scade ";
+
+/* The title for notification of upcoming TestFlight expiration */
+"TestFlight Expires Soon" = "TestFlight scade a breve";
 
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "La quantità di bolo immessa è inferiore alla quantità minima erogabile.";
@@ -1097,11 +1151,20 @@
 /* String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus */
 "This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." = "Questa opzione si applica solo quando la strategia di dosaggio di Loop è impostata su Bolo automatico.";
 
+/* No comment provided by engineer. */
+"Time Sensitive Alerts" = "Avvisi sensibili al fattore tempo";
+
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Notifiche a tempo";
 
+/* No comment provided by engineer. */
+"Transmitter Low Battery" = "Batteria scarica del trasmettitore";
+
 /* Critical event log export error alert try again button */
 "Try Again" = "Riprova";
+
+/* Description text for temporarily silencing non-critical alerts (1: app name) */
+"Turn off the volume on your iOS device or add %1$@ as an allowed app to each Focus Mode. Time Sensitive and Critical Alerts will still sound, but non-Critical Alerts will be silenced." = "Disattiva il volume sul tuo dispositivo iOS o aggiungi %1$@ come app consentita a ciascuna modalità Focus. Gli avvisi urgenti e critici continueranno a suonare, ma gli avvisi non critici verranno silenziati.";
 
 /* Bluetooth off foreground alert body */
 "Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Attiva il Bluetooth per ricevere avvisi, allarmi o letture glicemiche del sensore.";
@@ -1125,9 +1188,9 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Impossibile interrompere il bolo in corso. Avvicinare l'iPhone al microinfusore e riprovare. Controllare nella cronologia delle somministrazioni l'insulina e monitorare attentamente la glicemia.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Sconosciuto";
 
 /* The error message displayed for unknown errors. (1: unknown error) */
@@ -1160,8 +1223,14 @@
 /* The title of a target alert action specifying workout targets duration until it is turned off by the user */
 "Until I turn off" = "Finché non spengo";
 
+/* No comment provided by engineer. */
+"Urgent Low" = "Urgente Basso";
+
 /* The title of the alert controller used to select a duration for pre-meal targets */
 "Use Pre-Meal Preset" = "Usa preimpostazione Pre-Pasto";
+
+/* Description text for temporarily silencing all sounds (1: app name) */
+"Use the Mute Alerts feature. It allows you to temporarily silence all of your alerts and alarms via the %1$@ app, including Critical Alerts and Time Sensitive Alerts." = "Utilizza la funzione Disattiva avvisi. Ti consente di silenziare temporaneamente tutti gli avvisi e gli allarmi tramite l'app %1$@ , inclusi gli avvisi critici e gli avvisi urgenti.";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Utilizza i target glicemi per l'allenamento";
@@ -1175,6 +1244,9 @@
 /* Alert Permissions Need Attention alert title */
 "Warning! Safety notifications are turned OFF" = "Attenzione! Le notifiche di sicurezza sono disattivate";
 
+/* No comment provided by engineer. */
+"What are examples of Critical and Time Sensitive alerts?" = "Quali sono gli esempi di avvisi critici e urgenti?";
+
 /* Explanation of glucose safety limit */
 "When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Quando la glicemia attuale o prevista è inferiore al limite di sicurezza, Loop non consiglia un bolo e raccomanda sempre una velocità basale temporanea di 0 unità all'ora.";
 
@@ -1186,6 +1258,12 @@
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Quando non è in modalità ciclo chiuso, l'applicazione utilizza un calcolatore di bolo semplificato come un tipico microinfusore.";
+
+/* App sounds descriptive text (1: app name) */
+"While mute alerts is on, all alerts from your %1$@ app including Critical and Time Sensitive alerts will temporarily display without sounds and will vibrate only." = "Quando l'audio è disattivato, gli avvisi %1$@ verranno temporaneamente visualizzati senza suoni e vibreranno solo. Una volta terminato il periodo di disattivazione, gli avvisi riprenderanno normalmente.";
+
+/* No comment provided by engineer. */
+"While mute alerts is on, your insulin pump and CGM hardware may still sound." = "Mentre gli avvisi di disattivazione audio sono attivi, il microinfusore per insulina e l'hardware CGM potrebbero continuare a suonare.";
 
 /* Format string for message of reset loop alert. (1: App name) (2: error description) */
 "While trying to restart %1$@ an error occured.\n\n%2$@" = "Durante il tentativo di riavviare %1$@ si è verificato un errore.\n\n%2$@";

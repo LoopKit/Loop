@@ -1,9 +1,6 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "WatchApp-utvidelse";
 
-/* Bundle name */
-"CFBundleName" = "WatchApp-utvidelse";
-
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Måltidsdata fra helsedatabasen brukes til å bestemme glukoseeffekter. Glukosedata fra helsedatabasen brukes til grafer og momentumberegning. Søvndata fra helsedatabasen brukes til å optimalisere leveringen av Apple Watch-komplikasjonsoppdateringer når du er våken.";
 

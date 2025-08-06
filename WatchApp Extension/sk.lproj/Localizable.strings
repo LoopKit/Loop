@@ -23,7 +23,7 @@
 "dB" = "dB";
 
 /* Short unit label for gram measurement
-   The short unit display string for grams */
+The short unit display string for grams */
 "g" = "g";
 
 /* The short unit display string for milligrams of glucose per decilter */

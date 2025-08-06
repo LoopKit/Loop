@@ -8,7 +8,7 @@
 "\n%1$@\n\nTap your CGM and insulin pump status icons for more information. %2$@ will continue trying to complete a loop, but watch for potential communication issues with your pump and CGM." = "%1$@\n\nTrykk på statusikonene for CGM og insulinpumpe for mer informasjon. %2$@ vil fortsette å prøve å fullføre en loop, men se etter potensielle kommunikasjonsproblemer med pumpen og CGM.";
 
 /* Green closed loop OFF message (1: app name)(2: reason for open loop) */
-"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "%1$@ opererer med Closed Loop i OFF posisjon. Pumpen og CGM vil fortsette å fungere, men appen vil ikke justere doseringen automatisk.\n\n%2$@";
+"\n%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically.\n\n%2$@" = "%1$@ opererer med Lukket Loop i AV-posisjon. Pumpen og CGM vil fortsette å fungere, men appen vil ikke justere doseringen automatisk.\n\n%2$@";
 
 /* No glucose value representation (3 dashes for mg/dL) */
 "– – –" = "– – –";
@@ -29,7 +29,7 @@
 "%1$@ at %2$@" = "%1$@ kl. %2$@";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
-"%1$@ units per hour at %2$@" = "%1$@ enheter per time kl. %2$@";
+"%1$@ units per hour at %2$@" = "%1$@ enheter pr. time kl. %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v %2$@";

@@ -1,9 +1,6 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "Loop";
 
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Bluetooth được sử dụng để liên lạc với máy bơm insulin và các thiết bị theo dõi đường huyết liên tục/CGM.";
 

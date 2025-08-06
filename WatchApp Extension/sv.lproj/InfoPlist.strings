@@ -1,9 +1,6 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "WatchApp Extension";
 
-/* Bundle name */
-"CFBundleName" = "WatchApp Extension";
-
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Kolhydratdata från Apple Health-databasen används för att avgöra blodsockereffekt. Blodsockervärden från Apple Health-databasen används i diagram och för beräkning av förändring.";
 

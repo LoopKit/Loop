@@ -1,9 +1,6 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "ループ";
 
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "ブルートゥースは、インスリンポンプおよび連続グルコースモニタデバイスと通信するために使用されます";
 

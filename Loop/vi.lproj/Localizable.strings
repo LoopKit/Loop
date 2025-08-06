@@ -230,7 +230,7 @@
 "Disables" = "Vô hiệu hóa";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "Từ bỏ";
 
 /* The action hint of the workout mode toggle button when disabled */
@@ -331,8 +331,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Hiệu ứng động lượng";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Thêm thông tin";
 
 /* Sensor state description for the non-valid state */
@@ -345,12 +345,12 @@
 "No connected devices, or failure during device connection" = "Không có thiết bị nào được kết nối, hoặc lỗi trong quá trình kết nối";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
 /* Notification Setting Status is On */
@@ -459,9 +459,9 @@
 "U" = "U";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Không nhận ra";
 
 /* The format for the description of a temporary override end date */

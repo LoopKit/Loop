@@ -1,9 +1,6 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "Loop";
 
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Bluetooth משמש לתקשורת עם משאבת אינסולין, חיישנים ומכשירים נוספים.";
 

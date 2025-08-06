@@ -65,7 +65,7 @@
 "%1$@: %2$@" = "%1$@: %2$@";
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
-   Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
+Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* Description of the prediction input effect for glucose momentum */
@@ -128,7 +128,7 @@
 "Adjusted for" = "Justerad för";
 
 /* Alert Permissions button text
-   Notification & Critical Alert Permissions screen title */
+Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Behörigheter för Varningar";
 
 /* The title of the section containing algorithm settings */
@@ -258,7 +258,7 @@
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Välj en längre absorptionstid för måltid med mycket fett eller protein. Ofta är det bäst att dela upp måltiden i snabba och långsamma kolhydrater och mata in dessa var för sig.";
 
 /* Button title to close view
-   The button label of the action used to dismiss the unsafe notification permission alert */
+The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Stäng";
 
 /* The title text for the looping enabled switch cell */
@@ -359,7 +359,7 @@
 "Disables" = "Stänger av";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "Avfärda";
 
 /* No comment provided by engineer. */
@@ -444,7 +444,7 @@
 "Glucose Data Now Available" = "Blodglukosvärde finns nu tillgängligt";
 
 /* Alert title for a manual glucose entry out of range error
-   Title for bolus screen warning when glucose entry is out of range */
+Title for bolus screen warning when glucose entry is out of range */
 "Glucose Entry Out of Range" = "Det manuellt inmatade blodsockervärdet utanför gränsvärden";
 
 /* Title of the prediction input effect for glucose momentum */
@@ -504,7 +504,7 @@
 "Loading..." = "Laddar...";
 
 /* Button text to log a dose
-   Title for dose logging screen */
+Title for dose logging screen */
 "Log Dose" = "Logga Dos";
 
 /* The title of the screen displaying a manually entered insulin dose */
@@ -543,8 +543,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentumeffekter";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Mer info";
 
 /* Sensor state description for the non-valid state */
@@ -554,8 +554,8 @@
 "Nightscout" = "Nightscout";
 
 /* Title for bolus screen notice when no bolus is recommended
-   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
-   Title for bolus screen warning when no bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+Title for bolus screen warning when no bolus is recommended */
 "No Bolus Recommended" = "Ingen bolus rekommenderas";
 
 /* The error message displayed for device connection errors. */
@@ -580,12 +580,12 @@
 "Off" = "Av";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
 /* Notification Setting Status is On */
@@ -655,7 +655,7 @@
 "Recommended Basal" = "Rekommenderad basaldos";
 
 /* Label for recommended bolus row on bolus screen
-   Label for recommended bolus row on simple bolus screen */
+Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "Rekommenderad bolus";
 
 /* Accessibility hint describing recommended bolus units */
@@ -669,9 +669,6 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Försök igen";
-
-/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Spara och ge";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Spara utan att ge bolus";
@@ -704,7 +701,7 @@
 "Starting Bolus" = "Påbörjar bolus";
 
 /* Section title for Support
-   The title of the support section in settings */
+The title of the support section in settings */
 "Support" = "Support";
 
 /* The title text in settings */
@@ -768,9 +765,9 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Det går inte att stoppa pågående bolus. Flytta din iPhone närmare din pump och försök igen. Kontrollera händelsehistorik för insulin för mer detaljerad information och var vaksam på sjunkande blodsocker.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Okänd";
 
 /* The format for the description of a temporary override end date */

@@ -1,9 +1,6 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "Loop";
 
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Bluetooth este folosit pentru a comunica cu pompa de insulină, precum și cu dispozitivele de monitorizare glicemică continuă.";
 

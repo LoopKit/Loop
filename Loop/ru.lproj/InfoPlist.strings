@@ -1,9 +1,6 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "Loop";
 
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Bluetooth используется для связи с инсулиновой помпой и устройствами непрерывного мониторинга глюкозы.";
 

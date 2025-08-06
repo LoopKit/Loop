@@ -1,9 +1,6 @@
 /* Bundle display name */
 "CFBundleDisplayName" = "Loop";
 
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Bluetooth, insülin pompası ve sürekli glikoz izleme cihazlarıyla iletişim kurmak için kullanılır.";
 

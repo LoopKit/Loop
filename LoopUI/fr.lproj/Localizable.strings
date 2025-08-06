@@ -41,7 +41,7 @@
 "<1 min ago" = "moins qu'une minute";
 
 /* Accessibility hint describing completion HUD for a closed loop */
-"Closed loop" = "Loop fermée";
+"Closed loop" = "Boucle fermée";
 
 /* Title of green open loop OFF message */
 "Closed Loop OFF" = "Boucle Ouverte";

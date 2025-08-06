@@ -43,9 +43,6 @@
 /* Alert text for failing to cancel temp basal (1: reason description, 2: app name) */
 "%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@ %2$@ kunne ikke avbryte den nåværende midlertidige basaldosen, som er høyere enn den nye maksimale basalgrensen du har angitt. Dette kan føre til høyere insulintilførsel enn ønsket. \n\n Vurder å avbryte insulintilførselen manuelt og deretter umiddelbart gjenoppta for å innføre basaltilførsel med den nye grensen på plass.";
 
-/* Adds a full-stop to a statement (1: statement, 2: full stop character) */
-"%1@%2@" = "%1$@ %2$@";
-
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
@@ -58,8 +55,11 @@
 /* Formats (1: carb start time) and (2: carb absorption duration) */
 "%1$@ + %2$@" = "%1$@ + %2$@";
 
+/* App sounds title text (1: app name) */
+"%1$@ APP SOUNDS" = "%1$@ APP-LYDER";
+
 /* Alert message for closed loop off informational modal. (1: app name) */
-"%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically." = "%1$@ opererer med Closed Loop i OFF posisjon. Pumpen og CGM vil fortsette å fungere, men appen vil ikke justere doseringen automatisk.";
+"%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically." = "%1$@ opererer med Lukket Loop i AV-posisjon. Pumpen og CGM vil fortsette å fungere, men appen vil ikke justere doseringen automatisk.";
 
 /* Message for alert shown when alert acknowledgement fails for a device, and the device does not provide a LocalizedError. (1: app name) */
 "%1$@ is unable to clear the alert from your device" = "%1$@ kan ikke fjerne varselet fra enheten din";
@@ -85,6 +85,9 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v %2$@";
 
+/* Format string for body for notification of upcoming expiration. (1: app name) (2: amount of time until expiration */
+"%1$@ will stop working in %2$@. You will need to rebuild before that." = "%1$@ vil slutte å fungere i %2$@. Du må gjenoppbygge før det.";
+
 /* Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration */
 "%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile." = "%1$@ slutter å fungere om %2$@ . Du må oppdatere før det, med en ny klargjøringsprofil.";
 
@@ -92,7 +95,7 @@
 "%1$@: %2$@" = "%1$@ : %2$@";
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
-   Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
+Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@ : <b> %2$@ </b> %3$@";
 
 /* No comment provided by engineer. */
@@ -170,15 +173,18 @@
 "Adjusted for" = "Justert for";
 
 /* Alert Permissions button text
-   Title of alert management screen */
+Title of alert management screen */
 "Alert Management" = "Administrasjon av varsler";
 
 /* Alert Permissions button text
-   Notification & Critical Alert Permissions screen title */
+Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Varslingsinnstillinger";
 
+/* Alert Permissions descriptive text */
+"Alert Permissions and Mute Alerts" = "Varselstillatelser og demp varsler";
+
 /* Navigation title for algorithms experiments screen
-   The title of the Algorithm Experiments section in settings */
+The title of the Algorithm Experiments section in settings */
 "Algorithm Experiments" = "Algoritmeeksperimenter";
 
 /* Algorithm Experiments description. */
@@ -359,7 +365,7 @@
 "Choose Favorite:" = "Velg favoritt:";
 
 /* Button title to close view
-   The button label of the action used to dismiss the unsafe notification permission alert */
+The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Lukk";
 
 /* The title text for the looping enabled switch cell */
@@ -481,7 +487,7 @@
 "Disables" = "Deaktiverer";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "Avvis";
 
 /* No comment provided by engineer. */
@@ -571,11 +577,17 @@
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "For %1$@";
 
+/* Description text for silencing time sensitive and non-critical alerts (1: app name) */
+"For safety purposes, you should allow Critical Alerts, Time Sensitive and Notification Permissions (non-critical alerts) on your device to continue using %1$@ and cannot turn off individual alarms." = "Av sikkerhetshensyn bør du tillate at kritiske varsler, tidssensitive varsler og varslingstillatelser (ikke-kritiske varsler) på enheten din fortsetter å bruke %1$@ og ikke kan slå av individuelle alarmer.";
+
 /* No comment provided by engineer. */
 "Forecasted blood glucose may still be higher than target range." = "Forventet blodsukker kan fortsatt være høyere enn målområdet.";
 
 /* Title for forecast explanation modal on bolus view */
 "Forecasted Glucose" = "Forventet blodsukker";
+
+/* Label for link to see frequently asked questions */
+"Frequently asked questions about alerts" = "Ofte stilte spørsmål om varsler";
 
 /* The short unit display string for grams */
 "g" = "g";
@@ -587,7 +599,7 @@
 "Glucose" = "Blodsukker";
 
 /* Title for glucose based partial application experiment description
-   Title of glucose based partial application experiment */
+Title of glucose based partial application experiment */
 "Glucose Based Partial Application" = "Partiell anvendelse basert på glukosenivå";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
@@ -603,7 +615,7 @@
 "Glucose effect of suspending insulin delivery" = "Glukoseeffekt av å suspendere insulintilførsel";
 
 /* Alert title for a manual glucose entry out of range error
-   Title for bolus screen warning when glucose entry is out of range */
+Title for bolus screen warning when glucose entry is out of range */
 "Glucose Entry Out of Range" = "Blodsukkerdata er utenfor intervallet";
 
 /* Title of the prediction input effect for glucose momentum */
@@ -612,8 +624,26 @@
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "Tidsplan for blodsukker målområde";
 
+/* No comment provided by engineer. */
+"HARDWARE SOUNDS" = "MASKINVARELYDER";
+
+/* No comment provided by engineer. */
+"High Glucose" = "Høyt glukosenivå";
+
+/* No comment provided by engineer. */
+"How can I silence non-Critical Alerts?" = "Hvordan kan jeg dempe ikke-kritiske varsler?";
+
+/* No comment provided by engineer. */
+"How can I silence only Time Sensitive and Non-Critical alerts?" = "Hvordan kan jeg deaktivere kun tidssensitive og ikke-kritiske varsler?";
+
+/* Title text for temporarily silencing all sounds (1: app name) */
+"How can I temporarily silence all %1$@ app sounds?" = "Hvordan kan jeg midlertidig dempe alle %1$@-applydene?";
+
 /* The title text for how to update */
 "How to update (LoopDocs)" = "Hvordan oppdatere (LoopDocs)";
+
+/* Focus modes descriptive text (1: app name) */
+"If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered and non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App." = "Hvis iOS Focus Mode er PÅ og Mute Alerts er AV, vil kritiske varsler fortsatt bli levert og ikke-kritiske varsler vil bli dempet inntil %1$@ er lagt til i hver Focus Mode som en tillatt app.";
 
 /* Immediate Delivery status text */
 "Immediate" = "Umiddelbar";
@@ -660,7 +690,7 @@
 "Insulin Type" = "Insulintype";
 
 /* Title for integral retrospective correction experiment description
-   Title of integral retrospective correction experiment */
+Title of integral retrospective correction experiment */
 "Integral Retrospective Correction" = "Integrert retrospektiv korreksjon";
 
 /* Description of Integral Retrospective Correction toggle. */
@@ -687,6 +717,12 @@
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Ugyldig blodsukkermåling med et tidsstempel som er %1$@ i fremtiden";
 
+/* No comment provided by engineer. */
+"iOS Critical Alerts and Time Sensitive Alerts are types of Apple notifications. They are used for high-priority events. Some examples include:" = "iOS Critical Alerts og Time Sensitive Alerts er typer Apple-varsler. De brukes ved hendelser med høy prioritet. Noen eksempler er:";
+
+/* No comment provided by engineer. */
+"IOS FOCUS MODES" = "IOS-FOKUSMODUSER";
+
 /* The title text for the issue report cell */
 "Issue Report" = "Problem Rapport";
 
@@ -709,7 +745,7 @@
 "Loading..." = "Laster inn...";
 
 /* Button text to log a dose
-   Title for dose logging screen */
+Title for dose logging screen */
 "Log Dose" = "Logg Dose";
 
 /* The title of the screen displaying a manually entered insulin dose */
@@ -730,9 +766,6 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop har ikke fullført i %@";
 
-/* Description of Glucose Based Partial Application toggle. */
-"Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for." = "Loop gir normalt 40 %1$ av det forventede insulinbehovet i hver doseringssyklus.\n\nNår eksperimentet Glukosebasert delvis tilførsel er aktivert, vil Loop variere prosentandelen av anbefalt bolus som tilføres hver syklus med glukosenivået.\n\nI nærheten av korreksjonsområdet bruker den 20 %2$ (i likhet med Temp Basal), og øker gradvis til maksimalt 80 %3$ ved høyt glukosenivå (200 mg/dL, 11,1 mmol/L).\n\nVær oppmerksom på at når glukosenivået stiger raskt, f.eks. etter et uanmeldt måltid, kan denne funksjonen, kombinert med hastighets- og retrospektive korreksjonseffekter, resultere i en større dose enn det ISF skulle tilsi.";
-
 /* Description string for automatic bolus dosing strategy */
 "Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." = "Lopp vil sette bolus når insulinbehovet er over planlagt basal, og vil bruke midlertidige basale rater når det er nødvendig for å redusere insulintilførselen under planlagt basal";
 
@@ -743,17 +776,20 @@
 "Loop will set temporary basal rates to increase and decrease insulin delivery." = "Loop vil sette midlertidige basal rater for å øke og redusere insulin levering.";
 
 /* Title for bolus screen warning when glucose is below glucose warning limit.
-   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
 "Low Glucose" = "Lavt blodsukker";
 
 /* Manage Permissions in Settings button text */
 "Manage Permissions in Settings" = "Behandle tillatelser i Innstillinger";
 
+/* View title for how mute alerts work */
+"Managing Alerts" = "Administrere varsler";
+
 /* Description of a bolus dose entry (1: value (? if no value) in bold, 2: unit) */
 "Manual Dose: <b>%1$@</b> %2$@" = "Manuell dose: <b>%1$@</b> %2$@";
 
 /* Details for configuration error when maximum basal rate per hour is missing */
-"Maximum Basal Rate Per Hour" = "Maksimal basalrate per time";
+"Maximum Basal Rate Per Hour" = "Maksimal basaldose pr. time";
 
 /* Details for configuration error when maximum bolus is missing */
 "Maximum Bolus" = "Maks bolus";
@@ -782,8 +818,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum effekter";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Mer info";
 
 /* Label for button to mute all alerts */
@@ -805,8 +841,8 @@
 "No alerts or alarms will sound while muted. Select how long you would you like to mute for." = "Ingen varsler eller alarmer vil høres mens de er dempet. Velg hvor lenge du ønsker å dempe lyden.";
 
 /* Title for bolus screen notice when no bolus is recommended
-   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
-   Title for bolus screen warning when no bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+Title for bolus screen warning when no bolus is recommended */
 "No Bolus Recommended" = "Ingen anbefalt bolus";
 
 /* The error message displayed for device connection errors. */
@@ -855,12 +891,12 @@
 "Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "Å nei! Loop krasjet under dosering, og insulinjusteringer er satt på pause til denne dialogen er lukket. Doseringshistorikken er kanskje ikke nøyaktig. Vennligst sjekk diagrammer for insulin levering, og overvåk blodsukkeret nøye.";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
 /* Notification Setting Status is On */
@@ -917,6 +953,9 @@
 /* The title of the screen displaying a pump event */
 "Pump Event" = "Pumpehendelse";
 
+/* No comment provided by engineer. */
+"Pump Expired" = "Pumpen er utløpt";
+
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Pumpe manager";
 
@@ -951,7 +990,7 @@
 "Recommended Basal" = "Anbefalt Basal";
 
 /* Label for recommended bolus row on bolus screen
-   Label for recommended bolus row on simple bolus screen */
+Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "Anbefalt bolus";
 
 /* Title for bolus screen warning when recommended bolus exceeds max bolus */
@@ -961,7 +1000,7 @@
 "Recommended Bolus: %@ Units" = "Anbefalt bolus: %@ enheter";
 
 /* The notification title for a remote bolus. (1: Bolus amount)
-   The notification title for a remote failure. (1: Bolus amount) */
+The notification title for a remote failure. (1: Bolus amount) */
 "Remote Bolus Entry: %@ U" = "Ekstern bolusregistrering: %@ E";
 
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
@@ -969,6 +1008,9 @@
 
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Reservoar";
+
+/* No comment provided by engineer. */
+"Reservoir Empty" = "Reservoaret er tomt";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Retrospektiv korreksjon";
@@ -979,11 +1021,11 @@
 /* No comment provided by engineer. */
 "Save" = "Lagre";
 
-/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Lagre og gi bolus";
-
 /* No comment provided by engineer. */
 "Save as favorite food" = "Lagre som favorittmat";
+
+/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
+"Save Carbs & Deliver" = "Lagre og gi bolus";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Lagre uten å sette bolus";
@@ -993,6 +1035,9 @@
 
 /* No comment provided by engineer. */
 "Selecting a favorite food in the carb entry screen automatically fills in the carb quantity, food type, and absorption time fields! Tap the add button below to create your first favorite food!" = "Når du velger en favorittmat i skjermbildet for innlegging av karbohydrater, fylles feltene for karbohydratmengde, matvaretype og opptakstid automatisk ut! Trykk på knappen Legg til nedenfor for å opprette din første favorittmat!";
+
+/* No comment provided by engineer. */
+"Sensor Failed" = "Sensor mislyktes";
 
 /* The title of the services section in settings */
 "Services" = "Tjenester";
@@ -1031,7 +1076,7 @@
 "Starting Bolus" = "Starter Bolus";
 
 /* Section title for Support
-   The title of the support section in settings */
+The title of the support section in settings */
 "Support" = "Brukerstøtte";
 
 /* The title text in settings */
@@ -1063,6 +1108,18 @@
 
 /* The alert body for unmute alert confirmation */
 "Tap Unmute to resume sound for your alerts and alarms." = "Trykk på Slå av lyd for å gjenoppta lyden for varsler og alarmer.";
+
+/* Settings app TestFlight section */
+"TestFlight" = "TestFlight";
+
+/* Settings TestFlight expiration view */
+"TestFlight Expiration" = "TestFlight-utløp";
+
+/* Time that build expires */
+"TestFlight expires " = "TestFlight utløper ";
+
+/* The title for notification of upcoming TestFlight expiration */
+"TestFlight Expires Soon" = "TestFlight utløper snart";
 
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "Den angitte bolusmengden er mindre enn minimumsleveransen.";
@@ -1097,11 +1154,20 @@
 /* String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus */
 "This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." = "Dette alternativet gjelder bare når Loops doseringsstrategi er satt til Automatisk bolus.";
 
+/* No comment provided by engineer. */
+"Time Sensitive Alerts" = "Tidssensitive varsler";
+
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Tidssensitive varsler";
 
+/* No comment provided by engineer. */
+"Transmitter Low Battery" = "Svakt batteri i senderen";
+
 /* Critical event log export error alert try again button */
 "Try Again" = "Prøv på nytt";
+
+/* Description text for temporarily silencing non-critical alerts (1: app name) */
+"Turn off the volume on your iOS device or add %1$@ as an allowed app to each Focus Mode. Time Sensitive and Critical Alerts will still sound, but non-Critical Alerts will be silenced." = "Slå av volumet på iOS-enheten eller legg til %1$@ som en tillatt app i hver fokusmodus. Tidssensitive og kritiske varsler vil fortsatt høres, men ikke-kritiske varsler blir dempet.";
 
 /* Bluetooth off foreground alert body */
 "Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Slå på Bluetooth for å motta varsler, alarmer eller avlesninger fra glukosesensor.";
@@ -1125,9 +1191,9 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Kan ikke stoppe bolusen som pågår. Flytt iPhone nærmere pumpen og prøv igjen. Sjekk insulinleveringshistorikken for detaljer, og overvåk glukosen nøye.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Ukjent";
 
 /* The error message displayed for unknown errors. (1: unknown error) */
@@ -1160,8 +1226,14 @@
 /* The title of a target alert action specifying workout targets duration until it is turned off by the user */
 "Until I turn off" = "Frem til jeg skrur av";
 
+/* No comment provided by engineer. */
+"Urgent Low" = "Øyeblikkelig lav";
+
 /* The title of the alert controller used to select a duration for pre-meal targets */
 "Use Pre-Meal Preset" = "Bruk pre-måltidsmål";
+
+/* Description text for temporarily silencing all sounds (1: app name) */
+"Use the Mute Alerts feature. It allows you to temporarily silence all of your alerts and alarms via the %1$@ app, including Critical Alerts and Time Sensitive Alerts." = "Bruk funksjonen Demp varsler. Med denne funksjonen kan du midlertidig dempe alle varsler og alarmer via %1$@-appen, inkludert kritiske varsler og tidssensitive varsler.";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Bruk treningsmodus for BS-målområde";
@@ -1175,17 +1247,26 @@
 /* Alert Permissions Need Attention alert title */
 "Warning! Safety notifications are turned OFF" = "Advarsel! Sikkerhetsvarsler er slått AV";
 
+/* No comment provided by engineer. */
+"What are examples of Critical and Time Sensitive alerts?" = "Hva er eksempler på kritiske og tidssensitive varsler?";
+
 /* Explanation of glucose safety limit */
-"When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når gjeldende eller anslått glukose er under glukosesikkerhetsgrensen, vil ikke Loop anbefale en bolus, og vil alltid anbefale en midlertidig basalrate på 0 enheter per time.";
+"When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når gjeldende eller anslått glukose er under glukosesikkerhetsgrensen, vil ikke Loop anbefale en bolus, og vil alltid anbefale en midlertidig basaldose på 0 enheter pr. time.";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når gjeldende eller anslått glukose er under suspenderingsterskelen, vil ikke Loop anbefale en bolus, og vil alltid anbefale en midlertidig basalrate på 0 enheter per time.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når gjeldende eller anslått glukose er under suspenderingsterskelen, vil ikke Loop anbefale en bolus, og vil alltid anbefale en midlertidig basaldose på 0 enheter pr. time.";
 
 /* Description of missed meal notifications. */
 "When enabled, Loop can notify you when it detects a meal that wasn't logged." = "Når den er aktivert, kan Loop varsle deg når den oppdager et måltid som ikke ble logget.";
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Når den er ute av lukket Loop-modus, bruker appen en forenklet boluskalkulator som en vanlig pumpe.";
+
+/* App sounds descriptive text (1: app name) */
+"While mute alerts is on, all alerts from your %1$@ app including Critical and Time Sensitive alerts will temporarily display without sounds and will vibrate only." = "Når lydløse varsler er på, vil alle varsler fra %1$@-appen, inkludert kritiske og tidssensitive varsler, midlertidig vises uten lyd og kun vibrere.";
+
+/* No comment provided by engineer. */
+"While mute alerts is on, your insulin pump and CGM hardware may still sound." = "Selv om dempede varsler er aktivert, kan insulinpumpen og CGM-maskinvaren fortsatt avgi lyd.";
 
 /* Format string for message of reset loop alert. (1: App name) (2: error description) */
 "While trying to restart %1$@ an error occured.\n\n%2$@" = "Det oppstod en feil da du prøvde å starte %1$@ på nytt.\n\n%2$@";

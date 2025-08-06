@@ -43,9 +43,6 @@
 /* Alert text for failing to cancel temp basal (1: reason description, 2: app name) */
 "%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@%2$@ не смог отменить вашу текущую   ВБС, которая превышает установленный вами новый предел максимальной ВБС. Это может привести к   большему количеству подаваемого инсулина, чем хотелось бы.\n\nРассмотрите возможность приостановить введение инсулина вручную, а затем немедленно возобновить введение базального инсулина с новым установленным лимитом.";
 
-/* Adds a full-stop to a statement (1: statement, 2: full stop character) */
-"%1@%2@" = "%1$@ %2$@";
-
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
@@ -57,6 +54,9 @@
 
 /* Formats (1: carb start time) and (2: carb absorption duration) */
 "%1$@ + %2$@" = "%1$@ + %2$@";
+
+/* App sounds title text (1: app name) */
+"%1$@ APP SOUNDS" = "%1$@ ЗВУКИ ПРИЛОЖЕНИЯ";
 
 /* Alert message for closed loop off informational modal. (1: app name) */
 "%1$@ is operating with Closed Loop in the OFF position. Your pump and CGM will continue operating, but the app will not adjust dosing automatically." = "%1$@ работает с замкнутым циклом в положении ВЫКЛ. Ваша помпа и CGM будут продолжать работать, но приложение не будет регулировать дозировку автоматически.";
@@ -85,6 +85,9 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ версии %2$@";
 
+/* Format string for body for notification of upcoming expiration. (1: app name) (2: amount of time until expiration */
+"%1$@ will stop working in %2$@. You will need to rebuild before that." = "%1$@ перестанет работать в %2$@. До этого времени необходимо пересобрать приложение заново.";
+
 /* Format string for body for notification of upcoming provisioning profile expiration. (1: app name) (2: amount of time until expiration */
 "%1$@ will stop working in %2$@. You will need to update before that, with a new provisioning profile." = "%1$@ перестанет работать в %2$@. Вам нужно будет обновить его до этого, используя новую подпись.";
 
@@ -92,7 +95,7 @@
 "%1$@: %2$@" = "%1$@: %2$@";
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
-   Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
+Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* No comment provided by engineer. */
@@ -167,12 +170,15 @@
 "Adjusted for" = "Скорректировано на";
 
 /* Alert Permissions button text
-   Title of alert management screen */
+Title of alert management screen */
 "Alert Management" = "Управление оповещениями";
 
 /* Alert Permissions button text
-   Notification & Critical Alert Permissions screen title */
+Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Разрешение оповещений";
+
+/* Alert Permissions descriptive text */
+"Alert Permissions and Mute Alerts" = "Разрешения на оповещения и отключение звука оповещений";
 
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Настройки алгоритма";
@@ -328,7 +334,7 @@
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Выберите более длительное время усвоения для больших порций пищи или тех, которые содержат жиры и белки. Это лишь руководство к алгоритму и не обязательно должно быть точным.";
 
 /* Button title to close view
-   The button label of the action used to dismiss the unsafe notification permission alert */
+The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Закрыть";
 
 /* The title text for the looping enabled switch cell */
@@ -441,7 +447,7 @@
 "Disables" = "Отключает";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "Отклонить";
 
 /* No comment provided by engineer. */
@@ -522,11 +528,17 @@
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "В течение %1$@";
 
+/* Description text for silencing time sensitive and non-critical alerts (1: app name) */
+"For safety purposes, you should allow Critical Alerts, Time Sensitive and Notification Permissions (non-critical alerts) on your device to continue using %1$@ and cannot turn off individual alarms." = "В целях безопасности вам следует разрешить критические оповещения, срочные оповещения и уведомления (некритические оповещения) на вашем устройстве, чтобы продолжить использовать %1$@ и не отключать отдельные тревоги.";
+
 /* No comment provided by engineer. */
 "Forecasted blood glucose may still be higher than target range." = "Прогнозируемый уровень глюкозы в крови все еще может быть выше целевого диапазона.";
 
 /* Title for forecast explanation modal on bolus view */
 "Forecasted Glucose" = "Прогнозируемый уровень глюкозы";
+
+/* Label for link to see frequently asked questions */
+"Frequently asked questions about alerts" = "Часто задаваемые вопросы об оповещениях";
 
 /* The short unit display string for grams */
 "g" = "г";
@@ -547,7 +559,7 @@
 "Glucose Data Now Available" = "Данные о глюкозе теперь доступны";
 
 /* Alert title for a manual glucose entry out of range error
-   Title for bolus screen warning when glucose entry is out of range */
+Title for bolus screen warning when glucose entry is out of range */
 "Glucose Entry Out of Range" = "Ввод глюкозы вне допустимого диапазона";
 
 /* Title of the prediction input effect for glucose momentum */
@@ -556,8 +568,26 @@
 /* Details for configuration error when glucose target range schedule is missing */
 "Glucose Target Range Schedule" = "График целевого диапазона глюкозы";
 
+/* No comment provided by engineer. */
+"HARDWARE SOUNDS" = "АППАРАТНЫЕ ЗВУКИ";
+
+/* No comment provided by engineer. */
+"High Glucose" = "Высокий уровень глюкозы";
+
+/* No comment provided by engineer. */
+"How can I silence non-Critical Alerts?" = "Как отключить некритичные оповещения?";
+
+/* No comment provided by engineer. */
+"How can I silence only Time Sensitive and Non-Critical alerts?" = "Как отключить только срочные и некритические предупреждения?";
+
+/* Title text for temporarily silencing all sounds (1: app name) */
+"How can I temporarily silence all %1$@ app sounds?" = "Как временно отключить все звуки приложения %1$@?";
+
 /* The title text for how to update */
 "How to update (LoopDocs)" = "Как обновить (LoopDocs)";
+
+/* Focus modes descriptive text (1: app name) */
+"If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered and non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App." = "Если режим фокусировки iOS включен, а функция отключения оповещений выключена, критические оповещения будут по-прежнему доставляться, а некритические будут глушиться до тех пор, пока %1$@ не будет добавлен в каждый режим фокусировки в качестве разрешенного приложения.";
 
 /* Immediate Delivery status text */
 "Immediate" = "Немедленно";
@@ -618,6 +648,12 @@
 /* The error message when glucose data is in the future. (1: glucose data time in future in minutes) */
 "Invalid glucose reading with a timestamp that is %1$@ in the future" = "Неверное показание глюкозы с временной меткой, которая находится на %1$@ в будущем";
 
+/* No comment provided by engineer. */
+"iOS Critical Alerts and Time Sensitive Alerts are types of Apple notifications. They are used for high-priority events. Some examples include:" = "Критические оповещения iOS и срочные оповещения — это типы уведомлений Apple. Они используются для проведения высокоприоритетных мероприятий. Вот некоторые примеры:";
+
+/* No comment provided by engineer. */
+"IOS FOCUS MODES" = "РЕЖИМЫ ФОКУСИРОВКИ IOS";
+
 /* The title text for the issue report cell */
 "Issue Report" = "Сообщить об ошибке";
 
@@ -640,7 +676,7 @@
 "Loading..." = "Загрузка...";
 
 /* Button text to log a dose
-   Title for dose logging screen */
+Title for dose logging screen */
 "Log Dose" = "Доза из лога";
 
 /* The title of the screen displaying a manually entered insulin dose */
@@ -671,11 +707,14 @@
 "Loop will set temporary basal rates to increase and decrease insulin delivery." = "Петля установит ВБС для увеличения или уменьшения подачи инсулина.";
 
 /* Title for bolus screen warning when glucose is below glucose warning limit.
-   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
 "Low Glucose" = "Низкий уровень глюкозы";
 
 /* Manage Permissions in Settings button text */
 "Manage Permissions in Settings" = "Управление разрешениями в настройках";
+
+/* View title for how mute alerts work */
+"Managing Alerts" = "Управление оповещениями";
 
 /* Description of a bolus dose entry (1: value (? if no value) in bold, 2: unit) */
 "Manual Dose: <b>%1$@</b> %2$@" = "Ручная доза: <b>%1$@</b> %2$@";
@@ -710,8 +749,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Влияние динамики СК";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Доп. инфо";
 
 /* Label for button to mute all alerts */
@@ -727,8 +766,8 @@
 "Nightscout" = "Nightscout";
 
 /* Title for bolus screen notice when no bolus is recommended
-   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
-   Title for bolus screen warning when no bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+Title for bolus screen warning when no bolus is recommended */
 "No Bolus Recommended" = "Нет рекомендации болюса";
 
 /* The error message displayed for device connection errors. */
@@ -777,12 +816,12 @@
 "Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "Внимание! Во время подачи произошел сбой петли, и управление помпой было приостановлено до закрытия этого диалога. История событий может быть неточной. Пожалуйста, просмотрите графики введения инсулина в помпе и внимательно следите за уровнем глюкозы в крови.";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
 /* Notification Setting Status is On */
@@ -839,6 +878,9 @@
 /* The title of the screen displaying a pump event */
 "Pump Event" = "Событие помпы";
 
+/* No comment provided by engineer. */
+"Pump Expired" = "Срок работы помпы закончился";
+
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Менеджер помпо";
 
@@ -873,7 +915,7 @@
 "Recommended Basal" = "Рекомендуемый базал";
 
 /* Label for recommended bolus row on bolus screen
-   Label for recommended bolus row on simple bolus screen */
+Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "Рекомендуемый болюс";
 
 /* Title for bolus screen warning when recommended bolus exceeds max bolus */
@@ -883,7 +925,7 @@
 "Recommended Bolus: %@ Units" = "Рекомендуемый болюс: %@ ед";
 
 /* The notification title for a remote bolus. (1: Bolus amount)
-   The notification title for a remote failure. (1: Bolus amount) */
+The notification title for a remote failure. (1: Bolus amount) */
 "Remote Bolus Entry: %@ U" = "Удаленный ввод болюса: %@ U";
 
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
@@ -892,20 +934,23 @@
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Резервуар";
 
+/* No comment provided by engineer. */
+"Reservoir Empty" = "Резервуар пуст";
+
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Ретроспективная коррекция";
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Повторить";
 
-/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Сохранить и подать болюс";
-
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Сохранить без болюса";
 
 /* Scheduled Delivery status text */
 "Scheduled" = "Запланировано";
+
+/* No comment provided by engineer. */
+"Sensor Failed" = "Ошибка сенсора";
 
 /* The title of the services section in settings */
 "Services" = "Службы";
@@ -944,7 +989,7 @@
 "Starting Bolus" = "Начинаю болюс";
 
 /* Section title for Support
-   The title of the support section in settings */
+The title of the support section in settings */
 "Support" = "Поддержка";
 
 /* The title text in settings */
@@ -967,6 +1012,18 @@
 
 /* Message presented in the status row instructing the user to tap this row to stop a bolus */
 "Tap to Stop" = "Нажмите, чтобы остановить";
+
+/* Settings app TestFlight section */
+"TestFlight" = "TestFlight";
+
+/* Settings TestFlight expiration view */
+"TestFlight Expiration" = "Срок действия TestFlight";
+
+/* Time that build expires */
+"TestFlight expires " = "Срок действия TestFlight истекает ";
+
+/* The title for notification of upcoming TestFlight expiration */
+"TestFlight Expires Soon" = "Срок действия TestFlight скоро истечет";
 
 /* Alert message for a bolus too small validation error */
 "The bolus amount entered is smaller than the minimum deliverable." = "Введенное количество болюса меньше минимально допустимого в помпе";
@@ -1001,11 +1058,20 @@
 /* String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus */
 "This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." = "Эта опция применима только в том случае, если для стратегии дозирования петли установлено значение «Автоматический болюс».";
 
+/* No comment provided by engineer. */
+"Time Sensitive Alerts" = "Срочные оповещения";
+
 /* Time Sensitive Status text */
 "Time Sensitive Notifications" = "Уведомления, чувствительные к времени";
 
+/* No comment provided by engineer. */
+"Transmitter Low Battery" = "Батарейка трансмиттера садится";
+
 /* Critical event log export error alert try again button */
 "Try Again" = "Попробуйте еще раз";
+
+/* Description text for temporarily silencing non-critical alerts (1: app name) */
+"Turn off the volume on your iOS device or add %1$@ as an allowed app to each Focus Mode. Time Sensitive and Critical Alerts will still sound, but non-Critical Alerts will be silenced." = "Выключите громкость на устройстве iOS или добавьте %1$@ в качестве разрешенного приложения для каждого режима фокусировки. Срочные и критические оповещения по-прежнему будут звучать, но некритические оповещения будут отключены.";
 
 /* Bluetooth off foreground alert body */
 "Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Включите Bluetooth для получения предупреждений, сигналов тревоги или показаний датчика глюкозы.";
@@ -1029,9 +1095,9 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Не удается остановить текущий болюс. Переместите свой iPhone ближе к помпе и попробуйте еще раз. Проверьте историю введения инсулина и внимательно следите за уровнем глюкозы.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Неизвестно";
 
 /* The error message displayed for unknown errors. (1: unknown error) */
@@ -1064,8 +1130,14 @@
 /* The title of a target alert action specifying workout targets duration until it is turned off by the user */
 "Until I turn off" = "Пока я не выключу";
 
+/* No comment provided by engineer. */
+"Urgent Low" = "Очень низкий";
+
 /* The title of the alert controller used to select a duration for pre-meal targets */
 "Use Pre-Meal Preset" = "Использовать функцию до еды";
+
+/* Description text for temporarily silencing all sounds (1: app name) */
+"Use the Mute Alerts feature. It allows you to temporarily silence all of your alerts and alarms via the %1$@ app, including Critical Alerts and Time Sensitive Alerts." = "Используйте функцию отключения оповещений. Она позволяет временно отключить все ваши оповещения и тревоги с помощью кнопки %1$@ , включая критические оповещения и срочные оповещения.";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Применить цели гликемии как для физической нагрузки";
@@ -1079,6 +1151,9 @@
 /* Alert Permissions Need Attention alert title */
 "Warning! Safety notifications are turned OFF" = "Внимание! Уведомления о безопасности отключены";
 
+/* No comment provided by engineer. */
+"What are examples of Critical and Time Sensitive alerts?" = "Каковы примеры критических и срочных оповещений?";
+
 /* Explanation of glucose safety limit */
 "When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Если текущий или прогнозируемый уровень глюкозы ниже безопасного предела глюкозы, Loop не будет рекомендовать болюс и всегда будет рекомендовать временную базальную скорость 0 единиц в час.";
 
@@ -1090,6 +1165,12 @@
 
 /* No comment provided by engineer. */
 "When out of Closed Loop mode, the app uses a simplified bolus calculator like a typical pump." = "Когда приложение выходит из режима замкнутого цикла, оно использует упрощенный калькулятор болюса, как в обычной помпе.";
+
+/* App sounds descriptive text (1: app name) */
+"While mute alerts is on, all alerts from your %1$@ app including Critical and Time Sensitive alerts will temporarily display without sounds and will vibrate only." = "Пока отключение звука оповещений включено, все оповещения от вашего %1$@ приложения, включая критические и срочные оповещения, будут временно отображаться без звуков и будут только вибрировать.";
+
+/* No comment provided by engineer. */
+"While mute alerts is on, your insulin pump and CGM hardware may still sound." = "При отключении звуковых сигналов ваша инсулиновая помпа и мониторинг могут продолжать издавать звуки.";
 
 /* Format string for message of reset loop alert. (1: App name) (2: error description) */
 "While trying to restart %1$@ an error occured.\n\n%2$@" = "При попытке перезапустить %1$@ произошла ошибка. \n\n %2$@";

@@ -290,7 +290,7 @@
 "Disables" = "Disables";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "בטל";
 
 /* No comment provided by engineer. */
@@ -437,7 +437,7 @@
 "Loop will set temporary basal rates to increase and decrease insulin delivery." = "Loop תגדיר בזאלי זמני כדי להגדיל ולהקטין מתן אינסולין.";
 
 /* Title for bolus screen warning when glucose is below glucose warning limit.
-   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
 "Low Glucose" = "גלוקוז נמוך";
 
 /* Manage Permissions in Settings button text */
@@ -476,8 +476,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "השפעות מומנטום";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "מידע נוסף";
 
 /* Label for button to mute all alerts */
@@ -493,8 +493,8 @@
 "Nightscout" = "Nightscout";
 
 /* Title for bolus screen notice when no bolus is recommended
-   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
-   Title for bolus screen warning when no bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+Title for bolus screen warning when no bolus is recommended */
 "No Bolus Recommended" = "אין המלצה לבולוס";
 
 /* The error message displayed for device connection errors. */
@@ -543,12 +543,12 @@
 "Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "אוי לא! Loop קרסה בזמן הזרקה והתאמות אינסולין נעצרו עד שתסגור חלון זה. ייתכן שהיסטוריות ההזרקות לא תהיה מדוייקת. עיין בגרף מתן האינסולין ועקוב אחר הגלוקוז שלך מקרוב.";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "אישור";
 
 /* Notification Setting Status is On */
@@ -636,7 +636,7 @@
 "Recommended Basal" = "בזאלי מומלץ";
 
 /* Label for recommended bolus row on bolus screen
-   Label for recommended bolus row on simple bolus screen */
+Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "בולוס מומלץ";
 
 /* Title for bolus screen warning when recommended bolus exceeds max bolus */
@@ -646,7 +646,7 @@
 "Recommended Bolus: %@ Units" = "בולוס מומלץ: %@ יחידות";
 
 /* The notification title for a remote bolus. (1: Bolus amount)
-   The notification title for a remote failure. (1: Bolus amount) */
+The notification title for a remote failure. (1: Bolus amount) */
 "Remote Bolus Entry: %@ U" = "הזרקת בולוס מרחוק: %@ U";
 
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
@@ -660,9 +660,6 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "נסה שוב";
-
-/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "שמור והזרק";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "שמור ללא הזרקת בולוס";
@@ -707,7 +704,7 @@
 "Starting Bolus" = "מתחיל בולוס";
 
 /* Section title for Support
-   The title of the support section in settings */
+The title of the support section in settings */
 "Support" = "תמיכה";
 
 /* The title text in settings */
@@ -789,9 +786,9 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "לא ניתן להפסיק את הבולוס בתהליך. קרב את האייפון שלך למשאבה ונסה שוב. בדוק את היסטוריית מתן האינסולין שלך, ועקוב מקרוב אחר הגלוקוז שלך.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "לא ידוע";
 
 /* The error message displayed for unknown errors. (1: unknown error) */
