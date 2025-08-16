@@ -51,6 +51,7 @@ public struct SettingsView: View {
             
             case favoriteFoods
             case therapySettings
+            case aiSettings
         }
     }
     
@@ -84,6 +85,7 @@ public struct SettingsView: View {
                     deviceSettingsSection
                     if FeatureFlags.allowExperimentalFeatures {
                         favoriteFoodsSection
+                        aiSettingsSection
                     }
                     if (viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice) && viewModel.showDeleteTestData {
                         deleteDataSection
@@ -157,6 +159,8 @@ public struct SettingsView: View {
                     .environment(\.insulinTintColor, self.insulinTintColor)
                 case .favoriteFoods:
                     FavoriteFoodsView()
+                case .aiSettings:
+                    AISettingsView()
                 }
             }
         }
@@ -371,6 +375,19 @@ extension SettingsView {
                         imageView: Image("Favorite Foods Icon").renderingMode(.template).foregroundColor(carbTintColor),
                         label: "Favorite Foods",
                         descriptiveText: "Simplify Carb Entry")
+        }
+    }
+    
+    private var aiSettingsSection: some View {
+        Section {
+            LargeButton(action: { sheet = .aiSettings },
+                        includeArrow: true,
+                        imageView: Image(systemName: "sparkles")
+                .resizable().renderingMode(.template)
+                            .foregroundColor(.purple)
+                            .frame(width: 35, height: 35),
+                        label: "Food Search",
+                        descriptiveText: "Search & AI Providers")
         }
     }
     

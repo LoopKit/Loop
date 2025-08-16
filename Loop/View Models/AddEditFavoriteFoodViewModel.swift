@@ -54,11 +54,12 @@ final class AddEditFavoriteFoodViewModel: ObservableObject {
         }
     }
     
-    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, onSave: @escaping (NewFavoriteFood) -> ()) {
+    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, suggestedName: String? = nil, onSave: @escaping (NewFavoriteFood) -> ()) {
         self.onSave = onSave
         self.carbsQuantity = carbsQuantity
         self.foodType = foodType
         self.absorptionTime = absorptionTime
+        self.name = suggestedName ?? ""
     }
     
     var originalFavoriteFood: StoredFavoriteFood?
