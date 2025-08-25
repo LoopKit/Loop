@@ -44,18 +44,18 @@ struct BolusEntryView: View {
                 .insetGroupedListStyle()
                 
                 self.actionArea
-                    .frame(height: self.isKeyboardVisible ? 0 : nil)
-                    .opacity(self.isKeyboardVisible ? 0 : 1)
+//                    .frame(height: self.isKeyboardVisible ? 0 : nil)
+//                    .opacity(self.isKeyboardVisible ? 0 : 1)
             }
-            .onKeyboardStateChange { state in
-                self.isKeyboardVisible = state.height > 0
-                
-                if state.height == 0 {
-                    // Ensure tapping 'Enter Bolus' can make the text field the first responder again
-                    self.shouldBolusEntryBecomeFirstResponder = false
-                }
-            }
-            .keyboardAware()
+//            .onKeyboardStateChange { state in
+//                self.isKeyboardVisible = state.height > 0
+//               
+//                if state.height == 0 {
+//                    // Ensure tapping 'Enter Bolus' can make the text field the first responder again
+//                    self.shouldBolusEntryBecomeFirstResponder = false
+//                }
+//            }
+//            .keyboardAware()
             .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
             .navigationBarTitle(self.title)
             .supportedInterfaceOrientations(.portrait)
