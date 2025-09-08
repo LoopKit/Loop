@@ -41,6 +41,7 @@ public struct ExperimentRow: View {
 public struct ExperimentsSettingsView: View {
     @AppStorage(UserDefaults.Key.GlucoseBasedApplicationFactorEnabled.rawValue) private var isGlucoseBasedApplicationFactorEnabled = false
     @AppStorage(UserDefaults.Key.IntegralRetrospectiveCorrectionEnabled.rawValue) private var isIntegralRetrospectiveCorrectionEnabled = false
+    @AppStorage(UserDefaults.Key.DisableRetrospectiveCorrection.rawValue) private var isDisableRetrospectiveCorrectionEnabled = false
     var automaticDosingStrategy: AutomaticDosingStrategy
 
     public var body: some View {
@@ -70,6 +71,11 @@ public struct ExperimentsSettingsView: View {
                         name: NSLocalizedString("Integral Retrospective Correction", comment: "Title of integral retrospective correction experiment"),
                         enabled: isIntegralRetrospectiveCorrectionEnabled)
                 }
+                NavigationLink(destination: DisableRetrospectiveCorrectionSelectionView(isDisableRetrospectiveCorrectionEnabled: $isDisableRetrospectiveCorrectionEnabled)) {
+                    ExperimentRow(
+                        name: NSLocalizedString("Disable Retrospective Correction", comment: "Title of disable retrospective correction experiment"),
+                        enabled: isDisableRetrospectiveCorrectionEnabled)
+                }
                 Spacer()
             }
             .padding()
@@ -83,6 +89,7 @@ extension UserDefaults {
     fileprivate enum Key: String {
         case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
         case IntegralRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.integralRetrospectiveCorrectionEnabled"
+        case DisableRetrospectiveCorrection = "com.loopkit.algorithmExperiments.disableRetrospectiveCorrection"
     }
 
     var glucoseBasedApplicationFactorEnabled: Bool {
@@ -100,6 +107,15 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.IntegralRetrospectiveCorrectionEnabled.rawValue)
+        }
+    }
+
+    var disableRetrospectiveCorrectionEnabled: Bool {
+        get {
+            bool(forKey: Key.DisableRetrospectiveCorrection.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.DisableRetrospectiveCorrection.rawValue)
         }
     }
 
