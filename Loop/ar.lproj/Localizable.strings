@@ -200,7 +200,7 @@
 "Disables" = "تعطيل";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "تجاهل";
 
 /* The action hint of the workout mode toggle button when disabled */
@@ -302,12 +302,12 @@
 "No connected devices, or failure during device connection" = "لا يوجد أجهزة متصلة, أو يوجد خطأ أثناء الاتصال";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "موافق";
 
 /* Notification Setting Status is On */
@@ -413,9 +413,9 @@
 "U" = "وحدة";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Unknown";
 
 /* The error message displayed for unknown errors. (1: unknown error) */

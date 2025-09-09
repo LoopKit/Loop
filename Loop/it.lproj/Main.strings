@@ -5,7 +5,7 @@
 "5gz-kZ-iF1.text" = "3.5 U/ora @ 12:12 PM";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
-"87H-N1-0vJ.text" = "Predetto";
+"87H-N1-0vJ.text" = "Previsto";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
 "aCb-Qs-bpu.text" = "Dettaglio";
@@ -14,19 +14,19 @@
 "bIL-Ub-qYp.text" = "Etichetta";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Modifica Carboidrati";
+"bq4-98-cQU.text" = "Modifica carboidrati";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
-"d3X-AN-tA5.text" = "Totale gr";
+"d3X-AN-tA5.text" = "g Totali";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "La glicemia futura è predetta combinando gli effetti di più dati inseriti. L'utilizzo di questo applicativo permette di valutare come i singoli dati inseriti influiscano sul valore finale predetto.";
+"D4C-I2-dhA.text" = "La glicemia futura viene prevista combinando gli effetti di più input. Utilizza questo strumento per alternare diversi input e confrontarli con la previsione finale.";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Etichetta";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
-"E41-FN-nkk.text" = "probabile glic. 92 mg/dL";
+"E41-FN-nkk.text" = "alla fine 92 mg/dL";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Osservato";
@@ -38,13 +38,13 @@
 "hZZ-2S-lrd.title" = "Effetti dei carboidrati";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Per valutare l'assorbimento dei carboidrati, è possibile utilizzare i cambiamenti osservati nel glucosio, sottraendo i cambiamenti modellati dall'erogazione di insulina.";
+"IxU-As-glo.text" = "Per valutare l'assorbimento dei carboidrati, è possibile utilizzare i cambiamenti osservati nella glicemia, sottraendo i cambiamenti modellati dall'erogazione d'insulina.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Dettaglio";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
-"k3F-Na-7mn.text" = "Basale Raccomandata";
+"k3F-Na-7mn.text" = "Basale raccomandata";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "Etichetta";
@@ -53,13 +53,13 @@
 "OFA-qT-ZAg.text" = "Etichetta";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Glicemia Prevista";
+"PA3-sP-cWY.title" = "Glicemia prevista";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
-"Rse-x8-amW.text" = "probabile glic. 92 mg/dL";
+"Rse-x8-amW.text" = "alla fine 92 mg/dL";
 
 /* Class = "UILabel"; text = "g Active Carbs"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g Carboidrati attivi";
+"SQx-au-ZcM.text" = "g carboidrati attivi";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glicemia";
@@ -71,7 +71,7 @@
 "Vpi-5b-bY5.title" = "Carboidrati";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "xhx-PI-bBI"; */
-"xhx-PI-bBI.text" = "Basale Raccomandata";
+"xhx-PI-bBI.text" = "Basale raccomandata";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";

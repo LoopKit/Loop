@@ -26,7 +26,7 @@
 "Dismiss" = "تجاهل";
 
 /* Short unit label for gram measurement
-   The short unit display string for grams */
+The short unit display string for grams */
 "g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails

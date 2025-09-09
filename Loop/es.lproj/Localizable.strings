@@ -43,9 +43,6 @@
 /* Alert text for failing to cancel temp basal (1: reason description, 2: app name) */
 "%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@ %2$@ no pudo cancelar su basal temporal actual, que es más alta que el nuevo límite basal máximo que ha establecido. Esto puede resultar en una administración de insulina superior a la deseada. \n\n Considere suspender la administración de insulina manualmente y luego reanudarla de inmediato para activar la administración basal con el nuevo límite establecido.";
 
-/* Adds a full-stop to a statement (1: statement, 2: full stop character) */
-"%1@%2@" = "%1$@ %2$@";
-
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
@@ -92,7 +89,7 @@
 "%1$@: %2$@" = "%1$@: %2$@";
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
-   Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
+Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* Description of the prediction input effect for glucose momentum */
@@ -164,11 +161,11 @@
 "Adjusted for" = "Ajustado para";
 
 /* Alert Permissions button text
-   Title of alert management screen */
+Title of alert management screen */
 "Alert Management" = "Gestión de Alertas";
 
 /* Alert Permissions button text
-   Notification & Critical Alert Permissions screen title */
+Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Permisos de Alertas";
 
 /* The title of the section containing algorithm settings */
@@ -325,7 +322,7 @@
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Elija un tiempo de absorción más largo para comidas más grandes, o aquellas que contienen grasas y proteínas. Esta es solo una guía para el algoritmo y no necesita ser exacta.";
 
 /* Button title to close view
-   The button label of the action used to dismiss the unsafe notification permission alert */
+The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Cerrar";
 
 /* The title text for the looping enabled switch cell */
@@ -438,7 +435,7 @@
 "Disables" = "Desactivar";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "Ignorar";
 
 /* No comment provided by engineer. */
@@ -541,7 +538,7 @@
 "Glucose Data Now Available" = "Datos de glucosa ahora disponibles";
 
 /* Alert title for a manual glucose entry out of range error
-   Title for bolus screen warning when glucose entry is out of range */
+Title for bolus screen warning when glucose entry is out of range */
 "Glucose Entry Out of Range" = "Entrada de glucosa fuera de rango";
 
 /* Title of the prediction input effect for glucose momentum */
@@ -628,7 +625,7 @@
 "Loading..." = "Cargando...";
 
 /* Button text to log a dose
-   Title for dose logging screen */
+Title for dose logging screen */
 "Log Dose" = "Registrar dosis";
 
 /* The title of the screen displaying a manually entered insulin dose */
@@ -656,7 +653,7 @@
 "Loop will set temporary basal rates to increase and decrease insulin delivery." = "Loop establecerá basal temporales para aumentar y disminuir la administración de insulina.";
 
 /* Title for bolus screen warning when glucose is below glucose warning limit.
-   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
 "Low Glucose" = "Glucosa baja";
 
 /* Manage Permissions in Settings button text */
@@ -692,8 +689,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Efectos de Momento";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Más Info";
 
 /* Label for button to mute all alerts */
@@ -706,8 +703,8 @@
 "Nightscout" = "Nightscout";
 
 /* Title for bolus screen notice when no bolus is recommended
-   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
-   Title for bolus screen warning when no bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+Title for bolus screen warning when no bolus is recommended */
 "No Bolus Recommended" = "No hay bolo recomendado";
 
 /* The error message displayed for device connection errors. */
@@ -756,12 +753,12 @@
 "Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "¡Oh, no! Loop falló durante la dosificación y los ajustes de insulina se pausaron hasta que se cierre este cuadro de diálogo. El historial de dosificación puede no ser exacto. Revise los gráficos de administración de insulina y controle cuidadosamente su nivel de glucosa en sangre.";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
 
 /* Notification Setting Status is On */
@@ -846,7 +843,7 @@
 "Recommended Basal" = "Basal Recomendada";
 
 /* Label for recommended bolus row on bolus screen
-   Label for recommended bolus row on simple bolus screen */
+Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "Bolo recomendado";
 
 /* Title for bolus screen warning when recommended bolus exceeds max bolus */
@@ -856,7 +853,7 @@
 "Recommended Bolus: %@ Units" = "Bolo Recomendado: %@ Unidades";
 
 /* The notification title for a remote bolus. (1: Bolus amount)
-   The notification title for a remote failure. (1: Bolus amount) */
+The notification title for a remote failure. (1: Bolus amount) */
 "Remote Bolus Entry: %@ U" = "Entrada remota de bolo: %@ U";
 
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
@@ -870,9 +867,6 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Reintentar";
-
-/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Guardar y entregar";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Guardar sin Entregar Bolo";
@@ -914,7 +908,7 @@
 "Starting Bolus" = "Comenzando Bolo";
 
 /* Section title for Support
-   The title of the support section in settings */
+The title of the support section in settings */
 "Support" = "Ayuda";
 
 /* The title text in settings */
@@ -996,9 +990,9 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "No se puede detener el bolo en progreso. Mueve tu iPhone más cerca de la microinfusora e inténtalo de nuevo. Revisa tu historial de entrega de insulina para más detalles y supervisa tu glucosa.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Desconocido";
 
 /* The error message displayed for unknown errors. (1: unknown error) */

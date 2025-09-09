@@ -38,7 +38,7 @@
 "Dismiss" = "Rozumiem";
 
 /* Short unit label for gram measurement
-   The short unit display string for grams */
+The short unit display string for grams */
 "g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails
@@ -47,7 +47,7 @@
 "Make sure your iPhone is nearby and try again" = "Upewnij się, że Twój iPhone jest w pobliżu i spróbuj ponownie";
 
 /* The recovery message displayed after a bolus attempt fails
-   The recovery message displayed after a potential carb entry send attempt fails */
+The recovery message displayed after a potential carb entry send attempt fails */
 "Make sure your iPhone is nearby and try again." = "Upewnij się, że Twój iPhone jest w pobliżu i spróbuj ponownie.";
 
 /* The short unit display string for milligrams of glucose per decilter */

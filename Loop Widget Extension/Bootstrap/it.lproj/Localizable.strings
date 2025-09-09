@@ -14,7 +14,7 @@
 "%@ U" = "%@ U";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ contro %2$@";
+"%1$@ v%2$@" = "%1$@ v%2$@";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -26,7 +26,7 @@
 "g" = "g";
 
 /* No comment provided by engineer. */
-"Loop Status Widget" = "Widget Stato loop";
+"Loop Status Widget" = "Widget di stato del ciclo";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";

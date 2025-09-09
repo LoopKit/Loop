@@ -5,19 +5,19 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - NFC Scan Usage Description */
-"NFCReaderUsageDescription" = "L'app utilizza NFC per l'accoppiamento con i dispositivi per il diabete.";
+"NFCReaderUsageDescription" = "L'app utilizza NFC per l'abbinamento con i dispositivi per il diabete.";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Il Bluetooth è utilizzato per comunicare con il microinfusore ed il sensore glicemico";
+"NSBluetoothAlwaysUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con le pompe d'insulina e con i dispositivi di monitoraggio continuo della glicemia.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Il Bluetooth è utilizzato per comunicare con il microinfusore ed il sensore glicemico";
+"NSBluetoothPeripheralUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con le pompe d'insulina e con i dispositivi di monitoraggio continuo della glicemia.";
 
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "La fotocamera è utilizzata per scansionare i codici a barre dei tuoi dispositivi.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID viene utilizzato per autenticare il bolo.";
+"NSFaceIDUsageDescription" = "Face ID viene utilizzato per autenticare il bolo d'insulina e per salvare le modifiche alle impostazioni della terapia.";
 
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "I dati sui pasti dal database Salute vengono utilizzati per determinare gli effetti del glucosio. I dati del glucosio del database Salute vengono utilizzati per il calcolo del grafico della glicemia.";
@@ -26,5 +26,5 @@
 "NSHealthUpdateUsageDescription" = "I dati sui carboidrati dei pasti inseriti nell'app e sull'orologio sono trasferiti nel database di Salute. I dati recuperati dal sensore CGM sono storati nel database di HealthKit.";
 
 /* Privacy - Siri Usage Description */
-"NSSiriUsageDescription" = "Loop utilizza Siri per permettere l'attivazione delle preimpostazioni con la tua voce";
+"NSSiriUsageDescription" = "Loop utilizza Siri per permettere l'attivazione dei Preset con la tua voce.";
 

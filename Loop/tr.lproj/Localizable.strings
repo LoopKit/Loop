@@ -43,9 +43,6 @@
 /* Alert text for failing to cancel temp basal (1: reason description, 2: app name) */
 "%@%@ was unable to cancel your current temporary basal rate, which is higher than the new Max Basal limit you have set. This may result in higher insulin delivery than desired.\n\nConsider suspending insulin delivery manually and then immediately resuming to enact basal delivery with the new limit in place." = "%1$@ %2$@ , ayarladığınız yeni Maks Bazal limitinden daha yüksek olan mevcut geçici bazal oranınızı iptal edemedi. Bu, istenenden daha yüksek insülin iletimi ile sonuçlanabilir. \n\n İnsülin iletimini manuel olarak askıya almayı ve ardından yeni limit geçerliyken bazal iletimi etkinleştirmek için hemen devam etmeyi düşünün.";
 
-/* Adds a full-stop to a statement (1: statement, 2: full stop character) */
-"%1@%2@" = "%1$@%2$@";
-
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
@@ -92,7 +89,7 @@
 "%1$@: %2$@" = "%1$@: %2$@";
 
 /* Description of a basal temp basal dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit)
-   Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
+Description of a bolus dose entry (1: title for dose type, 2: value (? if no value) in bold, 3: unit) */
 "%1$@: <b>%2$@</b> %3$@" = "%1$@: <b>%2$@</b> %3$@";
 
 /* Description of the prediction input effect for glucose momentum */
@@ -164,11 +161,11 @@
 "Adjusted for" = "için düzeltilmiş";
 
 /* Alert Permissions button text
-   Title of alert management screen */
+Title of alert management screen */
 "Alert Management" = "Uyarı Yönetimi";
 
 /* Alert Permissions button text
-   Notification & Critical Alert Permissions screen title */
+Notification & Critical Alert Permissions screen title */
 "Alert Permissions" = "Uyarı İzinleri";
 
 /* The title of the section containing algorithm settings */
@@ -325,7 +322,7 @@
 "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Daha büyük öğünler veya yağ ve protein içeren besinler için daha uzun bir emilim süresi seçin. Bu değer yalnızca algoritmaya rehberlik eder ve kesin olması gerekmez.";
 
 /* Button title to close view
-   The button label of the action used to dismiss the unsafe notification permission alert */
+The button label of the action used to dismiss the unsafe notification permission alert */
 "Close" = "Kapat";
 
 /* The title text for the looping enabled switch cell */
@@ -438,7 +435,7 @@
 "Disables" = "Devre Dışı";
 
 /* Default alert dismissal
-   The button label of the action used to dismiss an error alert */
+The button label of the action used to dismiss an error alert */
 "Dismiss" = "Reddet";
 
 /* No comment provided by engineer. */
@@ -544,7 +541,7 @@
 "Glucose Data Now Available" = "KŞ Verileri Artık Kullanılabilir";
 
 /* Alert title for a manual glucose entry out of range error
-   Title for bolus screen warning when glucose entry is out of range */
+Title for bolus screen warning when glucose entry is out of range */
 "Glucose Entry Out of Range" = "KŞ Girişi Aralık Dışında";
 
 /* Title of the prediction input effect for glucose momentum */
@@ -637,7 +634,7 @@
 "Loading..." = "Yükleniyor...";
 
 /* Button text to log a dose
-   Title for dose logging screen */
+Title for dose logging screen */
 "Log Dose" = "Günlük Doz";
 
 /* The title of the screen displaying a manually entered insulin dose */
@@ -668,7 +665,7 @@
 "Loop will set temporary basal rates to increase and decrease insulin delivery." = "Loop, insülin iletimini artırmak ve azaltmak için geçici bazal oranlar ayarlayacaktır.";
 
 /* Title for bolus screen warning when glucose is below glucose warning limit.
-   Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended */
 "Low Glucose" = "Düşük KŞ";
 
 /* Manage Permissions in Settings button text */
@@ -707,8 +704,8 @@
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum etkileri";
 
-/* Text for more info action on notification of upcoming profile expiration
-   Text for more info action on notification of upcoming TestFlight expiration */
+/* Text for more info action on notification of upcoming TestFlight expiration
+Text for more info action on notification of upcoming profile expiration */
 "More Info" = "Daha fazla bilgi";
 
 /* Label for button to mute all alerts */
@@ -724,8 +721,8 @@
 "Nightscout" = "Nightscout";
 
 /* Title for bolus screen notice when no bolus is recommended
-   Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
-   Title for bolus screen warning when no bolus is recommended */
+Title for bolus screen warning when glucose is below suspend threshold, and a bolus is not recommended
+Title for bolus screen warning when no bolus is recommended */
 "No Bolus Recommended" = "Bolus Önerilmez";
 
 /* The error message displayed for device connection errors. */
@@ -774,12 +771,12 @@
 "Oh no! Loop crashed while dosing, and insulin adjustments have been paused until this dialog is closed. Dosing history may not be accurate. Please review Insulin Delivery charts, and monitor your blood glucose carefully." = "Oh hayır! Dozlama sırasında Loop çöktü ve bu iletişim kutusu kapatılana kadar insülin ayarlamaları duraklatıldı. Dozlama geçmişi doğru olmayabilir. Lütfen İnsülin İletim tablolarını gözden geçirin ve kan şekerinizi dikkatle izleyin.";
 
 /* Alert acknowledgment OK button
-   Critical Alert permissions disabled alert button
-   Default action for alert when alert acknowledgment fails
-   Notifications permissions disabled alert button
-   Text for ok action on notification of upcoming profile expiration
-   Text for ok action on notification of upcoming TestFlight expiration
-   The title of the notification action to acknowledge a device alert */
+Critical Alert permissions disabled alert button
+Default action for alert when alert acknowledgment fails
+Notifications permissions disabled alert button
+Text for ok action on notification of upcoming TestFlight expiration
+Text for ok action on notification of upcoming profile expiration
+The title of the notification action to acknowledge a device alert */
 "OK" = "Tamam";
 
 /* Notification Setting Status is On */
@@ -867,7 +864,7 @@
 "Recommended Basal" = "Önerilen Bazal";
 
 /* Label for recommended bolus row on bolus screen
-   Label for recommended bolus row on simple bolus screen */
+Label for recommended bolus row on simple bolus screen */
 "Recommended Bolus" = "Önerilen Bolus";
 
 /* Title for bolus screen warning when recommended bolus exceeds max bolus */
@@ -877,7 +874,7 @@
 "Recommended Bolus: %@ Units" = "Önerilen Bolus: %@ Ünite";
 
 /* The notification title for a remote bolus. (1: Bolus amount)
-   The notification title for a remote failure. (1: Bolus amount) */
+The notification title for a remote failure. (1: Bolus amount) */
 "Remote Bolus Entry: %@ U" = "Uzak Bolus Girişi: %@ U";
 
 /* The carb amount message for a remote carbs entry notification. (1: Carb amount in grams) */
@@ -891,9 +888,6 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Yeniden dene";
-
-/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Kaydet ve İlet";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Bolus olmadan Kaydet";
@@ -938,7 +932,7 @@
 "Starting Bolus" = "Bolus başlatılıyor";
 
 /* Section title for Support
-   The title of the support section in settings */
+The title of the support section in settings */
 "Support" = "Destek";
 
 /* The title text in settings */
@@ -1020,9 +1014,9 @@
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Devam etmekte olan bolus durdurulamıyor. iPhone'unuzu pompaya yaklaştırın ve tekrar deneyin. Ayrıntılar için insülin uygulama geçmişinizi kontrol edin ve kan şekerinizi yakından takip edin.";
 
 /* Event title displayed when StoredPumpEvent.title is not set
-   label for when the alert mute end time is unknown
-   result when time cannot be formatted
-   The default description to use when an entry has no dose description */
+The default description to use when an entry has no dose description
+label for when the alert mute end time is unknown
+result when time cannot be formatted */
 "Unknown" = "Bilinmeyen";
 
 /* The error message displayed for unknown errors. (1: unknown error) */

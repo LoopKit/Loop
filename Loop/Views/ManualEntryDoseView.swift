@@ -15,15 +15,20 @@ import LoopUI
 
 
 struct ManualEntryDoseView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     @ObservedObject var viewModel: ManualEntryDoseViewModel
 
     @State private var enteredBolusString = ""
-    @State private var shouldBolusEntryBecomeFirstResponder = false
-
     @State private var isInteractingWithChart = false
-    @State private var isKeyboardVisible = false
+
+    @FocusState private var bolusFieldFocused: Bool
 
     @Environment(\.dismissAction) var dismiss
+
+    private var accessoryClearance: CGFloat {
+        dynamicTypeSize.isAccessibilitySize ? 72 : 52
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -32,29 +37,18 @@ struct ManualEntryDoseView: View {
                     self.chartSection
                     self.summarySection
                 }
-                // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
-                // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Bolus".
-                // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
-                // TODO: Fix this in Xcode 12 when we're building for iOS 14.
-                .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : -28)
                 .insetGroupedListStyle()
-                
-                self.actionArea
-                    .frame(height: self.isKeyboardVisible ? 0 : nil)
-                    .opacity(self.isKeyboardVisible ? 0 : 1)
             }
-            .onKeyboardStateChange { state in
-                self.isKeyboardVisible = state.height > 0
-                
-                if state.height == 0 {
-                    // Ensure tapping 'Enter Bolus' can make the text field the first responder again
-                    self.shouldBolusEntryBecomeFirstResponder = false
-                }
-            }
-            .keyboardAware()
-            .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
             .navigationBarTitle(self.title)
             .supportedInterfaceOrientations(.portrait)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if bolusFieldFocused {
+                    // Reserve space so the toolbar doesn’t overlap the field
+                    Color.clear.frame(height: accessoryClearance)
+                } else {
+                    actionArea
+                }
+            }
         }
     }
     
@@ -62,12 +56,6 @@ struct ManualEntryDoseView: View {
         return Text("Log Dose", comment: "Title for dose logging screen")
     }
 
-    private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
-        // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
-        // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
-        shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
-    }
-    
     private var chartSection: some View {
         Section {
             VStack(spacing: 8) {
@@ -189,16 +177,25 @@ struct ManualEntryDoseView: View {
             Text("Bolus", comment: "Label for bolus entry row on bolus screen")
             Spacer()
             HStack(alignment: .firstTextBaseline) {
-                DismissibleKeyboardTextField(
-                    text: typedBolusEntry,
-                    placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
-                    font: .preferredFont(forTextStyle: .title1),
-                    textColor: .loopAccent,
-                    textAlignment: .right,
-                    keyboardType: .decimalPad,
-                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder,
-                    maxLength: 5
-                )
+                TextField(Self.doseAmountFormatter.string(from: 0.0)!, text: typedBolusEntry)
+                .keyboardType(.decimalPad)
+                .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
+                .font(.title)
+                .multilineTextAlignment(.trailing)
+                .foregroundColor(.loopAccent)
+                .focused($bolusFieldFocused)
+                .onChange(of: enteredBolusString) { newValue in
+                    if newValue.count > 5 {
+                        enteredBolusString = String(newValue.prefix(5))
+                    }
+                }
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") { bolusFieldFocused = false }
+                    }
+                }
                 bolusUnitsLabel
             }
         }
@@ -250,7 +247,7 @@ struct ManualEntryDoseView: View {
     }
 }
 
-extension InsulinType: Labeled {
+extension InsulinType: @retroactive Labeled {
     public var label: String {
         return title
     }

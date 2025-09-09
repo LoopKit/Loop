@@ -4,6 +4,9 @@
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
+/* Privacy - NFC Scan Usage Description */
+"NFCReaderUsageDescription" = "Appen bruger NFC til at parre sig med diabetesapparater.";
+
 /* Privacy - Bluetooth Always Usage Description */
 "NSBluetoothAlwaysUsageDescription" = "Bluetooth bliver brugt til at kommunikere med din insulinpumpe og din glukosemonitor.";
 
