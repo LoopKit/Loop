@@ -459,7 +459,7 @@ struct LabeledQuantity: View {
 
     var valueText: Text {
         guard let quantity = quantity else {
-            return Text("– –")
+            return Text(verbatim: "– –")
         }
         
         let formatter = QuantityFormatter(for: unit)
@@ -470,7 +470,7 @@ struct LabeledQuantity: View {
 
         guard let string = formatter.string(from: quantity) else {
             assertionFailure("Unable to format \(String(describing: quantity)) \(unit)")
-            return Text("")
+            return Text(verbatim: "")
         }
 
         return Text(string)

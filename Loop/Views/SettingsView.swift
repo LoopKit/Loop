@@ -440,7 +440,7 @@ extension SettingsView {
     
     private func makeDeleteAlert<T>(for model: DeviceViewModel<T>) -> SwiftUI.Alert {
         return SwiftUI.Alert(title: Text("Delete Testing Data"),
-                             message: Text("Are you sure you want to delete all your \(model.name()) Data?\n(This action is not reversible)"),
+                             message: Text("Are you sure you want to delete all your \(model.name()) Data?\n(This action is not reversible)", comment: "Confirmation before you delete all your Simulated Test Devices data"),
                              primaryButton: .cancel(),
                              secondaryButton: .destructive(Text("Delete"), action: model.deleteTestingDataFunc()))
     }

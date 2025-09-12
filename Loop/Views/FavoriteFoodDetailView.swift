@@ -35,10 +35,10 @@ public struct FavoriteFoodDetailView: View {
                 Section("Information") {
                     VStack(spacing: 16) {
                         let rows: [(field: String, value: String)] = [
-                            ("Name", food.name),
-                            ("Carb Quantity", food.carbsString(formatter: carbFormatter)),
-                            ("Food Type", food.foodType),
-                            ("Absorption Time", food.absorptionTimeString(formatter: absorptionTimeFormatter))
+                            (String(localized: "Name", comment: "Label for name row on add favorite food screen"), food.name),
+                            (String(localized: "Carb Quantity", comment: "Label for carb quantity row on add favorite food screen"), food.carbsString(formatter: carbFormatter)),
+                            (String(localized:"Food Type", comment: "Label for food type entry on add favorite food screen"), food.foodType),
+                            (String(localized: "Absorption Time", comment: "Label for food absorption entry on add favorite food screen"), food.absorptionTimeString(formatter: absorptionTimeFormatter))
                         ]
                         ForEach(rows, id: \.field) { row in
                             HStack {

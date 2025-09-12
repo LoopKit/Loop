@@ -160,7 +160,7 @@ struct ManualEntryDoseView: View {
         // Allow 6 hours before & after due to longest DIA
         ZStack(alignment: .topLeading) {
             DatePicker(
-                "",
+                String(""),
                 selection: $viewModel.selectedDoseDate,
                 in: Date().addingTimeInterval(-.hours(6))...Date().addingTimeInterval(.hours(6)),
                 displayedComponents: [.date, .hourAndMinute]
