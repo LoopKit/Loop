@@ -32,7 +32,6 @@ public struct FavoriteFoodDetailView: View {
     public var body: some View {
         if let food {
             List {
-                // Thumbnail (if available)
                 if let thumb = thumbnailForFood(food) {
                     Section {
                         Image(uiImage: thumb)
@@ -51,20 +50,48 @@ public struct FavoriteFoodDetailView: View {
                 }
                 Section("Information") {
                     VStack(spacing: 16) {
-                        let rows: [(field: String, value: String)] = [
-                            ("Name", food.name),
-                            ("Carb Quantity", food.carbsString(formatter: carbFormatter)),
-                            ("Food Type", food.foodType),
-                            ("Absorption Time", food.absorptionTimeString(formatter: absorptionTimeFormatter))
-                        ]
-                        ForEach(rows, id: \.field) { row in
-                            HStack {
-                                Text(row.field)
-                                    .font(.subheadline)
-                                Spacer()
-                                Text(row.value)
+                        HStack {
+                            Text("Name")
+                                .font(.subheadline)
+                            Spacer()
+                            Text(food.name)
+                                .font(.subheadline)
+                        }
+
+                        HStack {
+                            Text("Carb Quantity")
+                                .font(.subheadline)
+                            Spacer()
+                            Text(food.carbsString(formatter: carbFormatter))
+                                .font(.subheadline)
+                        }
+
+                        HStack(alignment: .center) {
+                            Text("Food Type")
+                                .font(.subheadline)
+                            Spacer()
+                            if let thumb = thumbnailForFood(food) {
+                                Image(uiImage: thumb)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 32, height: 32)
+                                    .cornerRadius(6)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                    )
+                            } else {
+                                Text(food.foodType)
                                     .font(.subheadline)
                             }
+                        }
+
+                        HStack {
+                            Text("Absorption Time")
+                                .font(.subheadline)
+                            Spacer()
+                            Text(food.absorptionTimeString(formatter: absorptionTimeFormatter))
+                                .font(.subheadline)
                         }
                     }
                 }
@@ -72,7 +99,7 @@ public struct FavoriteFoodDetailView: View {
                 
                 Button(role: .destructive, action: { isConfirmingDelete.toggle() }) {
                     Text("Delete Food")
-                        .frame(maxWidth: .infinity, alignment: .center) // Align text in center
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
             .alert(isPresented: $isConfirmingDelete) {
@@ -89,7 +116,6 @@ public struct FavoriteFoodDetailView: View {
     }
 }
 
-// MARK: - Thumbnail helper
 extension FavoriteFoodDetailView {
     private func thumbnailForFood(_ food: StoredFavoriteFood) -> UIImage? {
         let map = UserDefaults.standard.favoriteFoodImageIDs

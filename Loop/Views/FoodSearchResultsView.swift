@@ -228,8 +228,14 @@ private struct FoodSearchResultRow: View {
         HStack(alignment: .top, spacing: 12) {
                 // Product image with async loading
                 Group {
-                    if let imageURL = product.imageFrontURL ?? product.imageURL, 
-                       let url = URL(string: imageURL) {
+                    if let thumbnail = FruitThumbnailProvider.thumbnail(for: product.displayName) {
+                        // Show emoji-based fruit/veg thumbnail for simple whole foods
+                        thumbnail
+                            .frame(width: 50, height: 50)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else if let imageURL = product.imageFrontURL ?? product.imageURL,
+                              let url = URL(string: imageURL) {
                         AsyncImage(url: url) { image in
                             image
                                 .resizable()
@@ -326,7 +332,84 @@ private struct FoodSearchResultRow: View {
     }
 }
 
-// MARK: - Preview
+// MARK: - Lightweight Fruit/Veg Thumbnails
+
+/// Provides emoji-based thumbnails for simple whole foods (e.g., apple, banana).
+/// Keeps UI visually helpful when provider (USDA) does not offer images.
+private enum FruitThumbnailProvider {
+    static func thumbnail(for name: String) -> AnyView? {
+        let n = name.lowercased()
+        let emoji: String? = {
+            switch true {
+            // Fruits
+            case n.contains("apple"): return "🍎"
+            case n.contains("banana"): return "🍌"
+            case n.contains("orange"): return "🍊"
+            case n.contains("grape"): return "🍇"
+            case n.contains("strawberry"): return "🍓"
+            case n.contains("blueberry") || n.contains("blueberries"): return "🫐"
+            case n.contains("cherry") || n.contains("cherries"): return "🍒"
+            case n.contains("pear"): return "🍐"
+            case n.contains("peach"): return "🍑"
+            case n.contains("mango"): return "🥭"
+            case n.contains("pineapple"): return "🍍"
+            case n.contains("watermelon"): return "🍉"
+            case n.contains("melon"): return "🍈"
+            case n.contains("kiwi"): return "🥝"
+            case n.contains("coconut"): return "🥥"
+            case n.contains("lemon"): return "🍋"
+            case n.contains("lime"): return "🟢"
+            case n.contains("avocado"): return "🥑"
+            // Vegetables
+            case n.contains("tomato"): return "🍅"
+            case n.contains("carrot"): return "🥕"
+            case n.contains("broccoli"): return "🥦"
+            case n.contains("cauliflower"): return "🥦"
+            case n.contains("lettuce") || n.contains("spinach") || n.contains("kale") || n.contains("greens"): return "🥬"
+            case n.contains("cucumber") || n.contains("zucchini"): return "🥒"
+            case n.contains("pepper") && !n.contains("chili"): return "🫑"
+            case n.contains("chili") || n.contains("chilli") || n.contains("jalapeno"): return "🌶️"
+            case n.contains("corn"): return "🌽"
+            case n.contains("onion"): return "🧅"
+            case n.contains("garlic"): return "🧄"
+            case n.contains("mushroom"): return "🍄"
+            case n.contains("potato"): return "🥔"
+            case n.contains("sweet potato") || n.contains("yam"): return "🍠"
+            case n.contains("olive") || n.contains("olives"): return "🫒"
+            case n.contains("salad"): return "🥗"
+            // Grains / staples
+            case n.contains("rice"): return "🍚"
+            case n.contains("pasta") || n.contains("spaghetti") || n.contains("noodle") || n.contains("noodles"): return "🍝"
+            case n.contains("bread"): return "🍞"
+            case n.contains("bagel"): return "🥯"
+            case n.contains("oatmeal") || n.contains("oats") || n.contains("cereal"): return "🥣"
+            case n.contains("tortilla") || n.contains("flatbread") || n.contains("pita"): return "🫓"
+            // Proteins / dairy
+            case n.contains("egg"): return "🥚"
+            case n.contains("milk"): return "🥛"
+            case n.contains("yogurt") || n.contains("yoghurt"): return "🥛"
+            case n.contains("cheese"): return "🧀"
+            case n.contains("chicken") || n.contains("turkey"): return "🍗"
+            case n.contains("beef") || n.contains("steak"): return "🥩"
+            case n.contains("pork"): return "🍖"
+            case n.contains("fish") || n.contains("salmon") || n.contains("tuna"): return "🐟"
+            case n.contains("shrimp") || n.contains("prawn"): return "🍤"
+            case n.contains("bean") || n.contains("lentil") || n.contains("chickpea") || n.contains("legume"): return "🫘"
+            case n.contains("nut") || n.contains("almond") || n.contains("walnut") || n.contains("peanut"): return "🥜"
+            default: return nil
+            }
+        }()
+        guard let e = emoji else { return nil }
+        let view = Text(e)
+            .font(.system(size: 28))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color(.systemGray4), lineWidth: 0.5)
+            )
+        return AnyView(view)
+    }
+}
 
 #if DEBUG
 struct FoodSearchResultsView_Previews: PreviewProvider {

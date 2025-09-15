@@ -76,6 +76,19 @@ class NetworkQualityMonitor: ObservableObject {
     }
 }
 
+// MARK: - Preencoded Image Representation
+
+/// Shared representation of a JPEG-encoded image for reuse across providers and cache
+struct PreencodedImage {
+    let resizedImage: UIImage
+    let jpegData: Data
+    let base64: String
+    let sha256: String
+    let bytes: Int
+    let width: Int
+    let height: Int
+}
+
 // MARK: - Timeout Helper
 
 /// Timeout wrapper for async operations
@@ -105,86 +118,11 @@ private func withTimeoutForAnalysis<T>(seconds: TimeInterval, operation: @escapi
 
 /// Function to generate analysis prompt based on advanced dosing recommendations setting
 /// Forces fresh read of UserDefaults to avoid caching issues
-internal func getAnalysisPrompt() -> String {
-    // Force fresh read of UserDefaults to avoid caching issues
-    let isAdvancedEnabled = UserDefaults.standard.advancedDosingRecommendationsEnabled
-    let selectedPrompt = isAdvancedEnabled ? advancedAnalysisPrompt : standardAnalysisPrompt
-    let promptLength = selectedPrompt.count
-    
-    print("🎯 AI Analysis Prompt Selection:")
-    print("   Advanced Dosing Enabled: \(isAdvancedEnabled)")
-    print("   Selected Prompt Length: \(promptLength) characters")
-    print("   Prompt Type: \(isAdvancedEnabled ? "ADVANCED (with FPU calculations)" : "STANDARD (basic diabetes analysis)")")
-    print("   First 100 chars of selected prompt: \(String(selectedPrompt.prefix(100)))")
-    
-    return selectedPrompt
-}
-
-/// Standard analysis prompt for basic diabetes management (used when Advanced Dosing is OFF)
-private let standardAnalysisPrompt = """
-STANDARD MODE v4.1 - You are my diabetes nutrition specialist. Analyze this food image for accurate carbohydrate counting. Do not over estimate carbs.
-
-LANGUAGE HANDLING: If you see text in any language (Spanish, French, Italian, German, Chinese, Japanese, Korean, etc.), first identify and translate the food names to English, then proceed with analysis. Always respond in English.
-
-FIRST: Determine if this image shows:
-1. ACTUAL FOOD ON A PLATE, PLATTER, or CONTAINER (analyze portions and proceed with portion analysis)  
-2. MENU TEXT (identify language, translate food names, provide USDA standard serving estimates only)
-3. RECIPE TEXT (assume and provide USDA standard serving estimates only)
-
-Key concepts:
-• PORTIONS = distinct food items visible
-• SERVINGS = compare to USDA standard amounts (3oz chicken, 1/2 cup rice)
-• Calculate serving multipliers vs USDA standards
-
-Glycemic Index:
-• LOW GI (<55): Slower rise - oats (42), whole grain bread (51)
-• MEDIUM GI (56-69): Moderate rise - brown rice (68)
-• HIGH GI (70+): Fast rise - white rice (73), white bread (75)
-
-Insulin timing:
-• Simple carbs: 15-20 min before eating
-• Complex carbs + protein/fat: 10-15 min before
-• High fat/protein: 0-10 min before
-
-RESPOND IN JSON FORMAT:
-{
-  "image_type": "food_photo" or "menu_item",
-  "food_items": [
-    {
-      "name": "specific food name with preparation details",
-      "portion_estimate": "exact portion with visual references",
-      "usda_serving_size": "standard USDA serving size",
-      "serving_multiplier": number_of_USDA_servings,
-      "preparation_method": "cooking details observed",
-      "visual_cues": "visual elements analyzed",
-      "carbohydrates": grams_for_this_portion,
-      "calories": kcal_for_this_portion,
-      "fat": grams_for_this_portion,
-      "fiber": grams_for_this_portion,
-      "protein": grams_for_this_portion,
-      "assessment_notes": "Explain how you calculated this specific portion size, what visual references you used for measurement, and how you determined the USDA serving multiplier. Write in natural, conversational language."
-    }
-  ],
-  "total_food_portions": count_distinct_items,
-  "total_usda_servings": sum_serving_multipliers,
-  "total_carbohydrates": sum_all_carbs,
-  "total_calories": sum_all_calories,
-  "total_fat": sum_all_fat,
-  "total_fiber": sum_all_fiber,
-  "total_protein": sum_all_protein,
-  "confidence": decimal_0_to_1,
-  "net_carbs_adjustment": "Carb adjustment: total_carbs - (fiber × 0.5 if >5g fiber)",
-  "diabetes_considerations": "Carb sources, GI impact (low/medium/high), timing considerations",
-  "insulin_timing_recommendations": "Meal type and pre-meal timing (minutes before eating)",
-  "absorption_time_hours": hours_between_2_and_6,
-  "absorption_time_reasoning": "Brief timing calculation explanation",
-  "safety_alerts": "Any safety considerations",
-  "visual_assessment_details": "Textures, colors, cooking evidence",
-  "overall_description": "What I see: plate, arrangement, textures, colors",
-  "portion_assessment_method": "Explain in natural language how you estimated portion sizes using visual references like plate size, utensils, or other objects for scale. Describe your measurement process for each food item and explain how you converted visual portions to USDA serving equivalents. Include your confidence level and what factors affected your accuracy."
-}
+// Shared, strict requirements applied to ALL prompts
+private let mandatoryNoVagueBlock = """
 
 MANDATORY REQUIREMENTS - DO NOT BE VAGUE:
+
 FOR FOOD PHOTOS:
 ❌ NEVER confuse portions with servings - count distinct food items as portions, calculate number of servings based on USDA standards
 ❌ NEVER say "4 servings" when you mean "4 portions" - be precise about USDA serving calculations
@@ -237,189 +175,78 @@ FOR MENU AND RECIPE ITEMS:
 ✅ ALWAYS provide actual USDA standard nutrition values (carbohydrates, protein, fat, calories)
 ✅ ALWAYS calculate nutrition based on typical USDA serving sizes for the identified food type
 ✅ ALWAYS include total nutrition fields even for menu items (based on USDA standards)
-✅ ALWAYS translate into the user's device native language or if unknown, translate into ENGLISH before analysing the menu item
+✅ ALWAYS translate into the user's device native language or if unknown, translate into ENGLISH before analyzing the menu item
 ✅ ALWAYS provide glycemic index assessment for menu items based on typical preparation methods
 ✅ ALWAYS include diabetes timing guidance even for menu items based on typical GI values
-
 """
 
-/// Advanced analysis prompt with FPU calculations and exercise considerations (used when Advanced Dosing is ON)
-private let advancedAnalysisPrompt = """
-You are my personal certified diabetes nutrition specialist with advanced training in Fat/Protein Units (FPUs), fiber impact calculations, and exercise-aware nutrition management. You understand Servings compared to Portions and the importance of being educated about this. You are clinically minded but have a knack for explaining complicated nutrition information in layman's terms. Analyze this food image for optimal diabetes management with comprehensive insulin dosing guidance. Primary goal: accurate carbohydrate content for insulin dosing with advanced FPU calculations and timing recommendations. Do not over estimate the carbs, when in doubt estimate on the side of caution; over-estimating could lead to user over dosing on insulin.
+internal func getAnalysisPrompt() -> String {
+    let isAdvancedEnabled = UserDefaults.standard.advancedDosingRecommendationsEnabled
+    let base = [standardAnalysisPrompt, mandatoryNoVagueBlock].joined(separator: "\n\n")
+    if isAdvancedEnabled {
+        return [base, advancedAnalysisRequirements].joined(separator: "\n\n")
+    }
+    return base
+}
 
-LANGUAGE HANDLING: If you see text in any language (Spanish, French, Italian, German, Chinese, Japanese, Korean, Arabic, etc.), first identify and translate the food names to English, then proceed with analysis. Always respond in English.
+/// Standard analysis prompt for basic diabetes management (when Advanced Dosing is OFF)
+// Compact Standard prompt (backup of the previous detailed version is available in repo history)
+private let standardAnalysisPrompt = """
+You are a certified diabetologist specializing in diabetes carb counting. You understand Servings compared to Portions and the importance of being educated about this. You are clinically minded but have a knack for explaining complicated nutrition information in layman's terms. Be precise and conservative. Output strictly JSON matching the schema; no prose.
 
-FIRST: Determine if this image shows:
-1. ACTUAL FOOD ON A PLATE/PLATTER/CONTAINER (proceed with portion analysis)
-2. MENU TEXT/DESCRIPTIONS (identify language, translate food names, provide USDA standard servings only, clearly marked as estimates)
-3. RECIPE TEXT (identify language, translate food names, provide USDA standard serving estimates only)
+Task: Analyze the food image and return nutrition for visible portions only.
 
-KEY CONCEPTS FOR ACTUAL FOOD PHOTOS:
-• PORTIONS = distinct food items visible
-• SERVINGS = compare to USDA standard amounts (3oz chicken, 1/2 cup rice/vegetables)
-• Calculate serving multipliers vs USDA standards
+Rules:
+- Use visual evidence; compare to visible objects for scale when possible.
+- Distinguish portions (items on plate) vs USDA servings (standard amounts); include serving_multiplier.
+- Name foods precisely with preparation method if visible.
+- Use grams for macros and kcal for calories; non‑negative values; round carbs to 1 decimal.
+- If uncertain, lower confidence; do not invent items.
 
-KEY CONCEPTS FOR MENU OR RECIPE ITEMS:
-• NO PORTION ANALYSIS possible without seeing actual food
-• Provide ONLY USDA standard serving information
-• Mark all values as "estimated based on USDA standards"
-• Cannot assess actual portions or plate sizes from menu or receipt text
+Portion Estimation Guidance (MANDATORY to include in "portion_assessment_method"):
+- State the scale references used (e.g., dinner fork ≈ 19–20 mm wide at the tines, plate ≈ 10–11 inches, can diameter ≈ 66 mm, standard cup ≈ 240 ml).
+- Infer an approximate plate diameter or other reference and describe how you derived it from the photo.
+- For each major item, explain how the visible area/height maps to a volume or weight estimate.
+- Explicitly compare to the typical USDA serving size for that item and compute the serving_multiplier (portion ÷ USDA serving). Include 1–2 concrete examples, e.g., "corn appears ≈ 1 cup (2× USDA 1/2 cup)."
+- Keep to 3–6 concise sentences written in natural language.
 
-EXAMPLE: Chicken (6oz = 2 servings), Rice (1 cup = 2 servings), Vegetables (1/2 cup = 1 serving)
+JSON schema (required):
+{
+  "image_type": "food_photo" | "menu_item",
+  "food_items": [{
+    "name": string,
+    "portion_estimate": string,
+    "usda_serving_size": string,
+    "serving_multiplier": number,
+    "preparation_method": string | null,
+    "visual_cues": string | null,
+    "carbohydrates": number,
+    "calories": number,
+    "fat": number,
+    "fiber": number | null,
+    "protein": number,
+    "assessment_notes": string | null
+  }],
+  "total_food_portions": integer,
+  "total_usda_servings": number,
+  "total_carbohydrates": number,
+  "total_calories": number,
+  "total_fat": number,
+  "total_fiber": number | null,
+  "total_protein": number,
+  "confidence": number,
+  "overall_description": string,
+  "portion_assessment_method": string
+  ,
+  "diabetes_considerations": string
+}
 
-ADVANCED MACRONUTRIENT DOSING GUIDANCE:
+Do: identify items precisely; use visible scale; base macros on portions; separate portions vs USDA servings; lower confidence if unsure.
+Don’t: add prose/disclaimers; include items not visible; use vague terms like "mixed vegetables" or "average portion".
+"""
 
-FAT/PROTEIN UNITS (FPUs) CALCULATION:
-• FPU = (Fat grams + Protein grams) ÷ 10
-• 1 FPU = approximately 10g equivalent carb impact over 3-8 hours
-• Low FPU (<2): Minimal extended bolus needed
-• Medium FPU (2-4): Consider 30-50% extended over 2-4 hours
-• High FPU (>4): Consider 50-70% extended over 4-8 hours
-• RESEARCH EVIDENCE: Studies show fat delays glucose absorption by 30-180 minutes
-• PROTEIN IMPACT: 50-60% of protein converts to glucose over 2-4 hours in T1D
-• COMBINATION EFFECT: Mixed meals with >15g fat + >25g protein require extended dosing
-
-FIBER IMPACT CALCULATIONS:
-• SOLUBLE FIBER: Reduces effective carbs by 25-50% depending on source
-  - Oats, beans, apples: High soluble fiber, significant glucose blunting
-  - Berries: Moderate fiber impact, reduces peak by 20-30%
-• INSOLUBLE FIBER: Minimal direct glucose impact but slows absorption
-• NET CARBS ADJUSTMENT: For >5g fiber, subtract 25-50% from total carbs for dosing
-• RESEARCH EVIDENCE: 10g additional fiber can reduce post-meal glucose peak by 15-25mg/dL
-• CLINICAL STUDIES: Beta-glucan fiber (oats, barley) reduces glucose AUC by 20-30% in T1D patients
-• FIBER TIMING: Pre-meal fiber supplements can reduce glucose excursions by 18-35%
-
-PROTEIN CONSIDERATIONS:
-• LEAN PROTEIN (chicken breast, fish): 50-60% glucose conversion over 3-4 hours
-• HIGH-FAT PROTEIN (beef, cheese): 35-45% conversion, delayed to 4-8 hours
-• PLANT PROTEIN: 40-50% conversion with additional fiber benefits
-• TIMING: Protein glucose effect peaks 90-180 minutes post-meal
-• CLINICAL GUIDELINE: For >25g protein, consider 20-30% additional insulin over 3-4 hours
-• RESEARCH EVIDENCE: Type 1 diabetes studies show protein increases glucose area-under-curve by 15-25% at 5 hours post-meal
-
-EXERCISE-AWARE NUTRITION RECOMMENDATIONS:
-
-PRE-EXERCISE NUTRITION:
-• BEFORE AEROBIC EXERCISE (>30 min):
-  - Target: 15-30g carbs 1-3 hours prior
-  - Low GI preferred: oatmeal (GI 55), banana (GI 51)
-  - Reduce rapid insulin by 25-50% if exercising within 2 hours
-• BEFORE RESISTANCE TRAINING:
-  - Target: 20-40g carbs + 15-20g protein 1-2 hours prior
-  - Higher protein needs for muscle recovery
-• MORNING EXERCISE (fasted):
-  - Monitor carefully for dawn phenomenon + exercise interaction
-  - Consider 10-15g quick carbs pre-exercise if BG <120 mg/dL
-
-POST-EXERCISE NUTRITION:
-• AEROBIC EXERCISE RECOVERY:
-  - Immediate (0-30 min): 0.5-1.2g carbs per kg body weight
-  - Extended effect: Increased insulin sensitivity 12-48 hours
-  - Reduce basal insulin by 10-20% for 12-24 hours post-exercise
-• RESISTANCE TRAINING RECOVERY:
-  - Target: 20-40g protein + 30-50g carbs within 2 hours
-  - Enhanced muscle protein synthesis window
-  - Monitor for delayed glucose rise 2-4 hours post-workout
-
-EXERCISE TIMING CONSIDERATIONS:
-• MORNING EXERCISE: Account for dawn phenomenon (typically +20-40 mg/dL rise)
-• AFTERNOON EXERCISE: Peak insulin sensitivity period
-• EVENING EXERCISE: Monitor for nocturnal hypoglycemia, reduce night basal by 10-25%
-• EXTENDED ACTIVITY (>90 min): Plan carb intake every 60-90 minutes (15-30g per hour)
-
-GLYCEMIC INDEX REFERENCE FOR DIABETES MANAGEMENT:
-• LOW GI (55 or less): Slower blood sugar rise, easier insulin timing
-  - Examples: Barley (25), Steel-cut oats (42), Whole grain bread (51), Sweet potato (54)
-• MEDIUM GI (56-69): Moderate blood sugar impact
-  - Examples: Brown rice (68), Whole wheat bread (69), Instant oatmeal (66)
-• HIGH GI (70+): Rapid blood sugar spike, requires careful insulin timing
-  - Examples: White rice (73), White bread (75), Instant mashed potatoes (87), Cornflakes (81)
-
-COOKING METHOD IMPACT ON GI:
-• Cooking increases GI: Raw carrots (47) vs cooked carrots (85)
-• Processing increases GI: Steel-cut oats (42) vs instant oats (79)
-• Cooling cooked starches slightly reduces GI (resistant starch formation)
-• Al dente pasta has lower GI than well-cooked pasta
-
-QUANTITATIVE DOSING ADJUSTMENTS & TIMING RECOMMENDATIONS:
-
-INSULIN TIMING BASED ON MEAL COMPOSITION:
-• SIMPLE CARBS ONLY (>70% carbs, minimal fat/protein):
-  - Pre-meal timing: 15-20 minutes before eating
-  - Peak insulin need: 30-60 minutes post-meal
-  - Example: White bread, candy, juice
-• COMPLEX CARBS + MODERATE PROTEIN/FAT:
-  - Pre-meal timing: 10-15 minutes before eating  
-  - Consider dual-wave: 60% immediate, 40% extended over 2-3 hours
-  - Peak insulin need: 60-90 minutes with extended tail
-• HIGH FAT/PROTEIN MEALS (>4 FPUs):
-  - Pre-meal timing: 0-10 minutes before eating
-  - Consider extended bolus: 40-50% immediate, 50-60% over 4-8 hours
-  - Monitor: Secondary glucose rise at 3-6 hours post-meal
-
-RESEARCH-BASED DOSING CALCULATIONS:
-• PROTEIN DOSING: For every 25g protein, add 15-20% extra insulin over 3-4 hours
-• FAT DOSING: For every 15g fat, consider 10-15% extra insulin over 4-6 hours
-• FIBER ADJUSTMENT: Subtract 0.5-1g effective carbs per 1g soluble fiber (>5g total)
-• ALCOHOL IMPACT: Reduces hepatic glucose production, decrease basal by 25-50% for 6-12 hours
-• COMBINATION MEALS: Mixed macronutrient meals require 10-40% less insulin than calculated sum due to gastric emptying delays
-• MEAL SIZE IMPACT: Large meals (>800 kcal) may require 20-30% extended dosing due to gastroparesis-like effects
-
-ABSORPTION TIME CALCULATIONS FOR LOOP INTEGRATION:
-• BASELINE: Simple carbs = 2-3 hours, Complex carbs = 3-4 hours
-• FPU ADJUSTMENTS: 
-  - Low FPU (<2): Add 1 hour to baseline (2-4 hours total)
-  - Medium FPU (2-4): Add 2-3 hours to baseline (4-6 hours total) 
-  - High FPU (>4): Add 4-6 hours to baseline (6-8 hours total)
-• FIBER IMPACT: High fiber (>8g) adds 1-2 hours due to slowed gastric emptying
-• MEAL SIZE IMPACT: 
-  - Small meals (<400 kcal): Use baseline absorption time
-  - Medium meals (400-800 kcal): Add 1 hour to calculated time
-  - Large meals (>800 kcal): Add 2-3 hours due to gastroparesis-like effects
-• LIQUID vs SOLID: Liquid meals reduce absorption time by 25-30%
-• COOKING METHOD: Well-cooked/processed foods reduce time by 15-25%
-• FINAL CALCULATION: MAX(baseline + FPU_adjustment + fiber_adjustment + size_adjustment, 24 hours)
-
-TIMING RECOMMENDATIONS FOR DIFFERENT SCENARIOS:
-• DAWN PHENOMENON ACTIVE (morning meals):
-  - Add 10-20% extra insulin or dose 20-25 minutes pre-meal
-  - Monitor for rebound hypoglycemia 2-3 hours later
-• POST-EXERCISE MEALS (within 6 hours of activity):
-  - Reduce rapid insulin by 25-50% due to increased sensitivity
-  - Monitor closely for delayed hypoglycemia
-• STRESS/ILLNESS CONDITIONS:
-  - Increase insulin by 20-40% and monitor more frequently
-  - Consider temp basal increases of 25-75%
-
-DIABETIC DOSING IMPLICATIONS:
-• LOW GI foods: Allow longer pre-meal insulin timing (15-30 min before eating)
-• HIGH GI foods: May require immediate insulin or post-meal correction
-• MIXED MEALS: Protein and fat slow carb absorption, reducing effective GI
-• PORTION SIZE: Larger portions of even low-GI foods can cause significant blood sugar impact
-• FOOD COMBINATIONS: Combining high GI foods with low GI foods balances glucose levels
-• FIBER CONTENT: Higher fiber foods have lower GI (e.g., whole grains vs processed grains)
-• RIPENESS AFFECTS GI: Ripe fruits have higher GI than unripe fruits
-• PROCESSING INCREASES GI: Instant foods have higher GI than minimally processed foods
-
-SAFETY CONSIDERATIONS & INDIVIDUALIZATION:
-• INDIVIDUAL VARIATION: These guidelines are population-based; personal response may vary ±25-50%
-• PUMP vs. MDI DIFFERENCES: Insulin pump users can utilize precise extended boluses; MDI users may need split dosing
-• GASTROPARESIS CONSIDERATIONS: If delayed gastric emptying present, delay insulin timing by 30-60 minutes
-• HYPOGLYCEMIA RISK FACTORS: 
-  - Recent exercise increases hypo risk for 12-48 hours
-  - Alcohol consumption increases hypo risk for 6-24 hours
-  - Previous severe hypo in last 24 hours increases current risk
-  - Menstrual cycle: Pre-menstrual phase may increase insulin resistance by 10-25%
-• HYPERGLYCEMIA CORRECTIONS: If BG >180 mg/dL pre-meal, consider correction + meal insulin separately
-• MONITORING REQUIREMENTS:
-  - Check BG at 2 hours post-meal for all new meal types
-  - For high FPU meals (>4), check BG at 4-6 hours post-meal
-  - Consider CGM alarms set 15-30 minutes post-meal for rapid carbs
-  - Temperature extremes: Hot weather may accelerate insulin absorption by 20-30%
-• PREGNANCY MODIFICATIONS: Increase all insulin recommendations by 20-40% in 2nd/3rd trimester
-• ILLNESS CONSIDERATIONS: Stress hormones increase insulin needs by 50-200% during acute illness
-• AGE-RELATED FACTORS: Pediatric patients may require 10-15% higher insulin-to-carb ratios due to growth hormones
-
+// Detailed advanced analysis instructions appended when advanced dosing is enabled.
+private let advancedAnalysisRequirements = """
 RESPOND ONLY IN JSON FORMAT with these exact fields:
 
 FOR ACTUAL FOOD PHOTOS:
@@ -628,65 +455,6 @@ If menu shows "Quinoa Bowl with Sweet Potato and Black Beans", respond:
   "overall_description": "Menu item text analysis. No actual food portions visible for assessment.",
   "portion_assessment_method": "MENU ANALYSIS ONLY - Cannot determine actual portions without seeing food on plate. All nutrition values are ESTIMATES based on USDA standard serving sizes. Actual restaurant portions may vary significantly."
 }
-
-MANDATORY REQUIREMENTS - DO NOT BE VAGUE:
-
-FOR FOOD PHOTOS:
-❌ NEVER confuse portions with servings - count distinct food items as portions, calculate number of servings based on USDA standards
-❌ NEVER say "4 servings" when you mean "4 portions" - be precise about USDA serving calculations
-❌ NEVER say "mixed vegetables" - specify "steamed broccoli florets, diced carrots"
-❌ NEVER say "chicken" - specify "grilled chicken breast"
-❌ NEVER say "average portion" - specify "6 oz portion covering 1/4 of plate = 2 USDA servings"
-❌ NEVER say "well-cooked" - specify "golden-brown with visible caramelization"
-
-✅ ALWAYS distinguish between food portions (distinct items) and USDA servings (standardized amounts)
-✅ ALWAYS calculate serving_multiplier based on USDA serving sizes
-✅ ALWAYS explain WHY you calculated the number of servings (e.g., "twice the standard serving size")
-✅ ALWAYS indicate if portions are larger/smaller than typical (helps with portion control)
-✅ ALWAYS describe exact colors, textures, sizes, shapes, cooking evidence
-✅ ALWAYS compare portions to visible objects (fork, plate, hand if visible)
-✅ ALWAYS explain if the food appears to be on a platter of food or a single plate of food
-✅ ALWAYS describe specific cooking methods you can see evidence of
-✅ ALWAYS count discrete items (3 broccoli florets, 4 potato wedges)
-✅ ALWAYS calculate nutrition from YOUR visual portion assessment
-✅ ALWAYS explain your reasoning with specific visual evidence
-✅ ALWAYS identify glycemic index category (low/medium/high GI) for carbohydrate-containing foods
-✅ ALWAYS explain how cooking method affects GI when visible (e.g., "well-cooked white rice = high GI ~73")
-✅ ALWAYS provide specific insulin timing guidance based on GI classification
-✅ ALWAYS consider how protein/fat in mixed meals may moderate carb absorption
-✅ ALWAYS assess food combinations and explain how low GI foods may balance high GI foods in the meal
-✅ ALWAYS note fiber content and processing level as factors affecting GI
-✅ ALWAYS consider food ripeness and cooking degree when assessing GI impact
-✅ ALWAYS calculate Fat/Protein Units (FPUs) and provide classification (Low/Medium/High)
-✅ ALWAYS calculate net carbs adjustment for fiber content >5g
-✅ ALWAYS provide specific insulin timing recommendations based on meal composition
-✅ ALWAYS include FPU-based dosing guidance for extended insulin needs
-✅ ALWAYS consider exercise timing and provide specific insulin adjustments
-✅ ALWAYS include relevant safety alerts for the specific meal composition
-✅ ALWAYS provide quantitative dosing percentages and timing durations
-✅ ALWAYS calculate absorption_time_hours based on meal composition (FPUs, fiber, meal size)
-✅ ALWAYS provide detailed absorption_time_reasoning showing the calculation process
-✅ ALWAYS consider that Loop will highlight non-default absorption times in blue to alert user
-
-FOR MENU AND RECIPE ITEMS:
-❌ NEVER make assumptions about plate sizes, portions, or actual serving sizes
-❌ NEVER estimate visual portions when analyzing menu text only
-❌ NEVER claim to see cooking methods, textures, or visual details from menu text
-❌ NEVER multiply nutrition values by assumed restaurant portion sizes
-
-✅ ALWAYS set image_type to "menu_item" when analyzing menu text
-✅ ALWAYS set portion_estimate to "CANNOT DETERMINE - menu text only"
-✅ ALWAYS set serving_multiplier to 1.0 for menu items (USDA standard only)
-✅ ALWAYS set visual_cues to "NONE - menu text analysis only"
-✅ ALWAYS mark assessment_notes as "ESTIMATE ONLY - Based on USDA standard serving size"
-✅ ALWAYS use portion_assessment_method to explain this is menu analysis with no visual portions
-✅ ALWAYS provide actual USDA standard nutrition values (carbohydrates, protein, fat, calories)
-✅ ALWAYS calculate nutrition based on typical USDA serving sizes for the identified food type
-✅ ALWAYS include total nutrition fields even for menu items (based on USDA standards)
-✅ ALWAYS translate into the user's device native language or if unknown, translate into ENGLISH before analysing the menu item
-✅ ALWAYS provide glycemic index assessment for menu items based on typical preparation methods
-✅ ALWAYS include diabetes timing guidance even for menu items based on typical GI values
-
 """
 
 /// Individual food item analysis with detailed portion assessment
@@ -719,6 +487,7 @@ struct AIFoodAnalysisResult {
     var foodItemsDetailed: [FoodItemAnalysis]
     let overallDescription: String?
     let confidence: AIConfidenceLevel
+    let numericConfidence: Double?
     let totalFoodPortions: Int?
     let totalUsdaServings: Double?
     var totalCarbohydrates: Double
@@ -866,7 +635,7 @@ enum AIFoodAnalysisError: Error, LocalizedError {
             return NSLocalizedString("Invalid response from AI service", comment: "Error for invalid API response")
         case .apiError(let code):
             if code == 400 {
-                return NSLocalizedString("Invalid API request (400). Please check your API key configuration in Food Search Settings.", comment: "Error for 400 API failures")
+                return NSLocalizedString("Invalid API request (400). Please check your API key configuration in FoodFinder Settings.", comment: "Error for 400 API failures")
             } else if code == 403 {
                 return NSLocalizedString("API access forbidden (403). Your API key may be invalid or you've exceeded your quota.", comment: "Error for 403 API failures") 
             } else if code == 404 {
@@ -877,7 +646,7 @@ enum AIFoodAnalysisError: Error, LocalizedError {
         case .responseParsingFailed:
             return NSLocalizedString("Failed to parse AI analysis results", comment: "Error when response parsing fails")
         case .noApiKey:
-            return NSLocalizedString("No API key configured. Please go to Food Search Settings to set up your API key.", comment: "Error when API key is missing")
+            return NSLocalizedString("No API key configured. Please go to FoodFinder Settings to set up your API key.", comment: "Error when API key is missing")
         case .customError(let message):
             return message
         case .creditsExhausted(let provider):
@@ -903,11 +672,11 @@ enum SearchType: String, CaseIterable {
     var description: String {
         switch self {
         case .textSearch:
-            return "Searching by typing food names or using voice input"
+            return "Search by typing food names or using voice input"
         case .barcodeSearch:
-            return "Scanning product barcodes with camera"
+            return "Scan product barcodes with camera"
         case .aiImageSearch:
-            return "Taking photos of food for AI analysis"
+            return "Take photos of food for AI analysis"
         }
     }
 }
@@ -919,6 +688,7 @@ enum SearchProvider: String, CaseIterable {
     case openAI = "OpenAI (ChatGPT API)"
     case openFoodFacts = "OpenFoodFacts (Default)"
     case usdaFoodData = "USDA FoodData Central"
+    case bringYourOwn = "BYO (Custom)"
     
     
     var supportsSearchType: [SearchType] {
@@ -933,6 +703,9 @@ enum SearchProvider: String, CaseIterable {
             return [.textSearch, .barcodeSearch]
         case .usdaFoodData:
             return [.textSearch]
+        case .bringYourOwn:
+            // Only available for AI Image Analysis
+            return [.aiImageSearch]
         }
     }
     
@@ -940,10 +713,33 @@ enum SearchProvider: String, CaseIterable {
         switch self {
         case .openFoodFacts, .usdaFoodData:
             return false
-        case .claude, .googleGemini, .openAI:
+        case .claude, .googleGemini, .openAI, .bringYourOwn:
             return true
         }
     }
+}
+
+// MARK: - Confidence Extraction (file-scope helper)
+
+/// Attempts to extract a numeric confidence score (0.0–1.0) from provider JSON.
+/// Accepts numeric values or common string variants such as "high", "medium", etc.
+private func extractNumericConfidence(from json: [String: Any]) -> Double? {
+    let keys = ["confidence", "confidence_score", "accuracy", "confidence_level"]
+    for key in keys {
+        if let d = json[key] as? Double { return min(1.0, max(0.0, d)) }
+        if let s = json[key] as? String {
+            let ls = s.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            if let v = Double(ls) { return min(1.0, max(0.0, v)) }
+            switch ls {
+            case "very high": return 0.9
+            case "high": return 0.85
+            case "medium", "moderate": return 0.65
+            case "low", "very low": return 0.4
+            default: break
+            }
+        }
+    }
+    return nil
 }
 
 // MARK: - Intelligent Caching System
@@ -967,8 +763,9 @@ class ImageAnalysisCache {
             timestamp: Date(),
             imageHash: imageHash
         )
-        
-        cache.setObject(cachedResult, forKey: imageHash as NSString)
+        // Estimate object cost in bytes for effective totalCostLimit behavior
+        let cost = estimateCostBytes(for: result)
+        cache.setObject(cachedResult, forKey: imageHash as NSString, cost: cost)
     }
     
     /// Get cached result for the given image if available and not expired
@@ -1002,6 +799,73 @@ class ImageAnalysisCache {
     /// Clear all cached results
     func clearCache() {
         cache.removeAllObjects()
+    }
+
+    /// Approximate serialized byte size of a result for NSCache cost
+    private func estimateCostBytes(for result: AIFoodAnalysisResult) -> Int {
+        var bytes = 0
+        // String fields
+        func addString(_ s: String?) { if let s = s { bytes += s.utf8.count } }
+        addString(result.overallDescription)
+        addString(result.portionAssessmentMethod)
+        addString(result.diabetesConsiderations)
+        addString(result.visualAssessmentDetails)
+        addString(result.notes)
+        addString(result.absorptionTimeReasoning)
+        addString(result.mealSizeImpact)
+        addString(result.individualizationFactors)
+        addString(result.safetyAlerts)
+        addString(result.fatProteinUnits)
+        addString(result.netCarbsAdjustment)
+        addString(result.insulinTimingRecommendations)
+        addString(result.fpuDosingGuidance)
+        addString(result.exerciseConsiderations)
+        // Numbers (8 bytes each as approximation)
+        func addNum(_ n: Double?) { if n != nil { bytes += 8 } }
+        addNum(result.totalProtein)
+        addNum(result.totalFat)
+        addNum(result.totalFiber)
+        addNum(result.totalCalories)
+        addNum(result.absorptionTimeHours)
+        // Detailed items
+        for item in result.foodItemsDetailed {
+            addString(item.name)
+            addString(item.portionEstimate)
+            addString(item.usdaServingSize)
+            addString(item.preparationMethod)
+            addString(item.visualCues)
+            addString(item.assessmentNotes)
+            addNum(item.calories)
+            addNum(item.fat)
+            addNum(item.fiber)
+            addNum(item.protein)
+            bytes += 8 // carbs
+            bytes += 8 // servingMultiplier
+            addNum(item.absorptionTimeHours)
+        }
+        // Base overhead
+        return max(bytes, 1024)
+    }
+}
+
+extension ImageAnalysisCache {
+    /// Cache using a preencoded image + provider key (prevents cross‑provider collisions)
+    func cacheResult(_ result: AIFoodAnalysisResult, forPreencoded pre: PreencodedImage, providerKey: String) {
+        let key = (pre.sha256 + "|" + providerKey) as NSString
+        let cached = CachedAnalysisResult(result: result, timestamp: Date(), imageHash: pre.sha256)
+        let cost = estimateCostBytes(for: result)
+        cache.setObject(cached, forKey: key, cost: cost)
+    }
+
+    /// Retrieve cache using a preencoded image key + provider key
+    func getCachedResult(forPreencoded pre: PreencodedImage, providerKey: String) -> AIFoodAnalysisResult? {
+        let key = (pre.sha256 + "|" + providerKey) as NSString
+        guard let cached = cache.object(forKey: key) else { return nil }
+        if Date().timeIntervalSince(cached.timestamp) > cacheExpirationTime {
+            cache.removeObject(forKey: key)
+            return nil
+        }
+        return cached.result
     }
 }
 
@@ -1044,10 +908,27 @@ class ConfigurableAIService: ObservableObject {
     @Published var aiImageSearchProvider: SearchProvider = .googleGemini
     
     private init() {
-        // Load current settings
-        textSearchProvider = SearchProvider(rawValue: UserDefaults.standard.textSearchProvider) ?? .openFoodFacts
-        barcodeSearchProvider = SearchProvider(rawValue: UserDefaults.standard.barcodeSearchProvider) ?? .openFoodFacts
-        aiImageSearchProvider = SearchProvider(rawValue: UserDefaults.standard.aiImageProvider) ?? .googleGemini
+        // Load current settings with normalization for legacy strings
+        let storedText = UserDefaults.standard.textSearchProvider
+        let storedBarcode = UserDefaults.standard.barcodeSearchProvider
+        let storedAI = UserDefaults.standard.aiImageProvider
+
+        func normalize(_ raw: String) -> SearchProvider? {
+            if let p = SearchProvider(rawValue: raw) { return p }
+            // Legacy aliases
+            switch raw {
+            case "OpenFoodFacts": return .openFoodFacts
+            case "BYO": return .bringYourOwn
+            case "OpenAI ChatGPT": return .openAI
+            case "Anthropic Claude": return .claude
+            case "Google Gemini", "Google (Gemini)": return .googleGemini
+            default: return nil
+            }
+        }
+
+        textSearchProvider = normalize(storedText) ?? .openFoodFacts
+        barcodeSearchProvider = normalize(storedBarcode) ?? .openFoodFacts
+        aiImageSearchProvider = normalize(storedAI) ?? .openAI
         
         // Google Gemini API key should be configured by user
         if UserDefaults.standard.googleGeminiAPIKey.isEmpty {
@@ -1212,14 +1093,37 @@ class ConfigurableAIService: ObservableObject {
     // MARK: - Search Type Configuration
     
     func getProviderForSearchType(_ searchType: SearchType) -> SearchProvider {
-        switch searchType {
-        case .textSearch:
-            return textSearchProvider
-        case .barcodeSearch:
-            return barcodeSearchProvider
-        case .aiImageSearch:
-            return aiImageSearchProvider
+        // Retrieve the configured provider
+        let configured: SearchProvider = {
+            switch searchType {
+            case .textSearch: return textSearchProvider
+            case .barcodeSearch: return barcodeSearchProvider
+            case .aiImageSearch: return aiImageSearchProvider
+            }
+        }()
+
+        // If the configured provider does not support this search type (e.g., BYO for text/barcode),
+        // fall back to a sensible default and persist the correction.
+        if !configured.supportsSearchType.contains(searchType) {
+            let fallback: SearchProvider
+            switch searchType {
+            case .textSearch:
+                fallback = .openFoodFacts
+                textSearchProvider = fallback
+                UserDefaults.standard.textSearchProvider = fallback.rawValue
+            case .barcodeSearch:
+                fallback = .openFoodFacts
+                barcodeSearchProvider = fallback
+                UserDefaults.standard.barcodeSearchProvider = fallback.rawValue
+            case .aiImageSearch:
+                fallback = .googleGemini
+                aiImageSearchProvider = fallback
+                UserDefaults.standard.aiImageProvider = fallback.rawValue
+            }
+            return fallback
         }
+
+        return configured
     }
     
     func setProviderForSearchType(_ provider: SearchProvider, searchType: SearchType) {
@@ -1269,6 +1173,9 @@ class ConfigurableAIService: ObservableObject {
         case .openFoodFacts, .usdaFoodData:
             // These don't support image analysis, fallback to basic
             return .basicAnalysis
+        case .bringYourOwn:
+            // BYO is not enabled for image analysis; use basic to avoid confusion
+            return .basicAnalysis
         }
     }
     
@@ -1279,11 +1186,9 @@ class ConfigurableAIService: ObservableObject {
     
     /// Analyze food image with telemetry callbacks for progress tracking
     func analyzeFoodImage(_ image: UIImage, telemetryCallback: ((String) -> Void)?) async throws -> AIFoodAnalysisResult {
-        // Check cache first for instant results
-        if let cachedResult = imageAnalysisCache.getCachedResult(for: image) {
-            telemetryCallback?("📋 Found cached analysis result")
-            return cachedResult
-        }
+        // Pre-encode once to reuse across providers and caching
+        telemetryCallback?("🖼️ Preparing image once for all providers...")
+        let pre = await ConfigurableAIService.preencodeImageForProviders(image)
         
         telemetryCallback?("🎯 Selecting optimal AI provider...")
         
@@ -1295,6 +1200,58 @@ class ConfigurableAIService: ObservableObject {
             return result
         }
         
+        // If BYO is selected for image analysis, run custom OpenAI-compatible path directly
+        if aiImageSearchProvider == .bringYourOwn {
+            telemetryCallback?("🤖 Connecting to your custom AI provider...")
+            // Prefer temporary BYO test override if enabled (DEBUG), else UserDefaults.
+            let key: String
+            let base: String
+            let model: String?
+            let version: String?
+            let org: String?
+
+            if BYOTestConfig.enabled {
+                key = BYOTestConfig.apiKey
+                base = BYOTestConfig.baseURL
+                model = BYOTestConfig.model
+                version = BYOTestConfig.apiVersion
+                org = BYOTestConfig.organizationID
+            } else {
+                key = UserDefaults.standard.customAIAPIKey
+                base = UserDefaults.standard.customAIBaseURL
+                let m = UserDefaults.standard.customAIModel
+                let v = UserDefaults.standard.customAIAPIVersion
+                let o = UserDefaults.standard.customAIOrganization
+                model = m.isEmpty ? nil : m
+                version = v.isEmpty ? nil : v
+                org = o.isEmpty ? nil : o
+            }
+
+            guard !key.isEmpty, !base.isEmpty else {
+                print("❌ BYO AI not configured for image analysis")
+                throw AIFoodAnalysisError.noApiKey
+            }
+            // Use empty query to apply our optimized internal prompts
+            let result = try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(
+                image,
+                apiKey: key,
+                query: "",
+                baseURL: base,
+                model: model,
+                apiVersion: version,
+                organizationID: org,
+                customPath: UserDefaults.standard.customAIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : UserDefaults.standard.customAIEndpointPath,
+                telemetryCallback: telemetryCallback,
+                preencoded: pre
+            )
+            // Cache BYO using provider-specific key (base|model|version|adv|mode)
+            let adv = UserDefaults.standard.advancedDosingRecommendationsEnabled ? "adv" : "std"
+            let modeKey = analysisMode.rawValue
+            let byoKey = ["BYO", base, model ?? "", version ?? "", adv, "mode=\(modeKey)"].joined(separator: "|")
+            imageAnalysisCache.cacheResult(result, forPreencoded: pre, providerKey: byoKey)
+            return result
+        }
+
         // Use the AI image search provider instead of the separate currentProvider
         let provider = getAIProviderForImageAnalysis()
         
@@ -1313,7 +1270,7 @@ class ConfigurableAIService: ObservableObject {
                 throw AIFoodAnalysisError.noApiKey
             }
             telemetryCallback?("🤖 Connecting to Claude AI...")
-            result = try await ClaudeFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query, telemetryCallback: telemetryCallback)
+            result = try await ClaudeFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query, telemetryCallback: telemetryCallback, preencoded: pre)
         case .googleGemini:
             let key = UserDefaults.standard.googleGeminiAPIKey
             // Use empty query to ensure only optimized prompts are used for performance
@@ -1323,7 +1280,7 @@ class ConfigurableAIService: ObservableObject {
                 throw AIFoodAnalysisError.noApiKey
             }
             telemetryCallback?("🤖 Connecting to Google Gemini...")
-            result = try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query, telemetryCallback: telemetryCallback)
+            result = try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query, telemetryCallback: telemetryCallback, preencoded: pre)
         case .openAI:
             let key = UserDefaults.standard.openAIAPIKey
             // Use empty query to ensure only optimized prompts are used for performance
@@ -1333,13 +1290,29 @@ class ConfigurableAIService: ObservableObject {
                 throw AIFoodAnalysisError.noApiKey
             }
             telemetryCallback?("🤖 Connecting to OpenAI...")
-            result = try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query, telemetryCallback: telemetryCallback)
+            result = try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query, telemetryCallback: telemetryCallback, preencoded: pre)
         }
         
         telemetryCallback?("💾 Caching analysis result...")
-        
-        // Cache the result for future use
-        imageAnalysisCache.cacheResult(result, for: image)
+        // Build provider-specific cache key using public SearchProvider mapping when available
+        let modelForCache: String = {
+            switch provider {
+            case .claude:
+                return ConfigurableAIService.optimalModel(for: .claude, mode: analysisMode)
+            case .googleGemini:
+                return ConfigurableAIService.optimalModel(for: .googleGemini, mode: analysisMode)
+            case .openAI:
+                return ConfigurableAIService.optimalModel(for: .openAI, mode: analysisMode)
+            case .basicAnalysis:
+                return "basic"
+            }
+        }()
+        let providerKey = [provider.rawValue,
+                           modelForCache,
+                           UserDefaults.standard.advancedDosingRecommendationsEnabled ? "adv" : "std",
+                           "mode=\(analysisMode.rawValue)"]
+            .joined(separator: "|")
+        imageAnalysisCache.cacheResult(result, forPreencoded: pre, providerKey: providerKey)
         
         return result
     }
@@ -1479,6 +1452,9 @@ class ConfigurableAIService: ObservableObject {
             } else {
                 return 20  // GPT-4o models - good balance of speed and reliability
             }
+        case .bringYourOwn:
+            // Default to OpenAI-like timeout; can be tuned per service
+            return 20
         case .claude:
             return 25  // Highest quality responses but slower processing
         case .openFoodFacts, .usdaFoodData:
@@ -1538,6 +1514,58 @@ class ConfigurableAIService: ObservableObject {
         
         // Perform high-quality resize
         return resizeImage(image, to: newSize)
+    }
+
+    /// Pre-encode an image once for all providers with a byte budget
+    /// - Parameters:
+    ///   - image: source image
+    ///   - targetBytes: desired upper bound in bytes (default ~450 KB)
+    /// - Returns: PreencodedImage with JPEG data, base64, and SHA256
+    static func preencodeImageForProviders(_ image: UIImage, targetBytes: Int = 450 * 1024) async -> PreencodedImage {
+        // Respect user cancellation before heavy work
+        try? Task.checkCancellation()
+        let optimized = await optimizeImageForAnalysisSafely(image)
+        try? Task.checkCancellation()
+        // Binary search JPEG quality
+        var low: CGFloat = 0.35
+        var high: CGFloat = 0.95
+        var bestData: Data? = nil
+        for _ in 0..<7 { // ~7 iters is enough
+            if Task.isCancelled { break }
+            let mid = (low + high) / 2
+            if let d = optimized.jpegData(compressionQuality: mid) {
+                if d.count > targetBytes {
+                    high = mid
+                } else {
+                    bestData = d
+                    low = mid
+                }
+            } else {
+                break
+            }
+        }
+        var finalImage = optimized
+        var data = bestData ?? (optimized.jpegData(compressionQuality: 0.75) ?? Data())
+        // If still above target, downscale once and retry quickly at a safe quality
+        if data.count > targetBytes {
+            try? Task.checkCancellation()
+            let scale: CGFloat = 0.85
+            let newSize = CGSize(width: optimized.size.width * scale, height: optimized.size.height * scale)
+            let downsized = resizeImage(optimized, to: newSize)
+            finalImage = downsized
+            data = downsized.jpegData(compressionQuality: 0.7) ?? data
+        }
+        let base64 = data.base64EncodedString()
+        let sha = data.sha256Hash
+        return PreencodedImage(
+            resizedImage: finalImage,
+            jpegData: data,
+            base64: base64,
+            sha256: sha,
+            bytes: data.count,
+            width: Int(finalImage.size.width),
+            height: Int(finalImage.size.height)
+        )
     }
     
     /// High-quality image resizing helper
@@ -1720,7 +1748,6 @@ private func performGPT5RequestWithRetry(request: URLRequest, telemetryCallback:
     
     for attempt in 1...maxRetries {
         do {
-            print("🔧 GPT-5 Debug - Attempt \(attempt)/\(maxRetries)")
             telemetryCallback?("🔄 GPT-5 attempt \(attempt)/\(maxRetries)...")
             
             // Create a custom URLSession with extended timeout for GPT-5
@@ -1734,11 +1761,9 @@ private func performGPT5RequestWithRetry(request: URLRequest, telemetryCallback:
                 try await session.data(for: request)
             }
             
-            print("🔧 GPT-5 Debug - Request succeeded on attempt \(attempt)")
             return (data, response)
             
         } catch AIFoodAnalysisError.timeout {
-            print("⚠️ GPT-5 Debug - Timeout on attempt \(attempt)")
             lastError = AIFoodAnalysisError.timeout
             
             if attempt < maxRetries {
@@ -1747,14 +1772,12 @@ private func performGPT5RequestWithRetry(request: URLRequest, telemetryCallback:
                 try await Task.sleep(nanoseconds: UInt64(backoffDelay * 1_000_000_000))
             }
         } catch {
-            print("❌ GPT-5 Debug - Non-timeout error on attempt \(attempt): \(error)")
             // For non-timeout errors, fail immediately
             throw error
         }
     }
     
     // All retries failed
-    print("❌ GPT-5 Debug - All retry attempts failed")
     telemetryCallback?("❌ GPT-5 requests timed out, switching to GPT-4o...")
     
     // Auto-fallback to GPT-4o on persistent timeout
@@ -1792,7 +1815,7 @@ private func retryWithGPT4Fallback(_ image: UIImage, apiKey: String, query: Stri
     let finalPrompt = query.isEmpty ? analysisPrompt : "\(query)\n\n\(analysisPrompt)"
     let payload: [String: Any] = [
         "model": fallbackModel,
-        "max_tokens": isAdvancedPrompt ? 6000 : 2500,
+        "max_completion_tokens": isAdvancedPrompt ? 6000 : 2500,
         "temperature": 0.01,
         "messages": [
             [
@@ -1888,6 +1911,25 @@ private func parseOpenAIResponse(content: String) throws -> AIFoodAnalysisResult
         }
         return .medium
     }
+
+    func extractNumericConfidence(from json: [String: Any]) -> Double? {
+        let keys = ["confidence", "confidence_score", "accuracy", "confidence_level"]
+        for key in keys {
+            if let d = json[key] as? Double { return min(1.0, max(0.0, d)) }
+            if let s = json[key] as? String {
+                let ls = s.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                if let v = Double(ls) { return min(1.0, max(0.0, v)) }
+                switch ls {
+                case "very high": return 0.9
+                case "high": return 0.85
+                case "medium", "moderate": return 0.65
+                case "low", "very low": return 0.4
+                default: break
+                }
+            }
+        }
+        return nil
+    }
     
     // Extract JSON from response
     let cleanedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1949,6 +1991,7 @@ private func parseOpenAIResponse(content: String) throws -> AIFoodAnalysisResult
                        detailedFoodItems.compactMap { $0.calories }.reduce(0, +)
     
     let confidence = extractConfidence(from: nutritionData)
+    let numericConf = extractNumericConfidence(from: nutritionData)
     let originalServings = detailedFoodItems.reduce(0) { $0 + $1.servingMultiplier }
     let absorptionHours = extractNumber(from: nutritionData, keys: ["absorption_time_hours"])
     
@@ -1957,6 +2000,7 @@ private func parseOpenAIResponse(content: String) throws -> AIFoodAnalysisResult
         foodItemsDetailed: detailedFoodItems,
         overallDescription: extractString(from: nutritionData, keys: ["overall_description"]),
         confidence: confidence,
+        numericConfidence: numericConf,
         totalFoodPortions: extractNumber(from: nutritionData, keys: ["total_food_portions"]).map { Int($0) },
         totalUsdaServings: extractNumber(from: nutritionData, keys: ["total_usda_servings"]),
         totalCarbohydrates: totalCarbs,
@@ -1986,7 +2030,42 @@ private func parseOpenAIResponse(content: String) throws -> AIFoodAnalysisResult
 
 class OpenAIFoodAnalysisService {
     static let shared = OpenAIFoodAnalysisService()
-    private init() {}
+    private init() {
+        // Preconfigure sessions for OpenAI-compatible endpoints
+        self.sessionOpenAI = OpenAIFoodAnalysisService.makeSession(timeout: 60)
+        self.sessionAzure = OpenAIFoodAnalysisService.makeSession(timeout: 90)
+    }
+
+    private static func makeSession(timeout: TimeInterval) -> URLSession {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = timeout
+        config.timeoutIntervalForResource = timeout * 2
+        config.waitsForConnectivity = true
+        config.allowsCellularAccess = true
+        config.httpMaximumConnectionsPerHost = 2
+        config.httpShouldSetCookies = false
+        config.httpCookieAcceptPolicy = .never
+        return URLSession(configuration: config)
+    }
+
+    private let sessionOpenAI: URLSession
+    private let sessionAzure: URLSession
+
+    // Normalizes a custom endpoint path to ensure it begins with a single '/'
+    private func normalizedPath(_ path: String?) -> String {
+        guard let raw = path?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else {
+            return "/v1/chat/completions"
+        }
+        return raw.hasPrefix("/") ? raw : "/" + raw
+    }
+
+    // Safely build Azure Chat Completions URL, encoding the deployment as a path component
+    private func buildAzureChatCompletionsURL(baseURL: String, deployment: String, apiVersion: String) -> URL? {
+        let trimmed = baseURL.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let encodedDeployment = deployment.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? deployment
+        let full = "\(trimmed)/openai/deployments/\(encodedDeployment)/chat/completions?api-version=\(apiVersion)"
+        return URL(string: full)
+    }
     
     func analyzeFoodImage(_ image: UIImage, apiKey: String, query: String) async throws -> AIFoodAnalysisResult {
         return try await analyzeFoodImage(image, apiKey: apiKey, query: query, telemetryCallback: nil)
@@ -1994,8 +2073,8 @@ class OpenAIFoodAnalysisService {
     
     /// Create a GPT-5 optimized version of the comprehensive analysis prompt
     private func createGPT5OptimizedPrompt(from fullPrompt: String) -> String {
-        // Extract whether this is advanced mode by checking the prompt content
-        let isAdvancedEnabled = fullPrompt.contains("fat_protein_units") || fullPrompt.contains("FPU")
+        // Determine advanced mode directly from settings
+        let isAdvancedEnabled = UserDefaults.standard.advancedDosingRecommendationsEnabled
         
         if isAdvancedEnabled {
             // GPT-5 optimized prompt with advanced dosing fields
@@ -2028,6 +2107,7 @@ ADVANCED DIABETES ANALYSIS - JSON format required:
   "absorption_time_reasoning": "explain_absorption_timing"
 }
 
+// (moved extension below createGPT5OptimizedPrompt)
 Calculate FPU = (total_fat + total_protein) ÷ 10. Use visual references for portions.
 """
         } else {
@@ -2058,8 +2138,194 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
 """
         }
     }
+
+// Convenience overload for BYO/OpenAI that uses a preencoded image (method lives in class scope)
+    func analyzeFoodImage(
+        _ image: UIImage,
+        apiKey: String,
+        query: String,
+        baseURL: String? = nil,
+        model overrideModel: String? = nil,
+        apiVersion: String? = nil,
+        organizationID: String? = nil,
+        customPath: String? = nil,
+        telemetryCallback: ((String) -> Void)?,
+        preencoded pre: PreencodedImage? = nil
+    ) async throws -> AIFoodAnalysisResult {
+        let defaultBase = "https://api.openai.com"
+        let trimmedBase = (baseURL ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let base = trimmedBase.isEmpty ? defaultBase : trimmedBase
+        let isAzure = base.contains(".openai.azure.com") || ((apiVersion ?? "").isEmpty == false)
+
+        let url: URL? = isAzure
+            ? buildAzureChatCompletionsURL(baseURL: base, deployment: (overrideModel?.isEmpty == false ? overrideModel! : ConfigurableAIService.optimalModel(for: .openAI, mode: ConfigurableAIService.shared.analysisMode)), apiVersion: (apiVersion?.isEmpty == false ? apiVersion! : "2024-06-01"))
+            : URL(string: base.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + normalizedPath(customPath))
+        guard let url else { throw AIFoodAnalysisError.invalidResponse }
+
+        let analysisMode = ConfigurableAIService.shared.analysisMode
+        let model = overrideModel ?? ConfigurableAIService.optimalModel(for: .openAI, mode: analysisMode)
+        let imageDetail = (analysisMode == .fast) ? "low" : "high"
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if isAzure { request.setValue(apiKey, forHTTPHeaderField: "api-key") }
+        else { request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization") }
+
+        let analysisPrompt = getAnalysisPrompt()
+        let isAdvancedPrompt = UserDefaults.standard.advancedDosingRecommendationsEnabled
+        let finalPrompt: String = model.contains("gpt-5")
+            ? (query.isEmpty ? createGPT5OptimizedPrompt(from: analysisPrompt) : query)
+            : (query.isEmpty ? analysisPrompt : "\(query)\n\n\(analysisPrompt)")
+
+        var contentBlocks: [[String: Any]] = []
+        contentBlocks.append(["type": "text", "text": finalPrompt])
+        // Prepare image (use preencoded if provided)
+        let prepared: PreencodedImage
+        if let provided = pre {
+            prepared = provided
+        } else {
+            prepared = await ConfigurableAIService.preencodeImageForProviders(image)
+        }
+        var imageURL: [String: Any] = ["url": "data:image/jpeg;base64,\(prepared.base64)"]
+        if !isAzure { imageURL["detail"] = imageDetail }
+        contentBlocks.append(["type": "image_url", "image_url": imageURL])
+
+        var payload: [String: Any] = ["messages": [["role": "user", "content": contentBlocks]]]
+        if !isAzure { payload["model"] = model }
+        if isAzure {
+            let ver = (apiVersion?.isEmpty == false ? apiVersion! : "")
+            let useNew = ver.hasPrefix("2024-12") || ver.hasPrefix("2025")
+            if useNew { payload["max_completion_tokens"] = isAdvancedPrompt ? 6000 : 2500 } else { payload["max_tokens"] = isAdvancedPrompt ? 6000 : 2500 }
+            payload["temperature"] = 0.01
+            if !model.contains("gpt-5") { payload["response_format"] = ["type": "json_object"] }
+        } else {
+            if model.contains("gpt-5") || model.contains("gpt-4") {
+                payload["max_completion_tokens"] = isAdvancedPrompt ? 6000 : 2500
+                payload["response_format"] = ["type": "json_object"]
+                if model.contains("gpt-5") { payload["stream"] = false }
+            } else {
+                payload["max_tokens"] = isAdvancedPrompt ? 6000 : 2500
+                payload["temperature"] = 0.01
+                payload["response_format"] = ["type": "json_object"]
+            }
+        }
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let (data, response) = try await (isAzure ? sessionAzure : sessionOpenAI).data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { throw AIFoodAnalysisError.apiError((response as? HTTPURLResponse)?.statusCode ?? -1) }
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let choices = json["choices"] as? [[String: Any]],
+              let first = choices.first,
+              let message = first["message"] as? [String: Any],
+              let content = message["content"] as? String else { throw AIFoodAnalysisError.responseParsingFailed }
+        return try parseOpenAIResponse(content: content)
+    }
+// end of convenience overload
+
+
+    // MARK: - Connection Test (OpenAI-compatible/BYO)
+    /// Performs a minimal connectivity/auth check against an OpenAI-compatible endpoint.
+    /// Scope: verifies network reachability and that the API accepts the key (no model/parse validation).
+    /// Returns a concise status string suitable for UI display.
+    func testConnection(
+        baseURL: String,
+        apiKey: String,
+        model: String?,
+        apiVersion: String?,
+        organizationID: String?,
+        customPath: String?
+    ) async throws -> String {
+        let trimmedBase = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedBase.isEmpty, !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw AIFoodAnalysisError.customError("Missing Base URL or API key")
+        }
+
+        let isAzure = trimmedBase.contains(".openai.azure.com") || ((apiVersion ?? "").isEmpty == false)
+        let url: URL?
+        if isAzure {
+            let deployment = (model?.isEmpty == false ? model! : "gpt-4o")
+            let version = (apiVersion?.isEmpty == false ? apiVersion! : "2024-06-01")
+            url = buildAzureChatCompletionsURL(baseURL: trimmedBase, deployment: deployment, apiVersion: version)
+        } else {
+            let path = normalizedPath(customPath)
+            url = URL(string: trimmedBase.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + path)
+        }
+
+        guard let url else {
+            throw AIFoodAnalysisError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if isAzure {
+            request.setValue(apiKey, forHTTPHeaderField: "api-key")
+        } else {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            if let org = organizationID, !org.isEmpty { request.setValue(org, forHTTPHeaderField: "OpenAI-Organization") }
+        }
+        request.timeoutInterval = 15
+
+        // Minimal body: a tiny, valid chat payload for OpenAI-compatible endpoints.
+        // We intentionally avoid strict response parsing. Any 2xx (and many 400s) indicate
+        // connectivity + key acceptance; 401/403 indicate auth failures.
+        var payload: [String: Any] = [
+            "messages": [["role": "user", "content": [["type": "text", "text": "ping"]]]],
+            // Use modern token param for OpenAI; Azure still relies on max_tokens
+            (isAzure ? "max_tokens" : "max_completion_tokens"): 1,
+            "temperature": 0
+        ]
+        if !isAzure { payload["model"] = (model?.isEmpty == false ? model! : "gpt-4o-mini") }
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+
+        let (data, response) = try await (isAzure ? sessionAzure : sessionOpenAI).data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw AIFoodAnalysisError.invalidResponse }
+
+        // Treat success and many client errors (400) as a connectivity/auth pass.
+        switch http.statusCode {
+        case 200...299:
+            // Success: we don't parse the body; scope is connectivity/auth only.
+            return isAzure ? "Connection OK (Azure endpoint)" : "Connection OK (OpenAI-compatible)"
+        case 400:
+            // Likely a schema/parameter issue; if not an auth error, consider it an OK connection.
+            if let info = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let error = info["error"] as? [String: Any],
+               let type = (error["type"] as? String)?.lowercased(),
+               type.contains("auth") || type.contains("key") {
+                throw AIFoodAnalysisError.customError("Authentication failed (400) — check key or headers")
+            }
+            return "Connection OK (request invalid — credentials likely accepted)"
+        case 401, 403:
+            // Auth failures
+            let message: String
+            if let info = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let error = info["error"] as? [String: Any],
+               let msg = error["message"] as? String {
+                message = msg
+            } else {
+                message = HTTPURLResponse.localizedString(forStatusCode: http.statusCode)
+            }
+            throw AIFoodAnalysisError.customError("Authentication failed (\(http.statusCode)): \(message)")
+        case 404:
+            // Likely not an OpenAI-compatible path (e.g., Gemini endpoint) — surface a helpful hint.
+            let baseLower = trimmedBase.lowercased()
+            if baseLower.contains("googleapis.com") || baseLower.contains("aistudio") || baseLower.contains("gemini") {
+                return "Connected, but endpoint is not OpenAI-compatible (Gemini). BYO expects OpenAI-compatible APIs."
+            }
+            throw AIFoodAnalysisError.apiError(404)
+        default:
+            // Other errors: attempt to show provider message
+            if let info = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let error = info["error"] as? [String: Any],
+               let msg = error["message"] as? String {
+                throw AIFoodAnalysisError.customError("HTTP \(http.statusCode): \(msg)")
+            }
+            throw AIFoodAnalysisError.apiError(http.statusCode)
+        }
+    }
     
-    func analyzeFoodImage(_ image: UIImage, apiKey: String, query: String, telemetryCallback: ((String) -> Void)?) async throws -> AIFoodAnalysisResult {
+    func analyzeFoodImage(_ image: UIImage, apiKey: String, query: String, telemetryCallback: ((String) -> Void)?, preencoded: PreencodedImage? = nil) async throws -> AIFoodAnalysisResult {
         // OpenAI GPT Vision implementation (GPT-5 or GPT-4o-mini)
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
             throw AIFoodAnalysisError.invalidResponse
@@ -2068,6 +2334,7 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
         // Get optimal model based on current analysis mode
         telemetryCallback?("⚙️ Configuring OpenAI parameters...")
         let analysisMode = ConfigurableAIService.shared.analysisMode
+        let imageDetail = (analysisMode == .fast) ? "low" : "high"
         let model = ConfigurableAIService.optimalModel(for: .openAI, mode: analysisMode)
         let gpt5Enabled = UserDefaults.standard.useGPT5ForOpenAI
         
@@ -2076,25 +2343,20 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
         print("   GPT-5 Enabled: \(gpt5Enabled)")
         print("   Selected Model: \(model)")
         
-        // Optimize image size for faster processing and uploads
+        // Pre-encode once using byte budget
         telemetryCallback?("🖼️ Optimizing your image...")
-        let optimizedImage = ConfigurableAIService.optimizeImageForAnalysis(image)
-        
-        // Convert image to base64 with adaptive compression  
-        // GPT-5 benefits from more aggressive compression due to slower processing
-        telemetryCallback?("🔄 Encoding image data...")
-        let compressionQuality = model.contains("gpt-5") ? 
-            min(0.7, ConfigurableAIService.adaptiveCompressionQuality(for: optimizedImage)) :
-            ConfigurableAIService.adaptiveCompressionQuality(for: optimizedImage)
-        guard let imageData = optimizedImage.jpegData(compressionQuality: compressionQuality) else {
-            throw AIFoodAnalysisError.imageProcessingFailed
+        let pre: PreencodedImage
+        if let provided = preencoded {
+            pre = provided
+        } else {
+            pre = await ConfigurableAIService.preencodeImageForProviders(image)
         }
-        let base64Image = imageData.base64EncodedString()
+        let base64Image = pre.base64
         
         // Get analysis prompt early to check complexity
         telemetryCallback?("📡 Preparing API request...")
         let analysisPrompt = getAnalysisPrompt()
-        let isAdvancedPrompt = analysisPrompt.count > 10000
+        let isAdvancedPrompt = UserDefaults.standard.advancedDosingRecommendationsEnabled
         
         // Create OpenAI API request
         var request = URLRequest(url: url)
@@ -2105,14 +2367,10 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
         // Set appropriate timeout based on model type and prompt complexity
         if model.contains("gpt-5") {
             request.timeoutInterval = 120  // 2 minutes for GPT-5 models
-            print("🔧 GPT-5 Debug - Set URLRequest timeout to 120 seconds")
         } else {
             // For GPT-4 models, extend timeout significantly for advanced analysis (very long prompt)
             request.timeoutInterval = isAdvancedPrompt ? 150 : 30  // 2.5 min for advanced, 30s for standard
-            print("🔧 GPT-4 Timeout - Model: \(model), Advanced: \(isAdvancedPrompt), Timeout: \(request.timeoutInterval)s, Prompt: \(analysisPrompt.count) chars")
-            if isAdvancedPrompt {
-                print("🔧 GPT-4 Advanced - Using extended 150s timeout for comprehensive analysis (\(analysisPrompt.count) chars)")
-            }
+            // Advanced prompt uses extended timeout for comprehensive analysis
         }
         
         // Use appropriate parameters based on model type
@@ -2140,12 +2398,6 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
                                     // For GPT-4, use full prompt system
                                     finalPrompt = query.isEmpty ? analysisPrompt : "\(query)\n\n\(analysisPrompt)"
                                 }
-                                print("🔍 OpenAI Final Prompt Debug:")
-                                print("   Query isEmpty: \(query.isEmpty)")
-                                print("   Query length: \(query.count) characters")
-                                print("   Analysis prompt length: \(analysisPrompt.count) characters")
-                                print("   Final combined prompt length: \(finalPrompt.count) characters")
-                                print("   First 100 chars of final prompt: \(String(finalPrompt.prefix(100)))")
                                 return finalPrompt
                             }()
                         ],
@@ -2153,7 +2405,7 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
                             "type": "image_url",
                             "image_url": [
                                 "url": "data:image/jpeg;base64,\(base64Image)",
-                                "detail": "high"  // Request high-detail image processing
+                                "detail": "\(imageDetail)"
                             ]
                         ]
                     ]
@@ -2173,28 +2425,24 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
             // Add performance optimization for GPT-5
             payload["stream"] = false  // Ensure complete response (no streaming)
             telemetryCallback?("⚡ Using GPT-5 optimized settings...")
+        } else if model.contains("gpt-4") {
+            // GPT-4 and later support max_completion_tokens
+            payload["max_completion_tokens"] = isAdvancedPrompt ? 6000 : 2500
+            payload["temperature"] = 0.01
+            // Enforce JSON output
+            payload["response_format"] = ["type": "json_object"]
         } else {
-            // GPT-4 models use max_tokens and support custom temperature
-            payload["max_tokens"] = isAdvancedPrompt ? 6000 : 2500  // Much more tokens for advanced analysis
-            payload["temperature"] = 0.01  // Minimal temperature for fastest, most direct responses
-            if isAdvancedPrompt {
-                print("🔧 GPT-4 Advanced - Using \(payload["max_tokens"]!) max_tokens for comprehensive analysis")
-            }
+            // Older models use max_tokens
+            payload["max_tokens"] = isAdvancedPrompt ? 6000 : 2500
+            payload["temperature"] = 0.01
+            // Enforce JSON output in GPT-4o path
+            payload["response_format"] = ["type": "json_object"]
         }
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: payload)
             
-            // Debug logging for GPT-5 requests
-            if model.contains("gpt-5") {
-                print("🔧 GPT-5 Debug - Request payload keys: \(payload.keys.sorted())")
-                if let bodyData = request.httpBody,
-                   let bodyString = String(data: bodyData, encoding: .utf8) {
-                    print("🔧 GPT-5 Debug - Request body length: \(bodyString.count) characters")
-                    print("🔧 GPT-5 Debug - Request contains image: \(bodyString.contains("image_url"))")
-                    print("🔧 GPT-5 Debug - Request contains response_format: \(bodyString.contains("response_format"))")
-                }
-            }
+            // Intentionally no request body debug logging in production builds
         } catch {
             throw AIFoodAnalysisError.requestCreationFailed
         }
@@ -2202,23 +2450,16 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
         telemetryCallback?("🌐 Sending request to OpenAI...")
         
         do {
-            if isAdvancedPrompt {
-                telemetryCallback?("⏳ Doing a deep analysis (may take a bit)...")
-            } else {
-                telemetryCallback?("⏳ AI is cooking up results...")
-            }
+            // Telemetry hints shown to the user (kept minimal)
+            telemetryCallback?("⏳ Analyzing...")
             
             // Use enhanced timeout logic with retry for GPT-5
             let (data, response): (Data, URLResponse)
             if model.contains("gpt-5") {
                 do {
-                    // GPT-5 requires special handling with retries and extended timeout
                     (data, response) = try await performGPT5RequestWithRetry(request: request, telemetryCallback: telemetryCallback)
                 } catch let error as AIFoodAnalysisError where error.localizedDescription.contains("GPT-5 timeout") {
-                    // GPT-5 failed, immediately retry with GPT-4o
-                    print("🔄 Immediate fallback: Retrying with GPT-4o after GPT-5 failure")
-                    telemetryCallback?("🔄 Retrying with GPT-4o...")
-                    
+                    telemetryCallback?("🔄 Retrying with GPT-4o…")
                     return try await retryWithGPT4Fallback(image, apiKey: apiKey, query: query, 
                                                          analysisPrompt: analysisPrompt, isAdvancedPrompt: isAdvancedPrompt, 
                                                          telemetryCallback: telemetryCallback)
@@ -2233,18 +2474,6 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
             guard let httpResponse = response as? HTTPURLResponse else {
                 print("❌ OpenAI: Invalid HTTP response")
                 throw AIFoodAnalysisError.invalidResponse
-            }
-            
-            
-            // Debug GPT-5 responses
-            if model.contains("gpt-5") {
-                print("🔧 GPT-5 Debug - HTTP Status: \(httpResponse.statusCode)")
-                print("🔧 GPT-5 Debug - Response headers: \(httpResponse.allHeaderFields)")
-                print("🔧 GPT-5 Debug - Response data length: \(data.count)")
-                
-                if let responseString = String(data: data, encoding: .utf8) {
-                    print("🔧 GPT-5 Debug - Raw response: \(responseString.prefix(500))...")
-                }
             }
             
             guard httpResponse.statusCode == 200 else {
@@ -2491,6 +2720,7 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
             let visualAssessmentDetails = extractString(from: nutritionData, keys: ["visual_assessment_details"])
             
             let confidence = extractConfidence(from: nutritionData)
+            let numericConf = extractNumericConfidence(from: nutritionData)
             
             // Extract image type to determine if this is menu analysis or food photo
             let imageTypeString = extractString(from: nutritionData, keys: ["image_type"])
@@ -2516,6 +2746,7 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
                 foodItemsDetailed: detailedFoodItems,
                 overallDescription: overallDescription,
                 confidence: confidence,
+                numericConfidence: numericConf,
                 totalFoodPortions: extractNumber(from: nutritionData, keys: ["total_food_portions"]).map { Int($0) },
                 totalUsdaServings: extractNumber(from: nutritionData, keys: ["total_usda_servings"]),
                 totalCarbohydrates: totalCarbs,
@@ -2544,6 +2775,264 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
             throw error
         } catch {
             throw AIFoodAnalysisError.networkError(error)
+        }
+    }
+
+    // Helper to convert nutrition JSON (from OpenAI-compatible text result) to AIFoodAnalysisResult
+    private func parseNutritionDataToAnalysisResult(_ nutritionData: [String: Any], image: UIImage) throws -> AIFoodAnalysisResult {
+        // Extract minimal fields with safe defaults
+        let foodName: String = (nutritionData["food_name"] as? String)
+            ?? (nutritionData["name"] as? String)
+            ?? (nutritionData["foodItems"] as? [[String: Any]])?.first?["name"] as? String
+            ?? "Food item"
+        let serving: String = (nutritionData["serving_size"] as? String)
+            ?? (nutritionData["serving"] as? String)
+            ?? "1 serving"
+        let carbs = (nutritionData["carbohydrates"] as? NSNumber)?.doubleValue
+            ?? (nutritionData["carbs"] as? NSNumber)?.doubleValue
+            ?? 0
+        let protein = (nutritionData["protein"] as? NSNumber)?.doubleValue
+        let fat = (nutritionData["fat"] as? NSNumber)?.doubleValue
+        let calories = (nutritionData["calories"] as? NSNumber)?.doubleValue
+
+        // Build FoodItemAnalysis using the full memberwise initializer
+        let item = FoodItemAnalysis(
+            name: foodName,
+            portionEstimate: serving,
+            usdaServingSize: nil,
+            servingMultiplier: 1.0,
+            preparationMethod: nil,
+            visualCues: nil,
+            carbohydrates: carbs,
+            calories: calories,
+            fat: fat,
+            fiber: nil,
+            protein: protein,
+            assessmentNotes: nil,
+            absorptionTimeHours: nil
+        )
+
+        // Compute totals with reasonable defaults
+        let totalCarbs = carbs
+        let totalProtein = protein
+        let totalFat = fat
+        let totalFiber: Double? = nil
+        let totalCalories = calories
+        let originalServings = 1.0
+        let confidence: AIConfidenceLevel = .medium
+
+        return AIFoodAnalysisResult(
+            imageType: .foodPhoto,
+            foodItemsDetailed: [item],
+            overallDescription: foodName,
+            confidence: confidence,
+            numericConfidence: nil,
+            totalFoodPortions: 1,
+            totalUsdaServings: 1.0,
+            totalCarbohydrates: totalCarbs,
+            totalProtein: totalProtein,
+            totalFat: totalFat,
+            totalFiber: totalFiber,
+            totalCalories: totalCalories,
+            portionAssessmentMethod: "Text-based nutrition lookup",
+            diabetesConsiderations: nil,
+            visualAssessmentDetails: nil,
+            notes: "Custom provider (BYO) text analysis",
+            originalServings: originalServings,
+            fatProteinUnits: nil,
+            netCarbsAdjustment: nil,
+            insulinTimingRecommendations: nil,
+            fpuDosingGuidance: nil,
+            exerciseConsiderations: nil,
+            absorptionTimeHours: nil,
+            absorptionTimeReasoning: nil,
+            mealSizeImpact: nil,
+            individualizationFactors: nil,
+            safetyAlerts: nil
+        )
+    }
+
+    // MARK: - Custom Endpoint (OpenAI-compatible, e.g., Azure OpenAI, Groq, Together)
+    /// Analyze an image using a custom OpenAI-compatible endpoint.
+    /// If `baseURL` is empty or nil, falls back to standard OpenAI endpoint.
+    func analyzeFoodImage(
+        _ image: UIImage,
+        apiKey: String,
+        query: String,
+        baseURL: String?,
+        model overrideModel: String?,
+        apiVersion: String?,
+        organizationID: String?,
+        customPath: String? = nil,
+        telemetryCallback: ((String) -> Void)?
+    ) async throws -> AIFoodAnalysisResult {
+        let defaultBase = "https://api.openai.com"
+        let trimmedBase = (baseURL ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let base = trimmedBase.isEmpty ? defaultBase : trimmedBase
+        let isAzure = base.contains(".openai.azure.com") || ((apiVersion ?? "").isEmpty == false)
+        let url: URL?
+        if isAzure {
+            // Azure uses deployment name in the path and api-version query param
+            let deployment = (overrideModel?.isEmpty == false ? overrideModel! : ConfigurableAIService.optimalModel(for: .openAI, mode: ConfigurableAIService.shared.analysisMode))
+            let version = (apiVersion?.isEmpty == false ? apiVersion! : "2024-06-01")
+            url = buildAzureChatCompletionsURL(baseURL: base, deployment: deployment, apiVersion: version)
+        } else {
+            let path = normalizedPath(customPath)
+            url = URL(string: base.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + path)
+        }
+        guard let url else {
+            throw AIFoodAnalysisError.invalidResponse
+        }
+
+        telemetryCallback?("⚙️ Configuring OpenAI-compatible parameters...")
+        telemetryCallback?(isAzure ? "🔗 Azure OpenAI endpoint detected (chat/completions)" : "🔗 OpenAI-compatible endpoint detected (chat/completions)")
+        let analysisMode = ConfigurableAIService.shared.analysisMode
+        let model = overrideModel ?? ConfigurableAIService.optimalModel(for: .openAI, mode: analysisMode)
+        let imageDetail = (analysisMode == .fast) ? "low" : "high"
+
+        // Optimize and encode image
+        telemetryCallback?("🖼️ Optimizing your image...")
+        let optimizedImage = await ConfigurableAIService.optimizeImageForAnalysisSafely(image)
+        telemetryCallback?("🔄 Encoding image data...")
+        var compressionQuality = model.contains("gpt-5") ?
+            min(0.7, ConfigurableAIService.adaptiveCompressionQuality(for: optimizedImage)) :
+            ConfigurableAIService.adaptiveCompressionQuality(for: optimizedImage)
+        if analysisMode == .fast { compressionQuality = min(compressionQuality, 0.6) }
+        guard let imageData = optimizedImage.jpegData(compressionQuality: compressionQuality) else {
+            throw AIFoodAnalysisError.imageProcessingFailed
+        }
+        let base64Image = imageData.base64EncodedString()
+
+        telemetryCallback?("📡 Preparing API request...")
+        let analysisPrompt = getAnalysisPrompt()
+        let isAdvancedPrompt = UserDefaults.standard.advancedDosingRecommendationsEnabled
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if isAzure {
+            request.setValue(apiKey, forHTTPHeaderField: "api-key")
+        } else {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            if let org = organizationID, !org.isEmpty { request.setValue(org, forHTTPHeaderField: "OpenAI-Organization") }
+        }
+
+        // Timeouts similar to default
+        if model.contains("gpt-5") { request.timeoutInterval = 120 } else { request.timeoutInterval = isAdvancedPrompt ? 150 : 30 }
+
+        // Build messages content (Azure is stricter: omit `detail` in image_url)
+        var contentBlocks: [[String: Any]] = []
+        // Text block
+        let finalPrompt: String = {
+            if model.contains("gpt-5") {
+                return query.isEmpty ? createGPT5OptimizedPrompt(from: analysisPrompt) : query
+            } else {
+                return query.isEmpty ? analysisPrompt : "\(query)\n\n\(analysisPrompt)"
+            }
+        }()
+        contentBlocks.append(["type": "text", "text": finalPrompt])
+        // Image block
+        var imageURL: [String: Any] = ["url": "data:image/jpeg;base64,\(base64Image)"]
+        if !isAzure { imageURL["detail"] = imageDetail }
+        contentBlocks.append(["type": "image_url", "image_url": imageURL])
+
+        var payload: [String: Any] = [
+            "messages": [["role": "user", "content": contentBlocks]]
+        ]
+        if !isAzure { payload["model"] = model }
+
+        if isAzure {
+            // Azure Chat Completions
+            // Prefer max_completion_tokens for newer API versions; fall back to max_tokens for compatibility
+            let version = (apiVersion?.isEmpty == false ? apiVersion! : "")
+            let useNewTokensParam = version.hasPrefix("2024-12") || version.hasPrefix("2025")
+            if useNewTokensParam {
+                payload["max_completion_tokens"] = isAdvancedPrompt ? 6000 : 2500
+            } else {
+                payload["max_tokens"] = isAdvancedPrompt ? 6000 : 2500
+            }
+            payload["temperature"] = 0.01
+            // Stricter JSON guarantees on Azure for GPT-4o family
+            if !model.contains("gpt-5") {
+                payload["response_format"] = ["type": "json_object"]
+            }
+        } else {
+            if model.contains("gpt-5") || model.contains("gpt-4") {
+                payload["max_completion_tokens"] = isAdvancedPrompt ? 6000 : 2500
+                payload["response_format"] = ["type": "json_object"]
+                if model.contains("gpt-5") { payload["stream"] = false }
+            } else {
+                payload["max_tokens"] = isAdvancedPrompt ? 6000 : 2500
+                payload["temperature"] = 0.01
+                payload["response_format"] = ["type": "json_object"]
+            }
+        }
+
+        do { request.httpBody = try JSONSerialization.data(withJSONObject: payload) } catch { throw AIFoodAnalysisError.requestCreationFailed }
+
+        telemetryCallback?("🌐 Sending request to OpenAI-compatible endpoint...")
+        let (data, response): (Data, URLResponse)
+        if model.contains("gpt-5") && !isAzure {
+            (data, response) = try await performGPT5RequestWithRetry(request: request, telemetryCallback: telemetryCallback)
+        } else {
+            (data, response) = try await URLSession.shared.data(for: request)
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else { throw AIFoodAnalysisError.invalidResponse }
+        if httpResponse.statusCode != 200 {
+            switch httpResponse.statusCode {
+            case 400:
+                // Often schema/preview feature mismatches; surface a helpful hint for Azure
+                if isAzure {
+                    throw AIFoodAnalysisError.customError("Azure returned 400 (Bad Request). Verify deployment supports vision chat and try another api-version.")
+                } else {
+                    throw AIFoodAnalysisError.apiError(400)
+                }
+            case 401, 403:
+                throw AIFoodAnalysisError.customError("Authentication failed (\(httpResponse.statusCode)). Check API key and permissions.")
+            case 404:
+                if isAzure {
+                    throw AIFoodAnalysisError.customError("Deployment not found (404). Check Azure deployment name and region.")
+                } else {
+                    throw AIFoodAnalysisError.apiError(404)
+                }
+            case 429:
+                throw AIFoodAnalysisError.rateLimitExceeded(provider: isAzure ? "Azure OpenAI" : "OpenAI-compatible")
+            case 500...599:
+                throw AIFoodAnalysisError.customError("Server error (\(httpResponse.statusCode)). Azure endpoint may be unavailable; retry or adjust api-version.")
+            default:
+                throw AIFoodAnalysisError.apiError(httpResponse.statusCode)
+            }
+        }
+
+        guard data.count > 0 else { throw AIFoodAnalysisError.invalidResponse }
+        telemetryCallback?("🔍 Parsing response...")
+        guard let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let choices = jsonResponse["choices"] as? [[String: Any]],
+              let first = choices.first,
+              let message = first["message"] as? [String: Any],
+              let content = message["content"] as? String else {
+            throw AIFoodAnalysisError.responseParsingFailed
+        }
+
+        let cleanedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let jsonString: String
+        if let s = cleanedContent.range(of: "{"), let e = cleanedContent.range(of: "}", options: .backwards), s.lowerBound < e.upperBound {
+            jsonString = String(cleanedContent[s.lowerBound..<e.upperBound])
+        } else { jsonString = cleanedContent }
+        guard let jsonData = jsonString.data(using: .utf8),
+              let nutritionData = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
+            throw AIFoodAnalysisError.responseParsingFailed
+        }
+
+        // Prefer detailed, standardized schema if present; otherwise fall back to simplified parser
+        if nutritionData["food_items"] != nil || nutritionData["total_carbohydrates"] != nil {
+            return parseUnifiedAnalysisResult(from: nutritionData, defaultNotes: isAzure ? "Azure OpenAI BYO vision analysis" : "OpenAI-compatible BYO vision analysis")
+        } else {
+            return try parseNutritionDataToAnalysisResult(nutritionData, image: image)
         }
     }
     
@@ -2596,6 +3085,114 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
             }
         }
         return nil
+    }
+
+    // Unified parser for our standard/advanced schema used across providers
+    // Handles `food_items` array with per-item macros and top-level totals.
+    private func parseUnifiedAnalysisResult(from nutritionData: [String: Any], defaultNotes: String) -> AIFoodAnalysisResult {
+        var detailedFoodItems: [FoodItemAnalysis] = []
+        if let foodItemsArray = nutritionData["food_items"] as? [[String: Any]] {
+            for itemData in foodItemsArray {
+                let foodItem = FoodItemAnalysis(
+                    name: extractString(from: itemData, keys: ["name"]) ?? "Unknown Food",
+                    portionEstimate: extractString(from: itemData, keys: ["portion_estimate"]) ?? "1 serving",
+                    usdaServingSize: extractString(from: itemData, keys: ["usda_serving_size"]),
+                    servingMultiplier: max(0.1, extractNumber(from: itemData, keys: ["serving_multiplier"]) ?? 1.0),
+                    preparationMethod: extractString(from: itemData, keys: ["preparation_method"]),
+                    visualCues: extractString(from: itemData, keys: ["visual_cues"]),
+                    carbohydrates: max(0, extractNumber(from: itemData, keys: ["carbohydrates"]) ?? 0),
+                    calories: extractNumber(from: itemData, keys: ["calories"]).map { max(0, $0) },
+                    fat: extractNumber(from: itemData, keys: ["fat"]).map { max(0, $0) },
+                    fiber: extractNumber(from: itemData, keys: ["fiber"]).map { max(0, $0) },
+                    protein: extractNumber(from: itemData, keys: ["protein"]).map { max(0, $0) },
+                    assessmentNotes: extractString(from: itemData, keys: ["assessment_notes"]),
+                    absorptionTimeHours: extractNumber(from: itemData, keys: ["absorption_time_hours"])
+                )
+                detailedFoodItems.append(foodItem)
+            }
+        } else if let combined = extractStringArray(from: nutritionData, keys: ["food_items"]) {
+            // Legacy fallback (list of names only)
+            let totalCarbs = extractNumber(from: nutritionData, keys: ["total_carbohydrates", "carbohydrates", "carbs"]) ?? 25.0
+            let totalProtein = extractNumber(from: nutritionData, keys: ["total_protein", "protein"])
+            let totalFat = extractNumber(from: nutritionData, keys: ["total_fat", "fat"])
+            let totalFiber = extractNumber(from: nutritionData, keys: ["total_fiber", "fiber"])
+            let totalCalories = extractNumber(from: nutritionData, keys: ["total_calories", "calories"])
+            let item = FoodItemAnalysis(
+                name: combined.joined(separator: ", "),
+                portionEstimate: extractString(from: nutritionData, keys: ["portion_size"]) ?? "1 serving",
+                usdaServingSize: nil,
+                servingMultiplier: 1.0,
+                preparationMethod: nil,
+                visualCues: nil,
+                carbohydrates: totalCarbs,
+                calories: totalCalories,
+                fat: totalFat,
+                fiber: totalFiber,
+                protein: totalProtein,
+                assessmentNotes: "Legacy format - combined nutrition values",
+                absorptionTimeHours: nil
+            )
+            detailedFoodItems = [item]
+        }
+
+        if detailedFoodItems.isEmpty {
+            // As a last resort provide a non-zero safe fallback so UI doesn’t show zeros
+            detailedFoodItems = [FoodItemAnalysis(
+                name: extractString(from: nutritionData, keys: ["overall_description"]) ?? "AI analyzed food",
+                portionEstimate: "1 serving",
+                usdaServingSize: nil,
+                servingMultiplier: 1.0,
+                preparationMethod: nil,
+                visualCues: nil,
+                carbohydrates: 25.0,
+                calories: 200.0,
+                fat: 8.0,
+                fiber: 3.0,
+                protein: 8.0,
+                assessmentNotes: "Safe fallback — verify",
+                absorptionTimeHours: nil
+            )]
+        }
+
+        let totalCarbs = extractNumber(from: nutritionData, keys: ["total_carbohydrates"]) ?? detailedFoodItems.reduce(0) { $0 + $1.carbohydrates }
+        let totalProtein = extractNumber(from: nutritionData, keys: ["total_protein"]) ?? detailedFoodItems.compactMap { $0.protein }.reduce(0, +)
+        let totalFat = extractNumber(from: nutritionData, keys: ["total_fat"]) ?? detailedFoodItems.compactMap { $0.fat }.reduce(0, +)
+        let totalFiber = extractNumber(from: nutritionData, keys: ["total_fiber"]) ?? detailedFoodItems.compactMap { $0.fiber }.reduce(0, +)
+        let totalCalories = extractNumber(from: nutritionData, keys: ["total_calories"]) ?? detailedFoodItems.compactMap { $0.calories }.reduce(0, +)
+
+        let confidence = extractConfidence(from: nutritionData)
+        let numericConf = extractNumericConfidence(from: nutritionData)
+        let absorptionHours = extractNumber(from: nutritionData, keys: ["absorption_time_hours"])
+
+        return AIFoodAnalysisResult(
+            imageType: .foodPhoto,
+            foodItemsDetailed: detailedFoodItems,
+            overallDescription: extractString(from: nutritionData, keys: ["overall_description"]),
+            confidence: confidence,
+            numericConfidence: numericConf,
+            totalFoodPortions: extractNumber(from: nutritionData, keys: ["total_food_portions"]).map { Int($0) },
+            totalUsdaServings: extractNumber(from: nutritionData, keys: ["total_usda_servings"]),
+            totalCarbohydrates: totalCarbs,
+            totalProtein: totalProtein > 0 ? totalProtein : nil,
+            totalFat: totalFat > 0 ? totalFat : nil,
+            totalFiber: totalFiber,
+            totalCalories: totalCalories > 0 ? totalCalories : nil,
+            portionAssessmentMethod: extractString(from: nutritionData, keys: ["portion_assessment_method", "analysis_notes"]),
+            diabetesConsiderations: extractString(from: nutritionData, keys: ["diabetes_considerations"]),
+            visualAssessmentDetails: extractString(from: nutritionData, keys: ["visual_assessment_details"]),
+            notes: defaultNotes,
+            originalServings: detailedFoodItems.reduce(0) { $0 + $1.servingMultiplier },
+            fatProteinUnits: extractString(from: nutritionData, keys: ["fat_protein_units"]),
+            netCarbsAdjustment: extractString(from: nutritionData, keys: ["net_carbs_adjustment"]),
+            insulinTimingRecommendations: extractString(from: nutritionData, keys: ["insulin_timing_recommendations"]),
+            fpuDosingGuidance: extractString(from: nutritionData, keys: ["fpu_dosing_guidance"]),
+            exerciseConsiderations: extractString(from: nutritionData, keys: ["exercise_considerations"]),
+            absorptionTimeHours: absorptionHours,
+            absorptionTimeReasoning: extractString(from: nutritionData, keys: ["absorption_time_reasoning"]),
+            mealSizeImpact: extractString(from: nutritionData, keys: ["meal_size_impact"]),
+            individualizationFactors: extractString(from: nutritionData, keys: ["individualization_factors"]),
+            safetyAlerts: extractString(from: nutritionData, keys: ["safety_alerts"])
+        )
     }
     
     private func extractConfidence(from json: [String: Any]) -> AIConfidenceLevel {
@@ -2660,11 +3257,12 @@ class USDAFoodDataService {
         }
         
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+        let usdaKey = UserDefaults.standard.usdaAPIKey.isEmpty ? "DEMO_KEY" : UserDefaults.standard.usdaAPIKey
         components.queryItems = [
-            URLQueryItem(name: "api_key", value: "DEMO_KEY"), // USDA provides free demo access
+            URLQueryItem(name: "api_key", value: usdaKey),
             URLQueryItem(name: "query", value: query),
             URLQueryItem(name: "pageSize", value: String(pageSize)),
-            URLQueryItem(name: "dataType", value: "Foundation,SR Legacy,Survey"), // Get comprehensive nutrition data from multiple sources
+            URLQueryItem(name: "dataType", value: "Foundation,SR Legacy,Survey (FNDDS),Branded"),
             URLQueryItem(name: "sortBy", value: "dataType.keyword"),
             URLQueryItem(name: "sortOrder", value: "asc"),
             URLQueryItem(name: "requireAllWords", value: "false") // Allow partial matches for better results
@@ -2690,6 +3288,11 @@ class USDAFoodDataService {
             
             guard httpResponse.statusCode == 200 else {
                 print("🇺🇸 USDA: HTTP error \(httpResponse.statusCode)")
+                if httpResponse.statusCode == 429 {
+                    // Map USDA rate limit to a specific error so callers can gracefully fall back
+                    throw OpenFoodFactsError.rateLimitExceeded
+                }
+                // Prefer higher-level router to fall back; pass through server error
                 throw OpenFoodFactsError.serverError(httpResponse.statusCode)
             }
             
@@ -2993,8 +3596,8 @@ class GoogleGeminiFoodAnalysisService {
         return try await analyzeFoodImage(image, apiKey: apiKey, query: query, telemetryCallback: nil)
     }
     
-    func analyzeFoodImage(_ image: UIImage, apiKey: String, query: String, telemetryCallback: ((String) -> Void)?) async throws -> AIFoodAnalysisResult {
-        print("🍱 Starting Google Gemini food analysis")
+    func analyzeFoodImage(_ image: UIImage, apiKey: String, query: String, telemetryCallback: ((String) -> Void)?, preencoded: PreencodedImage? = nil) async throws -> AIFoodAnalysisResult {
+        
         telemetryCallback?("⚙️ Configuring Gemini parameters...")
         
         // Get optimal model based on current analysis mode
@@ -3007,17 +3610,10 @@ class GoogleGeminiFoodAnalysisService {
             throw AIFoodAnalysisError.invalidResponse
         }
         
-        // Optimize image size for faster processing and uploads
+        // Reuse pre-encode path for Gemini as well
         telemetryCallback?("🖼️ Optimizing your image...")
-        let optimizedImage = ConfigurableAIService.optimizeImageForAnalysis(image)
-        
-        // Convert image to base64 with adaptive compression
-        telemetryCallback?("🔄 Encoding image data...")
-        let compressionQuality = ConfigurableAIService.adaptiveCompressionQuality(for: optimizedImage)
-        guard let imageData = optimizedImage.jpegData(compressionQuality: compressionQuality) else {
-            throw AIFoodAnalysisError.imageProcessingFailed
-        }
-        let base64Image = imageData.base64EncodedString()
+        let pre = await ConfigurableAIService.preencodeImageForProviders(image)
+        let base64Image = pre.base64
         
         // Create Gemini API request payload
         var request = URLRequest(url: url)
@@ -3057,7 +3653,7 @@ class GoogleGeminiFoodAnalysisService {
         telemetryCallback?("🌐 Sending request to Google Gemini...")
         
         do {
-            telemetryCallback?("⏳ AI is cooking up results...")
+            telemetryCallback?("⏳ Analyzing...")
             let (data, response) = try await URLSession.shared.data(for: request)
             
             telemetryCallback?("📥 Received response from Gemini...")
@@ -3279,7 +3875,7 @@ class GoogleGeminiFoodAnalysisService {
                 imageType: imageType,
                 foodItemsDetailed: detailedFoodItems,
                 overallDescription: overallDescription,
-                confidence: confidence,
+                confidence: confidence, numericConfidence: extractNumericConfidence(from: nutritionData),
                 totalFoodPortions: extractNumber(from: nutritionData, keys: ["total_food_portions"]).map { Int($0) },
                 totalUsdaServings: extractNumber(from: nutritionData, keys: ["total_usda_servings"]),
                 totalCarbohydrates: totalCarbs,
@@ -3394,10 +3990,10 @@ class BasicFoodAnalysisService {
     }
     
     func analyzeFoodImage(_ image: UIImage, telemetryCallback: ((String) -> Void)?) async throws -> AIFoodAnalysisResult {
-        telemetryCallback?("📊 Initializing basic analysis...")
+        telemetryCallback?("📊 Initializing analysis...")
         
         // Simulate analysis time for better UX with telemetry updates
-        telemetryCallback?("📱 Analyzing image properties...")
+        telemetryCallback?("📱 Analyzing your image...")
         try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
         
         telemetryCallback?("🍽️ Identifying food characteristics...")
@@ -3407,7 +4003,7 @@ class BasicFoodAnalysisService {
         try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
         
         // Basic analysis based on image characteristics and common foods
-        telemetryCallback?("⚙️ Processing analysis results...")
+        telemetryCallback?("⚙️ Processing the results...")
         let analysisResult = performBasicAnalysis(image: image)
         
         return analysisResult
@@ -3437,7 +4033,7 @@ class BasicFoodAnalysisService {
             imageType: .foodPhoto, // Fallback analysis assumes food photo
             foodItemsDetailed: foodItems,
             overallDescription: "Basic analysis of visible food items. For more accurate results, consider using an AI provider with API key.",
-            confidence: .medium,
+            confidence: .medium, numericConfidence: nil,
             totalFoodPortions: foodItems.count,
             totalUsdaServings: Double(foodItems.count), // Fallback estimate
             totalCarbohydrates: totalCarbs,
@@ -3659,35 +4255,35 @@ class ClaudeFoodAnalysisService {
         return try await analyzeFoodImage(image, apiKey: apiKey, query: query, telemetryCallback: nil)
     }
     
-    func analyzeFoodImage(_ image: UIImage, apiKey: String, query: String, telemetryCallback: ((String) -> Void)?) async throws -> AIFoodAnalysisResult {
+    func analyzeFoodImage(_ image: UIImage, apiKey: String, query: String, telemetryCallback: ((String) -> Void)?, preencoded: PreencodedImage? = nil) async throws -> AIFoodAnalysisResult {
         guard let url = URL(string: "https://api.anthropic.com/v1/messages") else {
             throw AIFoodAnalysisError.invalidResponse
         }
         
         // Get optimal model based on current analysis mode
-        telemetryCallback?("⚙️ Configuring Claude parameters...")
+        telemetryCallback?("⚙️ Configuring parameters...")
         let analysisMode = ConfigurableAIService.shared.analysisMode
         let model = ConfigurableAIService.optimalModel(for: .claude, mode: analysisMode)
         
         
-        // Optimize image size for faster processing and uploads
+        // Use pre-encoded image if available (avoids recompression)
         telemetryCallback?("🖼️ Optimizing your image...")
-        let optimizedImage = ConfigurableAIService.optimizeImageForAnalysis(image)
-        
-        // Convert image to base64 with adaptive compression
-        telemetryCallback?("🔄 Encoding image data...")
-        let compressionQuality = ConfigurableAIService.adaptiveCompressionQuality(for: optimizedImage)
-        guard let imageData = optimizedImage.jpegData(compressionQuality: compressionQuality) else {
-            throw AIFoodAnalysisError.invalidResponse
+        let pre: PreencodedImage
+        if let provided = preencoded {
+            pre = provided
+        } else {
+            pre = await ConfigurableAIService.preencodeImageForProviders(image)
         }
-        let base64Image = imageData.base64EncodedString()
+        let base64Image = pre.base64
         
         // Prepare the request
         telemetryCallback?("📡 Preparing API request...")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+        // Trim potential whitespace/newlines from pasted keys to avoid auth errors
+        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        request.setValue(trimmedKey, forHTTPHeaderField: "x-api-key")
         request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
         
         let requestBody: [String: Any] = [
@@ -3717,13 +4313,13 @@ class ClaudeFoodAnalysisService {
         
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
-        telemetryCallback?("🌐 Sending request to Claude...")
+        telemetryCallback?("🌐 Sending request to AI...")
         
         // Make the request
-        telemetryCallback?("⏳ AI is cooking up results...")
+        telemetryCallback?("⏳ Analyzing...")
         let (data, response) = try await URLSession.shared.data(for: request)
         
-        telemetryCallback?("📥 Received response from Claude...")
+        telemetryCallback?("📥 Received response from AI...")
         
         guard let httpResponse = response as? HTTPURLResponse else {
             print("❌ Claude: Invalid HTTP response")
@@ -3919,7 +4515,7 @@ class ClaudeFoodAnalysisService {
             imageType: imageType,
             foodItemsDetailed: foodItems,
             overallDescription: ConfigurableAIService.cleanFoodText(json["overall_description"] as? String),
-            confidence: confidence,
+            confidence: confidence, numericConfidence: extractNumericConfidence(from: json),
             totalFoodPortions: (json["total_food_portions"] as? Double).map { Int($0) },
             totalUsdaServings: json["total_usda_servings"] as? Double,
             totalCarbohydrates: json["total_carbohydrates"] as? Double ?? foodItems.reduce(0) { $0 + $1.carbohydrates },

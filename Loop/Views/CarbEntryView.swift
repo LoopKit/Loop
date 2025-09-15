@@ -76,7 +76,8 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     private var content: some View {
         ZStack {
             Color(.systemGroupedBackground)
-                .edgesIgnoringSafeArea(.all)
+                // Avoid interfering with status/navigation bar insets on newer devices
+                .ignoresSafeArea(.container, edges: .bottom)
                 .onTapGesture {
                     // Dismiss keyboard when tapping background
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -184,17 +185,6 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                             showingAICamera = true
                         }
                     )
-                    
-                    // Quick search suggestions (shown when no search text and no results)
-                    if viewModel.foodSearchText.isEmpty && viewModel.foodSearchResults.isEmpty && !viewModel.isFoodSearching {
-                        QuickSearchSuggestions { suggestion in
-                            // Handle suggestion tap
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            viewModel.foodSearchText = suggestion
-                            viewModel.performFoodSearch(query: suggestion)
-                        }
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                    }
                     
                     // Search results
                     if viewModel.isFoodSearching || viewModel.showingFoodSearch || !viewModel.foodSearchResults.isEmpty {
@@ -434,7 +424,8 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                                 iconColor: .blue,
                                 title: "Portions & Servings:",
                                 content: portionMethod + "\n\nConfidence: \(pct)%",
-                                backgroundColor: Color(.systemBlue).opacity(0.08)
+                                backgroundColor: Color(.systemBlue).opacity(0.08),
+
                             )
                         }
                         
@@ -838,20 +829,61 @@ extension CarbEntryView {
                             Image(systemName: "heart.fill")
                                 .foregroundColor(.red)
                                 .font(.system(size: 16, weight: .medium))
-                            Text("Choose Favorite:")
+                            Text("Favorite:")
                             
                             let selectedFavorite = favoritedFoodTextFromIndex(viewModel.selectedFavoriteFoodIndex)
-                            Text(selectedFavorite)
-                                .minimumScaleFactor(0.8)
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .foregroundColor(viewModel.selectedFavoriteFoodIndex == -1 ? .blue : .primary)
+                            HStack(spacing: 8) {
+                                Text(selectedFavorite)
+                                    .minimumScaleFactor(0.8)
+                                    .foregroundColor(viewModel.selectedFavoriteFoodIndex == -1 ? .blue : .primary)
+                                if viewModel.selectedFavoriteFoodIndex >= 0 {
+                                    let idx = viewModel.selectedFavoriteFoodIndex
+                                    let foods = viewModel.favoriteFoods
+                                    if idx < foods.count {
+                                        if let thumb = thumbnailForFood(foods[idx]) {
+                                            Image(uiImage: thumb)
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 28, height: 28)
+                                                .cornerRadius(6)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 6)
+                                                        .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                                )
+                                        } else {
+                                            Text(foods[idx].foodType)
+                                                .font(.system(size: 18))
+                                        }
+                                    }
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                         
                         if expandedRow == .favoriteFoodSelection {
                             Picker("", selection: $viewModel.selectedFavoriteFoodIndex) {
                                 ForEach(-1..<viewModel.favoriteFoods.count, id: \.self) { index in
-                                    Text(favoritedFoodTextFromIndex(index))
-                                        .tag(index)
+                                    HStack(spacing: 8) {
+                                        Text(favoritedFoodTextFromIndex(index))
+                                        if index >= 0 {
+                                            let food = viewModel.favoriteFoods[index]
+                                            if let thumb = thumbnailForFood(food) {
+                                                Image(uiImage: thumb)
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 28, height: 28)
+                                                    .cornerRadius(6)
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 6)
+                                                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                                    )
+                                            } else {
+                                                Text(food.foodType)
+                                                    .font(.system(size: 18))
+                                            }
+                                        }
+                                    }
+                                    .tag(index)
                                 }
                             }
                             .pickerStyle(.wheel)
@@ -891,7 +923,7 @@ extension CarbEntryView {
             return "None"
         } else {
             let food = viewModel.favoriteFoods[index]
-            return "\(food.name) \(food.foodType)"
+            return food.name
         }
     }
     
@@ -903,6 +935,14 @@ extension CarbEntryView {
         clearExpandedRow()
         self.showAddFavoriteFood = false
         viewModel.onFavoriteFoodSave(food)
+    }
+}
+
+extension CarbEntryView {
+    private func thumbnailForFood(_ food: StoredFavoriteFood) -> UIImage? {
+        let map = UserDefaults.standard.favoriteFoodImageIDs
+        guard let id = map[food.id] else { return nil }
+        return FavoriteFoodImageStore.loadThumbnail(id: id)
     }
 }
 
@@ -935,25 +975,42 @@ extension CarbEntryView {
 
     // Confidence helpers
     private func computeConfidencePercent(from ai: AIFoodAnalysisResult, servings: Double) -> Int {
-        // Map AIConfidenceLevel to a baseline percent
-        let base: Double = {
+        if let numeric = ai.numericConfidence {
+            let pct = Int((min(1.0, max(0.0, numeric)) * 100).rounded())
+            return max(20, min(97, pct))
+        }
+        // Start from provider-reported confidence band
+        var percent: Int = {
             switch ai.confidence {
-            case .high: return 0.85
-            case .medium: return 0.65
-            case .low: return 0.4
+            case .high: return 88
+            case .medium: return 68
+            case .low: return 45
             }
         }()
-        var score: Double = 60
-        if ai.totalCarbohydrates > 0 { score += 10 }
-        if servings > 0, servings < 0.95 { score += 10 }
-        if !ai.foodItemsDetailed.isEmpty { score += 10 }
-        // Blend base with heuristic bump
-        let blended = min(0.95, max(0.0, base + (score - 60)/100.0))
-        return Int((blended * 100).rounded())
+
+        // Evidence-based small adjustments (keep within a narrow band to avoid 95% saturation)
+        if ai.totalCarbohydrates > 0 { percent += 4 } else { percent -= 6 }
+        if !ai.foodItemsDetailed.isEmpty { percent += 4 } else { percent -= 8 }
+        if let method = ai.portionAssessmentMethod, !method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { percent += 3 }
+        if let notes = ai.notes, notes.lowercased().contains("fallback") { percent -= 5 }
+
+        // Penalize if multiple key fields are missing
+        var missing = 0
+        if ai.totalProtein == nil { missing += 1 }
+        if ai.totalFat == nil { missing += 1 }
+        if ai.totalCalories == nil { missing += 1 }
+        if missing >= 2 { percent -= 6 }
+
+        // Weird servings (very tiny or very large) slightly reduces confidence
+        if servings < 0.3 || servings > 4.0 { percent -= 3 }
+
+        // Clamp to sensible range and avoid clustering at 95
+        percent = max(20, min(97, percent))
+        return percent
     }
     
     private func confidenceColor(_ percent: Int) -> Color {
-        if percent < 40 { return .red }
+        if percent < 45 { return .red }
         if percent < 75 { return .yellow }
         return .green
     }
@@ -1006,27 +1063,12 @@ extension CarbEntryView {
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
+
                 .padding(.horizontal, 8)
                 .padding(.vertical, 12)
                 .background(Color(.systemIndigo).opacity(0.08))
                 .cornerRadius(12)
                 
-                // Scope readout: make clear what's being shown
-                HStack(spacing: 6) {
-                    Image(systemName: "info.circle")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    let servingText = viewModel.selectedFoodServingSize?.lowercased() ?? "serving"
-                    if servingText.contains("medium") {
-                        Text("Carbs shown for \(String(format: "%.2f", viewModel.numberOfServings)) × 1 medium item")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text("Carbs shown for pictured portion")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
                 .onTapGesture {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         isAdvancedAnalysisExpanded.toggle()
@@ -1047,28 +1089,6 @@ extension CarbEntryView {
                             )
                         }
                         
-                        // Net Carbs Adjustment (Fiber Impact)
-                        if let netCarbs = aiResult.netCarbsAdjustment, !netCarbs.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            ExpandableNoteView(
-                                icon: "leaf.fill",
-                                iconColor: .green,
-                                title: "Fiber Impact (Net Carbs):",
-                                content: netCarbs,
-                                backgroundColor: Color(.systemGreen).opacity(0.08)
-                            )
-                        }
-                        
-                        // Insulin Timing Recommendations
-                        if let timingInfo = aiResult.insulinTimingRecommendations, !timingInfo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            ExpandableNoteView(
-                                icon: "clock.fill",
-                                iconColor: .purple,
-                                title: "Insulin Timing:",
-                                content: timingInfo,
-                                backgroundColor: Color(.systemPurple).opacity(0.08)
-                            )
-                        }
-                        
                         // FPU Dosing Guidance
                         if let fpuDosing = aiResult.fpuDosingGuidance, !fpuDosing.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             ExpandableNoteView(
@@ -1079,9 +1099,34 @@ extension CarbEntryView {
                                 backgroundColor: Color(.systemBlue).opacity(0.08)
                             )
                         }
+
+                        // Net Carbs Adjustment (Fiber Impact)
+                        if isUsefulAdvancedText(aiResult.netCarbsAdjustment) {
+                            let netCarbs = aiResult.netCarbsAdjustment!.trimmingCharacters(in: .whitespacesAndNewlines)
+                            ExpandableNoteView(
+                                icon: "leaf.fill",
+                                iconColor: .green,
+                                title: "Fiber Impact (Net Carbs):",
+                                content: netCarbs,
+                                backgroundColor: Color(.systemGreen).opacity(0.08)
+                            )
+                        }
                         
+                        // Insulin Timing Recommendations
+                        if isUsefulAdvancedText(aiResult.insulinTimingRecommendations) {
+                            let timingInfo = aiResult.insulinTimingRecommendations!.trimmingCharacters(in: .whitespacesAndNewlines)
+                            ExpandableNoteView(
+                                icon: "clock.fill",
+                                iconColor: .purple,
+                                title: "Insulin Timing:",
+                                content: timingInfo,
+                                backgroundColor: Color(.systemPurple).opacity(0.08)
+                            )
+                        }
+                                                
                         // Exercise Considerations
-                        if let exerciseInfo = aiResult.exerciseConsiderations, !exerciseInfo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        if isUsefulAdvancedText(aiResult.exerciseConsiderations) {
+                            let exerciseInfo = aiResult.exerciseConsiderations!.trimmingCharacters(in: .whitespacesAndNewlines)
                             ExpandableNoteView(
                                 icon: "figure.run",
                                 iconColor: .mint,
@@ -1092,9 +1137,10 @@ extension CarbEntryView {
                         }
                         
                         // Absorption Time Reasoning (when different from default)
-                        if let absorptionReasoning = aiResult.absorptionTimeReasoning, !absorptionReasoning.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        if isUsefulAdvancedText(aiResult.absorptionTimeReasoning) {
+                            let absorptionReasoning = aiResult.absorptionTimeReasoning!.trimmingCharacters(in: .whitespacesAndNewlines)
                             ExpandableNoteView(
-                                icon: "hourglass.fill",
+                                icon: "hourglass.bottomhalf.fill",
                                 iconColor: .indigo,
                                 title: "Absorption Time Analysis:",
                                 content: absorptionReasoning,
@@ -1103,7 +1149,8 @@ extension CarbEntryView {
                         }
                         
                         // Meal Size Impact
-                        if let mealSizeInfo = aiResult.mealSizeImpact, !mealSizeInfo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        if isUsefulAdvancedText(aiResult.mealSizeImpact) {
+                            let mealSizeInfo = aiResult.mealSizeImpact!.trimmingCharacters(in: .whitespacesAndNewlines)
                             ExpandableNoteView(
                                 icon: "scalemass.fill",
                                 iconColor: .brown,
@@ -1112,20 +1159,10 @@ extension CarbEntryView {
                                 backgroundColor: Color(.systemBrown).opacity(0.08)
                             )
                         }
-                        
-                        // Individualization Factors
-                        if let individualFactors = aiResult.individualizationFactors, !individualFactors.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            ExpandableNoteView(
-                                icon: "person.fill",
-                                iconColor: .pink,
-                                title: "Personal Factors:",
-                                content: individualFactors,
-                                backgroundColor: Color(.systemPink).opacity(0.08)
-                            )
-                        }
-                        
+                                                
                         // Safety Alerts (if different from main diabetes note)
-                        if let safetyInfo = aiResult.safetyAlerts, !safetyInfo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        if isUsefulAdvancedText(aiResult.safetyAlerts) {
+                            let safetyInfo = aiResult.safetyAlerts!.trimmingCharacters(in: .whitespacesAndNewlines)
                             ExpandableNoteView(
                                 icon: "exclamationmark.triangle.fill",
                                 iconColor: .red,
@@ -1144,6 +1181,25 @@ extension CarbEntryView {
                             .stroke(Color(.systemIndigo).opacity(0.3), lineWidth: 1)
                     )
                     .padding(.top, 4)
+                    
+                    // Scope readout: make clear what's being shown
+                    HStack(spacing: 6) {
+                        Image(systemName: "info.circle")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        let servingText = viewModel.selectedFoodServingSize?.lowercased() ?? "serving"
+                        if servingText.contains("medium") {
+                            Text("Carbs shown for \(String(format: "%.2f", viewModel.numberOfServings)) × 1 medium item")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("Carbs shown are for pictured portion")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    
                 }
             }
         }
@@ -1151,30 +1207,47 @@ extension CarbEntryView {
     
     // Helper function to check if there's any advanced analysis content
     private func hasAdvancedAnalysisContent(aiResult: AIFoodAnalysisResult) -> Bool {
-        return !((aiResult.fatProteinUnits?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) &&
-                (aiResult.netCarbsAdjustment?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) &&
-                (aiResult.insulinTimingRecommendations?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) &&
-                (aiResult.fpuDosingGuidance?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) &&
-                (aiResult.exerciseConsiderations?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) &&
-                (aiResult.absorptionTimeReasoning?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) &&
-                (aiResult.mealSizeImpact?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) &&
-                (aiResult.individualizationFactors?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) &&
-                (aiResult.safetyAlerts?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true))
+        return isUsefulAdvancedText(aiResult.fatProteinUnits) ||
+               isUsefulAdvancedText(aiResult.netCarbsAdjustment) ||
+               isUsefulAdvancedText(aiResult.insulinTimingRecommendations) ||
+               isUsefulAdvancedText(aiResult.fpuDosingGuidance) ||
+               isUsefulAdvancedText(aiResult.exerciseConsiderations) ||
+               isUsefulAdvancedText(aiResult.absorptionTimeReasoning) ||
+               isUsefulAdvancedText(aiResult.mealSizeImpact) ||
+               isUsefulAdvancedText(aiResult.individualizationFactors) ||
+               isUsefulAdvancedText(aiResult.safetyAlerts)
     }
     
     // Helper function to count advanced sections for display
     private func countAdvancedSections(aiResult: AIFoodAnalysisResult) -> Int {
         var count = 0
-        if !(aiResult.fatProteinUnits?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
-        if !(aiResult.netCarbsAdjustment?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
-        if !(aiResult.insulinTimingRecommendations?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
-        if !(aiResult.fpuDosingGuidance?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
-        if !(aiResult.exerciseConsiderations?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
-        if !(aiResult.absorptionTimeReasoning?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
-        if !(aiResult.mealSizeImpact?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
-        if !(aiResult.individualizationFactors?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
-        if !(aiResult.safetyAlerts?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) { count += 1 }
+        if isUsefulAdvancedText(aiResult.fatProteinUnits) { count += 1 }
+        if isUsefulAdvancedText(aiResult.netCarbsAdjustment) { count += 1 }
+        if isUsefulAdvancedText(aiResult.insulinTimingRecommendations) { count += 1 }
+        if isUsefulAdvancedText(aiResult.fpuDosingGuidance) { count += 1 }
+        if isUsefulAdvancedText(aiResult.exerciseConsiderations) { count += 1 }
+        if isUsefulAdvancedText(aiResult.absorptionTimeReasoning) { count += 1 }
+        if isUsefulAdvancedText(aiResult.mealSizeImpact) { count += 1 }
+        if isUsefulAdvancedText(aiResult.individualizationFactors) { count += 1 }
+        if isUsefulAdvancedText(aiResult.safetyAlerts) { count += 1 }
         return count
+    }
+
+    // Treat placeholders like "none", "none needed", "n/a" as not useful
+    private func isUsefulAdvancedText(_ text: String?) -> Bool {
+        guard var s = text?.trimmingCharacters(in: .whitespacesAndNewlines) else { return false }
+        if s.isEmpty { return false }
+        s = s.trimmingCharacters(in: CharacterSet(charactersIn: ".! ")).lowercased()
+        if s.isEmpty { return false }
+        let junk: Set<String> = [
+            "none", "none needed", "no", "n/a", "na", "not applicable",
+            "no alerts", "no safety alerts", "no alert", "none required",
+            "no change", "no changes", "no recommendation", "no recommendations"
+        ]
+        if junk.contains(s) { return false }
+        // Filter very short generic words
+        if s.count <= 3 { return false }
+        return true
     }
 
     @ViewBuilder
@@ -1274,7 +1347,8 @@ extension CarbEntryView {
                 Text("\(String(format: "%.1f", item.carbohydrates)) g carbs")
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundColor(.blue)
+                    .foregroundColor(isExcluded ? .secondary : .blue)
+                    .strikethrough(isExcluded, color: .secondary)
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
                     .background(Color(.systemGray5))
@@ -1377,7 +1451,8 @@ struct ServingsDisplayRow: View {
     private let formatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 1
+        // Show quarters cleanly (e.g., 0.25, 0.5, 0.75, 1)
+        formatter.maximumFractionDigits = 2
         formatter.minimumFractionDigits = 0
         return formatter
     }()
@@ -1396,7 +1471,9 @@ struct ServingsDisplayRow: View {
                 HStack(spacing: 8) {
                     // Decrease button
                     Button(action: {
-                        let newValue = max(0.0, (servings * 100 - 5).rounded() / 100) // step 0.05, clamp at 0.0
+                        // Step down by 0.25 (quarter serving)
+                        let quarters = (servings * 4).rounded()
+                        let newValue = max(0.0, (quarters - 1) / 4.0)
                         servings = newValue
                     }) {
                         Image(systemName: "minus.circle.fill")
@@ -1413,7 +1490,9 @@ struct ServingsDisplayRow: View {
                     
                     // Increase button
                     Button(action: {
-                        let newValue = min(10.0, (servings * 100 + 5).rounded() / 100) // step 0.05
+                        // Step up by 0.25 (quarter serving)
+                        let quarters = (servings * 4).rounded()
+                        let newValue = min(10.0, (quarters + 1) / 4.0)
                         servings = newValue
                     }) {
                         Image(systemName: "plus.circle.fill")
@@ -1547,13 +1626,42 @@ struct ExpandableNoteView: View {
     let backgroundColor: Color
     
     @State private var isExpanded = false
+    @State private var headerWidth: CGFloat = 0
     
-    private var truncatedContent: String {
-        content.components(separatedBy: ".").first ?? content
+    // Estimate how many characters can fit in the single-line header area
+    private var headerMaxChars: Int {
+        // Available width is the measured header width minus fixed elements (icon, paddings, title, chevron reserve)
+        let leftRightPadding: CGFloat = 24 // 12 + 12 from .padding(.horizontal, 12)
+        let iconWidth: CGFloat = 16         // approximate SF Symbol at caption size
+        let gaps: CGFloat = 12              // spacing between icon-title and title-content (6 + 6)
+        let chevronReserve: CGFloat = 18    // space for chevron if needed
+        
+        // Measure title width using UIFont matching .caption
+        let titleFont = UIFont.preferredFont(forTextStyle: .caption1)
+        let titleWidth = (title as NSString).size(withAttributes: [.font: titleFont]).width
+        
+        let available = max(0, headerWidth - leftRightPadding - iconWidth - gaps - titleWidth - chevronReserve)
+        // Approximate average character width for .caption2
+        let avgCharWidth: CGFloat = 6.0
+        let maxChars = Int(floor(available / avgCharWidth))
+        return max(0, maxChars)
     }
-    
-    private var hasMoreContent: Bool {
-        content.count > truncatedContent.count
+
+    // Collapsed single-line text snippet based on capacity
+    private var collapsedLineText: String {
+        let s = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard headerMaxChars > 0 else { return "" }
+        if s.count > headerMaxChars {
+            let idx = s.index(s.startIndex, offsetBy: headerMaxChars)
+            return String(s[..<idx]) + "…"
+        }
+        return s
+    }
+
+    // True only if there are characters beyond what the collapsed line can show
+    private var isOverflowing: Bool {
+        let sCount = content.trimmingCharacters(in: .whitespacesAndNewlines).count
+        return sCount > headerMaxChars
     }
     
     private var borderColor: Color {
@@ -1584,14 +1692,14 @@ struct ExpandableNoteView: View {
                 
                 // Show truncated content when collapsed, or nothing when expanded
                 if !isExpanded {
-                    Text(truncatedContent)
+                    Text(collapsedLineText)
                         .font(.caption2)
                         .foregroundColor(.primary)
                         .lineLimit(1)
                 }
                 
                 // Expansion indicator
-                if hasMoreContent {
+                if isOverflowing {
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption2)
                         .foregroundColor(.secondary)
@@ -1602,9 +1710,17 @@ struct ExpandableNoteView: View {
             .padding(.vertical, 8)
             .background(backgroundColor)
             .cornerRadius(12)
-            .contentShape(Rectangle()) // Makes entire area tappable
+            .contentShape(Rectangle())
+            // Measure header width to compute showable characters
+            .background(
+                GeometryReader { proxy in
+                    Color.clear
+                        .onAppear { headerWidth = proxy.size.width }
+                        .onChange(of: proxy.size.width) { newValue in headerWidth = newValue }
+                }
+            )
             .onTapGesture {
-                if hasMoreContent {
+                if isOverflowing {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         isExpanded.toggle()
                     }
@@ -1632,61 +1748,6 @@ struct ExpandableNoteView: View {
                 .padding(.top, 4)
             }
         }
-    }
-}
-
-// MARK: - Quick Search Suggestions Component
-
-/// Quick search suggestions for common foods
-struct QuickSearchSuggestions: View {
-    let onSuggestionTapped: (String) -> Void
-    
-    private let suggestions = [
-        ("🍎", "Apple"), ("🍌", "Banana"), ("🍞", "Bread"),
-        ("🍚", "Rice"), ("🍗", "Chicken"), ("🍝", "Pasta"),
-        ("🥛", "Milk"), ("🧀", "Cheese"), ("🥚", "Eggs"),
-        ("🥔", "Potato"), ("🥕", "Carrot"), ("🍅", "Tomato")
-    ]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Popular Foods")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .padding(.horizontal)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 8) {
-                    ForEach(suggestions, id: \.1) { emoji, name in
-                        Button(action: {
-                            onSuggestionTapped(name)
-                        }) {
-                            HStack(spacing: 6) {
-                                Text(emoji)
-                                    .font(.system(size: 16))
-                                Text(name)
-                                    .font(.caption)
-                                    .fontWeight(.medium)
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color(.systemGray6))
-                            .foregroundColor(.primary)
-                            .cornerRadius(16)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color(.systemGray4), lineWidth: 0.5)
-                            )
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        .scaleEffect(1.0)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: false)
-                    }
-                }
-                .padding(.horizontal)
-            }
-        }
-        .padding(.bottom, 8)
     }
 }
 
@@ -1950,7 +2011,7 @@ struct AIAbsorptionTimePickerRow: View {
     }
 }
 
-// MARK: - Food Search Enable Row
+// MARK: - FoodFinder Enable Row
 struct FoodSearchEnableRow: View {
     @Binding var isFoodSearchEnabled: Bool
     @State private var isAnimating = false
@@ -1965,7 +2026,7 @@ struct FoodSearchEnableRow: View {
                         .scaleEffect(isAnimating ? 1.1 : 1.0)
                         .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
                     
-                    Text("Enable Food Search")
+                    Text("Enable FoodFinder")
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
@@ -1977,7 +2038,7 @@ struct FoodSearchEnableRow: View {
                     .labelsHidden()
                     .scaleEffect(0.8)
                     .onChange(of: isFoodSearchEnabled) { newValue in
-                        UserDefaults.standard.foodSearchEnabled = newValue
+                        UserDefaults.standard.foodFinderEnabled = newValue
                     }
             }
             

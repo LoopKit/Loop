@@ -24,6 +24,13 @@ extension UserDefaults {
         case openAIQuery = "com.loopkit.Loop.openAIQuery"
         case googleGeminiAPIKey = "com.loopkit.Loop.googleGeminiAPIKey"
         case googleGeminiQuery = "com.loopkit.Loop.googleGeminiQuery"
+        case usdaAPIKey = "com.loopkit.Loop.usdaAPIKey"
+        case customAIBaseURL = "com.loopkit.Loop.customAIBaseURL"
+        case customAIAPIKey = "com.loopkit.Loop.customAIAPIKey"
+        case customAIModel = "com.loopkit.Loop.customAIModel"
+        case customAIAPIVersion = "com.loopkit.Loop.customAIAPIVersion"
+        case customAIOrganization = "com.loopkit.Loop.customAIOrganization"
+        case customAIEndpointPath = "com.loopkit.Loop.customAIEndpointPath"
         case textSearchProvider = "com.loopkit.Loop.textSearchProvider"
         case barcodeSearchProvider = "com.loopkit.Loop.barcodeSearchProvider"
         case aiImageProvider = "com.loopkit.Loop.aiImageProvider"
@@ -304,6 +311,40 @@ MANDATORY REQUIREMENTS:
             set(newValue, forKey: Key.googleGeminiAPIKey.rawValue)
         }
     }
+
+    // Optional: API key for USDA FoodData Central (improves reliability vs DEMO_KEY)
+    var usdaAPIKey: String {
+        get { string(forKey: Key.usdaAPIKey.rawValue) ?? "" }
+        set { set(newValue, forKey: Key.usdaAPIKey.rawValue) }
+    }
+
+    // Bring Your Own (OpenAI-compatible) provider configuration
+    var customAIBaseURL: String {
+        get { string(forKey: Key.customAIBaseURL.rawValue) ?? "" }
+        set { set(newValue, forKey: Key.customAIBaseURL.rawValue) }
+    }
+    var customAIAPIKey: String {
+        get { string(forKey: Key.customAIAPIKey.rawValue) ?? "" }
+        set { set(newValue, forKey: Key.customAIAPIKey.rawValue) }
+    }
+    var customAIModel: String {
+        get { string(forKey: Key.customAIModel.rawValue) ?? "" }
+        set { set(newValue, forKey: Key.customAIModel.rawValue) }
+    }
+    var customAIAPIVersion: String {
+        get { string(forKey: Key.customAIAPIVersion.rawValue) ?? "" }
+        set { set(newValue, forKey: Key.customAIAPIVersion.rawValue) }
+    }
+    var customAIOrganization: String {
+        get { string(forKey: Key.customAIOrganization.rawValue) ?? "" }
+        set { set(newValue, forKey: Key.customAIOrganization.rawValue) }
+    }
+    // Optional custom endpoint path for non-Azure OpenAI-compatible providers
+    // Example: "/v1/chat/completions" (default) or "/openai/v1/chat/completions"
+    var customAIEndpointPath: String {
+        get { string(forKey: Key.customAIEndpointPath.rawValue) ?? "" }
+        set { set(newValue, forKey: Key.customAIEndpointPath.rawValue) }
+    }
     
     var googleGeminiQuery: String {
         get {
@@ -356,7 +397,8 @@ MANDATORY REQUIREMENTS:
     
     var textSearchProvider: String {
         get {
-            return string(forKey: Key.textSearchProvider.rawValue) ?? "OpenFoodFacts (Default)"
+            // Default to USDA for first-time users
+            return string(forKey: Key.textSearchProvider.rawValue) ?? "USDA FoodData Central"
         }
         set {
             set(newValue, forKey: Key.textSearchProvider.rawValue)
@@ -374,7 +416,8 @@ MANDATORY REQUIREMENTS:
     
     var aiImageProvider: String {
         get {
-            return string(forKey: Key.aiImageProvider.rawValue) ?? "Google (Gemini API)"
+            // Default to OpenAI for first-time users
+            return string(forKey: Key.aiImageProvider.rawValue) ?? "OpenAI (ChatGPT API)"
         }
         set {
             set(newValue, forKey: Key.aiImageProvider.rawValue)
@@ -397,6 +440,12 @@ MANDATORY REQUIREMENTS:
         set {
             set(newValue, forKey: Key.foodSearchEnabled.rawValue)
         }
+    }
+
+    // Alias for rebranding: FoodFinder -> maps to Food Search flag
+    var foodFinderEnabled: Bool {
+        get { foodSearchEnabled }
+        set { foodSearchEnabled = newValue }
     }
     
     var advancedDosingRecommendationsEnabled: Bool {

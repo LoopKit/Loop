@@ -286,7 +286,7 @@ class FoodSearchIntegrationTests: XCTestCase {
 // MARK: - Mock Delegate
 
 @MainActor
-class MockCarbEntryViewModelDelegate: CarbEntryViewModelDelegate {
+class MockCarbEntryViewModelDelegate: @preconcurrency CarbEntryViewModelDelegate {
     var analyticsServicesManager: AnalyticsServicesManager {
         return mockAnalyticsManager
     }
@@ -307,7 +307,7 @@ class MockCarbEntryViewModelDelegate: CarbEntryViewModelDelegate {
     }
     
     // BolusEntryViewModelDelegate methods
-    func withLoopState(do block: @escaping (LoopState) -> Void) {
+    nonisolated func withLoopState(do block: @escaping (LoopState) -> Void) {
         // Mock implementation - do nothing
     }
     
@@ -315,31 +315,31 @@ class MockCarbEntryViewModelDelegate: CarbEntryViewModelDelegate {
         return nil
     }
     
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
+    nonisolated func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?, completion: @escaping (Result<StoredCarbEntry>) -> Void) {
         completion(.failure(NSError(domain: "MockError", code: 1, userInfo: nil)))
     }
     
-    func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
+    nonisolated func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) {
         // Mock implementation - do nothing
     }
     
-    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (Error?) -> Void) {
+    nonisolated func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (Error?) -> Void) {
         completion(nil)
     }
     
-    func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
+    nonisolated func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (Swift.Result<[StoredGlucoseSample], Error>) -> Void) {
         completion(.success([]))
     }
     
-    func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
+    nonisolated func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
         completion(.success(InsulinValue(startDate: date, value: 0.0)))
     }
     
-    func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (CarbStoreResult<CarbValue>) -> Void) {
+    nonisolated func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (CarbStoreResult<CarbValue>) -> Void) {
         completion(.success(CarbValue(startDate: date, value: 0.0)))
     }
     
-    func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
+    nonisolated func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
         return .hours(4)
     }
     
@@ -350,11 +350,11 @@ class MockCarbEntryViewModelDelegate: CarbEntryViewModelDelegate {
     var settings: LoopSettings { return LoopSettings() }
     var displayGlucosePreference: DisplayGlucosePreference { return DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter) }
     
-    func roundBolusVolume(units: Double) -> Double {
+    nonisolated func roundBolusVolume(units: Double) -> Double {
         return units
     }
     
-    func updateRemoteRecommendation() {
+    nonisolated func updateRemoteRecommendation() {
         // Mock implementation - do nothing
     }
 }

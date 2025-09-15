@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import UIKit
 import HealthKit
 import LoopKit
 import Combine
@@ -34,26 +35,48 @@ final class FavoriteFoodsViewModel: ObservableObject {
         observeFavoriteFoodChange()
     }
     
+    private func firstFiveWords(of text: String) -> String {
+        let words = text.split { $0.isWhitespace }
+        if words.count <= 5 { return text.trimmingCharacters(in: .whitespacesAndNewlines) }
+        return words.prefix(5).joined(separator: " ")
+    }
+
     func onFoodSave(_ newFood: NewFavoriteFood) {
+        let trimmedName = firstFiveWords(of: newFood.name)
+        // Determine if this is a simple food that maps to an emoji, and use ONLY the emoji for Food Type
+        let candidateNames = [newFood.name, newFood.foodType].compactMap { $0 }
+        let matchedNameForEmoji = candidateNames.first { EmojiThumbnailProvider.emoji(for: $0) != nil }
+        let resolvedEmoji: String? = matchedNameForEmoji.flatMap { EmojiThumbnailProvider.emoji(for: $0) }
+        let finalFoodType = resolvedEmoji ?? newFood.foodType
+
         if isAddViewActive {
-            let newStoredFood = StoredFavoriteFood(name: newFood.name, carbsQuantity: newFood.carbsQuantity, foodType: newFood.foodType, absorptionTime: newFood.absorptionTime)
-            withAnimation {
-                favoriteFoods.append(newStoredFood)
-            }
-            // Explicitly persist after add
+            let newStoredFood = StoredFavoriteFood(name: trimmedName, carbsQuantity: newFood.carbsQuantity, foodType: finalFoodType, absorptionTime: newFood.absorptionTime)
+            withAnimation { favoriteFoods.append(newStoredFood) }
             UserDefaults.standard.writeFavoriteFoods(favoriteFoods)
+            // Save emoji thumbnail if applicable so list shows an icon
+            if let match = matchedNameForEmoji, let image = EmojiThumbnailProvider.image(for: match) {
+                if let id = FavoriteFoodImageStore.saveThumbnail(from: image) {
+                    var map = UserDefaults.standard.favoriteFoodImageIDs
+                    map[newStoredFood.id] = id
+                    UserDefaults.standard.favoriteFoodImageIDs = map
+                }
+            }
             isAddViewActive = false
-            // Attempt to use any last AI image from carb entry context is not available here;
-            // List view additions do not capture images, so we skip thumbnail here.
-        }
-        else if var selectedFood, let selectedFooxIndex = favoriteFoods.firstIndex(of: selectedFood) {
-            selectedFood.name = newFood.name
+        } else if var selectedFood, let selectedFooxIndex = favoriteFoods.firstIndex(of: selectedFood) {
+            selectedFood.name = trimmedName
             selectedFood.carbsQuantity = newFood.carbsQuantity
-            selectedFood.foodType = newFood.foodType
+            selectedFood.foodType = finalFoodType
             selectedFood.absorptionTime = newFood.absorptionTime
             favoriteFoods[selectedFooxIndex] = selectedFood
-            // Explicitly persist after edit
             UserDefaults.standard.writeFavoriteFoods(favoriteFoods)
+            // Update emoji thumbnail if applicable
+            if let match = matchedNameForEmoji, let image = EmojiThumbnailProvider.image(for: match) {
+                if let id = FavoriteFoodImageStore.saveThumbnail(from: image) {
+                    var map = UserDefaults.standard.favoriteFoodImageIDs
+                    map[selectedFood.id] = id
+                    UserDefaults.standard.favoriteFoodImageIDs = map
+                }
+            }
             isEditViewActive = false
         }
     }
@@ -65,9 +88,7 @@ final class FavoriteFoodsViewModel: ObservableObject {
         withAnimation {
             _ = favoriteFoods.remove(food)
         }
-        // Explicitly persist after delete
         UserDefaults.standard.writeFavoriteFoods(favoriteFoods)
-        // Remove thumbnail mapping and file if present
         var map = UserDefaults.standard.favoriteFoodImageIDs
         if let id = map[food.id] {
             FavoriteFoodImageStore.deleteThumbnail(id: id)
@@ -80,7 +101,6 @@ final class FavoriteFoodsViewModel: ObservableObject {
         withAnimation {
             favoriteFoods.move(fromOffsets: from, toOffset: to)
         }
-        // Explicitly persist after reorder
         UserDefaults.standard.writeFavoriteFoods(favoriteFoods)
     }
     

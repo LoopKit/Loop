@@ -321,14 +321,26 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     // MARK: - Favorite Foods
+    private func firstFiveWords(of text: String) -> String {
+        let words = text.split { $0.isWhitespace }
+        if words.count <= 5 { return text.trimmingCharacters(in: .whitespacesAndNewlines) }
+        return words.prefix(5).joined(separator: " ")
+    }
+
     func onFavoriteFoodSave(_ food: NewFavoriteFood) {
-        let newStoredFood = StoredFavoriteFood(name: food.name, carbsQuantity: food.carbsQuantity, foodType: food.foodType, absorptionTime: food.absorptionTime)
+        // Determine an emoji icon for simple foods and use it as Food Type if the user didn't set one
+        var finalFoodType = food.foodType
+        let candidateNames = [food.name, food.foodType, selectedFoodProduct?.displayName].compactMap { $0 }
+        if let match = candidateNames.first(where: { EmojiThumbnailProvider.emoji(for: $0) != nil }),
+           let e = EmojiThumbnailProvider.emoji(for: match) {
+            // Requirement: Store ONLY the icon as Food Type for simple foods
+            finalFoodType = e
+        }
+        let newStoredFood = StoredFavoriteFood(name: firstFiveWords(of: food.name), carbsQuantity: food.carbsQuantity, foodType: finalFoodType, absorptionTime: food.absorptionTime)
         favoriteFoods.append(newStoredFood)
-        // Explicitly persist to avoid race with other view models' sinks
         UserDefaults.standard.writeFavoriteFoods(favoriteFoods)
         selectedFavoriteFoodIndex = favoriteFoods.count - 1
 
-        // Save thumbnail if we have an AI-captured image
         if let image = capturedAIImage {
             if let id = FavoriteFoodImageStore.saveThumbnail(from: image) {
                 var map = UserDefaults.standard.favoriteFoodImageIDs
@@ -336,7 +348,6 @@ final class CarbEntryViewModel: ObservableObject {
                 UserDefaults.standard.favoriteFoodImageIDs = map
             }
         } else if let product = selectedFoodProduct {
-            // Attempt to fetch a thumbnail from product image URLs (text/barcode flows)
             let urlStrings: [String] = [product.imageFrontURL, product.imageURL].compactMap { $0 }
             if let firstURLString = urlStrings.first, let firstURL = URL(string: firstURLString) {
                 Task {
@@ -347,6 +358,17 @@ final class CarbEntryViewModel: ObservableObject {
                             UserDefaults.standard.favoriteFoodImageIDs = map
                         }
                     }
+                }
+            }
+        } else {
+            // Fallback: generate an emoji-based thumbnail for simple foods (e.g., apple, banana)
+            let candidateNames = [food.name, food.foodType, selectedFoodProduct?.displayName].compactMap { $0 }
+            if let match = candidateNames.first(where: { EmojiThumbnailProvider.image(for: $0) != nil }),
+               let emojiImage = EmojiThumbnailProvider.image(for: match) {
+                if let id = FavoriteFoodImageStore.saveThumbnail(from: emojiImage) {
+                    var map = UserDefaults.standard.favoriteFoodImageIDs
+                    map[newStoredFood.id] = id
+                    UserDefaults.standard.favoriteFoodImageIDs = map
                 }
             }
         }
@@ -594,8 +616,6 @@ extension CarbEntryViewModel {
         foodSearchError = nil
         isFoodSearching = true
         
-        print("🔍 DEBUG: Set isFoodSearching = true, showingFoodSearch = true")
-        print("🔍 DEBUG: foodSearchResults.count = \(foodSearchResults.count)")
         
         // Perform new search immediately but ensure minimum search time for UX
         foodSearchTask = Task { [weak self] in
@@ -618,7 +638,6 @@ extension CarbEntryViewModel {
     @MainActor
     private func searchFoodProducts(query: String) async {
         print("🔍 searchFoodProducts starting for: '\(query)'")
-        print("🔍 DEBUG: isFoodSearching at start: \(isFoodSearching)")
         foodSearchError = nil
         
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -731,7 +750,6 @@ extension CarbEntryViewModel {
         // Always set isFoodSearching to false at the end
         isFoodSearching = false
         print("🔍 searchFoodProducts finished, isFoodSearching = false")
-        print("🔍 DEBUG: Final results count: \(foodSearchResults.count)")
     }
     
     /// Search for a specific product by barcode
@@ -951,14 +969,6 @@ extension CarbEntryViewModel {
         selectedFoodProduct = product
         
         // DEBUG LOGGING: Print fiber data when a food product is selected
-        print("🌾 DEBUG: Food product selected - \(product.displayName)")
-        print("🌾 DEBUG: Product ID: \(product.id)")
-        print("🌾 DEBUG: Data source: \(product.dataSource)")
-        print("🌾 DEBUG: Fiber in nutriments: \(product.nutriments.fiber ?? 0.0)g")
-        print("🌾 DEBUG: Fiber per serving: \(product.fiberPerServing ?? 0.0)g")
-        print("🌾 DEBUG: Serving size: \(product.servingSizeDisplay)")
-        print("🌾 DEBUG: Number of servings: \(numberOfServings)")
-        print("🌾 DEBUG: Total fiber for servings: \((product.fiberPerServing ?? product.nutriments.fiber ?? 0.0) * numberOfServings)g")
         
         // Populate food type (truncate to 20 chars to fit RowEmojiTextField maxLength)
         let maxFoodTypeLength = 20
@@ -1141,88 +1151,14 @@ extension CarbEntryViewModel {
     
     /// Perform text search using configured provider
     private func performTextSearch(query: String) async throws -> [OpenFoodFactsProduct] {
-        let provider = aiService.getProviderForSearchType(.textSearch)
-        
-        print("🔍 DEBUG: Text search using provider: \(provider.rawValue)")
-        print("🔍 DEBUG: Google Gemini API key configured: \(!UserDefaults.standard.googleGeminiAPIKey.isEmpty)")
-        print("🔍 DEBUG: Google Gemini API key: \(UserDefaults.standard.googleGeminiAPIKey.prefix(10))...")
-        print("🔍 DEBUG: Available text search providers: \(SearchProvider.allCases.filter { $0.supportsSearchType.contains(.textSearch) }.map { $0.rawValue })")
-        print("🔍 DEBUG: Current aiService.textSearchProvider: \(aiService.textSearchProvider.rawValue)")
-        
-        switch provider {
-        case .openFoodFacts:
-            print("🔍 Using OpenFoodFacts for text search")
-            let products = try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
-            return products.map { product in
-                OpenFoodFactsProduct(
-                    id: product.id,
-                    productName: product.productName,
-                    brands: product.brands,
-                    categories: product.categories,
-                    nutriments: product.nutriments,
-                    servingSize: product.servingSize,
-                    servingQuantity: product.servingQuantity,
-                    imageURL: product.imageURL,
-                    imageFrontURL: product.imageFrontURL,
-                    code: product.code,
-                    dataSource: .textSearch
-                )
-            }
-            
-        case .usdaFoodData:
-            print("🔍 Using USDA FoodData Central for text search")
-            let products = try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-            return products.map { product in
-                OpenFoodFactsProduct(
-                    id: product.id,
-                    productName: product.productName,
-                    brands: product.brands,
-                    categories: product.categories,
-                    nutriments: product.nutriments,
-                    servingSize: product.servingSize,
-                    servingQuantity: product.servingQuantity,
-                    imageURL: product.imageURL,
-                    imageFrontURL: product.imageFrontURL,
-                    code: product.code,
-                    dataSource: .textSearch
-                )
-            }
-            
-        case .claude:
-            print("🔍 Using Claude for text search")
-            return try await searchWithClaude(query: query)
-            
-        case .googleGemini:
-            print("🔍 Using Google Gemini for text search")
-            return try await searchWithGoogleGemini(query: query)
-            
-            
-        case .openAI:
-            // These providers don't support text search well, fall back to OpenFoodFacts
-            let products = try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
-            return products.map { product in
-                OpenFoodFactsProduct(
-                    id: product.id,
-                    productName: product.productName,
-                    brands: product.brands,
-                    categories: product.categories,
-                    nutriments: product.nutriments,
-                    servingSize: product.servingSize,
-                    servingQuantity: product.servingQuantity,
-                    imageURL: product.imageURL,
-                    imageFrontURL: product.imageFrontURL,
-                    code: product.code,
-                    dataSource: .textSearch
-                )
-            }
-        }
+        // Centralize text search routing and fallbacks in FoodSearchRouter
+        return try await FoodSearchRouter.shared.searchFoodsByText(query)
     }
     
     /// Perform barcode search using configured provider  
     private func performBarcodeSearch(barcode: String) async throws -> OpenFoodFactsProduct? {
         let provider = aiService.getProviderForSearchType(.barcodeSearch)
         
-        print("🔍 DEBUG: Barcode search using provider: \(provider.rawValue)")
         
         switch provider {
         case .openFoodFacts:
@@ -1263,6 +1199,9 @@ extension CarbEntryViewModel {
                 )
             }
             return nil
+        case .bringYourOwn:
+            // BYO is not supported for barcode search; fall back via router
+            return try await FoodSearchRouter.shared.searchFoodsByBarcode(barcode)
         }
     }
     
@@ -1664,6 +1603,7 @@ extension CarbEntryViewModel {
             foodItemsDetailed: [foodItem],
             overallDescription: "Text-based nutrition analysis for \(foodName)",
             confidence: confidenceLevel,
+            numericConfidence: confidence,
             totalFoodPortions: 1,
             totalUsdaServings: 1.0,
             totalCarbohydrates: carbs,

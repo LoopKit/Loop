@@ -15,16 +15,42 @@ struct StableSecureField: View {
     let isSecure: Bool
     
     var body: some View {
-        if isSecure {
-            SecureField(placeholder, text: $text)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-        } else {
-            TextField(placeholder, text: $text)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
+        let field: some View = Group {
+            if isSecure {
+                SecureField(placeholder, text: $text)
+            } else {
+                TextField(placeholder, text: $text)
+            }
+        }
+        .textFieldStyle(RoundedBorderTextFieldStyle())
+        .autocapitalization(.none)
+        .autocorrectionDisabled()
+        .overlay(alignment: .trailing) {
+            if !text.isEmpty {
+                Button(action: { text = "" }) {
+                    Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .padding(.trailing, 8)
+            }
+        }
+        // Return the composed field view
+        field
+    }
+}
+
+// Small reusable modifier to add a clear (x) button to standard TextField inputs
+private struct ClearButton: ViewModifier {
+    @Binding var text: String
+    func body(content: Content) -> some View {
+        content.overlay(alignment: .trailing) {
+            if !text.isEmpty {
+                Button(action: { text = "" }) {
+                    Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .padding(.trailing, 8)
+            }
         }
     }
 }
@@ -33,18 +59,49 @@ struct StableSecureField: View {
 struct AISettingsView: View {
     @ObservedObject private var aiService = ConfigurableAIService.shared
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.openURL) var openURL
     @State private var claudeKey: String = ""
     @State private var claudeQuery: String = ""
     @State private var openAIKey: String = ""
     @State private var openAIQuery: String = ""
     @State private var googleGeminiKey: String = ""
     @State private var googleGeminiQuery: String = ""
+    // USDA (database) API key – optional but recommended to avoid DEMO_KEY rate limits
+    @State private var usdaAPIKey: String = ""
+    // Bring Your Own (OpenAI-compatible)
+    @State private var customAPIBaseURL: String = ""
+    @State private var customAPIKey: String = ""
+    @State private var customModel: String = ""
+    @State private var customAPIVersion: String = ""
+    @State private var customOrganizationID: String = ""
+    @State private var customAPIEndpointPath: String = ""
+    @State private var isTestingBYO: Bool = false
+    @State private var byoTestMessage: String = ""
+    @State private var showBYOTestAlert: Bool = false
+    @State private var byoLastTestOK: Bool = false
+
+    // Detect unsaved changes for BYO fields vs persisted values
+    private var hasUnsavedBYOChanges: Bool {
+        let base = customAPIBaseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = customAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let model = customModel.trimmingCharacters(in: .whitespacesAndNewlines)
+        let version = customAPIVersion.trimmingCharacters(in: .whitespacesAndNewlines)
+        let org = customOrganizationID.trimmingCharacters(in: .whitespacesAndNewlines)
+        return base != UserDefaults.standard.customAIBaseURL ||
+               key != UserDefaults.standard.customAIAPIKey ||
+               model != UserDefaults.standard.customAIModel ||
+               version != UserDefaults.standard.customAIAPIVersion ||
+               org != UserDefaults.standard.customAIOrganization ||
+               customAPIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines) != UserDefaults.standard.customAIEndpointPath
+    }
     @State private var showingAPIKeyAlert = false
     
     // API Key visibility toggles - start with keys hidden (secure)
     @State private var showClaudeKey: Bool = false
     @State private var showOpenAIKey: Bool = false
     @State private var showGoogleGeminiKey: Bool = false
+    @State private var showUSDAKey: Bool = false
+    @State private var showCustomKey: Bool = false
     
     // Feature flag for Food Search
     @State private var foodSearchEnabled: Bool = UserDefaults.standard.foodSearchEnabled
@@ -55,6 +112,9 @@ struct AISettingsView: View {
     // GPT-5 feature flag
     @State private var useGPT5ForOpenAI: Bool = UserDefaults.standard.useGPT5ForOpenAI
     
+    // Selected provider tab: 0 OpenAI, 1 Claude, 2 Gemini, 3 BYO
+    @State private var selectedTab: Int = 0
+
     init() {
         _claudeKey = State(initialValue: ConfigurableAIService.shared.getAPIKey(for: .claude) ?? "")
         _claudeQuery = State(initialValue: ConfigurableAIService.shared.getQuery(for: .claude) ?? "")
@@ -62,337 +122,40 @@ struct AISettingsView: View {
         _openAIQuery = State(initialValue: ConfigurableAIService.shared.getQuery(for: .openAI) ?? "")
         _googleGeminiKey = State(initialValue: ConfigurableAIService.shared.getAPIKey(for: .googleGemini) ?? "")
         _googleGeminiQuery = State(initialValue: ConfigurableAIService.shared.getQuery(for: .googleGemini) ?? "")
+        // USDA key
+        _usdaAPIKey = State(initialValue: UserDefaults.standard.usdaAPIKey)
+        // BYO
+        _customAPIBaseURL = State(initialValue: UserDefaults.standard.customAIBaseURL)
+        _customAPIKey = State(initialValue: UserDefaults.standard.customAIAPIKey)
+        _customModel = State(initialValue: UserDefaults.standard.customAIModel)
+        _customAPIVersion = State(initialValue: UserDefaults.standard.customAIAPIVersion)
+        _customOrganizationID = State(initialValue: UserDefaults.standard.customAIOrganization)
+        _customAPIEndpointPath = State(initialValue: UserDefaults.standard.customAIEndpointPath)
+        // Init selected tab from current provider
+        let pImage = UserDefaults.standard.aiImageProvider.lowercased()
+        if pImage.contains("bring") { _selectedTab = State(initialValue: 3) }
+        else if pImage.contains("claude") { _selectedTab = State(initialValue: 1) }
+        else if pImage.contains("gemini") || pImage.contains("google") { _selectedTab = State(initialValue: 2) }
+        else { _selectedTab = State(initialValue: 0) }
     }
     
     var body: some View {
         NavigationView {
             Form {
-                // Feature Toggle Section
-                Section(header: Text("Food Search Feature"), 
-                       footer: Text("Enable this to show Food Search functionality in the carb entry screen. When disabled, the feature is hidden but all your settings are preserved.")) {
-                    Toggle("Enable Food Search", isOn: $foodSearchEnabled)
-                }
-                
-                // Advanced Dosing Recommendations Section
-                Section(header: Text("Advanced Dosing Recommendations"), 
-                       footer: Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations, extended bolus timing, excersize impact, and absorption time estimates. FPUs help account for the delayed glucose impact from fat and protein in meals, which can affect blood sugar 3-8 hours after eating.")) {
-                    Toggle("Advanced Dosing Recommendations", isOn: $advancedDosingRecommendationsEnabled)
-                        .disabled(!foodSearchEnabled)
-                }
-                
-                // GPT-5 Feature Section - Only show when OpenAI is selected for AI Image Analysis
-                if aiService.aiImageSearchProvider.rawValue.contains("OpenAI") {
-                    Section(header: Text("OpenAI GPT-5 (Latest)"), 
-                           footer: Text("Enable GPT-5, GPT-5-mini, and GPT-5-nano models for OpenAI analysis. Standard Quality uses GPT-5, Fast Mode uses GPT-5-nano for ultra-fast analysis. GPT-5 takes longer to perform analysis but these are the latest models with some improvements in health advisory accuracy. Fallback to GPT-4o if unavailable.")) {
-                        Toggle("Use GPT-5 Models", isOn: $useGPT5ForOpenAI)
-                            .disabled(!foodSearchEnabled)
-                            .onChange(of: useGPT5ForOpenAI) { _ in
-                                // Trigger view refresh to update Analysis Mode descriptions
-                                aiService.objectWillChange.send()
-                            }
-                    }
-                }
-                
-                // Only show configuration sections if feature is enabled
+                featureToggleSection
                 if foodSearchEnabled {
-                    Section(header: Text("Food Search Provider Configuration"), 
-                       footer: Text("Configure the API service used for each type of food search. AI Image Analysis controls what happens when you take photos of food. Different providers excel at different search methods.")) {
-                    
-                    ForEach(SearchType.allCases, id: \.self) { searchType in
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(searchType.rawValue)
-                                    .font(.headline)
-                                Spacer()
-                            }
-                            
-                            Text(searchType.description)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            
-                            Picker("Provider for \(searchType.rawValue)", selection: getBindingForSearchType(searchType)) {
-                                ForEach(aiService.getAvailableProvidersForSearchType(searchType), id: \.self) { provider in
-                                    Text(provider.rawValue).tag(provider)
-                                }
-                            }
-                            .pickerStyle(MenuPickerStyle())
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-                
-                // Analysis Mode Configuration
-                Section(header: Text("AI Analysis Mode"), 
-                       footer: Text("Choose between speed and accuracy. Fast mode uses lighter AI models for 2-3x faster analysis with slightly reduced accuracy (~5-10% trade-off). Standard mode uses full AI models for maximum accuracy.")) {
-                    
+                    providerMappingSection
+                    usdaKeySection
+                    providerSelectionSection
                     analysisModeSection
+                    advancedOptionsSection
                 }
-                
-                // Claude API Configuration
-                Section(header: Text("Anthropic (Claude API) Configuration"), 
-                       footer: Text("Get a Claude API key from console.anthropic.com. Claude excels at detailed reasoning and food analysis. Pricing starts at $0.25 per million tokens for Haiku model.")) {
-                    VStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("Claude API Key")
-                                    .font(.headline)
-                                Spacer()
-                                Button(action: {
-                                    showClaudeKey.toggle()
-                                }) {
-                                    Image(systemName: showClaudeKey ? "eye.slash" : "eye")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                            
-                            HStack {
-                                StableSecureField(
-                                    placeholder: "Enter your Claude API key",
-                                    text: $claudeKey,
-                                    isSecure: !showClaudeKey
-                                )
-                            }
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("AI Prompt for Enhanced Results")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Spacer()
-                                
-                                Menu("Examples") {
-                                    Button("Default Query") {
-                                        claudeQuery = "Analyze this food image for diabetes management. Describe exactly what you see in detail: colors, textures, cooking methods, plate type, utensils, and food arrangement. Identify each food item with specific preparation details, estimate precise portion sizes using visual references, and provide carbohydrates, protein, fat, and calories for each component. Focus on accurate carbohydrate estimation for insulin dosing."
-                                    }
-                                    
-                                    Button("Detailed Visual Analysis") {
-                                        claudeQuery = "Provide extremely detailed visual analysis of this food image. Describe every element you can see: food colors, textures, cooking methods (grilled marks, browning, steaming), plate type and size, utensils present, garnishes, sauces, cooking oils visible, food arrangement, and background elements. Use these visual details to estimate precise portion sizes and calculate accurate nutrition values for diabetes management."
-                                    }
-                                    
-                                    Button("Diabetes Focus") {
-                                        claudeQuery = "Focus specifically on carbohydrate analysis for Type 1 diabetes management. Identify all carb sources, estimate absorption timing, and provide detailed carb counts with confidence levels."
-                                    }
-                                    
-                                    Button("Macro Tracking") {
-                                        claudeQuery = "Provide complete macronutrient analysis with detailed portion reasoning. For each food component, describe the visual cues you're using for portion estimation: compare to visible objects (fork, plate, hand), note cooking methods affecting nutrition (oils, preparation style), explain food quality indicators (ripeness, doneness), and provide comprehensive nutrition breakdown with your confidence level for each estimate."
-                                    }
-                                }
-                                .font(.caption)
-                            }
-                            
-                            TextEditor(text: $claudeQuery)
-                                .frame(minHeight: 80)
-                                .border(Color.secondary.opacity(0.3), width: 0.5)
-                        }
-                    }
-                }
-                
-                // Google Gemini API Configuration
-                Section(header: Text("Google (Gemini API) Configuration"), 
-                       footer: Text("Get a free API key from ai.google.dev. Google Gemini provides excellent food recognition with generous free tier (1500 requests per day).")) {
-                    VStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("Google Gemini API Key")
-                                    .font(.headline)
-                                Spacer()
-                                Button(action: {
-                                    showGoogleGeminiKey.toggle()
-                                }) {
-                                    Image(systemName: showGoogleGeminiKey ? "eye.slash" : "eye")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                            
-                            HStack {
-                                StableSecureField(
-                                    placeholder: "Enter your Google Gemini API key",
-                                    text: $googleGeminiKey,
-                                    isSecure: !showGoogleGeminiKey
-                                )
-                            }
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("AI Prompt for Enhanced Results")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Spacer()
-                                
-                                Menu("Examples") {
-                                    Button("Default Query") {
-                                        googleGeminiQuery = "Analyze this food image for diabetes management. Describe exactly what you see in detail: colors, textures, cooking methods, plate type, utensils, and food arrangement. Identify each food item with specific preparation details, estimate precise portion sizes using visual references, and provide carbohydrates, protein, fat, and calories for each component. Focus on accurate carbohydrate estimation for insulin dosing."
-                                    }
-                                    
-                                    Button("Detailed Visual Analysis") {
-                                        googleGeminiQuery = "Provide extremely detailed visual analysis of this food image. Describe every element you can see: food colors, textures, cooking methods (grilled marks, browning, steaming), plate type and size, utensils present, garnishes, sauces, cooking oils visible, food arrangement, and background elements. Use these visual details to estimate precise portion sizes and calculate accurate nutrition values for diabetes management."
-                                    }
-                                    
-                                    Button("Diabetes Focus") {
-                                        googleGeminiQuery = "Identify all food items in this image with focus on carbohydrate content for diabetes management. Provide detailed carb counts for each component and total meal carbohydrates."
-                                    }
-                                    
-                                    Button("Macro Tracking") {
-                                        googleGeminiQuery = "Break down this meal into individual components with complete macronutrient profiles (carbs, protein, fat, calories) per item and combined totals."
-                                    }
-                                }
-                                .font(.caption)
-                            }
-                            
-                            TextEditor(text: $googleGeminiQuery)
-                                .frame(minHeight: 80)
-                                .border(Color.secondary.opacity(0.3), width: 0.5)
-                        }
-                    }
-                }
-                
-                // OpenAI (ChatGPT) API Configuration
-                Section(header: Text("OpenAI (ChatGPT API) Configuration"), 
-                       footer: Text("Get an API key from platform.openai.com. Customize the analysis prompt to get specific meal component breakdowns and nutrition totals. (~$0.01 per image)")) {
-                    VStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("ChatGPT (OpenAI) API Key")
-                                    .font(.headline)
-                                Spacer()
-                                Button(action: {
-                                    showOpenAIKey.toggle()
-                                }) {
-                                    Image(systemName: showOpenAIKey ? "eye.slash" : "eye")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                            
-                            HStack {
-                                StableSecureField(
-                                    placeholder: "Enter your OpenAI API key",
-                                    text: $openAIKey,
-                                    isSecure: !showOpenAIKey
-                                )
-                            }
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("AI Prompt for Enhanced Results")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Spacer()
-                                
-                                Menu("Examples") {
-                                    Button("Default Query") {
-                                        openAIQuery = "Analyze this food image for diabetes management. Describe exactly what you see in detail: colors, textures, cooking methods, plate type, utensils, and food arrangement. Identify each food item with specific preparation details, estimate precise portion sizes using visual references, and provide carbohydrates, protein, fat, and calories for each component. Focus on accurate carbohydrate estimation for insulin dosing."
-                                    }
-                                    
-                                    Button("Detailed Visual Analysis") {
-                                        openAIQuery = "Provide extremely detailed visual analysis of this food image. Describe every element you can see: food colors, textures, cooking methods (grilled marks, browning, steaming), plate type and size, utensils present, garnishes, sauces, cooking oils visible, food arrangement, and background elements. Use these visual details to estimate precise portion sizes and calculate accurate nutrition values for diabetes management."
-                                    }
-                                    
-                                    Button("Diabetes Focus") {
-                                        openAIQuery = "Identify all food items in this image with focus on carbohydrate content for diabetes management. Provide detailed carb counts for each component and total meal carbohydrates."
-                                    }
-                                    
-                                    Button("Macro Tracking") {
-                                        openAIQuery = "Break down this meal into individual components with complete macronutrient profiles (carbs, protein, fat, calories) per item and combined totals."
-                                    }
-                                }
-                                .font(.caption)
-                            }
-                            
-                            TextEditor(text: $openAIQuery)
-                                .frame(minHeight: 80)
-                                .border(Color.secondary.opacity(0.3), width: 0.5)
-                        }
-                    }
-                }
-                
-                Section(header: Text("Important: How to Use Your API Keys"), 
-                       footer: Text("To use your paid API keys, make sure to select the corresponding provider in 'AI Image Analysis' above. The provider you select for AI Image Analysis is what will be used when you take photos of food.")) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "camera.fill")
-                                .foregroundColor(.blue)
-                            Text("Camera Food Analysis")
-                                .font(.headline)
-                        }
-                        
-                        Text("When you take a photo of food, the app uses the provider selected in 'AI Image Analysis' above.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Text("✅ Select 'Anthropic (Claude API)', 'Google (Gemini API)', or 'OpenAI (ChatGPT API)' for AI Image Analysis to use your paid keys")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                        
-                        Text("❌ If you select 'OpenFoodFacts' or 'USDA', camera analysis will use basic estimation instead of AI")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                    }
-                }
-                
-                Section(header: Text("Provider Information")) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Available Search Providers:")
-                            .font(.headline)
-                        
-                        Text("• **Anthropic (Claude API)**: Advanced AI with detailed reasoning. Excellent at food analysis and portion estimation. Requires API key (~$0.25 per million tokens).")
-                        
-                        Text("• **Google (Gemini API)**: Free AI with generous limits (1500/day). Excellent food recognition using Google's Vision AI. Perfect balance of quality and cost.")
-                        
-                        Text("• **OpenAI (ChatGPT API)**: Most accurate AI analysis using GPT-4 Vision. Requires API key (~$0.01 per image). Excellent at image analysis and natural language queries.")
-                        
-                        Text("• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods. Default for text and barcode searches.")
-                        
-                        Text("• **USDA FoodData Central**: Free, official nutrition database. Superior nutrition data for non-packaged foods like fruits, vegetables, and meat.")
-                        
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                }
-                
-                Section(header: Text("Search Type Recommendations")) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Group {
-                            Text("**Text/Voice Search:**")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                            Text("USDA FoodData Central → OpenFoodFacts")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            
-                            Text("**Barcode Scanning:**")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                            Text("OpenFoodFacts")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            
-                            Text("**AI Image Analysis:**")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                            Text("Google (Gemini API) → OpenAI (ChatGPT API) → Anthropic (Claude API)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                } // End if foodSearchEnabled
-                
-                Section(header: Text("Medical Disclaimer")) {
-                    Text("AI nutritional estimates are approximations only. Always consult with your healthcare provider for medical decisions. Verify nutritional information whenever possible. Use at your own risk.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+                medicalDisclaimerSection
             }
-            .navigationTitle("Food Search Settings")
+            .navigationTitle("FoodFinder Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(
-                leading: Button("Cancel") {
+        .navigationBarItems(
+            leading: Button("Cancel") {
                     // Restore original values (discard changes)
                     claudeKey = ConfigurableAIService.shared.getAPIKey(for: .claude) ?? ""
                     claudeQuery = ConfigurableAIService.shared.getQuery(for: .claude) ?? ""
@@ -400,6 +163,7 @@ struct AISettingsView: View {
                     openAIQuery = ConfigurableAIService.shared.getQuery(for: .openAI) ?? ""
                     googleGeminiKey = ConfigurableAIService.shared.getAPIKey(for: .googleGemini) ?? ""
                     googleGeminiQuery = ConfigurableAIService.shared.getQuery(for: .googleGemini) ?? ""
+                    usdaAPIKey = UserDefaults.standard.usdaAPIKey
                     foodSearchEnabled = UserDefaults.standard.foodSearchEnabled  // Restore original feature flag state
                     advancedDosingRecommendationsEnabled = UserDefaults.standard.advancedDosingRecommendationsEnabled  // Restore original advanced dosing flag state
                     
@@ -412,14 +176,381 @@ struct AISettingsView: View {
                 .font(.headline)
                 .foregroundColor(.accentColor)
             )
-        }
-        .alert("API Key Required", isPresented: $showingAPIKeyAlert) {
-            Button("OK") { }
-        } message: {
-            Text("This AI provider requires an API key. Please enter your API key in the settings below.")
+            .alert(isPresented: $showingAPIKeyAlert) {
+                Alert(
+                    title: Text("API Key Required"),
+                    message: Text("This AI provider requires an API key. Please enter your API key in the settings below."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            .alert(isPresented: $showBYOTestAlert) {
+                Alert(
+                    title: Text("BYO Connection Test"),
+                    message: Text(byoTestMessage),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
-    
+}
+
+// Helper views and methods
+extension AISettingsView {
+    private var endpointPathError: String? {
+        let p = customAPIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
+        if p.isEmpty { return nil }
+        if p.contains("://") { return "Enter only the path, not a full URL (e.g., /v1/chat/completions)." }
+        if p.contains(" ") { return "Path cannot contain spaces." }
+        return nil
+    }
+
+    private func normalizedPath(_ path: String) -> String {
+        let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        if p.isEmpty { return "/v1/chat/completions" }
+        return p.hasPrefix("/") ? p : "/" + p
+    }
+
+    private var endpointPreview: String {
+        let base = customAPIBaseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !base.isEmpty else { return "" }
+        let trimmedBase = base.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let isAzure = base.lowercased().contains(".openai.azure.com") || !customAPIVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        if isAzure {
+            let dep = customModel.trimmingCharacters(in: .whitespacesAndNewlines)
+            let ver = customAPIVersion.trimmingCharacters(in: .whitespacesAndNewlines)
+            let depDisp = dep.isEmpty ? "<deployment>" : dep
+            let verDisp = ver.isEmpty ? "<api-version>" : ver
+            return "\(trimmedBase)/openai/deployments/\(depDisp)/chat/completions?api-version=\(verDisp)"
+        } else {
+            let path = normalizedPath(customAPIEndpointPath)
+            return "\(trimmedBase)\(path)"
+        }
+    }
+
+    // MARK: Section builders (to help type-checker)
+    private var featureToggleSection: some View {
+        Section(
+            header: Text("FoodFinder"),
+            footer: VStack(alignment: .leading, spacing: 2) {
+                Text("Enable this to show FoodFinder in the carb entry screen. Requires Internet connection. When disabled, feature is hidden but settings are preserved.")
+            }
+        ) {
+            Toggle("Enable FoodFinder", isOn: $foodSearchEnabled)
+        }
+    }
+
+    private var providerMappingSection: some View {
+        Section(
+            header: Text("FoodFinder Provider Configuration"),
+            footer: Text("Configure the service used for each type of search. AI Image Analysis controls what happens when you take photos of food.")
+        ) {
+            ForEach(SearchType.allCases, id: \.self) { searchType in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(searchType.rawValue).font(.headline)
+                        Spacer()
+                    }
+                    Text(searchType.description).font(.caption).foregroundColor(.secondary)
+                    Picker(selection: getBindingForSearchType(searchType)) {
+                        ForEach(aiService.getAvailableProvidersForSearchType(searchType), id: \.self) { provider in
+                            Text(provider.rawValue).tag(provider)
+                        }
+                    } label: { EmptyView() }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+
+    private var providerSelectionSection: some View {
+        Section(
+            header: HStack(spacing: 8) {
+                Image(systemName: "sparkles").foregroundColor(.purple)
+                Text("AI API KEY CONFIGURATION").textCase(.uppercase)
+            }
+        ) {
+            Picker("Provider", selection: $selectedTab) {
+                Text("OpenAI Chat GPT").tag(0)
+                Text("Anthropic Claude").tag(1)
+                Text("Google Gemini").tag(2)
+                Text("BYO").tag(3)
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: selectedTab) { newVal in
+                switch newVal {
+                case 0:
+                    UserDefaults.standard.aiImageProvider = "OpenAI (ChatGPT API)"
+                case 1:
+                    UserDefaults.standard.aiImageProvider = "Anthropic (Claude API)"
+                case 2:
+                    UserDefaults.standard.aiImageProvider = "Google (Gemini API)"
+                case 3:
+                    UserDefaults.standard.aiImageProvider = "Bring your own (Custom)"
+                default:
+                    break
+                }
+            }
+            Text("Choose which AI service you want to use for food analysis")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+
+            Group {
+                if selectedTab == 0 { openAIKeyRow }
+                else if selectedTab == 1 { claudeKeyRow }
+                else if selectedTab == 2 { geminiKeyRow }
+                else { bringYourOwnRow }
+            }
+        }
+    }
+
+    // USDA database key section (optional but recommended)
+    private var usdaKeySection: some View {
+        Section(
+            header: HStack(spacing: 8) {
+                Image(systemName: "leaf").foregroundColor(.green)
+                Text("USDA DATABASE (TEXT SEARCH)").textCase(.uppercase)
+            },
+            footer: VStack(alignment: .leading, spacing: 4) {
+                Text("Why add a key?")
+                    .font(.caption).fontWeight(.semibold)
+                Text("Without your own key, searches use a public DEMO_KEY that is heavily rate‑limited and often returns 429 errors. Adding your free personal key avoids this.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        ) {
+            HStack(spacing: 8) {
+                StableSecureField(placeholder: "Enter your USDA API key (optional)", text: $usdaAPIKey, isSecure: !showUSDAKey)
+                Button(action: { showUSDAKey.toggle() }) {
+                    Image(systemName: showUSDAKey ? "eye.slash" : "eye").foregroundColor(.green)
+                }
+                .buttonStyle(.plain)
+            }
+            Button(action: { if let url = URL(string: "https://fdc.nal.usda.gov/api-guide") { openURL(url) } }) {
+                HStack { Image(systemName: "info.circle"); Text("How to get a key") }
+                    .foregroundColor(.green)
+            }
+            .buttonStyle(.plain)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("How to obtain a USDA API key:")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Text("1. Open the USDA FoodData Central API Guide. 2. Sign in or create an account. 3. Request a new API key. 4. Copy and paste it here. The key activates immediately.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private var openAIKeyRow: some View {
+        Group {
+            HStack(spacing: 8) {
+                Image(systemName: "brain.head.profile").foregroundColor(.blue)
+                Text("ChatGPT Configuration").font(.headline).foregroundColor(.blue)
+            }
+            HStack {
+                StableSecureField(placeholder: "Enter your OpenAI API key", text: $openAIKey, isSecure: !showOpenAIKey)
+                Button(action: { showOpenAIKey.toggle() }) {
+                    Image(systemName: showOpenAIKey ? "eye.slash" : "eye").foregroundColor(.blue)
+                }
+                .buttonStyle(.plain)
+            }
+            Button(action: { if let url = URL(string: "https://platform.openai.com/api-keys") { openURL(url) } }) {
+                HStack { Image(systemName: "info.circle"); Text("How to get API keys") }
+                    .foregroundColor(.blue)
+            }
+            .buttonStyle(.plain)
+            // GPT-5 option (OpenAI only)
+            Toggle("Use GPT-5 Models", isOn: $useGPT5ForOpenAI)
+                .disabled(!foodSearchEnabled)
+                .onChange(of: useGPT5ForOpenAI) { _ in aiService.objectWillChange.send() }
+            Text("OpenAI: highly accurate vision models (GPT-4o/GPT-5). ~$0.01/image.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private var claudeKeyRow: some View {
+        Group {
+            HStack(spacing: 8) {
+                Image(systemName: "bolt.heart").foregroundColor(.orange)
+                Text("Claude Configuration").font(.headline).foregroundColor(.orange)
+            }
+            HStack {
+                StableSecureField(placeholder: "Enter your Claude API key", text: $claudeKey, isSecure: !showClaudeKey)
+                Button(action: { showClaudeKey.toggle() }) {
+                    Image(systemName: showClaudeKey ? "eye.slash" : "eye").foregroundColor(.orange)
+                }
+                .buttonStyle(.plain)
+            }
+            Button(action: { if let url = URL(string: "https://console.anthropic.com/settings/keys") { openURL(url) } }) {
+                HStack { Image(systemName: "info.circle"); Text("How to get API keys") }
+                    .foregroundColor(.orange)
+            }
+            .buttonStyle(.plain)
+            Text("Anthropic Claude: excellent reasoning for detailed analysis.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private var geminiKeyRow: some View {
+        Group {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles").foregroundColor(.green)
+                Text("Gemini Configuration").font(.headline).foregroundColor(.green)
+            }
+            HStack {
+                StableSecureField(placeholder: "Enter your Google Gemini API key", text: $googleGeminiKey, isSecure: !showGoogleGeminiKey)
+                Button(action: { showGoogleGeminiKey.toggle() }) {
+                    Image(systemName: showGoogleGeminiKey ? "eye.slash" : "eye").foregroundColor(.green)
+                }
+                .buttonStyle(.plain)
+            }
+            Button(action: { if let url = URL(string: "https://aistudio.google.com/app/apikey") { openURL(url) } }) {
+                HStack { Image(systemName: "info.circle"); Text("How to get API keys") }
+                    .foregroundColor(.green)
+            }
+            .buttonStyle(.plain)
+            Text("Google Gemini: great recognition with generous free limits.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private var bringYourOwnRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "wand.and.stars").foregroundColor(.purple)
+                Text("Bring your own (OpenAI-compatible)").font(.headline).foregroundColor(.purple)
+                if byoLastTestOK && !hasUnsavedBYOChanges {
+                    Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                } else if hasUnsavedBYOChanges {
+                    Text("Unsaved")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.yellow.opacity(0.2))
+                        .foregroundColor(.orange)
+                        .cornerRadius(6)
+                }
+            }
+            TextField("Base URL (e.g., https://api.openai.com)", text: $customAPIBaseURL)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .autocorrectionDisabled()
+                .onChange(of: customAPIBaseURL) { _ in byoLastTestOK = false }
+                .modifier(ClearButton(text: $customAPIBaseURL))
+            HStack {
+                StableSecureField(placeholder: "Enter your API key", text: $customAPIKey, isSecure: !showCustomKey)
+                Button(action: { showCustomKey.toggle() }) {
+                    Image(systemName: showCustomKey ? "eye.slash" : "eye").foregroundColor(.purple)
+                }
+                .buttonStyle(.plain)
+            }
+            .onChange(of: customAPIKey) { _ in byoLastTestOK = false }
+            TextField(customAPIBaseURL.lowercased().contains(".openai.azure.com") ? "Deployment name (Azure), e.g., gpt-5-test" : "Model (OpenAI), e.g., gpt-4o", text: $customModel)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .autocorrectionDisabled()
+                .onChange(of: customModel) { _ in byoLastTestOK = false }
+                .modifier(ClearButton(text: $customModel))
+            TextField("API version (Azure only, e.g., 2024-06-01)", text: $customAPIVersion)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .autocorrectionDisabled()
+                .onChange(of: customAPIVersion) { _ in byoLastTestOK = false }
+                .modifier(ClearButton(text: $customAPIVersion))
+            TextField("Custom endpoint path (non-Azure), e.g., /v1/chat/completions or /openai/v1/chat/completions", text: $customAPIEndpointPath)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .autocorrectionDisabled()
+                .onChange(of: customAPIEndpointPath) { _ in byoLastTestOK = false }
+                .modifier(ClearButton(text: $customAPIEndpointPath))
+            if let pathError = endpointPathError {
+                Text(pathError)
+                    .font(.caption2)
+                    .foregroundColor(.red)
+            } else {
+                Text("Leave blank for most providers. Enter only a path (with or without leading '/'). Azure ignores this field.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            Text("Leave blank for most providers. Only needed for non-Azure providers whose Chat Completions path differs from the OpenAI default. For example: Together.ai uses '/v1/chat/completions', Groq uses '/openai/v1/chat/completions'. Azure ignores this field because it uses the deployment-based path.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            if !endpointPreview.isEmpty {
+                Text("Will call: \(endpointPreview)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+            TextField("Organization ID (optional)", text: $customOrganizationID)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .autocorrectionDisabled()
+                .onChange(of: customOrganizationID) { _ in byoLastTestOK = false }
+                .modifier(ClearButton(text: $customOrganizationID))
+            HStack {
+                Button(action: testBYOConnection) {
+                    if isTestingBYO {
+                        HStack { ProgressView(); Text("Testing…") }
+                    } else {
+                        HStack { Image(systemName: "checkmark.shield"); Text("Test connection") }
+                    }
+                }
+                .disabled(isTestingBYO)
+                .buttonStyle(.bordered)
+                .tint(.purple)
+                Spacer()
+            }
+            Text("BYO is for AI Image Analysis only (OpenAI-compatible endpoints, including Azure). Test connection only checks connectivity/auth — it does not validate model compatibility. GPT-5 support may be limited across many API providers at this time. BYO is experimental and unsupported; use at your own risk.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            if hasUnsavedBYOChanges {
+                Text("Unsaved changes aren’t persisted. Tap Save (top-right) to keep them. Testing does not save.")
+                    .font(.caption2)
+                    .foregroundColor(.orange)
+            }
+        }
+    }
+
+    private func testBYOConnection() {
+        let base = customAPIBaseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = customAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !base.isEmpty, !key.isEmpty else {
+            byoTestMessage = "Please enter Base URL and API key first."
+            showBYOTestAlert = true
+            return
+        }
+        isTestingBYO = true
+        byoLastTestOK = false
+        let model = customModel.trimmingCharacters(in: .whitespacesAndNewlines)
+        let version = customAPIVersion.trimmingCharacters(in: .whitespacesAndNewlines)
+        let org = customOrganizationID.trimmingCharacters(in: .whitespacesAndNewlines)
+        Task {
+            do {
+                let status = try await OpenAIFoodAnalysisService.shared.testConnection(
+                    baseURL: base,
+                    apiKey: key,
+                    model: model.isEmpty ? nil : model,
+                    apiVersion: version.isEmpty ? nil : version,
+                    organizationID: org.isEmpty ? nil : org,
+                    customPath: customAPIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : customAPIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+                byoTestMessage = status
+                byoLastTestOK = true
+            } catch {
+                byoTestMessage = "Test failed: \(error.localizedDescription)"
+                byoLastTestOK = false
+            }
+            isTestingBYO = false
+            showBYOTestAlert = true
+        }
+    }
+
+    // (inline provider configuration is embedded directly in body)
     @ViewBuilder
     private var analysisModeSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -438,7 +569,8 @@ struct AISettingsView: View {
             modelInformation
         }
     }
-    
+
+   
     @ViewBuilder
     private var currentModeDetails: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -459,7 +591,7 @@ struct AISettingsView: View {
         .background(aiService.analysisMode.backgroundColor)
         .cornerRadius(8)
     }
-    
+
     @ViewBuilder
     private var modelInformation: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -479,7 +611,7 @@ struct AISettingsView: View {
         .background(Color(.systemGray6))
         .cornerRadius(6)
     }
-    
+
     @ViewBuilder
     private func modelRow(provider: String, model: String) -> some View {
         HStack {
@@ -492,7 +624,21 @@ struct AISettingsView: View {
                 .foregroundColor(.primary)
         }
     }
-    
+
+    private var advancedOptionsSection: some View {
+          Section(header: Text("Advanced Options"), footer: Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations.")) {
+              Toggle("Advanced Dosing Recommendations", isOn: $advancedDosingRecommendationsEnabled).disabled(!foodSearchEnabled)
+          }
+      }
+      
+      private var medicalDisclaimerSection: some View {
+          Section(header: Text("Medical Disclaimer")) {
+              Text("AI nutritional estimates are approximations only. Verify information when possible.")
+                  .font(.caption)
+                  .foregroundColor(.secondary)
+          }
+      }
+
     private func saveSettings() {
         // Save all current settings to UserDefaults
         // Feature flag settings
@@ -501,49 +647,59 @@ struct AISettingsView: View {
         UserDefaults.standard.useGPT5ForOpenAI = useGPT5ForOpenAI
         
         // API key and query settings
-        aiService.setAPIKey(claudeKey, for: .claude)
-        aiService.setAPIKey(openAIKey, for: .openAI)
-        aiService.setAPIKey(googleGeminiKey, for: .googleGemini)
+        aiService.setAPIKey(claudeKey.trimmingCharacters(in: .whitespacesAndNewlines), for: .claude)
+        aiService.setAPIKey(openAIKey.trimmingCharacters(in: .whitespacesAndNewlines), for: .openAI)
+        aiService.setAPIKey(googleGeminiKey.trimmingCharacters(in: .whitespacesAndNewlines), for: .googleGemini)
         aiService.setQuery(claudeQuery, for: .claude)
         aiService.setQuery(openAIQuery, for: .openAI)
         aiService.setQuery(googleGeminiQuery, for: .googleGemini)
+        // USDA key
+        UserDefaults.standard.usdaAPIKey = usdaAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // BYO settings
+        UserDefaults.standard.customAIBaseURL = customAPIBaseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        UserDefaults.standard.customAIAPIKey = customAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        UserDefaults.standard.customAIModel = customModel.trimmingCharacters(in: .whitespacesAndNewlines)
+        UserDefaults.standard.customAIAPIVersion = customAPIVersion.trimmingCharacters(in: .whitespacesAndNewlines)
+        UserDefaults.standard.customAIOrganization = customOrganizationID.trimmingCharacters(in: .whitespacesAndNewlines)
+        UserDefaults.standard.customAIEndpointPath = customAPIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
         
         // Search type provider settings are automatically saved via the Binding
         // No additional action needed as they update UserDefaults directly
         
-        
         // Dismiss the settings view
         presentationMode.wrappedValue.dismiss()
     }
-    
-    private func getBindingForSearchType(_ searchType: SearchType) -> Binding<SearchProvider> {
-        switch searchType {
-        case .textSearch:
-            return Binding(
-                get: { aiService.textSearchProvider },
-                set: { newValue in
-                    aiService.textSearchProvider = newValue
-                    UserDefaults.standard.textSearchProvider = newValue.rawValue
-                }
-            )
-        case .barcodeSearch:
-            return Binding(
-                get: { aiService.barcodeSearchProvider },
-                set: { newValue in
-                    aiService.barcodeSearchProvider = newValue
-                    UserDefaults.standard.barcodeSearchProvider = newValue.rawValue
-                }
-            )
-        case .aiImageSearch:
-            return Binding(
-                get: { aiService.aiImageSearchProvider },
-                set: { newValue in
-                    aiService.aiImageSearchProvider = newValue
-                    UserDefaults.standard.aiImageProvider = newValue.rawValue
-                }
-            )
-        }
+
+private func getBindingForSearchType(_ searchType: SearchType) -> Binding<SearchProvider> {
+    switch searchType {
+    case .textSearch:
+        return Binding(
+            get: { aiService.textSearchProvider },
+            set: { newValue in
+                aiService.textSearchProvider = newValue
+                UserDefaults.standard.textSearchProvider = newValue.rawValue
+            }
+        )
+    case .barcodeSearch:
+        return Binding(
+            get: { aiService.barcodeSearchProvider },
+            set: { newValue in
+                aiService.barcodeSearchProvider = newValue
+                UserDefaults.standard.barcodeSearchProvider = newValue.rawValue
+            }
+        )
+    case .aiImageSearch:
+        return Binding(
+            get: { aiService.aiImageSearchProvider },
+            set: { newValue in
+                aiService.aiImageSearchProvider = newValue
+                UserDefaults.standard.aiImageProvider = newValue.rawValue
+            }
+        )
     }
+}
+
 }
 
 // MARK: - Preview

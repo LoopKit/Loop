@@ -16,7 +16,8 @@ class OpenFoodFactsService {
     // MARK: - Properties
     
     private let session: URLSession
-    private let baseURL = "https://world.openfoodfacts.net"
+    // Use the primary .org domain for stable API responses
+    private let baseURL = "https://world.openfoodfacts.org"
     private let userAgent = "Loop-iOS-Diabetes-App/1.0"
     private let log = OSLog(category: "OpenFoodFactsService")
     
@@ -164,6 +165,13 @@ class OpenFoodFactsService {
                 throw OpenFoodFactsError.networkError(URLError(.badServerResponse))
             }
             
+            // Validate content type early to avoid decoding HTML error pages as JSON
+            if let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type")?.lowercased(),
+               !contentType.contains("json") {
+                os_log("Unexpected content type: %{public}@", log: log, type: .error, contentType)
+                throw OpenFoodFactsError.invalidResponse
+            }
+
             switch httpResponse.statusCode {
             case 200:
                 return (data, httpResponse)

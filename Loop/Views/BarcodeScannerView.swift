@@ -27,7 +27,7 @@ struct BarcodeScannerView: View {
     enum ScanningStage: String, CaseIterable {
         case initializing = "Initializing camera..."
         case positioning = "Position camera over barcode or QR code"
-        case scanning = "Scanning for barcode or QR code..."
+        case scanning = "Scanning for barcode/QR code..."
         case detected = "Code detected!"
         case validating = "Validating format..."
         case lookingUp = "Looking up product..."

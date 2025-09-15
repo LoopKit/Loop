@@ -32,30 +32,32 @@ class FoodSearchRouter {
         let provider = aiService.getProviderForSearchType(.textSearch)
         
         log.info("🔍 Routing text search '%{public}@' to provider: %{public}@", query, provider.rawValue)
-        print("🔍 DEBUG: Text search using provider: \(provider.rawValue)")
-        print("🔍 DEBUG: Available providers for text search: \(aiService.getAvailableProvidersForSearchType(.textSearch).map { $0.rawValue })")
-        print("🔍 DEBUG: UserDefaults textSearchProvider: \(UserDefaults.standard.textSearchProvider)")
-        print("🔍 DEBUG: Google Gemini API key configured: \(!UserDefaults.standard.googleGeminiAPIKey.isEmpty)")
         
         switch provider {
         case .openFoodFacts:
             return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
             
         case .usdaFoodData:
-            return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
+            do {
+                return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
+            } catch {
+                log.error("❌ USDA search failed: %{public}@ — falling back to OpenFoodFacts", error.localizedDescription)
+                return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
+            }
             
-        case .claude:
-            return try await searchWithClaude(query: query)
-            
-        case .googleGemini:
-            return try await searchWithGoogleGemini(query: query)
-            
-            
-        case .openAI:
-            return try await searchWithOpenAI(query: query)
-            
-            
-            
+        case .claude, .googleGemini, .openAI:
+            // Unify prompts: AI prompts live in AIFoodAnalysis.swift and are for image analysis only.
+            // For text search, stick to structured databases for reliability.
+            log.info("ℹ️ AI providers are not used for text search; using USDA with OFF fallback")
+            do {
+                return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
+            } catch {
+                return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
+            }
+        case .bringYourOwn:
+            // BYO is not supported for text search; fall back to OpenFoodFacts
+            log.info("⚠️ Bring Your Own is not available for text search; using OpenFoodFacts")
+            return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
         }
     }
     
@@ -73,7 +75,7 @@ class FoodSearchRouter {
             
             
             
-        case .claude, .openAI, .usdaFoodData, .googleGemini:
+        case .claude, .openAI, .usdaFoodData, .googleGemini, .bringYourOwn:
             // These providers don't support barcode search, fall back to OpenFoodFacts
             log.info("⚠️ %{public}@ doesn't support barcode search, falling back to OpenFoodFacts", provider.rawValue)
             return try await openFoodFactsService.fetchProduct(barcode: barcode)
@@ -91,7 +93,7 @@ class FoodSearchRouter {
         switch provider {
         case .claude:
             let key = aiService.getAPIKey(for: .claude) ?? ""
-            let query = aiService.getQuery(for: .claude) ?? ""
+            let query = "" // Always use centralized prompts from AIFoodAnalysis.swift
             guard !key.isEmpty else {
                 throw AIFoodAnalysisError.noApiKey
             }
@@ -99,7 +101,7 @@ class FoodSearchRouter {
             
         case .openAI:
             let key = aiService.getAPIKey(for: .openAI) ?? ""
-            let query = aiService.getQuery(for: .openAI) ?? ""
+            let query = "" // Always use centralized prompts from AIFoodAnalysis.swift
             guard !key.isEmpty else {
                 throw AIFoodAnalysisError.noApiKey
             }
@@ -109,14 +111,60 @@ class FoodSearchRouter {
             
         case .googleGemini:
             let key = UserDefaults.standard.googleGeminiAPIKey
-            let query = UserDefaults.standard.googleGeminiQuery
+            let query = "" // Always use centralized prompts from AIFoodAnalysis.swift
             guard !key.isEmpty else {
                 throw AIFoodAnalysisError.noApiKey
             }
             return try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query)
-            
-            
-            
+
+
+
+        case .bringYourOwn:
+            // Use OpenAI-compatible custom endpoint for image analysis
+            // Prefer temporary BYO test override if enabled (DEBUG), else UserDefaults.
+            let key: String
+            let base: String
+            let model: String?
+            let version: String?
+            let org: String?
+
+            if BYOTestConfig.enabled {
+                os_log("🧪 Using BYO test override configuration", log: log, type: .info)
+                key = BYOTestConfig.apiKey
+                base = BYOTestConfig.baseURL
+                model = BYOTestConfig.model
+                version = BYOTestConfig.apiVersion
+                org = BYOTestConfig.organizationID
+            } else {
+                key = UserDefaults.standard.customAIAPIKey
+                base = UserDefaults.standard.customAIBaseURL
+                let m = UserDefaults.standard.customAIModel
+                let v = UserDefaults.standard.customAIAPIVersion
+                let o = UserDefaults.standard.customAIOrganization
+                model = m.isEmpty ? nil : m
+                version = v.isEmpty ? nil : v
+                org = o.isEmpty ? nil : o
+            }
+
+            guard !key.isEmpty, !base.isEmpty else {
+                throw AIFoodAnalysisError.noApiKey
+            }
+
+            return try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(
+                image,
+                apiKey: key,
+                query: "", // rely on internal optimized prompt
+                baseURL: base,
+                model: model,
+                apiVersion: version,
+                organizationID: org,
+                customPath: {
+                    let path = UserDefaults.standard.customAIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return path.isEmpty ? nil : path
+                }(),
+                telemetryCallback: nil
+            )
+
         case .openFoodFacts, .usdaFoodData:
             // OpenFoodFacts and USDA don't support AI image analysis, fall back to Google Gemini
             log.info("⚠️ %{public}@ doesn't support AI image analysis, falling back to Google Gemini", provider.rawValue)
@@ -128,148 +176,8 @@ class FoodSearchRouter {
             return try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query)
         }
     }
-    
-    // MARK: - Provider-Specific Implementations
-    
-    // MARK: Text Search Implementations
-    
-    private func searchWithGoogleGemini(query: String) async throws -> [OpenFoodFactsProduct] {
-        let key = UserDefaults.standard.googleGeminiAPIKey
-        guard !key.isEmpty else {
-            log.info("🔑 Google Gemini API key not configured, falling back to USDA")
-            return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-        }
-        
-        log.info("🍱 Using Google Gemini for text-based nutrition search")
-        
-        // Use Google Gemini to analyze the food query and return nutrition data
-        let nutritionQuery = """
-        Provide detailed nutrition information for "\(query)". Return the data as JSON with this exact format:
-        {
-          "food_name": "name of the food",
-          "serving_size": "typical serving size",
-          "carbohydrates": number (grams per serving),
-          "protein": number (grams per serving),
-          "fat": number (grams per serving),
-          "calories": number (calories per serving)
-        }
-        
-        If multiple foods match the query, provide information for the most common one. Use standard serving sizes (e.g., "1 medium apple", "1 cup cooked rice", "2 slices bread").
-        """
-        
-        do {
-            // Create a placeholder image since Gemini needs an image, but we'll rely on the text prompt
-            let placeholderImage = createPlaceholderImage()
-            let result = try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(
-                placeholderImage, 
-                apiKey: key, 
-                query: nutritionQuery
-            )
-            
-            // Convert AI result to OpenFoodFactsProduct
-            let geminiProduct = OpenFoodFactsProduct(
-                id: "gemini_text_\(UUID().uuidString.prefix(8))",
-                productName: result.foodItems.first ?? query.capitalized,
-                brands: "Google Gemini AI",
-                categories: nil,
-                nutriments: Nutriments(
-                    carbohydrates: result.carbohydrates,
-                    proteins: result.protein,
-                    fat: result.fat,
-                    calories: result.calories,
-                    sugars: nil,
-                    fiber: result.totalFiber
-                ),
-                servingSize: result.portionSize.isEmpty ? "1 serving" : result.portionSize,
-                servingQuantity: 100.0,
-                imageURL: nil,
-                imageFrontURL: nil,
-                code: nil,
-                dataSource: .aiAnalysis
-            )
-            
-            log.info("✅ Google Gemini text search completed for: %{public}@", query)
-            return [geminiProduct]
-            
-        } catch {
-            log.error("❌ Google Gemini text search failed: %{public}@, falling back to USDA", error.localizedDescription)
-            return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-        }
-    }
-    
-    
-    private func searchWithClaude(query: String) async throws -> [OpenFoodFactsProduct] {
-        let key = UserDefaults.standard.claudeAPIKey
-        guard !key.isEmpty else {
-            log.info("🔑 Claude API key not configured, falling back to USDA")
-            return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-        }
-        
-        log.info("🧠 Using Claude for text-based nutrition search")
-        
-        // Use Claude to analyze the food query and return nutrition data
-        let nutritionQuery = """
-        Provide detailed nutrition information for "\(query)". Return the data as JSON with this exact format:
-        {
-          "food_name": "name of the food",
-          "serving_size": "typical serving size",
-          "carbohydrates": number (grams per serving),
-          "protein": number (grams per serving),
-          "fat": number (grams per serving),
-          "calories": number (calories per serving)
-        }
-        
-        If multiple foods match the query, provide information for the most common one. Use standard serving sizes (e.g., "1 medium apple", "1 cup cooked rice", "2 slices bread"). Focus on accuracy for diabetes carbohydrate counting.
-        """
-        
-        do {
-            // Create a placeholder image since Claude needs an image for the vision API
-            let placeholderImage = createPlaceholderImage()
-            let result = try await ClaudeFoodAnalysisService.shared.analyzeFoodImage(
-                placeholderImage, 
-                apiKey: key, 
-                query: nutritionQuery
-            )
-            
-            // Convert Claude analysis result to OpenFoodFactsProduct
-            let syntheticID = "claude_\(abs(query.hashValue))"
-            let nutriments = Nutriments(
-                carbohydrates: result.totalCarbohydrates,
-                proteins: result.totalProtein,
-                fat: result.totalFat,
-                calories: result.totalCalories,
-                sugars: nil,
-                fiber: result.totalFiber
-            )
-            
-            let placeholderProduct = OpenFoodFactsProduct(
-                id: syntheticID,
-                productName: result.foodItems.first ?? query.capitalized,
-                brands: "Claude AI Analysis",
-                categories: nil,
-                nutriments: nutriments,
-                servingSize: result.foodItemsDetailed.first?.portionEstimate ?? "1 serving",
-                servingQuantity: 100.0,
-                imageURL: nil,
-                imageFrontURL: nil,
-                code: nil,
-                dataSource: .aiAnalysis
-            )
-            
-            return [placeholderProduct]
-        } catch {
-            log.error("❌ Claude search failed: %{public}@", error.localizedDescription)
-            // Fall back to USDA if Claude fails
-            return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-        }
-    }
-    
-    private func searchWithOpenAI(query: String) async throws -> [OpenFoodFactsProduct] {
-        // TODO: Implement OpenAI text search using natural language processing
-        // This would involve sending the query to OpenAI and parsing the response
-        log.info("🤖 OpenAI text search not yet implemented, falling back to OpenFoodFacts")
-        return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
-    }
+
+    // Removed AI-based text search implementations. Text search now uses OFF/USDA only.
     
     
     

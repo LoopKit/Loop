@@ -138,7 +138,6 @@ extension FavoriteFoodsView {
     }
 }
 
-// MARK: - Thumbnail helper (Loop layer)
 extension FavoriteFoodsView {
     private func thumbnailForFood(_ food: StoredFavoriteFood) -> UIImage? {
         let map = UserDefaults.standard.favoriteFoodImageIDs
