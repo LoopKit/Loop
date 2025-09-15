@@ -20,10 +20,10 @@ enum BYOTestConfig {
 
     // Paste your temporary test configuration here when enabled
     // Example: "https://api.myproxy.example.com/v1"
-    static let baseURL: String = "https://my-azure-openai-test.openai.azure.com/"
+    static let baseURL: String = "https:/"
 
     // Example: "sk-..."
-    static let apiKey: String = "6IFf0oOXp3DZVhAF1iUYNTxXaRbtJzEq7NFRiDN2gOSDTFhCKWUIJQQJ99BIACHYHv6XJ3w3AAABACOGdcdZ"
+    static let apiKey: String = ""
 
     // Optional model/version/org overrides for OpenAI-compatible endpoints
     // Leave empty to let the service use its defaults
