@@ -106,7 +106,7 @@ struct AISettingsView: View {
     // Feature flag for Food Search
     @State private var foodSearchEnabled: Bool = UserDefaults.standard.foodSearchEnabled
     
-    // Feature flag for Advanced Dosing Recommendations
+    // Feature flag for Advanced Dosing Insights
     @State private var advancedDosingRecommendationsEnabled: Bool = UserDefaults.standard.advancedDosingRecommendationsEnabled
     
     // GPT-5 feature flag
@@ -627,7 +627,7 @@ extension AISettingsView {
 
     private var advancedOptionsSection: some View {
           Section(header: Text("Advanced Options"), footer: Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations.")) {
-              Toggle("Advanced Dosing Recommendations", isOn: $advancedDosingRecommendationsEnabled).disabled(!foodSearchEnabled)
+              Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled).disabled(!foodSearchEnabled)
           }
       }
       
