@@ -82,12 +82,12 @@ extension DeviceDataManager {
     func didTapOnCGMStatus(_ view: BaseHUDView? = nil) -> HUDTapAction? {
         if let action = bluetoothProvider.bluetoothState.action {
             return action
+        } else if let cgmManagerUI = (cgmManager as? CGMManagerUI) {
+            return .presentViewController(cgmManagerUI.settingsViewController(bluetoothProvider: bluetoothProvider, displayGlucosePreference: displayGlucosePreference, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures))
         } else if let url = cgmManager?.appURL,
             UIApplication.shared.canOpenURL(url)
         {
             return .openAppURL(url)
-        } else if let cgmManagerUI = (cgmManager as? CGMManagerUI) {
-            return .presentViewController(cgmManagerUI.settingsViewController(bluetoothProvider: bluetoothProvider, displayGlucosePreference: displayGlucosePreference, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures))
         } else {
             return .setupNewCGM
         }
