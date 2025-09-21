@@ -128,7 +128,7 @@ extension NotificationManager {
         ]
         
         if let decisionId {
-            notification.userInfo[LoopNotificationUserInfoKey.decisionId.rawValue] = decisionId
+            notification.userInfo[LoopNotificationUserInfoKey.decisionId.rawValue] = decisionId.uuidString
         }
 
         let request = UNNotificationRequest(
