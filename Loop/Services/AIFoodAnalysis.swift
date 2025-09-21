@@ -182,13 +182,33 @@ FOR MENU AND RECIPE ITEMS:
 ✅ ALWAYS make reasonable USDA-based assumptions for nutrition when details are missing and document those assumptions in assessment_notes
 """
 
-internal func getAnalysisPrompt() -> String {
-    let isAdvancedEnabled = UserDefaults.standard.advancedDosingRecommendationsEnabled
-    let base = [standardAnalysisPrompt, mandatoryNoVagueBlock].joined(separator: "\n\n")
-    if isAdvancedEnabled {
-        return [base, advancedAnalysisRequirements].joined(separator: "\n\n")
+private enum AnalysisPromptCache {
+    private static var cachedAdvanced: Bool?
+    private static var cachedPrompt: String?
+
+    static func prompt(isAdvancedEnabled: Bool) -> String {
+        if cachedAdvanced == isAdvancedEnabled, let prompt = cachedPrompt {
+            return prompt
+        }
+
+        let base = [standardAnalysisPrompt, mandatoryNoVagueBlock].joined(separator: "\n\n")
+        let prompt = isAdvancedEnabled
+            ? [base, advancedAnalysisRequirements].joined(separator: "\n\n")
+            : base
+
+        cachedAdvanced = isAdvancedEnabled
+        cachedPrompt = prompt
+        return prompt
     }
-    return base
+
+    static func invalidate() {
+        cachedAdvanced = nil
+        cachedPrompt = nil
+    }
+}
+
+internal func getAnalysisPrompt() -> String {
+    AnalysisPromptCache.prompt(isAdvancedEnabled: UserDefaults.standard.advancedDosingRecommendationsEnabled)
 }
 
 /// Standard analysis prompt for basic diabetes management (when Advanced Dosing is OFF)
@@ -1191,15 +1211,15 @@ class ConfigurableAIService: ObservableObject {
         // Pre-encode once to reuse across providers and caching
         telemetryCallback?("🖼️ Preparing image once for all providers...")
         let pre = await ConfigurableAIService.preencodeImageForProviders(image)
-        
-        // Use parallel processing if enabled
-        if enableParallelProcessing {
-            telemetryCallback?("⚡ Starting parallel provider analysis...")
-            let result = try await analyzeImageWithParallelProviders(image, telemetryCallback: telemetryCallback)
-            imageAnalysisCache.cacheResult(result, for: image)
-            return result
+
+        let originalWidth = Int((image.size.width * image.scale).rounded())
+        let originalHeight = Int((image.size.height * image.scale).rounded())
+        if pre.width > 0, pre.height > 0,
+           (pre.width != originalWidth || pre.height != originalHeight) {
+            telemetryCallback?("✂️ Optimized image to \(pre.width)×\(pre.height) px (was \(originalWidth)×\(originalHeight))")
         }
-        
+        telemetryCallback?(String(format: "🗜️ Encoded upload ≈ %.0f KB", Double(pre.bytes) / 1024.0))
+
         // If BYO is selected for image analysis, run custom OpenAI-compatible path directly
         if aiImageSearchProvider == .bringYourOwn {
             telemetryCallback?("🤖 Connecting to your chosen AI provider...")
@@ -1232,6 +1252,21 @@ class ConfigurableAIService: ObservableObject {
                 throw AIFoodAnalysisError.noApiKey
             }
             // Use empty query to apply our optimized internal prompts
+            let adv = UserDefaults.standard.advancedDosingRecommendationsEnabled ? "adv" : "std"
+            let modeKey = analysisMode.rawValue
+            let byoKey = [BYOTestConfig.enabled ? "BYO_TEST" : "BYO",
+                          base,
+                          model ?? "",
+                          version ?? "",
+                          adv,
+                          "mode=\(modeKey)"]
+                .joined(separator: "|")
+
+            if let cached = imageAnalysisCache.getCachedResult(forPreencoded: pre, providerKey: byoKey) {
+                telemetryCallback?("⚡ Using cached BYO analysis result")
+                return cached
+            }
+
             let result = try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(
                 image,
                 apiKey: key,
@@ -1245,18 +1280,37 @@ class ConfigurableAIService: ObservableObject {
                 preencoded: pre
             )
             // Cache BYO using provider-specific key (base|model|version|adv|mode)
-            let adv = UserDefaults.standard.advancedDosingRecommendationsEnabled ? "adv" : "std"
-            let modeKey = analysisMode.rawValue
-            let byoKey = ["BYO", base, model ?? "", version ?? "", adv, "mode=\(modeKey)"].joined(separator: "|")
             imageAnalysisCache.cacheResult(result, forPreencoded: pre, providerKey: byoKey)
             return result
         }
 
         // Use the AI image search provider instead of the separate currentProvider
         let provider = getAIProviderForImageAnalysis()
-        
+        let advFlag = UserDefaults.standard.advancedDosingRecommendationsEnabled ? "adv" : "std"
+        let modelForCache: String = {
+            switch provider {
+            case .claude:
+                return ConfigurableAIService.optimalModel(for: .claude, mode: analysisMode)
+            case .googleGemini:
+                return ConfigurableAIService.optimalModel(for: .googleGemini, mode: analysisMode)
+            case .openAI:
+                return ConfigurableAIService.optimalModel(for: .openAI, mode: analysisMode)
+            case .basicAnalysis:
+                return "basic"
+            }
+        }()
+        let providerKey = [provider.rawValue,
+                           modelForCache,
+                           advFlag,
+                           "mode=\(analysisMode.rawValue)"].joined(separator: "|")
+
+        if let cached = imageAnalysisCache.getCachedResult(forPreencoded: pre, providerKey: providerKey) {
+            telemetryCallback?("⚡ Using cached \(provider.rawValue) analysis")
+            return cached
+        }
+
         let result: AIFoodAnalysisResult
-        
+
         switch provider {
         case .basicAnalysis:
             telemetryCallback?("🧠 Running basic analysis...")
@@ -1294,26 +1348,8 @@ class ConfigurableAIService: ObservableObject {
         }
         
         telemetryCallback?("💾 Caching analysis result...")
-        // Build provider-specific cache key using public SearchProvider mapping when available
-        let modelForCache: String = {
-            switch provider {
-            case .claude:
-                return ConfigurableAIService.optimalModel(for: .claude, mode: analysisMode)
-            case .googleGemini:
-                return ConfigurableAIService.optimalModel(for: .googleGemini, mode: analysisMode)
-            case .openAI:
-                return ConfigurableAIService.optimalModel(for: .openAI, mode: analysisMode)
-            case .basicAnalysis:
-                return "basic"
-            }
-        }()
-        let providerKey = [provider.rawValue,
-                           modelForCache,
-                           UserDefaults.standard.advancedDosingRecommendationsEnabled ? "adv" : "std",
-                           "mode=\(analysisMode.rawValue)"]
-            .joined(separator: "|")
         imageAnalysisCache.cacheResult(result, forPreencoded: pre, providerKey: providerKey)
-        
+
         return result
     }
     
@@ -1497,23 +1533,19 @@ class ConfigurableAIService: ObservableObject {
     
     /// Intelligent image resizing for optimal AI analysis performance
     static func optimizeImageForAnalysis(_ image: UIImage) -> UIImage {
-        let maxDimension: CGFloat = 1024
-        
-        // Check if resizing is needed
-        if image.size.width <= maxDimension && image.size.height <= maxDimension {
-            return image // No resizing needed
+        let trimmed = cropUniformBorder(from: image)
+        let usingGPT5 = UserDefaults.standard.useGPT5ForOpenAI
+        let maxDimension: CGFloat = usingGPT5 ? 896 : 1024
+
+        if trimmed.size.width <= maxDimension && trimmed.size.height <= maxDimension {
+            return trimmed
         }
-        
-        // Calculate new size maintaining aspect ratio
-        let scale = maxDimension / max(image.size.width, image.size.height)
-        let newSize = CGSize(
-            width: image.size.width * scale,
-            height: image.size.height * scale
-        )
-        
-        
-        // Perform high-quality resize
-        return resizeImage(image, to: newSize)
+
+        let scale = maxDimension / max(trimmed.size.width, trimmed.size.height)
+        let newSize = CGSize(width: trimmed.size.width * scale,
+                             height: trimmed.size.height * scale)
+
+        return resizeImage(trimmed, to: newSize)
     }
 
     /// Pre-encode an image once for all providers with a byte budget
@@ -1526,6 +1558,12 @@ class ConfigurableAIService: ObservableObject {
         try? Task.checkCancellation()
         let optimized = await optimizeImageForAnalysisSafely(image)
         try? Task.checkCancellation()
+        let byteBudget: Int = {
+            if UserDefaults.standard.useGPT5ForOpenAI {
+                return min(targetBytes, 320 * 1024)
+            }
+            return targetBytes
+        }()
         // Binary search JPEG quality
         var low: CGFloat = 0.35
         var high: CGFloat = 0.95
@@ -1534,7 +1572,7 @@ class ConfigurableAIService: ObservableObject {
             if Task.isCancelled { break }
             let mid = (low + high) / 2
             if let d = optimized.jpegData(compressionQuality: mid) {
-                if d.count > targetBytes {
+                if d.count > byteBudget {
                     high = mid
                 } else {
                     bestData = d
@@ -1547,7 +1585,7 @@ class ConfigurableAIService: ObservableObject {
         var finalImage = optimized
         var data = bestData ?? (optimized.jpegData(compressionQuality: 0.75) ?? Data())
         // If still above target, downscale once and retry quickly at a safe quality
-        if data.count > targetBytes {
+        if data.count > byteBudget {
             try? Task.checkCancellation()
             let scale: CGFloat = 0.85
             let newSize = CGSize(width: optimized.size.width * scale, height: optimized.size.height * scale)
@@ -1567,7 +1605,7 @@ class ConfigurableAIService: ObservableObject {
             height: Int(finalImage.size.height)
         )
     }
-    
+
     /// High-quality image resizing helper
     private static func resizeImage(_ image: UIImage, to newSize: CGSize) -> UIImage {
         UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
@@ -1575,6 +1613,169 @@ class ConfigurableAIService: ObservableObject {
         
         image.draw(in: CGRect(origin: .zero, size: newSize))
         return UIGraphicsGetImageFromCurrentImageContext() ?? image
+    }
+
+    /// Trim near-uniform borders (e.g., table, counter, plain backgrounds) to reduce upload size
+    private static func cropUniformBorder(from image: UIImage) -> UIImage {
+        guard let cgImage = image.cgImage else { return image }
+        let width = cgImage.width
+        let height = cgImage.height
+        guard width > 32, height > 32 else { return image }
+
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        var rawData = [UInt8](repeating: 0, count: Int(bytesPerRow * height))
+
+        guard let context = CGContext(data: &rawData,
+                                      width: width,
+                                      height: height,
+                                      bitsPerComponent: 8,
+                                      bytesPerRow: bytesPerRow,
+                                      space: colorSpace,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue) else {
+            return image
+        }
+
+        // Ensure row 0 maps to the top edge
+        context.translateBy(x: 0, y: CGFloat(height))
+        context.scaleBy(x: 1, y: -1)
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)))
+
+        @inline(__always)
+        func pixelOffset(x: Int, y: Int) -> Int {
+            y * bytesPerRow + x * bytesPerPixel
+        }
+
+        @inline(__always)
+        func sampleRGB(x: Int, y: Int) -> (Double, Double, Double) {
+            let offset = pixelOffset(x: x, y: y)
+            let r = Double(rawData[offset]) / 255.0
+            let g = Double(rawData[offset + 1]) / 255.0
+            let b = Double(rawData[offset + 2]) / 255.0
+            return (r, g, b)
+        }
+
+        // Derive background color from corners and mid-edges
+        let samplePoints: [(Int, Int)] = [
+            (0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1),
+            (width / 2, 0), (width / 2, height - 1), (0, height / 2), (width - 1, height / 2)
+        ]
+        var bgR = 0.0, bgG = 0.0, bgB = 0.0
+        for point in samplePoints {
+            let (r, g, b) = sampleRGB(x: max(0, min(width - 1, point.0)),
+                                      y: max(0, min(height - 1, point.1)))
+            bgR += r
+            bgG += g
+            bgB += b
+        }
+        let sampleCount = Double(samplePoints.count)
+        bgR /= sampleCount
+        bgG /= sampleCount
+        bgB /= sampleCount
+
+        let tolerance = 0.08
+        @inline(__always)
+        func isBackground(_ color: (Double, Double, Double)) -> Bool {
+            let dr = abs(color.0 - bgR)
+            let dg = abs(color.1 - bgG)
+            let db = abs(color.2 - bgB)
+            return dr < tolerance && dg < tolerance && db < tolerance
+        }
+
+        let sampleStride = max(1, min(width, height) / 300)
+        var edgeSamples = 0
+        var edgeMatches = 0
+
+        func countEdgeMatches(xRange: StrideThrough<Int>, fixedY: Int) {
+            for x in xRange {
+                let rgb = sampleRGB(x: x, y: fixedY)
+                if isBackground(rgb) { edgeMatches += 1 }
+                edgeSamples += 1
+            }
+        }
+
+        func countEdgeMatchesVertical(yRange: StrideThrough<Int>, fixedX: Int) {
+            for y in yRange {
+                let rgb = sampleRGB(x: fixedX, y: y)
+                if isBackground(rgb) { edgeMatches += 1 }
+                edgeSamples += 1
+            }
+        }
+
+        let horizontalRange = stride(from: 0, through: width - 1, by: sampleStride)
+        let verticalRange = stride(from: 0, through: height - 1, by: sampleStride)
+        countEdgeMatches(xRange: horizontalRange, fixedY: 0)
+        countEdgeMatches(xRange: horizontalRange, fixedY: height - 1)
+        countEdgeMatchesVertical(yRange: verticalRange, fixedX: 0)
+        countEdgeMatchesVertical(yRange: verticalRange, fixedX: width - 1)
+
+        if edgeSamples == 0 || Double(edgeMatches) / Double(edgeSamples) < 0.65 {
+            return image
+        }
+
+        func rowHasContent(_ y: Int) -> Bool {
+            var nonBackground = 0
+            var total = 0
+            for x in stride(from: 0, to: width, by: sampleStride) {
+                let rgb = sampleRGB(x: x, y: y)
+                if !isBackground(rgb) { nonBackground += 1 }
+                total += 1
+                if nonBackground > max(1, total / 12) { return true }
+            }
+            return false
+        }
+
+        func columnHasContent(_ x: Int) -> Bool {
+            var nonBackground = 0
+            var total = 0
+            for y in stride(from: 0, to: height, by: sampleStride) {
+                let rgb = sampleRGB(x: x, y: y)
+                if !isBackground(rgb) { nonBackground += 1 }
+                total += 1
+                if nonBackground > max(1, total / 12) { return true }
+            }
+            return false
+        }
+
+        var top = 0
+        while top < height && !rowHasContent(top) {
+            top += sampleStride
+        }
+
+        var bottom = height - 1
+        while bottom > top && !rowHasContent(bottom) {
+            bottom -= sampleStride
+        }
+
+        var left = 0
+        while left < width && !columnHasContent(left) {
+            left += sampleStride
+        }
+
+        var right = width - 1
+        while right > left && !columnHasContent(right) {
+            right -= sampleStride
+        }
+
+        if top <= 0 && left <= 0 && bottom >= height - 1 && right >= width - 1 {
+            return image
+        }
+
+        let margin = max(sampleStride, Int(Double(min(width, height)) * 0.02))
+        top = max(0, top - margin)
+        left = max(0, left - margin)
+        bottom = min(height - 1, bottom + margin)
+        right = min(width - 1, right + margin)
+
+        let cropWidth = right - left + 1
+        let cropHeight = bottom - top + 1
+        guard cropWidth > 0, cropHeight > 0 else { return image }
+
+        let cropRect = CGRect(x: left, y: top, width: cropWidth, height: cropHeight)
+        guard let cropped = cgImage.cropping(to: cropRect) else { return image }
+
+        return UIImage(cgImage: cropped, scale: image.scale, orientation: image.imageOrientation)
     }
     
     /// Analyze image with network-aware provider strategy
@@ -1739,122 +1940,6 @@ class ConfigurableAIService: ObservableObject {
 }
 
 
-// MARK: - GPT-5 Enhanced Request Handling
-
-/// Performs a GPT-5 request with retry logic and enhanced timeout handling
-private func performGPT5RequestWithRetry(request: URLRequest, telemetryCallback: ((String) -> Void)?) async throws -> (Data, URLResponse) {
-    let maxRetries = 2
-
-    for attempt in 1...maxRetries {
-        do {
-            telemetryCallback?("🔄 GPT-5 attempt \(attempt)/\(maxRetries)...")
-
-            let config = URLSessionConfiguration.default
-            config.timeoutIntervalForRequest = 60
-            config.timeoutIntervalForResource = 80
-            let session = URLSession(configuration: config)
-
-            let (data, response) = try await withTimeoutForAnalysis(seconds: 40) {
-                try await session.data(for: request)
-            }
-
-            return (data, response)
-
-        } catch AIFoodAnalysisError.timeout {
-            if attempt < maxRetries {
-                let backoffDelay = Double(attempt) * 1.5
-                telemetryCallback?("⏳ GPT-5 retry in \(String(format: "%.1f", backoffDelay))s...")
-                try await Task.sleep(nanoseconds: UInt64(backoffDelay * 1_000_000_000))
-            }
-        } catch {
-            throw error
-        }
-    }
-
-    telemetryCallback?("❌ GPT-5 requests timed out, switching to GPT-4o...")
-
-    throw AIFoodAnalysisError.customError("GPT-5 timeout")
-}
-
-/// Retry the request with GPT-4o after GPT-5 failure
-private func retryWithGPT4Fallback(_ image: UIImage, apiKey: String, query: String, 
-                                  analysisPrompt: String, isAdvancedPrompt: Bool, 
-                                  telemetryCallback: ((String) -> Void)?) async throws -> AIFoodAnalysisResult {
-    
-    // Use GPT-4o model for fallback
-    let fallbackModel = "gpt-4o"
-    let compressionQuality: CGFloat = 0.85  // Standard compression for GPT-4
-    
-    guard let imageData = image.jpegData(compressionQuality: compressionQuality),
-          let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
-        throw AIFoodAnalysisError.imageProcessingFailed
-    }
-    
-    let base64Image = imageData.base64EncodedString()
-    
-    // Create GPT-4o request with appropriate timeouts
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-    request.timeoutInterval = isAdvancedPrompt ? 150 : 30
-    
-    // Create GPT-4o payload
-    let finalPrompt = query.isEmpty ? analysisPrompt : "\(query)\n\n\(analysisPrompt)"
-    let payload: [String: Any] = [
-        "model": fallbackModel,
-        "max_completion_tokens": isAdvancedPrompt ? 6000 : 2500,
-        "temperature": 0.01,
-        "messages": [
-            [
-                "role": "user",
-                "content": [
-                    [
-                        "type": "text",
-                        "text": finalPrompt
-                    ],
-                    [
-                        "type": "image_url",
-                        "image_url": [
-                            "url": "data:image/jpeg;base64,\(base64Image)",
-                            "detail": "high"
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    ]
-    
-    request.httpBody = try JSONSerialization.data(withJSONObject: payload)
-    
-    print("🔄 Fallback request: Using \(fallbackModel) with \(request.timeoutInterval)s timeout")
-    
-    // Execute GPT-4o request
-    let (data, response) = try await URLSession.shared.data(for: request)
-    
-    guard let httpResponse = response as? HTTPURLResponse else {
-        throw AIFoodAnalysisError.invalidResponse
-    }
-    
-    guard httpResponse.statusCode == 200 else {
-        throw AIFoodAnalysisError.apiError(httpResponse.statusCode)
-    }
-    
-    // Parse the response (reuse the existing parsing logic)
-    guard let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-          let choices = jsonResponse["choices"] as? [[String: Any]],
-          let firstChoice = choices.first,
-          let message = firstChoice["message"] as? [String: Any],
-          let content = message["content"] as? String else {
-        throw AIFoodAnalysisError.responseParsingFailed
-    }
-    
-    telemetryCallback?("✅ GPT-4o fallback successful!")
-    print("✅ GPT-4o fallback completed successfully")
-    
-    // Use the same parsing logic as the main function
-    return try parseOpenAIResponse(content: content)
-}
 
 /// Parse OpenAI response content into AIFoodAnalysisResult
 private func parseOpenAIResponse(content: String) throws -> AIFoodAnalysisResult {
@@ -2117,6 +2202,7 @@ ADVANCED DIABETES ANALYSIS - JSON format required:
   "food_items": [{
     "name": "specific_food_name",
     "portion_estimate": "visual_portion_with_reference", 
+    "usda_serving_size": "describe_standard_usda_portion",
     "carbohydrates": grams,
     "protein": grams,
     "fat": grams,
@@ -2150,6 +2236,7 @@ DIABETES ANALYSIS - JSON format required:
   "food_items": [{
     "name": "specific_food_name",
     "portion_estimate": "visual_portion_with_reference",
+    "usda_serving_size": "describe_standard_usda_portion",
     "serving_multiplier": usda_serving_ratio,
     "carbohydrates": grams,
     "protein": grams,
@@ -2162,6 +2249,7 @@ DIABETES ANALYSIS - JSON format required:
   "total_fat": sum_fat,
   "total_fiber": sum_fiber,
   "total_calories": sum_calories,
+  "portion_assessment_method": "explain_measurement_process",
   "confidence": 0.0_to_1.0,
   "diabetes_considerations": "concise_notes_on_glycemic_risk"
 }
@@ -4623,4 +4711,120 @@ class ClaudeFoodAnalysisService {
         
         return .medium // Default to medium instead of assuming high
     }
+}
+// MARK: - GPT-5 Enhanced Request Handling
+
+/// Performs a GPT-5 request with retry logic and enhanced timeout handling
+private func performGPT5RequestWithRetry(request: URLRequest, telemetryCallback: ((String) -> Void)?) async throws -> (Data, URLResponse) {
+    let maxRetries = 2
+
+    for attempt in 1...maxRetries {
+        do {
+            telemetryCallback?("🔄 GPT-5 attempt \(attempt)/\(maxRetries)...")
+
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = 60
+            config.timeoutIntervalForResource = 80
+            let session = URLSession(configuration: config)
+
+            let (data, response) = try await withTimeoutForAnalysis(seconds: 40) {
+                try await session.data(for: request)
+            }
+
+            return (data, response)
+
+        } catch AIFoodAnalysisError.timeout {
+            if attempt < maxRetries {
+                let backoffDelay = Double(attempt) * 1.5
+                telemetryCallback?("⏳ GPT-5 retry in \(String(format: "%.1f", backoffDelay))s...")
+                try await Task.sleep(nanoseconds: UInt64(backoffDelay * 1_000_000_000))
+            }
+        } catch {
+            throw error
+        }
+    }
+
+    telemetryCallback?("❌ GPT-5 requests timed out, switching to GPT-4o...")
+
+    throw AIFoodAnalysisError.customError("GPT-5 timeout")
+}
+
+/// Retry the request with GPT-4o after GPT-5 failure
+private func retryWithGPT4Fallback(_ image: UIImage, apiKey: String, query: String,
+                                  analysisPrompt: String, isAdvancedPrompt: Bool,
+                                  telemetryCallback: ((String) -> Void)?) async throws -> AIFoodAnalysisResult {
+
+    // Use GPT-4o model for fallback
+    let fallbackModel = "gpt-4o"
+    let compressionQuality: CGFloat = 0.85  // Standard compression for GPT-4
+
+    guard let imageData = image.jpegData(compressionQuality: compressionQuality),
+          let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+        throw AIFoodAnalysisError.imageProcessingFailed
+    }
+
+    let base64Image = imageData.base64EncodedString()
+
+    // Create GPT-4o request with appropriate timeouts
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+    request.timeoutInterval = isAdvancedPrompt ? 150 : 30
+
+    // Create GPT-4o payload
+    let finalPrompt = query.isEmpty ? analysisPrompt : "\(query)\n\n\(analysisPrompt)"
+    let payload: [String: Any] = [
+        "model": fallbackModel,
+        "max_completion_tokens": isAdvancedPrompt ? 6000 : 2500,
+        "temperature": 0.01,
+        "messages": [
+            [
+                "role": "user",
+                "content": [
+                    [
+                        "type": "text",
+                        "text": finalPrompt
+                    ],
+                    [
+                        "type": "image_url",
+                        "image_url": [
+                            "url": "data:image/jpeg;base64,\(base64Image)",
+                            "detail": "high"
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+
+    request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+
+    print("🔄 Fallback request: Using \(fallbackModel) with \(request.timeoutInterval)s timeout")
+
+    // Execute GPT-4o request
+    let (data, response) = try await URLSession.shared.data(for: request)
+
+    guard let httpResponse = response as? HTTPURLResponse else {
+        throw AIFoodAnalysisError.invalidResponse
+    }
+
+    guard httpResponse.statusCode == 200 else {
+        throw AIFoodAnalysisError.apiError(httpResponse.statusCode)
+    }
+
+    // Parse the response (reuse the existing parsing logic)
+    guard let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+          let choices = jsonResponse["choices"] as? [[String: Any]],
+          let firstChoice = choices.first,
+          let message = firstChoice["message"] as? [String: Any],
+          let content = message["content"] as? String else {
+        throw AIFoodAnalysisError.responseParsingFailed
+    }
+
+    telemetryCallback?("✅ GPT-4o fallback successful!")
+    print("✅ GPT-4o fallback completed successfully")
+
+    // Use the same parsing logic as the main function
+    return try parseOpenAIResponse(content: content)
 }

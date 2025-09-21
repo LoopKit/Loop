@@ -105,15 +105,7 @@ struct AISettingsView: View {
 
     // Feature flag for Food Search
     @State private var foodSearchEnabled: Bool = UserDefaults.standard.foodSearchEnabled
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    
-=======
 
->>>>>>> Stashed changes
-=======
-
->>>>>>> Stashed changes
     // Feature flag for Advanced Dosing Insights
     @State private var advancedDosingRecommendationsEnabled: Bool = UserDefaults.standard.advancedDosingRecommendationsEnabled
 
@@ -266,7 +258,7 @@ extension AISettingsView {
                 if foodSearchEnabled {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 6) {
-                            Image(systemName: "staroflife.fill")
+                            Image(systemName: "cross.fill")
                                 .foregroundColor(.red)
                             Text("MEDICAL DISCLAIMER")
                                 .font(.caption)
@@ -478,7 +470,7 @@ extension AISettingsView {
                         .foregroundColor(.secondary)
                 }
             }
-            Text("OpenAI: highly accurate vision models (GPT-4o/GPT-5). ~$0.01/image.")
+            Text("OpenAI: highly accurate vision models (GPT-4o/GPT-5). ~$0.01/image. GPT-5 are large models - they will be slower.")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -709,6 +701,7 @@ extension AISettingsView {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(aiService.analysisMode.backgroundColor)
         .cornerRadius(8)
     }
@@ -728,9 +721,10 @@ extension AISettingsView {
             }
         }
         .padding(.vertical, 6)
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.systemGray6))
-        .cornerRadius(6)
+        .cornerRadius(8)
     }
 
     @ViewBuilder
@@ -747,23 +741,6 @@ extension AISettingsView {
     }
 
     private var advancedOptionsSection: some View {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-          Section(header: Text("Advanced Options"), footer: Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations.")) {
-              Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled).disabled(!foodSearchEnabled)
-          }
-      }
-      
-      private var medicalDisclaimerSection: some View {
-          Section(header: Text("Medical Disclaimer")) {
-              Text("AI nutritional estimates are approximations only. Verify information when possible.")
-                  .font(.caption)
-                  .foregroundColor(.secondary)
-          }
-      }
-=======
-=======
->>>>>>> Stashed changes
         Section {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
@@ -785,10 +762,6 @@ extension AISettingsView {
             }
         }
     }
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
     private func saveSettings() {
         // Save all current settings to UserDefaults

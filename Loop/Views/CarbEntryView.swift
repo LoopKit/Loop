@@ -467,17 +467,19 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                         }
                         
                         // Portion estimation method (expandable)
-                        if let portionMethod = aiResult.portionAssessmentMethod, !portionMethod.isEmpty {
-                            // Confidence line inside the Portions & Servings expandable
+                        // Portion estimation method (expandable)
+                        let trimmedPortion = aiResult.portionAssessmentMethod?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                        let portionSummary = trimmedPortion.isEmpty ? fallbackPortionSummary(aiResult: aiResult) : trimmedPortion
+                        if !portionSummary.isEmpty {
                             let pct = computeConfidencePercent(from: aiResult, servings: viewModel.numberOfServings)
                             let confidenceLine = pct < 60 ? "Confidence: \(pct)% – treat as estimate" : "Confidence: \(pct)%"
+                            let noteContent = portionSummary + "\n\n" + confidenceLine
                             ExpandableNoteView(
                                 icon: "ruler",
                                 iconColor: .blue,
                                 title: "Portions & Servings:",
-                                content: portionMethod + "\n\n" + confidenceLine,
-                                backgroundColor: Color(.systemBlue).opacity(0.08),
-
+                                content: noteContent,
+                                backgroundColor: Color(.systemBlue).opacity(0.08)
                             )
                         }
                         
@@ -520,8 +522,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
 
             if let reasoning = viewModel.lastAIAnalysisResult?.absorptionTimeReasoning?.trimmingCharacters(in: .whitespacesAndNewlines),
                !reasoning.isEmpty,
-               viewModel.absorptionTimeWasAIGenerated,
-               !UserDefaults.standard.advancedDosingRecommendationsEnabled {
+               viewModel.absorptionTimeWasAIGenerated {
                 let hoursString = String(format: "%.1f", viewModel.absorptionTime / 3600)
                 DisclosureGroup(isExpanded: $showAbsorptionReasoning) {
                     Text(reasoning)
@@ -1342,6 +1343,32 @@ extension CarbEntryView {
         return true
     }
 
+private func fallbackPortionSummary(aiResult: AIFoodAnalysisResult) -> String {
+        let items = aiResult.foodItemsDetailed
+        guard !items.isEmpty else {
+            return "Serving multipliers derived from the AI-estimated portions."
+        }
+
+        let snippets = items.prefix(3).map { item -> String in
+            let name = cleanFoodNameForDisplay(item.name)
+            let multiplier = item.servingMultiplier
+            let multiplierText = multiplier > 0.01 ? String(format: "×%.2f", multiplier) : "unknown"
+            if let usda = item.usdaServingSize?.trimmingCharacters(in: .whitespacesAndNewlines), !usda.isEmpty {
+                return "\(name): \(multiplierText) vs \(usda)"
+            }
+            return "\(name): \(multiplierText) of USDA baseline"
+        }
+
+        var summary = "Serving multipliers derived from the AI-estimated portions."
+        if !snippets.isEmpty {
+            summary += " " + snippets.joined(separator: "; ")
+            if items.count > snippets.count {
+                summary += "…"
+            }
+        }
+        return summary
+    }
+
     @ViewBuilder
     private func detailedFoodBreakdownSection(aiResult: AIFoodAnalysisResult) -> some View {
         VStack(spacing: 0) {
@@ -1457,30 +1484,19 @@ extension CarbEntryView {
                 .buttonStyle(.plain)
             }
             VStack(alignment: .leading, spacing: 4) {
-                if let usda = item.usdaServingSize, !usda.isEmpty {
-                    HStack(spacing: 6) {
-                        Text("Normal USDA Serving:")
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                        Text(usda)
-                            .font(.caption)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
+                let trimmedUSDA = item.usdaServingSize?.trimmingCharacters(in: .whitespacesAndNewlines)
+                let baseMultiplier = item.servingMultiplier
+                let usdaDisplay: String = {
+                    if let text = trimmedUSDA, !text.isEmpty { return text }
+                    if baseMultiplier > 0.01 {
+                        return String(format: "Derived USDA portion (pictured is ×%.2f)", baseMultiplier)
                     }
-                }
-                HStack(spacing: 6) {
-                    Text("Portion That I See:")
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                    Text(item.portionEstimate.isEmpty ? "Unknown portion" : item.portionEstimate)
-                        .font(.caption)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .layoutPriority(1)
-                }
+                    return "Standard USDA portion"
+                }()
+
+                LinePair(label: "Normal USDA Serving:", value: usdaDisplay)
+                LinePair(label: "Portion That I See:", value: item.portionEstimate.isEmpty ? "Unknown portion" : item.portionEstimate)
+
                 if item.portionEstimate.uppercased().contains("CANNOT DETERMINE") {
                     Text("Estimated from menu text")
                         .font(.caption2)
@@ -1491,15 +1507,30 @@ extension CarbEntryView {
                         .foregroundColor(.orange)
                         .clipShape(Capsule())
                 }
-                if viewModel.numberOfServings > 0, let ai = viewModel.lastAIAnalysisResult, ai.originalServings > 0 {
+
+                if baseMultiplier > 0.01 && abs(baseMultiplier - 1.0) > 0.01 {
+                    HStack(spacing: 6) {
+                        Text("Difference:")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+                        Text("×\(String(format: "%.2f", baseMultiplier)) for this item")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                }
+
+                if viewModel.numberOfServings > 0,
+                   let ai = viewModel.lastAIAnalysisResult,
+                   ai.originalServings > 0 {
                     let mult = viewModel.numberOfServings / ai.originalServings
                     if abs(mult - 1.0) > 0.01 {
                         HStack(spacing: 6) {
-                            Text("Normal USDA Serving:")
+                            Text("Adjusted Servings:")
                                 .font(.caption2)
                                 .fontWeight(.medium)
                                 .foregroundColor(.secondary)
-                            Text("(×\(String(format: "%.1f", mult)))")
+                            Text("×\(String(format: "%.1f", mult)) applied to totals")
                                 .font(.caption)
                                 .foregroundColor(.orange)
                         }
@@ -1542,6 +1573,27 @@ extension CarbEntryView {
             let fiber = selectedFood.fiberPerServing.map { $0 * numberOfServings }
             let protein = selectedFood.proteinPerServing.map { $0 * numberOfServings }
             return (carbs, cals, fat, fiber, protein)
+        }
+    }
+}
+
+private struct LinePair: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(label)
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(.secondary)
+                .layoutPriority(1)
+                .lineLimit(1)
+            Text(value)
+                .font(.caption)
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
         }
     }
 }
