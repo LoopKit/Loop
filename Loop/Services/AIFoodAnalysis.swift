@@ -167,17 +167,19 @@ FOR MENU AND RECIPE ITEMS:
 ❌ NEVER multiply nutrition values by assumed restaurant portion sizes
 
 ✅ ALWAYS set image_type to "menu_item" when analyzing menu text
-✅ ALWAYS set portion_estimate to "CANNOT DETERMINE - menu text only"
+✅ ALWAYS set portion_estimate to "CANNOT DETERMINE PORTIONS - menu text only"
 ✅ ALWAYS set serving_multiplier to 1.0 for menu items (USDA standard only)
-✅ ALWAYS set visual_cues to "NONE - menu text analysis only"
+✅ ALWAYS set visual_cues to "NO VISUAL CUES - menu text analysis only"
 ✅ ALWAYS mark assessment_notes as "ESTIMATE ONLY - Based on USDA standard serving size"
 ✅ ALWAYS use portion_assessment_method to explain this is menu analysis with no visual portions
 ✅ ALWAYS provide actual USDA standard nutrition values (carbohydrates, protein, fat, calories)
 ✅ ALWAYS calculate nutrition based on typical USDA serving sizes for the identified food type
 ✅ ALWAYS include total nutrition fields even for menu items (based on USDA standards)
-✅ ALWAYS translate into the user's device native language or if unknown, translate into ENGLISH before analyzing the menu item
+✅ ALWAYS translate menu item text into the user's device language (fallback to English if unknown) before populating JSON fields, and include the original wording in assessment_notes when helpful
+✅ ALWAYS use translated item names and descriptions when presenting results
 ✅ ALWAYS provide glycemic index assessment for menu items based on typical preparation methods
 ✅ ALWAYS include diabetes timing guidance even for menu items based on typical GI values
+✅ ALWAYS make reasonable USDA-based assumptions for nutrition when details are missing and document those assumptions in assessment_notes
 """
 
 internal func getAnalysisPrompt() -> String {
@@ -1190,8 +1192,6 @@ class ConfigurableAIService: ObservableObject {
         telemetryCallback?("🖼️ Preparing image once for all providers...")
         let pre = await ConfigurableAIService.preencodeImageForProviders(image)
         
-        telemetryCallback?("🎯 Selecting optimal AI provider...")
-        
         // Use parallel processing if enabled
         if enableParallelProcessing {
             telemetryCallback?("⚡ Starting parallel provider analysis...")
@@ -1202,7 +1202,7 @@ class ConfigurableAIService: ObservableObject {
         
         // If BYO is selected for image analysis, run custom OpenAI-compatible path directly
         if aiImageSearchProvider == .bringYourOwn {
-            telemetryCallback?("🤖 Connecting to your custom AI provider...")
+            telemetryCallback?("🤖 Connecting to your chosen AI provider...")
             // Prefer temporary BYO test override if enabled (DEBUG), else UserDefaults.
             let key: String
             let base: String
@@ -1744,48 +1744,36 @@ class ConfigurableAIService: ObservableObject {
 /// Performs a GPT-5 request with retry logic and enhanced timeout handling
 private func performGPT5RequestWithRetry(request: URLRequest, telemetryCallback: ((String) -> Void)?) async throws -> (Data, URLResponse) {
     let maxRetries = 2
-    var lastError: Error?
-    
+
     for attempt in 1...maxRetries {
         do {
             telemetryCallback?("🔄 GPT-5 attempt \(attempt)/\(maxRetries)...")
-            
-            // Create a custom URLSession with extended timeout for GPT-5
+
             let config = URLSessionConfiguration.default
-            config.timeoutIntervalForRequest = 150    // 2.5 minutes request timeout
-            config.timeoutIntervalForResource = 180   // 3 minutes resource timeout
+            config.timeoutIntervalForRequest = 60
+            config.timeoutIntervalForResource = 80
             let session = URLSession(configuration: config)
-            
-            // Execute with our custom timeout wrapper
-            let (data, response) = try await withTimeoutForAnalysis(seconds: 140) {
+
+            let (data, response) = try await withTimeoutForAnalysis(seconds: 40) {
                 try await session.data(for: request)
             }
-            
+
             return (data, response)
-            
+
         } catch AIFoodAnalysisError.timeout {
-            lastError = AIFoodAnalysisError.timeout
-            
             if attempt < maxRetries {
-                let backoffDelay = Double(attempt) * 2.0  // 2s, 4s backoff
-                telemetryCallback?("⏳ GPT-5 retry in \(Int(backoffDelay))s...")
+                let backoffDelay = Double(attempt) * 1.5
+                telemetryCallback?("⏳ GPT-5 retry in \(String(format: "%.1f", backoffDelay))s...")
                 try await Task.sleep(nanoseconds: UInt64(backoffDelay * 1_000_000_000))
             }
         } catch {
-            // For non-timeout errors, fail immediately
             throw error
         }
     }
-    
-    // All retries failed
+
     telemetryCallback?("❌ GPT-5 requests timed out, switching to GPT-4o...")
-    
-    // Auto-fallback to GPT-4o on persistent timeout
-    DispatchQueue.main.async {
-        UserDefaults.standard.useGPT5ForOpenAI = false
-    }
-    
-    throw AIFoodAnalysisError.customError("GPT-5 requests timed out consistently. Automatically switched to GPT-4o for reliability.")
+
+    throw AIFoodAnalysisError.customError("GPT-5 timeout")
 }
 
 /// Retry the request with GPT-4o after GPT-5 failure
@@ -2051,6 +2039,11 @@ class OpenAIFoodAnalysisService {
     private let sessionOpenAI: URLSession
     private let sessionAzure: URLSession
 
+    private struct OpenAIModelList: Decodable {
+        struct Model: Decodable { let id: String }
+        let data: [Model]
+    }
+
     // Normalizes a custom endpoint path to ensure it begins with a single '/'
     private func normalizedPath(_ path: String?) -> String {
         guard let raw = path?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else {
@@ -2066,7 +2059,47 @@ class OpenAIFoodAnalysisService {
         let full = "\(trimmed)/openai/deployments/\(encodedDeployment)/chat/completions?api-version=\(apiVersion)"
         return URL(string: full)
     }
-    
+
+    func ensureGPT5Availability(apiKey: String, organizationID: String?) async throws {
+        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedKey.isEmpty else {
+            throw AIFoodAnalysisError.customError("OpenAI API key required to enable GPT-5 models.")
+        }
+
+        guard let url = URL(string: "https://api.openai.com/v1/models") else {
+            throw AIFoodAnalysisError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 20
+        request.setValue("Bearer \(trimmedKey)", forHTTPHeaderField: "Authorization")
+        if let organizationID, !organizationID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            request.setValue(organizationID.trimmingCharacters(in: .whitespacesAndNewlines), forHTTPHeaderField: "OpenAI-Organization")
+        }
+
+        let (data, response) = try await sessionOpenAI.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw AIFoodAnalysisError.invalidResponse
+        }
+
+        switch http.statusCode {
+        case 200:
+            let list = try JSONDecoder().decode(OpenAIModelList.self, from: data)
+            let hasGPT5 = list.data.contains { $0.id.lowercased().contains("gpt-5") }
+            if !hasGPT5 {
+                throw AIFoodAnalysisError.customError("Your OpenAI account does not list GPT-5 models yet. Please contact OpenAI support or disable the GPT-5 toggle.")
+            }
+        case 401, 403:
+            throw AIFoodAnalysisError.customError("OpenAI rejected your API key for GPT-5 access (HTTP \(http.statusCode)). GPT-5 requires an approved account.")
+        case 429:
+            throw AIFoodAnalysisError.customError("OpenAI rate limit reached while verifying GPT-5 availability. Please try again shortly.")
+        default:
+            let body = String(data: data, encoding: .utf8) ?? ""
+            throw AIFoodAnalysisError.customError("Unable to confirm GPT-5 availability (HTTP \(http.statusCode)). \(body)")
+        }
+    }
+
     func analyzeFoodImage(_ image: UIImage, apiKey: String, query: String) async throws -> AIFoodAnalysisResult {
         return try await analyzeFoodImage(image, apiKey: apiKey, query: query, telemetryCallback: nil)
     }
@@ -2111,30 +2144,29 @@ ADVANCED DIABETES ANALYSIS - JSON format required:
 Calculate FPU = (total_fat + total_protein) ÷ 10. Use visual references for portions.
 """
         } else {
-            // Standard GPT-5 prompt
             return """
 DIABETES ANALYSIS - JSON format required:
 {
   "food_items": [{
     "name": "specific_food_name",
-    "portion_estimate": "visual_portion_with_reference", 
+    "portion_estimate": "visual_portion_with_reference",
+    "serving_multiplier": usda_serving_ratio,
     "carbohydrates": grams,
     "protein": grams,
     "fat": grams,
-    "calories": kcal,
-    "serving_multiplier": usda_serving_ratio
+    "fiber": grams,
+    "calories": kcal
   }],
   "total_carbohydrates": sum_carbs,
   "total_protein": sum_protein,
-  "total_fat": sum_fat, 
+  "total_fat": sum_fat,
+  "total_fiber": sum_fiber,
   "total_calories": sum_calories,
-  "portion_assessment_method": "explain_measurement_process",
   "confidence": 0.0_to_1.0,
-  "overall_description": "visual_description",
-  "diabetes_considerations": "carb_sources_and_timing"
+  "diabetes_considerations": "concise_notes_on_glycemic_risk"
 }
 
-Use visual references for portion estimates. Compare to USDA serving sizes.
+Return compact JSON only. Avoid markdown or narrative explanations.
 """
         }
     }
@@ -2345,11 +2377,16 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
         
         // Pre-encode once using byte budget
         telemetryCallback?("🖼️ Optimizing your image...")
+        let targetBytes = model.contains("gpt-5") ? 320 * 1024 : 450 * 1024
         let pre: PreencodedImage
         if let provided = preencoded {
-            pre = provided
+            if model.contains("gpt-5") && provided.bytes > targetBytes {
+                pre = await ConfigurableAIService.preencodeImageForProviders(image, targetBytes: targetBytes)
+            } else {
+                pre = provided
+            }
         } else {
-            pre = await ConfigurableAIService.preencodeImageForProviders(image)
+            pre = await ConfigurableAIService.preencodeImageForProviders(image, targetBytes: targetBytes)
         }
         let base64Image = pre.base64
         
@@ -2364,14 +2401,7 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         
-        // Set appropriate timeout based on model type and prompt complexity
-        if model.contains("gpt-5") {
-            request.timeoutInterval = 120  // 2 minutes for GPT-5 models
-        } else {
-            // For GPT-4 models, extend timeout significantly for advanced analysis (very long prompt)
-            request.timeoutInterval = isAdvancedPrompt ? 150 : 30  // 2.5 min for advanced, 30s for standard
-            // Advanced prompt uses extended timeout for comprehensive analysis
-        }
+        request.timeoutInterval = model.contains("gpt-5") ? 80 : (isAdvancedPrompt ? 150 : 30)
         
         // Use appropriate parameters based on model type
         var payload: [String: Any] = [
@@ -2459,7 +2489,7 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
                 do {
                     (data, response) = try await performGPT5RequestWithRetry(request: request, telemetryCallback: telemetryCallback)
                 } catch let error as AIFoodAnalysisError where error.localizedDescription.contains("GPT-5 timeout") {
-                    telemetryCallback?("🔄 Retrying with GPT-4o…")
+                    telemetryCallback?("⚠️ GPT-5 timed out, switching to GPT-4o…")
                     return try await retryWithGPT4Fallback(image, apiKey: apiKey, query: query, 
                                                          analysisPrompt: analysisPrompt, isAdvancedPrompt: isAdvancedPrompt, 
                                                          telemetryCallback: telemetryCallback)
@@ -2917,8 +2947,7 @@ Use visual references for portion estimates. Compare to USDA serving sizes.
             if let org = organizationID, !org.isEmpty { request.setValue(org, forHTTPHeaderField: "OpenAI-Organization") }
         }
 
-        // Timeouts similar to default
-        if model.contains("gpt-5") { request.timeoutInterval = 120 } else { request.timeoutInterval = isAdvancedPrompt ? 150 : 30 }
+        request.timeoutInterval = model.contains("gpt-5") ? 80 : (isAdvancedPrompt ? 150 : 30)
 
         // Build messages content (Azure is stricter: omit `detail` in image_url)
         var contentBlocks: [[String: Any]] = []

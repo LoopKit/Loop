@@ -22,6 +22,7 @@ struct AICameraView: View {
     @State private var imageSourceType: UIImagePickerController.SourceType = .camera
     @State private var telemetryLogs: [String] = []
     @State private var showTelemetry = false
+    @State private var showingTips = false
     
     var body: some View {
         NavigationView {
@@ -37,20 +38,27 @@ struct AICameraView: View {
                                 .font(.system(size: 64))
                                 .foregroundColor(.accentColor)
                             
-                            Text("AI Food Analysis")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                            
-                            Text("Camera will open to analyze your food")
-                                .font(.body)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Better photos = better estimates")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Spacer()
+                                VStack(alignment: .leading, spacing: 8) {
+                                    CameraTipRow(icon: "sun.max.fill", title: "Use bright, even light", detail: "Harsh shadows confuse the AI and dim light can hide textures.")
+                                    CameraTipRow(icon: "arrow.2.circlepath", title: "Clear the area", detail: "Remove napkins, lids, or packaging that may be misidentified as food.")
+                                    CameraTipRow(icon: "square.dashed", title: "Frame the full meal", detail: "Make sure every food item is in the frame.")
+                                    CameraTipRow(icon: "ruler", title: "Add a size reference", detail: "Forks, cups, or hands help AI calculate realistic portions.")
+                                    CameraTipRow(icon: "camera.metering.spot", title: "Shoot from slightly above", detail: "Keep the camera level to reduce distortion and keep portions proportional.")
+                                }
+                            }
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
                         
                         Spacer()
                         
-                        // Quick action buttons  
+                        // Quick action buttons
                         VStack(spacing: 12) {
                             Button(action: {
                                 imageSourceType = .camera
@@ -59,7 +67,7 @@ struct AICameraView: View {
                                 HStack {
                                     Image(systemName: "sparkles")
                                         .font(.system(size: 14))
-                                    Text("Analyze with AI")
+                                    Text("Take a Photo")
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding()
@@ -87,13 +95,7 @@ struct AICameraView: View {
                         .padding(.horizontal)
                         .padding(.bottom, 30)
                     }
-                    .onAppear {
-                        // Auto-launch camera when view appears
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            imageSourceType = .camera
-                            showingImagePicker = true
-                        }
-                    }
+                    
                 } else {
                     // Show captured image and auto-start analysis
                     VStack(spacing: 20) {
@@ -140,17 +142,17 @@ struct AICameraView: View {
             .navigationTitle("AI Food Analysis")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
-            .toolbar(content: {
+            .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         onCancel()
                     }
                 }
-            })
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .sheet(isPresented: $showingImagePicker) {
-            ImagePicker(image: $capturedImage, sourceType: imageSourceType)
+            ImagePicker(image: $capturedImage, sourceType: $imageSourceType)
         }
         .alert("Analysis Error", isPresented: $showingErrorAlert) {
             // Credit/quota exhaustion errors - provide direct guidance
@@ -352,20 +354,47 @@ struct AICameraView: View {
     }
 }
 
+private struct CameraTipRow: View {
+    let icon: String
+    let title: String
+    let detail: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .foregroundColor(.orange)
+                .font(.system(size: 20, weight: .semibold))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 // MARK: - Image Picker
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
-    let sourceType: UIImagePickerController.SourceType
+    @Binding var sourceType: UIImagePickerController.SourceType
     @Environment(\.presentationMode) var presentationMode
-    
+
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
-        picker.sourceType = sourceType
-        picker.allowsEditing = sourceType == .camera // Only enable editing for camera, not photo library
-        
-        // Style the navigation bar and buttons to be blue with AI branding
+        applyBaseAppearance(to: picker)
+        configurePicker(picker, for: sourceType)
+        return picker
+    }
+
+    private func applyBaseAppearance(to picker: UIImagePickerController) {
         if let navigationBar = picker.navigationBar as UINavigationBar? {
             navigationBar.tintColor = UIColor.systemBlue
             navigationBar.titleTextAttributes = [
@@ -373,129 +402,90 @@ struct ImagePicker: UIViewControllerRepresentable {
                 .font: UIFont.boldSystemFont(ofSize: 17)
             ]
         }
-        
-        // Apply comprehensive UI styling for AI branding
+
         picker.navigationBar.tintColor = UIColor.systemBlue
-        
-        // Style all buttons in the camera interface to be blue with appearance proxies
+        picker.view.tintColor = UIColor.systemBlue
+        picker.toolbar?.tintColor = UIColor.systemBlue
+        picker.toolbar?.barTintColor = UIColor.systemBlue.withAlphaComponent(0.1)
+
         UIBarButtonItem.appearance(whenContainedInInstancesOf: [UIImagePickerController.self]).tintColor = UIColor.systemBlue
         UIButton.appearance(whenContainedInInstancesOf: [UIImagePickerController.self]).tintColor = UIColor.systemBlue
         UILabel.appearance(whenContainedInInstancesOf: [UIImagePickerController.self]).tintColor = UIColor.systemBlue
-        
-        // Style toolbar buttons (including "Use Photo" button)
-        picker.toolbar?.tintColor = UIColor.systemBlue
         UIToolbar.appearance(whenContainedInInstancesOf: [UIImagePickerController.self]).tintColor = UIColor.systemBlue
         UIToolbar.appearance(whenContainedInInstancesOf: [UIImagePickerController.self]).barTintColor = UIColor.systemBlue.withAlphaComponent(0.1)
-        
-        // Apply blue styling to all UI elements in camera
-        picker.view.tintColor = UIColor.systemBlue
-        
-        // Set up custom button styling with multiple attempts
+
         setupCameraButtonStyling(picker)
-        
-        // Add combined camera overlay for AI analysis and tips
-        if sourceType == .camera {
-            picker.cameraFlashMode = .auto
-            addCombinedCameraOverlay(to: picker)
+    }
+
+    private func configurePicker(_ picker: UIImagePickerController, for desiredType: UIImagePickerController.SourceType) {
+        guard UIImagePickerController.isSourceTypeAvailable(desiredType) else {
+            return
         }
-        
-        return picker
+
+        let wasCamera = picker.sourceType == .camera
+
+        // When leaving camera mode, clear overlays before we switch types (camera only API)
+        if wasCamera && desiredType != .camera {
+            picker.cameraOverlayView = nil
+        }
+
+        if picker.sourceType != desiredType {
+            picker.sourceType = desiredType
+        }
+
+        picker.allowsEditing = false
+
+        if desiredType == .camera {
+            picker.cameraOverlayView = nil
+            setupCameraButtonStyling(picker)
+        }
     }
-    
-    private func addCombinedCameraOverlay(to picker: UIImagePickerController) {
-        // Create main overlay view
-        let overlayView = UIView()
-        overlayView.backgroundColor = UIColor.clear
-        overlayView.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Create photo tips container (at the top)
-        let tipsContainer = UIView()
-        tipsContainer.backgroundColor = UIColor.black.withAlphaComponent(0.75)
-        tipsContainer.layer.cornerRadius = 12
-        tipsContainer.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Create tips text
-        let tipsLabel = UILabel()
-        tipsLabel.text = "📸 For best AI analysis:\n• Take photos directly overhead\n• Include a fork or coin for size\n• Use good lighting - avoid shadows\n• Fill the frame with your food"
-        tipsLabel.textColor = UIColor.white
-        tipsLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        tipsLabel.numberOfLines = 0
-        tipsLabel.textAlignment = .left
-        tipsLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Add views to overlay
-        overlayView.addSubview(tipsContainer)
-        tipsContainer.addSubview(tipsLabel)
-        
-        // Set up constraints
-        NSLayoutConstraint.activate([
-            // Tips container at top
-            tipsContainer.topAnchor.constraint(equalTo: overlayView.safeAreaLayoutGuide.topAnchor, constant: 20),
-            tipsContainer.leadingAnchor.constraint(equalTo: overlayView.leadingAnchor, constant: 20),
-            tipsContainer.trailingAnchor.constraint(equalTo: overlayView.trailingAnchor, constant: -20),
-            
-            // Tips label within container
-            tipsLabel.topAnchor.constraint(equalTo: tipsContainer.topAnchor, constant: 12),
-            tipsLabel.leadingAnchor.constraint(equalTo: tipsContainer.leadingAnchor, constant: 12),
-            tipsLabel.trailingAnchor.constraint(equalTo: tipsContainer.trailingAnchor, constant: -12),
-            tipsLabel.bottomAnchor.constraint(equalTo: tipsContainer.bottomAnchor, constant: -12)
-        ])
-        
-        // Set overlay as camera overlay
-        picker.cameraOverlayView = overlayView
-    }
-    
+
     private func setupCameraButtonStyling(_ picker: UIImagePickerController) {
-        // Apply basic blue theme to navigation elements only
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             self.applyBasicBlueStyling(to: picker.view)
         }
     }
-    
+
     private func applyBasicBlueStyling(to view: UIView) {
-        // Apply only basic blue theme to navigation elements
         for subview in view.subviews {
             if let toolbar = subview as? UIToolbar {
                 toolbar.tintColor = UIColor.systemBlue
                 toolbar.barTintColor = UIColor.systemBlue.withAlphaComponent(0.1)
-                
-                // Style toolbar items but don't modify text
                 toolbar.items?.forEach { item in
                     item.tintColor = UIColor.systemBlue
                 }
             }
-            
+
             if let navBar = subview as? UINavigationBar {
                 navBar.tintColor = UIColor.systemBlue
                 navBar.titleTextAttributes = [.foregroundColor: UIColor.systemBlue]
             }
-            
+
             applyBasicBlueStyling(to: subview)
         }
     }
-    
-    // Button styling methods removed - keeping native Use Photo button as-is
-    
+
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
-        // Apply basic styling only
+        configurePicker(uiViewController, for: sourceType)
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.applyBasicBlueStyling(to: uiViewController.view)
         }
     }
-    
+
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
-    
+
     class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         let parent: ImagePicker
-        
+
         init(_ parent: ImagePicker) {
             self.parent = parent
         }
-        
+
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-            // Use edited image if available, otherwise fall back to original
             if let uiImage = info[.editedImage] as? UIImage {
                 parent.image = uiImage
             } else if let uiImage = info[.originalImage] as? UIImage {
@@ -503,7 +493,7 @@ struct ImagePicker: UIViewControllerRepresentable {
             }
             parent.presentationMode.wrappedValue.dismiss()
         }
-        
+
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             parent.presentationMode.wrappedValue.dismiss()
         }
@@ -550,7 +540,8 @@ struct TelemetryWindow: View {
                         }
                         
                         // Add bottom padding to prevent cutoff
-                        Spacer(minLength: 24)
+                        Color.clear
+                            .frame(height: 56)
                     }
                     .onAppear {
                         // Auto-scroll to latest log
@@ -570,6 +561,7 @@ struct TelemetryWindow: View {
                     }
                 }
             }
+            .padding(.bottom, 14)
             .frame(height: 320)
             .background(Color(.systemBackground))
         }

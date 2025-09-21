@@ -1695,7 +1695,8 @@ extension CarbEntryViewModel {
                 fat: newTotalFat,
                 fiber: newTotalFiber,
                 calories: newTotalCalories,
-                remainingItems: currentResult.foodItemsDetailed
+                remainingItems: currentResult.foodItemsDetailed,
+                context: "Adjusted after removing an item"
             )
             
             currentResult.absorptionTimeHours = newAbsorptionHours
@@ -1717,9 +1718,38 @@ extension CarbEntryViewModel {
         
         print("✅ Food item deleted. New total carbs: \(newTotalCarbs)g")
     }
-    
+
+    /// Ensures we have an absorption time even if the AI response omitted it.
+    func ensureAbsorptionTimeForInitialResult(_ result: inout AIFoodAnalysisResult) {
+        if let hours = result.absorptionTimeHours, hours > 0 { return }
+
+        let carbs = result.totalCarbohydrates
+        let protein = result.totalProtein ?? result.foodItemsDetailed.compactMap { $0.protein }.reduce(0, +)
+        let fat = result.totalFat ?? result.foodItemsDetailed.compactMap { $0.fat }.reduce(0, +)
+        let fiber = result.totalFiber ?? result.foodItemsDetailed.compactMap { $0.fiber }.reduce(0, +)
+        let calories = result.totalCalories ?? result.foodItemsDetailed.compactMap { $0.calories }.reduce(0, +)
+
+        let (hours, reasoning) = recalculateAbsorptionTime(
+            carbs: carbs,
+            protein: protein,
+            fat: fat,
+            fiber: fiber,
+            calories: calories,
+            remainingItems: result.foodItemsDetailed,
+            context: "Estimated from meal composition"
+        )
+
+        let defaultHours = defaultAbsorptionTimes.medium / 3600
+        if abs(hours - defaultHours) < 0.75 {
+            return
+        }
+
+        result.absorptionTimeHours = hours
+        result.absorptionTimeReasoning = reasoning
+    }
+
     // MARK: - Absorption Time Recalculation
-    
+
     /// Recalculates absorption time based on remaining meal composition using AI dosing logic
     private func recalculateAbsorptionTime(
         carbs: Double,
@@ -1727,7 +1757,8 @@ extension CarbEntryViewModel {
         fat: Double,
         fiber: Double,
         calories: Double,
-        remainingItems: [FoodItemAnalysis]
+        remainingItems: [FoodItemAnalysis],
+        context: String
     ) -> (hours: Double, reasoning: String) {
         
         // Base absorption time based on carb complexity
@@ -1783,7 +1814,7 @@ extension CarbEntryViewModel {
         let totalHours = min(max(baselineHours + fpuAdjustment + fiberAdjustment + mealSizeAdjustment, 2.0), 8.0)
         
         // Generate detailed reasoning
-        let reasoning = "RECALCULATED after food deletion: " +
+        let reasoning = "\(context): " +
                        "BASELINE: \(String(format: "%.1f", baselineHours)) hours for \(String(format: "%.1f", carbs))g carbs. " +
                        "FPU IMPACT: \(fpuDescription) (+\(String(format: "%.1f", fpuAdjustment)) hours). " +
                        "FIBER EFFECT: \(fiberDescription) (+\(String(format: "%.1f", fiberAdjustment)) hours). " +

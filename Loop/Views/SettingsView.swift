@@ -382,11 +382,11 @@ extension SettingsView {
         Section {
             LargeButton(action: { sheet = .aiSettings },
                         includeArrow: true,
-                        imageView: Image(systemName: "sparkles").resizable().renderingMode(.template)
+                        imageView: Image(systemName: "fork.knife.circle.fill").resizable().renderingMode(.template)
                             .foregroundColor(.purple)
                             .frame(width: 35, height: 35),
                         label: "FoodFinder",
-                        descriptiveText: "Search & AI Providers")
+                        descriptiveText: "Food Search & AI Providers")
         }
     }
     

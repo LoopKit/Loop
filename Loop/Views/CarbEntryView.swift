@@ -27,6 +27,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     @State private var showingAICamera = false
     @State private var showingAISettings = false
     @State private var isFoodSearchEnabled = UserDefaults.standard.foodSearchEnabled
+    @State private var showAbsorptionReasoning = false
     
     // MARK: - Row enum
     enum Row: Hashable {
@@ -323,6 +324,23 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                                 let fatValue = valuesTuple.fat
                                 let fiberValue = valuesTuple.fiber
                                 let proteinValue = valuesTuple.protein
+
+                                let fallbackCalories = (proteinValue ?? 0) * 4 + (fatValue ?? 0) * 9 + carbsValue * 4
+                                let caloriesForTargets: Double? = {
+                                    if let caloriesValue, caloriesValue > 0 {
+                                        return caloriesValue
+                                    }
+                                    return fallbackCalories > 0 ? fallbackCalories : nil
+                                }()
+                                // Derive per-meal targets using observed carbs as the anchor
+                                let balancedTargets = computeBalancedTargets(
+                                    carbs: carbsValue,
+                                    protein: proteinValue,
+                                    fat: fatValue,
+                                    calories: caloriesForTargets
+                                )
+
+                                let carbTarget = max(balancedTargets?.carbs ?? max(carbsValue, 1), 1)
                                 
                                 // Carbohydrates (first)
                                 NutritionCircle(
@@ -330,22 +348,33 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                                     unit: "g",
                                     label: "Carbs",
                                     color: Color(red: 0.4, green: 0.7, blue: 1.0), // Light blue
-                                    maxValue: 50.0 // Typical daily carb portion
+                                    maxValue: carbTarget
                                 )
                                 
                                 // Calories (second)
-                                if let calories = caloriesValue, calories > 0 {
+                                let caloriesAmount = caloriesValue ?? balancedTargets?.calories ?? 0
+                                if caloriesAmount > 0 {
+                                    let calorieTarget = max(balancedTargets?.calories ?? max(caloriesAmount, 1), 1)
                                     NutritionCircle(
-                                        value: calories,
+                                        value: caloriesAmount,
                                         unit: "cal",
                                         label: "Calories",
                                         color: Color(red: 0.5, green: 0.8, blue: 0.4), // Green
-                                        maxValue: 500.0 // Typical meal calories
+                                        maxValue: calorieTarget
                                     )
                                 }
                                 
                                 // Fat (third)
-                                if let fat = fatValue, fat > 0 {
+                                if let fatTarget = balancedTargets?.fat, fatTarget > 0 {
+                                    let fatAmount = max(fatValue ?? 0, 0)
+                                    NutritionCircle(
+                                        value: fatAmount,
+                                        unit: "g",
+                                        label: "Fat", 
+                                        color: Color(red: 1.0, green: 0.8, blue: 0.2), // Golden yellow
+                                        maxValue: max(fatTarget, 1)
+                                    )
+                                } else if let fat = fatValue, fat > 0 {
                                     NutritionCircle(
                                         value: fat,
                                         unit: "g",
@@ -356,7 +385,16 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                                 }
                                 
                                 // Fiber (fourth)
-                                if let fiber = fiberValue, fiber > 0 {
+                                if let fiberTarget = balancedTargets?.fiber, fiberTarget > 0 {
+                                    let fiberAmount = max(fiberValue ?? 0, 0)
+                                    NutritionCircle(
+                                        value: fiberAmount,
+                                        unit: "g", 
+                                        label: "Fiber",
+                                        color: Color(red: 0.6, green: 0.4, blue: 0.8), // Purple
+                                        maxValue: max(fiberTarget, 1)
+                                    )
+                                } else if let fiber = fiberValue, fiber > 0 {
                                     NutritionCircle(
                                         value: fiber,
                                         unit: "g", 
@@ -367,7 +405,16 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                                 }
                                 
                                 // Protein (fifth)
-                                if let protein = proteinValue, protein > 0 {
+                                if let proteinTarget = balancedTargets?.protein, proteinTarget > 0 {
+                                    let proteinAmount = max(proteinValue ?? 0, 0)
+                                    NutritionCircle(
+                                        value: proteinAmount,
+                                        unit: "g", 
+                                        label: "Protein",
+                                        color: Color(red: 1.0, green: 0.4, blue: 0.4), // Coral/red
+                                        maxValue: max(proteinTarget, 1)
+                                    )
+                                } else if let protein = proteinValue, protein > 0 {
                                     NutritionCircle(
                                         value: protein,
                                         unit: "g", 
@@ -392,8 +439,12 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                                         .foregroundStyle(.secondary)
                                     Text("\(pct)%")
                                         .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 2)
+                                        .background(confidenceBadgeColor(pct))
                                         .foregroundColor(confidenceColor(pct))
-                                        .blendMode(.normal)
+                                        .clipShape(Capsule())
                                 }
                                 .padding(.top, 2)
                             }
@@ -419,11 +470,12 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                         if let portionMethod = aiResult.portionAssessmentMethod, !portionMethod.isEmpty {
                             // Confidence line inside the Portions & Servings expandable
                             let pct = computeConfidencePercent(from: aiResult, servings: viewModel.numberOfServings)
+                            let confidenceLine = pct < 60 ? "Confidence: \(pct)% – treat as estimate" : "Confidence: \(pct)%"
                             ExpandableNoteView(
                                 icon: "ruler",
                                 iconColor: .blue,
                                 title: "Portions & Servings:",
-                                content: portionMethod + "\n\nConfidence: \(pct)%",
+                                content: portionMethod + "\n\n" + confidenceLine,
                                 backgroundColor: Color(.systemBlue).opacity(0.08),
 
                             )
@@ -465,6 +517,32 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     print("🎯 AIAbsorptionTimePickerRow received isAIGenerated: \(isAIGenerated)")
                 }
                 .padding(.bottom, 2)
+
+            if let reasoning = viewModel.lastAIAnalysisResult?.absorptionTimeReasoning?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !reasoning.isEmpty,
+               viewModel.absorptionTimeWasAIGenerated,
+               !UserDefaults.standard.advancedDosingRecommendationsEnabled {
+                let hoursString = String(format: "%.1f", viewModel.absorptionTime / 3600)
+                DisclosureGroup(isExpanded: $showAbsorptionReasoning) {
+                    Text(reasoning)
+                        .font(.caption)
+                        .foregroundColor(.primary)
+                        .padding(.top, 4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "hourglass.bottomhalf.fill")
+                            .foregroundColor(.indigo)
+                        Text("Why \(hoursString) hours?")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.indigo)
+                    }
+                }
+                .padding(8)
+                .background(Color(.systemIndigo).opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
             
             // Food Search enablement toggle (only show when Food Search is disabled)
             if !isFoodSearchEnabled {
@@ -498,28 +576,32 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     /// Handle AI food analysis results by converting to food product format
     @MainActor
     private func handleAIFoodAnalysis(_ result: AIFoodAnalysisResult) {
+        var enrichedResult = result
+        viewModel.ensureAbsorptionTimeForInitialResult(&enrichedResult)
+        showAbsorptionReasoning = false
+
         // Store the detailed AI result for UI display
-        viewModel.lastAIAnalysisResult = result
+        viewModel.lastAIAnalysisResult = enrichedResult
         
         // Convert AI result to OpenFoodFactsProduct format for consistency
-        let aiProduct = convertAIResultToFoodProduct(result)
+        let aiProduct = convertAIResultToFoodProduct(enrichedResult)
         
         // Use existing food selection workflow
         viewModel.selectFoodProduct(aiProduct)
 
         // Set servings carefully to avoid double-scaling
-        if result.servings > 0 && result.servings < 0.95 {
+        if enrichedResult.servings > 0 && enrichedResult.servings < 0.95 {
             // Totals already represent the measured portion; keep 1.0 serving
             // Unless we detected a base-serving reconstruction above (medium reference).
-            if result.servingSizeDescription.localizedCaseInsensitiveContains("medium") {
+            if enrichedResult.servingSizeDescription.localizedCaseInsensitiveContains("medium") {
                 // In base-serving mode, use the multiplier as servings
-                viewModel.numberOfServings = result.servings
+                viewModel.numberOfServings = enrichedResult.servings
             } else {
                 viewModel.numberOfServings = 1.0
             }
-        } else if result.servings >= 0.95 {
+        } else if enrichedResult.servings >= 0.95 {
             // Use provided servings (≈1 or more)
-            viewModel.numberOfServings = result.servings
+            viewModel.numberOfServings = enrichedResult.servings
         } else {
             viewModel.numberOfServings = 1.0
         }
@@ -527,10 +609,10 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
         // Set dynamic absorption time from AI analysis (works for both Standard and Advanced modes)
         print("🤖 AI ABSORPTION TIME DEBUG:")
         print("🤖 Advanced Dosing Enabled: \(UserDefaults.standard.advancedDosingRecommendationsEnabled)")
-        print("🤖 AI Absorption Hours: \(result.absorptionTimeHours ?? 0)")
+        print("🤖 AI Absorption Hours: \(enrichedResult.absorptionTimeHours ?? 0)")
         print("🤖 Current Absorption Time: \(viewModel.absorptionTime)")
         
-        if let absorptionHours = result.absorptionTimeHours,
+        if let absorptionHours = enrichedResult.absorptionTimeHours,
            absorptionHours > 0 {
             let absorptionTimeInterval = TimeInterval(absorptionHours * 3600) // Convert hours to seconds
             
@@ -552,8 +634,8 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
 
         // Soft clamp for obvious slice-based overestimates (initialization only)
         // Applies when description includes "medium" base and portion mentions slices (1–4)
-        if result.servingSizeDescription.localizedCaseInsensitiveContains("medium") {
-            let portionText = (result.analysisNotes ?? result.servingSizeDescription).lowercased()
+        if enrichedResult.servingSizeDescription.localizedCaseInsensitiveContains("medium") {
+            let portionText = (enrichedResult.analysisNotes ?? enrichedResult.servingSizeDescription).lowercased()
             // Extract a small slice count (1-4)
             if portionText.contains("slice") || portionText.contains("slices") {
                 if let match = portionText.range(of: "\\b(1|2|3|4)\\b", options: .regularExpression) {
@@ -566,7 +648,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     default: break
                     }
                     if cap > 0 {
-                        let aiServings = result.servings
+                        let aiServings = enrichedResult.servings
                         if aiServings > cap {
                             print("🧮 Applying slice-based soft cap: AI=\(aiServings) -> cap=\(cap) for \(count) slice(s)")
                             viewModel.numberOfServings = cap
@@ -1014,6 +1096,16 @@ extension CarbEntryView {
         if percent < 75 { return .yellow }
         return .green
     }
+
+    private func confidenceBadgeColor(_ percent: Int) -> Color {
+        if percent < 45 {
+            return Color(.systemYellow).opacity(0.25)
+        }
+        if percent < 75 {
+            return Color(.systemGray5)
+        }
+        return Color(.systemGray6)
+    }
     private var dismissButton: some View {
         Button(action: dismiss) {
             Text("Cancel")
@@ -1365,14 +1457,6 @@ extension CarbEntryView {
                 .buttonStyle(.plain)
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text("Portion I See:")
-                    .font(.caption2)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-                Text(item.portionEstimate.isEmpty ? "Unknown portion" : item.portionEstimate)
-                    .font(.caption)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
                 if let usda = item.usdaServingSize, !usda.isEmpty {
                     HStack(spacing: 6) {
                         Text("Normal USDA Serving:")
@@ -1384,6 +1468,28 @@ extension CarbEntryView {
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
+                }
+                HStack(spacing: 6) {
+                    Text("Portion That I See:")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                    Text(item.portionEstimate.isEmpty ? "Unknown portion" : item.portionEstimate)
+                        .font(.caption)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .layoutPriority(1)
+                }
+                if item.portionEstimate.uppercased().contains("CANNOT DETERMINE") {
+                    Text("Estimated from menu text")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color(.systemYellow).opacity(0.3))
+                        .foregroundColor(.orange)
+                        .clipShape(Capsule())
                 }
                 if viewModel.numberOfServings > 0, let ai = viewModel.lastAIAnalysisResult, ai.originalServings > 0 {
                     let mult = viewModel.numberOfServings / ai.originalServings
@@ -1438,6 +1544,56 @@ extension CarbEntryView {
             return (carbs, cals, fat, fiber, protein)
         }
     }
+}
+
+private struct BalancedMacroTargets {
+    let carbs: Double
+    let protein: Double
+    let fat: Double
+    let fiber: Double
+    let calories: Double
+}
+
+private enum BalancedMealGuidelines {
+    static let preferredCarbFraction: Double = 0.45
+    static let preferredProteinFraction: Double = 0.20
+    static let preferredFatFraction: Double = 0.30
+    static let fiberPerCalorie: Double = 14.0 / 1000.0
+}
+
+private func computeBalancedTargets(carbs: Double, protein: Double?, fat: Double?, calories: Double?) -> BalancedMacroTargets? {
+    let safeCarbs = max(carbs, 0)
+    let safeProtein = max(protein ?? 0, 0)
+    let safeFat = max(fat ?? 0, 0)
+    let providedCalories = max(calories ?? 0, 0)
+
+    let macrosCalories = safeCarbs * 4 + safeProtein * 4 + safeFat * 9
+    let observedCalories = max(providedCalories, macrosCalories)
+
+    let baselineCalories: Double
+    if safeCarbs > 0 {
+        let estimatedFromCarbs = (safeCarbs * 4) / BalancedMealGuidelines.preferredCarbFraction
+        baselineCalories = max(observedCalories, estimatedFromCarbs)
+    } else {
+        baselineCalories = observedCalories
+    }
+
+    guard baselineCalories > 0 else {
+        return nil
+    }
+
+    let targetCarbs = baselineCalories * BalancedMealGuidelines.preferredCarbFraction / 4
+    let targetProtein = baselineCalories * BalancedMealGuidelines.preferredProteinFraction / 4
+    let targetFat = baselineCalories * BalancedMealGuidelines.preferredFatFraction / 9
+    let targetFiber = baselineCalories * BalancedMealGuidelines.fiberPerCalorie
+
+    return BalancedMacroTargets(
+        carbs: targetCarbs,
+        protein: targetProtein,
+        fat: targetFat,
+        fiber: targetFiber,
+        calories: baselineCalories
+    )
 }
 
 // MARK: - ServingsRow Component
@@ -1527,8 +1683,15 @@ struct NutritionCircle: View {
     @State private var animatedProgress: Double = 0
     @State private var isLoading: Bool = false
     
-    private var progress: Double {
-        min(value / maxValue, 1.0)
+    private func normalizedProgress(for rawValue: Double) -> Double {
+        guard maxValue > 0 else {
+            return rawValue > 0 ? 1.0 : 0.0
+        }
+        let ratio = rawValue / maxValue
+        if ratio.isNaN || ratio.isInfinite {
+            return 0.0
+        }
+        return min(max(ratio, 0.0), 1.0)
     }
     
     private var displayValue: String {
@@ -1576,30 +1739,32 @@ struct NutritionCircle: View {
                 }
             }
             .onAppear {
-                // Start count-up animation when circle appears
                 withAnimation(.easeOut(duration: 1.0)) {
                     animatedValue = value
-                    animatedProgress = progress
+                    animatedProgress = normalizedProgress(for: value)
                 }
             }
             .onChange(of: value) { newValue in
-                // Smooth value transitions when data changes
-                if newValue == 0 {
-                    // Show loading state for empty values
+                if newValue == 0 && animatedValue > 0 {
                     isLoading = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         isLoading = false
                         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                             animatedValue = newValue
-                            animatedProgress = min(newValue / maxValue, 1.0)
+                            animatedProgress = normalizedProgress(for: newValue)
                         }
                     }
                 } else {
-                    // Immediate transition for real values
+                    isLoading = false
                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                         animatedValue = newValue
-                        animatedProgress = min(newValue / maxValue, 1.0)
+                        animatedProgress = normalizedProgress(for: newValue)
                     }
+                }
+            }
+            .onChange(of: maxValue) { _ in
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                    animatedProgress = normalizedProgress(for: value)
                 }
             }
             

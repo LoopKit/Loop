@@ -102,16 +102,23 @@ struct AISettingsView: View {
     @State private var showGoogleGeminiKey: Bool = false
     @State private var showUSDAKey: Bool = false
     @State private var showCustomKey: Bool = false
-    
+
     // Feature flag for Food Search
     @State private var foodSearchEnabled: Bool = UserDefaults.standard.foodSearchEnabled
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
     // Feature flag for Advanced Dosing Insights
     @State private var advancedDosingRecommendationsEnabled: Bool = UserDefaults.standard.advancedDosingRecommendationsEnabled
-    
+
     // GPT-5 feature flag
     @State private var useGPT5ForOpenAI: Bool = UserDefaults.standard.useGPT5ForOpenAI
-    
+    @State private var isCheckingGPT5Availability: Bool = false
+    @State private var showGPT5AvailabilityAlert: Bool = false
+    @State private var gpt5AvailabilityMessage: String = ""
+
     // Selected provider tab: 0 OpenAI, 1 Claude, 2 Gemini, 3 BYO
     @State private var selectedTab: Int = 0
 
@@ -150,7 +157,6 @@ struct AISettingsView: View {
                     analysisModeSection
                     advancedOptionsSection
                 }
-                medicalDisclaimerSection
             }
             .navigationTitle("FoodFinder Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -190,6 +196,13 @@ struct AISettingsView: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
+            .alert("GPT-5 Not Available", isPresented: $showGPT5AvailabilityAlert, actions: {
+                Button("OK", role: .cancel) {
+                    gpt5AvailabilityMessage = ""
+                }
+            }, message: {
+                Text(gpt5AvailabilityMessage)
+            })
         }
     }
 }
@@ -229,115 +242,170 @@ extension AISettingsView {
 
     // MARK: Section builders (to help type-checker)
     private var featureToggleSection: some View {
-        Section(
-            header: Text("FoodFinder"),
-            footer: VStack(alignment: .leading, spacing: 2) {
-                Text("Enable this to show FoodFinder in the carb entry screen. Requires Internet connection. When disabled, feature is hidden but settings are preserved.")
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "fork.knife.circle.fill")
+                        .foregroundColor(.purple)
+                    Text("FOODFINDER")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                        .lineLimit(1)
+                        .layoutPriority(1)
+                }
+                Toggle("Enable FoodFinder", isOn: $foodSearchEnabled)
+                Text("Enable this to show FoodFinder in the carb entry screen. Requires Internet connection. When disabled, the feature is hidden but settings are preserved.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                if foodSearchEnabled {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "staroflife.fill")
+                                .foregroundColor(.red)
+                            Text("MEDICAL DISCLAIMER")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.secondary)
+                                .textCase(.uppercase)
+                                .lineLimit(1)
+                        }
+                        Text("AI nutritional estimates are approximations only. Verify information before dosing; this is not medical advice.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
-        ) {
-            Toggle("Enable FoodFinder", isOn: $foodSearchEnabled)
         }
     }
 
     private var providerMappingSection: some View {
-        Section(
-            header: Text("FoodFinder Provider Configuration"),
-            footer: Text("Configure the service used for each type of search. AI Image Analysis controls what happens when you take photos of food.")
-        ) {
-            ForEach(SearchType.allCases, id: \.self) { searchType in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(searchType.rawValue).font(.headline)
-                        Spacer()
-                    }
-                    Text(searchType.description).font(.caption).foregroundColor(.secondary)
-                    Picker(selection: getBindingForSearchType(searchType)) {
-                        ForEach(aiService.getAvailableProvidersForSearchType(searchType), id: \.self) { provider in
-                            Text(provider.rawValue).tag(provider)
-                        }
-                    } label: { EmptyView() }
-                    .pickerStyle(MenuPickerStyle())
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "slider.horizontal.3")
+                        .foregroundColor(.blue)
+                    Text("FOODFINDER PROVIDER")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                        .lineLimit(1)
+                        .layoutPriority(1)
                 }
-                .padding(.vertical, 4)
+                Text("Configure the service used for each type of search. AI Image Analysis controls what happens when you take photos of food.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                ForEach(SearchType.allCases, id: \.self) { searchType in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(searchType.rawValue).font(.headline)
+                            Spacer()
+                        }
+                        Text(searchType.description).font(.caption).foregroundColor(.secondary)
+                        Picker(selection: getBindingForSearchType(searchType)) {
+                            ForEach(aiService.getAvailableProvidersForSearchType(searchType), id: \.self) { provider in
+                                Text(provider.rawValue).tag(provider)
+                            }
+                        } label: { EmptyView() }
+                        .pickerStyle(MenuPickerStyle())
+                    }
+                    .padding(.vertical, 4)
+                }
             }
         }
     }
 
     private var providerSelectionSection: some View {
-        Section(
-            header: HStack(spacing: 8) {
-                Image(systemName: "sparkles").foregroundColor(.purple)
-                Text("AI API KEY CONFIGURATION").textCase(.uppercase)
-            }
-        ) {
-            Picker("Provider", selection: $selectedTab) {
-                Text("OpenAI Chat GPT").tag(0)
-                Text("Anthropic Claude").tag(1)
-                Text("Google Gemini").tag(2)
-                Text("BYO").tag(3)
-            }
-            .pickerStyle(.segmented)
-            .onChange(of: selectedTab) { newVal in
-                switch newVal {
-                case 0:
-                    UserDefaults.standard.aiImageProvider = "OpenAI (ChatGPT API)"
-                case 1:
-                    UserDefaults.standard.aiImageProvider = "Anthropic (Claude API)"
-                case 2:
-                    UserDefaults.standard.aiImageProvider = "Google (Gemini API)"
-                case 3:
-                    UserDefaults.standard.aiImageProvider = "Bring your own (Custom)"
-                default:
-                    break
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles").foregroundColor(.purple)
+                    Text("API KEY CONFIGURATION")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
                 }
-            }
-            Text("Choose which AI service you want to use for food analysis")
-                .font(.footnote)
-                .foregroundColor(.secondary)
 
-            Group {
-                if selectedTab == 0 { openAIKeyRow }
-                else if selectedTab == 1 { claudeKeyRow }
-                else if selectedTab == 2 { geminiKeyRow }
-                else { bringYourOwnRow }
+                Picker("Provider", selection: $selectedTab) {
+                    Text("OpenAI Chat GPT").tag(0)
+                    Text("Anthropic Claude").tag(1)
+                    Text("Google Gemini").tag(2)
+                    Text("BYO").tag(3)
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: selectedTab) { newVal in
+                    switch newVal {
+                    case 0:
+                        UserDefaults.standard.aiImageProvider = "OpenAI (ChatGPT API)"
+                    case 1:
+                        UserDefaults.standard.aiImageProvider = "Anthropic (Claude API)"
+                    case 2:
+                        UserDefaults.standard.aiImageProvider = "Google (Gemini API)"
+                    case 3:
+                        UserDefaults.standard.aiImageProvider = "Bring your own (Custom)"
+                    default:
+                        break
+                    }
+                }
+                Text("Choose which AI service you want to use for food analysis")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+
+                Group {
+                    if selectedTab == 0 { openAIKeyRow }
+                    else if selectedTab == 1 { claudeKeyRow }
+                    else if selectedTab == 2 { geminiKeyRow }
+                    else { bringYourOwnRow }
+                }
             }
         }
     }
 
     // USDA database key section (optional but recommended)
     private var usdaKeySection: some View {
-        Section(
-            header: HStack(spacing: 8) {
-                Image(systemName: "leaf").foregroundColor(.green)
-                Text("USDA DATABASE (TEXT SEARCH)").textCase(.uppercase)
-            },
-            footer: VStack(alignment: .leading, spacing: 4) {
-                Text("Why add a key?")
-                    .font(.caption).fontWeight(.semibold)
-                Text("Without your own key, searches use a public DEMO_KEY that is heavily rate‑limited and often returns 429 errors. Adding your free personal key avoids this.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        ) {
-            HStack(spacing: 8) {
-                StableSecureField(placeholder: "Enter your USDA API key (optional)", text: $usdaAPIKey, isSecure: !showUSDAKey)
-                Button(action: { showUSDAKey.toggle() }) {
-                    Image(systemName: showUSDAKey ? "eye.slash" : "eye").foregroundColor(.green)
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: "leaf").foregroundColor(.green)
+                    Text("USDA DATABASE (TEXT SEARCH)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                }
+
+                HStack(spacing: 8) {
+                    StableSecureField(placeholder: "Enter your USDA API key (optional)", text: $usdaAPIKey, isSecure: !showUSDAKey)
+                    Button(action: { showUSDAKey.toggle() }) {
+                        Image(systemName: showUSDAKey ? "eye.slash" : "eye").foregroundColor(.green)
+                    }
+                    .buttonStyle(.plain)
+                }
+                Button(action: { if let url = URL(string: "https://fdc.nal.usda.gov/api-guide") { openURL(url) } }) {
+                    HStack { Image(systemName: "info.circle"); Text("How to get a key") }
+                        .foregroundColor(.green)
                 }
                 .buttonStyle(.plain)
-            }
-            Button(action: { if let url = URL(string: "https://fdc.nal.usda.gov/api-guide") { openURL(url) } }) {
-                HStack { Image(systemName: "info.circle"); Text("How to get a key") }
-                    .foregroundColor(.green)
-            }
-            .buttonStyle(.plain)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("How to obtain a USDA API key:")
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("How to obtain a USDA API key:")
                     .font(.caption)
                     .fontWeight(.semibold)
                 Text("1. Open the USDA FoodData Central API Guide. 2. Sign in or create an account. 3. Request a new API key. 4. Copy and paste it here. The key activates immediately.")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Why add a key?")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    Text("Without your own key, searches use a public DEMO_KEY that is heavily rate-limited and often returns 429 errors. Adding your free personal key avoids this.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
         }
     }
@@ -362,8 +430,50 @@ extension AISettingsView {
             .buttonStyle(.plain)
             // GPT-5 option (OpenAI only)
             Toggle("Use GPT-5 Models", isOn: $useGPT5ForOpenAI)
-                .disabled(!foodSearchEnabled)
-                .onChange(of: useGPT5ForOpenAI) { _ in aiService.objectWillChange.send() }
+                .disabled(!foodSearchEnabled || isCheckingGPT5Availability)
+                .onChange(of: useGPT5ForOpenAI) { newValue in
+                    aiService.objectWillChange.send()
+                    guard newValue else { return }
+                    isCheckingGPT5Availability = true
+                    Task {
+                        let trimmedKey = openAIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let keyToCheck = trimmedKey.isEmpty ? (ConfigurableAIService.shared.getAPIKey(for: .openAI) ?? "") : trimmedKey
+                        guard !keyToCheck.isEmpty else {
+                            await MainActor.run {
+                                useGPT5ForOpenAI = false
+                                aiService.objectWillChange.send()
+                                UserDefaults.standard.useGPT5ForOpenAI = false
+                                isCheckingGPT5Availability = false
+                                gpt5AvailabilityMessage = "Enter your OpenAI API key before enabling GPT-5 models."
+                                showGPT5AvailabilityAlert = true
+                            }
+                            return
+                        }
+                        do {
+                            try await OpenAIFoodAnalysisService.shared.ensureGPT5Availability(apiKey: keyToCheck, organizationID: nil)
+                        } catch {
+                            await MainActor.run {
+                                useGPT5ForOpenAI = false
+                                aiService.objectWillChange.send()
+                                UserDefaults.standard.useGPT5ForOpenAI = false
+                                gpt5AvailabilityMessage = error.localizedDescription
+                                showGPT5AvailabilityAlert = true
+                            }
+                        }
+                        await MainActor.run {
+                            isCheckingGPT5Availability = false
+                        }
+                    }
+                }
+            if isCheckingGPT5Availability {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                    Text("Verifying GPT-5 access…")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
             Text("OpenAI: highly accurate vision models (GPT-4o/GPT-5). ~$0.01/image.")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -421,7 +531,7 @@ extension AISettingsView {
     private var bringYourOwnRow: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                Image(systemName: "wand.and.stars").foregroundColor(.purple)
+                Image(systemName: "sparkles").foregroundColor(.purple)
                 Text("Bring your own (OpenAI-compatible)").font(.headline).foregroundColor(.purple)
                 if byoLastTestOK && !hasUnsavedBYOChanges {
                     Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
@@ -473,15 +583,12 @@ extension AISettingsView {
                     .font(.caption2)
                     .foregroundColor(.red)
             } else {
-                Text("Leave blank for most providers. Enter only a path (with or without leading '/'). Azure ignores this field.")
+                Text("Leave blank for most providers. Only needed for non-Azure providers whose Chat Completions path differs from the OpenAI default. For example: Together.ai uses '/v1/chat/completions', Groq uses '/openai/v1/chat/completions'. Azure ignores this field because it uses the deployment-based path.")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
-            Text("Leave blank for most providers. Only needed for non-Azure providers whose Chat Completions path differs from the OpenAI default. For example: Together.ai uses '/v1/chat/completions', Groq uses '/openai/v1/chat/completions'. Azure ignores this field because it uses the deployment-based path.")
-                .font(.caption2)
-                .foregroundColor(.secondary)
             if !endpointPreview.isEmpty {
-                Text("Will call: \(endpointPreview)")
+                Text("This will call: \(endpointPreview)")
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .lineLimit(2)
@@ -505,7 +612,7 @@ extension AISettingsView {
                 .tint(.purple)
                 Spacer()
             }
-            Text("BYO is for AI Image Analysis only (OpenAI-compatible endpoints, including Azure). Test connection only checks connectivity/auth — it does not validate model compatibility. GPT-5 support may be limited across many API providers at this time. BYO is experimental and unsupported; use at your own risk.")
+            Text("BYO is for AI Image Analysis only (OpenAI-compatible endpoints, including Azure). Test connection only checks connectivity/auth — it does not validate model compatibility. GPT-5 support may be limited across many API providers at this time. BYO is experimental and unsupported; your mileage may vary.")
                 .font(.caption)
                 .foregroundColor(.secondary)
             if hasUnsavedBYOChanges {
@@ -554,6 +661,15 @@ extension AISettingsView {
     @ViewBuilder
     private var analysisModeSection: some View {
         VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "burst").foregroundColor(.yellow)
+                Text("ANALYSIS MODE")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+            }
+
             // Mode picker
             Picker("Analysis Mode", selection: Binding(
                 get: { aiService.analysisMode },
@@ -573,6 +689,7 @@ extension AISettingsView {
    
     @ViewBuilder
     private var currentModeDetails: some View {
+
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: aiService.analysisMode.iconName)
@@ -626,6 +743,7 @@ extension AISettingsView {
     }
 
     private var advancedOptionsSection: some View {
+<<<<<<< Updated upstream
           Section(header: Text("Advanced Options"), footer: Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations.")) {
               Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled).disabled(!foodSearchEnabled)
           }
@@ -638,6 +756,29 @@ extension AISettingsView {
                   .foregroundColor(.secondary)
           }
       }
+=======
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "syringe")
+                        .foregroundColor(.orange)
+                    Text("ADVANCED OPTIONS")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                        .lineLimit(1)
+                        .layoutPriority(1)
+                }
+                Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled)
+                    .disabled(!foodSearchEnabled)
+                Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+>>>>>>> Stashed changes
 
     private func saveSettings() {
         // Save all current settings to UserDefaults
