@@ -106,7 +106,11 @@ struct AISettingsView: View {
     // Feature flag for Food Search
     @State private var foodSearchEnabled: Bool = UserDefaults.standard.foodSearchEnabled
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
 =======
 
 >>>>>>> Stashed changes
@@ -744,6 +748,7 @@ extension AISettingsView {
 
     private var advancedOptionsSection: some View {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           Section(header: Text("Advanced Options"), footer: Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations.")) {
               Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled).disabled(!foodSearchEnabled)
           }
@@ -757,6 +762,8 @@ extension AISettingsView {
           }
       }
 =======
+=======
+>>>>>>> Stashed changes
         Section {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
@@ -778,6 +785,9 @@ extension AISettingsView {
             }
         }
     }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
     private func saveSettings() {
