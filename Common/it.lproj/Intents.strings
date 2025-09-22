@@ -1,36 +1,36 @@
 /* (No Comment) */
-"9KhaIS" = "Ho impostato la preimpostazione";
+"9KhaIS" = "Ho impostato il Preset";
 
 /* (No Comment) */
-"80eo5o" = "Agg. Carb. Assunti";
+"80eo5o" = "Aggiungi inserimento carboidrati";
 
 /* (No Comment) */
-"b085BW" = "I wasn't able to set the preset.";
+"b085BW" = "Non sono riuscito a impostare il Preset.";
 
 /* (No Comment) */
-"I4OZy8" = "Abilita Programma Alternativo";
+"I4OZy8" = "Attiva Preset Override";
 
 /* (No Comment) */
-"lYMuWV" = "Nome Programma Alternativo";
+"lYMuWV" = "Nome Override";
 
 /* (No Comment) */
-"nDKAmn" = "Qual'è il nome del programma alternativo che vuoi impostare?";
+"nDKAmn" = "Qual'è il nome dell'Override che vuoi impostare?";
 
 /* (No Comment) */
-"OcNxIj" = "Agg. Carb. Assunti";
+"OcNxIj" = "Aggiungi inserimento carboidrati";
 
 /* (No Comment) */
-"oLQSsJ" = "Abilita '${overrideName}' Programma Alternativo";
+"oLQSsJ" = "Attiva '${OverrideName}' Preset Override";
 
 /* (No Comment) */
-"XNNmtH" = "Enable preset in Loop";
+"XNNmtH" = "Attiva Preset in Loop";
 
 /* (No Comment) */
-"yBzwCL" = "Selezione Programma Alternativo";
+"yBzwCL" = "Selezione Override";
 
 /* (No Comment) */
-"yc02Yq" = "Aggiungi carboidrati a Loop";
+"yc02Yq" = "Aggiungi inserimento carboidrati a Loop";
 
 /* (No Comment) */
-"ZZ3mtM" = "Attiva Programma Alternativo in Loop";
+"ZZ3mtM" = "Attiva un Preset Override in Loop";
 

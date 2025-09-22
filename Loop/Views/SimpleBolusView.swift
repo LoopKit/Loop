@@ -146,7 +146,7 @@ struct SimpleBolusView: View {
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
                     text: enteredManualGlucose,
-                    placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
+                    placeholder: "– – –",
                     font: .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,

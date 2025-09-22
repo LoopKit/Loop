@@ -32,8 +32,8 @@ import LoopKitUI
             // round the edges of the progress view
             progressView.layer.cornerRadius = 2
             progressView.clipsToBounds = true
-            progressView.layer.sublayers![1].cornerRadius = 2
-            progressView.subviews[1].clipsToBounds = true
+            progressView.layer.sublayers!.last!.cornerRadius = 2
+            progressView.subviews.last!.clipsToBounds = true
         }
     }
     

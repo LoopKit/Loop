@@ -32,7 +32,7 @@ struct ManualGlucoseEntryRow: View {
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
                     text: $valueText,
-                    placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
+                    placeholder: "– – –",
                     font: .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,

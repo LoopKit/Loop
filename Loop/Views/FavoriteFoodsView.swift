@@ -70,7 +70,7 @@ struct FavoriteFoodsView: View {
                     dismissButton
                 }
             }
-            .navigationBarTitle("Favorite Foods", displayMode: .large)
+            .navigationBarTitle(String(localized: "Favorite Foods", comment: "Title for Favorite Foods view"), displayMode: .large)
         }
         .sheet(isPresented: $viewModel.isAddViewActive) {
             AddEditFavoriteFoodView(onSave: viewModel.onFoodSave(_:))
@@ -96,7 +96,7 @@ struct FavoriteFoodsView: View {
 extension FavoriteFoodsView {
     private var listHeader: some View {
         HStack {
-            Text("All Favorites")
+            Text("All Favorites", comment: "section header for list of existing FavoriteFoods")
                 .font(.title3)
                 .fontWeight(.semibold)
                 .textCase(nil)
@@ -131,7 +131,7 @@ extension FavoriteFoodsView {
             HStack {
                 Image(systemName: "plus.circle.fill")
                 
-                Text("Add a new favorite food")
+                Text("Add a new favorite food", comment: "Button label to open new favorite food view")
             }
         }
         .buttonStyle(ActionButtonStyle())
