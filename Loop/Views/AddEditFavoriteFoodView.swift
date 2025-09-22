@@ -27,8 +27,8 @@ struct AddEditFavoriteFoodView: View {
     }
     
     /// Initializer for presenting the `AddEditFavoriteFoodView` prepopulated from the `CarbEntryView`
-    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, onSave: @escaping (NewFavoriteFood) -> Void) {
-        self._viewModel = StateObject(wrappedValue: AddEditFavoriteFoodViewModel(carbsQuantity: carbsQuantity, foodType: foodType, absorptionTime: absorptionTime, onSave: onSave))
+    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, suggestedName: String? = nil, onSave: @escaping (NewFavoriteFood) -> Void) {
+        self._viewModel = StateObject(wrappedValue: AddEditFavoriteFoodViewModel(carbsQuantity: carbsQuantity, foodType: foodType, absorptionTime: absorptionTime, suggestedName: suggestedName, onSave: onSave))
     }
     
     var body: some View {
@@ -93,7 +93,7 @@ struct AddEditFavoriteFoodView: View {
             let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
             let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
             
-            TextFieldRow(text: $viewModel.name, isFocused: nameFocused, title: String(localized: "Name", comment: "Label for name row on add favorite food screen"), placeholder: String(localized: "Apple", comment: "Default name on add favorite food screen"))
+            TextFieldRow(text: $viewModel.name, isFocused: nameFocused, title: String(localized: "Name", comment: "Label for name row on add favorite food screen"), placeholder: String(localized: "Apple", comment: "Default name on add favorite food screen"), maxLength: AddEditFavoriteFoodViewModel.maxNameLength, adjustsFontToFitWidth: true))
             
             CardSectionDivider()
 

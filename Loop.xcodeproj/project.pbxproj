@@ -233,6 +233,21 @@
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
 		4FF4D1001E18374700846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
 		4FF4D1011E18375000846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
+		600E528A2E1569AD004D0346 /* VoiceSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52892E1569AD004D0346 /* VoiceSearchView.swift */; };
+		600E528B2E1569AD004D0346 /* BarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52862E1569AD004D0346 /* BarcodeScannerView.swift */; };
+		600E528C2E1569AD004D0346 /* FoodSearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52872E1569AD004D0346 /* FoodSearchBar.swift */; };
+		600E528D2E1569AD004D0346 /* AICameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52842E1569AD004D0346 /* AICameraView.swift */; };
+		600E528E2E1569AD004D0346 /* FoodSearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52882E1569AD004D0346 /* FoodSearchResultsView.swift */; };
+		600E528F2E1569AD004D0346 /* AISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52852E1569AD004D0346 /* AISettingsView.swift */; };
+		600E52972E1569C5004D0346 /* OpenFoodFactsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52952E1569C5004D0346 /* OpenFoodFactsModels.swift */; };
+		600E52982E1569C5004D0346 /* VoiceSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52962E1569C5004D0346 /* VoiceSearchResult.swift */; };
+		600E52992E1569C5004D0346 /* BarcodeScanResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E52942E1569C5004D0346 /* BarcodeScanResult.swift */; };
+		600E529B2E1569D3004D0346 /* OpenFoodFactsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E529A2E1569D3004D0346 /* OpenFoodFactsService.swift */; };
+		60DAE6D52E15845B005972E0 /* BarcodeScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DAE6D12E15845B005972E0 /* BarcodeScannerTests.swift */; };
+		60DAE6D62E15845B005972E0 /* FoodSearchIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DAE6D22E15845B005972E0 /* FoodSearchIntegrationTests.swift */; };
+		60DAE6D72E15845B005972E0 /* OpenFoodFactsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DAE6D32E15845B005972E0 /* OpenFoodFactsTests.swift */; };
+		60DAE6D82E15845B005972E0 /* VoiceSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DAE6D42E15845B005972E0 /* VoiceSearchTests.swift */; };
+		63F5E17C297DDF3900A62D4B /* ckcomplication.strings in Resources */ = {isa = PBXBuildFile; fileRef = 63F5E17A297DDF3900A62D4B /* ckcomplication.strings */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
 		84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D22A4A27A3000B658B /* LoopWidgets.swift */; };
@@ -632,6 +647,34 @@
 			remoteGlobalIDString = 4F75288A1DFE1DC600C322D6;
 			remoteInfo = LoopUI;
 		};
+		608994B42E1562EC00D6F0F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 432B0E881CDFC3C50045347B;
+			remoteInfo = LibreTransmitter;
+		};
+		608994B62E1562EC00D6F0F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 43A8EC82210E664300A81379;
+			remoteInfo = LibreTransmitterUI;
+		};
+		608994B82E1562EC00D6F0F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B40BF25E23ABD47400A43CEE;
+			remoteInfo = LibreTransmitterPlugin;
+		};
+		608994BA2E1562EC00D6F0F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C1BDBAFA2A4397E200A787D1;
+			remoteInfo = LibreDemoPlugin;
+		};
 		C117ED70232EDB3200DA57CD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -968,6 +1011,35 @@
 		4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		4FFEDFBE20E5CF22000BFC58 /* ChartHUDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartHUDController.swift; sourceTree = "<group>"; };
+		600E52842E1569AD004D0346 /* AICameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICameraView.swift; sourceTree = "<group>"; };
+		600E52852E1569AD004D0346 /* AISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISettingsView.swift; sourceTree = "<group>"; };
+		600E52862E1569AD004D0346 /* BarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
+		600E52872E1569AD004D0346 /* FoodSearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchBar.swift; sourceTree = "<group>"; };
+		600E52882E1569AD004D0346 /* FoodSearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchResultsView.swift; sourceTree = "<group>"; };
+		600E52892E1569AD004D0346 /* VoiceSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSearchView.swift; sourceTree = "<group>"; };
+		600E52942E1569C5004D0346 /* BarcodeScanResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScanResult.swift; sourceTree = "<group>"; };
+		600E52952E1569C5004D0346 /* OpenFoodFactsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsModels.swift; sourceTree = "<group>"; };
+		600E52962E1569C5004D0346 /* VoiceSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSearchResult.swift; sourceTree = "<group>"; };
+		600E529A2E1569D3004D0346 /* OpenFoodFactsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsService.swift; sourceTree = "<group>"; };
+		60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LibreTransmitter.xcodeproj; path = ../LibreTransmitter/LibreTransmitter.xcodeproj; sourceTree = SOURCE_ROOT; };
+		60DAE6D12E15845B005972E0 /* BarcodeScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerTests.swift; sourceTree = "<group>"; };
+		60DAE6D22E15845B005972E0 /* FoodSearchIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchIntegrationTests.swift; sourceTree = "<group>"; };
+		60DAE6D32E15845B005972E0 /* OpenFoodFactsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsTests.swift; sourceTree = "<group>"; };
+		60DAE6D42E15845B005972E0 /* VoiceSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSearchTests.swift; sourceTree = "<group>"; };
+		63F5E17B297DDF3900A62D4B /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/ckcomplication.strings; sourceTree = "<group>"; };
+		7D199D93212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Main.strings; sourceTree = "<group>"; };
+		7D199D94212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/MainInterface.strings; sourceTree = "<group>"; };
+		7D199D95212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Interface.strings; sourceTree = "<group>"; };
+		7D199D96212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D199D97212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D199D99212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D199D9A212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D199D9D212A067700241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D23667521250BE30028B67D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D23667621250BF70028B67D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D23667821250C2D0028B67D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D23667921250C440028B67D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D23667A21250C480028B67D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7D23667C21250C7E0028B67D /* LocalizedString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LocalizedString.swift; path = LoopUI/Common/LocalizedString.swift; sourceTree = SOURCE_ROOT; };
 		7D9BEEE62335A6B3005DCFD6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		7D9BEEE82335A6B9005DCFD6 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
@@ -1380,6 +1452,10 @@
 		F5E0BDE327E1D7230033557E /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		600E52BB2E156B40004D0346 /* Services */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Services; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		14B1735928AED9EC006CCD7C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -1603,6 +1679,9 @@
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				600E52942E1569C5004D0346 /* BarcodeScanResult.swift */,
+				600E52952E1569C5004D0346 /* OpenFoodFactsModels.swift */,
+				600E52962E1569C5004D0346 /* VoiceSearchResult.swift */,
 				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
@@ -1630,6 +1709,7 @@
 		43776F831B8022E90074EA36 = {
 			isa = PBXGroup;
 			children = (
+				60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */,
 				C18A491122FCC20B00FDA733 /* Scripts */,
 				4FF4D0FA1E1834BD00846527 /* Common */,
 				43776F8E1B8022E90074EA36 /* Loop */,
@@ -1670,6 +1750,7 @@
 		43776F8E1B8022E90074EA36 /* Loop */ = {
 			isa = PBXGroup;
 			children = (
+				600E52BB2E156B40004D0346 /* Services */,
 				C16DA84022E8E104008624C2 /* Plugins */,
 				B66D1F322E6A5D6600471149 /* Localizable.xcstrings */,
 				B66D1F382E6A5D6600471149 /* InfoPlist.xcstrings */,
@@ -1907,6 +1988,12 @@
 		43F5C2CF1B92A2ED003EB13D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				600E52842E1569AD004D0346 /* AICameraView.swift */,
+				600E52852E1569AD004D0346 /* AISettingsView.swift */,
+				600E52862E1569AD004D0346 /* BarcodeScannerView.swift */,
+				600E52872E1569AD004D0346 /* FoodSearchBar.swift */,
+				600E52882E1569AD004D0346 /* FoodSearchResultsView.swift */,
+				600E52892E1569AD004D0346 /* VoiceSearchView.swift */,
 				1452F4AA2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift */,
 				B4001CED28CBBC82002FB414 /* AlertManagementView.swift */,
 				897A5A9524C2175B00C4E71D /* BolusEntryView.swift */,
@@ -1946,6 +2033,7 @@
 		43F5C2E41B93C5D4003EB13D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				600E529A2E1569D3004D0346 /* OpenFoodFactsService.swift */,
 				B42D124228D371C400E43D22 /* AlertMuter.swift */,
 				1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */,
 				439897361CD2F80600223065 /* AnalyticsServicesManager.swift */,
@@ -1989,6 +2077,10 @@
 		43F78D2C1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXGroup;
 			children = (
+				60DAE6D12E15845B005972E0 /* BarcodeScannerTests.swift */,
+				60DAE6D22E15845B005972E0 /* FoodSearchIntegrationTests.swift */,
+				60DAE6D32E15845B005972E0 /* OpenFoodFactsTests.swift */,
+				60DAE6D42E15845B005972E0 /* VoiceSearchTests.swift */,
 				E9C58A7624DB510500487A17 /* Fixtures */,
 				B4CAD8772549D2330057946B /* LoopCore */,
 				1DA7A83F24476E8C008257F0 /* Managers */,
@@ -2159,6 +2251,17 @@
 				E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		608994AE2E1562EC00D6F0F7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				608994B52E1562EC00D6F0F7 /* LibreTransmitter.framework */,
+				608994B72E1562EC00D6F0F7 /* LibreTransmitterUI.framework */,
+				608994B92E1562EC00D6F0F7 /* LibreTransmitterPlugin.loopplugin */,
+				608994BB2E1562EC00D6F0F7 /* LibreDemoPlugin.loopplugin */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		7D23667B21250C5A0028B67D /* Common */ = {
@@ -2682,6 +2785,9 @@
 				E9B07F93253BBA6500BAD8F8 /* PBXTargetDependency */,
 				14B1736828AED9EE006CCD7C /* PBXTargetDependency */,
 			);
+			fileSystemSynchronizedGroups = (
+				600E52BB2E156B40004D0346 /* Services */,
+			);
 			name = Loop;
 			packageProductDependencies = (
 				C1F00C5F285A802A006302C5 /* SwiftCharts */,
@@ -2991,6 +3097,12 @@
 			);
 			productRefGroup = 43776F8D1B8022E90074EA36 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 608994AE2E1562EC00D6F0F7 /* Products */;
+					ProjectRef = 60DAD4812E11B0F000ECACA0 /* LibreTransmitter.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				43776F8B1B8022E90074EA36 /* Loop */,
@@ -3006,6 +3118,37 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		608994B52E1562EC00D6F0F7 /* LibreTransmitter.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = LibreTransmitter.framework;
+			remoteRef = 608994B42E1562EC00D6F0F7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		608994B72E1562EC00D6F0F7 /* LibreTransmitterUI.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = LibreTransmitterUI.framework;
+			remoteRef = 608994B62E1562EC00D6F0F7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		608994B92E1562EC00D6F0F7 /* LibreTransmitterPlugin.loopplugin */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = LibreTransmitterPlugin.loopplugin;
+			remoteRef = 608994B82E1562EC00D6F0F7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		608994BB2E1562EC00D6F0F7 /* LibreDemoPlugin.loopplugin */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = LibreDemoPlugin.loopplugin;
+			remoteRef = 608994BA2E1562EC00D6F0F7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		14B1735A28AED9EC006CCD7C /* Resources */ = {
@@ -3318,6 +3461,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
+				600E528A2E1569AD004D0346 /* VoiceSearchView.swift in Sources */,
+				600E528B2E1569AD004D0346 /* BarcodeScannerView.swift in Sources */,
+				600E528C2E1569AD004D0346 /* FoodSearchBar.swift in Sources */,
+				600E528D2E1569AD004D0346 /* AICameraView.swift in Sources */,
+				600E528E2E1569AD004D0346 /* FoodSearchResultsView.swift in Sources */,
+				600E528F2E1569AD004D0346 /* AISettingsView.swift in Sources */,
 				897A5A9624C2175B00C4E71D /* BolusEntryView.swift in Sources */,
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
 				A9A056B324B93C62007CF06D /* CriticalEventLogExportView.swift in Sources */,
@@ -3458,6 +3607,7 @@
 				A999D40624663D18004C89D4 /* PumpManagerError.swift in Sources */,
 				437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */,
 				A987CD4924A58A0100439ADC /* ZipArchive.swift in Sources */,
+				600E529B2E1569D3004D0346 /* OpenFoodFactsService.swift in Sources */,
 				43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */,
 				A9CBE45C248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift in Sources */,
 				433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */,
@@ -3475,6 +3625,9 @@
 				4372E490213CFCE70068E043 /* LoopSettingsUserInfo.swift in Sources */,
 				C174233C259BEB0F00399C9D /* ManualEntryDoseViewModel.swift in Sources */,
 				89CA2B3D226E6B13004D9350 /* LocalTestingScenariosManager.swift in Sources */,
+				600E52972E1569C5004D0346 /* OpenFoodFactsModels.swift in Sources */,
+				600E52982E1569C5004D0346 /* VoiceSearchResult.swift in Sources */,
+				600E52992E1569C5004D0346 /* BarcodeScanResult.swift in Sources */,
 				1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */,
 				E9B0802B253BBDFF00BAD8F8 /* IntentExtensionInfo.swift in Sources */,
 				C1E3862628247C6100F561A4 /* StoredLoopNotRunningNotification.swift in Sources */,
@@ -3661,6 +3814,10 @@
 				A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */,
 				C16575732538AFF6004AE16E /* CGMStalenessMonitorTests.swift in Sources */,
 				1DA7A84424477698008257F0 /* InAppModalAlertSchedulerTests.swift in Sources */,
+				60DAE6D52E15845B005972E0 /* BarcodeScannerTests.swift in Sources */,
+				60DAE6D62E15845B005972E0 /* FoodSearchIntegrationTests.swift in Sources */,
+				60DAE6D72E15845B005972E0 /* OpenFoodFactsTests.swift in Sources */,
+				60DAE6D82E15845B005972E0 /* VoiceSearchTests.swift in Sources */,
 				1D70C40126EC0F9D00C62570 /* SupportManagerTests.swift in Sources */,
 				E93E86A824DDCC4400FF40C8 /* MockDoseStore.swift in Sources */,
 				B4D4534128E5CA7900F1A8D9 /* AlertMuterTests.swift in Sources */,
@@ -4345,7 +4502,7 @@
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = 4S2EW2Q6ZW;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4356,6 +4513,7 @@
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
 				"OTHER_SWIFT_FLAGS[sdk=iphonesimulator*]" = "-D IOS_SIMULATOR -D DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.4S2EW2Q6ZW.loopkit.Loop;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_DEBUG)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -4374,8 +4532,9 @@
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				DEVELOPMENT_TEAM = 4S2EW2Q6ZW;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				"FRAMEWORK_SEARCH_PATHS[arch=*]" = LibreTransmitter;
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4383,6 +4542,7 @@
 				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.4S2EW2Q6ZW.loopkit.Loop;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_RELEASE)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

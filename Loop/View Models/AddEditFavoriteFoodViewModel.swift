@@ -11,6 +11,7 @@ import LoopKit
 import HealthKit
 
 final class AddEditFavoriteFoodViewModel: ObservableObject {
+    static let maxNameLength = 30
     enum Alert: Identifiable {
         var id: Self {
             return self
@@ -39,14 +40,41 @@ final class AddEditFavoriteFoodViewModel: ObservableObject {
     @Published var alert: AddEditFavoriteFoodViewModel.Alert?
     
     private let onSave: (NewFavoriteFood) -> ()
+
+    private static func truncatedName(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let clean = trimmed
+        guard clean.count > maxNameLength else { return clean }
+        let endIndex = clean.index(clean.startIndex, offsetBy: maxNameLength)
+        return String(clean[..<endIndex])
+    }
+
+    private static func resolvedFoodType(initial: String, additionalCandidates: [String?]) -> String {
+        let trimmedInitial = initial.trimmingCharacters(in: .whitespacesAndNewlines)
+        let extraCandidates = additionalCandidates.compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+        let nonEmptyExtras = extraCandidates.filter { !$0.isEmpty }
+
+        // Prefer any mapped emoji for known simple foods using the provided candidates.
+        let lookupCandidates = ([trimmedInitial] + nonEmptyExtras).filter { !$0.isEmpty }
+        if let emoji = lookupCandidates.compactMap({ EmojiThumbnailProvider.emoji(for: $0) }).first {
+            return emoji
+        }
+
+        // If no emoji mapping, fall back to the first non-empty candidate (initial or provided name).
+        if !trimmedInitial.isEmpty {
+            return trimmedInitial
+        }
+        return nonEmptyExtras.first ?? trimmedInitial
+    }
     
     init(originalFavoriteFood: StoredFavoriteFood?, onSave: @escaping (NewFavoriteFood) -> ()) {
         self.onSave = onSave
         if let food = originalFavoriteFood {
             self.originalFavoriteFood = food
-            self.name = food.name
+            self.name = Self.truncatedName(food.name)
             self.carbsQuantity = food.carbsQuantity.doubleValue(for: preferredCarbUnit)
-            self.foodType = food.foodType
+            self.foodType = Self.resolvedFoodType(initial: food.foodType,
+                                                  additionalCandidates: [food.name])
             self.absorptionTime = food.absorptionTime
         }
         else {
@@ -54,11 +82,13 @@ final class AddEditFavoriteFoodViewModel: ObservableObject {
         }
     }
     
-    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, onSave: @escaping (NewFavoriteFood) -> ()) {
+    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, suggestedName: String? = nil, onSave: @escaping (NewFavoriteFood) -> ()) {
         self.onSave = onSave
         self.carbsQuantity = carbsQuantity
-        self.foodType = foodType
+        self.foodType = Self.resolvedFoodType(initial: foodType,
+                                              additionalCandidates: [suggestedName])
         self.absorptionTime = absorptionTime
+        self.name = Self.truncatedName(suggestedName ?? "")
     }
     
     var originalFavoriteFood: StoredFavoriteFood?

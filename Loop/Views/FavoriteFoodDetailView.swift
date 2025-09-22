@@ -32,6 +32,22 @@ public struct FavoriteFoodDetailView: View {
     public var body: some View {
         if let food {
             List {
+                if let thumb = thumbnailForFood(food) {
+                    Section {
+                        Image(uiImage: thumb)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 160)
+                            .frame(maxWidth: .infinity)
+                            .clipped()
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color(.separator), lineWidth: 0.5)
+                            )
+                    }
+                    .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 0, trailing: 12))
+                }
                 Section("Information") {
                     VStack(spacing: 16) {
                         let rows: [(field: String, value: String)] = [
@@ -46,8 +62,48 @@ public struct FavoriteFoodDetailView: View {
                                     .font(.subheadline)
                                 Spacer()
                                 Text(row.value)
+                        HStack {
+                            Text("Name")
+                                .font(.subheadline)
+                            Spacer()
+                            Text(food.name)
+                                .font(.subheadline)
+                        }
+
+                        HStack {
+                            Text("Carb Quantity")
+                                .font(.subheadline)
+                            Spacer()
+                            Text(food.carbsString(formatter: carbFormatter))
+                                .font(.subheadline)
+                        }
+
+                        HStack(alignment: .center) {
+                            Text("Food Type")
+                                .font(.subheadline)
+                            Spacer()
+                            if let thumb = thumbnailForFood(food) {
+                                Image(uiImage: thumb)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 32, height: 32)
+                                    .cornerRadius(6)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                    )
+                            } else {
+                                Text(food.foodType)
                                     .font(.subheadline)
                             }
+                        }
+
+                        HStack {
+                            Text("Absorption Time")
+                                .font(.subheadline)
+                            Spacer()
+                            Text(food.absorptionTimeString(formatter: absorptionTimeFormatter))
+                                .font(.subheadline)
                         }
                     }
                 }
@@ -55,7 +111,7 @@ public struct FavoriteFoodDetailView: View {
                 
                 Button(role: .destructive, action: { isConfirmingDelete.toggle() }) {
                     Text("Delete Food")
-                        .frame(maxWidth: .infinity, alignment: .center) // Align text in center
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
             .alert(isPresented: $isConfirmingDelete) {
@@ -69,5 +125,13 @@ public struct FavoriteFoodDetailView: View {
             .insetGroupedListStyle()
             .navigationTitle(food.title)
         }
+    }
+}
+
+extension FavoriteFoodDetailView {
+    private func thumbnailForFood(_ food: StoredFavoriteFood) -> UIImage? {
+        let map = UserDefaults.standard.favoriteFoodImageIDs
+        guard let id = map[food.id] else { return nil }
+        return FavoriteFoodImageStore.loadThumbnail(id: id)
     }
 }

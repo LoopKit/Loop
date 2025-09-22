@@ -30,7 +30,16 @@ struct FavoriteFoodsView: View {
                     else {
                         Section(header: listHeader) {
                             ForEach(viewModel.favoriteFoods) { food in
-                                FavoriteFoodListRow(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit)
+                                FavoriteFoodListRow(
+                                    food: food,
+                                    foodToConfirmDeleteId: $foodToConfirmDeleteId,
+                                    onFoodTap: onFoodTap(_:),
+                                    onFoodDelete: viewModel.onFoodDelete(_:),
+                                    carbFormatter: viewModel.carbFormatter,
+                                    absorptionTimeFormatter: viewModel.absorptionTimeFormatter,
+                                    preferredCarbUnit: viewModel.preferredCarbUnit,
+                                    thumbnail: thumbnailForFood(food)
+                                )
                                     .environment(\.editMode, self.$editMode)
                                     .listRowInsets(EdgeInsets())
                             }
@@ -126,5 +135,13 @@ extension FavoriteFoodsView {
             }
         }
         .buttonStyle(ActionButtonStyle())
+    }
+}
+
+extension FavoriteFoodsView {
+    private func thumbnailForFood(_ food: StoredFavoriteFood) -> UIImage? {
+        let map = UserDefaults.standard.favoriteFoodImageIDs
+        guard let id = map[food.id] else { return nil }
+        return FavoriteFoodImageStore.loadThumbnail(id: id)
     }
 }
