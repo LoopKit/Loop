@@ -205,7 +205,7 @@ class InsulinDeliveryLogViewModel {
         }
         
         let automationEnabled = loopDataManager.automaticDosingStatus.automaticDosingEnabled
-        let automatedTreatmentState = pumpManager.pumpManagerDelegate?.automatedTreatmentState ?? .neutralNoOverride
+        let automatedTreatmentState = loopDataManager.automatedTreatmentState ?? .neutralNoOverride
 
         if insulinSuspended {
             return .error(status: .suspended)

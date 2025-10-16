@@ -421,8 +421,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         charts.updateEndDate(charts.maxEndDate)
     }
     
-    private var lastDoseEntry: DoseEntry?
-
     override func reloadData(animated: Bool = false) async {
         dispatchPrecondition(condition: .onQueue(.main))
 
@@ -509,8 +507,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         if currentContext.contains(.insulin) {
             doseEntries = try? await loopManager.doseStore.getNormalizedDoseEntries(start: startDate, end: nil)
-            lastDoseEntry = try? await loopManager.doseStore.getNormalizedDoseEntries(start: Date().addingTimeInterval(.days(-1)), end: nil).filter({ $0.automatic == false }).last
-
             iobValues = loopManager.iobValues.filterDateRange(startDate, nil)
             totalDelivery = await loopManager.totalDeliveredToday()?.value
         }
@@ -1116,15 +1112,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         }
     }
-    
+
     @ViewBuilder
     private func iobFooterViewContent() -> some View {
-        let formatter = QuantityFormatter(for: .internationalUnit)
-        
-        if let lastManualDose = lastDoseEntry, let formattedBolusValue = formatter.string(from: LoopQuantity(unit: .internationalUnit, doubleValue: lastManualDose.deliveredUnits ?? lastManualDose.value)), lastManualDose.endDate <= Date() {
-            
-            let hoursDifference = Date().timeIntervalSince(lastManualDose.endDate) / 3600
-            
+        if let lastManualDose = loopManager.lastManualBolus, let formattedBolusValue = insulinFormatter.string(from: LoopQuantity(unit: .internationalUnit, doubleValue: lastManualDose.amount)) {
+
+            let hoursDifference = Date().timeIntervalSince(lastManualDose.startDate) / 3600
+
             let lastBolusLabel = Text("Last Bolus: ")
             let lastBolusValue = Text("\(formattedBolusValue) ").fontWeight(.semibold)
             let icon = Text(Image(systemName: "hourglass.bottomhalf.filled")).foregroundStyle(.secondary)

@@ -517,6 +517,9 @@
 		C1DA43552B193BCB00CBD33F /* MockUploadEventListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DA43542B193BCB00CBD33F /* MockUploadEventListener.swift */; };
 		C1DA43572B1A70BE00CBD33F /* SettingsManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DA43562B1A70BE00CBD33F /* SettingsManagerTests.swift */; };
 		C1DA43592B1A784900CBD33F /* MockDeliveryDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DA43582B1A784900CBD33F /* MockDeliveryDelegate.swift */; };
+		C1DCEDDD2E983A22001A7BB0 /* AutomatedTreatmentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DCEDDC2E983A1B001A7BB0 /* AutomatedTreatmentState.swift */; };
+		C1DCEDF42E999D5E001A7BB0 /* LastManualBolus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DCEDF32E999D5A001A7BB0 /* LastManualBolus.swift */; };
+		C1DCEDF52E999D5E001A7BB0 /* LastManualBolus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DCEDF32E999D5A001A7BB0 /* LastManualBolus.swift */; };
 		C1DE5D23251BFC4D00439E49 /* SimpleBolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */; };
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		C1E3862628247C6100F561A4 /* StoredLoopNotRunningNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */; };
@@ -1554,6 +1557,8 @@
 		C1DA43562B1A70BE00CBD33F /* SettingsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManagerTests.swift; sourceTree = "<group>"; };
 		C1DA43582B1A784900CBD33F /* MockDeliveryDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDeliveryDelegate.swift; sourceTree = "<group>"; };
 		C1DA986B2843B6F9001D04CC /* PersistedProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedProperty.swift; sourceTree = "<group>"; };
+		C1DCEDDC2E983A1B001A7BB0 /* AutomatedTreatmentState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomatedTreatmentState.swift; sourceTree = "<group>"; };
+		C1DCEDF32E999D5A001A7BB0 /* LastManualBolus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastManualBolus.swift; sourceTree = "<group>"; };
 		C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleBolusView.swift; sourceTree = "<group>"; };
 		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
 		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MKRingProgressView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2620,6 +2625,7 @@
 		895788B4242E69C8002CB114 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				C1DCEDDC2E983A1B001A7BB0 /* AutomatedTreatmentState.swift */,
 				89E08FC7242E76E9000D719B /* AnyTransition.swift */,
 				895788A9242E69A1002CB114 /* Color.swift */,
 				89F9118E24352F1600ECCAF3 /* DigitalCrownRotation.swift */,
@@ -2840,6 +2846,7 @@
 		C1ED6C632E7C6DA6002F91C2 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				C1DCEDF32E999D5A001A7BB0 /* LastManualBolus.swift */,
 				C1ED6C812E7D8E36002F91C2 /* AcknowledgeAlertUserInfo.swift */,
 				A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */,
 				4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */,
@@ -3851,6 +3858,7 @@
 				89A605E72432860C009C1096 /* PeriodicPublisher.swift in Sources */,
 				895788AE242E69A2002CB114 /* CarbAndBolusFlow.swift in Sources */,
 				89A605F12432BD18009C1096 /* BolusConfirmationVisual.swift in Sources */,
+				C1DCEDDD2E983A22001A7BB0 /* AutomatedTreatmentState.swift in Sources */,
 				898ECA65218ABD9B001E9D35 /* CGRect.swift in Sources */,
 				43CB2B2B1D924D450079823D /* WCSession.swift in Sources */,
 				43BFF0B51E45C1E700FF19A9 /* NumberFormatter.swift in Sources */,
@@ -3880,6 +3888,7 @@
 				C1ED6C622E79BBA5002F91C2 /* NotificationManager.swift in Sources */,
 				C1ED6C7B2E7C6FE6002F91C2 /* WatchContextRequestUserInfo.swift in Sources */,
 				C1ED6C6F2E7C6EDE002F91C2 /* IntentExtensionInfo.swift in Sources */,
+				C1DCEDF42E999D5E001A7BB0 /* LastManualBolus.swift in Sources */,
 				C1ED6C752E7C6F36002F91C2 /* WatchContext.swift in Sources */,
 				43D9002021EB209400AF44BF /* NSTimeInterval.swift in Sources */,
 				C1ED6C712E7C6F07002F91C2 /* SetBolusUserInfo.swift in Sources */,
@@ -3915,6 +3924,7 @@
 				C1ED6C612E79BBA5002F91C2 /* NotificationManager.swift in Sources */,
 				C1ED6C7A2E7C6FE5002F91C2 /* WatchContextRequestUserInfo.swift in Sources */,
 				C1ED6C6E2E7C6EDE002F91C2 /* IntentExtensionInfo.swift in Sources */,
+				C1DCEDF52E999D5E001A7BB0 /* LastManualBolus.swift in Sources */,
 				C1ED6C742E7C6F36002F91C2 /* WatchContext.swift in Sources */,
 				43D9FFFB21EAF3D300AF44BF /* NSTimeInterval.swift in Sources */,
 				C1ED6C702E7C6F07002F91C2 /* SetBolusUserInfo.swift in Sources */,

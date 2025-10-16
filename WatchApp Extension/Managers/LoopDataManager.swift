@@ -283,7 +283,14 @@ extension LoopDataManager {
 
         ActivityPreset.ActivityType.allCases.forEach { activityType in
             if !settings.overridePresets.contains(where: { $0.id == activityType.id }) {
-                presets.append(.activity(ActivityPreset(activityType: activityType, preset: activityType.defaultPreset(duration: .finite(.minutes(90))))))
+                presets.append(
+                    .activity(
+                        ActivityPreset(
+                            activityType: activityType,
+                            preset: activityType.defaultPreset(duration: .finite(.minutes(90)))
+                        )
+                    )
+                )
             }
         }
 

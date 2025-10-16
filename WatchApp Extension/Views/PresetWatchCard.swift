@@ -69,6 +69,18 @@ struct PresetWatchCard: View {
     let correctionRange: ClosedRange<LoopQuantity>?
     let isScheduled: Bool
 
+    init(presetId: String, icon: PresetSymbol?, presetName: String, duration: PresetDuration, insulinMultiplier: Double?, correctionRange: ClosedRange<LoopQuantity>?, isScheduled: Bool) {
+        self.presetId = presetId
+        self.icon = icon
+        self.presetName = presetName
+        self.duration = duration
+        self.insulinMultiplier = insulinMultiplier
+        self.correctionRange = correctionRange
+        self.isScheduled = isScheduled
+
+        print("preset \(presetName), icon = \(icon)")
+    }
+
     private var numberFormatter: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .percent

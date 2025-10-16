@@ -18,6 +18,8 @@ struct ChartPageView: View {
 
     @State private var isShowingCarbList: Bool = false
 
+    @ScaledMetric private var iconSize: Double = 26
+
     var presetActive: Bool {
         return loopManager.watchInfo.scheduleOverride?.isActive() == true
     }
@@ -132,29 +134,32 @@ struct ChartPageView: View {
             LoopHeader()
             chartView
 
-            VStack {
-                LabelValueRow(
-                    label: "Active Insulin",
-                    value: activeInsulin
-                )
+            VStack(spacing: 8) {
+                LabelValueRow("Active Insulin") {
+                    Text(activeInsulin ?? "-")
+                }
                 Divider()
-                LabelValueRow(
-                    label: "Active Carbs",
-                    value: activeCarbohydrates
-                )
+                LabelValueRow("Active Carbs") {
+                    Text(activeCarbohydrates ?? "-")
+                }
                 .onTapGesture {
                     isShowingCarbList = true
                 }
                 Divider()
-                LabelValueRow(
-                    label: "Net Basal Rate",
-                    value: netTempBasalDose
-                )
+                LabelValueRow("Last Bolus") {
+                    Text(netTempBasalDose ?? "-")
+                }
+                if let automatedTreatmentState = loopManager.activeContext?.automatedTreatmentState {
+                    Divider()
+                    LabelValueRow("Current Delivery") {
+                        Text(automatedTreatmentState.iconImage) +
+                        Text(" " + automatedTreatmentState.shortDescription)
+                    }
+                }
                 Divider()
-                LabelValueRow(
-                    label: "Reservoir Volume",
-                    value: reservoirVolume
-                )
+                LabelValueRow("Reservoir Volume") {
+                    Text(reservoirVolume ?? "-")
+                }
             }
             .padding(.horizontal)
         }

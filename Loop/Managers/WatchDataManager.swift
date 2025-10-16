@@ -335,6 +335,8 @@ final class WatchDataManager: NSObject {
         }
 
         context.iob = loopDataManager.activeInsulin?.value
+        context.automatedTreatmentState = loopDataManager.automatedTreatmentState
+        context.lastManualBolus = loopDataManager.lastManualBolus
 
         dosingDecision.historicalGlucose = historicalGlucose
         dosingDecision.insulinOnBoard = loopDataManager.activeInsulin

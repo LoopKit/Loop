@@ -113,6 +113,8 @@ final class LoopDataManager: ObservableObject {
     @Published private(set) var lastLoopCompleted: Date?
     @Published private(set) var publishedMostRecentGlucoseDataDate: Date?
     @Published private(set) var publishedMostRecentPumpDataDate: Date?
+    @Published private(set) var lastManualBolus: LastManualBolus?
+
 
     var deliveryDelegate: DeliveryDelegate?
 
@@ -217,7 +219,7 @@ final class LoopDataManager: ObservableObject {
                 queue: nil
             ) { (note) -> Void in
                 Task { @MainActor in
-                    self.logger.default("Received notification of carb entries changing")
+                    self.logger.default("**** Received notification of carb entries changing")
                     await self.updateDisplayState()
                     self.notify(forChange: .carbs)
                 }
@@ -228,19 +230,19 @@ final class LoopDataManager: ObservableObject {
                 queue: nil
             ) { (note) in
                 Task { @MainActor in
-                    self.logger.default("Received notification of glucose samples changing")
+                    self.logger.default("**** Received notification of glucose samples changing")
                     self.restartGlucoseValueStalenessTimer()
                     await self.updateDisplayState()
                     self.notify(forChange: .glucose)
                 }
             },
             NotificationCenter.default.addObserver(
-                forName: nil,
+                forName: DoseStore.valuesDidChange,
                 object: self.doseStore,
                 queue: OperationQueue.main
             ) { (note) in
                 Task { @MainActor in
-                    self.logger.default("Received notification of dosing changing")
+                    self.logger.default("**** Received notification of dosing changing: reason = %{public}@", note.userInfo?["Reason"] as? String ?? "unknown")
                     await self.updateDisplayState()
                     self.notify(forChange: .insulin)
                 }
@@ -253,7 +255,7 @@ final class LoopDataManager: ObservableObject {
                 let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopUpdateContext.RawValue
                 if case .preferences = LoopUpdateContext(rawValue: context) {
                     Task { @MainActor in
-                        self.logger.default("Received notification of settings changing")
+                        self.logger.default("**** Received notification of settings changing")
                         await self.updateDisplayState()
                         self.notify(forChange: .forecast)
                     }
@@ -500,15 +502,27 @@ final class LoopDataManager: ObservableObject {
     }
 
     func updateDisplayState() async {
+        logger.debug("**** updateDisplayState")
+
         var newState = AlgorithmDisplayState()
         do {
-            let midnight = Calendar.current.startOfDay(for: Date())
+            let lastManualBolusVisibilityWindowStartDate = Date().addingTimeInterval(.days(-1))
 
-            var input = try await fetchData(for: now(), ensureDosingCoverageStart: midnight)
+            var input = try await fetchData(for: now(), ensureDosingCoverageStart: lastManualBolusVisibilityWindowStartDate)
             input.recommendationType = .manualBolus
             newState.input = input
             newState.output = LoopAlgorithm.run(input: input)
 
+            let lastStoredManualBolus = input.doses.last(
+                where: {
+                    $0.startDate >= lastManualBolusVisibilityWindowStartDate && $0.deliveryType == .bolus && $0.automatic == false
+                })
+
+            if let lastStoredManualBolus,
+               self.lastManualBolus == nil || lastStoredManualBolus.startDate >= self.lastManualBolus!.startDate
+            {
+                self.lastManualBolus = LastManualBolus(amount: lastStoredManualBolus.volume, startDate: lastStoredManualBolus.startDate)
+            }
         } catch {
             let loopError = error as? LoopError ?? .unknownError(error)
             logger.error("Error updating Loop state: %{public}@", String(describing: loopError))
@@ -1260,7 +1274,9 @@ extension LoopDataManager: SimpleBolusViewModelDelegate {
     }
     
     func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws {
+        let startDate = Date()
         try await deliveryDelegate?.enactBolus(units: units, decisionId: decisionId, activationType: activationType)
+        lastManualBolus = LastManualBolus(amount: units, startDate: startDate)
     }
     
 }
@@ -1589,7 +1605,7 @@ extension LoopDataManager: LoopControl {
         return deliveryDelegate?.basalDeliveryState?.currentBasalRate(currentScheduledBasalRate: scheduledBasalRate)
     }
     
-    var automatedTreatmentState: LoopKit.AutomatedTreatmentState? {
+    var automatedTreatmentState: AutomatedTreatmentState? {
         guard let input = displayState.input else {
             return nil
         }

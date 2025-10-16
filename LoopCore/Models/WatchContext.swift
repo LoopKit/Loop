@@ -38,6 +38,8 @@ public final class WatchContext: RawRepresentable {
     public var lastNetTempBasalDose: Double?
     public var lastNetTempBasalDate: Date?
     public var recommendedBolusDose: Double?
+    public var automatedTreatmentState: AutomatedTreatmentState?
+    public var lastManualBolus: LastManualBolus?
 
     public var potentialCarbEntry: NewCarbEntry?
 
@@ -74,6 +76,8 @@ public final class WatchContext: RawRepresentable {
         reservoirPercentage: Double? = nil,
         batteryPercentage: Double? = nil,
         cgmManagerState: CGMManager.RawStateValue? = nil,
+        automatedTreatmentState: AutomatedTreatmentState? = nil,
+        lastManualBolus: LastManualBolus? = nil,
         isClosedLoop: Bool? = nil
     ) {
         self.creationDate = creationDate
@@ -98,6 +102,8 @@ public final class WatchContext: RawRepresentable {
         self.reservoirPercentage = reservoirPercentage
         self.batteryPercentage = batteryPercentage
         self.cgmManagerState = cgmManagerState
+        self.automatedTreatmentState = automatedTreatmentState
+        self.lastManualBolus = lastManualBolus
         self.isClosedLoop = isClosedLoop
     }
 
@@ -138,6 +144,11 @@ public final class WatchContext: RawRepresentable {
         loopLastRunDate = rawValue["ld"] as? Date
         lastNetTempBasalDose = rawValue["ba"] as? Double
         lastNetTempBasalDate = rawValue["bad"] as? Date
+
+        if let rawAutomatedTreatmentState = rawValue["ats"] as? AutomatedTreatmentState.RawValue {
+            automatedTreatmentState = AutomatedTreatmentState(rawValue: rawAutomatedTreatmentState)
+        }
+
         recommendedBolusDose = rawValue["rbo"] as? Double
         if let rawPotentialCarbEntry = rawValue["pce"] as? NewCarbEntry.RawValue {
             potentialCarbEntry = NewCarbEntry(rawValue: rawPotentialCarbEntry)
@@ -184,6 +195,9 @@ public final class WatchContext: RawRepresentable {
         raw["iob"] = iob
         raw["ld"] = loopLastRunDate
         raw["r"] = reservoir
+
+        raw["ats"] = automatedTreatmentState?.rawValue
+
         raw["rbo"] = recommendedBolusDose
         raw["pce"] = potentialCarbEntry?.rawValue
         raw["rp"] = reservoirPercentage

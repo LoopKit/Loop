@@ -405,7 +405,7 @@ final class BolusEntryViewModel: ObservableObject {
             do {
                 try await delegate.enactBolus(units: amountToDeliver, decisionId: dosingDecision.id, activationType: activationType)
             } catch {
-                log.error("Failed to store bolus: %{public}@", String(describing: error))
+                log.error("Failed to enact bolus: %{public}@", String(describing: error))
             }
             self.analyticsServicesManager?.didBolus(source: "Phone", units: amountToDeliver)
         }

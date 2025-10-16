@@ -8,17 +8,23 @@
 
 import SwiftUI
 
-struct LabelValueRow: View {
+
+struct LabelValueRow<ValueView: View>: View {
     let label: LocalizedStringKey
-    let value: String?
+    let value: ValueView
+
+    init(_ label: LocalizedStringKey, @ViewBuilder value: () -> ValueView) {
+        self.label = label
+        self.value = value()
+    }
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
-            Text(value ?? "–")
+            value
                 .font(.title3)
                 .foregroundStyle(.primary)
         }
