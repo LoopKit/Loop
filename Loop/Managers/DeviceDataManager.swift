@@ -301,16 +301,6 @@ final class DeviceDataManager {
 
         setupPump()
         setupCGM()
-
-        cgmStalenessMonitor.$cgmDataIsStale
-            .combineLatest($cgmHasValidSensorSession)
-            .map { $0 == false || $1 }
-            .combineLatest($pumpIsAllowingAutomation)
-            .map { $0 && $1 }
-            .receive(on: RunLoop.main)
-            .removeDuplicates()
-            .assign(to: \.automaticDosingStatus.isAutomaticDosingAllowed, on: self)
-            .store(in: &cancellables)
     }
 
     func instantiateDeviceManagers() {

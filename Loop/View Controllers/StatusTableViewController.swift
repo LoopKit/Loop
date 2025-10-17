@@ -145,12 +145,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 Task { @MainActor [weak self] in
                     self?.registerPumpManager()
                     self?.configurePumpManagerHUDViews()
+                    await self?.reloadData()
                 }
             },
             notificationCenter.addObserver(forName: .CGMManagerChanged, object: deviceManager, queue: nil) { (notification: Notification) in
                 Task { @MainActor [weak self] in
                     self?.registerCGMManager()
                     self?.configureCGMManagerHUDViews()
+                    await self?.reloadData()
                 }
             },
             notificationCenter.addObserver(forName: .PumpEventsAdded, object: deviceManager, queue: nil) { (notification: Notification) in
@@ -430,6 +432,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         
         // This should be kept up to date immediately
         hudView?.loopCompletionHUD.lastLoopCompleted = loopManager.lastLoopCompleted
+        hudView?.loopCompletionHUD.deviceInoperable = deviceManager.cgmManager == nil || deviceManager.pumpManager == nil || basalDeliveryState == .pumpInoperable
         hudView?.loopCompletionHUD.mostRecentGlucoseDataDate = loopManager.mostRecentGlucoseDataDate
         hudView?.loopCompletionHUD.mostRecentPumpDataDate = loopManager.mostRecentPumpDataDate
 

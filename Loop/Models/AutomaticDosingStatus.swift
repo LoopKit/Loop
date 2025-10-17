@@ -10,24 +10,9 @@ import Foundation
 
 @Observable
 public class AutomaticDosingStatus: Codable {
-    public var automaticDosingEnabled: Bool {
-        didSet {
-            UserDefaults.standard.automaticDosingStatus = self
-        }
-    }
+    public var automaticDosingEnabled: Bool
     
-    public var isAutomaticDosingAllowed: Bool {
-        didSet {
-            UserDefaults.standard.automaticDosingStatus = self
-        }
-    }
-
-    public init(automaticDosingEnabled: Bool,
-                isAutomaticDosingAllowed: Bool)
-    {
+    public init(automaticDosingEnabled: Bool) {
         self.automaticDosingEnabled = automaticDosingEnabled
-        self.isAutomaticDosingAllowed = isAutomaticDosingAllowed
-        
-        UserDefaults.standard.automaticDosingStatus = self
     }
 }

@@ -39,7 +39,7 @@ final class DeviceDataManagerTests: XCTestCase {
         let mockUserNotificationCenter = MockUserNotificationCenter()
         let mockBluetoothProvider = MockBluetoothProvider()
         let alertPresenter = MockPresenter()
-        let automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)
+        let automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true)
 
         let alertManager = AlertManager(
             alertPresenter: alertPresenter,

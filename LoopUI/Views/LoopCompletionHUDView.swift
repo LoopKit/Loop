@@ -21,7 +21,20 @@ public final class LoopCompletionHUDView: BaseHUDView {
     private(set) var freshness = LoopCompletionFreshness.stale {
         didSet {
             loopStateView.freshness = freshness
+            updateLabelColor()
         }
+    }
+    
+    private var freshnessColor: UIColor {
+        switch freshness {
+        case .fresh: return .label
+        case .aging: return loopStatusColors.warning
+        case .stale: return loopStatusColors.error
+        }
+    }
+    
+    private func updateLabelColor() {
+        caption?.textColor = freshnessColor
     }
 
     override public func awakeFromNib() {
@@ -47,6 +60,12 @@ public final class LoopCompletionHUDView: BaseHUDView {
             if lastLoopCompleted != oldValue {
                 loopInProgress = false
             }
+        }
+    }
+    
+    public var deviceInoperable: Bool = false {
+        didSet {
+            loopStateView.deviceInoperable = deviceInoperable
         }
     }
     
@@ -137,10 +156,12 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
     @objc private func updateDisplay(_: Timer?) {
         lastLoopMessage = ""
+        caption?.isHidden = !loopIconClosed
         let timeAgoToIncludeTimeStamp: TimeInterval = .minutes(20)
         let timeAgoToIncludeDate: TimeInterval = .hours(4)
         if loopIconClosed, let date = lastLoopCompleted {
-            let ago = abs(min(0, date.timeIntervalSinceNow))
+            // restrict time ago from 0 to 7 days
+            let ago = min(abs(min(0, date.timeIntervalSinceNow)), TimeInterval.days(7))
 
             freshness = LoopCompletionFreshness(age: ago)
 
@@ -151,7 +172,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
                      UIContentSizeCategory.medium,
                      UIContentSizeCategory.large:
                     // Use a longer form only for smaller text sizes
-                    caption?.text = String(format: LocalizedString("%@ ago", comment: "Format string describing the time interval since the last completion date. (1: The localized date components"), timeString)
+                    caption?.attributedText = formattedTimeAgoString(timeString, includeGreaterThan: ago > .hours(1))
                 default:
                     caption?.text = timeString
                 }
@@ -185,18 +206,18 @@ public final class LoopCompletionHUDView: BaseHUDView {
                     UIContentSizeCategory.medium,
                     UIContentSizeCategory.large:
                     // Use a longer form only for smaller text sizes
-                    caption?.text = String(format: LocalizedString("%@ ago", comment: "Format string describing the time interval since the last cgm or pump communication date. (1: The localized date components"), timeString)
+                    caption?.attributedText = formattedTimeAgoString(timeString, includeGreaterThan: ago > .hours(1))
                 default:
                     caption?.text = timeString
                 }
                 
                 accessibilityLabel = String(format: LocalizedString("Last device communication ran %@ ago", comment: "Accessbility format label describing the time interval since the last device communication date. (1: The localized date components)"), timeString)
             } else {
-                caption?.text = "–"
+                caption?.text = ""
                 accessibilityLabel = nil
             }
         } else {
-            caption?.text = "–"
+            caption?.text = ""
             accessibilityLabel = LocalizedString("Waiting for first run", comment: "Accessibility label describing completion HUD waiting for first run")
         }
 
@@ -207,6 +228,29 @@ public final class LoopCompletionHUDView: BaseHUDView {
             accessibilityHint = LocalizedString("Open loop", comment: "Accessbility hint describing completion HUD for an open loop")
             accessibilityIdentifier = "loopCompletionHUDLoopStatusOpen"
         }
+    }
+    
+    private func formattedTimeAgoString(_ timeString: String, includeGreaterThan: Bool = false) -> NSAttributedString {
+        let config = UIImage.SymbolConfiguration(pointSize: 11, weight: .semibold)
+        let symbol = UIImage(systemName: "arrow.trianglehead.2.clockwise.rotate.90", withConfiguration: config)
+        let tintedSymbol = symbol?.withTintColor(freshnessColor, renderingMode: .alwaysOriginal)
+        let attachment = NSTextAttachment()
+        attachment.image = tintedSymbol
+        attachment.bounds = CGRect(x: 0, y: -2, width: 11, height: 11)
+        let imageString = NSAttributedString(attachment: attachment)
+        
+        let timeAgoString: NSAttributedString
+        if includeGreaterThan {
+            timeAgoString = NSAttributedString(string: String(format: LocalizedString(" >%@ ago", comment: "Format string describing the time interval since the last completion date, last cgm or last pump communication. (1: The localized date components"), timeString))
+        } else {
+            timeAgoString = NSAttributedString(string: String(format: LocalizedString(" %@ ago", comment: "Format string describing the time interval since the last completion date, last cgm or last pump communication. (1: The localized date components"), timeString))
+        }
+        
+        let combined = NSMutableAttributedString()
+        combined.append(imageString)
+        combined.append(timeAgoString)
+        
+        return combined
     }
 
     override public func didMoveToWindow() {

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24128" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24063"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -153,6 +153,12 @@
                 <view contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="tLF-hy-5Xi" customClass="LoopCompletionHUDView" customModule="LoopUI">
                     <rect key="frame" x="166" y="0.0" width="44" height="74"/>
                     <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="4 min ago" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XFc-Ul-doX">
+                            <rect key="frame" x="-30" y="53.5" width="104" height="13.5"/>
+                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="11"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
                         <view contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="Y5a-VS-uto" customClass="LoopStateView" customModule="LoopUI" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="10" width="44" height="44"/>
                             <constraints>
@@ -172,11 +178,13 @@
                         <bool key="isElement" value="YES"/>
                     </accessibility>
                     <constraints>
+                        <constraint firstItem="XFc-Ul-doX" firstAttribute="centerX" secondItem="Y5a-VS-uto" secondAttribute="centerX" id="6c7-pl-UMh"/>
                         <constraint firstItem="Y5a-VS-uto" firstAttribute="top" secondItem="tLF-hy-5Xi" secondAttribute="top" constant="10" id="6dB-mM-ayr"/>
                         <constraint firstItem="Y5a-VS-uto" firstAttribute="centerX" secondItem="tLF-hy-5Xi" secondAttribute="centerX" id="Jfr-8E-Rj4"/>
                         <constraint firstAttribute="width" constant="44" id="mjr-6a-sQN"/>
                     </constraints>
                     <connections>
+                        <outlet property="caption" destination="XFc-Ul-doX" id="1Fh-14-fqd"/>
                         <outlet property="loopStateView" destination="Y5a-VS-uto" id="amk-gf-7Pl"/>
                     </connections>
                 </view>
@@ -332,7 +340,9 @@
             </subviews>
             <viewLayoutGuide key="safeArea" id="e4M-Xl-l5l"/>
             <constraints>
+                <constraint firstItem="XFc-Ul-doX" firstAttribute="firstBaseline" secondItem="1CX-eC-9a3" secondAttribute="centerY" id="Fy3-5c-xej"/>
                 <constraint firstItem="GcS-Ho-amr" firstAttribute="width" secondItem="MLJ-z5-oVV" secondAttribute="width" id="Og2-az-9NZ"/>
+                <constraint firstItem="XFc-Ul-doX" firstAttribute="leading" secondItem="1CX-eC-9a3" secondAttribute="trailing" constant="4" id="rfv-HJ-DSC"/>
             </constraints>
             <point key="canvasLocation" x="28.985507246376812" y="58.928571428571423"/>
         </stackView>
@@ -344,16 +354,16 @@
         <image name="reservoir" width="28" height="44"/>
         <image name="reservoir_mask" width="28" height="39"/>
         <namedColor name="warning">
-            <color red="0.91699999570846558" green="0.7630000114440918" blue="0.26899999380111694" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+            <color red="0.86299997568130493" green="0.45500001311302185" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemBlueColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

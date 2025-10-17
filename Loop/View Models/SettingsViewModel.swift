@@ -229,7 +229,7 @@ extension SettingsViewModel {
                                  criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
                                  therapySettings: { TherapySettings() },
                                  initialDosingEnabled: true,
-                                 automaticDosingStatus: AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true),
+                                 automaticDosingStatus: AutomaticDosingStatus(automaticDosingEnabled: true),
                                  automaticDosingStrategy: .automaticBolus,
                                  lastLoopCompletion: FakeLastLoopCompletionPublisher().$mockLastLoopCompletion,
                                  mostRecentGlucoseDataDate: FakeLastLoopCompletionPublisher().$mockLastLoopCompletion,

@@ -19,7 +19,6 @@ extension UserDefaults {
         case inFlightAutomaticDose = "com.loopkit.Loop.inFlightAutomaticDose"
         case favoriteFoods = "com.loopkit.Loop.favoriteFoods"
         case automationHistory = "com.loopkit.Loop.automationHistory"
-        case automaticDosingStatus = "com.loopkit.Loop.automaticDosingStatus"
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {
@@ -128,25 +127,6 @@ extension UserDefaults {
                 set(data, forKey: Key.automationHistory.rawValue)
             } catch {
                 assertionFailure("Unable to encode automation history")
-            }
-        }
-    }
-    
-    var automaticDosingStatus: AutomaticDosingStatus? {
-        get {
-            let decoder = JSONDecoder()
-            guard let data = object(forKey: Key.automaticDosingStatus.rawValue) as? Data else {
-                return nil
-            }
-            return try? decoder.decode(AutomaticDosingStatus.self, from: data)
-        }
-        set {
-            do {
-                let encoder = JSONEncoder()
-                let data = try encoder.encode(newValue)
-                set(data, forKey: Key.automaticDosingStatus.rawValue)
-            } catch {
-                assertionFailure("Unable to encode automatic dosing status")
             }
         }
     }

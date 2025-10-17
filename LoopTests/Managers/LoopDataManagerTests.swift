@@ -123,7 +123,7 @@ class LoopDataManagerTests: XCTestCase {
         doseStore.lastAddedPumpData = now
 
         dosingDecisionStore = MockDosingDecisionStore()
-        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true)
 
         let temporaryPresetsManager = TemporaryPresetsManager(settingsProvider: settingsProvider, presetHistory: TemporaryScheduleOverrideHistory())
 

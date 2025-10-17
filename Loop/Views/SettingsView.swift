@@ -192,7 +192,7 @@ struct SettingsView: View {
     
     private var closedLoopToggleState: Binding<Bool> {
         Binding(
-            get: { self.viewModel.automaticDosingStatus.isAutomaticDosingAllowed && self.viewModel.closedLoopPreference },
+            get: { self.viewModel.closedLoopPreference },
             set: { self.viewModel.closedLoopPreference = $0 }
         )
     }
@@ -271,7 +271,7 @@ extension SettingsView {
                 }
             }
             .accessibilityIdentifier("settingsViewClosedLoopToggle")
-            .disabled(!viewModel.isOnboardingComplete || !viewModel.automaticDosingStatus.isAutomaticDosingAllowed)
+            .disabled(!viewModel.isOnboardingComplete)
             .padding(.vertical)
         }
     }
