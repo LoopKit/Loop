@@ -1373,7 +1373,14 @@ extension DeviceDataManager: DeliveryDelegate {
     var isSuspended: Bool {
         return pumpManager?.status.basalDeliveryState?.isSuspended ?? false
     }
-    
+
+    var isPumpInoperable: Bool {
+        guard let basalDeliveryState else {
+            return true
+        }
+        return basalDeliveryState == .pumpInoperable 
+    }
+
     func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) async throws {
         guard let pumpManager = pumpManager else {
             throw LoopError.configurationError(.pumpManager)

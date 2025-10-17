@@ -219,7 +219,6 @@ final class LoopDataManager: ObservableObject {
                 queue: nil
             ) { (note) -> Void in
                 Task { @MainActor in
-                    self.logger.default("**** Received notification of carb entries changing")
                     await self.updateDisplayState()
                     self.notify(forChange: .carbs)
                 }
@@ -230,7 +229,6 @@ final class LoopDataManager: ObservableObject {
                 queue: nil
             ) { (note) in
                 Task { @MainActor in
-                    self.logger.default("**** Received notification of glucose samples changing")
                     self.restartGlucoseValueStalenessTimer()
                     await self.updateDisplayState()
                     self.notify(forChange: .glucose)
@@ -242,7 +240,6 @@ final class LoopDataManager: ObservableObject {
                 queue: OperationQueue.main
             ) { (note) in
                 Task { @MainActor in
-                    self.logger.default("**** Received notification of dosing changing: reason = %{public}@", note.userInfo?["Reason"] as? String ?? "unknown")
                     await self.updateDisplayState()
                     self.notify(forChange: .insulin)
                 }
@@ -255,7 +252,6 @@ final class LoopDataManager: ObservableObject {
                 let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopUpdateContext.RawValue
                 if case .preferences = LoopUpdateContext(rawValue: context) {
                     Task { @MainActor in
-                        self.logger.default("**** Received notification of settings changing")
                         await self.updateDisplayState()
                         self.notify(forChange: .forecast)
                     }
@@ -502,7 +498,6 @@ final class LoopDataManager: ObservableObject {
     }
 
     func updateDisplayState() async {
-        logger.debug("**** updateDisplayState")
 
         var newState = AlgorithmDisplayState()
         do {

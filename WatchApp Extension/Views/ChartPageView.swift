@@ -9,6 +9,7 @@
 import SwiftUI
 import LoopKit
 import LoopCore
+import LoopAlgorithm
 import SpriteKit
 
 struct ChartPageView: View {
@@ -88,6 +89,28 @@ struct ChartPageView: View {
         return carbFormatter.string(from: activeCarbohydrates)
     }
 
+    var lastBolus: Text {
+        guard let lastBolus = loopManager.activeContext?.lastManualBolus else {
+            return Text("-")
+        }
+
+        let bolusFormatter = QuantityFormatter(for: .internationalUnit)
+        bolusFormatter.numberFormatter.minimumFractionDigits = 1
+        bolusFormatter.numberFormatter.maximumFractionDigits = 1
+
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeStyle = .short
+        dateFormatter.dateStyle = .none
+
+        let bolusVolume = bolusFormatter.string(from: LoopQuantity(unit: .internationalUnit, doubleValue: lastBolus.amount))!
+        let bolusTime = dateFormatter.string(from: lastBolus.startDate)
+
+        return
+            Text("\(bolusVolume)") +
+            Text(" at \(bolusTime)").font(.caption).foregroundColor(.secondary)
+    }
+
     var netTempBasalDose: String? {
         guard let activeContext = loopManager.activeContext,
             let tempBasal = activeContext.lastNetTempBasalDose
@@ -147,13 +170,13 @@ struct ChartPageView: View {
                 }
                 Divider()
                 LabelValueRow("Last Bolus") {
-                    Text(netTempBasalDose ?? "-")
+                    lastBolus
                 }
-                if let automatedTreatmentState = loopManager.activeContext?.automatedTreatmentState {
+                if let currentDelivery = loopManager.activeContext?.insulinDeliveryState {
                     Divider()
                     LabelValueRow("Current Delivery") {
-                        Text(automatedTreatmentState.iconImage) +
-                        Text(" " + automatedTreatmentState.shortDescription)
+                        Text(currentDelivery.iconImage) +
+                        Text(" " + currentDelivery.shortDescription)
                     }
                 }
                 Divider()

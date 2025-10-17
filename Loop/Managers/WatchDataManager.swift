@@ -312,7 +312,7 @@ final class WatchDataManager: NSObject {
             dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(
                 recommendation: recommendedBolus,
                 date: Date())
-            log.debug("*** watch bolus recommended: %{public}@ (with carb entry: %{public}@", String(describing: recommendedBolus.amount), String(describing: potentialCarbEntry))
+            log.debug("watch bolus recommended: %{public}@ (with carb entry: %{public}@", String(describing: recommendedBolus.amount), String(describing: potentialCarbEntry))
         }
 
         var historicalGlucose: [HistoricalGlucoseValue]?
@@ -335,7 +335,15 @@ final class WatchDataManager: NSObject {
         }
 
         context.iob = loopDataManager.activeInsulin?.value
-        context.automatedTreatmentState = loopDataManager.automatedTreatmentState
+
+        if deviceManager.isPumpInoperable {
+            context.insulinDeliveryState = .noDelivery
+        } else if deviceManager.isSuspended {
+            context.insulinDeliveryState = .suspended
+        } else if let automatedTreatmentState = loopDataManager.automatedTreatmentState {
+            context.insulinDeliveryState = InsulinDeliveryWatchState(automatedTreatmentState: automatedTreatmentState)
+        }
+
         context.lastManualBolus = loopDataManager.lastManualBolus
 
         dosingDecision.historicalGlucose = historicalGlucose
