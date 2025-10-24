@@ -69,7 +69,7 @@ struct ChartView: View {
                     PointMark (x: .value("Date", item.x),
                                y: .value("Glucose level", item.y)
                     )
-                    .symbolSize(20)
+                    .symbolSize(10)
                     .foregroundStyle(by: .value("Color", item.color))
                 }
                 
@@ -77,14 +77,15 @@ struct ChartView: View {
                     LineMark (x: .value("Date", item.x),
                               y: .value("Glucose level", item.y)
                     )
-                    .lineStyle(StrokeStyle(lineWidth: 3, dash: [2, 3]))
+                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [6, 5]))
+                    .foregroundStyle(by: .value("Color", item.color))
                 }
             }
             .chartForegroundStyleScale([
                 "Good": .green,
                 "High": .orange,
                 "Low": .red,
-                "Default": .blue
+                "Default": Color("glucose")
             ])
             .chartPlotStyle { plotContent in
                 plotContent.background(.cyan.opacity(0.15))
