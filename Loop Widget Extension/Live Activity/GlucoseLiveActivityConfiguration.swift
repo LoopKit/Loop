@@ -16,21 +16,67 @@ import HealthKit
 
 @available(iOS 16.2, *)
 struct GlucoseLiveActivityConfiguration: Widget {
-    private let timeFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .none
-        dateFormatter.timeStyle = .short
-        
-        return dateFormatter
-    }()
-    
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: GlucoseActivityAttributes.self) { context in
-            // Create the presentation that appears on the Lock Screen and as a
-            // banner on the Home Screen of devices that don't support the Dynamic Island.
-            ZStack {
-                VStack {
-                    if context.attributes.mode == .large {
+        if #available(iOS 18.0, *) {
+            return ActivityConfiguration(for: GlucoseActivityAttributes.self) { context in
+                lockScreenView(context: context)
+            } dynamicIsland: { context in
+                dynamicIslandView(context: context)
+            }
+            .supplementalActivityFamilies([.small])
+        } else {
+            return ActivityConfiguration(for: GlucoseActivityAttributes.self) { context in
+                lockScreenView(context: context)
+            } dynamicIsland: { context in
+                dynamicIslandView(context: context)
+            }
+        }
+    }
+
+    // MARK: - Lock Screen View
+
+    @ViewBuilder
+    private func lockScreenView(context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+        // Create the presentation that appears on the Lock Screen and as a
+        // banner on the Home Screen of devices that don't support the Dynamic Island.
+        if #available(iOS 18.0, *) {
+            AdaptiveLockScreenView(context: context)
+        } else {
+            fullLockScreenView(context: context)
+        }
+    }
+
+    @available(iOS 18.0, *)
+    struct AdaptiveLockScreenView: View {
+        let context: ActivityViewContext<GlucoseActivityAttributes>
+        @Environment(\.activityFamily) private var activityFamily
+
+        var body: some View {
+            if activityFamily == .small {
+                // CarPlay supplemental view - show only bottom row
+                compactLockScreenView(context: context)
+            } else {
+                // Lock screen - show full view with chart
+                fullLockScreenView(context: context)
+            }
+        }
+
+        @ViewBuilder
+        private func fullLockScreenView(context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+            GlucoseLiveActivityConfiguration().fullLockScreenView(context: context)
+        }
+
+        @ViewBuilder
+        private func compactLockScreenView(context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+            GlucoseLiveActivityConfiguration().compactLockScreenView(context: context)
+        }
+    }
+
+    @ViewBuilder
+    private func fullLockScreenView(context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+        ZStack {
+            VStack {
+                if context.attributes.mode == .large {
                         HStack(spacing: 15) {
                             loopIcon(context)
                             if context.attributes.addPredictiveLine {
@@ -115,10 +161,53 @@ struct GlucoseLiveActivityConfiguration: Widget {
                 .padding(.all, 15)
                 .background(BackgroundStyle.background.opacity(0.4))
                 .activityBackgroundTint(Color.clear)
-        } dynamicIsland: { context in
+    }
+
+    @ViewBuilder
+    private func compactLockScreenView(context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
+        /* Simple large display for CarPlay and Apple Watch - single row with Loop icon,
+           current BG with trend, and eventual BG. Larger fonts for CarPlay readability,
+           elements scale down on Watch to avoid truncation.
+        */
+        HStack(spacing: 0) {
+            // Loop icon - color coded, least important (only color matters)
+            // Scales down aggressively on narrow displays
+            Circle()
+                .trim(from: context.state.isCloseLoop ? 0 : 0.2, to: 1)
+                .stroke(getLoopColor(context.state.lastCompleted), lineWidth: 6)
+                .rotationEffect(Angle(degrees: -126))
+                .frame(idealWidth: 36, idealHeight: 36)
+                .frame(minWidth: 18, maxWidth: 36, minHeight: 18, maxHeight: 36)
+                .padding(.trailing, 8)
+                .layoutPriority(0)  // Lowest priority - shrinks first before the text elements
+
+            // Current BG with trend arrow + eventual BG - composed as single string so they scale together
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: context.state.isMmol ? HKUnit.millimolesPerLiter : HKUnit.milligramsPerDeciliter)
-            
-            return DynamicIsland {
+            let currentBG = (glucoseFormatter.string(from: context.state.currentGlucose) ?? "??") + getArrowImage(context.state.trendType)
+            let eventualBG = context.state.bottomRow.first(where: { $0.label == NSLocalizedString("Event", comment: "") })?.value ?? ""
+            let combinedText = currentBG + (eventualBG.isEmpty ? "" : "  " + eventualBG)
+
+            Text(combinedText)
+                .font(.system(size: 40, weight: .bold))
+                .foregroundStyle(!context.attributes.useLimits ? .primary : getGlucoseColor(context.state.currentGlucose, context: context))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .layoutPriority(1)  // Higher priority - shrinks less aggressively than the Loop icon
+        }
+        .frame(maxWidth: .infinity)  // Allow HStack to use full available width
+        .privacySensitive()
+        .padding(.horizontal, 7)
+        .padding(.vertical, 2)
+        .background(Color.clear)
+    }
+
+    // MARK: - Dynamic Island View
+
+    private func dynamicIslandView(context: ActivityViewContext<GlucoseActivityAttributes>) -> DynamicIsland {
+        let glucoseFormatter = NumberFormatter.glucoseFormatter(for: context.state.isMmol ? HKUnit.millimolesPerLiter : HKUnit.milligramsPerDeciliter)
+
+        return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     HStack(alignment: .center) {
                         loopIcon(context)
@@ -181,9 +270,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     .foregroundStyle(getGlucoseColor(context.state.currentGlucose, context: context))
                     .minimumScaleFactor(0.1)
             }
-        }
     }
-    
+
     @ViewBuilder
     private func loopIcon(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> some View {
         Circle()
@@ -197,11 +285,12 @@ struct GlucoseLiveActivityConfiguration: Widget {
     private func bottomItemGeneric(title: String, value: String, unit: String) -> some View {
         VStack(alignment: .center) {
             Text("\(value)\(unit)")
+                .font(.headline)
                 .foregroundStyle(.primary)
                 .fontWeight(.heavy)
                 .font(Font.body.leading(.tight))
             Text(title)
-                .font(.caption2)
+                .font(.subheadline)
         }
     }
     
