@@ -177,23 +177,34 @@ struct GlucoseLiveActivityConfiguration: Widget {
                 .stroke(getLoopColor(context.state.lastCompleted), lineWidth: 6)
                 .rotationEffect(Angle(degrees: -126))
                 .frame(idealWidth: 36, idealHeight: 36)
-                .frame(minWidth: 18, maxWidth: 36, minHeight: 18, maxHeight: 36)
+                .frame(minWidth: 20, maxWidth: 36, minHeight:20, maxHeight: 36)
                 .padding(.trailing, 8)
                 .layoutPriority(0)  // Lowest priority - shrinks first before the text elements
+            
+            VStack(alignment: .leading, spacing: 0) {
+                // Current BG with trend arrow + eventual BG - composed as single string so they scale together
+                let glucoseFormatter = NumberFormatter.glucoseFormatter(for: context.state.isMmol ? HKUnit.millimolesPerLiter : HKUnit.milligramsPerDeciliter)
+                let currentBG = (glucoseFormatter.string(from: context.state.currentGlucose) ?? "??") + getArrowImage(context.state.trendType)
+                let eventualBG = context.state.bottomRow.first(where: { $0.label == NSLocalizedString("Event", comment: "") })?.value ?? ""
+                let combinedText = currentBG + (eventualBG.isEmpty ? "" : "  " + eventualBG)
 
-            // Current BG with trend arrow + eventual BG - composed as single string so they scale together
-            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: context.state.isMmol ? HKUnit.millimolesPerLiter : HKUnit.milligramsPerDeciliter)
-            let currentBG = (glucoseFormatter.string(from: context.state.currentGlucose) ?? "??") + getArrowImage(context.state.trendType)
-            let eventualBG = context.state.bottomRow.first(where: { $0.label == NSLocalizedString("Event", comment: "") })?.value ?? ""
-            let combinedText = currentBG + (eventualBG.isEmpty ? "" : "  " + eventualBG)
-
-            Text(combinedText)
-                .font(.system(size: 40, weight: .bold))
-                .foregroundStyle(!context.attributes.useLimits ? .primary : getGlucoseColor(context.state.currentGlucose, context: context))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .layoutPriority(1)  // Higher priority - shrinks less aggressively than the Loop icon
+                Text(combinedText)
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundStyle(!context.attributes.useLimits ? .primary : getGlucoseColor(context.state.currentGlucose, context: context))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                                  
+                HStack() {
+                    Text(context.state.delta)
+                        .foregroundStyle(Color(white: 0.9))
+                        .font(.system(size: 25))
+                    Text(context.state.isMmol ? HKUnit.millimolesPerLiter.localizedShortUnitString : HKUnit.milligramsPerDeciliter.localizedShortUnitString)
+                        .foregroundStyle(Color(white: 0.7))
+                        .font(.subheadline)
+                }
+                .padding(.leading)
+            }
+            .layoutPriority(1)
         }
         .frame(maxWidth: .infinity)  // Allow HStack to use full available width
         .privacySensitive()
@@ -383,4 +394,5 @@ struct GlucoseLiveActivityConfiguration: Widget {
         
         return .green
     }
+
 }
