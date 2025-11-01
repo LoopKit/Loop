@@ -1,0 +1,33 @@
+{
+  "originHash" : "c4cada90348e9cd61ccdc1fdd95d021f037913f127c30ed5678702f19c1b75db",
+  "pins" : [
+    {
+      "identity" : "mkringprogressview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/maxkonovalov/MKRingProgressView.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "660888aab1d2ab0ed7eb9eb53caec12af4955fa7"
+      }
+    },
+    {
+      "identity" : "swiftcharts",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ivanschuetz/SwiftCharts",
+      "state" : {
+        "branch" : "master",
+        "revision" : "c354c1945bb35a1f01b665b22474f6db28cba4a2"
+      }
+    },
+    {
+      "identity" : "zipfoundation",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LoopKit/ZIPFoundation.git",
+      "state" : {
+        "branch" : "stream-entry",
+        "revision" : "ad465ee2545392153a64c0976d6e59227d0c1c70"
+      }
+    }
+  ],
+  "version" : 3
+}

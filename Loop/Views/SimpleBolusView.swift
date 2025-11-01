@@ -146,7 +146,7 @@ struct SimpleBolusView: View {
             HStack(alignment: .firstTextBaseline) {
                 DismissibleKeyboardTextField(
                     text: enteredManualGlucose,
-                    placeholder: NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)"),
+                    placeholder: "– – –",
                     font: .heavy(.title1),
                     textAlignment: .right,
                     keyboardType: .decimalPad,
@@ -265,7 +265,7 @@ struct SimpleBolusView: View {
                 case .saveWithoutBolusing:
                     return Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
                 case .saveAndDeliver:
-                    return Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
+                    return Text("Save Carbs & Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
                 case .enterBolus:
                     return Text("Enter Bolus", comment: "Button text to begin entering a bolus")
                 case .deliver:

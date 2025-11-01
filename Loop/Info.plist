@@ -87,7 +87,10 @@
 		<string>bluetooth-central</string>
 		<string>processing</string>
 		<string>remote-notification</string>
+		<string>audio</string>
 	</array>
+	<key>UIDesignRequiresCompatibility</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

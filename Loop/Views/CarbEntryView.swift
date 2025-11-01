@@ -211,7 +211,7 @@ extension CarbEntryView {
 extension CarbEntryView {
     private var favoriteFoodsCard: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("FAVORITE FOODS")
+            Text("FAVORITE FOODS", comment: "The section title for Carb entry screen where Favorite Foods can be selected")
                 .font(.footnote)
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 26)
@@ -220,7 +220,7 @@ extension CarbEntryView {
                 if !viewModel.favoriteFoods.isEmpty {
                     VStack {
                         HStack {
-                            Text("Choose Favorite:")
+                            Text("Choose Favorite:", comment: "The label for the row where you choose saved Favorite Food")
                             
                             let selectedFavorite = favoritedFoodTextFromIndex(viewModel.selectedFavoriteFoodIndex)
                             Text(selectedFavorite)
@@ -229,7 +229,7 @@ extension CarbEntryView {
                         }
                         
                         if expandedRow == .favoriteFoodSelection {
-                            Picker("", selection: $viewModel.selectedFavoriteFoodIndex) {
+                            Picker(String(""), selection: $viewModel.selectedFavoriteFoodIndex) {
                                 ForEach(-1..<viewModel.favoriteFoods.count, id: \.self) { index in
                                     Text(favoritedFoodTextFromIndex(index))
                                         .tag(index)
@@ -253,7 +253,7 @@ extension CarbEntryView {
                 }
                 
                 Button(action: saveAsFavoriteFood) {
-                    Text("Save as favorite food")
+                    Text("Save as favorite food", comment: "Button label for saving current carb entry as a new Favorite Food")
                         .frame(maxWidth: .infinity)
                 }
                 .disabled(viewModel.saveFavoriteFoodButtonDisabled)
@@ -267,7 +267,7 @@ extension CarbEntryView {
     
     private func favoritedFoodTextFromIndex(_ index: Int) -> String {
         if index == -1 {
-            return "None"
+            return String(localized: "None", comment: "Indicates no favorite food is selected")
         }
         else {
             let food = viewModel.favoriteFoods[index]
@@ -290,20 +290,20 @@ extension CarbEntryView {
 extension CarbEntryView {
     private var dismissButton: some View {
         Button(action: dismiss) {
-            Text("Cancel")
+            Text("Cancel", comment: "Button label for cancel")
         }
     }
     
     private var continueButton: some View {
         Button(action: viewModel.continueToBolus) {
-            Text("Continue")
+            Text("Continue", comment: "Button label for continue")
         }
         .disabled(viewModel.continueButtonDisabled)
     }
     
     private var continueActionButton: some View {
         Button(action: viewModel.continueToBolus) {
-            Text("Continue")
+            Text("Continue", comment: "Button label for continue")
         }
         .buttonStyle(ActionButtonStyle())
         .padding()

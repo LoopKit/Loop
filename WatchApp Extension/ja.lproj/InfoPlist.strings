@@ -1,3 +1,0 @@
-/* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "健康データベースからの食事データは、グルコース効果を決定するために使用される。 グルコースデータはグラフ作成と解析のためにHealthKitから検索されます";
-
