@@ -15,11 +15,10 @@ public enum BottomRowConfiguration: Codable {
     case currentBg
     case eventualBg
     case deltaBg
-    case loopCircle
     case updatedAt
     
     static let defaults: [BottomRowConfiguration] =  [.currentBg, .iob, .cob, .updatedAt]
-    public static let all: [BottomRowConfiguration] = [.iob, .cob, .basal, .currentBg, .eventualBg, .deltaBg, .loopCircle, .updatedAt]
+    public static let all: [BottomRowConfiguration] = [.iob, .cob, .basal, .currentBg, .eventualBg, .deltaBg, .updatedAt]
     
     public func name() -> String {
         switch self {
@@ -35,8 +34,6 @@ public enum BottomRowConfiguration: Codable {
             return NSLocalizedString("Eventual BG", comment: "")
         case .deltaBg:
             return NSLocalizedString("Delta", comment: "")
-        case .loopCircle:
-            return NSLocalizedString("Loop", comment: "")
         case .updatedAt:
             return NSLocalizedString("Updated", comment: "")
         }
@@ -56,8 +53,6 @@ public enum BottomRowConfiguration: Codable {
             return NSLocalizedString("Eventually", comment: "")
         case .deltaBg:
             return NSLocalizedString("Delta", comment: "")
-        case .loopCircle:
-            return NSLocalizedString("Loop circle", comment: "")
         case .updatedAt:
             return NSLocalizedString("Updated at", comment: "")
         }

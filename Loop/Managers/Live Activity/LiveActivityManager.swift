@@ -175,6 +175,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 preset: presetContext,
                 glucoseRanges: glucoseRanges,
                 currentGlucose: current,
+                eventualGlucose: statusContext?.predictedGlucose?.values.last,
                 trendType: statusContext?.glucoseDisplay?.trendType,
                 delta: delta,
                 isMmol: isMmol,
@@ -451,9 +452,6 @@ class LiveActivityManager : LiveActivityManagerProxy {
             case .deltaBg:
                 return BottomRowItem.generic(label: type.name(), value: delta, unit: "")
                 
-            case .loopCircle:
-                return BottomRowItem.loopIcon()
-                
             case .updatedAt:
                 return BottomRowItem.generic(label: type.name(), value: timeFormatter.string(from: Date.now), unit: "")
             }
@@ -468,6 +466,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 preset: nil,
                 glucoseRanges: [],
                 currentGlucose: 0,
+                eventualGlucose: nil,
                 trendType: nil,
                 delta: "",
                 isMmol: true,

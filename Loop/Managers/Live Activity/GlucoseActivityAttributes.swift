@@ -21,6 +21,7 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
         
         // Dynamic island data
         public let currentGlucose: Double
+        public let eventualGlucose: Double?
         public let trendType: GlucoseTrend?
         public let delta: String
         public let isMmol: Bool
@@ -70,7 +71,6 @@ public struct BottomRowItem: Codable, Hashable {
         case generic
         case basal
         case currentBg
-        case loopCircle
     }
     
     public let type: BottomRowType
@@ -127,18 +127,6 @@ public struct BottomRowItem: Codable, Hashable {
             value: value,
             unit: nil,
             trend: trend,
-            rate: nil,
-            percentage: nil
-        )
-    }
-    
-    static func loopIcon() -> BottomRowItem {
-        return BottomRowItem(
-            type: .loopCircle,
-            label: nil,
-            value: nil,
-            unit: nil,
-            trend: nil,
             rate: nil,
             percentage: nil
         )
