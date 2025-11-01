@@ -69,7 +69,7 @@ final class LoopDataManager {
 
     private var insulinOnBoard: InsulinValue?
     
-    private var liveActivityManager: LiveActivityManager?
+    private var liveActivityManager: LiveActivityManagerProxy?
 
     deinit {
         for observer in notificationObservers {
@@ -127,11 +127,13 @@ final class LoopDataManager {
 
         self.trustedTimeOffset = trustedTimeOffset
         
-        self.liveActivityManager = LiveActivityManager(
-            glucoseStore: self.glucoseStore,
-            doseStore: self.doseStore,
-            loopSettings: self.settings
-        )
+        if #available(iOS 16.2, *) {
+            self.liveActivityManager = LiveActivityManager(
+                glucoseStore: self.glucoseStore,
+                doseStore: self.doseStore,
+                loopSettings: self.settings
+            )
+        }
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {

@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 import Charts
 
+@available(iOS 16.2, *)
 struct ChartView: View {
     private let glucoseSampleData: [ChartValues]
     private let predicatedData: [ChartValues]

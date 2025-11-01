@@ -18,7 +18,7 @@ extension Notification.Name {
 }
 
 @available(iOS 16.2, *)
-class LiveActivityManager {
+class LiveActivityManager : LiveActivityManagerProxy {
     private let activityInfo = ActivityAuthorizationInfo()
     private var activity: Activity<GlucoseActivityAttributes>?
     private let healthStore = HKHealthStore()
