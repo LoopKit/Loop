@@ -546,7 +546,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 }
 
                 if let dose = entry.dose {
-                    description.append(String(describing: dose))
+                    description.append(dose.formatted)
                 }
 
                 if let raw = entry.raw {
