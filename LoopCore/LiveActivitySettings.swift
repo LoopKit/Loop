@@ -71,9 +71,9 @@ public enum LiveActivityMode: Codable, CustomStringConvertible {
     public func name() -> String {
         switch self {
         case .large:
-            return NSLocalizedString("Large", comment: "")
+            return NSLocalizedString("Plot and Row", comment: "")
         case .small:
-            return NSLocalizedString("Small", comment: "")
+            return NSLocalizedString("Row Only", comment: "")
         }
     }
 }
