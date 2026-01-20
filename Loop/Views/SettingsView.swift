@@ -50,8 +50,6 @@ public struct SettingsView: View {
             }
             
             case favoriteFoods
-            case therapySettings
-            case aiSettings
         }
     }
     
@@ -85,7 +83,6 @@ public struct SettingsView: View {
                     deviceSettingsSection
                     if FeatureFlags.allowExperimentalFeatures {
                         favoriteFoodsSection
-                        aiSettingsSection
                     }
                     if (viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice) && viewModel.showDeleteTestData {
                         deleteDataSection
@@ -139,28 +136,8 @@ public struct SettingsView: View {
             }
             .sheet(item: $sheet) { sheet in
                 switch sheet {
-                case .therapySettings:
-                    TherapySettingsView(
-                        mode: .settings,
-                        viewModel: TherapySettingsViewModel(
-                            therapySettings: viewModel.therapySettings(),
-                            sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
-                            adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
-                            delegate: viewModel.therapySettingsViewModelDelegate
-                        )
-                    )
-                    .environmentObject(displayGlucosePreference)
-                    .environment(\.dismissAction, self.dismiss)
-                    .environment(\.appName, self.appName)
-                    .environment(\.chartColorPalette, .primary)
-                    .environment(\.carbTintColor, self.carbTintColor)
-                    .environment(\.glucoseTintColor, self.glucoseTintColor)
-                    .environment(\.guidanceColors, self.guidanceColors)
-                    .environment(\.insulinTintColor, self.insulinTintColor)
                 case .favoriteFoods:
                     FavoriteFoodsView()
-                case .aiSettings:
-                    AISettingsView()
                 }
             }
         }
@@ -290,15 +267,37 @@ extension SettingsView {
             }
         }
     }
-        
+
+    private var therapySettingsView: some View {
+        TherapySettingsView(
+            mode: .settings,
+            viewModel: TherapySettingsViewModel(
+                therapySettings: viewModel.therapySettings(),
+                sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
+                adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
+                delegate: viewModel.therapySettingsViewModelDelegate
+            )
+        )
+        .environmentObject(displayGlucosePreference)
+        .environment(\.dismissAction, self.dismiss)
+        .environment(\.appName, self.appName)
+        .environment(\.chartColorPalette, .primary)
+        .environment(\.carbTintColor, self.carbTintColor)
+        .environment(\.glucoseTintColor, self.glucoseTintColor)
+        .environment(\.guidanceColors, self.guidanceColors)
+        .environment(\.insulinTintColor, self.insulinTintColor)
+    }
+
     private var configurationSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
-            LargeButton(action: { sheet = .therapySettings },
-                            includeArrow: true,
+            NavigationLink(destination: therapySettingsView) {
+                LargeButton(action: { },
+                            includeArrow: false,
                             imageView: Image("Therapy Icon"),
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
-            
+            }
+
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
@@ -375,18 +374,6 @@ extension SettingsView {
                         imageView: Image("Favorite Foods Icon").renderingMode(.template).foregroundColor(carbTintColor),
                         label: "Favorite Foods",
                         descriptiveText: "Simplify Carb Entry")
-        }
-    }
-    
-    private var aiSettingsSection: some View {
-        Section {
-            LargeButton(action: { sheet = .aiSettings },
-                        includeArrow: true,
-                        imageView: Image(systemName: "fork.knife.circle.fill").resizable().renderingMode(.template)
-                            .foregroundColor(.purple)
-                            .frame(width: 35, height: 35),
-                        label: "FoodFinder",
-                        descriptiveText: "Food Search & AI Providers")
         }
     }
     

@@ -320,7 +320,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Predicted"
+            "value" : "חזוי"
           }
         },
         "it" : {
@@ -494,7 +494,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Detail"
+            "value" : "Detaliu"
           }
         },
         "ru" : {
@@ -752,7 +752,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glucose Change"
+            "value" : "Modificarea glicemiei"
           }
         },
         "ru" : {
@@ -1670,7 +1670,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Efecte carbohidrați"
+            "value" : "Efectul carbohidraților"
           }
         },
         "ru" : {
@@ -1928,7 +1928,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Detail"
+            "value" : "Detaliu"
           }
         },
         "ru" : {
@@ -2851,7 +2851,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glucoza"
+            "value" : "Glicemie"
           }
         },
         "ru" : {

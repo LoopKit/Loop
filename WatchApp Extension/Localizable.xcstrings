@@ -212,6 +212,12 @@
             "state" : "translated",
             "value" : "---"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "– – –"
+          }
         }
       }
     },
@@ -542,7 +548,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "活性碳水化合物"
+            "value" : "活性碳水"
           }
         }
       }
@@ -1101,7 +1107,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actualizare Recomandare bolus"
+            "value" : "Actualizare recomandare de bolus"
           }
         },
         "ru" : {
@@ -1120,6 +1126,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bolus Önerisi Güncellendi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量推荐值已更新"
           }
         }
       }
@@ -1609,6 +1621,12 @@
             "state" : "translated",
             "value" : "g"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "克"
+          }
         }
       }
     },
@@ -1930,6 +1948,12 @@
             "state" : "translated",
             "value" : "mg/dL"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg/dL"
+          }
         }
       }
     },
@@ -2045,6 +2069,12 @@
           }
         },
         "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mmol/L"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mmol/L"
@@ -2393,6 +2423,12 @@
             "state" : "translated",
             "value" : "OK"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好的"
+          }
         }
       }
     },
@@ -2733,6 +2769,12 @@
             "state" : "translated",
             "value" : "Lütfen bolus miktarını tekrar onaylayın."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请重新确认大剂量。"
+          }
         }
       }
     },
@@ -2845,6 +2887,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trước bữa ăn"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "餐前"
           }
         }
       }
@@ -3674,6 +3722,12 @@
             "state" : "translated",
             "value" : "Kaydet & Bolus"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存并推注大剂量"
+          }
         }
       }
     },
@@ -3875,6 +3929,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Digital Crown'u bolusa\nçevirin"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旋转数字表冠\n以推注大剂量"
           }
         }
       }
@@ -4177,7 +4237,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu se poate conecta la iPhone"
+            "value" : "Nu se poate accesa iPhone-ul"
           }
         },
         "ru" : {

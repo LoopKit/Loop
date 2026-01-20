@@ -516,7 +516,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "餐前模式"
+            "value" : "餐前"
           }
         }
       }
@@ -996,6 +996,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выполнение"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running"
           }
         },
         "sv" : {
@@ -2296,7 +2302,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ACTIVE CARBS"
+            "value" : "活性碳水"
           }
         }
       }

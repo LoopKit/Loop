@@ -5,16 +5,16 @@
 "80eo5o" = "Adaugă carbohidrați";
 
 /* (No Comment) */
-"b085BW" = "I wasn't able to set the preset.";
+"b085BW" = "Nu am reușit să setez presetarea.";
 
 /* (No Comment) */
-"I4OZy8" = "Enable Override Preset";
+"I4OZy8" = "Activare modificarea personalizată presetată";
 
 /* (No Comment) */
-"lYMuWV" = "Override Name";
+"lYMuWV" = "Denumirea modificării personalizate";
 
 /* (No Comment) */
-"nDKAmn" = "What's the name of the override you'd like to set?";
+"nDKAmn" = "Cum se numește modificarea pe care doriți să o setați?";
 
 /* (No Comment) */
 "OcNxIj" = "Adaugă carbohidrați";
@@ -23,14 +23,14 @@
 "oLQSsJ" = "Enable '${overrideName}' Override Preset";
 
 /* (No Comment) */
-"XNNmtH" = "Enable preset in Loop";
+"XNNmtH" = "Activați presetarea în buclă";
 
 /* (No Comment) */
-"yBzwCL" = "Override Selection";
+"yBzwCL" = "Selecție modificare personalizată";
 
 /* (No Comment) */
 "yc02Yq" = "Adaugă carbohidrați în Loop";
 
 /* (No Comment) */
-"ZZ3mtM" = "Enable an override preset in Loop";
+"ZZ3mtM" = "Activați o modificare personalizată presetată în Buclă";
 

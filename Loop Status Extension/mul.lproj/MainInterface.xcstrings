@@ -231,6 +231,12 @@
             "state" : "translated",
             "value" : "0 gr"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0 g"
+          }
         }
       }
     },
@@ -463,6 +469,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "0 Ü"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0 U"
           }
         }
       }

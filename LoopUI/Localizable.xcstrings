@@ -69,6 +69,12 @@
             "state" : "translated",
             "value" : "\n%1$@\n\n%2$@ Kapalı Döngü AÇIK konumdayken çalışıyor."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\n %1$@\n\n%2$@当前处于闭环模式。"
+          }
         }
       }
     },
@@ -139,6 +145,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "\n%1$@\n\nDaha fazla bilgi için CGM ve insülin pompası durum simgelerine dokunun. %2$@ döngüyü tamamlamaya çalışacak, ancak pompanız ve CGM ile olası iletişim sorunlarını kontrol edin."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ \n\n点按你的 CGM 和泵状态图标以查看更多信息。%2$@ 将继续尝试完成循环，但请注意，泵和 CGM 之间可能存在通信问题。"
           }
         }
       }
@@ -211,6 +223,12 @@
             "state" : "translated",
             "value" : "\n%1$@\n\nDaha fazla bilgi için CGM ve insülin pompası durum simgelerinize dokunun. %2$@ döngüyü tamamlamaya çalışacak, ancak pompanız ve CGM ile olası iletişim sorunlarına dikkat edin."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ \n\n点按你的 CGM 和泵状态图标以查看更多信息。%2$@ 将继续尝试完成循环，但请注意，泵和 CGM 之间可能存在通信问题。"
+          }
         }
       }
     },
@@ -281,6 +299,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "\n%1$@ KAPALI konumda ve Kapalı Döngü ile çalışıyor. Pompanız ve CGM çalışmaya devam edecek, ancak uygulama dozajı otomatik olarak ayarlamayacaktır. \n\n%2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\n %1$@当前处于非闭环模式。胰岛素泵和连续血糖监测仪仍将正常运行，但应用程序不会自动调整胰岛素剂量。\n \n %2$@"
           }
         }
       }
@@ -412,6 +436,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "---"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "– – –"
           }
         }
       }
@@ -734,6 +764,12 @@
             "state" : "translated",
             "value" : "%1$@ önce"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 之前"
+          }
         }
       }
     },
@@ -804,6 +840,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ önce %2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 之前的 %2$@"
           }
         }
       }
@@ -1162,6 +1204,12 @@
             "state" : "translated",
             "value" : "%1$@ v%2$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ v%2$@"
+          }
         }
       }
     },
@@ -1359,6 +1407,12 @@
             "state" : "translated",
             "value" : "< 1 dakika önce"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "<1 分钟之前"
+          }
         }
       }
     },
@@ -1476,7 +1530,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "启动闭环"
+            "value" : "闭环模式"
           }
         }
       }
@@ -1541,7 +1595,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buclă închisă dezactivata"
+            "value" : "Buclă închisă dezactivată"
           }
         },
         "ru" : {
@@ -1560,6 +1614,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kapalı Döngü KAPALI"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "闭环模式已关闭"
           }
         }
       }
@@ -1624,7 +1684,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buclă închisă activata"
+            "value" : "Buclă închisă activată"
           }
         },
         "ru" : {
@@ -1643,6 +1703,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kapalı Döngü AÇIK"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "闭环模式已开启"
           }
         }
       }
@@ -1882,12 +1948,24 @@
             "state" : "translated",
             "value" : "g"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "克"
+          }
         }
       }
     },
     "HIGH" : {
       "comment" : "String displayed instead of a glucose value above the CGM range",
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرتفع"
+          }
+        },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1954,6 +2032,12 @@
             "value" : "WYSOKI"
           }
         },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIGH"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1982,6 +2066,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "YÜKSEK"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CAO"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高"
           }
         }
       }
@@ -2053,6 +2149,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Son tamamlanan döngü %1$@ ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上次闭环 %1$@"
           }
         }
       }
@@ -2141,7 +2243,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eșec Loop"
+            "value" : "Eșec buclă"
           }
         },
         "ru" : {
@@ -2369,6 +2471,12 @@
     "LOW" : {
       "comment" : "String displayed instead of a glucose value below the CGM range",
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "منخفض"
+          }
+        },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2435,6 +2543,12 @@
             "value" : "NISKI"
           }
         },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LOW"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2463,6 +2577,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "DÜŞÜK"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "THẤP"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低"
           }
         }
       }
@@ -2583,6 +2709,12 @@
             "state" : "translated",
             "value" : "mg/dL"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg/dL"
+          }
         }
       }
     },
@@ -2698,6 +2830,12 @@
           }
         },
         "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mmol/L"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mmol/L"
@@ -3137,6 +3275,12 @@
             "state" : "translated",
             "value" : "Uygulamanın insülininizi otomatikleştirmesini istiyorsanız, Kapalı Döngüyü AÇIK duruma getirmek için Ayarlar'a dokunun."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果您希望应用程序自动控制您的胰岛素，请点击“设置”，打开“闭环模式”开关。"
+          }
         }
       }
     },
@@ -3570,6 +3714,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ de idi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是在%1$@"
           }
         }
       }

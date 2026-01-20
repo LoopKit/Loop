@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     " (pending: %@)" : {
       "comment" : "The string format appended to active insulin that describes pending insulin. (1: pending insulin)",
       "extractionState" : "manual",
@@ -213,12 +216,24 @@
             "state" : "translated",
             "value" : "Yemek-Öncesi Ön Ayarı"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " 餐前预设"
+          }
         }
       }
     },
     " remaining" : {
       "comment" : "remaining time in setting's profile expiration section",
       "localizations" : {
+        "ce" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "remaining"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -252,7 +267,13 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "נותר"
+            "value" : " נותר"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "remaining"
           }
         },
         "it" : {
@@ -296,6 +317,18 @@
             "state" : "translated",
             "value" : "kalan"
           }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "remaining"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " 剩余"
+          }
         }
       }
     },
@@ -324,6 +357,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notifications de sécurité sont DÉSACTIVÉES"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " התראות בטיחות כבויות"
           }
         },
         "it" : {
@@ -366,6 +405,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Güvenlik Bildirimleri KAPALI"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " 安全提醒已关闭"
           }
         }
       }
@@ -456,6 +501,12 @@
             "state" : "translated",
             "value" : "Egzersiz Ön Ayarı"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " 运动预设"
+          }
         }
       }
     },
@@ -484,6 +535,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "-"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "."
           }
         },
         "it" : {
@@ -703,7 +760,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ absorbed"
+            "value" : "%@ נספג"
           }
         },
         "it" : {
@@ -819,6 +876,12 @@
             "value" : "%@ restant"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ נותרו"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -866,6 +929,12 @@
             "state" : "translated",
             "value" : "%@ kaldı"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剩余 %@"
+          }
         }
       }
     },
@@ -911,7 +980,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ U Total"
+            "value" : "%@ U סה״כ"
           }
         },
         "it" : {
@@ -1200,15 +1269,45 @@
             "state" : "translated",
             "value" : "%1$@ %2$@ , ayarladığınız yeni Maks Bazal limitinden daha yüksek olan mevcut geçici bazal oranınızı iptal edemedi. Bu, istenenden daha yüksek insülin iletimi ile sonuçlanabilir. \n\n İnsülin iletimini manuel olarak askıya almayı ve ardından yeni limit geçerliyken bazal iletimi etkinleştirmek için hemen devam etmeyi düşünün."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@%@ 无法取消当前的临时基础率，该基础率高于您新设定的最大基础率上限。这可能导致胰岛素输注量高于预期。\n\n建议您手动暂停胰岛素输注，然后立即恢复，以便根据新的上限重新执行基础输注。"
+          }
         }
       }
     },
     "%1@%2@" : {
       "comment" : "Adds a full-stop to a statement (1: statement, 2: full stop character)",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$1@%2$2@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%1$1@%2$2@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$1@%2$2@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$1@%2$2@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%1$1@%2$2@"
           }
         }
@@ -1825,6 +1924,12 @@
             "state" : "translated",
             "value" : "%1$@ , KAPALI konumda Kapalı Döngü ile çalışıyor. Pompanız ve CGM çalışmaya devam edecek, ancak uygulama dozajı otomatik olarak ayarlamayacaktır."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 当前处于非闭环模式。胰岛素泵和连续血糖监测仪仍将正常运行，但应用程序不会自动调整胰岛素剂量。"
+          }
         }
       }
     },
@@ -1895,6 +2000,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ , uyarıyı cihazınızdan silemiyor"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 无法清除您设备上的警报。"
           }
         }
       }
@@ -1985,6 +2096,12 @@
             "state" : "translated",
             "value" : "%1$@ insülin pompanızla iletişim kuramıyor. Uygulama pompanıza ulaşmaya çalışmaya devam edecek, ancak insülin iletim bilgileri güncellenemeyecek ve hiçbir otomasyon devam edemeyecektir.\nSorunun çözülüp çözülmediğini görmek için birkaç dakika bekleyebilir veya diğer seçenekler hakkında daha fazla bilgi edinmek için aşağıdaki butona dokunabilirsiniz."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 无法与您的胰岛素泵通信。应用将继续尝试连接胰岛素泵，但当前无法更新胰岛素输注信息，也无法继续自动化操作。\n\n您可以等待几分钟以观察问题是否自动恢复，或点击下方按钮了解其他可选操作。"
+          }
         }
       }
     },
@@ -2013,6 +2130,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ Paramètres d'heure requierent une attention"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ הגדרות השעה דורשות תשומת לב"
           }
         },
         "it" : {
@@ -2151,6 +2274,12 @@
             "state" : "translated",
             "value" : "%1$@ Ü"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ U"
+          }
         }
       }
     },
@@ -2203,7 +2332,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ U left"
+            "value" : "%1$@ U נותרו"
           }
         },
         "it" : {
@@ -2335,7 +2464,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ U left: %2$@"
+            "value" : "%1$@ U נותרו: %2$@"
           }
         },
         "it" : {
@@ -2467,7 +2596,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ U/hour @ %2$@"
+            "value" : "%1$@ יח׳/שעה @ %2$@"
           }
         },
         "it" : {
@@ -2684,6 +2813,12 @@
             "value" : "%1$@ holder op med at fungere i %2$@. Du bliver nødt til at rebuilde før det."
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ funktioniert in %2$@ nicht mehr. Sie müssen vorher einen Neuaufbau durchführen."
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2702,10 +2837,22 @@
             "value" : "%1$@ przestanie działać w %2$@. Konieczna będzie wcześniejsza odbudowa."
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ va înceta să funcționeze în %2$@. Va trebui să reconstruiți sistemul înainte de asta."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ перестанет работать в %2$@. До этого времени необходимо пересобрать приложение заново."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@将在%2$@停止工作。您需要在此之前重建。"
           }
         }
       }
@@ -2997,6 +3144,12 @@
             "value" : "⚠️"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3022,6 +3175,12 @@
           }
         },
         "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️"
+          }
+        },
+        "ro" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "⚠️"
@@ -3244,7 +3403,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comparație pe 30 min a glicemiei anticipate față de cea observată, continuată cu o diminuare pe 60 min."
+            "value" : "Comparație timp de 30 de minute între predicția glicemiei și valoarea reală, continuată cu scăderea valorii pe parcursul a 60 de minute"
           }
         },
         "ru" : {
@@ -3312,6 +3471,12 @@
             "value" : "Quelques secondes restantes"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נותרו כמה שניות"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3358,6 +3523,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birkaç saniye kaldı"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剩余几秒"
           }
         }
       }
@@ -3422,7 +3593,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O intrare manuală de glicermie trebuie să fie între %1$@ și %2$@"
+            "value" : "O intrare manuală de glicemie trebuie să fie între %1$@ și %2$@"
           }
         },
         "ru" : {
@@ -3441,6 +3612,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manuel KŞ girişi %1$@ ile %2$@ arasında olmalıdır"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入 %@ 到 %@ 之间的血糖值"
           }
         }
       }
@@ -3470,6 +3647,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une saisie manuelle de la glycémie doit être comprise entre %1$@ et %2$@."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הזנת גלוקוז ידנית חייבת להיות בין %1$@ ל- %2$@."
           }
         },
         "it" : {
@@ -3512,6 +3695,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manuel KŞ girişi %1$@ ile %2$@ arasında olmalıdır."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入 %1$@ 到 %2$@ 之间的血糖值"
           }
         }
       }
@@ -3775,7 +3964,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "基于已公布的Humalog，Novolog和Apidra胰岛素在成人中吸收的模型。"
+            "value" : "基于已发表的成人使用优泌乐、诺和锐和爱倍达胰岛素吸收数据的模型。"
           }
         }
       }
@@ -3919,6 +4108,12 @@
             "state" : "translated",
             "value" : "Yeni bir %@ sürümü mevcuttur."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@有新版本可用。"
+          }
         }
       }
     },
@@ -4002,11 +4197,49 @@
             "state" : "translated",
             "value" : "Bolus iletilmeden önce bir pompanın yapılandırılması gerek."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在注射大剂量前，必须先配置胰岛素泵。"
+          }
         }
       }
     },
     "Absorption Time" : {
-      "comment" : "Label for food absorption entry on add favorite food screen"
+      "comment" : "Label for food absorption entry on add favorite food screen",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resorptionsdauer"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמן ספיגה"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Absorpsjonstid"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timp de absorbție"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "吸收时间"
+          }
+        }
+      }
     },
     "AcceptRecommendedBolus" : {
       "comment" : "Action to copy the recommended Bolus value to the actual Bolus Field",
@@ -4182,7 +4415,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active Carbohydrates"
+            "value" : "פחמימות פעילות"
           }
         },
         "it" : {
@@ -4314,7 +4547,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active Carbohydrates: %@"
+            "value" : "פחמימות פעילות: %@"
           }
         },
         "it" : {
@@ -4439,7 +4672,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active Carbs"
+            "value" : "פחמימות פעילות"
           }
         },
         "it" : {
@@ -4513,6 +4746,12 @@
             "state" : "translated",
             "value" : "Lượng Carbs còn hoạt động"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活性碳水"
+          }
         }
       }
     },
@@ -4558,7 +4797,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active Insulin"
+            "value" : "אינסולין פעיל"
           }
         },
         "it" : {
@@ -4690,7 +4929,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active Insulin: %@"
+            "value" : "אינסולין פעיל: %@"
           }
         },
         "it" : {
@@ -4782,6 +5021,18 @@
             "value" : "Tilføj en ny favoritmad"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge ein neues Lieblingsessen hinzu"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוסף מאכל אהוב חדש"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4804,6 +5055,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dodaj nowe ulubione jedzenie"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adăugați o nouă mâncare preferată"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加常用食物"
           }
         }
       }
@@ -4850,7 +5113,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Carb Entry"
+            "value" : "הוספת פחמימות"
           }
         },
         "it" : {
@@ -5058,6 +5321,9 @@
         }
       }
     },
+    "Add item to bottom row" : {
+      "comment" : "Title for Add item"
+    },
     "Add Meal" : {
       "comment" : "The label of the carb entry button",
       "localizations" : {
@@ -5100,7 +5366,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Meal"
+            "value" : "הוסף ארוחה"
           }
         },
         "it" : {
@@ -5183,6 +5449,9 @@
         }
       }
     },
+    "Add predictive line" : {
+      "comment" : "Title for predictive line toggle"
+    },
     "Add Pump" : {
       "comment" : "Action sheet title selecting Pump\nThe title of the pump chooser in settings\nTitle text for button to add pump device\nTitle text for button to set up a Pump",
       "localizations" : {
@@ -5225,7 +5494,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Pump"
+            "value" : "הוסף משאבה"
           }
         },
         "it" : {
@@ -5344,7 +5613,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Service"
+            "value" : "הוסף שרות"
           }
         },
         "it" : {
@@ -5398,7 +5667,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Service"
+            "value" : "添加服务"
           }
         }
       }
@@ -5512,6 +5781,12 @@
             "value" : "Gestion des alertes"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ניהול התראות"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5553,6 +5828,12 @@
             "state" : "translated",
             "value" : "Uyarı Yönetimi"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警报管理"
+          }
         }
       }
     },
@@ -5587,6 +5868,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Autorisations d'alerte"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרשאות התראה"
           }
         },
         "it" : {
@@ -5636,6 +5923,12 @@
             "state" : "translated",
             "value" : "Uyarı İzinleri"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警报权限"
+          }
         }
       }
     },
@@ -5646,6 +5939,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Advarselstilladelser og dæmpede advarsler"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarmberechtigungen und Stummschalten von Alarmen"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרשאות התראה והשתקת התראות"
           }
         },
         "it" : {
@@ -5666,10 +5971,22 @@
             "value" : "Uprawnienia do alertów i wyciszanie alertów"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permisiuni de alertă și alerte silențioase"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Разрешения на оповещения и отключение звука оповещений"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警报权限与静音设置"
           }
         }
       }
@@ -5683,10 +6000,22 @@
             "value" : "Algoritme-eksperimenter"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algorithmus-Experimente"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Essais d'algorithmes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ניסויי אלגוריתמים"
           }
         },
         "it" : {
@@ -5712,6 +6041,18 @@
             "state" : "translated",
             "value" : "Algorytmy Eksperymentalne"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimente algoritmice"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "算法实验"
+          }
         }
       }
     },
@@ -5722,6 +6063,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Algoritmeeksperimenter er valgfrie ændringer af Loop-algoritmen. Disse ændringer er mindre testet end standard Loop-algoritmen, så brug venligst omhyggeligt."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algorithmus-Experimente sind optionale Modifikationen des Loop-Algorithmus. Diese Modifikationen sind weniger getestet als der Standard-Loop-Algorithmus. Verwende sie daher mit Vorsicht."
           }
         },
         "fr" : {
@@ -5752,6 +6099,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eksperymenty algorytmiczne to opcjonalne modyfikacje algorytmu pętli. Te modyfikacje są mniej przetestowane niż standardowy algorytm pętli, więc używaj ich ostrożnie."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimentele algoritmice sunt modificări opționale ale algoritmului de buclă. Aceste modificări sunt mai puțin testate decât algoritmul de buclă standard, așa că vă rugăm să le utilizați cu atenție."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "算法实验是对 Loop 算法的可选调整。这些调整的测试程度低于标准算法，请谨慎启用。"
           }
         }
       }
@@ -5861,6 +6220,18 @@
             "value" : "Alle alarmer er slået fra"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Warnungen stummgeschaltet"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל ההתראות משותקות"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5877,6 +6248,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wszystkie alerty wyciszone"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toate alertele sunt dezactivate"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有警报已静音"
           }
         }
       }
@@ -5896,6 +6279,12 @@
             "value" : "Alle Alarme stummgeschaltet bis"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל ההתראות מושתקות עד"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5912,6 +6301,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wszystkie alerty wyciszono do"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toate alertele sunt dezactivate până la"
           }
         }
       }
@@ -5948,6 +6343,18 @@
             "state" : "translated",
             "value" : "Wszystkie ulubione"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toate favoritele"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部常用"
+          }
         }
       }
     },
@@ -5972,6 +6379,12 @@
             "value" : "Quantité consommée"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כמות שנצרכה"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5988,6 +6401,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ilość węglowodanów"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cantitate consumată"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "摄入量"
           }
         }
       }
@@ -6186,6 +6611,12 @@
             "state" : "translated",
             "value" : "Aktif bir geçersiz kılma, karbonhidrat oranınızı ve insülin duyarlılığınızı değiştiriyor. Bunun bolus hesaplamanızı ve öngörülen glikozu etkilemesini istemiyorsanız geçersiz kılmayı kapatmayı düşünün."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前启用的覆盖设置正在修改您的碳水比和胰岛素敏感系数。\n如果您不希望其影响大剂量的计算和预测血糖，请考虑关闭该覆盖设置。"
+          }
         }
       }
     },
@@ -6268,6 +6699,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Karbonhidrat girişinizi kaydetmeye çalışırken bir hata oluştu."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存碳水记录时出错了。"
           }
         }
       }
@@ -6506,6 +6943,12 @@
             "state" : "translated",
             "value" : "Güncellenmiş bir bolus önerisi mevcuttur."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已有更新的大剂量推荐值。"
+          }
         }
       }
     },
@@ -6600,7 +7043,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "API Key"
+            "value" : "Cheie API"
           }
         },
         "ru" : {
@@ -6776,6 +7219,12 @@
             "state" : "translated",
             "value" : "API Secret"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Secret"
+          }
         }
       }
     },
@@ -6859,11 +7308,61 @@
             "state" : "translated",
             "value" : "Uygulama Profili"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用配置"
+          }
         }
       }
     },
     "Apple" : {
-      "comment" : "Default name on add favorite food screen"
+      "comment" : "Default name on add favorite food screen",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apfel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomme"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תפוח"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mela"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eple"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Măr"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "苹果"
+          }
+        }
+      }
     },
     "Are you sure you want to delete all history entries?" : {
       "comment" : "Action sheet confirmation message for pump history deletion",
@@ -6969,6 +7468,12 @@
             "state" : "translated",
             "value" : "Bạn có chắc muốn xóa hết các dữ liệu cũ?"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要删除所有历史记录吗？"
+          }
         }
       }
     },
@@ -7057,6 +7562,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Günlüğe kaydedilen tüm doz girişlerini silmek istediğinizden emin misiniz?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是否确定删除全部注射记录？"
           }
         }
       }
@@ -7165,6 +7676,12 @@
             "state" : "translated",
             "value" : "Bạn có chắc muốn xóa hết mọi giá trị của ngăn chứa insulin?"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是否确定删除全部储液量记录？"
+          }
         }
       }
     },
@@ -7253,6 +7770,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tüm %@ Verilerinizi silmek istediğinizden emin misiniz?\n (Bu eylem geri alınamaz)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要删除所有 %@ 数据吗？（此操作无法恢复）"
           }
         }
       }
@@ -7413,6 +7936,18 @@
             "state" : "translated",
             "value" : "Czy na pewno chcesz usunąć to jedzenie?"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunteți sigur că doriți să ștergeți acest aliment?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你确定要删除该食物吗？"
+          }
         }
       }
     },
@@ -7489,7 +8024,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ești sigur că vrei să ștergi acest serviciu?"
+            "value" : "Sunteți sigur că vreți să ștergeți acest serviciu?"
           }
         },
         "ru" : {
@@ -7834,7 +8369,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Autentifică-te pentru a înregistra %@ unități"
+            "value" : "Autentificare pentru a înregistra %@ unități"
           }
         },
         "ru" : {
@@ -7853,6 +8388,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ Ünite günlüğe kaydetmek için kimlik doğrulaması yapın"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请验证身份以记录 %@U 胰岛素"
           }
         }
       }
@@ -8194,6 +8735,12 @@
             "state" : "translated",
             "value" : "Tahmini KŞ'ne bağlı olarak bolus önerilmez."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "根据您的预测血糖值，当前不建议注射大剂量。"
+          }
         }
       }
     },
@@ -8228,6 +8775,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bluetooth désactivé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בלוטות׳ כבוי"
           }
         },
         "it" : {
@@ -8277,6 +8830,12 @@
             "state" : "translated",
             "value" : "Bluetooth\nKapalı"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "蓝牙已关闭"
+          }
         }
       }
     },
@@ -8311,6 +8870,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bluetooth\nIndisponible"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בלוטות׳ לא זמין"
           }
         },
         "it" : {
@@ -8360,6 +8925,12 @@
             "state" : "translated",
             "value" : "Bluetooth\nKullanılamıyor"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "蓝牙不可用"
+          }
         }
       }
     },
@@ -8394,6 +8965,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bluetooth désactivé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראת בלוטות׳ כבוי"
           }
         },
         "it" : {
@@ -8477,6 +9054,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bluetooth indisponible"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראת בלוטות׳ לא זמין"
           }
         },
         "it" : {
@@ -8722,6 +9305,12 @@
             "state" : "translated",
             "value" : "Bolus Sorunu"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量出现问题"
+          }
         }
       }
     },
@@ -8810,6 +9399,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bolus Önerisi Güncellendi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量推荐值已更新"
           }
         }
       }
@@ -8900,6 +9495,12 @@
             "state" : "translated",
             "value" : "Bolus Özeti"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量概要"
+          }
         }
       }
     },
@@ -8977,6 +9578,12 @@
             "state" : "translated",
             "value" : "Bolus Çok Küçük"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量太少"
+          }
         }
       }
     },
@@ -9022,7 +9629,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bolused %1$@ of %2$@"
+            "value" : "הוזרק %1$@ מתוך %2$@"
           }
         },
         "it" : {
@@ -9147,7 +9754,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bolusing %1$@"
+            "value" : "מזריק בולוס: %1$@"
           }
         },
         "it" : {
@@ -9230,8 +9837,14 @@
         }
       }
     },
+    "Bottom row" : {
+      "comment" : "Live activity Bottom row configuration title"
+    },
+    "Bottom row configuration" : {
+      "comment" : "Title for Bottom row configuration"
+    },
     "Cancel" : {
-      "comment" : "Button label for cancel\nCancel button for reset loop alert\nCancel export button title\nThe title of the cancel action in an action sheet",
+      "comment" : "Button label for cancel\nButton text to cancel\nCancel button for reset loop alert\nCancel export button title\nThe title of the cancel action in an action sheet",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9278,7 +9891,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cancel"
+            "value" : "בטל"
           }
         },
         "hi" : {
@@ -9409,7 +10022,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Canceling Bolus"
+            "value" : "מבטל בולוס"
           }
         },
         "it" : {
@@ -9451,7 +10064,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Întrerupere Bolus"
+            "value" : "Întrerupere bolus"
           }
         },
         "ru" : {
@@ -9534,7 +10147,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carb effects"
+            "value" : "השפעות פחמימות"
           }
         },
         "it" : {
@@ -9703,11 +10316,61 @@
             "state" : "translated",
             "value" : "Karb Girişi"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "碳水记录"
+          }
         }
       }
     },
     "Carb Quantity" : {
-      "comment" : "Label for carb quantity row on add favorite food screen"
+      "comment" : "Label for carb quantity row on add favorite food screen",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menge gegessen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quantité de glucides"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כמות פחמימות"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carboidrati Assunti"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antall karbohydrater"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cantitate carbohidrați"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "碳水含量"
+          }
+        }
+      }
     },
     "Carb Ratio Schedule" : {
       "comment" : "Details for configuration error when carb ratio schedule is missing",
@@ -10163,7 +10826,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carbohydrates"
+            "value" : "פחמימות"
           }
         },
         "it" : {
@@ -10385,6 +11048,12 @@
             "value" : "Achtung"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זהירות"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10407,6 +11076,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uwaga"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atenţie"
           }
         }
       }
@@ -11221,6 +11896,12 @@
             "state" : "translated",
             "value" : "Lựa chọn khoảng thời gian tiêu hóa dài hơn cho các bữa ăn no, hoặc những bữa ăn nhiều chất béo và protein. Đây chỉ là hướng dẫn cho thuật toán Algorithm và không cần phải chính xác."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对于大餐或含有脂肪和蛋白质的餐食，请选择较长的吸收时间。此设置仅作为算法的参考， 无需精确。"
+          }
         }
       }
     },
@@ -11256,6 +11937,18 @@
             "state" : "translated",
             "value" : "Wybierz ulubione:"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alegeți Preferatul:"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择常用"
+          }
         }
       }
     },
@@ -11290,6 +11983,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fermer"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סגור"
           }
         },
         "it" : {
@@ -11378,7 +12077,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Boucle Fermé"
+            "value" : "Boucle Fermée"
           }
         },
         "he" : {
@@ -11426,7 +12125,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loop automat"
+            "value" : "Buclă închisă"
           }
         },
         "ru" : {
@@ -11456,7 +12155,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开启闭环"
+            "value" : "闭环模式"
           }
         }
       }
@@ -11521,7 +12220,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buclă închisă dezactivata"
+            "value" : "Buclă închisă dezactivată"
           }
         },
         "ru" : {
@@ -11540,6 +12239,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kapalı Döngü KAPALI"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "闭环模式已关闭"
           }
         }
       }
@@ -11624,6 +12329,12 @@
             "state" : "translated",
             "value" : "Kapalı Döngü, aktif bir CGM Sensör Oturumu gerektirir"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "闭环需要活动的 CGM 传感器会话"
+          }
         }
       }
     },
@@ -11694,6 +12405,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kapalı Döngü, Kurulumun Tamamlanmasını gerektirir"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用闭环控制前需完成所有设置。"
           }
         }
       }
@@ -11808,6 +12525,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "lúc %1$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 %1$@"
           }
         }
       }
@@ -12600,7 +13323,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Monitorizare glicemică continuă"
+            "value" : "Senzor de monitorizare continuă a glicemiei"
           }
         },
         "ru" : {
@@ -12630,7 +13353,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "连续葡萄糖监测"
+            "value" : "连续血糖监测仪"
           }
         }
       }
@@ -12684,7 +13407,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Correction Range"
+            "value" : "טווח תיקון"
           }
         },
         "it" : {
@@ -12756,7 +13479,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "修正范围"
+            "value" : "校正范围"
           }
         }
       }
@@ -12768,6 +13491,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kunne ikke genstarte %1$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ konnte nicht neu gestartet werden"
           }
         },
         "it" : {
@@ -12786,6 +13515,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nie można ponownie uruchomić %1$@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nu s-a putut reporni %1$@"
           }
         }
       }
@@ -12869,6 +13604,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kritik Uyarılar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关键通知"
           }
         }
       }
@@ -13289,7 +14030,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " Glicemia curentă de %1$@ se situează sub intervalul țintă de corecție."
+            "value" : "Glicemia actuală de %1$@ se situează sub intervalul țintă de corecție."
           }
         },
         "ru" : {
@@ -13325,7 +14066,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "当前葡萄糖%1$@低于修正范围"
+            "value" : "当前葡萄糖%1$@低于校正范围"
           }
         }
       }
@@ -13456,6 +14197,9 @@
         }
       }
     },
+    "Custom preset" : {
+      "comment" : "The title of the cell indicating a generic custom preset is enabled"
+    },
     "Custom Preset" : {
       "comment" : "The title of the cell indicating a generic custom preset is enabled",
       "localizations" : {
@@ -13536,12 +14280,24 @@
             "state" : "translated",
             "value" : "Özel Ön Ayar"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义预设"
+          }
         }
       }
     },
     "Date" : {
       "comment" : "Date picker label",
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التاريخ"
+          }
+        },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13779,6 +14535,12 @@
     },
     "Delete" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حذف"
+          }
+        },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13839,16 +14601,28 @@
             "value" : "Usunąć"
           }
         },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Șterge"
+            "value" : "Ștergeți"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odstrániť"
           }
         },
         "sv" : {
@@ -13861,6 +14635,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sil"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xóa"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
           }
         }
       }
@@ -13879,6 +14665,12 @@
             "value" : "„ %@ “ löschen?"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "למחוק את \" %@ \"?"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13895,6 +14687,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Usunąć „ %@ ”?"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ștergeți „ %@ ”?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除”%@”？"
           }
         }
       }
@@ -14129,6 +14933,12 @@
             "state" : "translated",
             "value" : "Xóa hết"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除所有"
+          }
         }
       }
     },
@@ -14287,6 +15097,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Usuń jedzenie"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ștergeți alimentele"
           }
         }
       }
@@ -14482,7 +15298,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Șterge date CGM de testare"
+            "value" : "Ștergeți datele CGM de testare"
           }
         },
         "ru" : {
@@ -14570,7 +15386,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Șterge date de testare"
+            "value" : "Ștergeți datele de testare"
           }
         },
         "ru" : {
@@ -14766,6 +15582,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İlet"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输注"
           }
         }
       }
@@ -14968,7 +15790,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tratament Diabet"
+            "value" : "Tratamentul diabetului"
           }
         },
         "ru" : {
@@ -15058,6 +15880,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bu yemek için karbonhidrat miktarı olarak %1$@ gram girmeyi düşündünüz mü?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你确定本餐包含 %1$@ g 碳水吗？"
           }
         }
       }
@@ -15291,6 +16119,12 @@
             "state" : "translated",
             "value" : "Từ bỏ"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "忽略"
+          }
         }
       }
     },
@@ -15474,6 +16308,12 @@
             "state" : "translated",
             "value" : "Doz Özeti"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注射量摘要"
+          }
         }
       }
     },
@@ -15556,6 +16396,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dozlama Stratejisi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剂量策略"
           }
         }
       }
@@ -15664,6 +16510,12 @@
             "value" : "Activer \nbluetooth"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעל \n בלוטות'"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15711,6 +16563,12 @@
             "state" : "translated",
             "value" : "Etkinleştir\nBluetooth"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用蓝牙"
+          }
         }
       }
     },
@@ -15745,6 +16603,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Włącz Algorytm adaptacyjny"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activează aplicarea parțială pe bază de glicemie"
           }
         }
       }
@@ -15781,8 +16645,17 @@
             "state" : "translated",
             "value" : "Włącz Integralną Korektę Retrospektywną (IRC)"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activează corecția retrospectivă integrală"
+          }
         }
       }
+    },
+    "Enabled" : {
+      "comment" : "Title for enable live activity toggle"
     },
     "Enables" : {
       "comment" : "The action hint of the workout mode toggle button when disabled",
@@ -15989,6 +16862,12 @@
             "state" : "translated",
             "value" : "Önerilen bolus miktarı için bir ölçüm cihazından bir kan şekeri girin."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入血糖仪测得的血糖值，以获取推荐的大剂量。"
+          }
         }
       }
     },
@@ -16071,6 +16950,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bolus girin"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入大剂量"
           }
         }
       }
@@ -16161,6 +17046,12 @@
             "state" : "translated",
             "value" : "Parmak Ucu KŞ Girin"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入指尖血糖值"
+          }
         }
       }
     },
@@ -16249,6 +17140,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KŞ güvenlik limitini girin"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入血糖安全下限"
           }
         }
       }
@@ -17013,6 +17910,12 @@
             "state" : "translated",
             "value" : "Ayarlarda izin verilen maksimum bolusu aşıyor"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超出设定的最大剂量限制"
+          }
         }
       }
     },
@@ -17201,7 +18104,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "超过大剂量最大输注限制"
+            "value" : "超过大剂量上限"
           }
         }
       }
@@ -17458,11 +18361,49 @@
             "state" : "translated",
             "value" : "İnsülin İletimine Devam Edilemedi"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复胰岛素输注失败"
+          }
         }
       }
     },
     "Favorite Foods" : {
-      "comment" : "Title for Favorite Foods view"
+      "comment" : "Title for Favorite Foods view",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lieblingsessen"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מאכלים אהובים"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorittmat"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mâncăruri preferate"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "食物库"
+          }
+        }
+      }
     },
     "FAVORITE FOODS" : {
       "comment" : "The section title for Carb entry screen where Favorite Foods can be selected",
@@ -17477,6 +18418,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Favorisiertes Essen"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מאכלים אהובים"
           }
         },
         "it" : {
@@ -17501,6 +18448,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ULUBIONE JEDZENIE"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MÂNCĂRURI PREFERATE"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "食物库"
           }
         }
       }
@@ -17626,7 +18585,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fiasp"
+            "value" : "费雅普（Fiasp）"
           }
         }
       }
@@ -17806,6 +18765,12 @@
     "Food Type" : {
       "comment" : "Label for food type entry on add favorite food screen",
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food Type"
+          }
+        },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17818,10 +18783,28 @@
             "value" : "Essenstyp"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food Type"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food Type"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Type d'aliment"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סוג מאכל"
           }
         },
         "it" : {
@@ -17836,16 +18819,64 @@
             "value" : "Type mat"
           }
         },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type voeding"
+          }
+        },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rodzaj żywności"
           }
         },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food Type"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tip de alimente"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тип еды"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typ jedla"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typ av mat"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food Type"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loại thực phẩm"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "食物类型"
           }
         }
       }
@@ -17978,6 +19009,12 @@
             "value" : "Af sikkerhedsmæssige årsager bør du tillade, at Kritiske advarsler, Tidsfølsomme og Meddelelser (ikke-kritiske advarsler) på din enhed fortsætter med at bruge %1$@ og ikke kan slå individuelle alarmer fra."
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus Sicherheitsgründen solltest Du kritische Warnungen, zeitkritische Warnungen und Benachrichtigungsberechtigungen (nicht kritische Warnungen) auf Deinem Gerät zulassen, um %1$@ weiterhin verwenden zu können."
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17994,6 +19031,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ze względów bezpieczeństwa należy zezwolić na alerty krytyczne, alerty zależne od czasu i uprawnienia do powiadomień (alerty niekrytyczne) na swoim urządzeniu na dalsze korzystanie z %1$@ i nie można wyłączać poszczególnych alarmów."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În scopuri de siguranță, trebuie să permiteți alertele critice, sensibile la timp și permisiunile de notificare (alerte necritice) pe dispozitivul dvs. pentru a continua să utilizați %1$@ și nu puteți dezactiva alarmele individuale."
           }
         },
         "ru" : {
@@ -18076,6 +19119,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Öngörülen KŞ, hala hedef aralıktan yüksek olabilir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预测的血糖值可能仍高于目标范围。"
           }
         }
       }
@@ -18166,6 +19215,12 @@
             "value" : "Ofte stillede spørgsmål om påmindelser"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Häufig gestellte Fragen zu Benachrichtigungen"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18188,6 +19243,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Często zadawane pytania dotyczące alertów"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Întrebări frecvente privind alertele"
           }
         },
         "ru" : {
@@ -18314,6 +19375,12 @@
             "state" : "translated",
             "value" : "g"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "克"
+          }
         }
       }
     },
@@ -18384,6 +19451,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uyarı İzinleri ile ilgili yardım alın"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取有关警报权限的帮助"
           }
         }
       }
@@ -18484,7 +19557,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glucoza"
+            "value" : "Glicemia"
           }
         },
         "ru" : {
@@ -18534,6 +19607,12 @@
             "value" : "Glucose Based Partial Application"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilweise Anwendung auf Glukosebasis"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18550,6 +19629,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Algorytm adaptacyjny"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplicare parțială pe bază de glicemie"
           }
         }
       }
@@ -18884,6 +19969,12 @@
             "value" : "Glukoseeffekt ved afbrydelse af insulintilførsel"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukoseeffekt der Unterbrechung der Insulinabgabe"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18900,6 +19991,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wpływ wstrzymania podawania insuliny na poziom glukozy"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efectul asupra glicemiei al suspendării administrării de insulină"
           }
         }
       }
@@ -18983,6 +20080,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KŞ Girişi Aralık Dışında"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入血糖超出范围"
           }
         }
       }
@@ -19071,7 +20174,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Momentum glicemie"
+            "value" : "Avânt glicemie"
           }
         },
         "ru" : {
@@ -19185,6 +20288,12 @@
             "value" : "HARDWARE-LYDE"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HARDWARE-SOUNDS"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19209,6 +20318,12 @@
             "value" : "DŹWIĘKI SPRZĘTOWE"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SUNET HARDWARE"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19223,6 +20338,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Høj glukose"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoher Blutzucker"
           }
         },
         "fr" : {
@@ -19249,6 +20370,12 @@
             "value" : "Wysoki poziom glukozy"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glicemie ridicată"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19263,6 +20390,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hvordan kan jeg slå ikke-kritiske alarmer fra?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie kann ich nicht kritische Warnungen stummschalten?"
           }
         },
         "it" : {
@@ -19283,6 +20416,12 @@
             "value" : "Jak mogę wyciszyć alerty niekrytyczne?"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cum pot dezactiva sunetul alertelor non-critice?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19297,6 +20436,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hvordan kan jeg kun slå lyden fra for tidsfølsomme og ikke-kritiske advarsler?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie kann ich nur zeitkritische und nicht kritische Warnungen stummschalten?"
           }
         },
         "it" : {
@@ -19317,6 +20462,12 @@
             "value" : "Jak wyciszyć tylko alerty zależne od czasu i niekrytyczne?"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cum pot dezactiva sunetul doar alertelor sensibile la timp și non-critice?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19332,6 +20483,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hvordan kan jeg midlertidigt slå lyden fra for alle %1$@ applyde?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie kann ich alle Töne der %1$@ App vorübergehend stummschalten?"
           }
         },
         "fr" : {
@@ -19356,6 +20513,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jak mogę tymczasowo wyciszyć wszystkie dźwięki aplikacji %1$@ ?"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cum pot dezactiva temporar toate sunetele aplicației %1$@?"
           }
         },
         "ru" : {
@@ -19470,6 +20633,12 @@
             "value" : "Hvis iOS-fokustilstand er slået TIL, og Slå lyden fra-advarsler er slået fra, leveres kritiske advarsler stadig, og ikke-kritiske advarsler slås fra, indtil %1$@ føjes til hver fokustilstand som en tilladt app."
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn der iOS-Fokusmodus aktiviert und die Stummschaltung von Warnungen deaktiviert ist, werden kritische Warnungen weiterhin übermittelt und nicht kritische Warnungen stummgeschaltet, bis %1$@ jedem Fokusmodus als zulässige App hinzugefügt wird."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19492,6 +20661,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jeśli tryb skupienia w systemie iOS jest włączony, a opcja Wycisz alerty jest wyłączona, alerty krytyczne będą nadal dostarczane, a alerty niekrytyczne będą wyciszane, dopóki %1$@ nie zostanie dodany do każdego trybu skupienia jako dozwolona aplikacja."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dacă modul Focus iOS este ACTIVAT și opțiunea Dezactivare alerte este DEZACTIVATĂ, alertele critice vor fi transmise în continuare, iar alertele non-critice vor fi dezactivate până când %1$@ este adăugat la fiecare mod Focus ca aplicație permisă."
           }
         },
         "ru" : {
@@ -19570,6 +20745,12 @@
             "state" : "translated",
             "value" : "Acilen"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "实时"
+          }
         }
       }
     },
@@ -19610,6 +20791,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "W przyszłych wersjach Loop te eksperymenty mogą się zmienić, stać się standardowymi częściami algorytmu Loop lub zostać całkowicie usunięte z Loop. Śledź czat Loop Zulip, aby być na bieżąco z możliwymi zmianami w tych funkcjach."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În versiunile viitoare ale Loop, aceste experimente se pot schimba, pot deveni părți standard ale algoritmului Loop sau pot fi eliminate complet din Loop. Vă rugăm să urmăriți chat-ul Loop Zulip pentru a fi la curent cu posibilele modificări ale acestor funcții."
           }
         }
       }
@@ -19741,7 +20928,32 @@
       }
     },
     "Information" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Information"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informasjon"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informaţii"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信息"
+          }
+        }
+      }
     },
     "Insulin" : {
       "comment" : "Title of the prediction input effect for insulin",
@@ -20461,6 +21673,12 @@
             "value" : "Pompe à insuline"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משאבת אינסולין"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20507,6 +21725,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İnsülin pompası"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "胰岛素泵"
           }
         }
       }
@@ -20924,6 +22148,12 @@
             "state" : "translated",
             "value" : "Integralna korekta retrospektywna"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corecție retrospectivă integrală"
+          }
         }
       }
     },
@@ -20958,6 +22188,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Integralna korekta retrospektywna (IRC) jest rozszerzeniem standardowego komponentu algorytmu Korekta retrospektywna (RC) w Loop, który koryguje prognozę na podstawie historii rozbieżności między przewidywanymi a rzeczywistymi poziomami glukozy. \n\n W przeciwieństwie do RC, który analizuje rozbieżności w ciągu ostatnich 30 minut, w przypadku IRC historia rozbieżności sumuje się w czasie. Tak więc utrzymujące się dodatnie rozbieżności w czasie spowodują zwiększenie dawki. Jeśli rozbieżności są ujemne w czasie, Loop jeszcze bardziej zmniejszy podawanie insuliny."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corecția Retrospectivă Integrală (CRI) este o extensie a componentei algoritmului standard de Corecție Retrospectivă (CR) din Loop, care ajustează prognoza pe baza istoricului discrepanțelor dintre nivelurile de glicemie prezise și cele reale. \n \nSpre deosebire de CR, care analizează discrepanțele din ultimele 30 de minute, cu CRI, istoricul discrepanțelor se adună în timp. Așadar, discrepanțele pozitive continue în timp vor duce la creșterea dozării. Dacă discrepanțele sunt negative în timp, Loop va reduce și mai mult dozarea."
           }
         }
       }
@@ -21054,6 +22290,12 @@
             "value" : "Ugyldig absorptionstid: %1$@ timer"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungültige Resorptionszeit: %1$@ Stunden"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21070,6 +22312,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nieprawidłowy czas absorpcji: %1$@ godz"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timp de absorbție nevalid: %1$@ ore"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无效的吸收时间：%1$@ 小时"
           }
         }
       }
@@ -21141,6 +22395,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geçersiz Bolus Miktarı"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量无效"
           }
         }
       }
@@ -21218,6 +22478,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geçersiz karb miktarı"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "碳水含量无效"
           }
         }
       }
@@ -21498,6 +22764,12 @@
             "value" : "Kritiske iOS-advarsler og tidsfølsomme advarsler er typer Apple-meddelelser. De bruges til begivenheder med høj prioritet. Nogle eksempler inkluderer:"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kritische iOS-Warnungen und zeitkritische Warnungen sind Arten von Apple-Benachrichtigungen. Sie werden für Ereignisse mit hoher Priorität verwendet. Einige Beispiele:"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21522,6 +22794,12 @@
             "value" : "Alerty krytyczne systemu iOS i alerty zależne od czasu to typy powiadomień Apple. Wykorzystuje się je do zdarzeń o wysokim priorytecie. Oto kilka przykładów:"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alertele critice iOS și alertele sensibile la timp sunt tipuri de notificări Apple. Sunt folosite pentru evenimente cu prioritate ridicată. Câteva exemple includ:"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21536,6 +22814,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iOS-FOKUSTILSTANDE"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IOS-FOKUSMODI"
           }
         },
         "fr" : {
@@ -21560,6 +22844,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TRYBY SKUPIENIA IOS"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MODURI CONCENTRARE IOS"
           }
         },
         "ru" : {
@@ -21654,7 +22944,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Raportare probleme"
+            "value" : "Generează raport"
           }
         },
         "ru" : {
@@ -21833,6 +23123,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Büyük Yemek Girildi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已输入大份餐"
           }
         }
       }
@@ -22141,6 +23437,9 @@
         }
       }
     },
+    "Live activity" : {
+      "comment" : "Alert Permissions live activity\nLive activity screen title"
+    },
     "Loading..." : {
       "comment" : "The loading message for the diagnostic report screen",
       "localizations" : {
@@ -22339,6 +23638,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Günlük Doz"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "记录注射量"
           }
         }
       }
@@ -22579,6 +23884,12 @@
             "value" : "Panne de Loop"
           }
         },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop קרס"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22619,6 +23930,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loop Çöktü"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "loop 崩溃了"
           }
         }
       }
@@ -22822,6 +24139,12 @@
             "state" : "translated",
             "value" : "Loop, Bluetooth ayarlarınızla ilgili bir sorun algıladı ve Bluetooth etkinleştirilene kadar başarılı bir şekilde çalışmayacaktır. KŞ okumaları almayacaksınız veya bolus yapamayacaksınız."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop 检测到您的蓝牙设置存在问题，在蓝牙启用之前将无法正常工作。\n您将无法接收血糖读数，也无法推注大剂量。"
+          }
         }
       }
     },
@@ -22892,6 +24215,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loop atlanmış bir öğün tespit etti ve boyutunu tahmin etti. Yemiş olabileceğiniz karbonhidrat miktarına uyması için karbonhidrat miktarını düzenleyin."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop 检测到一次可能遗漏的进食，并估算了碳水量。请根据实际摄入情况修改碳水数值。"
           }
         }
       }
@@ -23016,7 +24345,33 @@
       }
     },
     "Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for." : {
-      "comment" : "Description of Glucose Based Partial Application toggle."
+      "comment" : "Description of Glucose Based Partial Application toggle.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop verabreicht normalerweise 40% Deines voraussichtlichen Insulinbedarfs pro Dosierungszyklus. \n\nWenn das Experiment zur glukosebasierten partiellen Verabreichung aktiviert ist (Glucose Based Partial Application), variiert Loop den Prozentsatz des empfohlenen Bolus, der pro Zyklus verabreicht wird, je nach Glukosespiegel. \n\nNahe dem unterem Korrekturbereich werden 20% verwendet (ähnlich wie bei Temp Basal) und bei hohem Glukosespiegel (200 mg/dl, 11,1 mmol/l) schrittweise auf maximal 80% erhöht. \n\nBitte beachte, dass diese Funktion bei schnell ansteigendem Glukosespiegel, etwa nach einer unangekündigten Mahlzeit, in Kombination mit Geschwindigkeits- und retrospektiven Korrektureffekten zu einer höheren Dosis führen kann, als Dein ISF erfordern würde."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop gir normalt 40 % av det forventede insulinbehovet ditt i hver doseringssyklus. Når eksperimentet Glukosebasert delvis tilførsel er aktivert, vil Loop variere prosentandelen av anbefalt bolus som gis i hver syklus med glukosenivået.\n\nI nærheten av korreksjonsområdet vil den bruke 20 % (på samme måte som Temp Basal), og gradvis øke til maksimalt 80 % ved høyt glukosenivå (200 mg/dL, 11,1 mmol/L). Vær oppmerksom på at ved raskt stigende glukose, for eksempel etter et uanmeldt måltid, kan denne funksjonen, kombinert med hastighet og retrospektive korreksjonseffekter, resultere i en større dose enn det ISF-en din ville ha krevd."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În mod normal, Loop furnizează 40% din necesarul de insulină estimat pentru fiecare ciclu de dozare. \n \nCând experimentul Aplicare parțială bazată pe glicemie este activat, Loop va varia procentul de bolus recomandat administrat pentru fiecare ciclu în funcție de nivelul glicemiei. \n \nÎn apropierea intervalului de corecție, va utiliza 20% (similar cu o bazală temporar) și va crește treptat până la maximum 80% la glicemie ridicată (200 mg/dl, 11,1 mmol/l). \n \nVă rugăm să rețineți că în timpul creșterii rapide a glicemiei, cum ar fi după o masă neanunțată, această funcție, combinată cu efectele vitezei și ale corecției retrospective, poate duce la o doză mai mare decât ar necesita ISF-ul dumneavoastră."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop 通常在每个给药周期中提供您预测胰岛素需求的 40%。\n\n启用“基于血糖的部分给药实验功能”后，Loop 将根据血糖水平调整每个周期实际推注的大剂量比例。\n\n当血糖接近矫正目标范围时，仅注射 20%（类似于临时基础率），血糖升高时比例会逐步增加，在高血糖状态（200 mg/dL，11.1 mmol/L）时最高可达 80%。\n\n请注意，当血糖快速上升（例如未申报的进食）时，该功能与血糖变化速度及回顾性矫正机制叠加，可能导致注射剂量超过由胰岛素敏感系数（ISF）计算出的剂量。"
+          }
+        }
+      }
     },
     "Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." : {
       "comment" : "Description string for automatic bolus dosing strategy",
@@ -23097,6 +24452,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loop, insülin ihtiyaçları programlanan bazalın üzerine çıktığında otomatik olarak bolus yapacak ve gerektiğinde insülin iletimini programlanan bazalın altına düşürmek için geçici bazal oranları kullanacaktır."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当所需胰岛素高于计划基础率时，Loop 将自动推注大剂量；当所需胰岛素低于计划基础率时，则使用临时基础率以减少胰岛素输注"
           }
         }
       }
@@ -23264,6 +24625,12 @@
             "state" : "translated",
             "value" : "Loop, insülin iletimini artırmak ve azaltmak için geçici bazal oranlar ayarlayacaktır."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop 将设置临时基础率，以增加或减少胰岛素输注。"
+          }
         }
       }
     },
@@ -23340,6 +24707,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Düşük KŞ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低血糖"
           }
         }
       }
@@ -23418,6 +24791,12 @@
             "state" : "translated",
             "value" : "Ayarlarda İzinleri Yönetin"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在系统设置中配置权限"
+          }
         }
       }
     },
@@ -23428,6 +24807,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Administration af advarsler"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwalten von Warnungen"
           }
         },
         "fr" : {
@@ -23452,6 +24837,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zarządzanie alertami"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestionarea alertelor"
           }
         },
         "ru" : {
@@ -23536,6 +24927,12 @@
             "state" : "translated",
             "value" : "Manuel Doz: <b> %1$@ </b> %2$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手动剂量： <b>%1$@</b> %2$@"
+          }
         }
       }
     },
@@ -23612,6 +25009,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saat Başı Maksimum Bazal Oran"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每小时最大基础速率"
           }
         }
       }
@@ -23720,6 +25123,12 @@
             "state" : "translated",
             "value" : "Liều Bolus tối đa"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最大剂量"
+          }
         }
       }
     },
@@ -23796,6 +25205,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Maksimum Bolus Aşıldı"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超过最大推注量"
           }
         }
       }
@@ -23885,6 +25300,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yemek Bolusu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "餐时注射"
           }
         }
       }
@@ -24005,6 +25426,12 @@
             "state" : "translated",
             "value" : "mg/dL"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg/dL"
+          }
         }
       }
     },
@@ -24075,6 +25502,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kaçırılan Yemek Bildirimleri"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "错过用餐通知"
           }
         }
       }
@@ -24391,8 +25824,17 @@
             "state" : "translated",
             "value" : "mmol/L"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mmol/L"
+          }
         }
       }
+    },
+    "Mode" : {
+      "comment" : "Title for mode live activity toggle"
     },
     "Momentum effects" : {
       "comment" : "Details for missing data error when momentum effects are missing",
@@ -24478,7 +25920,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Efecte momentum"
+            "value" : "Efecte avânt"
           }
         },
         "ru" : {
@@ -24617,6 +26059,12 @@
             "state" : "translated",
             "value" : "Thêm thông tin"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更多信息"
+          }
         }
       }
     },
@@ -24694,6 +26142,12 @@
             "state" : "translated",
             "value" : "Tüm Uyarıları Sessize Al"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "静音所有警报"
+          }
         }
       }
     },
@@ -24704,6 +26158,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Slå lyden fra for alle advarsler midlertidigt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Warnungen vorübergehend stummschalten"
           }
         },
         "fr" : {
@@ -24729,12 +26189,30 @@
             "state" : "translated",
             "value" : "Tymczasowo wycisz wszystkie alerty"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dezactivați temporar toate alertele"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂时静音所有警报"
+          }
         }
       }
     },
     "Name" : {
       "comment" : "Label for name row on add favorite food screen",
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاسم"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24853,6 +26331,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tên"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称"
           }
         }
       }
@@ -25043,7 +26527,33 @@
       }
     },
     "New Favorite Food" : {
-      "comment" : "Title of new favorite food screen"
+      "comment" : "Title of new favorite food screen",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neues Lieblingsessen"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ny favorittmat"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noua mâncare preferată"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增常用食物"
+          }
+        }
+      }
     },
     "Nightscout" : {
       "comment" : "The title of the Nightscout service",
@@ -25186,6 +26696,12 @@
             "value" : "Ingen advarsler eller alarmer lyder, mens lyden er slået fra. Vælg, hvor længe du vil slå lyden fra."
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei Stummschaltung ertönen keine Warn- oder Alarmsignale. Wähle die Dauer der Stummschaltung aus."
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25202,6 +26718,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Po wyciszeniu nie będą emitowane żadne alerty ani alarmy. Wybierz, jak długo chcesz wyciszyć."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicio alertă nu va suna când este dezactivat sunetul. Odată ce această perioadă se încheie, alertele și alarmele dvs. vor relua normal."
           }
         }
       }
@@ -25480,7 +27002,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bolusul Maxim nu este setat"
+            "value" : "Bolusul maxim nu este setat"
           }
         },
         "ru" : {
@@ -25499,6 +27021,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yapılandırılmış Maksimum Bolus Yok"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有设置最大推注量"
           }
         }
       }
@@ -25589,6 +27117,12 @@
             "state" : "translated",
             "value" : "Yapılandırılmış Pompa Yok"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未配置泵"
+          }
         }
       }
     },
@@ -25677,6 +27211,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Son KŞ Yok"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无近期血糖数据"
           }
         }
       }
@@ -25767,6 +27307,12 @@
             "state" : "translated",
             "value" : "Son KŞ Verisi Yok"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无近期血糖数据记录"
+          }
         }
       }
     },
@@ -25856,6 +27402,12 @@
             "state" : "translated",
             "value" : "Son Pompa Verisi Yok"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有最近的泵数据"
+          }
         }
       }
     },
@@ -25933,12 +27485,24 @@
             "state" : "translated",
             "value" : "Hayır, miktarı düzenle"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不，修改含量"
+          }
         }
       }
     },
     "None" : {
       "comment" : "Indicates no favorite food is selected",
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26135,6 +27699,12 @@
             "state" : "translated",
             "value" : "Bildirim Gönderimi"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知推送类型"
+          }
         }
       }
     },
@@ -26288,6 +27858,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bildirimler"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知"
           }
         }
       }
@@ -26443,6 +28019,12 @@
             "state" : "translated",
             "value" : "Bildirimler, uygulamayı açmanıza gerek kalmadan size önemli %1$@ uygulama bilgilerini verir."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知可在无需打开 %1$@ 应用的情况下，向你提供重要信息。"
+          }
         }
       }
     },
@@ -26519,6 +28101,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bildirimler, uygulamayı açmanıza gerek kalmadan size önemli %1$@ uygulama bilgilerini verir. \n\n %1$@ Bildirimler, Kritik Uyarılar ve Zamana Duyarlı Bildirimler aldığınızdan emin olmak için telefonunuzun ayarlarında bunları AÇIK durumda tutun."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知可在无需打开 %1$@ 应用的情况下，向你提供重要信息。\n\n请在手机设置中保持通知开启，以确保你能够接收 %1$@ 通知、关键通知和时效性通知。"
           }
         }
       }
@@ -26822,6 +28410,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好的"
           }
         }
       }
@@ -27151,6 +28745,12 @@
             "state" : "translated",
             "value" : "Muhtemel Kaçırılan Öğün"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可能未进餐"
+          }
         }
       }
     },
@@ -27478,6 +29078,12 @@
             "state" : "translated",
             "value" : "Tahmini KŞ aralık içinde."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预测血糖在目标范围内。"
+          }
         }
       }
     },
@@ -27566,6 +29172,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ tahmini KŞ, KŞ güvenlik limiti ayarınızın altında."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预测血糖 %1$@ 低于你设定的血糖安全下限。"
           }
         }
       }
@@ -27824,6 +29436,12 @@
             "value" : "prediction-description-integral-retrospective-correction"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Integraler Effekt: %1$@ \n Gesamtglukoseeffekt: %2$@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27846,6 +29464,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "predykcja-opis-całka-retrospektywna-korekta"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efect integral: %1$@ \nEfect total al glicemiei: %2$@"
           }
         },
         "ru" : {
@@ -28800,6 +30424,12 @@
             "value" : "Pumpen er udløbet"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pumpe abgelaufen"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28822,6 +30452,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pompa wygasła"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pompă expirată"
           }
         },
         "ru" : {
@@ -30210,6 +31846,12 @@
             "state" : "translated",
             "value" : "Önerilen Bolus"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推荐大剂量"
+          }
         }
       }
     },
@@ -30286,6 +31928,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Önerilen Bolus Maksimum Bolusu Aşıyor"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推荐大剂量超出最大限制"
           }
         }
       }
@@ -30690,7 +32338,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "胰岛素容量"
+            "value" : "储药器"
           }
         }
       }
@@ -30701,6 +32349,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reservoir tomt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reservoir leer"
           }
         },
         "fr" : {
@@ -30725,6 +32379,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pusty zbiorniczek"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rezervor gol"
           }
         },
         "ru" : {
@@ -31028,6 +32688,12 @@
             "value" : "Gem som favoritmad"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Lieblingsessen speichern"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -31057,12 +32723,30 @@
             "state" : "translated",
             "value" : "Zapisz jako ulubione jedzenie"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvați ca mâncare preferată"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存为常用食物"
+          }
         }
       }
     },
     "Save Carbs & Deliver" : {
       "comment" : "Button text to save carbs and/or manual glucose entry and deliver a bolus",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speichern und Abgeben"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -31073,6 +32757,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lagre og gi bolus"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvați carbohidrații și livrați"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存碳水摄入量并开始注射"
           }
         }
       }
@@ -31163,6 +32859,12 @@
             "state" : "translated",
             "value" : "Bolus olmadan Kaydet"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅保存，无大剂量"
+          }
         }
       }
     },
@@ -31251,6 +32953,12 @@
             "value" : "Hvis du vælger en favoritmad i kulhydratindtastningsskærmen, udfyldes felterne for kulhydratmængde, madtype og absorptionstid automatisk! Tryk på tilføj-knappen nedenfor for at oprette din første favoritmad!"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn Du im Kohlenhydrat-Eingabebildschirm ein Lieblingsessen auswählst, werden die Felder für Kohlenhydratmenge, Lebensmittelart und Absorptionszeit automatisch ausgefüllt! Tippe unten auf die Schaltfläche „Hinzufügen“, um Dein erstes Lieblingsessen zu erstellen!"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -31274,6 +32982,18 @@
             "state" : "translated",
             "value" : "Wybór ulubionego jedzenia na ekranie wprowadzania węglowodanów powoduje automatyczne wypełnienie pól ilości węglowodanów, rodzaju jedzenia i czasu wchłaniania! Dotknij przycisku dodawania poniżej, aby stworzyć swoje pierwsze ulubione jedzenie!"
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selectarea unui aliment preferat în ecranul de introducere a carbohidraților completează automat câmpurile pentru cantitatea de carbohidrați, tipul de aliment și timpul de absorbție! Apăsați butonul de adăugare de mai jos pentru a crea primul dvs. aliment preferat!"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在碳水记录界面选择一个常用食物时，系统会自动填充碳水含量、食物类型和吸收时间等字段！点击下方的添加按钮，创建你的第一个常用食物吧！"
+          }
         }
       }
     },
@@ -31283,6 +33003,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sensorfejl"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensorfehler"
           }
         },
         "fr" : {
@@ -31307,6 +33033,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Awaria sensora"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senzor defect"
           }
         },
         "ru" : {
@@ -32331,6 +34063,12 @@
             "state" : "translated",
             "value" : "Başlangıç zamanı aralığın dışında: %@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开始时间超出范围：%@"
+          }
         }
       }
     },
@@ -32537,7 +34275,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start Bolus"
+            "value" : "Start bolus"
           }
         },
         "ru" : {
@@ -32796,6 +34534,12 @@
             "value" : "Afbryd insulintilførsel"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unterbrechung der Insulinabgabe"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -32812,6 +34556,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wstrzymanie podawania insuliny"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suspendarea administrării insulinei"
           }
         }
       }
@@ -32902,6 +34652,12 @@
             "state" : "translated",
             "value" : "Bir CGM ayarlamak için buraya dokunun"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击此处设置 CGM"
+          }
         }
       }
     },
@@ -32990,6 +34746,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bir pompa ayarlamak için buraya dokunun"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击此处设置泵"
           }
         }
       }
@@ -33080,6 +34842,12 @@
             "state" : "translated",
             "value" : "Bir Servis ayarlamak için buraya dokunun"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击此处设置服务"
+          }
         }
       }
     },
@@ -33168,6 +34936,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eklemek için dokunun"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击添加"
           }
         }
       }
@@ -33377,6 +35151,12 @@
             "state" : "translated",
             "value" : "Durdurmak için dokunun"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击停止"
+          }
         }
       }
     },
@@ -33387,6 +35167,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tryk for at slå alarmer til"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe, um die Stummschaltung von Benachrichtigungen aufzuheben"
           }
         },
         "it" : {
@@ -33405,6 +35191,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stuknij, aby wyłączyć wyciszenie alertów"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atingeți pentru a activa alertele"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点按可恢复警报提示"
           }
         }
       }
@@ -33441,6 +35239,12 @@
             "state" : "translated",
             "value" : "Stuknij opcję Wyłącz wyciszenie, aby wznowić dźwięk alertów i alarmów."
           }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atingeți Activare sunet pentru a relua sunetul pentru alerte și alarme."
+          }
         }
       }
     },
@@ -33448,6 +35252,12 @@
       "comment" : "Settings app TestFlight section",
       "localizations" : {
         "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TestFlight"
+          }
+        },
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "TestFlight"
@@ -33477,6 +35287,12 @@
             "value" : "TestFlight"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TestFlight"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -33492,6 +35308,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TestFlight Udløber"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TestFlight-Ablauf"
           }
         },
         "fr" : {
@@ -33518,6 +35340,12 @@
             "value" : "Wygaśnięcie TestFlight"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expirare TestFlight"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -33533,6 +35361,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TestFlight udløber "
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TestFlight läuft ab "
           }
         },
         "fr" : {
@@ -33559,10 +35393,22 @@
             "value" : "TestFlight wygasa"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expiră TestFlight "
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Срок действия TestFlight истекает "
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TestFlight 到期 "
           }
         }
       }
@@ -33574,6 +35420,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TestFlight udløber snart"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TestFlight läuft bald ab"
           }
         },
         "fr" : {
@@ -33600,10 +35452,22 @@
             "value" : "TestFlight wkrótce wygaśnie"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TestFlight expiră în curând"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Срок действия TestFlight скоро истечет"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TestFlight 即将到期"
           }
         }
       }
@@ -33681,6 +35545,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Girilen bolus miktarı, minimum teslim edilebilir miktardan daha küçük."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入的推注量小于最小可推注量。"
           }
         }
       }
@@ -33847,6 +35717,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bolus önerisi güncellendi. Lütfen bolus miktarını yeniden onaylayın."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量推荐值已更新。请重新确认推注剂量。"
           }
         }
       }
@@ -34051,6 +35927,12 @@
             "state" : "translated",
             "value" : "İzin verilen maksimum miktar %@ gramdır."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许的最大数量为%@克。"
+          }
         }
       }
     },
@@ -34127,6 +36009,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İzin verilen maksimum tutar %1$@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许的最大量为：%1$@"
           }
         }
       }
@@ -34216,6 +36104,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Maksimum bolus miktarı %@ Ü."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最大推注量为：%@ U。"
           }
         }
       }
@@ -34341,7 +36235,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "大剂量输注最大限制为%@单位"
+            "value" : "大剂量推注最大限制为 %@ 单位"
           }
         }
       }
@@ -34432,6 +36326,12 @@
             "state" : "translated",
             "value" : "Bir bolus verilmeden önce maksimum bolus ayarı yapılandırılmalıdır."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先设置最大推注剂量，才能进行推注。"
+          }
         }
       }
     },
@@ -34521,6 +36421,12 @@
             "state" : "translated",
             "value" : "Tedavi Ayarları"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "治疗设置"
+          }
         }
       }
     },
@@ -34531,6 +36437,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Denne mulighed gælder kun, når Loops doseringsstrategi er indstillet til Automatisk bolus."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Option gilt nur, wenn die Dosierstrategie von Loop auf „Automatischer Bolus“ eingestellt ist."
           }
         },
         "fr" : {
@@ -34557,10 +36469,22 @@
             "value" : "Ta opcja ma zastosowanie tylko wtedy, gdy Strategia dawkowania pętli jest ustawiona na Automatyczny bolus."
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Această opțiune se aplică numai atunci când Strategia de dozare a Loop este setată pe Bolus automat."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Эта опция применима только в том случае, если для стратегии дозирования петли установлено значение «Автоматический болюс»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此选项仅在 Loop 的给药策略设为“自动大剂量”时适用。"
           }
         }
       }
@@ -34571,6 +36495,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tidsfølsomme advarsler"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitkritische Warnungen"
           }
         },
         "fr" : {
@@ -34595,6 +36525,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alerty zależne od czasu"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alerte sensibile la timp"
           }
         },
         "ru" : {
@@ -34679,6 +36615,12 @@
             "state" : "translated",
             "value" : "Zamana Duyarlı Bildirimler"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时效性通知"
+          }
         }
       }
     },
@@ -34688,6 +36630,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sender lavt batteri"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niedriger Batteriestatus"
           }
         },
         "fr" : {
@@ -34712,6 +36660,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Słaba bateria transmitera"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baterie descărcată a transmițătorului"
           }
         },
         "ru" : {
@@ -34808,6 +36762,12 @@
             "state" : "translated",
             "value" : "Tekrar deneyin"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
         }
       }
     },
@@ -34818,6 +36778,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sluk for lydstyrken på din iOS-enhed eller føj %1$@ som en tilladt app til hver fokustilstand. Tidsfølsomme og kritiske advarsler lyder stadig, men ikke-kritiske advarsler slås fra."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schalte die Lautstärke Deines iOS-Geräts aus oder fügen Sie %1$@ als zulässige App zu jedem Fokusmodus hinzu. Zeitkritische und kritische Warnungen ertönen weiterhin, nicht kritische Warnungen werden jedoch stummgeschaltet."
           }
         },
         "fr" : {
@@ -34842,6 +36808,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wyłącz głośność na swoim urządzeniu iOS lub dodaj %1$@ jako dozwoloną aplikację do każdego trybu skupienia. Alerty zależne od czasu i krytyczne będą nadal emitowane, ale alerty niekrytyczne zostaną wyciszone."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dezactivați volumul pe dispozitivul iOS sau adăugați %1$@ ca aplicație permisă pentru fiecare Mod de concentrare. Alertele sensibile la timp și cele critice vor suna în continuare, dar alertele non-critice vor fi dezactivate."
           }
         },
         "ru" : {
@@ -35318,6 +37290,12 @@
             "state" : "translated",
             "value" : "Karb Girişi Kaydedilemiyor"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法保存碳水记录"
+          }
         }
       }
     },
@@ -35710,6 +37688,12 @@
             "state" : "translated",
             "value" : "Bilinmeyen Hata: %1$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知错误：%1$@"
+          }
         }
       }
     },
@@ -35864,6 +37848,12 @@
             "state" : "translated",
             "value" : "Bilinmeyen zaman"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知时间"
+          }
         }
       }
     },
@@ -35874,6 +37864,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Slå lyden til"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stummschaltung aufheben"
           }
         },
         "it" : {
@@ -35894,10 +37890,22 @@
             "value" : "Wyłącz wyciszenie"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activează sunetul"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Включить звук"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消静音"
           }
         }
       }
@@ -35909,6 +37917,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Slå alarmer til?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stummschaltung für Warnungen aufheben?"
           }
         },
         "it" : {
@@ -35929,10 +37943,22 @@
             "value" : "Wyciszyć Alerty?"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activați sunetul alertelor?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Включить звук оповещений?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消静音警报？"
           }
         }
       }
@@ -35944,6 +37970,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ikke-understøttet meddelelsestjeneste: %1$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützter Benachrichtigungsdienst: %1$@"
           }
         },
         "it" : {
@@ -35964,10 +37996,22 @@
             "value" : "Nieobsługiwana usługa powiadomień: %1$@"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serviciu de notificare neacceptat: %1$@"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Неподдерживаемая служба уведомлений: %1$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不支持的通知服务：%1$@"
           }
         }
       }
@@ -36100,6 +38144,12 @@
             "value" : "Indtil %1$@"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bis %1$@"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -36118,10 +38168,22 @@
             "value" : "Do %1$@"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Până la %1$@"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "До %1$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直到 %1$@"
           }
         }
       }
@@ -36212,6 +38274,12 @@
             "state" : "translated",
             "value" : "Karb girene kadar"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在输入碳水前保持激活"
+          }
         }
       }
     },
@@ -36301,6 +38369,12 @@
             "state" : "translated",
             "value" : "Ben kapatana kadar"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直到我关闭"
+          }
         }
       }
     },
@@ -36310,6 +38384,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kritisk lav"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dringend niedrig"
           }
         },
         "fr" : {
@@ -36336,6 +38416,12 @@
             "value" : "Pilny niski"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hipoglicemie urgentă"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -36343,6 +38429,9 @@
           }
         }
       }
+    },
+    "Use BG coloring" : {
+      "comment" : "Title for BG coloring"
     },
     "Use Pre-Meal Preset" : {
       "comment" : "The title of the alert controller used to select a duration for pre-meal targets",
@@ -36430,6 +38519,12 @@
             "state" : "translated",
             "value" : "Yemek Öncesi Ön Ayarı Kullanın"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用餐前预设"
+          }
         }
       }
     },
@@ -36440,6 +38535,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Brug funktionen Mute Alerts. Den giver dig mulighed for midlertidigt at slå alle dine advarsler og alarmer fra via %1$@-appen, inklusive Kritiske advarsler og Tidsfølsomme advarsler."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwende die Funktion „Warnmeldungen stummschalten“. Damit kannst Du alle Deine Warnmeldungen und Alarme über die %1$@ App vorübergehend stummschalten, einschließlich kritischer und zeitkritischer Warnmeldungen."
           }
         },
         "fr" : {
@@ -36464,6 +38565,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Użyj funkcji Wycisz alerty. Umożliwia tymczasowe wyciszenie wszystkich alertów i alarmów za pośrednictwem aplikacji %1$@ , w tym alertów krytycznych i alertów zależnych od czasu."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folosește funcția Dezactivare sunet alerte. Aceasta îți permite să dezactivezi temporar toate alertele și alarmele prin intermediul aplicației %1$@, inclusiv alertele critice și alertele sensibile la timp."
           }
         },
         "ru" : {
@@ -36900,6 +39007,12 @@
             "value" : "Hvad er eksempler på kritiske og tidsfølsomme alarmer?"
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was sind Beispiele für kritische und zeitkritische Warnungen?"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -36922,6 +39035,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jakie są przykłady alertów krytycznych i alerty zależne od czasu?"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Care sunt exemple de alerte critice și alerte sensibile la timp?"
           }
         },
         "ru" : {
@@ -37017,6 +39136,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mevcut veya tahmin edilen KŞ,  KŞ güvenlik sınırının altında olduğunda Loop bir bolus önermez ve her zaman saatte 0  ünite geçici bazal oran önerir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前或预测的血糖低于血糖安全下限时，Loop 将不会推荐大剂量，并始终建议将临时基础速率设为 0 单位/小时。"
           }
         }
       }
@@ -37215,6 +39340,12 @@
             "state" : "translated",
             "value" : "Etkinleştirildiğinde Loop, günlüğe kaydedilmemiş bir öğün tespit ettiğinde sizi bilgilendirebilir."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用后，当 Loop 检测到疑似未记录的进餐时，会提醒你。"
+          }
         }
       }
     },
@@ -37315,6 +39446,12 @@
             "value" : "Mens lydløse advarsler er slået til, vises alle advarsler fra din %1$@ app inklusive kritiske og tidsfølsomme advarsler midlertidigt uden lyde og vil kun vibrere."
           }
         },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während die Stummschaltung von Warnungen aktiviert ist, werden alle Warnungen Deiner %1$@ App, einschließlich kritischer und zeitkritischer Warnungen, vorübergehend ohne Ton und nur durch Vibration angezeigt."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37339,6 +39476,12 @@
             "value" : "Gdy włączone jest wyciszenie alertów, wszystkie alerty z aplikacji %1$@ w tym alerty krytyczne i alerty zależne od czasu, będą tymczasowo wyświetlane bez dźwięków i będą jedynie wibrować."
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În timp ce alertele dezactivate sunt activate, toate alertele de la aplicația %1$@ inclusiv alertele critice și cele sensibile la timp, se vor afișa temporar fără sunete și vor vibra doar."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37353,6 +39496,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mens lydløs alarm er slået til, kan din insulinpumpe og CGM-hardware stadig afgive lyd."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während die Stummschaltung von Warnmeldungen aktiviert ist, können Deine Insulinpumpe und die CGM-Hardware weiterhin Töne abgeben."
           }
         },
         "fr" : {
@@ -37379,10 +39528,22 @@
             "value" : "Gdy włączone jest wyciszenie alertów, pompa insulinowa i sprzęt CGM mogą nadal wydawać dźwięki."
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În timp ce alertele silențioase sunt activate, este posibil ca pompa de insulină și hardware-ul CGM să sune în continuare."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "При отключении звуковых сигналов ваша инсулиновая помпа и мониторинг могут продолжать издавать звуки."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当“静音警报”开启时，胰岛素泵和连续血糖监测（CGM）设备仍可能发出声音。"
           }
         }
       }
@@ -37394,6 +39555,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Under forsøg på at genstarte %1$@ opstod der en fejl.\n\n%2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Versuch %1$@ neu zu starten, ist ein Fehler aufgetreten. \n \n %2$@"
           }
         },
         "it" : {
@@ -37412,6 +39579,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Podczas próby ponownego uruchomienia %1$@ wystąpił błąd. \n\n %2$@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În timp ce încercam să repornesc %1$@ a apărut o eroare. \n \n %2$@"
           }
         },
         "ru" : {
@@ -37607,7 +39780,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajustarea temporară de antrenament fost activată de mai mult de 24 de ore. Asigură-te că încă dorești să fie activată sau dezactiveaz-o din aplicație."
+            "value" : "Ajustarea temporară de antrenament fost activată de mai mult de 24 de ore. Asigurați-vă că încă doriți să fie activată sau dezactivați-o din aplicație."
           }
         },
         "ru" : {
@@ -37799,6 +39972,12 @@
             "state" : "translated",
             "value" : "Evet"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是"
+          }
         }
       }
     },
@@ -37875,6 +40054,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kritik güvenlik bilgileriyle ilgili sesli, görsel veya titreşimli uyarılar alamayabilirsiniz. \n\n Sorunu çözmek için 'Ayarlar'a dokunun ve Bildirimlerin, Kritik Uyarıların ve Zamana Duyarlı Bildirimlerin AÇIK olduğundan emin olun."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你可能无法收到与关键安全信息相关的声音、视觉或震动警报。\n若要解决此问题，请点击“设置”，确保已开启通知、关键警报和时间敏感通知。"
           }
         }
       }
@@ -38016,7 +40201,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glicemia dumneavoastră este sub %1$@. Sunteți sigur/ă că doriți să bolusați?"
+            "value" : "Glicemia dumneavoastră este sub %1$@. Sunteți sigur că doriți să bolusați?"
           }
         },
         "ru" : {
@@ -38029,6 +40214,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KŞ %1$@ altında. Bolus yapmak istediğinizden emin misiniz?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您的血糖低于%1$@。你确定要进行大剂量推注吗"
           }
         }
       }
@@ -38099,7 +40290,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glicemia ta este sub sau se anticipează că va scădea sub limita de siguranță, %@."
+            "value" : "Glicemia dumneavoastră este sub sau se anticipează că va scădea sub limita de siguranță, %@."
           }
         },
         "ru" : {
@@ -38118,6 +40309,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KŞ güvenlik sınırınızın %@ altındadır veya altına düşeceği tahmin edilmektedir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的血糖已低于或预计将低于你的血糖安全下限：%@。"
           }
         }
       }
@@ -38208,6 +40405,12 @@
             "state" : "translated",
             "value" : "KŞ güvenlik sınırınızın altında, %1$@ ."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的血糖已低于安全下限：%1$@。"
+          }
         }
       }
     },
@@ -38284,6 +40487,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KŞ düşük. Karbonhidrat yiyin ve KŞ güvenli bir aralığa gelene kadar bolus yapmayı erteleyin."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您的血糖偏低。请摄入碳水，并等到血糖恢复到安全范围后再进行大剂量推注。"
           }
         }
       }
@@ -38362,6 +40571,12 @@
             "state" : "translated",
             "value" : "KŞ düşük. Karbonhidrat yiyin ve yakından izleyin."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您的血糖偏低。请补充碳水并密切监测。"
+          }
         }
       }
     },
@@ -38438,6 +40653,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Maksimum bolus miktarınız %1$@ ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的最大输注剂量是 %1$@"
           }
         }
       }
@@ -38516,6 +40737,12 @@
             "state" : "translated",
             "value" : "Pompa verileriniz eski. %1$@ bir bolus miktarı öneremez."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您的胰岛素泵数据已过期。%1$@ 无法推荐大剂量。"
+          }
         }
       }
     },
@@ -38593,6 +40820,12 @@
             "state" : "translated",
             "value" : "Pompanız manuel bir geçici bazal oran veriyor."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在执行手动临时基础率。"
+          }
         }
       }
     },
@@ -38669,6 +40902,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Önerilen bolus miktarı, maksimum bolus miktarınız olan %1$@ değerini aşıyor."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推荐的大剂量超过了你设定的最大剂量限制：%1$@。"
           }
         }
       }

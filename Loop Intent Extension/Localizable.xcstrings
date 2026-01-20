@@ -117,6 +117,12 @@
             "state" : "translated",
             "value" : "%1$@ v%2$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ v%2$@"
+          }
         }
       }
     }

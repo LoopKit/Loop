@@ -420,8 +420,27 @@
             "state" : "translated",
             "value" : "%@ U"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ U"
+          }
         }
       }
+    },
+    "%@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$@"
+          }
+        }
+      }
+    },
+    "%@U" : {
+
     },
     "%1$@ v%2$@" : {
       "comment" : "The format string for the app name and version number. (1: bundle name)(2: bundle version)",
@@ -539,8 +558,20 @@
             "state" : "translated",
             "value" : "%1$@ v%2$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ v%2$@"
+          }
         }
       }
+    },
+    "Color" : {
+
+    },
+    "Date" : {
+
     },
     "dB" : {
       "comment" : "The short unit display string for decibles",
@@ -661,6 +692,9 @@
         }
       }
     },
+    "End" : {
+
+    },
     "Eventual" : {
       "localizations" : {
         "da" : {
@@ -685,6 +719,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Éventuel"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סופי"
           }
         },
         "it" : {
@@ -847,8 +887,20 @@
             "state" : "translated",
             "value" : "g"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "克"
+          }
         }
       }
+    },
+    "Glucose level" : {
+
+    },
+    "Glucose range" : {
+
     },
     "Loop Status Widget" : {
       "localizations" : {
@@ -1036,6 +1088,12 @@
             "state" : "translated",
             "value" : "mg/dL"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg/dL"
+          }
         }
       }
     },
@@ -1155,8 +1213,20 @@
             "state" : "translated",
             "value" : "mmol/L"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mmol/L"
+          }
         }
       }
+    },
+    "Open the app to update the widget" : {
+      "comment" : "No comment"
+    },
+    "Preset override" : {
+
     },
     "QUANTITY_VALUE_AND_UNIT" : {
       "comment" : "Format string for combining localized numeric value and unit. (1: numeric value)(2: unit)",
@@ -1351,8 +1421,17 @@
             "state" : "translated",
             "value" : "Mevcut kan şekerinizi ve insülin iletiminizi görün."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看您当前的血糖值和胰岛素输注情况。"
+          }
         }
       }
+    },
+    "Start" : {
+
     },
     "U" : {
       "comment" : "The short unit display string for international units of insulin",
