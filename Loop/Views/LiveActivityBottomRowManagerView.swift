@@ -41,7 +41,7 @@ struct LiveActivityBottomRowManagerView: View {
     
     var body: some View {
         List {
-            Section(header: Text("Display up to 4 items")) {
+            Section(header: Text("Display up to 4 items. Display label is in parentheses.", comment: "Indicates the maximum number of items that can be displayed and how the label for each item is shortened.")) {
                 ForEach($configuration, id: \.self) { item in
                     HStack {
                         deleteButton
@@ -82,7 +82,7 @@ struct LiveActivityBottomRowManagerView: View {
         }
         .actionSheet(isPresented: $showAdd, content: { addItem })
         .insetGroupedListStyle()
-        .navigationBarTitle(Text(NSLocalizedString("Configure Display", comment: "")))
+        .navigationBarTitle(Text(NSLocalizedString("Configure Display", comment: "Title for the view to configure the lock screen display")))
     }
     
     @ViewBuilder
