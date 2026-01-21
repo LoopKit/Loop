@@ -23,9 +23,9 @@ public enum BottomRowConfiguration: Codable {
     public func name() -> String {
         switch self {
         case .iob:
-            return NSLocalizedString("IOB", comment: "")
+            return NSLocalizedString("Active Insulin", comment: "")
         case .cob:
-            return NSLocalizedString("COB", comment: "")
+            return NSLocalizedString("Active Carbs", comment: "")
         case .basal:
             return NSLocalizedString("Basal", comment: "")
         case .currentBg:
@@ -35,7 +35,7 @@ public enum BottomRowConfiguration: Codable {
         case .deltaBg:
             return NSLocalizedString("Delta", comment: "")
         case .updatedAt:
-            return NSLocalizedString("at", comment: "")
+            return NSLocalizedString("Updated", comment: "")
         }
     }
     
@@ -46,13 +46,13 @@ public enum BottomRowConfiguration: Codable {
         case .cob:
             return NSLocalizedString("Active Carbohydrates", comment: "")
         case .basal:
-            return NSLocalizedString("Relative Basal Rate", comment: "")
+            return NSLocalizedString("Basal", comment: "")
         case .currentBg:
             return NSLocalizedString("Current Glucose", comment: "")
         case .eventualBg:
-            return NSLocalizedString("Eventual Glucose", comment: "")
+            return NSLocalizedString("Eventually", comment: "")
         case .deltaBg:
-            return NSLocalizedString("Delta Glucose", comment: "")
+            return NSLocalizedString("Delta", comment: "")
         case .updatedAt:
             return NSLocalizedString("Updated at", comment: "")
         }
@@ -71,9 +71,9 @@ public enum LiveActivityMode: Codable, CustomStringConvertible {
     public func name() -> String {
         switch self {
         case .large:
-            return NSLocalizedString("Plot and Row", comment: "")
+            return NSLocalizedString("Large", comment: "")
         case .small:
-            return NSLocalizedString("Row Only", comment: "")
+            return NSLocalizedString("Small", comment: "")
         }
     }
 }

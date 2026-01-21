@@ -25,14 +25,10 @@ struct BasalViewActivity: View {
             if let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
                 Text("\(rateString)U")
                     .font(.subheadline)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(2)
             }
             else {
                 Text("-U")
                     .font(.subheadline)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(2)
             }
         }
     }
