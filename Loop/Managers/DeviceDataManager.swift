@@ -1700,6 +1700,10 @@ extension DeviceDataManager: DeviceSupportDelegate {
                         deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
                     }
 
+                    let submodulesInfo = BuildDetails.default.submodules.map { key, value in
+                                "\n*   \(key): \(value.branch) \(value.commitSHA)"
+                            }.joined(separator: ",")
+
                     let report = [
                         "## Build Details",
                         "* appNameAndVersion: \(Bundle.main.localizedNameAndVersion)",
@@ -1711,6 +1715,8 @@ extension DeviceDataManager: DeviceSupportDelegate {
                         "* sourceRoot: \(BuildDetails.default.sourceRoot ?? "N/A")",
                         "* buildDateString: \(BuildDetails.default.buildDateString ?? "N/A")",
                         "* xcodeVersion: \(BuildDetails.default.xcodeVersion ?? "N/A")",
+                        "* submodules: [\(submodulesInfo)",
+                        "* ]",
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
