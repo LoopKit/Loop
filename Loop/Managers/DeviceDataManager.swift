@@ -1700,9 +1700,12 @@ extension DeviceDataManager: DeviceSupportDelegate {
                         deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
                     }
 
-                    let submodulesInfo = BuildDetails.default.submodules.map { key, value in
-                                "\n*   \(key): \(value.branch) \(value.commitSHA)"
-                            }.joined(separator: ",")
+                    let submodulesInfo = BuildDetails.default.submodules
+                        .sorted(by: { $0.key < $1.key })
+                        .map { key, value in
+                            "*   \(key): \(value.branch), \(value.commitSHA)"
+                        }
+                        .joined(separator: "\n")
 
                     let report = [
                         "## Build Details",
@@ -1715,8 +1718,10 @@ extension DeviceDataManager: DeviceSupportDelegate {
                         "* sourceRoot: \(BuildDetails.default.sourceRoot ?? "N/A")",
                         "* buildDateString: \(BuildDetails.default.buildDateString ?? "N/A")",
                         "* xcodeVersion: \(BuildDetails.default.xcodeVersion ?? "N/A")",
-                        "* submodules: [\(submodulesInfo)",
-                        "* ]",
+                        "* Workspace branch: \(BuildDetails.default.workspaceGitBranch ?? "N/A")",
+                        "* Workspace SHA: \(BuildDetails.default.workspaceGitRevision ?? "N/A")",
+                        "* Submodule name: branch, SHA",
+                        "\(submodulesInfo)",
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
