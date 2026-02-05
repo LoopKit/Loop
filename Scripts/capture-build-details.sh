@@ -125,24 +125,26 @@ fi
 
 # Gather submodule details.
 # We use git submodule foreach to output lines in the form:
-#   submodule_name|branch_or_tag|commit_sha
+#   submodule_name|branch_or_tag|commit_sha|commit_timestamp
 submodules_info=$(git submodule foreach --quiet '
   sub_git_branch=$(git symbolic-ref --short -q HEAD || echo "")
   sub_git_tag=$(git describe --tags --exact-match 2>/dev/null || echo "")
   sub_git_commit_sha=$(git log -1 --format="%h" --abbrev=7)
+  sub_git_commit_timestamp=$(git log -1 --format="%ct")
   sub_git_branch_or_tag="${sub_git_branch:-${sub_git_tag}}"
   if [ -z "${sub_git_branch_or_tag}" ]; then
     sub_git_branch_or_tag="detached"
   fi
-  echo "$name|$sub_git_branch_or_tag|$sub_git_commit_sha"
+  echo "$name|$sub_git_branch_or_tag|$sub_git_commit_sha|$sub_git_commit_timestamp"
 ')
 
 # For each line, add a dictionary entry for that submodule.
-echo "${submodules_info}" | while IFS="|" read -r submodule_name sub_branch sub_sha; do
+echo "${submodules_info}" | while IFS="|" read -r submodule_name sub_branch sub_sha sub_timestamp; do
     # Create a dictionary for this submodule
     /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name} dict" "${info_plist_path}"
     /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name}:branch string ${sub_branch}" "${info_plist_path}"
     /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name}:commit_sha string ${sub_sha}" "${info_plist_path}"
+    /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name}:commit_timestamp string ${sub_timestamp}" "${info_plist_path}"
 done
 
 echo "BuildDetails.plist has been updated at: ${info_plist_path}"

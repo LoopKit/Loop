@@ -1703,7 +1703,17 @@ extension DeviceDataManager: DeviceSupportDelegate {
                     let submodulesInfo = BuildDetails.default.submodules
                         .sorted(by: { $0.key < $1.key })
                         .map { key, value in
-                            "*   \(key): \(value.branch), \(value.commitSHA)"
+                            let dateStr: String
+                            if let timestamp = TimeInterval(value.commitTimestamp) {
+                                let date = Date(timeIntervalSince1970: timestamp)
+                                let formatter = DateFormatter()
+                                formatter.dateFormat = "yyyy-MM-dd"
+                                formatter.timeZone = TimeZone(identifier: "UTC")
+                                dateStr = formatter.string(from: date)
+                            } else {
+                                dateStr = "Unknown"
+                            }
+                            return "*   \(key): \(value.branch), \(value.commitSHA) (\(dateStr))"
                         }
                         .joined(separator: "\n")
 
@@ -1716,7 +1726,7 @@ extension DeviceDataManager: DeviceSupportDelegate {
                         "* xcodeVersion: \(BuildDetails.default.xcodeVersion ?? "N/A")",
                         "* Workspace branch: \(BuildDetails.default.workspaceGitBranch ?? "N/A")",
                         "* Workspace SHA: \(BuildDetails.default.workspaceGitRevision ?? "N/A")",
-                        "* Submodule name: branch, SHA",
+                        "* Submodule name: branch, SHA (date)",
                         "\(submodulesInfo)",
                         "",
                         "## FeatureFlags",

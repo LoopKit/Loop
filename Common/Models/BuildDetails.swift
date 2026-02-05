@@ -67,16 +67,17 @@ class BuildDetails {
     }
 
     /// Returns a dictionary of submodule details.
-    /// The keys are the submodule names, and the values are tuples (branch, commitSHA).
-    var submodules: [String: (branch: String, commitSHA: String)] {
+    /// The keys are the submodule names, and the values are tuples (branch, commitSHA, commitTimestamp).
+    var submodules: [String: (branch: String, commitSHA: String, commitTimestamp: String)] {
         guard let subs = dict["com-loopkit-Loop-submodules"] as? [String: [String: Any]] else {
             return [:]
         }
-        var result = [String: (branch: String, commitSHA: String)]()
+        var result = [String: (branch: String, commitSHA: String, commitTimestamp: String)]()
         for (name, info) in subs {
             let branch = info["branch"] as? String ?? String(localized: "Unknown")
             let commitSHA = info["commit_sha"] as? String ?? String(localized: "Unknown")
-            result[name] = (branch: branch, commitSHA: commitSHA)
+            let commitTimestamp = info["commit_timestamp"] as? String ?? String(localized: "Unknown")
+            result[name] = (branch: branch, commitSHA: commitSHA, commitTimestamp: commitTimestamp)
         }
         return result
     }
