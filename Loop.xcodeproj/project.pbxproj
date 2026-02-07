@@ -13,6 +13,13 @@
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		142CB7592A60BF2E0075748A /* EditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142CB7582A60BF2E0075748A /* EditMode.swift */; };
 		142CB75B2A60BFC30075748A /* FavoriteFoodsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */; };
+		AUTOPRESET00000001 /* AutoPresetsDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTOPRESET00000011 /* AutoPresetsDelegate.swift */; };
+		AUTOPRESET00000002 /* AutoPresetsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTOPRESET00000012 /* AutoPresetsModels.swift */; };
+		AUTOPRESET00000003 /* AutoPresetsStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTOPRESET00000013 /* AutoPresetsStorage.swift */; };
+		AUTOPRESET00000004 /* ActivityDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTOPRESET00000014 /* ActivityDetectionManager.swift */; };
+		AUTOPRESET00000005 /* AutoPresetsCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTOPRESET00000015 /* AutoPresetsCoordinator.swift */; };
+		AUTOPRESET00000006 /* AutoPresetsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTOPRESET00000016 /* AutoPresetsSettingsView.swift */; };
+		AUTOPRESET00000007 /* AutoPresetsLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTOPRESET00000017 /* AutoPresetsLogger.swift */; };
 		1452F4A92A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */; };
 		1452F4AB2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AA2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift */; };
 		1452F4AD2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */; };
@@ -825,6 +832,13 @@
 		EE7AAD3549253FE16941E10D /* LoopInsights_TrendsInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_TrendsInsightsView.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
+		AUTOPRESET00000011 /* AutoPresetsDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresetsDelegate.swift; sourceTree = "<group>"; };
+		AUTOPRESET00000012 /* AutoPresetsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresetsModels.swift; sourceTree = "<group>"; };
+		AUTOPRESET00000013 /* AutoPresetsStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresetsStorage.swift; sourceTree = "<group>"; };
+		AUTOPRESET00000014 /* ActivityDetectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDetectionManager.swift; sourceTree = "<group>"; };
+		AUTOPRESET00000015 /* AutoPresetsCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresetsCoordinator.swift; sourceTree = "<group>"; };
+		AUTOPRESET00000016 /* AutoPresetsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresetsSettingsView.swift; sourceTree = "<group>"; };
+		AUTOPRESET00000017 /* AutoPresetsLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresetsLogger.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFavoriteFoodViewModel.swift; sourceTree = "<group>"; };
 		1452F4AA2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFavoriteFoodView.swift; sourceTree = "<group>"; };
 		1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowAbsorptionTimeWorksView.swift; sourceTree = "<group>"; };
@@ -1786,6 +1800,7 @@
 			children = (
 				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */,
+				AUTOPRESET00000012 /* AutoPresetsModels.swift */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
 				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
 				C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */,
@@ -2105,6 +2120,7 @@
 				C191D2A025B3ACAA00C26C0B /* DosingStrategySelectionView.swift */,
 				149A28E32A8A63A700052EDF /* FavoriteFoodDetailView.swift */,
 				142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */,
+				AUTOPRESET00000016 /* AutoPresetsSettingsView.swift */,
 				43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */,
 				1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */,
 				B43CF07D29434EC4008A520B /* HowMuteAlertWorkView.swift */,
@@ -2136,8 +2152,13 @@
 		43F5C2E41B93C5D4003EB13D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				AUTOPRESET00000014 /* ActivityDetectionManager.swift */,
 				B42D124228D371C400E43D22 /* AlertMuter.swift */,
 				1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */,
+				AUTOPRESET00000015 /* AutoPresetsCoordinator.swift */,
+				AUTOPRESET00000011 /* AutoPresetsDelegate.swift */,
+				AUTOPRESET00000017 /* AutoPresetsLogger.swift */,
+				AUTOPRESET00000013 /* AutoPresetsStorage.swift */,
 				439897361CD2F80600223065 /* AnalyticsServicesManager.swift */,
 				B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */,
 				439BED291E76093C00B0AED5 /* CGMManager.swift */,
@@ -3754,6 +3775,13 @@
 				1DA649A9244126DA00F61E75 /* InAppModalAlertScheduler.swift in Sources */,
 				43B260491ED248FB008CAA77 /* CarbEntryTableViewCell.swift in Sources */,
 				142CB75B2A60BFC30075748A /* FavoriteFoodsView.swift in Sources */,
+				AUTOPRESET00000001 /* AutoPresetsDelegate.swift in Sources */,
+				AUTOPRESET00000002 /* AutoPresetsModels.swift in Sources */,
+				AUTOPRESET00000003 /* AutoPresetsStorage.swift in Sources */,
+				AUTOPRESET00000004 /* ActivityDetectionManager.swift in Sources */,
+				AUTOPRESET00000005 /* AutoPresetsCoordinator.swift in Sources */,
+				AUTOPRESET00000006 /* AutoPresetsSettingsView.swift in Sources */,
+				AUTOPRESET00000007 /* AutoPresetsLogger.swift in Sources */,
 				A9D5C5B625DC6C6A00534873 /* LoopAppManager.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				1452F4AB2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift in Sources */,
