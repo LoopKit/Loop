@@ -298,6 +298,16 @@ extension SettingsView {
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
             }
 
+            NavigationLink(destination: AutoPresetsSettingsView()) {
+                LargeButton(
+                    action: {},
+                    includeArrow: false,
+                    imageView: AutoPresetsIconView(),
+                    label: NSLocalizedString("AutoPresets", comment: "Title text for button to AutoPresets Settings"),
+                    descriptiveText: NSLocalizedString("Automate your presets during motion", comment: "Descriptive text for Auto-Apply Presets")
+                )
+            }
+
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
