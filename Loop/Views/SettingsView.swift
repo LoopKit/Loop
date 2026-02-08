@@ -84,9 +84,6 @@ public struct SettingsView: View {
                     if FeatureFlags.allowExperimentalFeatures {
                         favoriteFoodsSection
                     }
-                    if FoodFinder_FeatureFlags.isEnabled {
-                        foodFinderSettingsSection
-                    }
                     if (viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice) && viewModel.showDeleteTestData {
                         deleteDataSection
                     }
@@ -301,6 +298,8 @@ extension SettingsView {
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
             }
 
+            foodFinderSettingsRow
+
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
@@ -381,17 +380,15 @@ extension SettingsView {
     }
 
     // FoodFinder — single settings insertion point
-    private var foodFinderSettingsSection: some View {
-        Section {
-            NavigationLink(destination: FoodFinder_SettingsView()) {
-                LargeButton(action: {},
-                            includeArrow: false,
-                            imageView: Image(systemName: "fork.knife.circle.fill")
-                                .foregroundColor(.green)
-                                .font(.system(size: 24)),
-                            label: NSLocalizedString("FoodFinder Settings", comment: "Title text for button to FoodFinder Settings"),
-                            descriptiveText: NSLocalizedString("Configure AI Food Analysis", comment: "Descriptive text for FoodFinder Settings"))
-            }
+    private var foodFinderSettingsRow: some View {
+        NavigationLink(destination: AISettingsView()) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "fork.knife.circle.fill")
+                            .foregroundColor(.purple)
+                            .font(.system(size: 36)),
+                        label: NSLocalizedString("FoodFinder Settings", comment: "Title text for button to FoodFinder Settings"),
+                        descriptiveText: NSLocalizedString("Configure AI Food Analysis", comment: "Descriptive text for FoodFinder Settings"))
         }
     }
 

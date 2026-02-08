@@ -29,67 +29,69 @@ struct AICameraView: View {
             ZStack {
                 // Auto-launch camera interface
                 if capturedImage == nil {
-                    VStack(spacing: 20) {
-                        Spacer()
+                    VStack(spacing: 0) {
+                        ScrollView {
+                            VStack(spacing: 24) {
+                                // Camera icon
+                                Image(systemName: "camera.viewfinder")
+                                    .font(.system(size: 64))
+                                    .foregroundColor(.accentColor)
+                                    .padding(.top, 24)
 
-                        // Simple launch message
-                        VStack(spacing: 16) {
-                            Image(systemName: "camera.viewfinder")
-                                .font(.system(size: 64))
-                                .foregroundColor(.accentColor)
-
-                            VStack(alignment: .leading, spacing: 6) {
+                                // Heading
                                 Text("Better photos = better estimates")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                Spacer()
-                                VStack(alignment: .leading, spacing: 8) {
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal)
+
+                                // Tips
+                                VStack(alignment: .leading, spacing: 20) {
                                     CameraTipRow(icon: "sun.max.fill", title: "Use bright, even light", detail: "Harsh shadows confuse the AI and dim light can hide textures.")
                                     CameraTipRow(icon: "arrow.2.circlepath", title: "Clear the area", detail: "Remove napkins, lids, or packaging that may be misidentified as food.")
                                     CameraTipRow(icon: "square.dashed", title: "Frame the full meal", detail: "Make sure every food item is in the frame.")
                                     CameraTipRow(icon: "ruler", title: "Add a size reference", detail: "Forks, cups, or hands help AI calculate realistic portions.")
                                     CameraTipRow(icon: "camera.metering.spot", title: "Shoot from slightly above", detail: "Keep the camera level to reduce distortion and keep portions proportional.")
                                 }
+                                .padding(.horizontal)
                             }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
 
                         Spacer()
 
-                        // Quick action buttons
+                        // Action buttons pinned to bottom
                         VStack(spacing: 12) {
                             Button(action: {
                                 imageSourceType = .camera
                                 showingImagePicker = true
                             }) {
-                                HStack {
+                                HStack(spacing: 8) {
                                     Image(systemName: "sparkles")
-                                        .font(.system(size: 14))
+                                        .font(.system(size: 16, weight: .semibold))
                                     Text("Take a Photo")
+                                        .fontWeight(.semibold)
                                 }
                                 .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.purple)
+                                .padding(.vertical, 16)
+                                .background(Color(red: 0.85, green: 0.25, blue: 0.85))
                                 .foregroundColor(.white)
-                                .cornerRadius(12)
+                                .cornerRadius(14)
                             }
 
                             Button(action: {
-                                // Allow selecting from photo library
                                 imageSourceType = .photoLibrary
                                 showingImagePicker = true
                             }) {
-                                HStack {
+                                HStack(spacing: 8) {
                                     Image(systemName: "photo.fill")
                                     Text("Choose from Library")
+                                        .fontWeight(.medium)
                                 }
                                 .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.secondary.opacity(0.1))
+                                .padding(.vertical, 16)
+                                .background(Color(.systemGray5))
                                 .foregroundColor(.primary)
-                                .cornerRadius(12)
+                                .cornerRadius(14)
                             }
                         }
                         .padding(.horizontal)
@@ -360,16 +362,17 @@ private struct CameraTipRow: View {
     let detail: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
                 .foregroundColor(.orange)
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
+                .frame(width: 28, alignment: .center)
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(.body)
+                    .fontWeight(.bold)
                 Text(detail)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)

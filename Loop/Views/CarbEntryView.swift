@@ -70,19 +70,8 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
 
                 mainCard
                     .padding(.top, 8)
-                
-                continueActionButton
 
-                // FoodFinder integration — single insertion point
-                if isNewEntry, FoodFinder_FeatureFlags.isEnabled {
-                    FoodFinder_EntryPoint(
-                        carbsQuantity: $viewModel.carbsQuantity,
-                        foodType: $viewModel.foodType,
-                        absorptionTime: $viewModel.absorptionTime,
-                        absorptionTimeWasEdited: viewModel.absorptionTimeWasEdited,
-                        defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes
-                    )
-                }
+                continueActionButton
 
                 if isNewEntry, FeatureFlags.allowExperimentalFeatures {
                     favoriteFoodsCard
@@ -115,8 +104,19 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             
             CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
 
+            // FoodFinder integration — inside the main card
+            if isNewEntry {
+                FoodFinder_EntryPoint(
+                    carbsQuantity: $viewModel.carbsQuantity,
+                    foodType: $viewModel.foodType,
+                    absorptionTime: $viewModel.absorptionTime,
+                    absorptionTimeWasEdited: viewModel.absorptionTimeWasEdited,
+                    defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes
+                )
+            }
+
             CardSectionDivider()
-            
+
             DatePickerRow(date: $viewModel.time, isFocused: timeFocused, minimumDate: viewModel.minimumDate, maximumDate: viewModel.maximumDate)
             
             CardSectionDivider()

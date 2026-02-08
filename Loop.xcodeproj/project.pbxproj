@@ -1767,7 +1767,7 @@
 				43776F8D1B8022E90074EA36 /* Products */,
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
 				A951C5FF23E8AB51003E26DC /* Version.xcconfig */,
-				93F4741D9B20D83B5B586D72 /* FoodFinder */,
+				4E509264CB37CD931DE5B407 /* Documentation */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1810,7 +1810,8 @@
 				43F5C2CE1B92A2A0003EB13D /* View Controllers */,
 				43F5C2CF1B92A2ED003EB13D /* Views */,
 				897A5A9724C22DCE00C4E71D /* View Models */,
-				88C428BA6D11553B8D7CF090 /* FoodFinder */,
+				9C035E7454E6255EF4EA445C /* Services */,
+				AE59D88C5460D2413CB142C1 /* Resources */,
 			);
 			path = Loop;
 			sourceTree = "<group>";
@@ -2127,6 +2128,7 @@
 				A9DAE7CF2332D77F006AE942 /* LoopTests.swift */,
 				8968B113240C55F10074BB48 /* LoopSettingsTests.swift */,
 				E93E86AC24DDE02C00FF40C8 /* Mock Stores */,
+				93F4741D9B20D83B5B586D72 /* FoodFinder */,
 			);
 			path = LoopTests;
 			sourceTree = "<group>";
@@ -2421,6 +2423,7 @@
 				C174233B259BEB0F00399C9D /* ManualEntryDoseViewModel.swift */,
 				1DB619AB270BAD3D006C9D07 /* VersionUpdateViewModel.swift */,
 				3ED319952EB65A5C00820BCF /* LiveActivityManagementViewModel.swift */,
+				88C428BA6D11553B8D7CF090 /* FoodFinder */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";

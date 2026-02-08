@@ -110,10 +110,7 @@ struct FoodFinder_EntryPoint: View {
                 foodSearchSection
 
                 CardSectionDivider()
-            }
 
-            // Servings + product info + nutrition circles + AI notes
-            if isFoodSearchEnabled {
                 ServingsDisplayRow(
                     servings: $searchVM.numberOfServings,
                     servingSize: searchVM.selectedFoodServingSize,
@@ -366,7 +363,6 @@ extension FoodFinder_EntryPoint {
         .padding(.horizontal, 8)
         .background(Color(.systemGray6))
         .cornerRadius(12)
-        .padding(.horizontal)
         .padding(.top, 8)
     }
 }
@@ -524,7 +520,6 @@ extension FoodFinder_EntryPoint {
         .padding(.horizontal, 8)
         .background(Color(.systemGray6))
         .cornerRadius(12)
-        .padding(.horizontal, 4)
         .padding(.top, 8)
     }
 }

@@ -374,4 +374,89 @@ MANDATORY REQUIREMENTS:
         get { bool(forKey: FoodFinder_FeatureFlags.Keys.advancedDosingRecommendationsEnabled) }
         set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.advancedDosingRecommendationsEnabled) }
     }
+
+    // MARK: - Legacy Aliases (non-prefixed)
+    // Internal FoodFinder code (AIAnalysis, SettingsView, SearchRouter) uses these
+    // non-prefixed names. They forward to the same UserDefaults keys as above.
+
+    var aiProvider: String {
+        get { foodFinder_aiProvider }
+        set { foodFinder_aiProvider = newValue }
+    }
+    var aiImageProvider: String {
+        get { foodFinder_aiImageProvider }
+        set { foodFinder_aiImageProvider = newValue }
+    }
+    var analysisMode: String {
+        get { foodFinder_analysisMode }
+        set { foodFinder_analysisMode = newValue }
+    }
+    var useGPT5ForOpenAI: Bool {
+        get { foodFinder_useGPT5ForOpenAI }
+        set { foodFinder_useGPT5ForOpenAI = newValue }
+    }
+    var claudeAPIKey: String {
+        get { foodFinder_claudeAPIKey }
+        set { foodFinder_claudeAPIKey = newValue }
+    }
+    var claudeQuery: String {
+        get { foodFinder_claudeQuery }
+        set { foodFinder_claudeQuery = newValue }
+    }
+    var openAIAPIKey: String {
+        get { foodFinder_openAIAPIKey }
+        set { foodFinder_openAIAPIKey = newValue }
+    }
+    var openAIQuery: String {
+        get { foodFinder_openAIQuery }
+        set { foodFinder_openAIQuery = newValue }
+    }
+    var googleGeminiAPIKey: String {
+        get { foodFinder_googleGeminiAPIKey }
+        set { foodFinder_googleGeminiAPIKey = newValue }
+    }
+    var googleGeminiQuery: String {
+        get { foodFinder_googleGeminiQuery }
+        set { foodFinder_googleGeminiQuery = newValue }
+    }
+    var usdaAPIKey: String {
+        get { foodFinder_usdaAPIKey }
+        set { foodFinder_usdaAPIKey = newValue }
+    }
+    var customAIBaseURL: String {
+        get { foodFinder_customAIBaseURL }
+        set { foodFinder_customAIBaseURL = newValue }
+    }
+    var customAIAPIKey: String {
+        get { foodFinder_customAIAPIKey }
+        set { foodFinder_customAIAPIKey = newValue }
+    }
+    var customAIModel: String {
+        get { foodFinder_customAIModel }
+        set { foodFinder_customAIModel = newValue }
+    }
+    var customAIAPIVersion: String {
+        get { foodFinder_customAIAPIVersion }
+        set { foodFinder_customAIAPIVersion = newValue }
+    }
+    var customAIOrganization: String {
+        get { foodFinder_customAIOrganization }
+        set { foodFinder_customAIOrganization = newValue }
+    }
+    var customAIEndpointPath: String {
+        get { foodFinder_customAIEndpointPath }
+        set { foodFinder_customAIEndpointPath = newValue }
+    }
+    var textSearchProvider: String {
+        get { foodFinder_textSearchProvider }
+        set { foodFinder_textSearchProvider = newValue }
+    }
+    var barcodeSearchProvider: String {
+        get { foodFinder_barcodeSearchProvider }
+        set { foodFinder_barcodeSearchProvider = newValue }
+    }
+    var advancedDosingRecommendationsEnabled: Bool {
+        get { foodFinder_advancedDosingRecommendationsEnabled }
+        set { foodFinder_advancedDosingRecommendationsEnabled = newValue }
+    }
 }
