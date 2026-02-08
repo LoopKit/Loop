@@ -84,6 +84,9 @@ public struct SettingsView: View {
                     if FeatureFlags.allowExperimentalFeatures {
                         favoriteFoodsSection
                     }
+                    if FoodFinder_FeatureFlags.isEnabled {
+                        foodFinderSettingsSection
+                    }
                     if (viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice) && viewModel.showDeleteTestData {
                         deleteDataSection
                     }
@@ -376,7 +379,22 @@ extension SettingsView {
                         descriptiveText: "Simplify Carb Entry")
         }
     }
-    
+
+    // FoodFinder — single settings insertion point
+    private var foodFinderSettingsSection: some View {
+        Section {
+            NavigationLink(destination: FoodFinder_SettingsView()) {
+                LargeButton(action: {},
+                            includeArrow: false,
+                            imageView: Image(systemName: "fork.knife.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 24)),
+                            label: NSLocalizedString("FoodFinder Settings", comment: "Title text for button to FoodFinder Settings"),
+                            descriptiveText: NSLocalizedString("Configure AI Food Analysis", comment: "Descriptive text for FoodFinder Settings"))
+            }
+        }
+    }
+
     private var cgmChoices: [ActionSheet.Button] {
         var result = viewModel.cgmManagerSettingsViewModel.availableDevices
             .sorted(by: {$0.localizedTitle < $1.localizedTitle})

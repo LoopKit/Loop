@@ -32,6 +32,11 @@ public struct FavoriteFoodDetailView: View {
     public var body: some View {
         if let food {
             List {
+                // FoodFinder integration — thumbnail display
+                if FoodFinder_FeatureFlags.isEnabled {
+                    FoodFinder_FavoriteThumbnail(food: food)
+                }
+
                 Section("Information") {
                     VStack(spacing: 16) {
                         let rows: [(field: String, value: String)] = [

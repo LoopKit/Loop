@@ -72,7 +72,18 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     .padding(.top, 8)
                 
                 continueActionButton
-                
+
+                // FoodFinder integration — single insertion point
+                if isNewEntry, FoodFinder_FeatureFlags.isEnabled {
+                    FoodFinder_EntryPoint(
+                        carbsQuantity: $viewModel.carbsQuantity,
+                        foodType: $viewModel.foodType,
+                        absorptionTime: $viewModel.absorptionTime,
+                        absorptionTimeWasEdited: viewModel.absorptionTimeWasEdited,
+                        defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes
+                    )
+                }
+
                 if isNewEntry, FeatureFlags.allowExperimentalFeatures {
                     favoriteFoodsCard
                 }
