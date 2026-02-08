@@ -52,7 +52,6 @@ struct FoodFinder_EntryPoint: View {
 
     @State private var showingAICamera = false
     @State private var showingAISettings = false
-    @State private var showingVoiceSearch = false
     @State private var isFoodSearchEnabled: Bool
     @State private var showAbsorptionReasoning = false
     @State private var isAdvancedAnalysisExpanded = false
@@ -205,25 +204,6 @@ struct FoodFinder_EntryPoint: View {
         .sheet(isPresented: $showingAISettings) {
             AISettingsView()
         }
-        .sheet(isPresented: $showingVoiceSearch) {
-            NavigationView {
-                VoiceSearchView(
-                    onSearchCompleted: { transcribedText in
-                        showingVoiceSearch = false
-                        // Route voice text through AI generative analysis (not USDA text search)
-                        Task { @MainActor in
-                            if let result = await searchVM.performVoiceSearch(query: transcribedText) {
-                                handleAIFoodAnalysis(result)
-                            }
-                        }
-                    },
-                    onCancel: {
-                        showingVoiceSearch = false
-                    }
-                )
-            }
-            .navigationViewStyle(StackNavigationViewStyle())
-        }
     }
 
     // MARK: - Wire ViewModel Callbacks
@@ -238,6 +218,11 @@ struct FoodFinder_EntryPoint: View {
         }
         searchVM.onFoodCleared = {
             selectedFoodProduct?.wrappedValue = nil
+        }
+        // When the search field detects natural language (e.g. iOS keyboard dictation),
+        // the ViewModel routes through AI generative search and delivers the result here.
+        searchVM.onGenerativeSearchResult = { result in
+            handleAIFoodAnalysis(result)
         }
     }
 
@@ -276,7 +261,7 @@ extension FoodFinder_EntryPoint {
                 .accessibilityLabel("AI Settings")
             }
 
-            // Search bar with voice, barcode, and AI camera buttons
+            // Search bar with barcode and AI camera buttons
             FoodSearchBar(
                 searchText: $searchVM.foodSearchText,
                 onBarcodeScanTapped: {
@@ -284,9 +269,6 @@ extension FoodFinder_EntryPoint {
                 },
                 onAICameraTapped: {
                     showingAICamera = true
-                },
-                onVoiceSearchTapped: {
-                    showingVoiceSearch = true
                 }
             )
 

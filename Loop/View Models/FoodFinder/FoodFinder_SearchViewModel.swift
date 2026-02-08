@@ -77,6 +77,10 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// Callback when the selected food is cleared so the host can reset its fields.
     var onFoodCleared: (() -> Void)?
 
+    /// Callback when a generative AI search completes (triggered by natural language
+    /// detected in the text field, e.g. from iOS keyboard dictation).
+    var onGenerativeSearchResult: ((AIFoodAnalysisResult) -> Void)?
+
     // MARK: - Food Search Published Properties
 
     /// Current search text for food lookup
@@ -348,6 +352,32 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Natural Language Detection
+
+    /// Heuristic to detect natural language food descriptions (likely from iOS keyboard dictation).
+    /// Short keyword queries like "apple" or "chicken soup" go to USDA; longer descriptive
+    /// phrases like "a medium bowl of spicy ramen and a side of gyoza" go to AI.
+    private func isNaturalLanguageQuery(_ query: String) -> Bool {
+        let words = query.split(separator: " ").filter { !$0.isEmpty }
+        guard words.count >= 4 else { return false }
+
+        let lowered = query.lowercased()
+
+        // Explicit natural language indicators (common in dictated speech)
+        let indicators = [
+            "i'm eating", "i ate", "i had", "i'm having", "i just had", "i just ate",
+            "a bowl of", "a plate of", "a cup of", "a glass of", "a piece of", "a slice of",
+            "a medium", "a large", "a small", "with a side", "and a side", "and a",
+            "for lunch", "for dinner", "for breakfast", "some "
+        ]
+        for indicator in indicators {
+            if lowered.contains(indicator) { return true }
+        }
+
+        // 5+ words without explicit indicators is still likely a descriptive phrase
+        return words.count >= 5
+    }
+
     // MARK: - Food Search Methods
 
     /// Perform food search with given query
@@ -369,12 +399,25 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
         print("🔍 Starting search for: '\(trimmedQuery)'")
 
+        // Detect natural language input (e.g. iOS keyboard dictation) and route to AI
+        if isNaturalLanguageQuery(trimmedQuery) {
+            print("🎙️ Natural language detected — routing to AI generative search")
+            foodSearchTask = Task { [weak self] in
+                guard let self = self else { return }
+                if let result = await self.performVoiceSearch(query: trimmedQuery) {
+                    await MainActor.run {
+                        self.onGenerativeSearchResult?(result)
+                    }
+                }
+            }
+            return
+        }
+
         // Show search UI, clear previous results and error
         showingFoodSearch = true
         foodSearchResults = []  // Clear previous results to show searching state
         foodSearchError = nil
         isFoodSearching = true
-
 
         // Perform new search immediately but ensure minimum search time for UX
         foodSearchTask = Task { [weak self] in

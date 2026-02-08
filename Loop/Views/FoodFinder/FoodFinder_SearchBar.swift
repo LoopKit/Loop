@@ -13,12 +13,10 @@ struct FoodSearchBar: View {
     @Binding var searchText: String
     let onBarcodeScanTapped: () -> Void
     let onAICameraTapped: () -> Void
-    let onVoiceSearchTapped: () -> Void
 
     @State private var showingBarcodeScanner = false
     @State private var barcodeButtonPressed = false
     @State private var aiButtonPressed = false
-    @State private var voiceButtonPressed = false
     @State private var aiPulseAnimation = false
 
     @FocusState private var isSearchFieldFocused: Bool
@@ -69,32 +67,6 @@ struct FoodSearchBar: View {
 
             // Right-aligned buttons group
             HStack(spacing: 12) {
-                // Voice search (Generative AI) button
-                Button(action: {
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    isSearchFieldFocused = false
-                    onVoiceSearchTapped()
-                }) {
-                    Image(systemName: "mic.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.blue)
-                        .scaleEffect(voiceButtonPressed ? 0.95 : 1.0)
-                }
-                .frame(width: 48, height: 48)
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
-                .accessibilityLabel(NSLocalizedString("Voice search", comment: "Accessibility label for voice search button"))
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.1)) {
-                        voiceButtonPressed = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            voiceButtonPressed = false
-                        }
-                    }
-                }
-
                 // Barcode scan button
                 Button(action: {
                     print("🔍 DEBUG: Barcode button tapped")
@@ -238,8 +210,7 @@ struct FoodSearchBar_Previews: PreviewProvider {
             FoodSearchBar(
                 searchText: .constant(""),
                 onBarcodeScanTapped: {},
-                onAICameraTapped: {},
-                onVoiceSearchTapped: {}
+                onAICameraTapped: {}
             )
 
             FoodSearchBar(
