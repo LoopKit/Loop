@@ -177,7 +177,83 @@ class FoodSearchRouter {
         }
     }
 
-    // Removed AI-based text search implementations. Text search now uses OFF/USDA only.
+    // MARK: - Voice / Generative Text Search Routing
+
+    /// Perform AI-based food analysis from a text description (voice search).
+    /// Routes through the same AI provider and prompt infrastructure as image analysis,
+    /// using a placeholder image with the user's description as context.
+    func analyzeFoodByDescription(_ description: String) async throws -> AIFoodAnalysisResult {
+        let provider = aiService.getProviderForSearchType(.aiImageSearch)
+        let placeholderImage = createPlaceholderImage()
+        let voiceContext = "The user described their food verbally: \"\(description)\". There is no photo — analyze the food based solely on this text description. Provide the same detailed nutritional analysis you would for a food photo."
+
+        log.info("🎙️ Routing voice/generative search '%{public}@' to AI provider: %{public}@", description, provider.rawValue)
+
+        switch provider {
+        case .claude:
+            let key = aiService.getAPIKey(for: .claude) ?? ""
+            guard !key.isEmpty else { throw AIFoodAnalysisError.noApiKey }
+            return try await ClaudeFoodAnalysisService.shared.analyzeFoodImage(placeholderImage, apiKey: key, query: voiceContext)
+
+        case .openAI:
+            let key = aiService.getAPIKey(for: .openAI) ?? ""
+            guard !key.isEmpty else { throw AIFoodAnalysisError.noApiKey }
+            return try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(placeholderImage, apiKey: key, query: voiceContext)
+
+        case .googleGemini:
+            let key = UserDefaults.standard.googleGeminiAPIKey
+            guard !key.isEmpty else { throw AIFoodAnalysisError.noApiKey }
+            return try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(placeholderImage, apiKey: key, query: voiceContext)
+
+        case .bringYourOwn:
+            let key: String
+            let base: String
+            let model: String?
+            let version: String?
+            let org: String?
+
+            if BYOTestConfig.enabled {
+                key = BYOTestConfig.apiKey
+                base = BYOTestConfig.baseURL
+                model = BYOTestConfig.model
+                version = BYOTestConfig.apiVersion
+                org = BYOTestConfig.organizationID
+            } else {
+                key = UserDefaults.standard.customAIAPIKey
+                base = UserDefaults.standard.customAIBaseURL
+                let m = UserDefaults.standard.customAIModel
+                let v = UserDefaults.standard.customAIAPIVersion
+                let o = UserDefaults.standard.customAIOrganization
+                model = m.isEmpty ? nil : m
+                version = v.isEmpty ? nil : v
+                org = o.isEmpty ? nil : o
+            }
+
+            guard !key.isEmpty, !base.isEmpty else { throw AIFoodAnalysisError.noApiKey }
+
+            return try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(
+                placeholderImage,
+                apiKey: key,
+                query: voiceContext,
+                baseURL: base,
+                model: model,
+                apiVersion: version,
+                organizationID: org,
+                customPath: {
+                    let path = UserDefaults.standard.customAIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return path.isEmpty ? nil : path
+                }(),
+                telemetryCallback: nil
+            )
+
+        case .openFoodFacts, .usdaFoodData:
+            // Database providers can't do generative analysis — fall back to Gemini
+            log.info("⚠️ %{public}@ can't do generative search, falling back to Google Gemini", provider.rawValue)
+            let key = UserDefaults.standard.googleGeminiAPIKey
+            guard !key.isEmpty else { throw AIFoodAnalysisError.noApiKey }
+            return try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(placeholderImage, apiKey: key, query: voiceContext)
+        }
+    }
     
     
     

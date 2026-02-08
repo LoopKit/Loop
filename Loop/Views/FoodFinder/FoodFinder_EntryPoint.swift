@@ -52,6 +52,7 @@ struct FoodFinder_EntryPoint: View {
 
     @State private var showingAICamera = false
     @State private var showingAISettings = false
+    @State private var showingVoiceSearch = false
     @State private var isFoodSearchEnabled: Bool
     @State private var showAbsorptionReasoning = false
     @State private var isAdvancedAnalysisExpanded = false
@@ -204,6 +205,25 @@ struct FoodFinder_EntryPoint: View {
         .sheet(isPresented: $showingAISettings) {
             AISettingsView()
         }
+        .sheet(isPresented: $showingVoiceSearch) {
+            NavigationView {
+                VoiceSearchView(
+                    onSearchCompleted: { transcribedText in
+                        showingVoiceSearch = false
+                        // Route voice text through AI generative analysis (not USDA text search)
+                        Task { @MainActor in
+                            if let result = await searchVM.performVoiceSearch(query: transcribedText) {
+                                handleAIFoodAnalysis(result)
+                            }
+                        }
+                    },
+                    onCancel: {
+                        showingVoiceSearch = false
+                    }
+                )
+            }
+            .navigationViewStyle(StackNavigationViewStyle())
+        }
     }
 
     // MARK: - Wire ViewModel Callbacks
@@ -256,7 +276,7 @@ extension FoodFinder_EntryPoint {
                 .accessibilityLabel("AI Settings")
             }
 
-            // Search bar with barcode and AI camera buttons
+            // Search bar with voice, barcode, and AI camera buttons
             FoodSearchBar(
                 searchText: $searchVM.foodSearchText,
                 onBarcodeScanTapped: {
@@ -264,6 +284,9 @@ extension FoodFinder_EntryPoint {
                 },
                 onAICameraTapped: {
                     showingAICamera = true
+                },
+                onVoiceSearchTapped: {
+                    showingVoiceSearch = true
                 }
             )
 

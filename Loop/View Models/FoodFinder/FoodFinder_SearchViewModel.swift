@@ -303,6 +303,51 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         ))
     }
 
+    // MARK: - Voice / Generative Search
+
+    /// Perform a generative AI food search from voice-transcribed text.
+    /// Routes through the AI image analysis pipeline (same prompt) instead
+    /// of the USDA text search, enabling natural-language food descriptions
+    /// like "a medium bowl of spicy ramen and a side of gyoza".
+    @MainActor
+    func performVoiceSearch(query: String) async -> AIFoodAnalysisResult? {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        print("🎙️ Starting generative voice search for: '\(trimmed)'")
+
+        isFoodSearching = true
+        foodSearchError = nil
+        foodSearchResults = createSkeletonResults()
+        showingFoodSearch = true
+
+        defer {
+            isFoodSearching = false
+        }
+
+        do {
+            let result = try await foodFinder_withTimeout(seconds: 60) {
+                try await FoodSearchRouter.shared.analyzeFoodByDescription(trimmed)
+            }
+
+            print("🎙️ Voice search AI analysis completed for: '\(trimmed)' — carbs: \(result.totalCarbohydrates)g")
+
+            // Clear skeleton results
+            foodSearchResults = []
+            showingFoodSearch = false
+
+            return result
+        } catch {
+            print("🎙️ Voice search failed: \(error.localizedDescription)")
+
+            if error is CancellationError { return nil }
+
+            foodSearchError = "AI analysis failed: \(error.localizedDescription). Try typing your search instead."
+            foodSearchResults = []
+            return nil
+        }
+    }
+
     // MARK: - Food Search Methods
 
     /// Perform food search with given query
