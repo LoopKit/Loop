@@ -1,9 +1,24 @@
 import UIKit
 
 enum ImageDownloader {
+    private static let cache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.countLimit = 50
+        cache.totalCostLimit = 10 * 1024 * 1024 // 10 MB
+        return cache
+    }()
+
     static func fetchThumbnail(from url: URL, maxDimension: CGFloat = 300) async -> UIImage? {
+        let cacheKey = url.absoluteString as NSString
+
+        // Return cached image if available
+        if let cached = cache.object(forKey: cacheKey) {
+            return cached
+        }
+
         var req = URLRequest(url: url)
         req.timeoutInterval = 10
+        req.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", forHTTPHeaderField: "User-Agent")
         do {
             let (data, response) = try await URLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return nil }
@@ -11,7 +26,9 @@ enum ImageDownloader {
             guard data.count <= 2_000_000 else { return nil }
             guard let image = UIImage(data: data) else { return nil }
             let size = computeTargetSize(for: image.size, maxDimension: maxDimension)
-            return scale(image: image, to: size)
+            let scaled = scale(image: image, to: size)
+            cache.setObject(scaled, forKey: cacheKey)
+            return scaled
         } catch {
             #if DEBUG
             print("🌐 Image download failed: \(error)")
@@ -35,4 +52,3 @@ enum ImageDownloader {
         }
     }
 }
-

@@ -263,7 +263,9 @@ struct VoiceSearchView: View {
             .sink(
                 receiveCompletion: { completion in
                     if case .failure(let error) = completion {
+                        #if DEBUG
                         print("Voice search failed: \(error)")
+                        #endif
                     }
                 },
                 receiveValue: { result in

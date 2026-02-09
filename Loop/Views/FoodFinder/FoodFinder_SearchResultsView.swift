@@ -30,32 +30,44 @@ struct FoodSearchResultsView: View {
             if isSearching && isAISearching {
                 aiSearchingView
                     .onAppear {
+                        #if DEBUG
                         print("🔍 FoodSearchResultsView: Showing AI analysis state")
+                        #endif
                     }
             } else if isSearching {
                 searchingView
                     .onAppear {
+                        #if DEBUG
                         print("🔍 FoodSearchResultsView: Showing searching state")
+                        #endif
                     }
             } else if let errorMessage = errorMessage {
                 errorView(message: errorMessage)
                     .onAppear {
+                        #if DEBUG
                         print("🔍 FoodSearchResultsView: Showing error state - \(errorMessage)")
+                        #endif
                     }
             } else if searchResults.isEmpty {
                 emptyResultsView
                     .onAppear {
+                        #if DEBUG
                         print("🔍 FoodSearchResultsView: Showing empty results state")
+                        #endif
                     }
             } else {
                 resultsListView
                     .onAppear {
+                        #if DEBUG
                         print("🔍 FoodSearchResultsView: Showing \(searchResults.count) results")
+                        #endif
                     }
             }
         }
         .onAppear {
+            #if DEBUG
             print("🔍 FoodSearchResultsView body: isSearching=\(isSearching), results=\(searchResults.count), error=\(errorMessage ?? "none")")
+            #endif
         }
     }
 
@@ -132,7 +144,7 @@ struct FoodSearchResultsView: View {
                     }
                 }
 
-                Text(NSLocalizedString("Finding the best matches for you", comment: "Subtitle shown while searching for foods"))
+                Text(NSLocalizedString("Finding the best match for you...", comment: "Subtitle shown while searching for foods"))
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -408,7 +420,9 @@ private struct FoodSearchResultRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
                 .onTapGesture {
+                    #if DEBUG
                     print("🔍 User tapped on food result: \(product.displayName)")
+                    #endif
                     onSelected()
                 }
 

@@ -1421,7 +1421,9 @@ class USDAFoodDataService {
     /// - Parameter query: Search query string
     /// - Returns: Array of OpenFoodFactsProduct for compatibility with existing UI
     func searchProducts(query: String, pageSize: Int = 15) async throws -> [OpenFoodFactsProduct] {
+        #if DEBUG
         print("🇺🇸 Starting USDA FoodData Central search for: '\(query)'")
+        #endif
         
         guard let url = URL(string: "\(baseURL)/foods/search") else {
             throw OpenFoodFactsError.invalidURL
@@ -1458,7 +1460,9 @@ class USDAFoodDataService {
             }
             
             guard httpResponse.statusCode == 200 else {
+                #if DEBUG
                 print("🇺🇸 USDA: HTTP error \(httpResponse.statusCode)")
+                #endif
                 if httpResponse.statusCode == 429 {
                     // Map USDA rate limit to a specific error so callers can gracefully fall back
                     throw OpenFoodFactsError.rateLimitExceeded
@@ -1469,7 +1473,9 @@ class USDAFoodDataService {
             
             // Parse USDA response with detailed error handling
             guard let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                #if DEBUG
                 print("🇺🇸 USDA: Invalid JSON response format")
+                #endif
                 throw OpenFoodFactsError.decodingError(NSError(domain: "USDA", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON response"]))
             }
             
@@ -1477,16 +1483,22 @@ class USDAFoodDataService {
             if let error = jsonResponse["error"] as? [String: Any],
                let code = error["code"] as? String,
                let message = error["message"] as? String {
+                #if DEBUG
                 print("🇺🇸 USDA: API error - \(code): \(message)")
+                #endif
                 throw OpenFoodFactsError.serverError(400)
             }
             
             guard let foods = jsonResponse["foods"] as? [[String: Any]] else {
+                #if DEBUG
                 print("🇺🇸 USDA: No foods array in response")
+                #endif
                 throw OpenFoodFactsError.noData
             }
             
+            #if DEBUG
             print("🇺🇸 USDA: Raw API returned \(foods.count) food items")
+            #endif
             
             // Check for task cancellation before processing results
             try Task.checkCancellation()
@@ -1500,20 +1512,28 @@ class USDAFoodDataService {
                 return convertUSDAFoodToProduct(foodData)
             }
             
+            #if DEBUG
             print("🇺🇸 USDA search completed: \(products.count) valid products found (filtered from \(foods.count) raw items)")
+            #endif
             return products
             
         } catch {
+            #if DEBUG
             print("🇺🇸 USDA search failed: \(error)")
+            #endif
             
             // Handle task cancellation gracefully
             if error is CancellationError {
+                #if DEBUG
                 print("🇺🇸 USDA: Task was cancelled (expected behavior during rapid typing)")
+                #endif
                 return []
             }
             
             if let urlError = error as? URLError, urlError.code == .cancelled {
+                #if DEBUG
                 print("🇺🇸 USDA: URLSession request was cancelled (expected behavior during rapid typing)")
+                #endif
                 return []
             }
             
@@ -1525,7 +1545,9 @@ class USDAFoodDataService {
     private func convertUSDAFoodToProduct(_ foodData: [String: Any]) -> OpenFoodFactsProduct? {
         guard let fdcId = foodData["fdcId"] as? Int,
               let description = foodData["description"] as? String else {
+            #if DEBUG
             print("🇺🇸 USDA: Missing fdcId or description for food item")
+            #endif
             return nil
         }
         
@@ -1541,12 +1563,16 @@ class USDAFoodDataService {
         var foundNutrients: [String] = []
         
         if let foodNutrients = foodData["foodNutrients"] as? [[String: Any]] {
+            #if DEBUG
             print("🇺🇸 USDA: Found \(foodNutrients.count) nutrients for '\(description)'")
+            #endif
             
             for nutrient in foodNutrients {
                 // Debug: print the structure of the first few nutrients
                 if foundNutrients.count < 3 {
+                    #if DEBUG
                     print("🇺🇸 USDA: Nutrient structure: \(nutrient)")
+                    #endif
                 }
                 
                 // Try different possible field names for nutrient number
@@ -1647,21 +1673,31 @@ class USDAFoodDataService {
                 }
             }
         } else {
+            #if DEBUG
             print("🇺🇸 USDA: No foodNutrients array found in food data for '\(description)'")
+            #endif
+            #if DEBUG
             print("🇺🇸 USDA: Available keys in foodData: \(Array(foodData.keys))")
+            #endif
         }
         
         // Log what we found for debugging
         if foundNutrients.isEmpty {
+            #if DEBUG
             print("🇺🇸 USDA: No recognized nutrients found for '\(description)' (fdcId: \(fdcId))")
+            #endif
         } else {
+            #if DEBUG
             print("🇺🇸 USDA: Found nutrients for '\(description)': \(foundNutrients.joined(separator: ", "))")
+            #endif
         }
         
         // Enhanced data quality validation
         let hasUsableNutrientData = carbs > 0 || protein > 0 || fat > 0 || energy > 0
         if !hasUsableNutrientData {
+            #if DEBUG
             print("🇺🇸 USDA: Skipping '\(description)' - no usable nutrient data (carbs: \(carbs), protein: \(protein), fat: \(fat), energy: \(energy))")
+            #endif
             return nil
         }
         

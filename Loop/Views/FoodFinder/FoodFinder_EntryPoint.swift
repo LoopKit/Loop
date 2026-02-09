@@ -378,7 +378,7 @@ extension FoodFinder_EntryPoint {
                     .frame(width: 120, height: 90)
                     .clipped()
                     .cornerRadius(12)
-            } else if (selectedFood.imageFrontSmallURL ?? selectedFood.imageFrontURL ?? selectedFood.imageURL) != nil {
+            } else if (selectedFood.imageThumbURL ?? selectedFood.imageFrontSmallURL ?? selectedFood.imageFrontURL ?? selectedFood.imageURL) != nil {
                 // Static placeholder while thumbnail downloads (OFF images can be slow)
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color(.systemGray6))
@@ -1088,7 +1088,9 @@ extension FoodFinder_EntryPoint {
                     default: break
                     }
                     if cap > 0 && finalServings > cap {
+                        #if DEBUG
                         print("Applying slice-based soft cap: AI=\(finalServings) -> cap=\(cap) for \(count) slice(s)")
+                        #endif
                         finalServings = cap
                     }
                 }

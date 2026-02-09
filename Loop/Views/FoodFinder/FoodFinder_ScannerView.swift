@@ -57,33 +57,49 @@ struct BarcodeScannerView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button("Cancel") {
+                    #if DEBUG
                     print("🎥 ========== Cancel button tapped ==========")
+                    #endif
+                    #if DEBUG
                     print("🎥 Stopping scanner...")
+                    #endif
                     scannerService.stopScanning()
 
+                    #if DEBUG
                     print("🎥 Calling onCancel callback...")
+                    #endif
                     onCancel()
 
+                    #if DEBUG
                     print("🎥 Attempting to dismiss view...")
+                    #endif
                     // Try multiple dismiss approaches
                     DispatchQueue.main.async {
                         if #available(iOS 15.0, *) {
+                            #if DEBUG
                             print("🎥 Using iOS 15+ dismiss()")
+                            #endif
                             dismiss()
                         } else {
+                            #if DEBUG
                             print("🎥 Using presentationMode dismiss()")
+                            #endif
                             presentationMode.wrappedValue.dismiss()
                         }
                     }
 
+                    #if DEBUG
                     print("🎥 Cancel button action complete")
+                    #endif
                 }
                 .foregroundColor(.white)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     Button("Retry") {
+                        #if DEBUG
                         print("🎥 Retry button tapped")
+                        #endif
                         scannerService.resetSession()
                         setupScanner()
                     }
@@ -94,20 +110,28 @@ struct BarcodeScannerView: View {
             }
         }
         .onAppear {
+            #if DEBUG
             print("🎥 ========== BarcodeScannerView.onAppear() ==========")
+            #endif
+            #if DEBUG
             print("🎥 Current thread: \(Thread.isMainThread ? "MAIN" : "BACKGROUND")")
+            #endif
 
             // Clear any existing observers first to prevent duplicates
             cancellables.removeAll()
 
             // Check if we can reuse existing session or need to reset
             if scannerService.hasExistingSession && !scannerService.isScanning {
+                #if DEBUG
                 print("🎥 Scanner has existing session but not running, attempting quick restart...")
+                #endif
                 // Try to restart existing session first
                 scannerService.startScanning()
                 setupScannerAfterReset()
             } else if scannerService.hasExistingSession {
+                #if DEBUG
                 print("🎥 Scanner has existing session and is running, performing reset...")
+                #endif
                 scannerService.resetService()
 
                 // Wait a moment for reset to complete before proceeding (reduced delay)
@@ -118,7 +142,9 @@ struct BarcodeScannerView: View {
                 setupScannerAfterReset()
             }
 
+            #if DEBUG
             print("🎥 BarcodeScannerView onAppear setup complete")
+            #endif
 
             // Start scanning stage progression
             simulateScanningStages()
@@ -300,7 +326,9 @@ struct BarcodeScannerView: View {
             HStack(spacing: 16) {
                 if error == .cameraPermissionDenied {
                     Button("Settings") {
+                        #if DEBUG
                         print("🎥 Settings button tapped")
+                        #endif
                         openSettings()
                     }
                     .buttonStyle(.borderedProminent)
@@ -308,15 +336,21 @@ struct BarcodeScannerView: View {
 
                 VStack(spacing: 8) {
                     Button("Try Again") {
+                        #if DEBUG
                         print("🎥 Try Again button tapped in error overlay")
+                        #endif
                         scannerService.resetSession()
                         setupScanner()
                     }
 
                     Button("Check Permissions") {
+                        #if DEBUG
                         print("🎥 Check Permissions button tapped")
+                        #endif
                         let status = AVCaptureDevice.authorizationStatus(for: .video)
+                        #if DEBUG
                         print("🎥 Current system status: \(status)")
+                        #endif
                         scannerService.testCameraAccess()
 
                         // Clear the current error to test button functionality
@@ -326,7 +360,9 @@ struct BarcodeScannerView: View {
                         if status == .notDetermined {
                             scannerService.requestCameraPermission()
                                 .sink { granted in
+                                    #if DEBUG
                                     print("🎥 Permission request result: \(granted)")
+                                    #endif
                                     if granted {
                                         setupScanner()
                                     }
@@ -371,47 +407,69 @@ struct BarcodeScannerView: View {
     // MARK: - Methods
 
     private func setupScannerAfterReset() {
+        #if DEBUG
         print("🎥 Setting up scanner after reset...")
+        #endif
 
         // Get fresh camera authorization status
         let currentStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        #if DEBUG
         print("🎥 Camera authorization from system: \(currentStatus)")
+        #endif
+        #if DEBUG
         print("🎥 Scanner service authorization: \(scannerService.cameraAuthorizationStatus)")
+        #endif
 
         // Update scanner service status
         scannerService.cameraAuthorizationStatus = currentStatus
+        #if DEBUG
         print("🎥 Updated scanner service authorization to: \(scannerService.cameraAuthorizationStatus)")
+        #endif
 
         // Test camera access first
+        #if DEBUG
         print("🎥 Running camera access test...")
+        #endif
         scannerService.testCameraAccess()
 
         // Start scanning immediately
+        #if DEBUG
         print("🎥 Calling setupScanner()...")
+        #endif
         setupScanner()
 
         // Listen for scan results
+        #if DEBUG
         print("🎥 Setting up scan result observer...")
+        #endif
         scannerService.$lastScanResult
             .compactMap { $0 }
             .removeDuplicates { $0.barcodeString == $1.barcodeString }  // Remove duplicate barcodes
             .throttle(for: .milliseconds(500), scheduler: DispatchQueue.main, latest: false)  // Throttle rapid scans
             .sink { result in
+                #if DEBUG
                 print("🎥 ✅ Code result received: \(result.barcodeString) (Type: \(result.barcodeType))")
+                #endif
                 self.onBarcodeScanned(result.barcodeString)
 
                 // Clear scan state immediately to prevent rapid duplicate scans
                 self.scannerService.clearScanState()
+                #if DEBUG
                 print("🔍 Cleared scan state immediately to prevent duplicates")
+                #endif
             }
             .store(in: &cancellables)
     }
 
     private func setupScanner() {
+        #if DEBUG
         print("🎥 Setting up scanner, camera status: \(scannerService.cameraAuthorizationStatus)")
+        #endif
 
         #if targetEnvironment(simulator)
+        #if DEBUG
         print("🎥 WARNING: Running in iOS Simulator - barcode scanning not supported")
+        #endif
         // For simulator, immediately show an error
         DispatchQueue.main.async {
             self.scannerService.scanError = BarcodeScanError.cameraNotAvailable
@@ -420,16 +478,22 @@ struct BarcodeScannerView: View {
         #endif
 
         guard scannerService.cameraAuthorizationStatus != .denied else {
+            #if DEBUG
             print("🎥 Camera access denied, showing permission alert")
+            #endif
             showingPermissionAlert = true
             return
         }
 
         if scannerService.cameraAuthorizationStatus == .notDetermined {
+            #if DEBUG
             print("🎥 Camera permission not determined, requesting...")
+            #endif
             scannerService.requestCameraPermission()
                 .sink { granted in
+                    #if DEBUG
                     print("🎥 Camera permission granted: \(granted)")
+                    #endif
                     if granted {
                         self.startScanning()
                     } else {
@@ -438,13 +502,17 @@ struct BarcodeScannerView: View {
                 }
                 .store(in: &cancellables)
         } else if scannerService.cameraAuthorizationStatus == .authorized {
+            #if DEBUG
             print("🎥 Camera authorized, starting scanning")
+            #endif
             startScanning()
         }
     }
 
     private func startScanning() {
+        #if DEBUG
         print("🎥 BarcodeScannerView.startScanning() called")
+        #endif
 
         // Simply call the service method - observer already set up in onAppear
         scannerService.startScanning()
@@ -459,7 +527,9 @@ struct BarcodeScannerView: View {
             device.torchMode = device.torchMode == .on ? .off : .on
             device.unlockForConfiguration()
         } catch {
+            #if DEBUG
             print("Flashlight unavailable")
+            #endif
         }
     }
 
@@ -518,13 +588,19 @@ struct BarcodeScannerView: View {
 
     private func openSettings() {
         guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+            #if DEBUG
             print("🎥 ERROR: Could not create settings URL")
+            #endif
             return
         }
 
+        #if DEBUG
         print("🎥 Opening settings URL: \(settingsUrl)")
+        #endif
         UIApplication.shared.open(settingsUrl) { success in
+            #if DEBUG
             print("🎥 Settings URL opened successfully: \(success)")
+            #endif
         }
     }
 }
@@ -554,7 +630,9 @@ struct CameraPreviewView: UIViewRepresentable {
         // If we already have a preview layer with correct bounds, don't recreate
         if let existingLayer = existingLayers.first,
            existingLayer.frame == uiView.bounds {
+            #if DEBUG
             print("🎥 Preview layer already exists with correct bounds, skipping")
+            #endif
             return
         }
 
@@ -586,7 +664,9 @@ struct CameraPreviewView: UIViewRepresentable {
             }
 
             uiView.layer.insertSublayer(previewLayer, at: 0)
+            #if DEBUG
             print("🎥 Preview layer added to view with frame: \(previewLayer.frame)")
+            #endif
         }
     }
 }

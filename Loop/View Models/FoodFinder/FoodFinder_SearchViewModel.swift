@@ -230,10 +230,18 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             .removeDuplicates { $0.barcodeString == $1.barcodeString }
             .throttle(for: .milliseconds(800), scheduler: DispatchQueue.main, latest: false)
             .sink { [weak self] result in
+                #if DEBUG
                 print("🔍 ========== BARCODE RECEIVED IN VIEWMODEL ==========")
+                #endif
+                #if DEBUG
                 print("🔍 FoodFinder_SearchViewModel received barcode from BarcodeScannerService: \(result.barcodeString)")
+                #endif
+                #if DEBUG
                 print("🔍 Barcode confidence: \(result.confidence)")
+                #endif
+                #if DEBUG
                 print("🔍 Calling searchFoodProductByBarcode...")
+                #endif
                 // Consume the scan result immediately so other subscribers
                 // (e.g. from SwiftUI view recreation) don't re-process the same barcode.
                 BarcodeScannerService.shared.lastScanResult = nil
@@ -249,7 +257,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             .receive(on: RunLoop.main)
             .dropFirst()
             .sink { [weak self] servings in
+                #if DEBUG
                 print("🥄 numberOfServings changed to: \(servings), recalculating nutrition...")
+                #endif
                 self?.recalculateCarbsForServings(servings)
                 self?.recomputeAIAdjustments()
             }
@@ -258,14 +268,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
     private func observeAIExclusionsChange() {
         $excludedAIItemIndices
+            .combineLatest($lastAIAnalysisResult)
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.recomputeAIAdjustments()
-            }
-            .store(in: &cancellables)
-        $lastAIAnalysisResult
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] _, _ in
                 self?.recomputeAIAdjustments()
             }
             .store(in: &cancellables)
@@ -331,7 +336,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
+        #if DEBUG
         print("🎙️ Starting generative voice search for: '\(trimmed)'")
+        #endif
 
         isFoodSearching = true
         isAISearching = true
@@ -349,7 +356,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                 try await FoodSearchRouter.shared.analyzeFoodByDescription(trimmed)
             }
 
+            #if DEBUG
             print("🎙️ Voice search AI analysis completed for: '\(trimmed)' — carbs: \(result.totalCarbohydrates)g")
+            #endif
 
             // Clear skeleton results
             foodSearchResults = []
@@ -357,7 +366,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
             return result
         } catch {
+            #if DEBUG
             print("🎙️ Voice search failed: \(error.localizedDescription)")
+            #endif
 
             if error is CancellationError { return nil }
 
@@ -412,7 +423,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             return
         }
 
+        #if DEBUG
         print("🔍 Starting search for: '\(trimmedQuery)'")
+        #endif
 
         // Detect dictation (via DictationAwareTextField flag) or natural language input and route to AI
         let wasDictated = lastInputWasDictated
@@ -421,7 +434,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         }
 
         if wasDictated || isNaturalLanguageQuery(trimmedQuery) {
+            #if DEBUG
             print("🎙️ \(wasDictated ? "Dictation detected" : "Natural language detected") — routing to AI generative search for: '\(trimmedQuery)'")
+            #endif
             foodSearchTask = Task { [weak self] in
                 guard let self = self else { return }
                 if let result = await self.performVoiceSearch(query: trimmedQuery) {
@@ -446,7 +461,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             do {
                 await self.searchFoodProducts(query: trimmedQuery)
             } catch {
+                #if DEBUG
                 print("🔍 Food search error: \(error)")
+                #endif
                 await MainActor.run {
                     self.foodSearchError = error.localizedDescription
                     self.isFoodSearching = false
@@ -459,14 +476,18 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// - Parameter query: Search query string
     @MainActor
     private func searchFoodProducts(query: String) async {
+        #if DEBUG
         print("🔍 searchFoodProducts starting for: '\(query)'")
+        #endif
         foodSearchError = nil
 
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
         // Check cache first for instant results
         if let cachedResult = searchCache[trimmedQuery], !cachedResult.isExpired {
+            #if DEBUG
             print("🔍 Using cached results for: '\(trimmedQuery)'")
+            #endif
             foodSearchResults = cachedResult.results
             isFoodSearching = false
             return
@@ -475,11 +496,10 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         // Show skeleton loading state immediately
         foodSearchResults = createSkeletonResults()
 
-        let searchStartTime = Date()
-        let minimumSearchDuration: TimeInterval = 0.3 // Reduced from 1.2s for better responsiveness
-
         do {
+            #if DEBUG
             print("🔍 Performing text search with configured provider...")
+            #endif
             let rawProducts = try await performTextSearch(query: query)
 
             // Sort results by relevance so the most obvious match appears first
@@ -487,29 +507,20 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
             // Cache the sorted results for future use
             searchCache[trimmedQuery] = CachedSearchResult(results: products, timestamp: Date())
+            #if DEBUG
             print("🔍 Cached results for: '\(trimmedQuery)' (\(products.count) items)")
+            #endif
 
             // Periodically clean up expired cache entries
             if searchCache.count > 20 {
                 cleanupExpiredCache()
             }
 
-            // Ensure minimum search duration for smooth animations
-            let elapsedTime = Date().timeIntervalSince(searchStartTime)
-            if elapsedTime < minimumSearchDuration {
-                let remainingTime = minimumSearchDuration - elapsedTime
-                print("🔍 Adding \(remainingTime)s delay to reach minimum search duration")
-                do {
-                    try await Task.sleep(nanoseconds: UInt64(remainingTime * 1_000_000_000))
-                } catch {
-                    // Task.sleep can throw CancellationError, which is fine to ignore for timing
-                    print("🔍 Task.sleep cancelled during search timing (expected)")
-                }
-            }
-
             foodSearchResults = products
 
+            #if DEBUG
             print("🔍 Search completed! Found \(products.count) products")
+            #endif
 
             os_log("Food search for '%{public}@' returned %d results",
                    log: OSLog(category: "FoodSearch"),
@@ -518,11 +529,15 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                    products.count)
 
         } catch {
+            #if DEBUG
             print("🔍 Search failed with error: \(error)")
+            #endif
 
             // Don't show cancellation errors to the user - they're expected during rapid typing
             if error is CancellationError {
+                #if DEBUG
                 print("🔍 Search was cancelled (expected behavior)")
+                #endif
                 // Clear any previous error when cancelled
                 foodSearchError = nil
                 isFoodSearching = false
@@ -531,7 +546,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
             // Check for URLError cancellation as well
             if let urlError = error as? URLError, urlError.code == .cancelled {
+                #if DEBUG
                 print("🔍 URLSession request was cancelled (expected behavior)")
+                #endif
                 // Clear any previous error when cancelled
                 foodSearchError = nil
                 isFoodSearching = false
@@ -543,24 +560,13 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                case .networkError(let underlyingError) = openFoodFactsError,
                let urlError = underlyingError as? URLError,
                urlError.code == .cancelled {
+                #if DEBUG
                 print("🔍 OpenFoodFacts wrapped URLSession request was cancelled (expected behavior)")
+                #endif
                 // Clear any previous error when cancelled
                 foodSearchError = nil
                 isFoodSearching = false
                 return
-            }
-
-            // For real errors, ensure minimum search duration before showing error
-            let elapsedTime = Date().timeIntervalSince(searchStartTime)
-            if elapsedTime < minimumSearchDuration {
-                let remainingTime = minimumSearchDuration - elapsedTime
-                print("🔍 Adding \(remainingTime)s delay before showing error")
-                do {
-                    try await Task.sleep(nanoseconds: UInt64(remainingTime * 1_000_000_000))
-                } catch {
-                    // Task.sleep can throw CancellationError, which is fine to ignore for timing
-                    print("🔍 Task.sleep cancelled during error timing (expected)")
-                }
             }
 
             foodSearchError = error.localizedDescription
@@ -574,7 +580,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
         // Always set isFoodSearching to false at the end
         isFoodSearching = false
+        #if DEBUG
         print("🔍 searchFoodProducts finished, isFoodSearching = false")
+        #endif
     }
 
     // MARK: - Barcode Search
@@ -583,20 +591,32 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// - Parameter barcode: Product barcode
 
     func searchFoodProductByBarcode(_ barcode: String) {
+        #if DEBUG
         print("🔍 ========== BARCODE SEARCH STARTED ==========")
+        #endif
+        #if DEBUG
         print("🔍 searchFoodProductByBarcode called with barcode: \(barcode)")
+        #endif
+        #if DEBUG
         print("🔍 Current thread: \(Thread.isMainThread ? "MAIN" : "BACKGROUND")")
+        #endif
+        #if DEBUG
         print("🔍 lastBarcodeSearched: \(lastBarcodeSearched ?? "nil")")
+        #endif
 
         // Prevent duplicate searches for the same barcode
         if let lastBarcode = lastBarcodeSearched, lastBarcode == barcode {
+            #if DEBUG
             print("🔍 ⚠️ Ignoring duplicate barcode search for: \(barcode)")
+            #endif
             return
         }
 
         // Always cancel any existing task to prevent stalling
         if let existingTask = foodSearchTask, !existingTask.isCancelled {
+            #if DEBUG
             print("🔍 Cancelling existing search task")
+            #endif
             existingTask.cancel()
         }
 
@@ -606,7 +626,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             guard let self = self else { return }
 
             do {
+                #if DEBUG
                 print("🔍 Starting barcode lookup task for: \(barcode)")
+                #endif
 
                 // Add timeout wrapper to prevent infinite stalling
                 try await foodFinder_withTimeout(seconds: 45) {
@@ -618,12 +640,16 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                     self.lastBarcodeSearched = nil
                 }
             } catch {
+                #if DEBUG
                 print("🔍 Barcode search error: \(error)")
+                #endif
 
                 await MainActor.run {
                     // If it's a timeout, create fallback product
                     if error is FoodFinder_TimeoutError {
+                        #if DEBUG
                         print("🔍 Barcode search timed out, creating fallback product")
+                        #endif
                         self.createManualEntryPlaceholder(for: barcode)
                         self.lastBarcodeSearched = nil
                         return
@@ -643,7 +669,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// - Parameter barcode: Product barcode
     @MainActor
     private func lookupProductByBarcode(_ barcode: String) async {
+        #if DEBUG
         print("🔍 lookupProductByBarcode starting for: \(barcode)")
+        #endif
 
         // Clear previous results to show searching state
         foodSearchResults = []
@@ -651,34 +679,16 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         foodSearchError = nil
 
         defer {
+            #if DEBUG
             print("🔍 lookupProductByBarcode finished, setting isFoodSearching = false")
+            #endif
             isFoodSearching = false
         }
 
-        // Quick network connectivity check - if we can't reach the API quickly, show clear error
         do {
-            print("🔍 Testing OpenFoodFacts connectivity...")
-            let testUrl = URL(string: "https://world.openfoodfacts.net/api/v2/product/test.json")!
-            var testRequest = URLRequest(url: testUrl)
-            testRequest.timeoutInterval = 3.0  // Very short timeout for connectivity test
-            testRequest.httpMethod = "HEAD"  // Just check if server responds
-
-            let (_, response) = try await URLSession.shared.data(for: testRequest)
-            if let httpResponse = response as? HTTPURLResponse {
-                print("🔍 OpenFoodFacts connectivity test: HTTP \(httpResponse.statusCode)")
-                if httpResponse.statusCode >= 500 {
-                    throw URLError(.badServerResponse)
-                }
-            }
-        } catch {
-            print("🔍 OpenFoodFacts not reachable: \(error)")
-            // Offer to create a manual entry placeholder
-            createManualEntryPlaceholder(for: barcode)
-            return
-        }
-
-        do {
+            #if DEBUG
             print("🔍 Calling performBarcodeSearch for: \(barcode)")
+            #endif
             if let product = try await performBarcodeSearch(barcode: barcode) {
                 // Add to search results and select it
                 if !foodSearchResults.contains(product) {
@@ -692,20 +702,26 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                        barcode,
                        product.displayName)
             } else {
+                #if DEBUG
                 print("🔍 No product found, creating manual entry placeholder")
+                #endif
                 createManualEntryPlaceholder(for: barcode)
             }
 
         } catch {
             // Don't show cancellation errors to the user - just return without doing anything
             if error is CancellationError {
+                #if DEBUG
                 print("🔍 Barcode lookup was cancelled (expected behavior)")
+                #endif
                 foodSearchError = nil
                 return
             }
 
             if let urlError = error as? URLError, urlError.code == .cancelled {
+                #if DEBUG
                 print("🔍 Barcode lookup URLSession request was cancelled (expected behavior)")
+                #endif
                 foodSearchError = nil
                 return
             }
@@ -715,13 +731,17 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                case .networkError(let underlyingError) = openFoodFactsError,
                let urlError = underlyingError as? URLError,
                urlError.code == .cancelled {
+                #if DEBUG
                 print("🔍 Barcode lookup OpenFoodFacts wrapped URLSession request was cancelled (expected behavior)")
+                #endif
                 foodSearchError = nil
                 return
             }
 
             // For any other error (network issues, product not found, etc.), create manual entry placeholder
+            #if DEBUG
             print("🔍 Barcode lookup failed with error: \(error), creating manual entry placeholder")
+            #endif
             createManualEntryPlaceholder(for: barcode)
 
             os_log("Barcode lookup failed for %{public}@: %{public}@, created manual entry placeholder",
@@ -735,10 +755,18 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// Create a manual entry placeholder when network requests fail
     /// - Parameter barcode: The scanned barcode
     private func createManualEntryPlaceholder(for barcode: String) {
+        #if DEBUG
         print("🔍 ========== CREATING MANUAL ENTRY PLACEHOLDER ==========")
+        #endif
+        #if DEBUG
         print("🔍 Creating manual entry placeholder for barcode: \(barcode)")
+        #endif
+        #if DEBUG
         print("🔍 Current thread: \(Thread.isMainThread ? "MAIN" : "BACKGROUND")")
+        #endif
+        #if DEBUG
         print("🔍 ⚠️ WARNING: This is NOT real product data - requires manual entry")
+        #endif
 
         // Create a placeholder product that requires manual nutrition entry
         let fallbackProduct = OpenFoodFactsProduct(
@@ -776,10 +804,18 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         // Clear any error since we successfully created a fallback
         foodSearchError = nil
 
+        #if DEBUG
         print("🔍 ✅ Manual entry placeholder created for barcode: \(barcode)")
+        #endif
+        #if DEBUG
         print("🔍 foodSearchResults.count: \(foodSearchResults.count)")
+        #endif
+        #if DEBUG
         print("🔍 selectedFoodProduct: \(selectedFoodProduct?.displayName ?? "nil")")
+        #endif
+        #if DEBUG
         print("🔍 ========== MANUAL ENTRY PLACEHOLDER COMPLETE ==========")
+        #endif
     }
 
     // MARK: - Select Food Product
@@ -787,11 +823,21 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// Select a food product and populate carb entry fields
     /// - Parameter product: The selected food product
     func selectFoodProduct(_ product: OpenFoodFactsProduct) {
+        #if DEBUG
         print("🔄 ========== SELECTING FOOD PRODUCT ==========")
+        #endif
+        #if DEBUG
         print("🔄 Product: \(product.displayName)")
+        #endif
+        #if DEBUG
         print("🔄 Product ID: \(product.id)")
+        #endif
+        #if DEBUG
         print("🔄 Data source: \(product.dataSource)")
+        #endif
+        #if DEBUG
         print("🔄 Current absorptionTime BEFORE selecting: \(absorptionTime)")
+        #endif
 
         selectedFoodProduct = product
         downloadProductThumbnail(for: product)
@@ -817,7 +863,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         if product.id.hasPrefix("fallback_") {
             // This is a fallback product - don't auto-populate any nutrition data
             carbsQuantity = nil  // Force user to enter manually
+            #if DEBUG
             print("🔍 ⚠️ Fallback product selected - carbs must be entered manually")
+            #endif
         } else if let carbsPerServing = product.carbsPerServing {
             carbsQuantity = carbsPerServing * numberOfServings
         } else if product.nutriments.carbohydrates > 0 {
@@ -828,8 +876,12 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             carbsQuantity = nil
         }
 
+        #if DEBUG
         print("🔄 Current absorptionTime AFTER all processing: \(absorptionTime)")
+        #endif
+        #if DEBUG
         print("🔄 ========== FOOD PRODUCT SELECTION COMPLETE ==========")
+        #endif
 
         // Clear search UI but keep selected product
         foodSearchText = ""
@@ -873,22 +925,10 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// instead of AsyncImage (which restarts on every SwiftUI view rebuild).
     private func downloadProductThumbnail(for product: OpenFoodFactsProduct) {
         productThumbnailImage = nil
-        let urlString = product.imageFrontSmallURL ?? product.imageFrontURL ?? product.imageURL
+        // Prefer image_thumb_url (~100px) which is the smallest OFF provides
+        let urlString = product.imageThumbURL ?? product.imageFrontSmallURL ?? product.imageFrontURL ?? product.imageURL
         guard let urlString, !urlString.isEmpty else { return }
-
-        // Prefer the smallest OpenFoodFacts thumbnail (100px) for fast loading.
-        // OFF URLs follow the pattern: .../front_en.REV.SIZE.jpg
-        // Rewrite .200.jpg or .400.jpg → .100.jpg for a much smaller file.
-        let thumbURLString: String
-        if urlString.contains("openfoodfacts.org") {
-            thumbURLString = urlString
-                .replacingOccurrences(of: ".200.jpg", with: ".100.jpg")
-                .replacingOccurrences(of: ".400.jpg", with: ".100.jpg")
-        } else {
-            thumbURLString = urlString
-        }
-
-        guard let url = URL(string: thumbURLString) else { return }
+        guard let url = URL(string: urlString) else { return }
         Task {
             let image = await ImageDownloader.fetchThumbnail(from: url, maxDimension: 120)
             await MainActor.run {
@@ -906,23 +946,33 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// - Parameter servings: Number of servings
     private func recalculateCarbsForServings(_ servings: Double) {
         guard let selectedFood = selectedFoodProduct else {
+            #if DEBUG
             print("🥄 recalculateCarbsForServings: No selected food product")
+            #endif
             return
         }
 
+        #if DEBUG
         print("🥄 recalculateCarbsForServings: servings=\(servings), selectedFood=\(selectedFood.displayName)")
+        #endif
 
         // Calculate carbs based on servings - prefer per serving, fallback to per 100g
         let newCarbsQuantity: Double
         if let carbsPerServing = selectedFood.carbsPerServing {
             newCarbsQuantity = carbsPerServing * servings
+            #if DEBUG
             print("🥄 Using carbsPerServing: \(carbsPerServing) * \(servings) = \(newCarbsQuantity)")
+            #endif
         } else {
             newCarbsQuantity = selectedFood.nutriments.carbohydrates * servings
+            #if DEBUG
             print("🥄 Using nutriments.carbohydrates: \(selectedFood.nutriments.carbohydrates) * \(servings) = \(newCarbsQuantity)")
+            #endif
         }
 
+        #if DEBUG
         print("🥄 Final carbsQuantity set to: \(newCarbsQuantity)")
+        #endif
 
         // Determine food type from the selected product
         let maxFoodTypeLength = 20
@@ -998,14 +1048,18 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         }
 
         if !expiredKeys.isEmpty {
+            #if DEBUG
             print("🔍 Cleaned up \(expiredKeys.count) expired cache entries")
+            #endif
         }
     }
 
     /// Clear search cache manually
     func clearSearchCache() {
         searchCache.removeAll()
+        #if DEBUG
         print("🔍 Search cache cleared")
+        #endif
     }
 
     /// Toggle food search visibility
@@ -1189,11 +1243,15 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     func deleteFoodItem(at index: Int) {
         guard var currentResult = lastAIAnalysisResult,
               index >= 0 && index < currentResult.foodItemsDetailed.count else {
+            #if DEBUG
             print("⚠️ Cannot delete food item: invalid index \(index) or no AI analysis result")
+            #endif
             return
         }
 
+        #if DEBUG
         print("🗑️ Deleting food item at index \(index): \(currentResult.foodItemsDetailed[index].name)")
+        #endif
 
         // Remove the item from the array (now possible since foodItemsDetailed is var)
         currentResult.foodItemsDetailed.remove(at: index)
@@ -1233,7 +1291,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                 absorptionEditIsProgrammatic = true
                 absorptionTime = newAbsorptionTimeInterval
 
+                #if DEBUG
                 print("🤖 Updated AI absorption time after deletion: \(newAbsorptionHours) hours")
+                #endif
             }
         }
 
@@ -1260,7 +1320,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             absorptionTimeWasAIGenerated: absorptionTimeWasAIGenerated
         ))
 
+        #if DEBUG
         print("✅ Food item deleted. New total carbs: \(newTotalCarbs)g")
+        #endif
     }
 
     /// Ensures we have an absorption time even if the AI response omitted it.

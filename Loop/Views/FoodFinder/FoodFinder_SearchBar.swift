@@ -61,7 +61,9 @@ private struct FoodSearchTextField: UIViewRepresentable {
             // phrases at once. With autocorrection disabled, the only sources of
             // multi-char insertion are dictation and paste — both should route to AI.
             if charsAdded >= 3 && !newText.isEmpty {
+                #if DEBUG
                 print("🎙️ Rapid text insertion detected (\(charsAdded) chars added at once) — flagging as dictation")
+                #endif
                 onDictationDetected?()
             }
 
@@ -69,11 +71,15 @@ private struct FoodSearchTextField: UIViewRepresentable {
         }
 
         func textFieldDidBeginEditing(_ textField: UITextField) {
+            #if DEBUG
             print("🔍 FoodSearchTextField: DID BEGIN EDITING (keyboard should be visible)")
+            #endif
         }
 
         func textFieldDidEndEditing(_ textField: UITextField) {
+            #if DEBUG
             print("🔍 FoodSearchTextField: DID END EDITING")
+            #endif
         }
 
         func textFieldShouldReturn(_ textField: UITextField) -> Bool {
