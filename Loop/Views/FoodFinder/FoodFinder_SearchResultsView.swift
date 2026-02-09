@@ -1,9 +1,11 @@
 //
-//  FoodSearchResultsView.swift
+//  FoodFinder_SearchResultsView.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code for OpenFoodFacts Integration in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Search results display for food database queries.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import SwiftUI

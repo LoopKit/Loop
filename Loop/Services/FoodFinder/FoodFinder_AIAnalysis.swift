@@ -1,9 +1,12 @@
 //
-//  AIFoodAnalysis.swift
+//  FoodFinder_AIAnalysis.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — AI food analysis prompts, response parsing, and the
+//  ConfigurableAIService orchestrator.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import UIKit
@@ -216,7 +219,7 @@ internal func getAnalysisPrompt() -> String {
 private let standardAnalysisPrompt = """
 You are a certified diabetologist specializing in diabetes carb counting. You understand Servings compared to Portions and the importance of being educated about this. You are clinically minded but have a knack for explaining complicated nutrition information in layman's terms. Be precise and conservative. Output strictly JSON matching the schema; no prose.
 
-Task: Analyze the food image and return nutrition for visible portions only.
+Task: Analyze the image and return nutrition data. The image may be a food photo, a menu, a recipe, or text listing food items (in any language). If the image contains a menu, recipe, or text listing foods, set "image_type" to "menu_item", transcribe/translate the items, and estimate nutrition using USDA standard serving sizes. If the image shows actual food, set "image_type" to "food_photo" and analyze visible portions.
 
 Rules:
 - Use visual evidence; compare to visible objects for scale when possible.
@@ -224,6 +227,7 @@ Rules:
 - Name foods precisely with preparation method if visible.
 - Use grams for macros and kcal for calories; non‑negative values; round carbs to 1 decimal.
 - If uncertain, lower confidence; do not invent items.
+- For menus/recipes: use "CANNOT DETERMINE" for portion_estimate and "NONE" for visual_cues since no actual food is visible.
 
 Portion Estimation Guidance (MANDATORY to include in "portion_assessment_method"):
 - State the scale references used (e.g., dinner fork ≈ 19–20 mm wide at the tines, plate ≈ 10–11 inches, can diameter ≈ 66 mm, standard cup ≈ 240 ml).
@@ -1004,7 +1008,9 @@ class ConfigurableAIService: ObservableObject {
         return try await analyzeFoodImage(image, telemetryCallback: nil)
     }
 
-    /// Analyze food image with telemetry callbacks for progress tracking
+    /// Analyze food image with telemetry callbacks for progress tracking.
+    /// Runs on-device OCR first — if a menu/recipe/text is detected, routes through
+    /// the text analysis path (same as voice dictation) for much better results.
     func analyzeFoodImage(_ image: UIImage, telemetryCallback: ((String) -> Void)?) async throws -> AIFoodAnalysisResult {
         guard let config = UserDefaults.standard.activeAIProviderConfiguration else {
             throw AIFoodAnalysisError.noApiKey
@@ -1013,6 +1019,50 @@ class ConfigurableAIService: ObservableObject {
             throw AIFoodAnalysisError.noApiKey
         }
 
+        // ── Step 1: On-device OCR to detect menus, recipes, or text ──
+        telemetryCallback?("🔍 Scanning image for text...")
+        let ocr = await ConfigurableAIService.performOCR(on: image)
+
+        if ocr.isMenuOrRecipe {
+            #if DEBUG
+            print("📝 [OCR] Menu/recipe detected: \(ocr.lineCount) lines, confidence \(String(format: "%.0f%%", ocr.averageConfidence * 100))")
+            print("📝 [OCR] Extracted text:\n\(ocr.text.prefix(500))")
+            #endif
+
+            telemetryCallback?("📝 Menu/recipe detected (\(ocr.lineCount) text lines)")
+            telemetryCallback?("🤖 Analyzing menu text with \(config.name)...")
+
+            let basePrompt = getAnalysisPrompt()
+            let menuPrompt = """
+            \(basePrompt)
+
+            The following text was extracted via OCR from a photo of a menu, recipe, or food label. \
+            Analyze these food items and provide detailed nutritional information. \
+            Set "image_type" to "menu_item". \
+            If the text is in a foreign language, translate the food item names to English before analysis.
+
+            OCR-extracted text:
+            \"""
+            \(ocr.text)
+            \"""
+            """
+
+            let result = try await AIServiceManager.shared.analyzeFoodByText(
+                using: config,
+                query: menuPrompt
+            )
+
+            telemetryCallback?("✅ Menu analysis complete!")
+            return result
+        }
+
+        #if DEBUG
+        if !ocr.text.isEmpty {
+            print("📝 [OCR] Some text found but not enough for menu detection: \(ocr.lineCount) lines, confidence \(String(format: "%.0f%%", ocr.averageConfidence * 100))")
+        }
+        #endif
+
+        // ── Step 2: Normal image analysis path (food photo) ──
         telemetryCallback?("🖼️ Preparing image...")
         let pre = await ConfigurableAIService.preencodeImageForProviders(image)
 
@@ -1186,6 +1236,74 @@ class ConfigurableAIService: ObservableObject {
             width: Int(finalImage.size.width),
             height: Int(finalImage.size.height)
         )
+    }
+
+    // MARK: - On-Device OCR for Menu/Recipe Detection
+
+    /// Result of on-device OCR text detection
+    struct OCRResult {
+        let text: String
+        let lineCount: Int
+        let averageConfidence: Float
+        let isMenuOrRecipe: Bool
+    }
+
+    /// Performs on-device OCR using Apple Vision to detect and extract text from an image.
+    /// Runs on the full-resolution image for maximum accuracy — no compression or resizing.
+    /// Returns extracted text and a flag indicating whether the image appears to be a menu/recipe.
+    static func performOCR(on image: UIImage) async -> OCRResult {
+        await withCheckedContinuation { continuation in
+            guard let cgImage = image.cgImage else {
+                continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false))
+                return
+            }
+
+            let request = VNRecognizeTextRequest { request, error in
+                guard let observations = request.results as? [VNRecognizedTextObservation], error == nil else {
+                    continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false))
+                    return
+                }
+
+                var lines: [(String, Float)] = []
+                for observation in observations {
+                    if let candidate = observation.topCandidates(1).first {
+                        lines.append((candidate.string, candidate.confidence))
+                    }
+                }
+
+                let allText = lines.map { $0.0 }.joined(separator: "\n")
+                let avgConfidence = lines.isEmpty ? 0 : lines.map { $0.1 }.reduce(0, +) / Float(lines.count)
+
+                // Heuristic: treat as text-heavy image if OCR finds meaningful content.
+                // Even 1 high-confidence line is worth routing through text path —
+                // the cost of a false positive (text path for a food photo) is low,
+                // while the cost of a false negative (image path for a menu) is high
+                // (GPT-4o refuses to analyze text images).
+                let significantLines = lines.filter { $0.1 >= 0.3 }
+                let isMenu = (significantLines.count >= 1 && allText.count >= 10 && avgConfidence >= 0.5)
+                    || (significantLines.count >= 3 && avgConfidence >= 0.3)
+
+                continuation.resume(returning: OCRResult(
+                    text: allText,
+                    lineCount: significantLines.count,
+                    averageConfidence: avgConfidence,
+                    isMenuOrRecipe: isMenu
+                ))
+            }
+
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = true
+            if #available(iOS 16.0, *) {
+                request.automaticallyDetectsLanguage = true
+            }
+
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            do {
+                try handler.perform([request])
+            } catch {
+                continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false))
+            }
+        }
     }
 
     /// High-quality image resizing helper

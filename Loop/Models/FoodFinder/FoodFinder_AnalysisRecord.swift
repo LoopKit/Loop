@@ -5,6 +5,9 @@
 //  FoodFinder — Codable record for a single AI food analysis,
 //  used by the Analysis History feature for quick re-entry.
 //
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
+//
 
 import Foundation
 

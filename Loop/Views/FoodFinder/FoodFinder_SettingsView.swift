@@ -1,9 +1,11 @@
 //
-//  AISettingsView.swift
+//  FoodFinder_SettingsView.swift
 //  Loop
 //
-//  Created by Taylor Patterson, Coded by Claude Code for AI Settings Configuration in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Settings UI for configuring AI food analysis providers.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import SwiftUI

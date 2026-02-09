@@ -1,9 +1,11 @@
 //
-//  AIServiceAdapter.swift
+//  FoodFinder_AIServiceAdapter.swift
 //  Loop
 //
-//  Created by Taylor Patterson on 9/30/25.
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Protocol adapter bridging AI providers to a common interface.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation

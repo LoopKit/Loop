@@ -2,14 +2,11 @@
 //  FoodFinder_EntryPoint.swift
 //  Loop
 //
-//  The single integration view that encapsulates ALL FoodFinder UI.
-//  CarbEntryView embeds this with ~5 lines instead of 1000+ lines inline.
+//  FoodFinder — Single integration view encapsulating all FoodFinder UI.
+//  CarbEntryView embeds this instead of inline FoodFinder code.
 //
-//  Extracted from CarbEntryView.swift — faithful, complete copy of every
-//  FoodFinder section, helper struct, and computation function.
-//
-//  Created by Taylor Patterson. Coded by Claude Code.
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import SwiftUI

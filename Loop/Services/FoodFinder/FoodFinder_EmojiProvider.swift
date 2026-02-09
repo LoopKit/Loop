@@ -1,3 +1,13 @@
+//
+//  FoodFinder_EmojiProvider.swift
+//  Loop
+//
+//  FoodFinder — Emoji thumbnail provider for foods without product images.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
+//
+
 import UIKit
 import LoopKitUI
 

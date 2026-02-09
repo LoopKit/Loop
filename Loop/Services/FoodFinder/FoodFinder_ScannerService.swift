@@ -1,9 +1,11 @@
 //
-//  BarcodeScannerService.swift
+//  FoodFinder_ScannerService.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code for Barcode Scanning Integration in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Barcode detection service using AVFoundation and Vision.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation

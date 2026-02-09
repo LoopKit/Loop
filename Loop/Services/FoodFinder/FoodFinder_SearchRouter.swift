@@ -1,9 +1,11 @@
 //
-//  FoodSearchRouter.swift
+//  FoodFinder_SearchRouter.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Routes food search queries to the appropriate data source.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import UIKit
@@ -102,7 +104,6 @@ class FoodSearchRouter {
     /// Routes through the same AI provider and prompt infrastructure as image analysis,
     /// using a placeholder image with the user's description as context.
     func analyzeFoodByDescription(_ description: String) async throws -> AIFoodAnalysisResult {
-        let placeholderImage = createPlaceholderImage()
         let basePrompt = getAnalysisPrompt()
         let voiceContext = "\(basePrompt)\n\nThe user described their food verbally: \"\(description)\". There is no photo — analyze the food based solely on this text description. Provide the same detailed nutritional analysis you would for a food photo."
 
@@ -115,8 +116,7 @@ class FoodSearchRouter {
             throw AIFoodAnalysisError.noApiKey
         }
 
-        return try await AIServiceManager.shared.analyzeFoodImage(
-            placeholderImage,
+        return try await AIServiceManager.shared.analyzeFoodByText(
             using: config,
             query: voiceContext
         )

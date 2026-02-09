@@ -1,9 +1,11 @@
 //
-//  OpenFoodFactsModels.swift
+//  FoodFinder_Models.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code in June 2025
-//  Copyright © 20253 LoopKit Authors. All rights reserved.
+//  FoodFinder — Data models for OpenFoodFacts API responses and food products.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation

@@ -2,11 +2,10 @@
 //  FoodFinder_SecureStorage.swift
 //  Loop
 //
-//  Lightweight iOS Keychain wrapper for secure API key storage.
-//  API keys are stored encrypted at rest and never included in backups.
+//  FoodFinder — Keychain wrapper for secure API key storage.
 //
-//  Created by Taylor Patterson. Coded by Claude Code.
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation

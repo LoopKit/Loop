@@ -1,9 +1,11 @@
 //
-//  BarcodeScannerView.swift
+//  FoodFinder_ScannerView.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code for Barcode Scanning Integration in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Barcode scanner camera view using AVFoundation.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import SwiftUI

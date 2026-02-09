@@ -3,8 +3,9 @@
 //  Loop
 //
 //  FoodFinder — Persistence and cleanup for AI analysis history records.
-//  Uses UserDefaults (same pattern as favoriteFoods) and reuses
-//  FavoriteFoodImageStore for thumbnail storage.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation

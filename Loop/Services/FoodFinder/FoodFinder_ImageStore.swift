@@ -1,3 +1,13 @@
+//
+//  FoodFinder_ImageStore.swift
+//  Loop
+//
+//  FoodFinder — Thumbnail storage for Favorite Foods using JPEG on disk.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
+//
+
 import UIKit
 
 /// Stores small thumbnails for Favorite Foods and returns identifiers for lookup.

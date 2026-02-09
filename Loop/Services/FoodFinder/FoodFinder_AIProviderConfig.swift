@@ -2,15 +2,15 @@
 //  FoodFinder_AIProviderConfig.swift
 //  Loop
 //
-//  BYO API configuration model. Supports any OpenAI-compatible endpoint,
-//  Anthropic Messages API, and Google Generative AI — all driven by a
-//  single configuration struct.
+//  FoodFinder — BYO API configuration model supporting OpenAI-compatible,
+//  Anthropic, and Google AI providers.
 //
-//  Created by Taylor Patterson. Coded by Claude Code.
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation
+import os.log
 
 // MARK: - Request Format
 
@@ -256,5 +256,54 @@ extension UserDefaults {
     var activeAIProviderConfiguration: AIProviderConfiguration? {
         guard let activeId = activeAIProviderConfigurationId else { return nil }
         return aiProviderConfigurations.first { $0.id == activeId }?.withKeychainAPIKey()
+    }
+}
+
+// MARK: - AI Settings Manager
+
+/// Thin persistence manager for AI provider configurations.
+class AISettingsManager {
+    static let shared = AISettingsManager()
+    private let log = OSLog(category: "AISettingsManager")
+
+    private init() {}
+
+    /// Loads the active AI provider configuration
+    func loadActiveConfiguration() async throws -> AIProviderConfiguration? {
+        return UserDefaults.standard.activeAIProviderConfiguration
+    }
+
+    /// Saves the active AI provider configuration
+    func saveActiveConfiguration(_ configuration: AIProviderConfiguration) async throws {
+        var configs = UserDefaults.standard.aiProviderConfigurations
+
+        if let index = configs.firstIndex(where: { $0.id == configuration.id }) {
+            configs[index] = configuration
+        } else {
+            configs.append(configuration)
+        }
+
+        UserDefaults.standard.aiProviderConfigurations = configs
+        UserDefaults.standard.activeAIProviderConfigurationId = configuration.id
+
+        log.debug("Saved active AI provider configuration: %{public}@", configuration.name)
+    }
+
+    /// Deletes an AI provider configuration
+    func deleteConfiguration(id: String) async throws {
+        var configs = UserDefaults.standard.aiProviderConfigurations
+        configs.removeAll { $0.id == id }
+        UserDefaults.standard.aiProviderConfigurations = configs
+
+        if UserDefaults.standard.activeAIProviderConfigurationId == id {
+            UserDefaults.standard.activeAIProviderConfigurationId = nil
+        }
+
+        log.debug("Deleted AI provider configuration with ID: %{public}@", id)
+    }
+
+    /// Tests a connection to the AI provider with the given configuration
+    func testConnection(to configuration: AIProviderConfiguration) async -> AIServiceManager.TestConnectionResult {
+        return await AIServiceManager.shared.testConnection(to: configuration)
     }
 }

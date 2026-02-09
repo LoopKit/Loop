@@ -1,3 +1,13 @@
+//
+//  FoodFinder_ImageDownloader.swift
+//  Loop
+//
+//  FoodFinder — Async image downloader with caching for product thumbnails.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
+//
+
 import UIKit
 
 enum ImageDownloader {

@@ -1,9 +1,11 @@
 //
-//  FoodSearchBar.swift
+//  FoodFinder_SearchBar.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code for OpenFoodFacts Integration in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Search bar with barcode scan and AI camera buttons.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import SwiftUI

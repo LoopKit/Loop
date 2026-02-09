@@ -257,6 +257,8 @@ extension CarbEntryView {
                             }
                         }
                         .pickerStyle(.wheel)
+                        .frame(maxWidth: .infinity)
+                        .clipped()
                     }
                 }
                 .onTapGesture {
@@ -276,6 +278,13 @@ extension CarbEntryView {
         }
     }
 
+    /// Truncate a string to a max character count, appending "..." if needed.
+    private func truncatedName(_ name: String, maxLength: Int = 30) -> String {
+        guard name.count > maxLength else { return name }
+        let idx = name.index(name.startIndex, offsetBy: maxLength)
+        return String(name[..<idx]) + "…"
+    }
+
     @ViewBuilder
     private func analysisHistorySelectedLabel(_ index: Int) -> some View {
         if index >= 0 {
@@ -283,7 +292,9 @@ extension CarbEntryView {
             if let thumbID = record.thumbnailID,
                let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
                 HStack(spacing: 4) {
-                    Text(record.name)
+                    Text(truncatedName(record.name))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                         .minimumScaleFactor(0.8)
                     Image(uiImage: uiImage)
                         .resizable()
@@ -292,7 +303,9 @@ extension CarbEntryView {
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                 }
             } else {
-                Text("\(record.name) \(record.foodType)")
+                Text(truncatedName("\(record.name) \(record.foodType)"))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                     .minimumScaleFactor(0.8)
             }
         } else {
@@ -311,7 +324,9 @@ extension CarbEntryView {
             if let thumbID = record.thumbnailID,
                let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
                 HStack(spacing: 4) {
-                    Text(record.name)
+                    Text(truncatedName(record.name))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                     Image(uiImage: uiImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -319,7 +334,9 @@ extension CarbEntryView {
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                 }
             } else {
-                Text("\(record.name) \(record.foodType)")
+                Text(truncatedName("\(record.name) \(record.foodType)"))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
         }
     }

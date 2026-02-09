@@ -2,11 +2,11 @@
 //  FoodFinder_SearchViewModel.swift
 //  Loop
 //
-//  Extracted from CarbEntryViewModel.swift — all FoodFinder food-search
-//  state and logic now lives in this self-contained ViewModel.
+//  FoodFinder — ViewModel for food search state, AI analysis, and
+//  product selection logic.
 //
-//  Created by Taylor Patterson. Coded by Claude Code.
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import SwiftUI
@@ -297,19 +297,22 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             aiGenerated = true
         }
 
-        // Determine food type from the AI result
+        // Determine food type from the AI result (truncate to fit RowEmojiTextField maxLength)
+        let maxFoodTypeLength = 20
         let foodType: String = {
             let names = included.map { $0.name }
+            let raw: String
             if names.count == 1 {
-                return names[0]
+                raw = names[0]
             } else if !names.isEmpty {
-                let joined = names.joined(separator: ", ")
-                if joined.count > 20 {
-                    return String(joined.prefix(19)) + "…"
-                }
-                return joined
+                raw = names.joined(separator: ", ")
+            } else {
+                raw = ai.overallDescription ?? "AI Analysis"
             }
-            return ai.overallDescription ?? "AI Analysis"
+            if raw.count > maxFoodTypeLength {
+                return String(raw.prefix(maxFoodTypeLength - 1)) + "…"
+            }
+            return raw
         }()
 
         // Notify host
@@ -437,8 +440,19 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             #if DEBUG
             print("🎙️ \(wasDictated ? "Dictation detected" : "Natural language detected") — routing to AI generative search for: '\(trimmedQuery)'")
             #endif
+            // Cancel any in-flight search so only the latest query runs.
+            foodSearchTask?.cancel()
             foodSearchTask = Task { [weak self] in
                 guard let self = self else { return }
+                // Wait for dictation to settle — if more text arrives, this task
+                // gets cancelled and a new one starts with the updated query.
+                if wasDictated {
+                    do {
+                        try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+                    } catch {
+                        return // Cancelled — newer dictation text superseded this
+                    }
+                }
                 if let result = await self.performVoiceSearch(query: trimmedQuery) {
                     await MainActor.run {
                         self.onGenerativeSearchResult?(result)
@@ -1300,16 +1314,22 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         // Update the stored result
         lastAIAnalysisResult = currentResult
 
-        // Determine food type
+        // Determine food type (truncate to fit RowEmojiTextField maxLength)
+        let maxFoodTypeLength = 20
         let foodNames = currentResult.foodItemsDetailed.map { $0.name }
         let foodType: String
+        let rawFoodType: String
         if foodNames.count == 1 {
-            foodType = foodNames[0]
+            rawFoodType = foodNames[0]
         } else if !foodNames.isEmpty {
-            let joined = foodNames.joined(separator: ", ")
-            foodType = joined.count > 20 ? String(joined.prefix(19)) + "…" : joined
+            rawFoodType = foodNames.joined(separator: ", ")
         } else {
-            foodType = currentResult.overallDescription ?? "AI Analysis"
+            rawFoodType = currentResult.overallDescription ?? "AI Analysis"
+        }
+        if rawFoodType.count > maxFoodTypeLength {
+            foodType = String(rawFoodType.prefix(maxFoodTypeLength - 1)) + "…"
+        } else {
+            foodType = rawFoodType
         }
 
         // Notify host

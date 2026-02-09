@@ -1,9 +1,11 @@
 //
-//  OpenFoodFactsService.swift
+//  FoodFinder_OpenFoodFactsService.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code for OpenFoodFacts Integration in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — OpenFoodFacts API client for food product search.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation

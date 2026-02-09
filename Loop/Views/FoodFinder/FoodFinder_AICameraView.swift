@@ -1,9 +1,11 @@
 //
-//  AICameraView.swift
+//  FoodFinder_AICameraView.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code for AI Food Analysis Integration in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Camera view for AI-powered food image analysis.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import SwiftUI

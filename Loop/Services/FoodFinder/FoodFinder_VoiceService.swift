@@ -1,9 +1,11 @@
 //
-//  VoiceSearchService.swift
+//  FoodFinder_VoiceService.swift
 //  Loop
 //
-//  Created by Taylor Patterson. Coded by Claude Code for Voice Search Integration in June 2025
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  FoodFinder — Speech recognition service for voice-based food search.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation

@@ -2,12 +2,10 @@
 //  FoodFinder_AIServiceManager.swift
 //  Loop
 //
-//  Single generic AI client for food analysis. Handles all providers via
-//  RequestFormat-driven request building and response parsing. This is the
-//  only class that makes HTTP calls to AI APIs.
+//  FoodFinder — Generic AI HTTP client for food analysis across all providers.
 //
-//  Created by Taylor Patterson. Coded by Claude Code.
-//  Copyright © 2025 LoopKit Authors. All rights reserved.
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation
@@ -48,7 +46,11 @@ final class AIServiceManager {
         }
         let imageBase64 = imageData.base64EncodedString()
 
-        var request = try buildRequest(config: configuration, prompt: query, imageBase64: imageBase64)
+        // Ensure sufficient token budget for menus, recipes, and multi-item plates
+        var adjustedConfig = configuration
+        adjustedConfig.maxTokens = max(configuration.maxTokens, 4096)
+
+        var request = try buildRequest(config: adjustedConfig, prompt: query, imageBase64: imageBase64)
 
         // Advanced dosing prompts are much larger and produce longer responses
         let isAdvanced = UserDefaults.standard.advancedDosingRecommendationsEnabled
@@ -59,6 +61,35 @@ final class AIServiceManager {
         let requestDuration = Date().timeIntervalSince(requestStart)
 
         log.default("AI request completed in %.1f seconds (%d bytes)", requestDuration, data.count)
+
+        try validateHTTPResponse(response, data: data)
+
+        return try parseResponse(data: data, config: configuration)
+    }
+
+    /// Text-only food analysis (no image). Used for voice/dictation searches.
+    func analyzeFoodByText(
+        using configuration: AIProviderConfiguration,
+        query: String
+    ) async throws -> AIFoodAnalysisResult {
+        guard !configuration.apiKey.isEmpty else {
+            throw AIFoodAnalysisError.noApiKey
+        }
+
+        // Ensure sufficient token budget for menus, recipes, and multi-item descriptions
+        var adjustedConfig = configuration
+        adjustedConfig.maxTokens = max(configuration.maxTokens, 4096)
+
+        var request = try buildRequest(config: adjustedConfig, prompt: query, imageBase64: nil)
+
+        let isAdvanced = UserDefaults.standard.advancedDosingRecommendationsEnabled
+        request.timeoutInterval = isAdvanced ? 120 : 60
+
+        let requestStart = Date()
+        let (data, response) = try await executeRequest(request)
+        let requestDuration = Date().timeIntervalSince(requestStart)
+
+        log.default("AI text-only request completed in %.1f seconds (%d bytes)", requestDuration, data.count)
 
         try validateHTTPResponse(response, data: data)
 
@@ -382,12 +413,25 @@ final class AIServiceManager {
     // MARK: - Response Parsing
 
     private func parseResponse(data: Data, config: AIProviderConfiguration) throws -> AIFoodAnalysisResult {
+        #if DEBUG
+        let rawResponse = String(data: data, encoding: .utf8) ?? "<non-utf8>"
+        print("🤖 [PARSE] Raw response (\(data.count) bytes): \(String(rawResponse.prefix(500)))")
+        print("🤖 [PARSE] Using keyPath: \(config.responseKeyPath)")
+        #endif
+
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            #if DEBUG
+            print("🤖 [PARSE] FAILED: Could not parse top-level JSON")
+            #endif
             throw AIFoodAnalysisError.invalidResponseFormat
         }
 
         // Extract text content using the configured key path
         let textContent = try extractTextContent(from: json, keyPath: config.responseKeyPath)
+
+        #if DEBUG
+        print("🤖 [PARSE] Extracted text content (\(textContent.count) chars): \(String(textContent.prefix(300)))")
+        #endif
 
         // Clean markdown code fences if present
         let cleaned = textContent
@@ -398,16 +442,34 @@ final class AIServiceManager {
         // Find JSON bounds (first { to last })
         guard let jsonStart = cleaned.firstIndex(of: "{"),
               let jsonEnd = cleaned.lastIndex(of: "}") else {
+            #if DEBUG
+            print("🤖 [PARSE] FAILED: No JSON braces found in cleaned text: \(String(cleaned.prefix(200)))")
+            #endif
             throw AIFoodAnalysisError.invalidResponseFormat
         }
 
-        let jsonString = String(cleaned[jsonStart...jsonEnd])
+        var jsonString = String(cleaned[jsonStart...jsonEnd])
+
+        // Try parsing as-is first
+        if let jsonData = jsonString.data(using: .utf8),
+           let contentJson = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+            return try parseStructuredResponse(contentJson)
+        }
+
+        // JSON may be truncated (max_tokens exceeded). Try to repair by closing open braces/brackets.
+        jsonString = repairTruncatedJSON(jsonString)
 
         guard let jsonData = jsonString.data(using: .utf8),
               let contentJson = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
+            #if DEBUG
+            print("🤖 [PARSE] FAILED: Could not parse inner JSON (even after repair): \(String(jsonString.prefix(300)))")
+            #endif
             throw AIFoodAnalysisError.invalidResponseFormat
         }
 
+        #if DEBUG
+        print("🤖 [PARSE] Recovered truncated JSON via brace repair")
+        #endif
         return try parseStructuredResponse(contentJson)
     }
 
@@ -422,14 +484,74 @@ final class AIServiceManager {
                 current = array[index]
             } else {
                 log.error("Failed to navigate key path '%{public}@' at key '%{public}@'", keyPath, key)
+                #if DEBUG
+                print("🤖 [PARSE] FAILED at keyPath '\(keyPath)' key '\(key)'. Current value type: \(type(of: current as Any))")
+                if let dict = json["choices"] {
+                    print("🤖 [PARSE] choices value: \(String(describing: dict).prefix(300))")
+                }
+                #endif
                 throw AIFoodAnalysisError.invalidResponseFormat
             }
         }
 
-        guard let text = current as? String else {
-            throw AIFoodAnalysisError.invalidResponseFormat
+        // Handle string content directly
+        if let text = current as? String {
+            return text
         }
-        return text
+
+        // Handle content returned as an array (e.g., [{"type": "text", "text": "..."}])
+        if let contentArray = current as? [[String: Any]] {
+            let texts = contentArray.compactMap { $0["text"] as? String }
+            if !texts.isEmpty {
+                return texts.joined()
+            }
+        }
+
+        #if DEBUG
+        print("🤖 [PARSE] FAILED: Final value is not String or content array, got \(type(of: current as Any)): \(String(describing: current).prefix(200))")
+        #endif
+        throw AIFoodAnalysisError.invalidResponseFormat
+    }
+
+    /// Attempts to repair truncated JSON by closing unclosed braces, brackets, and strings.
+    private func repairTruncatedJSON(_ json: String) -> String {
+        var result = json
+        // Remove trailing incomplete key-value pairs (e.g., `"key": "unfinished...`)
+        // Strip trailing content after the last complete value
+        if let lastComma = result.lastIndex(of: ",") {
+            let afterComma = result[result.index(after: lastComma)...].trimmingCharacters(in: .whitespacesAndNewlines)
+            // If what's after the last comma doesn't end with } or ], it's likely incomplete
+            if !afterComma.hasSuffix("}") && !afterComma.hasSuffix("]") && !afterComma.isEmpty {
+                result = String(result[...lastComma])
+                // Remove the trailing comma
+                result = String(result.dropLast())
+            }
+        }
+
+        // Count open vs close braces/brackets and append closers
+        var openBraces = 0
+        var openBrackets = 0
+        var inString = false
+        var prevChar: Character = " "
+        for ch in result {
+            if ch == "\"" && prevChar != "\\" { inString.toggle() }
+            if !inString {
+                if ch == "{" { openBraces += 1 }
+                else if ch == "}" { openBraces -= 1 }
+                else if ch == "[" { openBrackets += 1 }
+                else if ch == "]" { openBrackets -= 1 }
+            }
+            prevChar = ch
+        }
+
+        // Close any unclosed strings
+        if inString { result += "\"" }
+
+        // Close brackets before braces (inner structures first)
+        for _ in 0..<max(0, openBrackets) { result += "]" }
+        for _ in 0..<max(0, openBraces) { result += "}" }
+
+        return result
     }
 
     private func parseStructuredResponse(_ json: [String: Any]) throws -> AIFoodAnalysisResult {

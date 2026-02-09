@@ -2,9 +2,11 @@
 //  FoodFinder_FeatureFlags.swift
 //  Loop
 //
-//  FoodFinder — AI-powered food/barcode scanning for carb entry.
-//  This is the single feature-toggle and configuration file.
+//  FoodFinder — Feature toggle and configuration flags.
 //  All FoodFinder enable/disable logic lives here.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation
