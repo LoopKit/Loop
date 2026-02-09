@@ -10,6 +10,35 @@
 
 import Foundation
 
+// MARK: - LoopInsights Notification
+//
+// Posted every time FoodFinder records a meal analysis. LoopInsights (or any
+// future feature) can observe this to correlate meal events with BG data in
+// real-time, without importing any FoodFinder view code.
+//
+// userInfo keys:
+//   "recordID" — String, the FoodFinder_AnalysisRecord.id that was just saved.
+
+extension Notification.Name {
+    static let foodFinderMealLogged = Notification.Name("com.loopkit.Loop.foodFinderMealLogged")
+}
+
+// MARK: - MealDataProvider Protocol
+//
+// Clean query interface for LoopInsights to access FoodFinder meal history.
+// FoodFinder_AnalysisHistoryStore conforms below so LoopInsights never needs
+// to know about UserDefaults keys, pruning logic, or storage format.
+//
+// Key fields for LoopInsights tuning recommendations:
+//   • originalAICarbs vs carbsGrams  → reveals systematic AI over/under-estimation
+//   • aiConfidencePercent            → low-confidence meals can be weighted differently
+//   • absorptionTime + foodType      → patterns in absorption accuracy by food category
+//   • date                           → time-of-day and day-of-week trend analysis
+
+protocol MealDataProvider {
+    static func meals(from startDate: Date, to endDate: Date) -> [FoodFinder_AnalysisRecord]
+}
+
 enum FoodFinder_AnalysisHistoryStore {
 
     // MARK: - Record
@@ -75,5 +104,18 @@ enum FoodFinder_AnalysisHistoryStore {
     private static func save(_ records: [FoodFinder_AnalysisRecord]) {
         guard let data = try? JSONEncoder().encode(records) else { return }
         UserDefaults.standard.set(data, forKey: key)
+    }
+}
+
+// MARK: - MealDataProvider Conformance
+//
+// Gives LoopInsights a clean way to query meal history by date range
+// without knowing anything about FoodFinder's storage internals.
+
+extension FoodFinder_AnalysisHistoryStore: MealDataProvider {
+    static func meals(from startDate: Date, to endDate: Date) -> [FoodFinder_AnalysisRecord] {
+        allRecords()
+            .filter { $0.date >= startDate && $0.date <= endDate }
+            .sorted { $0.date > $1.date }
     }
 }

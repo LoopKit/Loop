@@ -127,6 +127,7 @@ extension AISettingsView {
                             Text("Last 24 hours").tag(1)
                             Text("Last 7 days").tag(7)
                             Text("Last 14 days").tag(14)
+                            Text("Last 30 days").tag(30)
                         }
                         .pickerStyle(.menu)
                     }
@@ -408,7 +409,7 @@ extension AISettingsView {
 
     private var advancedSettingsSection: some View {
         Section {
-            DisclosureGroup("Advanced Settings", isExpanded: $showAdvanced) {
+            DisclosureGroup("Advanced API Settings", isExpanded: $showAdvanced) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("This section is for self-hosted, Azure, or non-standard API endpoints. Most users can ignore these.")
                         .font(.caption2)

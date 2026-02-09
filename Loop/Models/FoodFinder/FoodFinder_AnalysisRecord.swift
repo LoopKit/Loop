@@ -26,6 +26,20 @@ struct FoodFinder_AnalysisRecord: Codable, Identifiable, Equatable {
     let thumbnailID: String?
     let analysisResult: AIFoodAnalysisResult?
 
+    // MARK: - LoopInsights Preparation
+    //
+    // These fields capture what the AI originally suggested vs what the user
+    // actually entered. The delta between them is the single most valuable
+    // signal for LoopInsights: it reveals systematic over/under-estimation
+    // by food type, time of day, or confidence level — which directly informs
+    // Carb Ratio and ISF tuning recommendations.
+
+    /// The AI's original carb estimate before any user edits (nil for legacy records).
+    let originalAICarbs: Double?
+
+    /// The confidence percentage the AI reported (nil for legacy records).
+    let aiConfidencePercent: Int?
+
     enum AnalysisType: String, Codable {
         case image
         case dictation

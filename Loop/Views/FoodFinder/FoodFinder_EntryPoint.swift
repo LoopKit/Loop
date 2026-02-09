@@ -1114,9 +1114,11 @@ extension FoodFinder_EntryPoint {
     }
 
     /// Record an AI analysis to the history store for future re-entry.
+    /// Also posts a notification so future features (e.g. LoopInsights) can
+    /// observe meal events in real-time without importing FoodFinder code.
     private func recordAnalysis(_ result: AIFoodAnalysisResult, type: FoodFinder_AnalysisRecord.AnalysisType) {
         let name = extractFoodNameFromAIResult(result)
-        let carbs = result.carbohydrates
+        let aiCarbs = result.carbohydrates
         let absTime = result.absorptionTimeHours.map { TimeInterval($0 * 3600) }
             ?? absorptionTime
 
@@ -1125,18 +1127,41 @@ extension FoodFinder_EntryPoint {
             thumbID = FavoriteFoodImageStore.saveThumbnail(from: img)
         }
 
+        // Capture AI confidence for LoopInsights correlation analysis
+        let confidence: Int? = {
+            guard let ai = searchVM.lastAIAnalysisResult else { return nil }
+            if let numeric = ai.numericConfidence {
+                return max(20, min(97, Int((min(1.0, max(0.0, numeric)) * 100).rounded())))
+            }
+            switch ai.confidence {
+            case .high: return 88
+            case .medium: return 68
+            case .low: return 45
+            }
+        }()
+
         let record = FoodFinder_AnalysisRecord(
             id: UUID().uuidString,
             name: name,
-            carbsGrams: carbs,
+            carbsGrams: aiCarbs,
             foodType: foodType,
             absorptionTime: absTime,
             analysisType: type,
             date: Date(),
             thumbnailID: thumbID,
-            analysisResult: result
+            analysisResult: result,
+            originalAICarbs: aiCarbs,
+            aiConfidencePercent: confidence
         )
         FoodFinder_AnalysisHistoryStore.record(record)
+
+        // Broadcast for LoopInsights or any future observer.
+        // userInfo contains the record ID so listeners can look it up.
+        NotificationCenter.default.post(
+            name: .foodFinderMealLogged,
+            object: nil,
+            userInfo: ["recordID": record.id]
+        )
     }
 
     /// Convert AI analysis result to OpenFoodFactsProduct for integration with existing workflow
