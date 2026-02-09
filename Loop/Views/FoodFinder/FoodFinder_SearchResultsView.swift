@@ -13,12 +13,26 @@ import LoopKit
 struct FoodSearchResultsView: View {
     let searchResults: [OpenFoodFactsProduct]
     let isSearching: Bool
+    let isAISearching: Bool
     let errorMessage: String?
     let onProductSelected: (OpenFoodFactsProduct) -> Void
 
+    init(searchResults: [OpenFoodFactsProduct], isSearching: Bool, isAISearching: Bool = false, errorMessage: String?, onProductSelected: @escaping (OpenFoodFactsProduct) -> Void) {
+        self.searchResults = searchResults
+        self.isSearching = isSearching
+        self.isAISearching = isAISearching
+        self.errorMessage = errorMessage
+        self.onProductSelected = onProductSelected
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            if isSearching {
+            if isSearching && isAISearching {
+                aiSearchingView
+                    .onAppear {
+                        print("🔍 FoodSearchResultsView: Showing AI analysis state")
+                    }
+            } else if isSearching {
                 searchingView
                     .onAppear {
                         print("🔍 FoodSearchResultsView: Showing searching state")
@@ -132,6 +146,82 @@ struct FoodSearchResultsView: View {
     @State private var secondaryPulseScale: CGFloat = 1.0
     @State private var rotationAngle: Angle = .degrees(0)
     @State private var dotScales: [CGFloat] = [1.0, 1.0, 1.0]
+    @State private var aiPulseScale: CGFloat = 1.0
+    @State private var aiSparkleRotation: Angle = .degrees(0)
+    @State private var aiDotScales: [CGFloat] = [1.0, 1.0, 1.0]
+
+    private var aiSearchingView: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                // Outer pulsing ring (purple themed)
+                Circle()
+                    .stroke(Color.purple.opacity(0.3), lineWidth: 2)
+                    .frame(width: 70, height: 70)
+                    .scaleEffect(aiPulseScale)
+                    .animation(
+                        .easeInOut(duration: 1.2)
+                        .repeatForever(autoreverses: true),
+                        value: aiPulseScale
+                    )
+
+                // Inner filled circle
+                Circle()
+                    .fill(Color.purple.opacity(0.12))
+                    .frame(width: 60, height: 60)
+
+                // Sparkle icon
+                Image(systemName: "sparkles")
+                    .font(.title)
+                    .foregroundColor(.purple)
+                    .rotationEffect(aiSparkleRotation)
+                    .animation(
+                        .linear(duration: 3.0)
+                        .repeatForever(autoreverses: false),
+                        value: aiSparkleRotation
+                    )
+            }
+            .onAppear {
+                aiPulseScale = 1.3
+                aiSparkleRotation = .degrees(360)
+            }
+
+            VStack(spacing: 6) {
+                HStack(spacing: 4) {
+                    Text(NSLocalizedString("Analyzing your meal with AI", comment: "Text shown during AI food analysis"))
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    // Animated dots
+                    HStack(spacing: 2) {
+                        ForEach(0..<3) { index in
+                            Circle()
+                                .fill(Color.purple)
+                                .frame(width: 4, height: 4)
+                                .scaleEffect(aiDotScales[index])
+                                .animation(
+                                    .easeInOut(duration: 0.6)
+                                    .repeatForever()
+                                    .delay(Double(index) * 0.2),
+                                    value: aiDotScales[index]
+                                )
+                        }
+                    }
+                    .onAppear {
+                        for i in 0..<3 {
+                            aiDotScales[i] = 1.5
+                        }
+                    }
+                }
+
+                Text(NSLocalizedString("Identifying foods and estimating nutrition from your voice input", comment: "Subtitle shown during AI food analysis"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
 
     private func errorView(message: String) -> some View {
         VStack(spacing: 8) {
@@ -234,7 +324,7 @@ private struct FoodSearchResultRow: View {
                             .frame(width: 50, height: 50)
                             .background(Color(.systemGray6))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
-                    } else if let imageURL = product.imageFrontURL ?? product.imageURL,
+                    } else if let imageURL = product.imageFrontSmallURL ?? product.imageFrontURL ?? product.imageURL,
                               let url = URL(string: imageURL) {
                         AsyncImage(url: url) { image in
                             image

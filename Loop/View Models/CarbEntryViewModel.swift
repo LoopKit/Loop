@@ -81,6 +81,11 @@ final class CarbEntryViewModel: ObservableObject {
     
     @Published var favoriteFoods = UserDefaults.standard.favoriteFoods
     @Published var selectedFavoriteFoodIndex = -1
+
+    @Published var analysisHistory: [FoodFinder_AnalysisRecord] = []
+    @Published var selectedAnalysisHistoryIndex = -1
+    @Published var restoredAnalysisResult: AIFoodAnalysisResult?
+    @Published var restoredThumbnailID: String?
     
     weak var delegate: CarbEntryViewModelDelegate?
     
@@ -97,6 +102,8 @@ final class CarbEntryViewModel: ObservableObject {
         observeFavoriteFoodChange()
         observeFavoriteFoodIndexChange()
         observeLoopUpdates()
+        loadAnalysisHistory()
+        observeAnalysisHistoryIndexChange()
     }
     
     /// Initalizer for when`CarbEntryView` has an entry to edit
@@ -256,6 +263,45 @@ final class CarbEntryViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Analysis History
+    private func loadAnalysisHistory() {
+        let days = UserDefaults.standard.analysisHistoryRetentionDays
+        FoodFinder_AnalysisHistoryStore.pruneExpired(retentionDays: days)
+        analysisHistory = FoodFinder_AnalysisHistoryStore.loadRecords(retentionDays: days)
+    }
+
+    private func observeAnalysisHistoryIndexChange() {
+        $selectedAnalysisHistoryIndex
+            .receive(on: RunLoop.main)
+            .dropFirst()
+            .sink { [weak self] index in
+                self?.analysisHistorySelected(at: index)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func analysisHistorySelected(at index: Int) {
+        self.absorptionEditIsProgrammatic = true
+        if index == -1 {
+            self.carbsQuantity = 0
+            self.foodType = ""
+            self.absorptionTime = defaultAbsorptionTimes.medium
+            self.absorptionTimeWasEdited = false
+            self.usesCustomFoodType = false
+            self.restoredAnalysisResult = nil
+            self.restoredThumbnailID = nil
+        } else {
+            let record = analysisHistory[index]
+            self.carbsQuantity = record.carbsGrams
+            self.foodType = record.foodType
+            self.absorptionTime = record.absorptionTime
+            self.absorptionTimeWasEdited = true
+            self.usesCustomFoodType = true
+            self.restoredThumbnailID = record.thumbnailID
+            self.restoredAnalysisResult = record.analysisResult
+        }
+    }
+
     // MARK: - Utility
     func restoreUserActivityState(_ activity: NSUserActivity) {
         if let entry = activity.newCarbEntry {

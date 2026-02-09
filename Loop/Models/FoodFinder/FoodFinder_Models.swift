@@ -64,6 +64,7 @@ struct OpenFoodFactsProduct: Codable, Identifiable, Hashable {
     let servingQuantity: Double?
     let imageURL: String?
     let imageFrontURL: String?
+    let imageFrontSmallURL: String?
     let code: String? // barcode
     var dataSource: FoodDataSource = .unknown
 
@@ -79,6 +80,7 @@ struct OpenFoodFactsProduct: Codable, Identifiable, Hashable {
         case servingQuantity = "serving_quantity"
         case imageURL = "image_url"
         case imageFrontURL = "image_front_url"
+        case imageFrontSmallURL = "image_front_small_url"
         case code
         case dataSource = "data_source"
     }
@@ -117,6 +119,7 @@ struct OpenFoodFactsProduct: Codable, Identifiable, Hashable {
         }
         self.imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
         self.imageFrontURL = try container.decodeIfPresent(String.self, forKey: .imageFrontURL)
+        self.imageFrontSmallURL = try container.decodeIfPresent(String.self, forKey: .imageFrontSmallURL)
         // dataSource has a default value, but override if present in decoded data
         if let decodedDataSource = try? container.decode(FoodDataSource.self, forKey: .dataSource) {
             self.dataSource = decodedDataSource
@@ -134,6 +137,7 @@ struct OpenFoodFactsProduct: Codable, Identifiable, Hashable {
         try container.encodeIfPresent(servingQuantity, forKey: .servingQuantity)
         try container.encodeIfPresent(imageURL, forKey: .imageURL)
         try container.encodeIfPresent(imageFrontURL, forKey: .imageFrontURL)
+        try container.encodeIfPresent(imageFrontSmallURL, forKey: .imageFrontSmallURL)
         try container.encodeIfPresent(code, forKey: .code)
         try container.encode(dataSource, forKey: .dataSource)
         // Note: isSkeleton is intentionally not encoded as it's UI state only
@@ -142,7 +146,7 @@ struct OpenFoodFactsProduct: Codable, Identifiable, Hashable {
     // MARK: - Custom Initializers
 
     /// Create a skeleton product for loading states
-    init(id: String, productName: String?, brands: String?, categories: String? = nil, nutriments: Nutriments, servingSize: String?, servingQuantity: Double?, imageURL: String?, imageFrontURL: String?, code: String?, dataSource: FoodDataSource = .unknown, isSkeleton: Bool = false) {
+    init(id: String, productName: String?, brands: String?, categories: String? = nil, nutriments: Nutriments, servingSize: String?, servingQuantity: Double?, imageURL: String?, imageFrontURL: String?, imageFrontSmallURL: String? = nil, code: String?, dataSource: FoodDataSource = .unknown, isSkeleton: Bool = false) {
         self.id = id
         self.productName = productName
         self.brands = brands
@@ -152,6 +156,7 @@ struct OpenFoodFactsProduct: Codable, Identifiable, Hashable {
         self.servingQuantity = servingQuantity
         self.imageURL = imageURL
         self.imageFrontURL = imageFrontURL
+        self.imageFrontSmallURL = imageFrontSmallURL
         self.code = code
         self.dataSource = dataSource
         self.isSkeleton = isSkeleton
@@ -414,7 +419,7 @@ extension Nutriments {
 }
 
 extension OpenFoodFactsProduct {
-    init(id: String, productName: String?, brands: String?, categories: String?, nutriments: Nutriments, servingSize: String?, servingQuantity: Double?, imageURL: String?, imageFrontURL: String?, code: String?) {
+    init(id: String, productName: String?, brands: String?, categories: String?, nutriments: Nutriments, servingSize: String?, servingQuantity: Double?, imageURL: String?, imageFrontURL: String?, imageFrontSmallURL: String? = nil, code: String?) {
         self.id = id
         self.productName = productName
         self.brands = brands
@@ -424,6 +429,7 @@ extension OpenFoodFactsProduct {
         self.servingQuantity = servingQuantity
         self.imageURL = imageURL
         self.imageFrontURL = imageFrontURL
+        self.imageFrontSmallURL = imageFrontSmallURL
         self.code = code
     }
 
@@ -438,6 +444,7 @@ extension OpenFoodFactsProduct {
         self.servingQuantity = 100.0
         self.imageURL = imageURL
         self.imageFrontURL = imageURL
+        self.imageFrontSmallURL = nil
         self.code = nil
     }
 }

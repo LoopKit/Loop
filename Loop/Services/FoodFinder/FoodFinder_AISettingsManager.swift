@@ -59,14 +59,8 @@ class AISettingsManager {
     
     /// Tests a connection to the AI provider with the given configuration
     /// - Parameter configuration: The configuration to test
-    /// - Returns: True if the connection was successful, false otherwise
-    func testConnection(to configuration: AIProviderConfiguration) async -> Bool {
-        do {
-            return try await AIServiceManager.shared.testConnection(to: configuration)
-        } catch {
-            log.error("Failed to test connection to AI provider %{public}@: %{public}@", 
-                     configuration.name, error.localizedDescription)
-            return false
-        }
+    /// - Returns: Result with success/failure status and message
+    func testConnection(to configuration: AIProviderConfiguration) async -> AIServiceManager.TestConnectionResult {
+        return await AIServiceManager.shared.testConnection(to: configuration)
     }
 }

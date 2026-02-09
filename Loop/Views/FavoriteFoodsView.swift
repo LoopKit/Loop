@@ -30,9 +30,22 @@ struct FavoriteFoodsView: View {
                     else {
                         Section(header: listHeader) {
                             ForEach(viewModel.favoriteFoods) { food in
-                                FavoriteFoodListRow(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit)
-                                    .environment(\.editMode, self.$editMode)
-                                    .listRowInsets(EdgeInsets())
+                                HStack(spacing: 0) {
+                                    if !editMode.isEditing,
+                                       FoodFinder_FeatureFlags.isEnabled,
+                                       let thumb = FoodFinder_FavoritesHelper.thumbnail(for: food) {
+                                        Image(uiImage: thumb)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 40, height: 40)
+                                            .cornerRadius(8)
+                                            .clipped()
+                                            .padding(.leading, 16)
+                                    }
+                                    FavoriteFoodListRow(food: food, foodToConfirmDeleteId: $foodToConfirmDeleteId, onFoodTap: onFoodTap(_:), onFoodDelete: viewModel.onFoodDelete(_:), carbFormatter: viewModel.carbFormatter, absorptionTimeFormatter: viewModel.absorptionTimeFormatter, preferredCarbUnit: viewModel.preferredCarbUnit)
+                                        .environment(\.editMode, self.$editMode)
+                                }
+                                .listRowInsets(EdgeInsets())
                             }
                             .onMove(perform: viewModel.onFoodReorder(from:to:))
                             .moveDisabled(!editMode.isEditing)

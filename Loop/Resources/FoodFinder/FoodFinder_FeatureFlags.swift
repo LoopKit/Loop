@@ -34,41 +34,23 @@ extension FoodFinder_FeatureFlags {
         // Favorite food thumbnails
         static let favoriteFoodImageIDs             = "com.loopkit.Loop.favoriteFoodImageIDs"
 
-        // AI Provider selection
-        static let aiProvider                       = "com.loopkit.Loop.aiProvider"
-        static let analysisMode                     = "com.loopkit.Loop.analysisMode"
-        static let useGPT5ForOpenAI                 = "com.loopkit.Loop.useGPT5ForOpenAI"
-
-        // Claude
-        static let claudeAPIKey                     = "com.loopkit.Loop.claudeAPIKey"
-        static let claudeQuery                      = "com.loopkit.Loop.claudeQuery"
-
-        // OpenAI
-        static let openAIAPIKey                     = "com.loopkit.Loop.openAIAPIKey"
-        static let openAIQuery                      = "com.loopkit.Loop.openAIQuery"
-
-        // Google Gemini
-        static let googleGeminiAPIKey               = "com.loopkit.Loop.googleGeminiAPIKey"
-        static let googleGeminiQuery                = "com.loopkit.Loop.googleGeminiQuery"
-
-        // USDA
-        static let usdaAPIKey                       = "com.loopkit.Loop.usdaAPIKey"
-
-        // Custom / Bring-Your-Own AI provider
+        // BYO AI Provider configuration (non-secret settings stored in UserDefaults)
+        // API keys are stored securely in Keychain via FoodFinder_SecureStorage.
         static let customAIBaseURL                  = "com.loopkit.Loop.customAIBaseURL"
-        static let customAIAPIKey                   = "com.loopkit.Loop.customAIAPIKey"
         static let customAIModel                    = "com.loopkit.Loop.customAIModel"
         static let customAIAPIVersion               = "com.loopkit.Loop.customAIAPIVersion"
         static let customAIOrganization             = "com.loopkit.Loop.customAIOrganization"
         static let customAIEndpointPath             = "com.loopkit.Loop.customAIEndpointPath"
 
-        // Search provider routing
-        static let textSearchProvider               = "com.loopkit.Loop.textSearchProvider"
-        static let barcodeSearchProvider            = "com.loopkit.Loop.barcodeSearchProvider"
-        static let aiImageProvider                  = "com.loopkit.Loop.aiImageProvider"
-
         // Advanced dosing (FoodFinder-related)
         static let advancedDosingRecommendationsEnabled = "com.loopkit.Loop.advancedDosingRecommendationsEnabled"
+
+        // Analysis History
+        static let analysisHistory                  = "com.loopkit.Loop.analysisHistory"
+        static let analysisHistoryRetentionDays     = "com.loopkit.Loop.analysisHistoryRetentionDays"
+
+        // Migration tracking
+        static let byoMigrationComplete             = "com.loopkit.Loop.byoMigrationComplete"
     }
 }
 
@@ -105,230 +87,11 @@ extension UserDefaults {
         }
     }
 
-    // MARK: AI Provider
-
-    var foodFinder_aiProvider: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.aiProvider) ?? "Basic Analysis (Free)" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.aiProvider) }
-    }
-
-    var foodFinder_analysisMode: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.analysisMode) ?? "standard" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.analysisMode) }
-    }
-
-    var foodFinder_useGPT5ForOpenAI: Bool {
-        get { bool(forKey: FoodFinder_FeatureFlags.Keys.useGPT5ForOpenAI) }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.useGPT5ForOpenAI) }
-    }
-
-    // MARK: Claude
-
-    var foodFinder_claudeAPIKey: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.claudeAPIKey) ?? "" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.claudeAPIKey) }
-    }
-
-    var foodFinder_claudeQuery: String {
-        get {
-            return string(forKey: FoodFinder_FeatureFlags.Keys.claudeQuery) ?? """
-You are a nutrition expert analyzing this food image for diabetes management. Describe EXACTLY what you see in vivid detail.
-
-EXAMPLE of the detailed description I expect:
-"I can see a white ceramic dinner plate, approximately 10 inches in diameter, containing three distinct food items. The main protein appears to be a grilled chicken breast, about 5 inches long and 1 inch thick, with visible grill marks in a crosshatch pattern indicating high-heat cooking..."
-
-RESPOND ONLY IN JSON FORMAT with these exact fields:
-{
-  "food_items": [
-    {
-      "name": "specific food name with exact preparation detail I can see",
-      "portion_estimate": "exact portion with visual references",
-      "preparation_method": "specific cooking details I observe",
-      "visual_cues": "exact visual elements I'm analyzing",
-      "carbohydrates": number_in_grams_for_this_exact_portion,
-      "protein": number_in_grams_for_this_exact_portion,
-      "fat": number_in_grams_for_this_exact_portion,
-      "calories": number_in_kcal_for_this_exact_portion,
-      "serving_multiplier": decimal_representing_how_many_standard_servings,
-      "assessment_notes": "step-by-step explanation of how I calculated this portion"
-    }
-  ],
-  "overall_description": "COMPREHENSIVE visual inventory of everything I can see",
-  "total_carbohydrates": sum_of_all_carbs,
-  "total_protein": sum_of_all_protein,
-  "total_fat": sum_of_all_fat,
-  "total_calories": sum_of_all_calories,
-  "portion_assessment_method": "Step-by-step description of my measurement process",
-  "confidence": decimal_between_0_and_1,
-  "diabetes_considerations": "Based on what I can see: specific carb sources and timing considerations",
-  "visual_assessment_details": "Detailed texture, color, cooking, and quality analysis"
-}
-
-MANDATORY REQUIREMENTS:
-❌ NEVER say "mixed vegetables" - specify "steamed broccoli florets, diced carrots"
-❌ NEVER say "chicken" - specify "grilled chicken breast with char marks"
-❌ NEVER say "average portion" - specify "5 oz portion covering 1/4 of plate"
-✅ ALWAYS describe exact colors, textures, sizes, shapes, cooking evidence
-✅ ALWAYS compare portions to visible objects (fork, plate, hand if visible)
-✅ ALWAYS calculate nutrition from YOUR visual portion assessment
-"""
-        }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.claudeQuery) }
-    }
-
-    // MARK: OpenAI
-
-    var foodFinder_openAIAPIKey: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.openAIAPIKey) ?? "" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.openAIAPIKey) }
-    }
-
-    var foodFinder_openAIQuery: String {
-        get {
-            if UserDefaults.standard.foodFinder_useGPT5ForOpenAI {
-                return string(forKey: FoodFinder_FeatureFlags.Keys.openAIQuery) ?? """
-Analyze this food image for diabetes management. Be specific and accurate.
-
-JSON format required:
-{
-  "food_items": [{
-    "name": "specific food name with preparation details",
-    "portion_estimate": "portion size with visual reference",
-    "carbohydrates": grams_number,
-    "protein": grams_number,
-    "fat": grams_number,
-    "calories": kcal_number,
-    "serving_multiplier": decimal_servings
-  }],
-  "overall_description": "detailed visual description",
-  "total_carbohydrates": sum_carbs,
-  "total_protein": sum_protein,
-  "total_fat": sum_fat,
-  "total_calories": sum_calories,
-  "confidence": decimal_0_to_1,
-  "diabetes_considerations": "carb sources and timing advice"
-}
-
-Requirements: Use exact visual details, compare to visible objects, calculate from visual assessment.
-"""
-            } else {
-                return string(forKey: FoodFinder_FeatureFlags.Keys.openAIQuery) ?? """
-You are a nutrition expert analyzing this food image for diabetes management. Describe EXACTLY what you see in vivid detail.
-
-EXAMPLE of the detailed description I expect:
-"I can see a white ceramic dinner plate, approximately 10 inches in diameter, containing three distinct food items. The main protein appears to be a grilled chicken breast, about 5 inches long and 1 inch thick, with visible grill marks in a crosshatch pattern indicating high-heat cooking..."
-
-RESPOND ONLY IN JSON FORMAT with these exact fields:
-{
-  "food_items": [
-    {
-      "name": "specific food name with exact preparation detail I can see",
-      "portion_estimate": "exact portion with visual references",
-      "preparation_method": "specific cooking details I observe",
-      "visual_cues": "exact visual elements I'm analyzing",
-      "carbohydrates": number_in_grams_for_this_exact_portion,
-      "protein": number_in_grams_for_this_exact_portion,
-      "fat": number_in_grams_for_this_exact_portion,
-      "calories": number_in_kcal_for_this_exact_portion,
-      "serving_multiplier": decimal_representing_how_many_standard_servings,
-      "assessment_notes": "step-by-step explanation of how I calculated this portion"
-    }
-  ],
-  "overall_description": "COMPREHENSIVE visual inventory of everything I can see",
-  "total_carbohydrates": sum_of_all_carbs,
-  "total_protein": sum_of_all_protein,
-  "total_fat": sum_of_all_fat,
-  "total_calories": sum_of_all_calories,
-  "portion_assessment_method": "Step-by-step description of my measurement process",
-  "confidence": decimal_between_0_and_1,
-  "diabetes_considerations": "Based on what I can see: specific carb sources and timing considerations",
-  "visual_assessment_details": "Detailed texture, color, cooking, and quality analysis"
-}
-
-MANDATORY REQUIREMENTS:
-❌ NEVER say "mixed vegetables" - specify "steamed broccoli florets, diced carrots"
-❌ NEVER say "chicken" - specify "grilled chicken breast with char marks"
-❌ NEVER say "average portion" - specify "5 oz portion covering 1/4 of plate"
-✅ ALWAYS describe exact colors, textures, sizes, shapes, cooking evidence
-✅ ALWAYS compare portions to visible objects (fork, plate, hand if visible)
-✅ ALWAYS calculate nutrition from YOUR visual portion assessment
-"""
-            }
-        }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.openAIQuery) }
-    }
-
-    // MARK: Google Gemini
-
-    var foodFinder_googleGeminiAPIKey: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.googleGeminiAPIKey) ?? "" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.googleGeminiAPIKey) }
-    }
-
-    var foodFinder_googleGeminiQuery: String {
-        get {
-            return string(forKey: FoodFinder_FeatureFlags.Keys.googleGeminiQuery) ?? """
-You are a nutrition expert analyzing this food image for diabetes management. Describe EXACTLY what you see in vivid detail.
-
-EXAMPLE of the detailed description I expect:
-"I can see a white ceramic dinner plate, approximately 10 inches in diameter, containing three distinct food items. The main protein appears to be a grilled chicken breast, about 5 inches long and 1 inch thick, with visible grill marks in a crosshatch pattern indicating high-heat cooking..."
-
-RESPOND ONLY IN JSON FORMAT with these exact fields:
-{
-  "food_items": [
-    {
-      "name": "specific food name with exact preparation detail I can see",
-      "portion_estimate": "exact portion with visual references",
-      "preparation_method": "specific cooking details I observe",
-      "visual_cues": "exact visual elements I'm analyzing",
-      "carbohydrates": number_in_grams_for_this_exact_portion,
-      "protein": number_in_grams_for_this_exact_portion,
-      "fat": number_in_grams_for_this_exact_portion,
-      "calories": number_in_kcal_for_this_exact_portion,
-      "serving_multiplier": decimal_representing_how_many_standard_servings,
-      "assessment_notes": "step-by-step explanation of how I calculated this portion"
-    }
-  ],
-  "overall_description": "COMPREHENSIVE visual inventory of everything I can see",
-  "total_carbohydrates": sum_of_all_carbs,
-  "total_protein": sum_of_all_protein,
-  "total_fat": sum_of_all_fat,
-  "total_calories": sum_of_all_calories,
-  "portion_assessment_method": "Step-by-step description of my measurement process",
-  "confidence": decimal_between_0_and_1,
-  "diabetes_considerations": "Based on what I can see: specific carb sources and timing considerations",
-  "visual_assessment_details": "Detailed texture, color, cooking, and quality analysis"
-}
-
-MANDATORY REQUIREMENTS:
-❌ NEVER say "mixed vegetables" - specify "steamed broccoli florets, diced carrots"
-❌ NEVER say "chicken" - specify "grilled chicken breast with char marks"
-❌ NEVER say "average portion" - specify "5 oz portion covering 1/4 of plate"
-✅ ALWAYS describe exact colors, textures, sizes, shapes, cooking evidence
-✅ ALWAYS compare portions to visible objects (fork, plate, hand if visible)
-✅ ALWAYS calculate nutrition from YOUR visual portion assessment
-"""
-        }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.googleGeminiQuery) }
-    }
-
-    // MARK: USDA
-
-    var foodFinder_usdaAPIKey: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.usdaAPIKey) ?? "" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.usdaAPIKey) }
-    }
-
-    // MARK: Custom / Bring-Your-Own AI Provider
+    // MARK: BYO AI Provider (non-secret settings)
 
     var foodFinder_customAIBaseURL: String {
         get { string(forKey: FoodFinder_FeatureFlags.Keys.customAIBaseURL) ?? "" }
         set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.customAIBaseURL) }
-    }
-
-    var foodFinder_customAIAPIKey: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.customAIAPIKey) ?? "" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.customAIAPIKey) }
     }
 
     var foodFinder_customAIModel: String {
@@ -351,112 +114,128 @@ MANDATORY REQUIREMENTS:
         set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.customAIEndpointPath) }
     }
 
-    // MARK: Search Provider Routing
+    // MARK: API Keys (Keychain-backed via FoodFinder_SecureStorage)
 
-    var foodFinder_textSearchProvider: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.textSearchProvider) ?? "USDA FoodData Central" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.textSearchProvider) }
+    var foodFinder_aiAPIKey: String {
+        get { FoodFinder_SecureStorage.loadAPIKey() ?? "" }
+        set {
+            if newValue.isEmpty {
+                try? FoodFinder_SecureStorage.deleteAPIKey()
+            } else {
+                try? FoodFinder_SecureStorage.saveAPIKey(newValue)
+            }
+        }
     }
 
-    var foodFinder_barcodeSearchProvider: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.barcodeSearchProvider) ?? "OpenFoodFacts (Default)" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.barcodeSearchProvider) }
+    var foodFinder_usdaAPIKey: String {
+        get { FoodFinder_SecureStorage.loadUSDAKey() ?? "" }
+        set {
+            if newValue.isEmpty {
+                try? FoodFinder_SecureStorage.deleteUSDAKey()
+            } else {
+                try? FoodFinder_SecureStorage.saveUSDAKey(newValue)
+            }
+        }
     }
 
-    var foodFinder_aiImageProvider: String {
-        get { string(forKey: FoodFinder_FeatureFlags.Keys.aiImageProvider) ?? "OpenAI (ChatGPT API)" }
-        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.aiImageProvider) }
+    // MARK: Analysis History
+
+    var analysisHistoryRetentionDays: Int {
+        get {
+            let v = integer(forKey: FoodFinder_FeatureFlags.Keys.analysisHistoryRetentionDays)
+            return v > 0 ? v : 7
+        }
+        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.analysisHistoryRetentionDays) }
     }
 
-    // MARK: Advanced
+    // MARK: Advanced Dosing
 
     var foodFinder_advancedDosingRecommendationsEnabled: Bool {
         get { bool(forKey: FoodFinder_FeatureFlags.Keys.advancedDosingRecommendationsEnabled) }
         set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.advancedDosingRecommendationsEnabled) }
     }
 
-    // MARK: - Legacy Aliases (non-prefixed)
-    // Internal FoodFinder code (AIAnalysis, SettingsView, SearchRouter) uses these
-    // non-prefixed names. They forward to the same UserDefaults keys as above.
+    // MARK: Legacy Aliases
 
-    var aiProvider: String {
-        get { foodFinder_aiProvider }
-        set { foodFinder_aiProvider = newValue }
-    }
-    var aiImageProvider: String {
-        get { foodFinder_aiImageProvider }
-        set { foodFinder_aiImageProvider = newValue }
-    }
-    var analysisMode: String {
-        get { foodFinder_analysisMode }
-        set { foodFinder_analysisMode = newValue }
-    }
-    var useGPT5ForOpenAI: Bool {
-        get { foodFinder_useGPT5ForOpenAI }
-        set { foodFinder_useGPT5ForOpenAI = newValue }
-    }
-    var claudeAPIKey: String {
-        get { foodFinder_claudeAPIKey }
-        set { foodFinder_claudeAPIKey = newValue }
-    }
-    var claudeQuery: String {
-        get { foodFinder_claudeQuery }
-        set { foodFinder_claudeQuery = newValue }
-    }
-    var openAIAPIKey: String {
-        get { foodFinder_openAIAPIKey }
-        set { foodFinder_openAIAPIKey = newValue }
-    }
-    var openAIQuery: String {
-        get { foodFinder_openAIQuery }
-        set { foodFinder_openAIQuery = newValue }
-    }
-    var googleGeminiAPIKey: String {
-        get { foodFinder_googleGeminiAPIKey }
-        set { foodFinder_googleGeminiAPIKey = newValue }
-    }
-    var googleGeminiQuery: String {
-        get { foodFinder_googleGeminiQuery }
-        set { foodFinder_googleGeminiQuery = newValue }
-    }
+    /// Used by USDAFoodDataService and other internal FoodFinder code.
     var usdaAPIKey: String {
         get { foodFinder_usdaAPIKey }
         set { foodFinder_usdaAPIKey = newValue }
     }
-    var customAIBaseURL: String {
-        get { foodFinder_customAIBaseURL }
-        set { foodFinder_customAIBaseURL = newValue }
-    }
-    var customAIAPIKey: String {
-        get { foodFinder_customAIAPIKey }
-        set { foodFinder_customAIAPIKey = newValue }
-    }
-    var customAIModel: String {
-        get { foodFinder_customAIModel }
-        set { foodFinder_customAIModel = newValue }
-    }
-    var customAIAPIVersion: String {
-        get { foodFinder_customAIAPIVersion }
-        set { foodFinder_customAIAPIVersion = newValue }
-    }
-    var customAIOrganization: String {
-        get { foodFinder_customAIOrganization }
-        set { foodFinder_customAIOrganization = newValue }
-    }
-    var customAIEndpointPath: String {
-        get { foodFinder_customAIEndpointPath }
-        set { foodFinder_customAIEndpointPath = newValue }
-    }
-    var textSearchProvider: String {
-        get { foodFinder_textSearchProvider }
-        set { foodFinder_textSearchProvider = newValue }
-    }
-    var barcodeSearchProvider: String {
-        get { foodFinder_barcodeSearchProvider }
-        set { foodFinder_barcodeSearchProvider = newValue }
-    }
+
+    /// Used by AIAnalysis prompt cache and ConfigurableAIService.
     var advancedDosingRecommendationsEnabled: Bool {
         get { foodFinder_advancedDosingRecommendationsEnabled }
         set { foodFinder_advancedDosingRecommendationsEnabled = newValue }
+    }
+}
+
+// MARK: - BYO Migration
+
+extension FoodFinder_FeatureFlags {
+
+    /// Migrates legacy per-provider API keys from UserDefaults to Keychain + BYO format.
+    /// Called once on app launch. Idempotent — skips if already completed.
+    static func migrateToByoIfNeeded() {
+        let ud = UserDefaults.standard
+        guard !ud.bool(forKey: Keys.byoMigrationComplete) else { return }
+
+        // Old per-provider key strings (one-time read during migration)
+        let oldClaudeKey    = "com.loopkit.Loop.claudeAPIKey"
+        let oldOpenAIKey    = "com.loopkit.Loop.openAIAPIKey"
+        let oldGeminiKey    = "com.loopkit.Loop.googleGeminiAPIKey"
+        let oldCustomKey    = "com.loopkit.Loop.customAIAPIKey"
+        let oldUsdaKey      = "com.loopkit.Loop.usdaAPIKey"
+
+        // Find the first configured provider and migrate its key + set BYO config
+        let existingKey: String?
+
+        if let k = ud.string(forKey: oldCustomKey), !k.isEmpty {
+            // Already had BYO config — keep it
+            existingKey = k
+        } else if let k = ud.string(forKey: oldClaudeKey), !k.isEmpty {
+            existingKey = k
+            ud.set("https://api.anthropic.com/v1", forKey: Keys.customAIBaseURL)
+            ud.set("claude-sonnet-4-20250514", forKey: Keys.customAIModel)
+        } else if let k = ud.string(forKey: oldOpenAIKey), !k.isEmpty {
+            existingKey = k
+            ud.set("https://api.openai.com/v1", forKey: Keys.customAIBaseURL)
+            ud.set("gpt-4o", forKey: Keys.customAIModel)
+        } else if let k = ud.string(forKey: oldGeminiKey), !k.isEmpty {
+            existingKey = k
+            ud.set("https://generativelanguage.googleapis.com/v1beta", forKey: Keys.customAIBaseURL)
+            ud.set("gemini-2.0-flash", forKey: Keys.customAIModel)
+        } else {
+            existingKey = nil
+        }
+
+        // Write AI API key to Keychain
+        if let key = existingKey, !key.isEmpty {
+            try? FoodFinder_SecureStorage.saveAPIKey(key)
+        }
+
+        // Migrate USDA key to Keychain
+        if let usdaKey = ud.string(forKey: oldUsdaKey), !usdaKey.isEmpty {
+            try? FoodFinder_SecureStorage.saveUSDAKey(usdaKey)
+        }
+
+        // Clean up old per-provider UserDefaults keys
+        for suffix in [
+            "claudeAPIKey", "claudeQuery",
+            "openAIAPIKey", "openAIQuery",
+            "googleGeminiAPIKey", "googleGeminiQuery",
+            "customAIAPIKey",
+            "usdaAPIKey",
+            "aiProvider", "analysisMode", "useGPT5ForOpenAI",
+            "textSearchProvider", "barcodeSearchProvider", "aiImageProvider"
+        ] {
+            ud.removeObject(forKey: "com.loopkit.Loop.\(suffix)")
+        }
+
+        ud.set(true, forKey: Keys.byoMigrationComplete)
+
+        #if DEBUG
+        print("FoodFinder: BYO migration complete")
+        #endif
     }
 }

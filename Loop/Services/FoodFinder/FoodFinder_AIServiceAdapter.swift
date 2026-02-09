@@ -56,18 +56,12 @@ class AIServiceAdapter {
     }
     
     /// Test the connection to the active AI provider
-    func testConnection() async -> Bool {
-        do {
-            guard let config = try? await settingsManager.loadActiveConfiguration() else {
-                return false
-            }
-            
-            return await aiServiceManager.testConnection(to: config)
-            
-        } catch {
-            log.error("Failed to test connection: %{public}@", error.localizedDescription)
-            return false
+    func testConnection() async -> AIServiceManager.TestConnectionResult {
+        guard let config = try? await settingsManager.loadActiveConfiguration() else {
+            return AIServiceManager.TestConnectionResult(success: false, statusCode: nil, message: "No active AI provider configuration", supportsVision: nil)
         }
+
+        return await aiServiceManager.testConnection(to: config)
     }
     
     /// Get the active provider name for display

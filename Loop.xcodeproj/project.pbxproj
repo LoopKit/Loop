@@ -592,9 +592,9 @@
 		EF134BD7F1B6F20BFF523625 /* FoodFinder_AICameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04BA0B00F58C59F64EEE46FF /* FoodFinder_AICameraView.swift */; };
 		6F86CED6E856EC572B1EC890 /* FoodFinder_AIProviderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0991C859E0D9DE159DCB2B70 /* FoodFinder_AIProviderConfig.swift */; };
 		69A01BCB43357C948E70ED96 /* FoodFinder_AIServiceAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F58A7DE6D538296D6AB40C4F /* FoodFinder_AIServiceAdapter.swift */; };
+		B9785687C724B02E219DD94C /* FoodFinder_SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF3E369865A632F1C1BDA152 /* FoodFinder_SecureStorage.swift */; };
 		FE95CECF46CEFDBB64EE2F21 /* FoodFinder_AIServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989A22CEF0D185799695F34B /* FoodFinder_AIServiceManager.swift */; };
 		AB2C35130504788BD546643A /* FoodFinder_AISettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B84212082ACB37FB8CEF0E2E /* FoodFinder_AISettingsManager.swift */; };
-		D7C66BA594FCA0E48D43E1C0 /* FoodFinder_BYOTestConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C2279FEC72E126C7BEB1469 /* FoodFinder_BYOTestConfig.swift */; };
 		9B8960934E11016BD5A3C893 /* FoodFinder_BarcodeScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A7D02D25418CA0A4DEAC0C /* FoodFinder_BarcodeScannerTests.swift */; };
 		309660119104ABF9C7692F02 /* FoodFinder_EmojiProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831C0B7CE3534010D621E7D0 /* FoodFinder_EmojiProvider.swift */; };
 		10B625A9FF1939614C2E99F7 /* FoodFinder_EntryPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FAA6B5BFCA71FA1330CF5D /* FoodFinder_EntryPoint.swift */; };
@@ -608,7 +608,6 @@
 		3A7FBD5751DA0C1FB71B9026 /* FoodFinder_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F161EF31970B55337F735E3 /* FoodFinder_Models.swift */; };
 		88F5D0DB050CCE93047EEB3D /* FoodFinder_OpenFoodFactsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF37556B4222F9A8C4DE71F /* FoodFinder_OpenFoodFactsService.swift */; };
 		823DED9A0D02CE040129F44E /* FoodFinder_OpenFoodFactsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF9A0E97314FFA90A57CE52 /* FoodFinder_OpenFoodFactsTests.swift */; };
-		F4690B9F1011E2C935EE8EAA /* FoodFinder_ProviderEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 739AA26CE25E31CDAEE5E84E /* FoodFinder_ProviderEditView.swift */; };
 		DB2924254B04A61DD85837B1 /* FoodFinder_ScanResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF626F104EF8C2DAB56649FE /* FoodFinder_ScanResult.swift */; };
 		7CBD007CCDD32E082E9EA102 /* FoodFinder_ScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6240EC27B0D884EAED8B69B /* FoodFinder_ScannerService.swift */; };
 		704708A8CA57CB4B57789F7E /* FoodFinder_ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62E1AC96EEC1636891E430C /* FoodFinder_ScannerView.swift */; };
@@ -621,6 +620,8 @@
 		47448AE2656870E8609E484C /* FoodFinder_VoiceSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7B58807669E37BAD702BA94 /* FoodFinder_VoiceSearchTests.swift */; };
 		29730F11C80A5D2A065FE671 /* FoodFinder_VoiceSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AC2B41F72DAC473656BCFA6 /* FoodFinder_VoiceSearchView.swift */; };
 		18A56885FD960F7E45AE2C39 /* FoodFinder_VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CAFD38F7A4EC9387C0AE70 /* FoodFinder_VoiceService.swift */; };
+		1DE82D03265EF6137462130B /* FoodFinder_AnalysisRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2BA990A7B46B833530A0B /* FoodFinder_AnalysisRecord.swift */; };
+		866893504B18A74A8FDC1E72 /* FoodFinder_AnalysisHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B876633FB950693D1C798869 /* FoodFinder_AnalysisHistoryStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1446,9 +1447,9 @@
 		04BA0B00F58C59F64EEE46FF /* FoodFinder_AICameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AICameraView.swift; sourceTree = "<group>"; };
 		0991C859E0D9DE159DCB2B70 /* FoodFinder_AIProviderConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIProviderConfig.swift; sourceTree = "<group>"; };
 		F58A7DE6D538296D6AB40C4F /* FoodFinder_AIServiceAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIServiceAdapter.swift; sourceTree = "<group>"; };
+		CF3E369865A632F1C1BDA152 /* FoodFinder_SecureStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_SecureStorage.swift; sourceTree = "<group>"; };
 		989A22CEF0D185799695F34B /* FoodFinder_AIServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIServiceManager.swift; sourceTree = "<group>"; };
 		B84212082ACB37FB8CEF0E2E /* FoodFinder_AISettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AISettingsManager.swift; sourceTree = "<group>"; };
-		7C2279FEC72E126C7BEB1469 /* FoodFinder_BYOTestConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_BYOTestConfig.swift; sourceTree = "<group>"; };
 		C1A7D02D25418CA0A4DEAC0C /* FoodFinder_BarcodeScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_BarcodeScannerTests.swift; sourceTree = "<group>"; };
 		831C0B7CE3534010D621E7D0 /* FoodFinder_EmojiProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_EmojiProvider.swift; sourceTree = "<group>"; };
 		94FAA6B5BFCA71FA1330CF5D /* FoodFinder_EntryPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_EntryPoint.swift; sourceTree = "<group>"; };
@@ -1462,8 +1463,7 @@
 		7F161EF31970B55337F735E3 /* FoodFinder_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_Models.swift; sourceTree = "<group>"; };
 		EDF37556B4222F9A8C4DE71F /* FoodFinder_OpenFoodFactsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_OpenFoodFactsService.swift; sourceTree = "<group>"; };
 		1AF9A0E97314FFA90A57CE52 /* FoodFinder_OpenFoodFactsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_OpenFoodFactsTests.swift; sourceTree = "<group>"; };
-		739AA26CE25E31CDAEE5E84E /* FoodFinder_ProviderEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ProviderEditView.swift; sourceTree = "<group>"; };
-		02B849EB59DCD6406AC545BE /* FoodFinder_README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FoodFinder_README.md; sourceTree = "<group>"; };
+
 		BF626F104EF8C2DAB56649FE /* FoodFinder_ScanResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ScanResult.swift; sourceTree = "<group>"; };
 		B6240EC27B0D884EAED8B69B /* FoodFinder_ScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ScannerService.swift; sourceTree = "<group>"; };
 		F62E1AC96EEC1636891E430C /* FoodFinder_ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ScannerView.swift; sourceTree = "<group>"; };
@@ -1476,6 +1476,8 @@
 		F7B58807669E37BAD702BA94 /* FoodFinder_VoiceSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_VoiceSearchTests.swift; sourceTree = "<group>"; };
 		6AC2B41F72DAC473656BCFA6 /* FoodFinder_VoiceSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_VoiceSearchView.swift; sourceTree = "<group>"; };
 		16CAFD38F7A4EC9387C0AE70 /* FoodFinder_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_VoiceService.swift; sourceTree = "<group>"; };
+		63C2BA990A7B46B833530A0B /* FoodFinder_AnalysisRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AnalysisRecord.swift; sourceTree = "<group>"; };
+		B876633FB950693D1C798869 /* FoodFinder_AnalysisHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AnalysisHistoryStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2742,7 +2744,6 @@
 				6707F8B83849294382C4611C /* FoodFinder_FavoriteDetailView.swift */,
 				81480C6E3BECC2592D76F682 /* FoodFinder_FavoriteEditView.swift */,
 				8743F436888BCCBD8396EA4D /* FoodFinder_FavoritesView.swift */,
-				739AA26CE25E31CDAEE5E84E /* FoodFinder_ProviderEditView.swift */,
 				F62E1AC96EEC1636891E430C /* FoodFinder_ScannerView.swift */,
 				8FD9381A53A1E185D80B30CA /* FoodFinder_SearchBar.swift */,
 				02B08D4291FDCDFC7C7BAFD3 /* FoodFinder_SearchResultsView.swift */,
@@ -2758,6 +2759,7 @@
 				7F161EF31970B55337F735E3 /* FoodFinder_Models.swift */,
 				BF626F104EF8C2DAB56649FE /* FoodFinder_ScanResult.swift */,
 				8D45A9E463487CDFE2B58C3E /* FoodFinder_VoiceResult.swift */,
+				63C2BA990A7B46B833530A0B /* FoodFinder_AnalysisRecord.swift */,
 			);
 			path = FoodFinder;
 			sourceTree = "<group>";
@@ -2766,11 +2768,12 @@
 			isa = PBXGroup;
 			children = (
 				DFB0B8A051FB97720D029D74 /* FoodFinder_AIAnalysis.swift */,
+				B876633FB950693D1C798869 /* FoodFinder_AnalysisHistoryStore.swift */,
 				0991C859E0D9DE159DCB2B70 /* FoodFinder_AIProviderConfig.swift */,
 				F58A7DE6D538296D6AB40C4F /* FoodFinder_AIServiceAdapter.swift */,
 				989A22CEF0D185799695F34B /* FoodFinder_AIServiceManager.swift */,
 				B84212082ACB37FB8CEF0E2E /* FoodFinder_AISettingsManager.swift */,
-				7C2279FEC72E126C7BEB1469 /* FoodFinder_BYOTestConfig.swift */,
+				CF3E369865A632F1C1BDA152 /* FoodFinder_SecureStorage.swift */,
 				831C0B7CE3534010D621E7D0 /* FoodFinder_EmojiProvider.swift */,
 				0AB00FF448F43B860CCD3B02 /* FoodFinder_ImageDownloader.swift */,
 				6CDF09B9DFA98A7C6DFE74B0 /* FoodFinder_ImageStore.swift */,
@@ -2828,7 +2831,7 @@
 		050C078CB7ED1CC29B82B708 /* FoodFinder */ = {
 			isa = PBXGroup;
 			children = (
-				02B849EB59DCD6406AC545BE /* FoodFinder_README.md */,
+
 			);
 			path = FoodFinder;
 			sourceTree = "<group>";
@@ -3761,9 +3764,9 @@
 				EF134BD7F1B6F20BFF523625 /* FoodFinder_AICameraView.swift in Sources */,
 				6F86CED6E856EC572B1EC890 /* FoodFinder_AIProviderConfig.swift in Sources */,
 				69A01BCB43357C948E70ED96 /* FoodFinder_AIServiceAdapter.swift in Sources */,
+				B9785687C724B02E219DD94C /* FoodFinder_SecureStorage.swift in Sources */,
 				FE95CECF46CEFDBB64EE2F21 /* FoodFinder_AIServiceManager.swift in Sources */,
 				AB2C35130504788BD546643A /* FoodFinder_AISettingsManager.swift in Sources */,
-				D7C66BA594FCA0E48D43E1C0 /* FoodFinder_BYOTestConfig.swift in Sources */,
 				309660119104ABF9C7692F02 /* FoodFinder_EmojiProvider.swift in Sources */,
 				10B625A9FF1939614C2E99F7 /* FoodFinder_EntryPoint.swift in Sources */,
 				B1C1213CB12147B9D4D05EC4 /* FoodFinder_FavoriteDetailView.swift in Sources */,
@@ -3775,7 +3778,6 @@
 				A8BD0FB89E1131F1BB986DA7 /* FoodFinder_ImageStore.swift in Sources */,
 				3A7FBD5751DA0C1FB71B9026 /* FoodFinder_Models.swift in Sources */,
 				88F5D0DB050CCE93047EEB3D /* FoodFinder_OpenFoodFactsService.swift in Sources */,
-				F4690B9F1011E2C935EE8EAA /* FoodFinder_ProviderEditView.swift in Sources */,
 				DB2924254B04A61DD85837B1 /* FoodFinder_ScanResult.swift in Sources */,
 				7CBD007CCDD32E082E9EA102 /* FoodFinder_ScannerService.swift in Sources */,
 				704708A8CA57CB4B57789F7E /* FoodFinder_ScannerView.swift in Sources */,
@@ -3787,6 +3789,8 @@
 				9898D5C1255F7039ED26B6E8 /* FoodFinder_VoiceResult.swift in Sources */,
 				29730F11C80A5D2A065FE671 /* FoodFinder_VoiceSearchView.swift in Sources */,
 				18A56885FD960F7E45AE2C39 /* FoodFinder_VoiceService.swift in Sources */,
+				1DE82D03265EF6137462130B /* FoodFinder_AnalysisRecord.swift in Sources */,
+				866893504B18A74A8FDC1E72 /* FoodFinder_AnalysisHistoryStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

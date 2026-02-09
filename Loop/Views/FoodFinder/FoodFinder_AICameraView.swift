@@ -163,8 +163,7 @@ struct AICameraView: View {
                     // This could open settings or provider website in future enhancement
                     analysisError = nil
                 }
-                Button("Try Different Provider") {
-                    ConfigurableAIService.shared.resetToDefault()
+                Button("Retry Analysis") {
                     analysisError = nil
                     analyzeImage()
                 }
@@ -184,8 +183,7 @@ struct AICameraView: View {
                         analyzeImage()
                     }
                 }
-                Button("Try Different Provider") {
-                    ConfigurableAIService.shared.resetToDefault()
+                Button("Retry Analysis") {
                     analysisError = nil
                     analyzeImage()
                 }
@@ -207,10 +205,8 @@ struct AICameraView: View {
                     analysisError = nil
                 }
                 if analysisError?.contains("404") == true || analysisError?.contains("service error") == true {
-                    Button("Reset to Default") {
-                        ConfigurableAIService.shared.resetToDefault()
+                    Button("Check Settings") {
                         analysisError = nil
-                        analyzeImage()
                     }
                 }
                 Button("Cancel", role: .cancel) {
@@ -251,76 +247,22 @@ struct AICameraView: View {
 
         Task {
             do {
-                // Step 1: Image preparation
+                // Image preparation + send
                 await MainActor.run {
-                    addTelemetryLog("📱 Processing image data...")
-                }
-                try await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
-
-                await MainActor.run {
-                    addTelemetryLog("💼 Optimizing image quality...")
-                }
-                try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-
-                // Step 2: AI connection
-                await MainActor.run {
-                    addTelemetryLog("🧠 Connecting to AI provider...")
-                }
-                try await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
-
-                await MainActor.run {
-                    addTelemetryLog("📡 Uploading image for analysis...")
-                }
-                try await Task.sleep(nanoseconds: 250_000_000) // 0.25 seconds
-
-                // Step 3: Analysis stages
-                await MainActor.run {
-                    addTelemetryLog("📊 Analyzing nutritional content...")
-                }
-                try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-
-                await MainActor.run {
-                    addTelemetryLog("🔬 Identifying food portions...")
-                }
-                try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-
-                await MainActor.run {
-                    addTelemetryLog("📏 Calculating serving sizes...")
-                }
-                try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-
-                await MainActor.run {
-                    addTelemetryLog("⚖️ Comparing to USDA standards...")
-                }
-                try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-
-                // Step 4: AI processing (actual call)
-                await MainActor.run {
-                    addTelemetryLog("🤖 Running AI vision analysis...")
+                    addTelemetryLog("📡 Sending to AI provider...")
                 }
 
+                // Actual AI call — no artificial delays
                 let result = try await aiService.analyzeFoodImage(image) { telemetryMessage in
                     Task { @MainActor in
                         addTelemetryLog(telemetryMessage)
                     }
                 }
 
-                // Step 5: Results processing
-                await MainActor.run {
-                    addTelemetryLog("📊 Processing analysis results...")
-                }
-                try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-
-                await MainActor.run {
-                    addTelemetryLog("🍽️ Generating nutrition summary...")
-                }
-                try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-
                 await MainActor.run {
                     addTelemetryLog("✅ Analysis complete!")
 
-                    // Hide telemetry after a brief moment
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         showTelemetry = false
                         isAnalyzing = false
                         onFoodAnalyzed(result, capturedImage)
@@ -328,14 +270,9 @@ struct AICameraView: View {
                 }
             } catch {
                 await MainActor.run {
-                    addTelemetryLog("⚠️ Connection interrupted...")
-                }
-                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
-
-                await MainActor.run {
                     addTelemetryLog("❌ Analysis failed")
 
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         showTelemetry = false
                         isAnalyzing = false
                         analysisError = error.localizedDescription

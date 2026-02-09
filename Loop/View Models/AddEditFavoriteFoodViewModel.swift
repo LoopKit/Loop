@@ -54,11 +54,16 @@ final class AddEditFavoriteFoodViewModel: ObservableObject {
         }
     }
     
-    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, onSave: @escaping (NewFavoriteFood) -> ()) {
+    /// Optional thumbnail image from FoodFinder AI camera capture
+    var thumbnailImage: UIImage?
+
+    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, name: String = "", thumbnailImage: UIImage? = nil, onSave: @escaping (NewFavoriteFood) -> ()) {
         self.onSave = onSave
+        self.name = name
         self.carbsQuantity = carbsQuantity
         self.foodType = foodType
         self.absorptionTime = absorptionTime
+        self.thumbnailImage = thumbnailImage
     }
     
     var originalFavoriteFood: StoredFavoriteFood?

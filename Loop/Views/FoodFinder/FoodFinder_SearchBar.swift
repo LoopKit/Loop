@@ -13,9 +13,11 @@ import UIKit
 
 /// UIKit-backed text field that properly participates in first responder handoff
 /// with other UIKit text fields in the same card (e.g. CarbQuantityRow's RowTextField).
+/// Dictation is detected via rapid multi-character insertion in `textChanged`.
 private struct FoodSearchTextField: UIViewRepresentable {
     @Binding var text: String
     var placeholder: String
+    var onDictationDetected: (() -> Void)?
 
     func makeUIView(context: Context) -> UITextField {
         let tf = UITextField()
@@ -38,18 +40,32 @@ private struct FoodSearchTextField: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text)
+        Coordinator(text: $text, onDictationDetected: onDictationDetected)
     }
 
     class Coordinator: NSObject, UITextFieldDelegate {
         @Binding var text: String
+        var onDictationDetected: (() -> Void)?
 
-        init(text: Binding<String>) {
+        init(text: Binding<String>, onDictationDetected: (() -> Void)?) {
             _text = text
+            self.onDictationDetected = onDictationDetected
         }
 
         @objc func textChanged(_ textField: UITextField) {
-            text = textField.text ?? ""
+            let newText = textField.text ?? ""
+            let charsAdded = newText.count - text.count
+
+            // Detect rapid multi-character insertion (dictation or paste).
+            // Regular typing inserts 1 char at a time; dictation inserts entire
+            // phrases at once. With autocorrection disabled, the only sources of
+            // multi-char insertion are dictation and paste — both should route to AI.
+            if charsAdded >= 3 && !newText.isEmpty {
+                print("🎙️ Rapid text insertion detected (\(charsAdded) chars added at once) — flagging as dictation")
+                onDictationDetected?()
+            }
+
+            text = newText
         }
 
         func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -74,9 +90,13 @@ struct FoodSearchBar: View {
     @Binding var searchText: String
     let onBarcodeScanTapped: () -> Void
     let onAICameraTapped: () -> Void
+    var onDictationDetected: (() -> Void)? = nil
 
     @State private var showingBarcodeScanner = false
     @State private var aiPulseAnimation = false
+
+    /// Shared height so the search field and both buttons are identical
+    private let rowHeight: CGFloat = 40
 
     var body: some View {
         HStack(spacing: 12) {
@@ -88,7 +108,8 @@ struct FoodSearchBar: View {
 
                 FoodSearchTextField(
                     text: $searchText,
-                    placeholder: NSLocalizedString("Search foods...", comment: "Placeholder text for food search field")
+                    placeholder: NSLocalizedString("Search foods...", comment: "Placeholder text for food search field"),
+                    onDictationDetected: onDictationDetected
                 )
                 .frame(maxWidth: .infinity)
 
@@ -108,7 +129,7 @@ struct FoodSearchBar: View {
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .frame(height: rowHeight)
             .background(Color(.systemGray6))
             .cornerRadius(10)
             .frame(maxWidth: .infinity)
@@ -125,7 +146,7 @@ struct FoodSearchBar: View {
                     .frame(width: 28, height: 22)
             }
             .buttonStyle(ScaleButtonStyle())
-            .frame(width: 52, height: 36)
+            .frame(width: 52, height: rowHeight)
             .background(Color(.systemGray6))
             .cornerRadius(10)
             .accessibilityLabel(NSLocalizedString("Scan barcode", comment: "Accessibility label for barcode scan button"))
@@ -139,7 +160,7 @@ struct FoodSearchBar: View {
                     .frame(width: 20, height: 20)
             }
             .buttonStyle(ScaleButtonStyle())
-            .frame(width: 44, height: 36)
+            .frame(width: 44, height: rowHeight)
             .background(Color(.systemGray6))
             .cornerRadius(10)
             .overlay(

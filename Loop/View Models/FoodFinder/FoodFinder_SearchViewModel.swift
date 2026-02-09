@@ -92,6 +92,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// Currently selected food product
     @Published var selectedFoodProduct: OpenFoodFactsProduct? = nil
 
+    /// Pre-downloaded product thumbnail image (avoids AsyncImage rebuild issues)
+    @Published var productThumbnailImage: UIImage? = nil
+
     /// Serving size context for selected food product
     @Published var selectedFoodServingSize: String? = nil
 
@@ -101,11 +104,18 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// Whether a food search is currently in progress
     @Published var isFoodSearching: Bool = false
 
+    /// Whether the current search is an AI generative analysis (voice/dictation)
+    @Published var isAISearching: Bool = false
+
     /// Error message from food search operations
     @Published var foodSearchError: String? = nil
 
     /// Whether the food search UI is visible
     @Published var showingFoodSearch: Bool = false
+
+    /// Flag set when iOS keyboard dictation is detected via DictationAwareTextField.
+    /// Causes the next search to route through AI generative search regardless of word count.
+    var lastInputWasDictated: Bool = false
 
     /// Store the last AI analysis result for detailed UI display
     @Published var lastAIAnalysisResult: AIFoodAnalysisResult? = nil
@@ -224,6 +234,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                 print("🔍 FoodFinder_SearchViewModel received barcode from BarcodeScannerService: \(result.barcodeString)")
                 print("🔍 Barcode confidence: \(result.confidence)")
                 print("🔍 Calling searchFoodProductByBarcode...")
+                // Consume the scan result immediately so other subscribers
+                // (e.g. from SwiftUI view recreation) don't re-process the same barcode.
+                BarcodeScannerService.shared.lastScanResult = nil
                 self?.searchFoodProductByBarcode(result.barcodeString)
             }
             .store(in: &cancellables)
@@ -321,12 +334,14 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         print("🎙️ Starting generative voice search for: '\(trimmed)'")
 
         isFoodSearching = true
+        isAISearching = true
         foodSearchError = nil
-        foodSearchResults = createSkeletonResults()
+        foodSearchResults = []
         showingFoodSearch = true
 
         defer {
             isFoodSearching = false
+            isAISearching = false
         }
 
         do {
@@ -399,9 +414,14 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
         print("🔍 Starting search for: '\(trimmedQuery)'")
 
-        // Detect natural language input (e.g. iOS keyboard dictation) and route to AI
-        if isNaturalLanguageQuery(trimmedQuery) {
-            print("🎙️ Natural language detected — routing to AI generative search")
+        // Detect dictation (via DictationAwareTextField flag) or natural language input and route to AI
+        let wasDictated = lastInputWasDictated
+        if wasDictated {
+            lastInputWasDictated = false  // Reset flag immediately
+        }
+
+        if wasDictated || isNaturalLanguageQuery(trimmedQuery) {
+            print("🎙️ \(wasDictated ? "Dictation detected" : "Natural language detected") — routing to AI generative search for: '\(trimmedQuery)'")
             foodSearchTask = Task { [weak self] in
                 guard let self = self else { return }
                 if let result = await self.performVoiceSearch(query: trimmedQuery) {
@@ -460,9 +480,12 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
         do {
             print("🔍 Performing text search with configured provider...")
-            let products = try await performTextSearch(query: query)
+            let rawProducts = try await performTextSearch(query: query)
 
-            // Cache the results for future use
+            // Sort results by relevance so the most obvious match appears first
+            let products = sortByRelevance(rawProducts, query: trimmedQuery)
+
+            // Cache the sorted results for future use
             searchCache[trimmedQuery] = CachedSearchResult(results: products, timestamp: Date())
             print("🔍 Cached results for: '\(trimmedQuery)' (\(products.count) items)")
 
@@ -771,6 +794,7 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         print("🔄 Current absorptionTime BEFORE selecting: \(absorptionTime)")
 
         selectedFoodProduct = product
+        downloadProductThumbnail(for: product)
 
         // Populate food type (truncate to 20 chars to fit RowEmojiTextField maxLength)
         let maxFoodTypeLength = 20
@@ -841,6 +865,39 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             absorptionTime: absorptionTime,
             absorptionTimeWasAIGenerated: absorptionTimeWasAIGenerated
         ))
+    }
+
+    // MARK: - Product Thumbnail Download
+
+    /// Eagerly download the product thumbnail so the view can use a cached UIImage
+    /// instead of AsyncImage (which restarts on every SwiftUI view rebuild).
+    private func downloadProductThumbnail(for product: OpenFoodFactsProduct) {
+        productThumbnailImage = nil
+        let urlString = product.imageFrontSmallURL ?? product.imageFrontURL ?? product.imageURL
+        guard let urlString, !urlString.isEmpty else { return }
+
+        // Prefer the smallest OpenFoodFacts thumbnail (100px) for fast loading.
+        // OFF URLs follow the pattern: .../front_en.REV.SIZE.jpg
+        // Rewrite .200.jpg or .400.jpg → .100.jpg for a much smaller file.
+        let thumbURLString: String
+        if urlString.contains("openfoodfacts.org") {
+            thumbURLString = urlString
+                .replacingOccurrences(of: ".200.jpg", with: ".100.jpg")
+                .replacingOccurrences(of: ".400.jpg", with: ".100.jpg")
+        } else {
+            thumbURLString = urlString
+        }
+
+        guard let url = URL(string: thumbURLString) else { return }
+        Task {
+            let image = await ImageDownloader.fetchThumbnail(from: url, maxDimension: 120)
+            await MainActor.run {
+                // Only set if this product is still selected
+                if self.selectedFoodProduct?.id == product.id {
+                    self.productThumbnailImage = image
+                }
+            }
+        }
     }
 
     // MARK: - Recalculate Carbs for Servings
@@ -922,6 +979,7 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         foodSearchText = ""
         foodSearchResults = []
         selectedFoodProduct = nil
+        productThumbnailImage = nil
         selectedFoodServingSize = nil
         foodSearchError = nil
         showingFoodSearch = false
@@ -962,6 +1020,7 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// Clear selected food product and its context
     func clearSelectedFood() {
         selectedFoodProduct = nil
+        productThumbnailImage = nil
         selectedFoodServingSize = nil
         numberOfServings = 1.0
         lastAIAnalysisResult = nil
@@ -975,6 +1034,65 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
         // Notify host that food was cleared
         onFoodCleared?()
+    }
+
+    // MARK: - Relevance Sorting
+
+    /// Sort search results so the most obvious/generic match for the query appears first.
+    /// E.g. searching "banana" should show "Banana, raw" before "Yogurt Bnine BANANA".
+    private func sortByRelevance(_ products: [OpenFoodFactsProduct], query: String) -> [OpenFoodFactsProduct] {
+        let q = query.lowercased()
+
+        return products.sorted { a, b in
+            relevanceScore(for: a, query: q) > relevanceScore(for: b, query: q)
+        }
+    }
+
+    private func relevanceScore(for product: OpenFoodFactsProduct, query: String) -> Int {
+        let name = product.displayName.lowercased()
+        let nameWords = name.split(separator: " ")
+            .map { String($0).trimmingCharacters(in: .punctuationCharacters) }
+        var score = 0
+
+        // Exact match (e.g. "banana" == "banana")
+        if name == query { score += 10000 }
+
+        // Name starts with query word then comma/space (e.g. "banana, raw" or "banana chips")
+        if name.hasPrefix(query + ",") || name.hasPrefix(query + " ") { score += 5000 }
+
+        // Name starts with query
+        if name.hasPrefix(query) { score += 4000 }
+
+        // First word of name matches query (e.g. "bananas" for "banana")
+        if let first = nameWords.first, first.hasPrefix(query) { score += 3000 }
+
+        // Query appears as a standalone word anywhere in the name
+        if nameWords.contains(query) { score += 2000 }
+
+        // Prefer shorter, simpler product names (generic foods have fewer words)
+        let wordCount = nameWords.count
+        if wordCount == 1 { score += 500 }
+        else if wordCount == 2 { score += 400 }
+        else if wordCount <= 4 { score += 200 }
+        else { score -= wordCount * 20 }
+
+        // Penalize products where the query only matches as a substring of another word
+        // e.g. "BANANA" inside "Yogurt Bnine BANANA" is fine but
+        // rank lower if the product is clearly a different food category
+        let queryWords = query.split(separator: " ").map { String($0) }
+        if queryWords.count == 1 {
+            // Single-word query: penalize if name has many extra words
+            let extraWords = wordCount - 1
+            score -= extraWords * 30
+        }
+
+        // Penalize branded products for simple single-word queries
+        if queryWords.count == 1, let brands = product.brands,
+           !brands.isEmpty, brands.lowercased() != name {
+            score -= 100
+        }
+
+        return score
     }
 
     // MARK: - Provider Routing Methods
@@ -1004,16 +1122,16 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                     servingQuantity: product.servingQuantity,
                     imageURL: product.imageURL,
                     imageFrontURL: product.imageFrontURL,
+                    imageFrontSmallURL: product.imageFrontSmallURL,
                     code: product.code,
                     dataSource: .barcodeScan
                 )
             }
             return nil
 
-        case .claude, .usdaFoodData, .googleGemini, .openAI:
+        case .usdaFoodData, .aiProvider:
             // These providers don't support barcode search, fall back to OpenFoodFacts
             if let product = try await openFoodFactsService.fetchProduct(barcode: barcode) {
-                // Create a new product with the correct dataSource
                 return OpenFoodFactsProduct(
                     id: product.id,
                     productName: product.productName,
@@ -1024,440 +1142,17 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                     servingQuantity: product.servingQuantity,
                     imageURL: product.imageURL,
                     imageFrontURL: product.imageFrontURL,
+                    imageFrontSmallURL: product.imageFrontSmallURL,
                     code: product.code,
                     dataSource: .barcodeScan
                 )
             }
             return nil
-        case .bringYourOwn:
-            // BYO is not supported for barcode search; fall back via router
-            return try await FoodSearchRouter.shared.searchFoodsByBarcode(barcode)
         }
     }
 
-    /// Search using Google Gemini for text queries
-    private func searchWithGoogleGemini(query: String) async throws -> [OpenFoodFactsProduct] {
-        let key = UserDefaults.standard.foodFinder_googleGeminiAPIKey
-        guard !key.isEmpty else {
-            print("🔑 Google Gemini API key not configured, falling back to USDA")
-            let products = try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-            return products.map { product in
-                OpenFoodFactsProduct(
-                    id: product.id,
-                    productName: product.productName,
-                    brands: product.brands,
-                    categories: product.categories,
-                    nutriments: product.nutriments,
-                    servingSize: product.servingSize,
-                    servingQuantity: product.servingQuantity,
-                    imageURL: product.imageURL,
-                    imageFrontURL: product.imageFrontURL,
-                    code: product.code,
-                    dataSource: .textSearch
-                )
-            }
-        }
-
-        print("🍱 Using Google Gemini for text-based nutrition search: \(query)")
-
-        do {
-            // Use the Gemini text-only API for nutrition queries
-            let result = try await performGeminiTextQuery(query: query, apiKey: key)
-
-            // Convert AI result to OpenFoodFactsProduct
-            let geminiProduct = OpenFoodFactsProduct(
-                id: "gemini_text_\(UUID().uuidString.prefix(8))",
-                productName: result.foodItems.first ?? query.capitalized,
-                brands: "Google Gemini AI",
-                categories: nil,
-                nutriments: Nutriments(
-                    carbohydrates: result.carbohydrates,
-                    proteins: result.protein,
-                    fat: result.fat,
-                    calories: result.calories,
-                    sugars: nil,
-                    fiber: result.totalFiber
-                ),
-                servingSize: result.portionSize.isEmpty ? "1 serving" : result.portionSize,
-                servingQuantity: 100.0,
-                imageURL: nil,
-                imageFrontURL: nil,
-                code: nil,
-                dataSource: .aiAnalysis
-            )
-
-            print("✅ Google Gemini text search completed for: \(query) -> carbs: \(result.carbohydrates)g")
-
-            // Create multiple serving size options so user has choices
-            var products = [geminiProduct]
-
-            // Add variations for common serving sizes if the main result doesn't specify
-            if !result.portionSize.contains("cup") && !result.portionSize.contains("slice") {
-                // Create a smaller serving option
-                let smallProduct = OpenFoodFactsProduct(
-                    id: "gemini_text_small_\(UUID().uuidString.prefix(8))",
-                    productName: "\(result.foodItems.first ?? query.capitalized) (Small)",
-                    brands: "Google Gemini AI",
-                    categories: nil,
-                    nutriments: Nutriments(
-                        carbohydrates: result.carbohydrates * 0.6,
-                        proteins: (result.protein ?? 0) * 0.6,
-                        fat: (result.fat ?? 0) * 0.6,
-                        calories: (result.calories ?? 0) * 0.6,
-                        sugars: nil,
-                        fiber: (result.totalFiber ?? 0) * 0.6 > 0 ? (result.totalFiber ?? 0) * 0.6 : nil
-                    ),
-                    servingSize: "Small \(result.portionSize.isEmpty ? "serving" : result.portionSize.lowercased())",
-                    servingQuantity: 100.0,
-                    imageURL: nil,
-                    imageFrontURL: nil,
-                    code: nil,
-                    dataSource: .aiAnalysis
-                )
-
-                // Create a larger serving option
-                let largeProduct = OpenFoodFactsProduct(
-                    id: "gemini_text_large_\(UUID().uuidString.prefix(8))",
-                    productName: "\(result.foodItems.first ?? query.capitalized) (Large)",
-                    brands: "Google Gemini AI",
-                    categories: nil,
-                    nutriments: Nutriments(
-                        carbohydrates: result.carbohydrates * 1.5,
-                        proteins: (result.protein ?? 0) * 1.5,
-                        fat: (result.fat ?? 0) * 1.5,
-                        calories: (result.calories ?? 0) * 1.5,
-                        sugars: nil,
-                        fiber: (result.totalFiber ?? 0) * 1.5 > 0 ? (result.totalFiber ?? 0) * 1.5 : nil
-                    ),
-                    servingSize: "Large \(result.portionSize.isEmpty ? "serving" : result.portionSize.lowercased())",
-                    servingQuantity: 100.0,
-                    imageURL: nil,
-                    imageFrontURL: nil,
-                    code: nil,
-                    dataSource: .aiAnalysis
-                )
-
-                products = [smallProduct, geminiProduct, largeProduct]
-            }
-
-            return products
-
-        } catch {
-            print("❌ Google Gemini text search failed: \(error.localizedDescription), falling back to USDA")
-            let products = try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-            return products.map { product in
-                OpenFoodFactsProduct(
-                    id: product.id,
-                    productName: product.productName,
-                    brands: product.brands,
-                    categories: product.categories,
-                    nutriments: product.nutriments,
-                    servingSize: product.servingSize,
-                    servingQuantity: product.servingQuantity,
-                    imageURL: product.imageURL,
-                    imageFrontURL: product.imageFrontURL,
-                    code: product.code,
-                    dataSource: .textSearch
-                )
-            }
-        }
-    }
-
-    /// Search using Claude for text queries
-    private func searchWithClaude(query: String) async throws -> [OpenFoodFactsProduct] {
-        let key = UserDefaults.standard.foodFinder_claudeAPIKey
-        guard !key.isEmpty else {
-            print("🔑 Claude API key not configured, falling back to USDA")
-            let products = try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-            return products.map { product in
-                OpenFoodFactsProduct(
-                    id: product.id,
-                    productName: product.productName,
-                    brands: product.brands,
-                    categories: product.categories,
-                    nutriments: product.nutriments,
-                    servingSize: product.servingSize,
-                    servingQuantity: product.servingQuantity,
-                    imageURL: product.imageURL,
-                    imageFrontURL: product.imageFrontURL,
-                    code: product.code,
-                    dataSource: .textSearch
-                )
-            }
-        }
-
-        print("🧠 Using Claude for text-based nutrition search: \(query)")
-
-        do {
-            // Use Claude for nutrition queries with a placeholder image
-            let placeholderImage = createPlaceholderImage()
-            let nutritionQuery = """
-            Provide detailed nutrition information for "\(query)". Return data as JSON:
-            {
-              "food_items": ["\(query)"],
-              "total_carbohydrates": number (grams),
-              "total_protein": number (grams),
-              "total_fat": number (grams),
-              "total_calories": number (calories),
-              "portion_size": "typical serving size"
-            }
-
-            Focus on accurate carbohydrate estimation for diabetes management.
-            """
-
-            let result = try await ClaudeFoodAnalysisService.shared.analyzeFoodImage(
-                placeholderImage,
-                apiKey: key,
-                query: nutritionQuery
-            )
-
-            // Convert Claude result to OpenFoodFactsProduct
-            let claudeProduct = OpenFoodFactsProduct(
-                id: "claude_text_\(UUID().uuidString.prefix(8))",
-                productName: result.foodItems.first ?? query.capitalized,
-                brands: "Claude AI Analysis",
-                categories: nil,
-                nutriments: Nutriments(
-                    carbohydrates: result.totalCarbohydrates,
-                    proteins: result.totalProtein,
-                    fat: result.totalFat,
-                    calories: result.totalCalories,
-                    sugars: nil,
-                    fiber: result.totalFiber
-                ),
-                servingSize: result.foodItemsDetailed.first?.portionEstimate ?? "1 serving",
-                servingQuantity: 100.0,
-                imageURL: nil,
-                imageFrontURL: nil,
-                code: nil,
-                dataSource: .aiAnalysis
-            )
-
-            print("✅ Claude text search completed for: \(query) -> carbs: \(result.totalCarbohydrates)g")
-
-            // Create multiple serving size options
-            var products = [claudeProduct]
-
-            // Add variations for different serving sizes
-            let smallProduct = OpenFoodFactsProduct(
-                id: "claude_text_small_\(UUID().uuidString.prefix(8))",
-                productName: "\(result.foodItems.first ?? query.capitalized) (Small)",
-                brands: "Claude AI Analysis",
-                categories: nil,
-                nutriments: Nutriments(
-                    carbohydrates: result.totalCarbohydrates * 0.6,
-                    proteins: (result.totalProtein ?? 0) * 0.6,
-                    fat: (result.totalFat ?? 0) * 0.6,
-                    calories: (result.totalCalories ?? 0) * 0.6,
-                    sugars: nil,
-                    fiber: (result.totalFiber ?? 0) * 0.6 > 0 ? (result.totalFiber ?? 0) * 0.6 : nil
-                ),
-                servingSize: "Small serving",
-                servingQuantity: 100.0,
-                imageURL: nil,
-                imageFrontURL: nil,
-                code: nil,
-                dataSource: .aiAnalysis
-            )
-
-            let largeProduct = OpenFoodFactsProduct(
-                id: "claude_text_large_\(UUID().uuidString.prefix(8))",
-                productName: "\(result.foodItems.first ?? query.capitalized) (Large)",
-                brands: "Claude AI Analysis",
-                categories: nil,
-                nutriments: Nutriments(
-                    carbohydrates: result.totalCarbohydrates * 1.5,
-                    proteins: (result.totalProtein ?? 0) * 1.5,
-                    fat: (result.totalFat ?? 0) * 1.5,
-                    calories: (result.totalCalories ?? 0) * 1.5,
-                    sugars: nil,
-                    fiber: (result.totalFiber ?? 0) * 1.5 > 0 ? (result.totalFiber ?? 0) * 1.5 : nil
-                ),
-                servingSize: "Large serving",
-                servingQuantity: 100.0,
-                imageURL: nil,
-                imageFrontURL: nil,
-                code: nil,
-                dataSource: .aiAnalysis
-            )
-
-            products = [smallProduct, claudeProduct, largeProduct]
-            return products
-
-        } catch {
-            print("❌ Claude text search failed: \(error.localizedDescription), falling back to USDA")
-            let products = try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
-            return products.map { product in
-                OpenFoodFactsProduct(
-                    id: product.id,
-                    productName: product.productName,
-                    brands: product.brands,
-                    categories: product.categories,
-                    nutriments: product.nutriments,
-                    servingSize: product.servingSize,
-                    servingQuantity: product.servingQuantity,
-                    imageURL: product.imageURL,
-                    imageFrontURL: product.imageFrontURL,
-                    code: product.code,
-                    dataSource: .textSearch
-                )
-            }
-        }
-    }
-
-    /// Perform a text-only query to Google Gemini API
-    private func performGeminiTextQuery(query: String, apiKey: String) async throws -> AIFoodAnalysisResult {
-        let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-
-        guard let url = URL(string: "\(baseURL)?key=\(apiKey)") else {
-            throw AIFoodAnalysisError.invalidResponse
-        }
-
-        // Create a detailed nutrition query
-        let nutritionPrompt = """
-        Provide accurate nutrition information for "\(query)". Return only a JSON response with this exact format:
-        {
-          "food_name": "exact name of the food",
-          "serving_size": "typical serving size (e.g., '1 medium', '1 cup', '100g')",
-          "carbohydrates": actual_number_in_grams,
-          "protein": actual_number_in_grams,
-          "fat": actual_number_in_grams,
-          "calories": actual_number_in_calories,
-          "confidence": 0.9
-        }
-
-        Use real nutrition data. For example:
-        - Orange: ~15g carbs, 1g protein, 0g fat, 65 calories per medium orange
-        - Apple: ~25g carbs, 0g protein, 0g fat, 95 calories per medium apple
-        - Banana: ~27g carbs, 1g protein, 0g fat, 105 calories per medium banana
-
-        Be accurate and specific. Do not return 0 values unless the food truly has no macronutrients.
-        """
-
-        // Create request payload for text-only query
-        let payload: [String: Any] = [
-            "contents": [
-                [
-                    "parts": [
-                        [
-                            "text": nutritionPrompt
-                        ]
-                    ]
-                ]
-            ],
-            "generationConfig": [
-                "temperature": 0.1,
-                "topP": 0.8,
-                "topK": 40,
-                "maxOutputTokens": 1024
-            ]
-        ]
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: payload)
-        } catch {
-            throw AIFoodAnalysisError.requestCreationFailed
-        }
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw AIFoodAnalysisError.invalidResponse
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            print("🚨 Gemini API error: \(httpResponse.statusCode)")
-            if let errorData = String(data: data, encoding: .utf8) {
-                print("🚨 Error response: \(errorData)")
-            }
-            throw AIFoodAnalysisError.apiError(httpResponse.statusCode)
-        }
-
-        // Parse Gemini response
-        guard let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let candidates = jsonResponse["candidates"] as? [[String: Any]],
-              let firstCandidate = candidates.first,
-              let content = firstCandidate["content"] as? [String: Any],
-              let parts = content["parts"] as? [[String: Any]],
-              let firstPart = parts.first,
-              let text = firstPart["text"] as? String else {
-            throw AIFoodAnalysisError.responseParsingFailed
-        }
-
-        print("🍱 Gemini response: \(text)")
-
-        // Parse the JSON content from Gemini's response
-        let cleanedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "```json", with: "")
-            .replacingOccurrences(of: "```", with: "")
-
-        guard let jsonData = cleanedText.data(using: .utf8),
-              let nutritionData = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
-            throw AIFoodAnalysisError.responseParsingFailed
-        }
-
-        // Extract nutrition values
-        let foodName = nutritionData["food_name"] as? String ?? query.capitalized
-        let servingSize = nutritionData["serving_size"] as? String ?? "1 serving"
-        let carbs = nutritionData["carbohydrates"] as? Double ?? 0.0
-        let protein = nutritionData["protein"] as? Double ?? 0.0
-        let fat = nutritionData["fat"] as? Double ?? 0.0
-        let calories = nutritionData["calories"] as? Double ?? 0.0
-        let confidence = nutritionData["confidence"] as? Double ?? 0.8
-
-        let confidenceLevel: AIConfidenceLevel = confidence >= 0.8 ? .high : (confidence >= 0.5 ? .medium : .low)
-
-        // Create food item analysis for the text-based query
-        let foodItem = FoodItemAnalysis(
-            name: foodName,
-            portionEstimate: servingSize,
-            usdaServingSize: nil,
-            servingMultiplier: 1.0,
-            preparationMethod: nil,
-            visualCues: nil,
-            carbohydrates: carbs,
-            calories: calories,
-            fat: fat,
-            fiber: nil,
-            protein: protein,
-            assessmentNotes: "Text-based nutrition lookup using Google Gemini",
-            absorptionTimeHours: nil
-        )
-
-        return AIFoodAnalysisResult(
-            imageType: .foodPhoto, // Text search assumes standard food analysis
-            foodItemsDetailed: [foodItem],
-            overallDescription: "Text-based nutrition analysis for \(foodName)",
-            confidence: confidenceLevel,
-            numericConfidence: confidence,
-            totalFoodPortions: 1,
-            totalUsdaServings: 1.0,
-            totalCarbohydrates: carbs,
-            totalProtein: protein,
-            totalFat: fat,
-            totalFiber: nil,
-            totalCalories: calories,
-            portionAssessmentMethod: "Standard serving size estimate based on food name",
-            diabetesConsiderations: "Values estimated from food name - verify portion size for accurate insulin dosing",
-            visualAssessmentDetails: nil,
-            notes: "Google Gemini nutrition analysis from text query",
-            originalServings: 1.0,
-            fatProteinUnits: nil,
-            netCarbsAdjustment: nil,
-            insulinTimingRecommendations: nil,
-            fpuDosingGuidance: nil,
-            exerciseConsiderations: nil,
-            absorptionTimeHours: nil,
-            absorptionTimeReasoning: nil,
-            mealSizeImpact: nil,
-            individualizationFactors: nil,
-            safetyAlerts: nil
-        )
-    }
+    // Provider-specific text search methods removed during BYO migration.
+    // Text search now routes through FoodSearchRouter → USDA/OpenFoodFacts.
 
     /// Creates a small placeholder image for text-based Gemini queries
     private func createPlaceholderImage() -> UIImage {

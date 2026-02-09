@@ -8,173 +8,82 @@
 
 import SwiftUI
 
-/// Simple secure field that uses proper SwiftUI components
-struct StableSecureField: View {
-    let placeholder: String
-    @Binding var text: String
-    let isSecure: Bool
-
-    var body: some View {
-        let field: some View = Group {
-            if isSecure {
-                SecureField(placeholder, text: $text)
-            } else {
-                TextField(placeholder, text: $text)
-            }
-        }
-        .textFieldStyle(RoundedBorderTextFieldStyle())
-        .autocapitalization(.none)
-        .autocorrectionDisabled()
-        .overlay(alignment: .trailing) {
-            if !text.isEmpty {
-                Button(action: { text = "" }) {
-                    Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                }
-                .buttonStyle(.plain)
-                .padding(.trailing, 8)
-            }
-        }
-        // Return the composed field view
-        field
-    }
-}
-
-// Small reusable modifier to add a clear (x) button to standard TextField inputs
-private struct ClearButton: ViewModifier {
-    @Binding var text: String
-    func body(content: Content) -> some View {
-        content.overlay(alignment: .trailing) {
-            if !text.isEmpty {
-                Button(action: { text = "" }) {
-                    Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                }
-                .buttonStyle(.plain)
-                .padding(.trailing, 8)
-            }
-        }
-    }
-}
-
-/// Settings view for configuring AI food analysis
+/// Settings view for configuring AI food analysis.
+/// Completely AI-agnostic — the user enters their own endpoint, key, and model.
 struct AISettingsView: View {
-    @ObservedObject private var aiService = ConfigurableAIService.shared
     @Environment(\.openURL) var openURL
 
-    // All persisted settings use @AppStorage so they read/write UserDefaults directly
-    @AppStorage("com.loopkit.Loop.claudeAPIKey") private var claudeKey: String = ""
-    @AppStorage("com.loopkit.Loop.claudeQuery") private var claudeQuery: String = ""
-    @AppStorage("com.loopkit.Loop.openAIAPIKey") private var openAIKey: String = ""
-    @AppStorage("com.loopkit.Loop.openAIQuery") private var openAIQuery: String = ""
-    @AppStorage("com.loopkit.Loop.googleGeminiAPIKey") private var googleGeminiKey: String = ""
-    @AppStorage("com.loopkit.Loop.googleGeminiQuery") private var googleGeminiQuery: String = ""
-    @AppStorage("com.loopkit.Loop.usdaAPIKey") private var usdaAPIKey: String = ""
-    // Bring Your Own (OpenAI-compatible)
-    @AppStorage("com.loopkit.Loop.customAIBaseURL") private var customAPIBaseURL: String = ""
-    @AppStorage("com.loopkit.Loop.customAIAPIKey") private var customAPIKey: String = ""
-    @AppStorage("com.loopkit.Loop.customAIModel") private var customModel: String = ""
-    @AppStorage("com.loopkit.Loop.customAIAPIVersion") private var customAPIVersion: String = ""
-    @AppStorage("com.loopkit.Loop.customAIOrganization") private var customOrganizationID: String = ""
-    @AppStorage("com.loopkit.Loop.customAIEndpointPath") private var customAPIEndpointPath: String = ""
-    // Feature flags
+    // Feature toggles
     @AppStorage("com.loopkit.Loop.foodSearchEnabled") private var foodSearchEnabled: Bool = false
     @AppStorage("com.loopkit.Loop.advancedDosingRecommendationsEnabled") private var advancedDosingRecommendationsEnabled: Bool = false
-    @AppStorage("com.loopkit.Loop.useGPT5ForOpenAI") private var useGPT5ForOpenAI: Bool = false
+    @AppStorage("com.loopkit.Loop.analysisHistoryRetentionDays") private var retentionDays: Int = 7
 
-    // Non-persisted UI state
-    @State private var isTestingBYO: Bool = false
-    @State private var byoTestMessage: String = ""
-    @State private var showBYOTestAlert: Bool = false
-    @State private var byoLastTestOK: Bool = false
-    @State private var showingAPIKeyAlert = false
-    // API Key visibility toggles - start with keys hidden (secure)
-    @State private var showClaudeKey: Bool = false
-    @State private var showOpenAIKey: Bool = false
-    @State private var showGoogleGeminiKey: Bool = false
+    // AI configuration (non-secret settings)
+    @AppStorage("com.loopkit.Loop.customAIBaseURL") private var baseURL: String = ""
+    @AppStorage("com.loopkit.Loop.customAIModel") private var model: String = ""
+    @AppStorage("com.loopkit.Loop.customAIEndpointPath") private var endpointPath: String = ""
+    @AppStorage("com.loopkit.Loop.customAIAPIVersion") private var apiVersion: String = ""
+    @AppStorage("com.loopkit.Loop.customAIOrganization") private var organizationID: String = ""
+
+    // API keys (Keychain-backed)
+    @State private var apiKey: String = ""
+    @State private var usdaAPIKey: String = ""
+
+    // UI state
+    @State private var showAPIKey: Bool = false
     @State private var showUSDAKey: Bool = false
-    @State private var showCustomKey: Bool = false
-    @State private var isCheckingGPT5Availability: Bool = false
-    @State private var showGPT5AvailabilityAlert: Bool = false
-    @State private var gpt5AvailabilityMessage: String = ""
-    // Selected provider tab: 0 OpenAI, 1 Claude, 2 Gemini, 3 BYO
-    @State private var selectedTab: Int = {
-        let pImage = UserDefaults.standard.aiImageProvider.lowercased()
-        if pImage.contains("bring") { return 3 }
-        else if pImage.contains("claude") { return 1 }
-        else if pImage.contains("gemini") || pImage.contains("google") { return 2 }
-        else { return 0 }
-    }()
+    @State private var isTesting: Bool = false
+    @State private var testResult: TestResult?
+    @State private var showAdvanced: Bool = false
+    @State private var formatOverride: RequestFormat?
+
+    private enum TestResult {
+        case success
+        case successWithVisionWarning(String)
+        case warning(String)
+        case failure(String)
+    }
 
     var body: some View {
         Form {
             featureToggleSection
             if foodSearchEnabled {
-                providerMappingSection
-                usdaKeySection
-                providerSelectionSection
-                analysisModeSection
-                advancedOptionsSection
+                usdaSection
+                aiConfigSection
+                advancedSettingsSection
             }
         }
         .navigationTitle("FoodFinder Settings")
         .navigationBarTitleDisplayMode(.inline)
-        .alert(isPresented: $showingAPIKeyAlert) {
-            Alert(
-                title: Text("API Key Required"),
-                message: Text("This AI provider requires an API key. Please enter your API key in the settings below."),
-                dismissButton: .default(Text("OK"))
-            )
-        }
-        .alert(isPresented: $showBYOTestAlert) {
-            Alert(
-                title: Text("BYO Connection Test"),
-                message: Text(byoTestMessage),
-                dismissButton: .default(Text("OK"))
-            )
-        }
-        .alert("GPT-5 Not Available", isPresented: $showGPT5AvailabilityAlert, actions: {
-            Button("OK", role: .cancel) {
-                gpt5AvailabilityMessage = ""
+        .onAppear {
+            // Load API keys from Keychain
+            apiKey = FoodFinder_SecureStorage.loadAPIKey() ?? ""
+            usdaAPIKey = FoodFinder_SecureStorage.loadUSDAKey() ?? ""
+
+            // Clear stale endpoint path if it matches a different format's default
+            // (e.g. Google endpoint left over when user switched to OpenAI)
+            if !endpointPath.isEmpty {
+                let detectedFormat = RequestFormat.detect(from: baseURL)
+                let isKnownDefault = RequestFormat.allCases.contains { $0.defaultEndpoint == endpointPath }
+                if isKnownDefault && endpointPath != detectedFormat.defaultEndpoint {
+                    endpointPath = ""
+                }
             }
-        }, message: {
-            Text(gpt5AvailabilityMessage)
-        })
+
+            // Ensure an AIProviderConfiguration exists if we have a base URL
+            if !baseURL.isEmpty {
+                saveConfiguration()
+            }
+        }
     }
 }
 
-// Helper views and methods
+// MARK: - Sections
+
 extension AISettingsView {
-    private var endpointPathError: String? {
-        let p = customAPIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
-        if p.isEmpty { return nil }
-        if p.contains("://") { return "Enter only the path, not a full URL (e.g., /v1/chat/completions)." }
-        if p.contains(" ") { return "Path cannot contain spaces." }
-        return nil
-    }
 
-    private func normalizedPath(_ path: String) -> String {
-        let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
-        if p.isEmpty { return "/v1/chat/completions" }
-        return p.hasPrefix("/") ? p : "/" + p
-    }
+    // MARK: Feature Toggle
 
-    private var endpointPreview: String {
-        let base = customAPIBaseURL.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !base.isEmpty else { return "" }
-        let trimmedBase = base.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        let isAzure = base.lowercased().contains(".openai.azure.com") || !customAPIVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        if isAzure {
-            let dep = customModel.trimmingCharacters(in: .whitespacesAndNewlines)
-            let ver = customAPIVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-            let depDisp = dep.isEmpty ? "<deployment>" : dep
-            let verDisp = ver.isEmpty ? "<api-version>" : ver
-            return "\(trimmedBase)/openai/deployments/\(depDisp)/chat/completions?api-version=\(verDisp)"
-        } else {
-            let path = normalizedPath(customAPIEndpointPath)
-            return "\(trimmedBase)\(path)"
-        }
-    }
-
-    // MARK: Section builders (to help type-checker)
     private var featureToggleSection: some View {
         Section {
             VStack(alignment: .leading, spacing: 12) {
@@ -209,98 +118,235 @@ extension AISettingsView {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
+                    Divider()
+                    HStack {
+                        Text("Analysis History")
+                        Picker("", selection: $retentionDays) {
+                            Text("Last 24 hours").tag(1)
+                            Text("Last 7 days").tag(7)
+                            Text("Last 14 days").tag(14)
+                        }
+                        .pickerStyle(.menu)
+                    }
+                    Text("How long to keep AI-analyzed foods available for quick re-entry.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Divider()
+                    Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled)
+                    Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations. Prolongs analysis.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
         }
     }
 
-    private var providerMappingSection: some View {
+    // MARK: AI Configuration
+
+    private var aiConfigSection: some View {
         Section {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
-                    Image(systemName: "slider.horizontal.3")
-                        .foregroundColor(.blue)
-                    Text("FOODFINDER PROVIDER")
+                    Image(systemName: "sparkles")
+                        .foregroundColor(.purple)
+                    Text("AI CONFIGURATION")
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(.secondary)
                         .textCase(.uppercase)
-                        .lineLimit(1)
-                        .layoutPriority(1)
                 }
-                Text("Configure the service used for each type of search. AI Image Analysis controls what happens when you take photos of food.")
+                Text("Enter your preferred AI API connection details for any AI service that supports vision-capable chat completions.")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                ForEach(SearchType.allCases, id: \.self) { searchType in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(searchType.rawValue).font(.headline)
-                            Spacer()
-                        }
-                        Text(searchType.description).font(.caption).foregroundColor(.secondary)
-                        Picker(selection: getBindingForSearchType(searchType)) {
-                            ForEach(aiService.getAvailableProvidersForSearchType(searchType), id: \.self) { provider in
-                                Text(provider.rawValue).tag(provider)
+                // API key signup links
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("OR, get an API key from one of these popular providers:").font(.caption).foregroundColor(.secondary)
+                    HStack(spacing: 12) {
+                        apiKeyLink("OpenAI  ", url: "https://platform.openai.com/api-keys", color: .green)
+                        apiKeyLink("Anthropic  ", url: "https://console.anthropic.com/settings/keys", color: .orange)
+                        apiKeyLink("Gemini  ", url: "https://aistudio.google.com/apikey", color: .blue)
+                        apiKeyLink("Grok  ", url: "https://console.x.ai", color: .red)
+                    }
+                }
+
+                // Base URL
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Base URL").font(.caption).foregroundColor(.secondary)
+                    HStack(spacing: 8) {
+                        TextField("", text: $baseURL)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .overlay(alignment: .leading) {
+                                if baseURL.isEmpty {
+                                    Text("e.g. https://api.example.com/v1")
+                                        .foregroundColor(.secondary)
+                                        .padding(.leading, 4)
+                                        .allowsHitTesting(false)
+                                }
                             }
-                        } label: { EmptyView() }
-                        .pickerStyle(MenuPickerStyle())
+                            .foregroundColor(.primary)
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                            .onChange(of: baseURL) { _ in
+                                // Reset endpoint path and format override so auto-detection
+                                // drives the correct defaults for the new URL.
+                                endpointPath = ""
+                                formatOverride = nil
+                                testResult = nil
+                                saveConfiguration()
+                            }
+                        if !baseURL.isEmpty {
+                            Button(action: { baseURL = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                    .padding(.vertical, 4)
+                }
+
+                // API Key
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("API Key").font(.caption).foregroundColor(.secondary)
+                    HStack(spacing: 8) {
+                        Group {
+                            if showAPIKey {
+                                TextField("Enter your API key", text: $apiKey)
+                            } else {
+                                SecureField("Enter your API key", text: $apiKey)
+                            }
+                        }
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                        .onChange(of: apiKey) { newValue in
+                            saveAPIKey(newValue)
+                            testResult = nil
+                        }
+                        Button(action: { showAPIKey.toggle() }) {
+                            Image(systemName: showAPIKey ? "eye.slash" : "eye")
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(.plain)
+                        if !apiKey.isEmpty {
+                            Button(action: { apiKey = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    if !apiKey.isEmpty {
+                        Text("Stored securely in Keychain")
+                            .font(.caption2)
+                            .foregroundColor(.green)
+                    }
+                }
+
+                // Model
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Model").font(.caption).foregroundColor(.secondary)
+                    HStack(spacing: 8) {
+                        TextField("e.g. gpt-4o, claude-sonnet-4-20250514, gemini-2.0-flash", text: $model)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                            .onChange(of: model) { _ in
+                                testResult = nil
+                                saveConfiguration()
+                            }
+                        if !model.isEmpty {
+                            Button(action: { model = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+
+                // Test Connection
+                VStack(spacing: 8) {
+                    Button(action: testConnection) {
+                        HStack(spacing: 6) {
+                            if isTesting {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                    .scaleEffect(0.8)
+                                    .tint(.black)
+                                Text("Testing...")
+                            } else {
+                                Image(systemName: "checkmark.shield")
+                                Text("Test Connection")
+                            }
+                        }
+                        .font(.body.weight(.medium))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                    }
+                    .disabled(isTesting || apiKey.isEmpty || baseURL.isEmpty)
+                    .opacity((isTesting || apiKey.isEmpty || baseURL.isEmpty) ? 0.5 : 1.0)
+                    .buttonStyle(.plain)
+
+                    if let result = testResult {
+                        switch result {
+                        case .success:
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text("Connected")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
+                        case .successWithVisionWarning(let message):
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                    Text("Connected")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
+                                }
+                                HStack(alignment: .top, spacing: 4) {
+                                    Image(systemName: "eye.trianglebadge.exclamationmark")
+                                        .foregroundColor(.orange)
+                                    Text(message)
+                                        .font(.caption)
+                                        .foregroundColor(.orange)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                            }
+                        case .warning(let message):
+                            HStack(alignment: .top, spacing: 4) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.orange)
+                                Text(message)
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        case .failure(let message):
+                            HStack(alignment: .top, spacing: 4) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.red)
+                                Text(message)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    private var providerSelectionSection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles").foregroundColor(.purple)
-                    Text("API KEY CONFIGURATION")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-                }
+    // MARK: USDA Database
 
-                Picker("Provider", selection: $selectedTab) {
-                    Text("OpenAI Chat GPT").tag(0)
-                    Text("Anthropic Claude").tag(1)
-                    Text("Google Gemini").tag(2)
-                    Text("BYO").tag(3)
-                }
-                .pickerStyle(.segmented)
-                .onChange(of: selectedTab) { newVal in
-                    switch newVal {
-                    case 0:
-                        UserDefaults.standard.aiImageProvider = "OpenAI (ChatGPT API)"
-                    case 1:
-                        UserDefaults.standard.aiImageProvider = "Anthropic (Claude API)"
-                    case 2:
-                        UserDefaults.standard.aiImageProvider = "Google (Gemini API)"
-                    case 3:
-                        UserDefaults.standard.aiImageProvider = "Bring your own (Custom)"
-                    default:
-                        break
-                    }
-                }
-                Text("Choose which AI service you want to use for food analysis")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-
-                Group {
-                    if selectedTab == 0 { openAIKeyRow }
-                    else if selectedTab == 1 { claudeKeyRow }
-                    else if selectedTab == 2 { geminiKeyRow }
-                    else { bringYourOwnRow }
-                }
-            }
-        }
-    }
-
-    // USDA database key section (optional but recommended)
-    private var usdaKeySection: some View {
+    private var usdaSection: some View {
         Section {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {
@@ -313,7 +359,19 @@ extension AISettingsView {
                 }
 
                 HStack(spacing: 8) {
-                    StableSecureField(placeholder: "Enter your USDA API key (optional)", text: $usdaAPIKey, isSecure: !showUSDAKey)
+                    Group {
+                        if showUSDAKey {
+                            TextField("Enter your USDA API key (optional)", text: $usdaAPIKey)
+                        } else {
+                            SecureField("Enter your USDA API key (optional)", text: $usdaAPIKey)
+                        }
+                    }
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
+                    .onChange(of: usdaAPIKey) { newValue in
+                        saveUSDAKey(newValue)
+                    }
                     Button(action: { showUSDAKey.toggle() }) {
                         Image(systemName: showUSDAKey ? "eye.slash" : "eye").foregroundColor(.green)
                     }
@@ -326,11 +384,11 @@ extension AISettingsView {
                 .buttonStyle(.plain)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("How to obtain a USDA API key:")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                Text("1. Open the USDA FoodData Central API Guide. 2. Sign in or create an account. 3. Request a new API key. 4. Copy and paste it here. The key activates immediately.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    Text("1. Open the USDA FoodData Central API Guide. 2. Sign in or create an account. 3. Request a new API key. 4. Copy and paste it here. The key activates immediately.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Why add a key?")
@@ -344,376 +402,213 @@ extension AISettingsView {
         }
     }
 
-    private var openAIKeyRow: some View {
-        Group {
-            HStack(spacing: 8) {
-                Image(systemName: "brain.head.profile").foregroundColor(.blue)
-                Text("ChatGPT Configuration").font(.headline).foregroundColor(.blue)
-            }
-            HStack {
-                StableSecureField(placeholder: "Enter your OpenAI API key", text: $openAIKey, isSecure: !showOpenAIKey)
-                Button(action: { showOpenAIKey.toggle() }) {
-                    Image(systemName: showOpenAIKey ? "eye.slash" : "eye").foregroundColor(.blue)
-                }
-                .buttonStyle(.plain)
-            }
-            Button(action: { if let url = URL(string: "https://platform.openai.com/api-keys") { openURL(url) } }) {
-                HStack { Image(systemName: "info.circle"); Text("How to get API keys") }
-                    .foregroundColor(.blue)
-            }
-            .buttonStyle(.plain)
-            // GPT-5 option (OpenAI only)
-            Toggle("Use GPT-5 Models", isOn: $useGPT5ForOpenAI)
-                .disabled(!foodSearchEnabled || isCheckingGPT5Availability)
-                .onChange(of: useGPT5ForOpenAI) { newValue in
-                    aiService.objectWillChange.send()
-                    guard newValue else { return }
-                    isCheckingGPT5Availability = true
-                    Task {
-                        let trimmedKey = openAIKey.trimmingCharacters(in: .whitespacesAndNewlines)
-                        let keyToCheck = trimmedKey.isEmpty ? (ConfigurableAIService.shared.getAPIKey(for: .openAI) ?? "") : trimmedKey
-                        guard !keyToCheck.isEmpty else {
-                            await MainActor.run {
-                                useGPT5ForOpenAI = false
-                                aiService.objectWillChange.send()
-                                isCheckingGPT5Availability = false
-                                gpt5AvailabilityMessage = "Enter your OpenAI API key before enabling GPT-5 models."
-                                showGPT5AvailabilityAlert = true
-                            }
-                            return
-                        }
-                        do {
-                            try await OpenAIFoodAnalysisService.shared.ensureGPT5Availability(apiKey: keyToCheck, organizationID: nil)
-                        } catch {
-                            await MainActor.run {
-                                useGPT5ForOpenAI = false
-                                aiService.objectWillChange.send()
-                                gpt5AvailabilityMessage = error.localizedDescription
-                                showGPT5AvailabilityAlert = true
-                            }
-                        }
-                        await MainActor.run {
-                            isCheckingGPT5Availability = false
-                        }
-                    }
-                }
-            if isCheckingGPT5Availability {
-                HStack(spacing: 8) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text("Verifying GPT-5 access…")
+    // MARK: Advanced Settings
+
+    private var advancedSettingsSection: some View {
+        Section {
+            DisclosureGroup("Advanced Settings", isExpanded: $showAdvanced) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("This section is for self-hosted, Azure, or non-standard API endpoints. Most users can ignore these.")
                         .font(.caption2)
                         .foregroundColor(.secondary)
-                }
-            }
-            Text("OpenAI: highly accurate vision models (GPT-4o/GPT-5). ~$0.01/image. GPT-5 are large models - they will be slower.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-    }
 
-    private var claudeKeyRow: some View {
-        Group {
-            HStack(spacing: 8) {
-                Image(systemName: "bolt.heart").foregroundColor(.orange)
-                Text("Claude Configuration").font(.headline).foregroundColor(.orange)
-            }
-            HStack {
-                StableSecureField(placeholder: "Enter your Claude API key", text: $claudeKey, isSecure: !showClaudeKey)
-                Button(action: { showClaudeKey.toggle() }) {
-                    Image(systemName: showClaudeKey ? "eye.slash" : "eye").foregroundColor(.orange)
-                }
-                .buttonStyle(.plain)
-            }
-            Button(action: { if let url = URL(string: "https://console.anthropic.com/settings/keys") { openURL(url) } }) {
-                HStack { Image(systemName: "info.circle"); Text("How to get API keys") }
-                    .foregroundColor(.orange)
-            }
-            .buttonStyle(.plain)
-            Text("Anthropic Claude: excellent reasoning for detailed analysis.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-    }
+                    // Endpoint path
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Endpoint Path").font(.caption).foregroundColor(.secondary)
+                        TextField("e.g. /chat/completions", text: $endpointPath)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                            .onChange(of: endpointPath) { _ in saveConfiguration() }
+                        Text("Leave blank to use the default for your chosen format.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
 
-    private var geminiKeyRow: some View {
-        Group {
-            HStack(spacing: 8) {
-                Image(systemName: "sparkles").foregroundColor(.green)
-                Text("Gemini Configuration").font(.headline).foregroundColor(.green)
-            }
-            HStack {
-                StableSecureField(placeholder: "Enter your Google Gemini API key", text: $googleGeminiKey, isSecure: !showGoogleGeminiKey)
-                Button(action: { showGoogleGeminiKey.toggle() }) {
-                    Image(systemName: showGoogleGeminiKey ? "eye.slash" : "eye").foregroundColor(.green)
-                }
-                .buttonStyle(.plain)
-            }
-            Button(action: { if let url = URL(string: "https://aistudio.google.com/app/apikey") { openURL(url) } }) {
-                HStack { Image(systemName: "info.circle"); Text("How to get API keys") }
-                    .foregroundColor(.green)
-            }
-            .buttonStyle(.plain)
-            Text("Google Gemini: great recognition with generous free limits.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-    }
+                    // API Version
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("API Version").font(.caption).foregroundColor(.secondary)
+                        TextField("e.g. 2024-06-01 (Azure only)", text: $apiVersion)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                            .onChange(of: apiVersion) { _ in saveConfiguration() }
+                    }
 
-    private var bringYourOwnRow: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Image(systemName: "sparkles").foregroundColor(.purple)
-                Text("Bring your own (OpenAI-compatible)").font(.headline).foregroundColor(.purple)
-                if byoLastTestOK {
-                    Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
-                }
-            }
-            TextField("Base URL (e.g., https://api.openai.com)", text: $customAPIBaseURL)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-                .onChange(of: customAPIBaseURL) { _ in byoLastTestOK = false }
-                .modifier(ClearButton(text: $customAPIBaseURL))
-            HStack {
-                StableSecureField(placeholder: "Enter your API key", text: $customAPIKey, isSecure: !showCustomKey)
-                Button(action: { showCustomKey.toggle() }) {
-                    Image(systemName: showCustomKey ? "eye.slash" : "eye").foregroundColor(.purple)
-                }
-                .buttonStyle(.plain)
-            }
-            .onChange(of: customAPIKey) { _ in byoLastTestOK = false }
-            TextField(customAPIBaseURL.lowercased().contains(".openai.azure.com") ? "Deployment name (Azure), e.g., gpt-5-test" : "Model (OpenAI), e.g., gpt-4o", text: $customModel)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-                .onChange(of: customModel) { _ in byoLastTestOK = false }
-                .modifier(ClearButton(text: $customModel))
-            TextField("API version (Azure only, e.g., 2024-06-01)", text: $customAPIVersion)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-                .onChange(of: customAPIVersion) { _ in byoLastTestOK = false }
-                .modifier(ClearButton(text: $customAPIVersion))
-            TextField("Custom endpoint path (non-Azure), e.g., /v1/chat/completions or /openai/v1/chat/completions", text: $customAPIEndpointPath)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-                .onChange(of: customAPIEndpointPath) { _ in byoLastTestOK = false }
-                .modifier(ClearButton(text: $customAPIEndpointPath))
-            if let pathError = endpointPathError {
-                Text(pathError)
-                    .font(.caption2)
-                    .foregroundColor(.red)
-            } else {
-                Text("Leave blank for most providers. Only needed for non-Azure providers whose Chat Completions path differs from the OpenAI default. For example: Together.ai uses '/v1/chat/completions', Groq uses '/openai/v1/chat/completions'. Azure ignores this field because it uses the deployment-based path.")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-            if !endpointPreview.isEmpty {
-                Text("This will call: \(endpointPreview)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-            }
-            TextField("Organization ID (optional)", text: $customOrganizationID)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-                .onChange(of: customOrganizationID) { _ in byoLastTestOK = false }
-                .modifier(ClearButton(text: $customOrganizationID))
-            HStack {
-                Button(action: testBYOConnection) {
-                    if isTestingBYO {
-                        HStack { ProgressView(); Text("Testing…") }
-                    } else {
-                        HStack { Image(systemName: "checkmark.shield"); Text("Test connection") }
+                    // Organization ID
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Organization ID").font(.caption).foregroundColor(.secondary)
+                        TextField("e.g. org-... (OpenAI, Azure)", text: $organizationID)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                            .onChange(of: organizationID) { _ in saveConfiguration() }
+                    }
+
+                    // Request Format override
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Request Format Override").font(.caption).foregroundColor(.secondary)
+                        Picker("Format", selection: Binding(
+                            get: { formatOverride ?? .openAICompatible },
+                            set: { formatOverride = $0; saveConfiguration() }
+                        )) {
+                            ForEach(RequestFormat.allCases, id: \.self) { format in
+                                Text(format.displayName).tag(format)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        HStack(spacing: 4) {
+                            Text("Auto-detected:")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text(resolvedFormat.displayName)
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
+                            if formatOverride != nil {
+                                Button("Reset") { formatOverride = nil; saveConfiguration() }
+                                    .font(.caption2)
+                            }
+                        }
+                        Text("Most providers use Chat Completions. Only change this if auto-detection is wrong.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+
+                    if !endpointPreview.isEmpty {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Full endpoint URL:")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text(endpointPreview)
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
                     }
                 }
-                .disabled(isTestingBYO)
-                .buttonStyle(.bordered)
-                .tint(.purple)
-                Spacer()
+                .padding(.vertical, 4)
             }
-            Text("BYO is for AI Image Analysis only (OpenAI-compatible endpoints, including Azure). Test connection only checks connectivity/auth — it does not validate model compatibility. GPT-5 support may be limited across many API providers at this time. BYO is experimental and unsupported; your mileage may vary.")
+        }
+    }
+
+}
+
+// MARK: - Helpers
+
+extension AISettingsView {
+
+    private func apiKeyLink(_ name: String, url: String, color: Color) -> some View {
+        Button(action: { if let u = URL(string: url) { openURL(u) } }) {
+            Text(name)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(color)
         }
-    }
-
-    private func testBYOConnection() {
-        let base = customAPIBaseURL.trimmingCharacters(in: .whitespacesAndNewlines)
-        let key = customAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !base.isEmpty, !key.isEmpty else {
-            byoTestMessage = "Please enter Base URL and API key first."
-            showBYOTestAlert = true
-            return
-        }
-        isTestingBYO = true
-        byoLastTestOK = false
-        let model = customModel.trimmingCharacters(in: .whitespacesAndNewlines)
-        let version = customAPIVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-        let org = customOrganizationID.trimmingCharacters(in: .whitespacesAndNewlines)
-        Task {
-            do {
-                let status = try await OpenAIFoodAnalysisService.shared.testConnection(
-                    baseURL: base,
-                    apiKey: key,
-                    model: model.isEmpty ? nil : model,
-                    apiVersion: version.isEmpty ? nil : version,
-                    organizationID: org.isEmpty ? nil : org,
-                    customPath: customAPIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : customAPIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
-                )
-                byoTestMessage = status
-                byoLastTestOK = true
-            } catch {
-                byoTestMessage = "Test failed: \(error.localizedDescription)"
-                byoLastTestOK = false
-            }
-            isTestingBYO = false
-            showBYOTestAlert = true
-        }
-    }
-
-    // (inline provider configuration is embedded directly in body)
-    @ViewBuilder
-    private var analysisModeSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "burst").foregroundColor(.yellow)
-                Text("ANALYSIS MODE")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                    .textCase(.uppercase)
-            }
-
-            // Mode picker
-            Picker("Analysis Mode", selection: Binding(
-                get: { aiService.analysisMode },
-                set: { newMode in aiService.setAnalysisMode(newMode) }
-            )) {
-                ForEach(ConfigurableAIService.AnalysisMode.allCases, id: \.self) { mode in
-                    Text(mode.displayName).tag(mode)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-
-            currentModeDetails
-            modelInformation
-        }
-    }
-
-
-    @ViewBuilder
-    private var currentModeDetails: some View {
-
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: aiService.analysisMode.iconName)
-                    .foregroundColor(aiService.analysisMode.iconColor)
-                Text("Current Mode: \(aiService.analysisMode.displayName)")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-            }
-
-            Text(aiService.analysisMode.detailedDescription)
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(aiService.analysisMode.backgroundColor)
-        .cornerRadius(8)
-    }
-
-    @ViewBuilder
-    private var modelInformation: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Models Used:")
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundColor(.secondary)
-
-            VStack(alignment: .leading, spacing: 4) {
-                modelRow(provider: "Google Gemini:", model: ConfigurableAIService.optimalModel(for: .googleGemini, mode: aiService.analysisMode))
-                modelRow(provider: "OpenAI:", model: ConfigurableAIService.optimalModel(for: .openAI, mode: aiService.analysisMode))
-                modelRow(provider: "Claude:", model: ConfigurableAIService.optimalModel(for: .claude, mode: aiService.analysisMode))
-            }
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
-    }
-
-    @ViewBuilder
-    private func modelRow(provider: String, model: String) -> some View {
-        HStack {
-            Text(provider)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-            Text(model)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-        }
-    }
-
-    private var advancedOptionsSection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 6) {
-                    Image(systemName: "syringe")
-                        .foregroundColor(.orange)
-                    Text("ADVANCED OPTIONS")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-                        .lineLimit(1)
-                        .layoutPriority(1)
-                }
-                Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled)
-                    .disabled(!foodSearchEnabled)
-                Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-
-private func getBindingForSearchType(_ searchType: SearchType) -> Binding<SearchProvider> {
-    switch searchType {
-    case .textSearch:
-        return Binding(
-            get: { aiService.textSearchProvider },
-            set: { newValue in
-                aiService.textSearchProvider = newValue
-                UserDefaults.standard.textSearchProvider = newValue.rawValue
-            }
-        )
-    case .barcodeSearch:
-        return Binding(
-            get: { aiService.barcodeSearchProvider },
-            set: { newValue in
-                aiService.barcodeSearchProvider = newValue
-                UserDefaults.standard.barcodeSearchProvider = newValue.rawValue
-            }
-        )
-    case .aiImageSearch:
-        return Binding(
-            get: { aiService.aiImageSearchProvider },
-            set: { newValue in
-                aiService.aiImageSearchProvider = newValue
-                UserDefaults.standard.aiImageProvider = newValue.rawValue
-            }
-        )
+        .buttonStyle(.plain)
     }
 }
 
+// MARK: - Actions
+
+extension AISettingsView {
+
+    /// The effective request format: user override if set, otherwise auto-detected from base URL.
+    private var resolvedFormat: RequestFormat {
+        formatOverride ?? RequestFormat.detect(from: baseURL)
+    }
+
+    private func saveAPIKey(_ key: String) {
+        if key.isEmpty {
+            try? FoodFinder_SecureStorage.deleteAPIKey()
+        } else {
+            try? FoodFinder_SecureStorage.saveAPIKey(key)
+        }
+        saveConfiguration()
+    }
+
+    private func saveUSDAKey(_ key: String) {
+        if key.isEmpty {
+            try? FoodFinder_SecureStorage.deleteUSDAKey()
+        } else {
+            try? FoodFinder_SecureStorage.saveUSDAKey(key)
+        }
+    }
+
+    /// Saves the current settings as an AIProviderConfiguration and sets it as active.
+    private func saveConfiguration() {
+        let config = AIProviderConfiguration(
+            name: "AI Provider",
+            baseURL: baseURL,
+            model: model,
+            endpointPath: endpointPath.isEmpty ? nil : endpointPath,
+            requestFormat: resolvedFormat,
+            apiVersion: apiVersion.isEmpty ? nil : apiVersion,
+            organizationID: organizationID.isEmpty ? nil : organizationID
+        )
+
+        // Always maintain a single configuration — replace or create
+        var configs = UserDefaults.standard.aiProviderConfigurations
+
+        if let index = configs.firstIndex(where: { _ in true }) {
+            // Replace the first (only) config, keeping its ID for stability
+            let existingID = configs[index].id
+            var updated = config
+            updated.id = existingID
+            configs[index] = updated
+            UserDefaults.standard.aiProviderConfigurations = configs
+            UserDefaults.standard.activeAIProviderConfigurationId = existingID
+        } else {
+            configs.append(config)
+            UserDefaults.standard.aiProviderConfigurations = configs
+            UserDefaults.standard.activeAIProviderConfigurationId = config.id
+        }
+    }
+
+    private func testConnection() {
+        guard !baseURL.isEmpty, !apiKey.isEmpty else { return }
+
+        isTesting = true
+        testResult = nil
+
+        let config = AIProviderConfiguration(
+            name: "AI Provider",
+            baseURL: baseURL,
+            model: model,
+            endpointPath: endpointPath.isEmpty ? nil : endpointPath,
+            requestFormat: resolvedFormat,
+            apiVersion: apiVersion.isEmpty ? nil : apiVersion,
+            organizationID: organizationID.isEmpty ? nil : organizationID,
+            apiKey: apiKey
+        )
+
+        Task {
+            let result = await AIServiceManager.shared.testConnection(to: config)
+            await MainActor.run {
+                isTesting = false
+                if result.success {
+                    // 402/429 are "connected with caveats" — show as warning
+                    if let code = result.statusCode, (code == 402 || code == 429) {
+                        testResult = .warning(result.message)
+                    } else if result.supportsVision == false {
+                        testResult = .successWithVisionWarning("Connected — but this model may not support image analysis. FoodFinder requires a vision-capable model.")
+                    } else {
+                        testResult = .success
+                    }
+                } else {
+                    testResult = .failure(result.message)
+                }
+            }
+        }
+    }
+
+    private var endpointPreview: String {
+        let base = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !base.isEmpty else { return "" }
+        let trimmed = base.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let path = endpointPath.isEmpty ? resolvedFormat.defaultEndpoint : endpointPath
+        let resolvedPath = path.replacingOccurrences(of: "{MODEL}", with: model.isEmpty ? "<model>" : model)
+        return "\(trimmed)\(resolvedPath)"
+    }
 }
 
 // MARK: - Preview
@@ -721,7 +616,9 @@ private func getBindingForSearchType(_ searchType: SearchType) -> Binding<Search
 #if DEBUG
 struct AISettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        AISettingsView()
+        NavigationView {
+            AISettingsView()
+        }
     }
 }
 #endif

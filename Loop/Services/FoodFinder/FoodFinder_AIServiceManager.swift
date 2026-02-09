@@ -1,8 +1,12 @@
 //
-//  AIServiceManager.swift
+//  FoodFinder_AIServiceManager.swift
 //  Loop
 //
-//  Created by Taylor Patterson on 9/30/25.
+//  Single generic AI client for food analysis. Handles all providers via
+//  RequestFormat-driven request building and response parsing. This is the
+//  only class that makes HTTP calls to AI APIs.
+//
+//  Created by Taylor Patterson. Coded by Claude Code.
 //  Copyright © 2025 LoopKit Authors. All rights reserved.
 //
 
@@ -11,359 +15,434 @@ import os.log
 import UIKit
 import LoopKit
 
-/// Manages AI service operations using the provider-agnostic configuration
+/// Single generic AI client that handles all providers via RequestFormat.
 final class AIServiceManager {
     static let shared = AIServiceManager()
-    
+
     private let log = OSLog(category: "AIServiceManager")
-    private let session = URLSession.shared
-    private let jsonDecoder = JSONDecoder()
-    private let imageCache = NSCache<NSString, AnyObject>()
-    
+    private let session: URLSession
+
     private init() {
-        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-        imageCache.countLimit = 20 // Cache up to 20 images
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 60
+        config.timeoutIntervalForResource = 90
+        session = URLSession(configuration: config)
     }
-    
+
     // MARK: - Public Methods
-    
-    /// Analyzes a food image using the specified AI provider configuration
-    /// - Parameters:
-    ///   - image: The image to analyze
-    ///   - configuration: The AI provider configuration to use
-    ///   - query: Optional search query to guide the analysis
-    /// - Returns: The analysis result
+
+    /// Analyzes a food image using the configured AI provider.
     func analyzeFoodImage(
         _ image: UIImage,
         using configuration: AIProviderConfiguration,
         query: String = ""
     ) async throws -> AIFoodAnalysisResult {
-        // 1. Validate configuration
-        guard configuration.supportsVision else {
-            throw AIFoodAnalysisError.invalidModel
+        guard !configuration.apiKey.isEmpty else {
+            throw AIFoodAnalysisError.noApiKey
         }
-        
-        // 2. Prepare the image
+
         let preparedImage = await prepareImageForAnalysis(image)
-        
-        // 3. Create the request
-        let request = try createRequest(
-            with: configuration,
-            image: preparedImage,
-            query: query
-        )
-        
-        // 4. Make the request with timeout
-        let (data, response): (Data, URLResponse) = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<(Data, URLResponse), Error>) in
-            let task = session.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    continuation.resume(throwing: AIFoodAnalysisError.networkError(error))
-                    return
-                }
 
-                guard let data = data, let response = response else {
-                    continuation.resume(throwing: AIFoodAnalysisError.invalidResponse)
-                    return
-                }
-
-                continuation.resume(returning: (data, response))
-            }
-
-            task.resume()
+        guard let imageData = preparedImage.jpegData(compressionQuality: 0.6) else {
+            throw AIFoodAnalysisError.imageProcessingFailed
         }
-        
-        // 5. Validate the response
-        guard let httpResponse = response as? HTTPURLResponse else {
+        let imageBase64 = imageData.base64EncodedString()
+
+        var request = try buildRequest(config: configuration, prompt: query, imageBase64: imageBase64)
+
+        // Advanced dosing prompts are much larger and produce longer responses
+        let isAdvanced = UserDefaults.standard.advancedDosingRecommendationsEnabled
+        request.timeoutInterval = isAdvanced ? 120 : 60
+
+        let requestStart = Date()
+        let (data, response) = try await executeRequest(request)
+        let requestDuration = Date().timeIntervalSince(requestStart)
+
+        log.default("AI request completed in %.1f seconds (%d bytes)", requestDuration, data.count)
+
+        try validateHTTPResponse(response, data: data)
+
+        return try parseResponse(data: data, config: configuration)
+    }
+
+    /// Tests connectivity to the configured endpoint. Returns true if reachable.
+    /// Result of a connection test with status details.
+    struct TestConnectionResult {
+        let success: Bool
+        let statusCode: Int?
+        let message: String
+        let supportsVision: Bool?  // nil = not tested, true = confirmed, false = rejected
+    }
+
+    func testConnection(to configuration: AIProviderConfiguration) async -> TestConnectionResult {
+        do {
+            // Use a minimal config: max_tokens=1 to minimize cost and avoid quota issues
+            var testConfig = configuration
+            testConfig.maxTokens = 1
+            testConfig.temperature = 0
+
+            let testPrompt = "Say hi"
+            let request = try buildRequest(config: testConfig, prompt: testPrompt, imageBase64: nil)
+
+            log.debug("Test connection URL: %{public}@", request.url?.absoluteString ?? "nil")
+            log.debug("Test connection format: %{public}@, endpoint: %{public}@", configuration.requestFormat.displayName, configuration.endpointPath)
+
+            let (data, response) = try await executeRequest(request)
+
+            guard let http = response as? HTTPURLResponse else {
+                return TestConnectionResult(success: false, statusCode: nil, message: "Invalid response", supportsVision: nil)
+            }
+            let body = String(data: data, encoding: .utf8) ?? ""
+            log.debug("Test connection: status=%d body=%{public}@", http.statusCode, String(body.prefix(200)))
+
+            switch http.statusCode {
+            case 200...299:
+                let visionSupport = await testVisionSupport(config: testConfig)
+                return TestConnectionResult(success: true, statusCode: http.statusCode, message: "Connected successfully", supportsVision: visionSupport)
+            case 401:
+                return TestConnectionResult(success: false, statusCode: 401, message: "Invalid API key", supportsVision: nil)
+            case 402:
+                // 402 = payment required — key and endpoint are valid, billing issue
+                return TestConnectionResult(success: true, statusCode: 402, message: "Connected — but billing/quota issue on your account", supportsVision: nil)
+            case 403:
+                return TestConnectionResult(success: false, statusCode: 403, message: "Access denied — check API key permissions", supportsVision: nil)
+            case 404:
+                return TestConnectionResult(success: false, statusCode: 404, message: "Endpoint not found — check Base URL", supportsVision: nil)
+            case 405:
+                return TestConnectionResult(success: false, statusCode: 405, message: "Wrong endpoint — check Base URL and model", supportsVision: nil)
+            case 429:
+                // 429 = rate limited — key and endpoint are valid, just throttled
+                return TestConnectionResult(success: true, statusCode: 429, message: "Connected — rate limited, try again shortly", supportsVision: nil)
+            default:
+                let shortBody = String(body.prefix(100))
+                return TestConnectionResult(success: false, statusCode: http.statusCode, message: "HTTP \(http.statusCode): \(shortBody)", supportsVision: nil)
+            }
+        } catch {
+            log.error("Test connection failed: %{public}@", error.localizedDescription)
+            return TestConnectionResult(success: false, statusCode: nil, message: "Network error: \(error.localizedDescription)", supportsVision: nil)
+        }
+    }
+
+    // MARK: - Vision Support Detection
+
+    /// Minimal 1x1 white JPEG for vision capability testing (~600 bytes).
+    private static let minimalTestImageBase64: String = {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
+        let data = renderer.jpegData(withCompressionQuality: 0.1) { ctx in
+            UIColor.white.setFill()
+            ctx.fill(CGRect(origin: .zero, size: CGSize(width: 1, height: 1)))
+        }
+        return data.base64EncodedString()
+    }()
+
+    /// Vision-rejection keywords found in error responses from various AI providers.
+    private static let visionRejectionKeywords = [
+        "vision", "image", "does not support", "multimodal",
+        "not capable", "image_url", "cannot process image",
+        "not support image", "image input", "not available"
+    ]
+
+    /// Tests whether the model supports vision/image input.
+    /// Returns `true` if confirmed, `false` if rejected, `nil` if inconclusive.
+    private func testVisionSupport(config: AIProviderConfiguration) async -> Bool? {
+        do {
+            let request = try buildRequest(
+                config: config,
+                prompt: "Describe this image",
+                imageBase64: Self.minimalTestImageBase64
+            )
+
+            let (data, response) = try await executeRequest(request)
+
+            guard let http = response as? HTTPURLResponse else { return nil }
+
+            switch http.statusCode {
+            case 200...299:
+                return true
+            case 400, 404, 422:
+                let body = (String(data: data, encoding: .utf8) ?? "").lowercased()
+                let isVisionRejection = Self.visionRejectionKeywords.contains { body.contains($0) }
+                return isVisionRejection ? false : nil
+            default:
+                return nil
+            }
+        } catch {
+            log.debug("Vision support test inconclusive: %{public}@", error.localizedDescription)
+            return nil
+        }
+    }
+
+    // MARK: - Request Building
+
+    private func buildRequest(
+        config: AIProviderConfiguration,
+        prompt: String,
+        imageBase64: String?
+    ) throws -> URLRequest {
+        let url = try buildURL(config: config)
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Auth header
+        let keyValue = config.apiKeyPrefix + config.apiKey
+        request.setValue(keyValue, forHTTPHeaderField: config.apiKeyHeader)
+
+        // Extra headers from config
+        for (key, value) in config.headers where key != "Content-Type" {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        // Format-specific extra headers
+        if config.requestFormat == .anthropicMessages {
+            request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        }
+
+        // Build body
+        let body: Data
+        switch config.requestFormat {
+        case .openAICompatible:
+            body = try buildOpenAIBody(config: config, prompt: prompt, imageBase64: imageBase64)
+        case .anthropicMessages:
+            body = try buildAnthropicBody(config: config, prompt: prompt, imageBase64: imageBase64)
+        case .googleGenerativeAI:
+            body = try buildGoogleBody(config: config, prompt: prompt, imageBase64: imageBase64)
+        }
+
+        request.httpBody = body
+        return request
+    }
+
+    private func buildURL(config: AIProviderConfiguration) throws -> URL {
+        let base = config.baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/ "))
+        var endpoint = config.endpointPath
+
+        // Substitute {MODEL} in endpoint (used by Google Gemini)
+        endpoint = endpoint.replacingOccurrences(of: "{MODEL}", with: config.model)
+
+        // Ensure endpoint starts with /
+        if !endpoint.hasPrefix("/") {
+            endpoint = "/" + endpoint
+        }
+
+        // Azure: append api-version if present
+        var urlString = base + endpoint
+        if let apiVersion = config.apiVersion, !apiVersion.isEmpty, !urlString.contains("api-version") {
+            let separator = urlString.contains("?") ? "&" : "?"
+            urlString += "\(separator)api-version=\(apiVersion)"
+        }
+
+        // Google Gemini: append API key as query param
+        if config.requestFormat == .googleGenerativeAI {
+            let separator = urlString.contains("?") ? "&" : "?"
+            urlString += "\(separator)key=\(config.apiKey)"
+        }
+
+        guard let url = URL(string: urlString) else {
+            throw AIFoodAnalysisError.invalidURL(urlString)
+        }
+        return url
+    }
+
+    // MARK: - Format-Specific Body Builders
+
+    private func buildOpenAIBody(
+        config: AIProviderConfiguration,
+        prompt: String,
+        imageBase64: String?
+    ) throws -> Data {
+        var contentParts: [[String: Any]] = [
+            ["type": "text", "text": prompt]
+        ]
+
+        if let img = imageBase64 {
+            contentParts.append([
+                "type": "image_url",
+                "image_url": ["url": "data:image/jpeg;base64,\(img)", "detail": "high"]
+            ])
+        }
+
+        let body: [String: Any] = [
+            "model": config.model,
+            "messages": [
+                ["role": "user", "content": contentParts]
+            ],
+            "max_tokens": config.maxTokens,
+            "temperature": config.temperature
+        ]
+
+        return try JSONSerialization.data(withJSONObject: body)
+    }
+
+    private func buildAnthropicBody(
+        config: AIProviderConfiguration,
+        prompt: String,
+        imageBase64: String?
+    ) throws -> Data {
+        var contentParts: [[String: Any]] = []
+
+        if let img = imageBase64 {
+            contentParts.append([
+                "type": "image",
+                "source": [
+                    "type": "base64",
+                    "media_type": "image/jpeg",
+                    "data": img
+                ]
+            ])
+        }
+
+        contentParts.append(["type": "text", "text": prompt])
+
+        let body: [String: Any] = [
+            "model": config.model,
+            "max_tokens": config.maxTokens,
+            "temperature": config.temperature,
+            "messages": [
+                ["role": "user", "content": contentParts]
+            ]
+        ]
+
+        return try JSONSerialization.data(withJSONObject: body)
+    }
+
+    private func buildGoogleBody(
+        config: AIProviderConfiguration,
+        prompt: String,
+        imageBase64: String?
+    ) throws -> Data {
+        var parts: [[String: Any]] = [
+            ["text": prompt]
+        ]
+
+        if let img = imageBase64 {
+            parts.append([
+                "inline_data": [
+                    "mime_type": "image/jpeg",
+                    "data": img
+                ]
+            ])
+        }
+
+        let body: [String: Any] = [
+            "contents": [
+                ["parts": parts]
+            ],
+            "generationConfig": [
+                "maxOutputTokens": config.maxTokens,
+                "temperature": config.temperature,
+                "topP": 0.95,
+                "topK": 8
+            ]
+        ]
+
+        return try JSONSerialization.data(withJSONObject: body)
+    }
+
+    // MARK: - Request Execution
+
+    private func executeRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        do {
+            return try await session.data(for: request)
+        } catch let error as URLError {
+            if error.code == .timedOut {
+                throw AIFoodAnalysisError.timeout
+            }
+            throw AIFoodAnalysisError.networkError(error)
+        } catch {
+            throw AIFoodAnalysisError.networkError(error)
+        }
+    }
+
+    private func validateHTTPResponse(_ response: URLResponse, data: Data) throws {
+        guard let http = response as? HTTPURLResponse else {
             throw AIFoodAnalysisError.invalidResponse
         }
-        
-        // Handle rate limiting and quota errors
-        switch httpResponse.statusCode {
+
+        switch http.statusCode {
+        case 200...299:
+            return // Success
         case 429:
             throw AIFoodAnalysisError.rateLimitExceededGeneric
         case 402, 403:
             throw AIFoodAnalysisError.insufficientQuota
         case 400..<500:
-            let errorMessage = String(data: data, encoding: .utf8) ?? "Client error"
-            throw AIFoodAnalysisError.apiErrorWithMessage(statusCode: httpResponse.statusCode, message: errorMessage)
+            let msg = String(data: data, encoding: .utf8) ?? "Client error"
+            throw AIFoodAnalysisError.apiErrorWithMessage(statusCode: http.statusCode, message: msg)
         case 500..<600:
-            let errorMessage = String(data: data, encoding: .utf8) ?? "Server error"
-            throw AIFoodAnalysisError.serverError(errorMessage)
+            let msg = String(data: data, encoding: .utf8) ?? "Server error"
+            throw AIFoodAnalysisError.serverError(msg)
         default:
-            break
-        }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-            let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-            log.error("AI API error: %{public}@", errorMessage)
-            throw AIFoodAnalysisError.apiErrorWithMessage(statusCode: httpResponse.statusCode, message: errorMessage)
-        }
-        
-        // 6. Parse the response
-        do {
-            return try parseResponse(data: data, configuration: configuration)
-        } catch let error as AIFoodAnalysisError {
-            throw error
-        } catch {
-            log.error("Failed to parse AI response: %{public}@", error.localizedDescription)
-            throw AIFoodAnalysisError.invalidResponseFormat
+            let msg = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw AIFoodAnalysisError.apiErrorWithMessage(statusCode: http.statusCode, message: msg)
         }
     }
-    
-    /// Tests the connection to an AI provider
-    /// - Parameter configuration: The configuration to test
-    /// - Returns: True if the connection was successful
-    func testConnection(to configuration: AIProviderConfiguration) async -> Bool {
-        do {
-            // Create a simple test request
-            let request = try createTestRequest(with: configuration)
-            
-            // Make the request with a timeout
-            let (data, response): (Data, URLResponse) = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<(Data, URLResponse), Error>) in
-                let task = session.dataTask(with: request) { data, response, error in
-                    if let error = error {
-                        continuation.resume(throwing: error)
-                        return
-                    }
 
-                    guard let data = data, let response = response else {
-                        continuation.resume(throwing: AIFoodAnalysisError.invalidResponse)
-                        return
-                    }
+    // MARK: - Response Parsing
 
-                    continuation.resume(returning: (data, response))
-                }
-
-                task.resume()
-            }
-            
-            // Check if the response is valid
-            guard let httpResponse = response as? HTTPURLResponse else {
-                return false
-            }
-            
-            // Log the response for debugging
-            let statusCode = httpResponse.statusCode
-            let responseBody = String(data: data, encoding: .utf8) ?? ""
-            let truncatedResponse = String(responseBody.prefix(200))
-            log.debug("Test connection to %{public}@: Status %d, Response: %{public}@",
-                     configuration.name, statusCode, truncatedResponse)
-
-            // Consider 2xx and 4xx (auth errors) as valid responses
-            // since they indicate the endpoint is reachable
-            let isValid = (200...499).contains(statusCode)
-
-            if !isValid {
-                log.error("Connection test failed with status %d: %{public}@",
-                         statusCode, truncatedResponse)
-            }
-            
-            return isValid
-        } catch {
-            log.error("Connection test failed: %{public}@", error.localizedDescription)
-            return false
-        }
-    }
-    
-    // MARK: - Private Methods
-    
-    private func prepareImageForAnalysis(_ image: UIImage) async -> UIImage {
-        // Optimize the image for analysis
-        let targetSize = CGSize(width: 1024, height: 1024)
-        let resizedImage = await image.byPreparingForAnalysis(targetSize: targetSize)
-        return resizedImage
-    }
-    
-    private func createRequest(
-        with configuration: AIProviderConfiguration,
-        image: UIImage,
-        query: String
-    ) throws -> URLRequest {
-        // 1. Construct the URL
-        let baseURL = configuration.baseURL.trimmingCharacters(in: ["/"])
-        let endpoint = configuration.endpointPath.starts(with: "/") ? 
-            String(configuration.endpointPath.dropFirst()) : 
-            configuration.endpointPath
-        
-        let urlString = "\(baseURL)/\(endpoint)"
-        guard let url = URL(string: urlString) else {
-            throw AIFoodAnalysisError.invalidURL(urlString)
-        }
-        
-        // 2. Prepare the request body
-        var requestBody = configuration.requestTemplate
-            .replacingOccurrences(of: "{{MODEL}}", with: configuration.model)
-            .replacingOccurrences(of: "{{PROMPT}}", with: query)
-        
-        // Add the image if the provider supports vision
-        if configuration.supportsVision, let imageData = image.jpegData(compressionQuality: 0.8) {
-            let base64Image = imageData.base64EncodedString()
-            requestBody = requestBody.replacingOccurrences(of: "{{IMAGE_BASE64}}", with: base64Image)
-        }
-        
-        // 3. Create the request
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = requestBody.data(using: .utf8)
-        
-        // 4. Set headers
-        configuration.headers.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
-        }
-        
-        // 5. Add authentication
-        switch configuration.authType {
-        case .bearer:
-            request.setValue("Bearer \(configuration.apiKey)", forHTTPHeaderField: "Authorization")
-        case .apiKey:
-            request.setValue(configuration.apiKey, forHTTPHeaderField: "x-api-key")
-        case .custom:
-            if let header = configuration.customHeaderName, let value = configuration.customHeaderValue {
-                let finalValue = value.replacingOccurrences(of: "{{API_KEY}}", with: configuration.apiKey)
-                request.setValue(finalValue, forHTTPHeaderField: header)
-            }
-        }
-
-        return request
-    }
-
-    private func createTestRequest(with configuration: AIProviderConfiguration) throws -> URLRequest {
-        // Create a lightweight test request to validate the connection
-        let baseURL = configuration.baseURL.trimmingCharacters(in: ["/"])
-        let testEndpoint = configuration.testEndpointPath ?? configuration.endpointPath
-        let urlString = "\(baseURL)/\(testEndpoint)"
-
-        guard let url = URL(string: urlString) else {
-            throw AIFoodAnalysisError.invalidURL(urlString)
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.timeoutInterval = 10 // Shorter timeout for connection tests
-
-        // Add authentication
-        switch configuration.authType {
-        case .bearer:
-            request.setValue("Bearer \(configuration.apiKey)", forHTTPHeaderField: "Authorization")
-        case .apiKey:
-            request.setValue(configuration.apiKey, forHTTPHeaderField: "x-api-key")
-        case .custom:
-            if let header = configuration.customHeaderName, let value = configuration.customHeaderValue {
-                let finalValue = value.replacingOccurrences(of: "{{API_KEY}}", with: configuration.apiKey)
-                request.setValue(finalValue, forHTTPHeaderField: header)
-            }
-        }
-
-        return request
-    }
-    
-    private func parseResponse(data: Data, configuration: AIProviderConfiguration) throws -> AIFoodAnalysisResult {
-        // Parse the JSON response
+    private func parseResponse(data: Data, config: AIProviderConfiguration) throws -> AIFoodAnalysisResult {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw AIFoodAnalysisError.invalidResponseFormat
         }
 
-        // Extract the content using the configured key path
-        let content: String
-        if !configuration.responseKeyPath.isEmpty {
-            // Use key path to extract content
-            let keys = configuration.responseKeyPath.components(separatedBy: ".")
-            var current: Any? = json
+        // Extract text content using the configured key path
+        let textContent = try extractTextContent(from: json, keyPath: config.responseKeyPath)
 
-            for key in keys {
-                if let dict = current as? [String: Any] {
-                    current = dict[key]
-                } else if let array = current as? [Any], let index = Int(key), array.indices.contains(index) {
-                    current = array[index]
-                } else {
-                    throw AIFoodAnalysisError.invalidResponseFormat
-                }
-            }
+        // Clean markdown code fences if present
+        let cleaned = textContent
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
-            guard let resultContent = current as? String else {
-                throw AIFoodAnalysisError.invalidResponseFormat
-            }
-
-            content = resultContent
-        } else {
-            // Fallback to direct string conversion
-            guard let resultContent = String(data: data, encoding: .utf8) else {
-                throw AIFoodAnalysisError.invalidResponseFormat
-            }
-            content = resultContent
+        // Find JSON bounds (first { to last })
+        guard let jsonStart = cleaned.firstIndex(of: "{"),
+              let jsonEnd = cleaned.lastIndex(of: "}") else {
+            throw AIFoodAnalysisError.invalidResponseFormat
         }
 
-        // Try to parse the content as JSON
-        guard let contentData = content.data(using: .utf8),
-              let contentJson = try? JSONSerialization.jsonObject(with: contentData) as? [String: Any] else {
-            // If not valid JSON, return a basic result with the raw content
-            return AIFoodAnalysisResult(
-                imageType: nil,
-                foodItemsDetailed: [
-                    FoodItemAnalysis(
-                        name: "Unparsed Content",
-                        portionEstimate: "1 serving",
-                        usdaServingSize: nil,
-                        servingMultiplier: 1.0,
-                        preparationMethod: nil,
-                        visualCues: nil,
-                        carbohydrates: 0,
-                        calories: nil,
-                        fat: nil,
-                        fiber: nil,
-                        protein: nil,
-                        assessmentNotes: "The AI response could not be parsed as structured data.",
-                        absorptionTimeHours: nil
-                    )
-                ],
-                overallDescription: "Analysis completed with unparsed content",
-                confidence: .low,
-                numericConfidence: nil,
-                totalFoodPortions: 1,
-                totalUsdaServings: nil,
-                totalCarbohydrates: 0,
-                totalProtein: nil,
-                totalFat: nil,
-                totalFiber: nil,
-                totalCalories: nil,
-                portionAssessmentMethod: nil,
-                diabetesConsiderations: nil,
-                visualAssessmentDetails: nil,
-                notes: nil,
-                originalServings: 1.0,
-                fatProteinUnits: nil,
-                netCarbsAdjustment: nil,
-                insulinTimingRecommendations: nil,
-                fpuDosingGuidance: nil,
-                exerciseConsiderations: nil,
-                absorptionTimeHours: nil,
-                absorptionTimeReasoning: nil,
-                mealSizeImpact: nil,
-                individualizationFactors: nil,
-                safetyAlerts: nil
-            )
+        let jsonString = String(cleaned[jsonStart...jsonEnd])
+
+        guard let jsonData = jsonString.data(using: .utf8),
+              let contentJson = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
+            throw AIFoodAnalysisError.invalidResponseFormat
         }
 
-        // Parse the structured response
         return try parseStructuredResponse(contentJson)
     }
 
+    private func extractTextContent(from json: [String: Any], keyPath: String) throws -> String {
+        let keys = keyPath.components(separatedBy: ".")
+        var current: Any? = json
+
+        for key in keys {
+            if let dict = current as? [String: Any] {
+                current = dict[key]
+            } else if let array = current as? [Any], let index = Int(key), array.indices.contains(index) {
+                current = array[index]
+            } else {
+                log.error("Failed to navigate key path '%{public}@' at key '%{public}@'", keyPath, key)
+                throw AIFoodAnalysisError.invalidResponseFormat
+            }
+        }
+
+        guard let text = current as? String else {
+            throw AIFoodAnalysisError.invalidResponseFormat
+        }
+        return text
+    }
+
     private func parseStructuredResponse(_ json: [String: Any]) throws -> AIFoodAnalysisResult {
-        // Extract basic information
         let imageTypeString = json["image_type"] as? String
         let imageType: ImageAnalysisType? = imageTypeString.flatMap { ImageAnalysisType(rawValue: $0) }
 
         // Parse food items
         var foodItems: [FoodItemAnalysis] = []
-        if let foodItemsArray = json["food_items"] as? [[String: Any]] {
-            for item in foodItemsArray {
-                let name = item["name"] as? String ?? "Unknown Food"
-                let portionEstimate = item["portion_estimate"] as? String ?? "1 serving"
-
-                // Create food item using the actual FoodItemAnalysis structure
-                let foodItem = FoodItemAnalysis(
-                    name: name,
-                    portionEstimate: portionEstimate,
+        if let items = json["food_items"] as? [[String: Any]] {
+            for item in items {
+                foodItems.append(FoodItemAnalysis(
+                    name: item["name"] as? String ?? "Unknown Food",
+                    portionEstimate: item["portion_estimate"] as? String ?? "1 serving",
                     usdaServingSize: item["usda_serving_size"] as? String,
                     servingMultiplier: item["serving_multiplier"] as? Double ?? 1.0,
                     preparationMethod: item["preparation_method"] as? String,
@@ -375,38 +454,39 @@ final class AIServiceManager {
                     protein: item["protein"] as? Double,
                     assessmentNotes: item["assessment_notes"] as? String,
                     absorptionTimeHours: item["absorption_time_hours"] as? Double
-                )
-
-                foodItems.append(foodItem)
+                ))
             }
         }
 
-        // Calculate totals from food items
-        let totalCarbs = foodItems.map { $0.carbohydrates }.reduce(0, +)
-        let totalProtein = foodItems.compactMap { $0.protein }.reduce(0, +)
-        let totalFat = foodItems.compactMap { $0.fat }.reduce(0, +)
-        let totalCalories = foodItems.compactMap { $0.calories }.reduce(0, +)
-        let totalFiber = foodItems.compactMap { $0.fiber }.reduce(0, +)
+        // Calculate totals from items (fallback to JSON-level totals)
+        let itemCarbs = foodItems.map { $0.carbohydrates }.reduce(0, +)
+        let itemProtein = foodItems.compactMap { $0.protein }.reduce(0, +)
+        let itemFat = foodItems.compactMap { $0.fat }.reduce(0, +)
+        let itemCalories = foodItems.compactMap { $0.calories }.reduce(0, +)
+        let itemFiber = foodItems.compactMap { $0.fiber }.reduce(0, +)
 
-        // Create and return the result using the actual AIFoodAnalysisResult structure
+        // Parse servings
+        let totalServings = json["total_usda_servings"] as? Double
+        let totalPortions = json["total_food_portions"] as? Int ?? foodItems.count
+
         return AIFoodAnalysisResult(
             imageType: imageType,
             foodItemsDetailed: foodItems,
             overallDescription: json["overall_description"] as? String,
-            confidence: AIConfidenceLevel(rawValue: (json["confidence_level"] as? String) ?? "") ?? .medium,
+            confidence: AIConfidenceLevel(rawValue: json["confidence_level"] as? String ?? "") ?? .medium,
             numericConfidence: json["confidence"] as? Double,
-            totalFoodPortions: foodItems.count,
-            totalUsdaServings: json["total_usda_servings"] as? Double,
-            totalCarbohydrates: json["total_carbohydrates"] as? Double ?? totalCarbs,
-            totalProtein: totalProtein > 0 ? totalProtein : (json["total_protein"] as? Double),
-            totalFat: totalFat > 0 ? totalFat : (json["total_fat"] as? Double),
-            totalFiber: totalFiber > 0 ? totalFiber : (json["total_fiber"] as? Double),
-            totalCalories: totalCalories > 0 ? totalCalories : (json["total_calories"] as? Double),
+            totalFoodPortions: totalPortions,
+            totalUsdaServings: totalServings,
+            totalCarbohydrates: json["total_carbohydrates"] as? Double ?? itemCarbs,
+            totalProtein: itemProtein > 0 ? itemProtein : (json["total_protein"] as? Double),
+            totalFat: itemFat > 0 ? itemFat : (json["total_fat"] as? Double),
+            totalFiber: itemFiber > 0 ? itemFiber : (json["total_fiber"] as? Double),
+            totalCalories: itemCalories > 0 ? itemCalories : (json["total_calories"] as? Double),
             portionAssessmentMethod: json["portion_assessment_method"] as? String,
             diabetesConsiderations: json["diabetes_considerations"] as? String,
             visualAssessmentDetails: json["visual_assessment_details"] as? String,
             notes: json["notes"] as? String,
-            originalServings: (json["original_servings"] as? Double) ?? 1.0,
+            originalServings: totalServings ?? 1.0,
             fatProteinUnits: json["fat_protein_units"] as? String,
             netCarbsAdjustment: json["net_carbs_adjustment"] as? String,
             insulinTimingRecommendations: json["insulin_timing_recommendations"] as? String,
@@ -419,48 +499,39 @@ final class AIServiceManager {
             safetyAlerts: json["safety_alerts"] as? String
         )
     }
+
+    // MARK: - Image Preparation
+
+    private func prepareImageForAnalysis(_ image: UIImage) async -> UIImage {
+        let targetSize = CGSize(width: 768, height: 768)
+        return image.byPreparingForAnalysis(targetSize: targetSize)
+    }
 }
 
 // MARK: - Image Processing
 
 extension UIImage {
     func byPreparingForAnalysis(targetSize: CGSize) -> UIImage {
-        // 1. Crop to square aspect ratio
         let squareImage = byCroppingToSquare()
-        
-        // 2. Resize to target size
+
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1.0
         format.opaque = true
-        
+
         let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
-        let resizedImage = renderer.image { _ in
+        return renderer.image { _ in
             squareImage.draw(in: CGRect(origin: .zero, size: targetSize))
         }
-        
-        return resizedImage
     }
-    
+
     private func byCroppingToSquare() -> UIImage {
-        let originalWidth = size.width
-        let originalHeight = size.height
-        
-        // Check if already square
-        if originalWidth == originalHeight {
-            return self
-        }
-        
-        // Calculate square dimensions
-        let squareSize = min(originalWidth, originalHeight)
-        let x = (originalWidth - squareSize) / 2
-        let y = (originalHeight - squareSize) / 2
-        let squareRect = CGRect(x: x, y: y, width: squareSize, height: squareSize)
-        
-        // Crop to square
-        guard let cgImage = cgImage?.cropping(to: squareRect) else {
-            return self
-        }
-        
-        return UIImage(cgImage: cgImage, scale: scale, orientation: imageOrientation)
+        let w = size.width, h = size.height
+        guard w != h else { return self }
+
+        let side = min(w, h)
+        let rect = CGRect(x: (w - side) / 2, y: (h - side) / 2, width: side, height: side)
+
+        guard let cg = cgImage?.cropping(to: rect) else { return self }
+        return UIImage(cgImage: cg, scale: scale, orientation: imageOrientation)
     }
 }

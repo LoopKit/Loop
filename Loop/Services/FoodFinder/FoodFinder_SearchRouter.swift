@@ -26,17 +26,17 @@ class FoodSearchRouter {
     private let openFoodFactsService = OpenFoodFactsService() // Uses optimized configuration by default
     
     // MARK: - Text/Voice Search Routing
-    
+
     /// Perform text-based food search using the configured provider
     func searchFoodsByText(_ query: String) async throws -> [OpenFoodFactsProduct] {
         let provider = aiService.getProviderForSearchType(.textSearch)
-        
+
         log.info("🔍 Routing text search '%{public}@' to provider: %{public}@", query, provider.rawValue)
-        
+
         switch provider {
         case .openFoodFacts:
             return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
-            
+
         case .usdaFoodData:
             do {
                 return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
@@ -44,137 +44,56 @@ class FoodSearchRouter {
                 log.error("❌ USDA search failed: %{public}@ — falling back to OpenFoodFacts", error.localizedDescription)
                 return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
             }
-            
-        case .claude, .googleGemini, .openAI:
-            // Unify prompts: AI prompts live in AIFoodAnalysis.swift and are for image analysis only.
-            // For text search, stick to structured databases for reliability.
-            log.info("ℹ️ AI providers are not used for text search; using USDA with OFF fallback")
+
+        case .aiProvider:
+            // AI providers are not used for text search; use USDA with OFF fallback
+            log.info("ℹ️ AI provider not used for text search; using USDA with OFF fallback")
             do {
                 return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
             } catch {
                 return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
             }
-        case .bringYourOwn:
-            // BYO is not supported for text search; fall back to OpenFoodFacts
-            log.info("⚠️ Bring Your Own is not available for text search; using OpenFoodFacts")
-            return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
         }
     }
-    
+
     // MARK: - Barcode Search Routing
-    
+
     /// Perform barcode-based food search using the configured provider
     func searchFoodsByBarcode(_ barcode: String) async throws -> OpenFoodFactsProduct? {
         let provider = aiService.getProviderForSearchType(.barcodeSearch)
-        
+
         log.info("📱 Routing barcode search '%{public}@' to provider: %{public}@", barcode, provider.rawValue)
-        
+
         switch provider {
         case .openFoodFacts:
             return try await openFoodFactsService.fetchProduct(barcode: barcode)
-            
-            
-            
-        case .claude, .openAI, .usdaFoodData, .googleGemini, .bringYourOwn:
+
+        case .usdaFoodData, .aiProvider:
             // These providers don't support barcode search, fall back to OpenFoodFacts
             log.info("⚠️ %{public}@ doesn't support barcode search, falling back to OpenFoodFacts", provider.rawValue)
             return try await openFoodFactsService.fetchProduct(barcode: barcode)
         }
     }
-    
+
     // MARK: - AI Image Search Routing
-    
-    /// Perform AI image analysis using the configured provider
+
+    /// Perform AI image analysis using the configured BYO provider
     func analyzeFood(image: UIImage) async throws -> AIFoodAnalysisResult {
-        let provider = aiService.getProviderForSearchType(.aiImageSearch)
-        
-        log.info("🤖 Routing AI image analysis to provider: %{public}@", provider.rawValue)
-        
-        switch provider {
-        case .claude:
-            let key = aiService.getAPIKey(for: .claude) ?? ""
-            let query = "" // Always use centralized prompts from AIFoodAnalysis.swift
-            guard !key.isEmpty else {
-                throw AIFoodAnalysisError.noApiKey
-            }
-            return try await ClaudeFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query)
-            
-        case .openAI:
-            let key = aiService.getAPIKey(for: .openAI) ?? ""
-            let query = "" // Always use centralized prompts from AIFoodAnalysis.swift
-            guard !key.isEmpty else {
-                throw AIFoodAnalysisError.noApiKey
-            }
-            return try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query)
-            
-            
-            
-        case .googleGemini:
-            let key = UserDefaults.standard.googleGeminiAPIKey
-            let query = "" // Always use centralized prompts from AIFoodAnalysis.swift
-            guard !key.isEmpty else {
-                throw AIFoodAnalysisError.noApiKey
-            }
-            return try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query)
+        log.info("🤖 Routing AI image analysis to configured BYO provider")
 
-
-
-        case .bringYourOwn:
-            // Use OpenAI-compatible custom endpoint for image analysis
-            // Prefer temporary BYO test override if enabled (DEBUG), else UserDefaults.
-            let key: String
-            let base: String
-            let model: String?
-            let version: String?
-            let org: String?
-
-            if BYOTestConfig.enabled {
-                os_log("🧪 Using BYO test override configuration", log: log, type: .info)
-                key = BYOTestConfig.apiKey
-                base = BYOTestConfig.baseURL
-                model = BYOTestConfig.model
-                version = BYOTestConfig.apiVersion
-                org = BYOTestConfig.organizationID
-            } else {
-                key = UserDefaults.standard.customAIAPIKey
-                base = UserDefaults.standard.customAIBaseURL
-                let m = UserDefaults.standard.customAIModel
-                let v = UserDefaults.standard.customAIAPIVersion
-                let o = UserDefaults.standard.customAIOrganization
-                model = m.isEmpty ? nil : m
-                version = v.isEmpty ? nil : v
-                org = o.isEmpty ? nil : o
-            }
-
-            guard !key.isEmpty, !base.isEmpty else {
-                throw AIFoodAnalysisError.noApiKey
-            }
-
-            return try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(
-                image,
-                apiKey: key,
-                query: "", // rely on internal optimized prompt
-                baseURL: base,
-                model: model,
-                apiVersion: version,
-                organizationID: org,
-                customPath: {
-                    let path = UserDefaults.standard.customAIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
-                    return path.isEmpty ? nil : path
-                }(),
-                telemetryCallback: nil
-            )
-
-        case .openFoodFacts, .usdaFoodData:
-            // OpenFoodFacts and USDA don't support AI image analysis, fall back to Google Gemini
-            log.info("⚠️ %{public}@ doesn't support AI image analysis, falling back to Google Gemini", provider.rawValue)
-            let key = UserDefaults.standard.googleGeminiAPIKey
-            let query = UserDefaults.standard.googleGeminiQuery
-            guard !key.isEmpty else {
-                throw AIFoodAnalysisError.noApiKey
-            }
-            return try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(image, apiKey: key, query: query)
+        guard let config = UserDefaults.standard.activeAIProviderConfiguration else {
+            throw AIFoodAnalysisError.noApiKey
         }
+        guard !config.apiKey.isEmpty else {
+            throw AIFoodAnalysisError.noApiKey
+        }
+
+        let prompt = getAnalysisPrompt()
+        return try await AIServiceManager.shared.analyzeFoodImage(
+            image,
+            using: config,
+            query: prompt
+        )
     }
 
     // MARK: - Voice / Generative Text Search Routing
@@ -183,80 +102,26 @@ class FoodSearchRouter {
     /// Routes through the same AI provider and prompt infrastructure as image analysis,
     /// using a placeholder image with the user's description as context.
     func analyzeFoodByDescription(_ description: String) async throws -> AIFoodAnalysisResult {
-        let provider = aiService.getProviderForSearchType(.aiImageSearch)
         let placeholderImage = createPlaceholderImage()
-        let voiceContext = "The user described their food verbally: \"\(description)\". There is no photo — analyze the food based solely on this text description. Provide the same detailed nutritional analysis you would for a food photo."
+        let basePrompt = getAnalysisPrompt()
+        let voiceContext = "\(basePrompt)\n\nThe user described their food verbally: \"\(description)\". There is no photo — analyze the food based solely on this text description. Provide the same detailed nutritional analysis you would for a food photo."
 
-        log.info("🎙️ Routing voice/generative search '%{public}@' to AI provider: %{public}@", description, provider.rawValue)
+        log.info("🎙️ Routing voice/generative search '%{public}@' to configured BYO provider", description)
 
-        switch provider {
-        case .claude:
-            let key = aiService.getAPIKey(for: .claude) ?? ""
-            guard !key.isEmpty else { throw AIFoodAnalysisError.noApiKey }
-            return try await ClaudeFoodAnalysisService.shared.analyzeFoodImage(placeholderImage, apiKey: key, query: voiceContext)
-
-        case .openAI:
-            let key = aiService.getAPIKey(for: .openAI) ?? ""
-            guard !key.isEmpty else { throw AIFoodAnalysisError.noApiKey }
-            return try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(placeholderImage, apiKey: key, query: voiceContext)
-
-        case .googleGemini:
-            let key = UserDefaults.standard.googleGeminiAPIKey
-            guard !key.isEmpty else { throw AIFoodAnalysisError.noApiKey }
-            return try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(placeholderImage, apiKey: key, query: voiceContext)
-
-        case .bringYourOwn:
-            let key: String
-            let base: String
-            let model: String?
-            let version: String?
-            let org: String?
-
-            if BYOTestConfig.enabled {
-                key = BYOTestConfig.apiKey
-                base = BYOTestConfig.baseURL
-                model = BYOTestConfig.model
-                version = BYOTestConfig.apiVersion
-                org = BYOTestConfig.organizationID
-            } else {
-                key = UserDefaults.standard.customAIAPIKey
-                base = UserDefaults.standard.customAIBaseURL
-                let m = UserDefaults.standard.customAIModel
-                let v = UserDefaults.standard.customAIAPIVersion
-                let o = UserDefaults.standard.customAIOrganization
-                model = m.isEmpty ? nil : m
-                version = v.isEmpty ? nil : v
-                org = o.isEmpty ? nil : o
-            }
-
-            guard !key.isEmpty, !base.isEmpty else { throw AIFoodAnalysisError.noApiKey }
-
-            return try await OpenAIFoodAnalysisService.shared.analyzeFoodImage(
-                placeholderImage,
-                apiKey: key,
-                query: voiceContext,
-                baseURL: base,
-                model: model,
-                apiVersion: version,
-                organizationID: org,
-                customPath: {
-                    let path = UserDefaults.standard.customAIEndpointPath.trimmingCharacters(in: .whitespacesAndNewlines)
-                    return path.isEmpty ? nil : path
-                }(),
-                telemetryCallback: nil
-            )
-
-        case .openFoodFacts, .usdaFoodData:
-            // Database providers can't do generative analysis — fall back to Gemini
-            log.info("⚠️ %{public}@ can't do generative search, falling back to Google Gemini", provider.rawValue)
-            let key = UserDefaults.standard.googleGeminiAPIKey
-            guard !key.isEmpty else { throw AIFoodAnalysisError.noApiKey }
-            return try await GoogleGeminiFoodAnalysisService.shared.analyzeFoodImage(placeholderImage, apiKey: key, query: voiceContext)
+        guard let config = UserDefaults.standard.activeAIProviderConfiguration else {
+            throw AIFoodAnalysisError.noApiKey
         }
+        guard !config.apiKey.isEmpty else {
+            throw AIFoodAnalysisError.noApiKey
+        }
+
+        return try await AIServiceManager.shared.analyzeFoodImage(
+            placeholderImage,
+            using: config,
+            query: voiceContext
+        )
     }
-    
-    
-    
+
     // MARK: Barcode Search Implementations
     
     

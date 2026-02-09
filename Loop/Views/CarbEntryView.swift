@@ -21,6 +21,10 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     
     @State private var showHowAbsorptionTimeWorks = false
     @State private var showAddFavoriteFood = false
+
+    // FoodFinder data for favorite food pre-population
+    @State private var foodFinderFoodName: String = ""
+    @State private var foodFinderImage: UIImage? = nil
     
     private let isNewEntry: Bool
 
@@ -42,13 +46,14 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                         ToolbarItem(placement: .navigationBarLeading) {
                             dismissButton
                         }
-                        
+
                         ToolbarItem(placement: .navigationBarTrailing) {
                             continueButton
                         }
                     }
-                
+
             }
+            .navigationViewStyle(.stack)
         }
         else {
             content
@@ -73,6 +78,10 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
 
                 continueActionButton
 
+                if isNewEntry, UserDefaults.standard.foodFinderEnabled, !viewModel.analysisHistory.isEmpty {
+                    analysisHistoryCard
+                }
+
                 if isNewEntry, FeatureFlags.allowExperimentalFeatures {
                     favoriteFoodsCard
                 }
@@ -88,7 +97,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
         }
         .alert(item: $viewModel.alert, content: alert(for:))
         .sheet(isPresented: $showAddFavoriteFood, onDismiss: clearExpandedRow) {
-            AddEditFavoriteFoodView(carbsQuantity: $viewModel.carbsQuantity.wrappedValue, foodType: $viewModel.foodType.wrappedValue, absorptionTime: $viewModel.absorptionTime.wrappedValue, onSave: onFavoriteFoodSave(_:))
+            AddEditFavoriteFoodView(carbsQuantity: $viewModel.carbsQuantity.wrappedValue, foodType: $viewModel.foodType.wrappedValue, absorptionTime: $viewModel.absorptionTime.wrappedValue, name: foodFinderFoodName, thumbnailImage: foodFinderImage, onSave: onFavoriteFoodSave(_:))
         }
         .sheet(isPresented: $showHowAbsorptionTimeWorks) {
             HowAbsorptionTimeWorksView()
@@ -111,7 +120,11 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     foodType: $viewModel.foodType,
                     absorptionTime: $viewModel.absorptionTime,
                     absorptionTimeWasEdited: viewModel.absorptionTimeWasEdited,
-                    defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes
+                    defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes,
+                    favoriteFoodName: $foodFinderFoodName,
+                    favoriteFoodImage: $foodFinderImage,
+                    restoredAnalysisResult: $viewModel.restoredAnalysisResult,
+                    restoredThumbnailID: $viewModel.restoredThumbnailID
                 )
             }
 
@@ -218,6 +231,100 @@ extension CarbEntryView {
     }
 }
 
+// MARK: - Analysis History Card
+extension CarbEntryView {
+    private var analysisHistoryCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("RECENT AI ANALYSES")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 26)
+
+            VStack(spacing: 10) {
+                VStack {
+                    HStack {
+                        Text("Choose Recent:")
+
+                        analysisHistorySelectedLabel(viewModel.selectedAnalysisHistoryIndex)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+
+                    if expandedRow == .analysisHistorySelection {
+                        Picker(String(""), selection: $viewModel.selectedAnalysisHistoryIndex) {
+                            ForEach(-1..<viewModel.analysisHistory.count, id: \.self) { index in
+                                analysisHistoryPickerRow(index)
+                                    .tag(index)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                    }
+                }
+                .onTapGesture {
+                    withAnimation {
+                        if expandedRow == .analysisHistorySelection {
+                            expandedRow = nil
+                        } else {
+                            expandedRow = .analysisHistorySelection
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal)
+            .background(CardBackground())
+            .padding(.horizontal)
+        }
+    }
+
+    @ViewBuilder
+    private func analysisHistorySelectedLabel(_ index: Int) -> some View {
+        if index >= 0 {
+            let record = viewModel.analysisHistory[index]
+            if let thumbID = record.thumbnailID,
+               let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
+                HStack(spacing: 4) {
+                    Text(record.name)
+                        .minimumScaleFactor(0.8)
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 20, height: 20)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+            } else {
+                Text("\(record.name) \(record.foodType)")
+                    .minimumScaleFactor(0.8)
+            }
+        } else {
+            Text(String(localized: "None", comment: "Indicates no analysis history record is selected"))
+                .foregroundColor(.accentColor)
+                .minimumScaleFactor(0.8)
+        }
+    }
+
+    @ViewBuilder
+    private func analysisHistoryPickerRow(_ index: Int) -> some View {
+        if index == -1 {
+            Text(String(localized: "None", comment: "Indicates no analysis history record is selected"))
+        } else {
+            let record = viewModel.analysisHistory[index]
+            if let thumbID = record.thumbnailID,
+               let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
+                HStack(spacing: 4) {
+                    Text(record.name)
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 24, height: 24)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+            } else {
+                Text("\(record.name) \(record.foodType)")
+            }
+        }
+    }
+}
+
 // MARK: - Favorite Foods Card
 extension CarbEntryView {
     private var favoriteFoodsCard: some View {
@@ -232,17 +339,15 @@ extension CarbEntryView {
                     VStack {
                         HStack {
                             Text("Choose Favorite:", comment: "The label for the row where you choose saved Favorite Food")
-                            
-                            let selectedFavorite = favoritedFoodTextFromIndex(viewModel.selectedFavoriteFoodIndex)
-                            Text(selectedFavorite)
-                                .minimumScaleFactor(0.8)
+
+                            favoriteFoodSelectedLabel(viewModel.selectedFavoriteFoodIndex)
                                 .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                         
                         if expandedRow == .favoriteFoodSelection {
                             Picker(String(""), selection: $viewModel.selectedFavoriteFoodIndex) {
                                 ForEach(-1..<viewModel.favoriteFoods.count, id: \.self) { index in
-                                    Text(favoritedFoodTextFromIndex(index))
+                                    favoriteFoodPickerRow(index)
                                         .tag(index)
                                 }
                             }
@@ -266,6 +371,7 @@ extension CarbEntryView {
                 Button(action: saveAsFavoriteFood) {
                     Text("Save as favorite food", comment: "Button label for saving current carb entry as a new Favorite Food")
                         .frame(maxWidth: .infinity)
+                        .foregroundColor(.accentColor)
                 }
                 .disabled(viewModel.saveFavoriteFoodButtonDisabled)
             }
@@ -276,13 +382,51 @@ extension CarbEntryView {
         }
     }
     
-    private func favoritedFoodTextFromIndex(_ index: Int) -> String {
-        if index == -1 {
-            return String(localized: "None", comment: "Indicates no favorite food is selected")
-        }
-        else {
+    @ViewBuilder
+    private func favoriteFoodSelectedLabel(_ index: Int) -> some View {
+        if index >= 0 {
             let food = viewModel.favoriteFoods[index]
-            return "\(food.name) \(food.foodType)"
+            if food.foodType.isEmpty,
+               let uiImage = FoodFinder_FavoritesHelper.thumbnail(for: food) {
+                HStack(spacing: 4) {
+                    Text(food.name)
+                        .minimumScaleFactor(0.8)
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 20, height: 20)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+            } else {
+                Text("\(food.name) \(food.foodType)")
+                    .minimumScaleFactor(0.8)
+            }
+        } else {
+            Text(String(localized: "None", comment: "Indicates no favorite food is selected"))
+                .foregroundColor(.accentColor)
+                .minimumScaleFactor(0.8)
+        }
+    }
+
+    @ViewBuilder
+    private func favoriteFoodPickerRow(_ index: Int) -> some View {
+        if index == -1 {
+            Text(String(localized: "None", comment: "Indicates no favorite food is selected"))
+        } else {
+            let food = viewModel.favoriteFoods[index]
+            if food.foodType.isEmpty,
+               let uiImage = FoodFinder_FavoritesHelper.thumbnail(for: food) {
+                HStack(spacing: 4) {
+                    Text(food.name)
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 24, height: 24)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+            } else {
+                Text("\(food.name) \(food.foodType)")
+            }
         }
     }
     
@@ -293,7 +437,21 @@ extension CarbEntryView {
     private func onFavoriteFoodSave(_ food: NewFavoriteFood) {
         clearExpandedRow()
         self.showAddFavoriteFood = false
+
         viewModel.onFavoriteFoodSave(food)
+
+        // Save thumbnail if we have a captured AI image.
+        // The StoredFavoriteFood (with its ID) was just appended to favoriteFoods.
+        if let image = foodFinderImage,
+           FoodFinder_FeatureFlags.isEnabled,
+           let storedFood = viewModel.favoriteFoods.last,
+           storedFood.name == food.name {
+            if let thumbId = FavoriteFoodImageStore.saveThumbnail(from: image) {
+                var imageMap = UserDefaults.standard.favoriteFoodImageIDs
+                imageMap[storedFood.id] = thumbId
+                UserDefaults.standard.favoriteFoodImageIDs = imageMap
+            }
+        }
     }
 }
 
@@ -325,6 +483,6 @@ extension CarbEntryView {
 
 extension CarbEntryView {
     enum Row {
-        case amountConsumed, time, foodType, absorptionTime, favoriteFoodSelection
+        case amountConsumed, time, foodType, absorptionTime, favoriteFoodSelection, analysisHistorySelection
     }
 }

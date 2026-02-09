@@ -46,12 +46,26 @@ struct FoodFinder_EntryPoint: View {
     /// Optional binding so the host can observe the currently selected product
     var selectedFoodProduct: Binding<OpenFoodFactsProduct?>?
 
+    /// Binding for the food name to pre-populate favorite food form
+    @Binding var favoriteFoodName: String
+
+    /// Binding for the captured AI image to use as favorite food thumbnail
+    @Binding var favoriteFoodImage: UIImage?
+
+    /// Optional binding for a restored AI analysis result from history selection.
+    /// When set, the entry point consumes it (calling handleAIFoodAnalysis) and clears it.
+    @Binding var restoredAnalysisResult: AIFoodAnalysisResult?
+
+    /// Thumbnail ID from the selected history record, used to restore the product image.
+    @Binding var restoredThumbnailID: String?
+
     // MARK: - Internal State
 
     @StateObject private var searchVM: FoodFinder_SearchViewModel
 
     @State private var showingAICamera = false
     @State private var showingAISettings = false
+    @State private var showingFavoriteSheet = false
     @State private var isFoodSearchEnabled: Bool
     @State private var showAbsorptionReasoning = false
     @State private var isAdvancedAnalysisExpanded = false
@@ -79,7 +93,11 @@ struct FoodFinder_EntryPoint: View {
         defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes,
         preferredCarbUnit: HKUnit = .gram(),
         onFavoriteFoodSave: ((NewFavoriteFood) -> Void)? = nil,
-        selectedFoodProduct: Binding<OpenFoodFactsProduct?>? = nil
+        selectedFoodProduct: Binding<OpenFoodFactsProduct?>? = nil,
+        favoriteFoodName: Binding<String> = .constant(""),
+        favoriteFoodImage: Binding<UIImage?> = .constant(nil),
+        restoredAnalysisResult: Binding<AIFoodAnalysisResult?> = .constant(nil),
+        restoredThumbnailID: Binding<String?> = .constant(nil)
     ) {
         self._carbsQuantity = carbsQuantity
         self._foodType = foodType
@@ -89,6 +107,10 @@ struct FoodFinder_EntryPoint: View {
         self.preferredCarbUnit = preferredCarbUnit
         self.onFavoriteFoodSave = onFavoriteFoodSave
         self.selectedFoodProduct = selectedFoodProduct
+        self._favoriteFoodName = favoriteFoodName
+        self._favoriteFoodImage = favoriteFoodImage
+        self._restoredAnalysisResult = restoredAnalysisResult
+        self._restoredThumbnailID = restoredThumbnailID
 
         let initialEnabled = UserDefaults.standard.foodFinderEnabled
         self._isFoodSearchEnabled = State(initialValue: initialEnabled)
@@ -173,10 +195,25 @@ struct FoodFinder_EntryPoint: View {
             }
         }
         .onAppear {
+            FoodFinder_FeatureFlags.migrateToByoIfNeeded()
             isFoodSearchEnabled = UserDefaults.standard.foodFinderEnabled
             loadFavoriteFoods()
             wireSearchVMCallbacks()
             searchVM.setupObservers()
+        }
+        .onChange(of: restoredAnalysisResult) { newResult in
+            guard let result = newResult else { return }
+            // Restore thumbnail from history record
+            if let thumbID = restoredThumbnailID,
+               let thumbImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
+                searchVM.capturedAIImage = thumbImage
+                favoriteFoodImage = thumbImage
+            }
+            handleAIFoodAnalysis(result)
+            // Clear after consuming so the next selection triggers a fresh change
+            DispatchQueue.main.async {
+                restoredAnalysisResult = nil
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
             let currentSetting = UserDefaults.standard.foodFinderEnabled
@@ -190,7 +227,9 @@ struct FoodFinder_EntryPoint: View {
                     Task { @MainActor in
                         handleAIFoodAnalysis(result)
                         searchVM.capturedAIImage = capturedImage
+                        favoriteFoodImage = capturedImage
                         showingAICamera = false
+                        recordAnalysis(result, type: .image)
                     }
                 },
                 onCancel: {
@@ -200,6 +239,29 @@ struct FoodFinder_EntryPoint: View {
         }
         .sheet(isPresented: $showingAISettings) {
             AISettingsView()
+        }
+        .sheet(isPresented: $showingFavoriteSheet) {
+            AddEditFavoriteFoodView(
+                carbsQuantity: carbsQuantity,
+                foodType: foodType,
+                absorptionTime: absorptionTime,
+                name: favoriteFoodName,
+                thumbnailImage: searchVM.capturedAIImage,
+                onSave: { food in
+                    showingFavoriteSheet = false
+                    onFavoriteFoodSave?(food)
+
+                    // Save thumbnail linked to the newly created StoredFavoriteFood
+                    if let image = searchVM.capturedAIImage,
+                       let thumbId = FavoriteFoodImageStore.saveThumbnail(from: image) {
+                        var imageMap = UserDefaults.standard.favoriteFoodImageIDs
+                        imageMap[food.name] = thumbId
+                        UserDefaults.standard.favoriteFoodImageIDs = imageMap
+                    }
+
+                    loadFavoriteFoods()
+                }
+            )
         }
     }
 
@@ -220,6 +282,7 @@ struct FoodFinder_EntryPoint: View {
         // the ViewModel routes through AI generative search and delivers the result here.
         searchVM.onGenerativeSearchResult = { result in
             handleAIFoodAnalysis(result)
+            recordAnalysis(result, type: .dictation)
         }
     }
 
@@ -266,6 +329,9 @@ extension FoodFinder_EntryPoint {
                 },
                 onAICameraTapped: {
                     showingAICamera = true
+                },
+                onDictationDetected: {
+                    searchVM.lastInputWasDictated = true
                 }
             )
 
@@ -274,6 +340,7 @@ extension FoodFinder_EntryPoint {
                 FoodSearchResultsView(
                     searchResults: searchVM.foodSearchResults,
                     isSearching: searchVM.isFoodSearching,
+                    isAISearching: searchVM.isAISearching,
                     errorMessage: searchVM.foodSearchError,
                     onProductSelected: { product in
                         searchVM.selectFoodProduct(product)
@@ -303,29 +370,24 @@ extension FoodFinder_EntryPoint {
                     .frame(width: 120, height: 90)
                     .clipped()
                     .cornerRadius(12)
-            } else if let imageURL = selectedFood.imageFrontURL ?? selectedFood.imageURL, !imageURL.isEmpty {
-                // Show barcode product image from URL
-                AsyncImage(url: URL(string: imageURL)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 120, height: 90)
-                        .clipped()
-                        .cornerRadius(12)
-                } placeholder: {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemGray6))
-                        .frame(width: 120, height: 90)
-                        .overlay(
-                            VStack(spacing: 4) {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                Text("Loading...")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
-                        )
-                }
+            } else if let thumbnail = searchVM.productThumbnailImage {
+                // Show pre-downloaded product thumbnail (avoids AsyncImage rebuild issues)
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 120, height: 90)
+                    .clipped()
+                    .cornerRadius(12)
+            } else if (selectedFood.imageFrontSmallURL ?? selectedFood.imageFrontURL ?? selectedFood.imageURL) != nil {
+                // Static placeholder while thumbnail downloads (OFF images can be slow)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemGray6))
+                    .frame(width: 120, height: 90)
+                    .overlay(
+                        Image(systemName: "fork.knife")
+                            .font(.system(size: 28))
+                            .foregroundColor(Color(.systemGray3))
+                    )
             }
 
             // Product name with favorite heart (centered as a unit)
@@ -338,7 +400,11 @@ extension FoodFinder_EntryPoint {
                         .foregroundColor(.primary)
                         .lineLimit(1)
                         .truncationMode(.tail)
-                    Button(action: { toggleQuickFavorite(for: selectedFood) }) {
+                    Button(action: {
+                        if !isQuickFavorited(selectedFood) {
+                            showingFavoriteSheet = true
+                        }
+                    }) {
                         Image(systemName: isQuickFavorited(selectedFood) ? "heart.fill" : "heart")
                             .foregroundColor(isQuickFavorited(selectedFood) ? .red : Color(UIColor.tertiaryLabel))
                     }
@@ -354,10 +420,30 @@ extension FoodFinder_EntryPoint {
                 }
             }
 
-            // Package serving size (only show "Package Serving Size:" prefix for barcode scans)
-            Text(selectedFood.dataSource == .barcodeScan ? "Package Serving Size: \(selectedFood.servingSizeDisplay)" : selectedFood.servingSizeDisplay)
-                .font(.subheadline)
-                .foregroundColor(.primary)
+            // Serving size — replace "CANNOT DETERMINE" with the actual USDA standard serving size
+            if selectedFood.servingSizeDisplay.uppercased().contains("CANNOT DETERMINE") {
+                let usdaSize = searchVM.lastAIAnalysisResult?.foodItemsDetailed.first?.usdaServingSize?.trimmingCharacters(in: .whitespacesAndNewlines)
+                if let usda = usdaSize, !usda.isEmpty {
+                    Text("USDA standard serving: \(usda). Adjust servings as needed.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                } else {
+                    let foodName = shortenedTitle(selectedFood.displayName)
+                    Text("Based on a standard serving of \(foodName). Adjust servings as needed.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            } else if selectedFood.dataSource == .barcodeScan {
+                Text("Package Serving Size: \(selectedFood.servingSizeDisplay)")
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+            } else {
+                Text(selectedFood.servingSizeDisplay)
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+            }
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 8)
@@ -686,17 +772,19 @@ extension FoodFinder_EntryPoint {
                 }()
 
                 FoodFinder_LinePair(label: "Normal USDA Serving:", value: usdaDisplay)
-                FoodFinder_LinePair(label: "Portion That I See:", value: item.portionEstimate.isEmpty ? "Unknown portion" : item.portionEstimate)
 
                 if item.portionEstimate.uppercased().contains("CANNOT DETERMINE") {
-                    Text("Estimated from menu text")
+                    FoodFinder_LinePair(label: "Portion:", value: "No photo — using standard USDA serving for \(item.name)")
+                    Text("Values based on standard portion")
                         .font(.caption2)
                         .fontWeight(.semibold)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color(.systemYellow).opacity(0.3))
-                        .foregroundColor(.orange)
+                        .background(Color(.systemBlue).opacity(0.15))
+                        .foregroundColor(.blue)
                         .clipShape(Capsule())
+                } else {
+                    FoodFinder_LinePair(label: "Portion That I See:", value: item.portionEstimate.isEmpty ? "Unknown portion" : item.portionEstimate)
                 }
 
                 if baseMultiplier > 0.01 && abs(baseMultiplier - 1.0) > 0.01 {
@@ -970,47 +1058,23 @@ extension FoodFinder_EntryPoint {
         // Convert AI result to OpenFoodFactsProduct format for consistency
         let aiProduct = convertAIResultToFoodProduct(enrichedResult)
 
+        // Update favorite food name binding for pre-populating the favorite food form
+        favoriteFoodName = extractFoodNameFromAIResult(enrichedResult)
+
         // Use existing food selection workflow
         searchVM.selectFoodProduct(aiProduct)
 
-        // Set servings carefully to avoid double-scaling
+        // Calculate final servings value once to avoid multiple onChange triggers per frame
+        var finalServings: Double = 1.0
         if enrichedResult.servings > 0 && enrichedResult.servings < 0.95 {
             if enrichedResult.servingSizeDescription.localizedCaseInsensitiveContains("medium") {
-                searchVM.numberOfServings = enrichedResult.servings
-            } else {
-                searchVM.numberOfServings = 1.0
+                finalServings = enrichedResult.servings
             }
         } else if enrichedResult.servings >= 0.95 {
-            searchVM.numberOfServings = enrichedResult.servings
-        } else {
-            searchVM.numberOfServings = 1.0
+            finalServings = enrichedResult.servings
         }
 
-        // Set dynamic absorption time from AI analysis
-        print("AI ABSORPTION TIME DEBUG:")
-        print("Advanced Dosing Enabled: \(UserDefaults.standard.foodFinder_advancedDosingRecommendationsEnabled)")
-        print("AI Absorption Hours: \(enrichedResult.absorptionTimeHours ?? 0)")
-        print("Current Absorption Time: \(absorptionTime)")
-
-        if let absorptionHours = enrichedResult.absorptionTimeHours,
-           absorptionHours > 0 {
-            let absorptionTimeInterval = TimeInterval(absorptionHours * 3600)
-
-            print("Setting AI absorption time: \(absorptionHours) hours = \(absorptionTimeInterval) seconds")
-
-            searchVM.absorptionEditIsProgrammatic = true
-            absorptionTime = absorptionTimeInterval
-            searchVM.absorptionTime = absorptionTimeInterval
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                searchVM.absorptionTimeWasAIGenerated = true
-                print("AI absorption time flag set. Flag: \(searchVM.absorptionTimeWasAIGenerated)")
-            }
-        } else {
-            print("AI absorption time conditions not met - not setting absorption time")
-        }
-
-        // Soft clamp for obvious slice-based overestimates (initialization only)
+        // Soft clamp for obvious slice-based overestimates
         if enrichedResult.servingSizeDescription.localizedCaseInsensitiveContains("medium") {
             let portionText = (enrichedResult.analysisNotes ?? enrichedResult.servingSizeDescription).lowercased()
             if portionText.contains("slice") || portionText.contains("slices") {
@@ -1023,16 +1087,57 @@ extension FoodFinder_EntryPoint {
                     case 3, 4: cap = 0.50
                     default: break
                     }
-                    if cap > 0 {
-                        let aiServings = enrichedResult.servings
-                        if aiServings > cap {
-                            print("Applying slice-based soft cap: AI=\(aiServings) -> cap=\(cap) for \(count) slice(s)")
-                            searchVM.numberOfServings = cap
-                        }
+                    if cap > 0 && finalServings > cap {
+                        print("Applying slice-based soft cap: AI=\(finalServings) -> cap=\(cap) for \(count) slice(s)")
+                        finalServings = cap
                     }
                 }
             }
         }
+
+        // Single assignment — avoids multiple onChange triggers per frame
+        searchVM.numberOfServings = finalServings
+
+        // Set dynamic absorption time from AI analysis
+        if let absorptionHours = enrichedResult.absorptionTimeHours,
+           absorptionHours > 0 {
+            let absorptionTimeInterval = TimeInterval(absorptionHours * 3600)
+
+            searchVM.absorptionEditIsProgrammatic = true
+            absorptionTime = absorptionTimeInterval
+            searchVM.absorptionTime = absorptionTimeInterval
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                searchVM.absorptionTimeWasAIGenerated = true
+            }
+        }
+
+    }
+
+    /// Record an AI analysis to the history store for future re-entry.
+    private func recordAnalysis(_ result: AIFoodAnalysisResult, type: FoodFinder_AnalysisRecord.AnalysisType) {
+        let name = extractFoodNameFromAIResult(result)
+        let carbs = result.carbohydrates
+        let absTime = result.absorptionTimeHours.map { TimeInterval($0 * 3600) }
+            ?? absorptionTime
+
+        var thumbID: String? = nil
+        if type == .image, let img = searchVM.capturedAIImage {
+            thumbID = FavoriteFoodImageStore.saveThumbnail(from: img)
+        }
+
+        let record = FoodFinder_AnalysisRecord(
+            id: UUID().uuidString,
+            name: name,
+            carbsGrams: carbs,
+            foodType: foodType,
+            absorptionTime: absTime,
+            analysisType: type,
+            date: Date(),
+            thumbnailID: thumbID,
+            analysisResult: result
+        )
+        FoodFinder_AnalysisHistoryStore.record(record)
     }
 
     /// Convert AI analysis result to OpenFoodFactsProduct for integration with existing workflow
