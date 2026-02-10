@@ -1376,7 +1376,13 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
     // MARK: - Absorption Time Recalculation
 
-    /// Recalculates absorption time based on remaining meal composition using AI dosing logic
+    /// Recalculates absorption time based on remaining meal composition.
+    ///
+    /// Uses conservative adjustments anchored to Loop's 3-hour default.
+    /// Fat/protein slow gastric emptying slightly but don't dramatically extend
+    /// carb absorption — they primarily create a secondary glucose rise that
+    /// Loop's prediction algorithm handles separately. Most mixed meals should
+    /// land between 3–4 hours; only exceptionally heavy meals warrant 4.5–5.
     private func recalculateAbsorptionTime(
         carbs: Double,
         protein: Double,
@@ -1387,65 +1393,73 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         context: String
     ) -> (hours: Double, reasoning: String) {
 
-        // Base absorption time based on carb complexity
+        // Baseline: 3 hours is Loop's well-tested default for most meals.
+        // Only low-carb snacks get a shorter baseline.
         let baselineHours: Double = carbs <= 15 ? 2.5 : 3.0
 
-        // Calculate Fat/Protein Units (FPUs)
+        // Fat/Protein Units — conservative adjustments.
+        // Fat and protein slow gastric emptying modestly, but the bulk of
+        // their glucose effect is a secondary rise hours later that Loop
+        // models separately. We only nudge absorption time slightly.
         let fpuValue = (fat + protein) / 10.0
         let fpuAdjustment: Double
         let fpuDescription: String
 
         if fpuValue < 2.0 {
-            fpuAdjustment = 1.0
-            fpuDescription = "Low FPU (\(String(format: "%.1f", fpuValue))) - minimal extension"
+            fpuAdjustment = 0.0
+            fpuDescription = "Low FPU (\(String(format: "%.1f", fpuValue))) — no meaningful extension"
         } else if fpuValue < 4.0 {
-            fpuAdjustment = 2.5
-            fpuDescription = "Medium FPU (\(String(format: "%.1f", fpuValue))) - moderate extension"
+            fpuAdjustment = 0.5
+            fpuDescription = "Medium FPU (\(String(format: "%.1f", fpuValue))) — slight gastric emptying delay"
         } else {
-            fpuAdjustment = 4.0
-            fpuDescription = "High FPU (\(String(format: "%.1f", fpuValue))) - significant extension"
+            fpuAdjustment = 1.0
+            fpuDescription = "High FPU (\(String(format: "%.1f", fpuValue))) — moderate gastric emptying delay"
         }
 
-        // Fiber impact on absorption
+        // Fiber — modest effect on absorption speed.
+        // High fiber flattens the glucose curve (more gradual rise) but
+        // doesn't dramatically extend total absorption duration.
         let fiberAdjustment: Double
         let fiberDescription: String
 
         if fiber > 8.0 {
-            fiberAdjustment = 2.0
-            fiberDescription = "High fiber (\(String(format: "%.1f", fiber))g) - significantly slows absorption"
+            fiberAdjustment = 0.5
+            fiberDescription = "High fiber (\(String(format: "%.1f", fiber))g) — slows gastric emptying modestly"
         } else if fiber > 5.0 {
-            fiberAdjustment = 1.0
-            fiberDescription = "Moderate fiber (\(String(format: "%.1f", fiber))g) - moderately slows absorption"
+            fiberAdjustment = 0.25
+            fiberDescription = "Moderate fiber (\(String(format: "%.1f", fiber))g) — slight slowing effect"
         } else {
             fiberAdjustment = 0.0
-            fiberDescription = "Low fiber (\(String(format: "%.1f", fiber))g) - minimal impact"
+            fiberDescription = "Low fiber (\(String(format: "%.1f", fiber))g) — no meaningful impact"
         }
 
-        // Meal size impact
+        // Meal size — minor effect on gastric emptying.
+        // Very large meals slow stomach emptying, but the effect is modest
+        // compared to what the old model assumed.
         let mealSizeAdjustment: Double
         let mealSizeDescription: String
 
         if calories > 800 {
-            mealSizeAdjustment = 2.0
-            mealSizeDescription = "Large meal (\(String(format: "%.0f", calories)) cal) - delayed gastric emptying"
+            mealSizeAdjustment = 0.5
+            mealSizeDescription = "Large meal (\(String(format: "%.0f", calories)) cal) — slightly slower gastric emptying"
         } else if calories > 400 {
-            mealSizeAdjustment = 1.0
-            mealSizeDescription = "Medium meal (\(String(format: "%.0f", calories)) cal) - moderate impact"
+            mealSizeAdjustment = 0.25
+            mealSizeDescription = "Medium meal (\(String(format: "%.0f", calories)) cal) — minimal impact"
         } else {
             mealSizeAdjustment = 0.0
-            mealSizeDescription = "Small meal (\(String(format: "%.0f", calories)) cal) - minimal impact"
+            mealSizeDescription = "Small meal (\(String(format: "%.0f", calories)) cal) — no impact"
         }
 
-        // Calculate total absorption time (capped at reasonable limits)
-        let totalHours = min(max(baselineHours + fpuAdjustment + fiberAdjustment + mealSizeAdjustment, 2.0), 8.0)
+        // Total: capped at 2–5 hours (aligned with Loop's fast/medium/slow range)
+        let totalHours = min(max(baselineHours + fpuAdjustment + fiberAdjustment + mealSizeAdjustment, 2.0), 5.0)
 
         // Generate detailed reasoning
         let reasoning = "\(context): " +
                        "BASELINE: \(String(format: "%.1f", baselineHours)) hours for \(String(format: "%.1f", carbs))g carbs. " +
-                       "FPU IMPACT: \(fpuDescription) (+\(String(format: "%.1f", fpuAdjustment)) hours). " +
-                       "FIBER EFFECT: \(fiberDescription) (+\(String(format: "%.1f", fiberAdjustment)) hours). " +
-                       "MEAL SIZE: \(mealSizeDescription) (+\(String(format: "%.1f", mealSizeAdjustment)) hours). " +
-                       "TOTAL: \(String(format: "%.1f", totalHours)) hours for remaining meal composition."
+                       "FPU IMPACT: \(fpuDescription) (+\(String(format: "%.1f", fpuAdjustment)) hr). " +
+                       "FIBER EFFECT: \(fiberDescription) (+\(String(format: "%.1f", fiberAdjustment)) hr). " +
+                       "MEAL SIZE: \(mealSizeDescription) (+\(String(format: "%.1f", mealSizeAdjustment)) hr). " +
+                       "TOTAL: \(String(format: "%.1f", totalHours)) hours."
 
         return (totalHours, reasoning)
     }

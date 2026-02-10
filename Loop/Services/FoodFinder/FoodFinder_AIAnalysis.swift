@@ -159,9 +159,10 @@ FOR FOOD PHOTOS:
 ✅ ALWAYS consider exercise timing and provide specific insulin adjustments
 ✅ ALWAYS include relevant safety alerts for the specific meal composition
 ✅ ALWAYS provide quantitative dosing percentages and timing durations
-✅ ALWAYS calculate absorption_time_hours based on meal composition (FPUs, fiber, meal size)
+✅ ALWAYS calculate absorption_time_hours conservatively — most mixed meals should be 3–4 hours; only truly high-fat/high-fiber meals warrant 4.5–5 hours
 ✅ ALWAYS provide detailed absorption_time_reasoning showing the calculation process
-✅ ALWAYS consider that Loop will highlight non-default absorption times in blue to alert user
+✅ ALWAYS anchor to Loop's default 3-hour absorption time and only deviate with clear justification (high fat/protein, very high fiber, or very large meal)
+✅ ALWAYS consider that Loop will highlight non-default absorption times in blue to alert user — frequent deviations from 3 hours reduce user trust
 
 FOR MENU AND RECIPE ITEMS:
 ❌ NEVER make assumptions about plate sizes, portions, or actual serving sizes
@@ -308,8 +309,8 @@ FOR ACTUAL FOOD PHOTOS:
   "insulin_timing_recommendations": "MEAL TYPE: [Simple/Complex/High Fat-Protein]. PRE-MEAL INSULIN TIMING: [specific minutes before eating]. BOLUS STRATEGY: [immediate percentage]% now, [extended percentage]% over [duration] hours if applicable. MONITORING: Check BG at [specific times] post-meal",
   "fpu_dosing_guidance": "FPU LEVEL: [Low/Medium/High] ([calculated FPUs]). ADDITIONAL INSULIN: Consider [percentage]% extra insulin over [duration] hours for protein/fat. EXTENDED BOLUS: [specific recommendations for pump users]. MDI USERS: [split dosing recommendations]",
   "exercise_considerations": "PRE-EXERCISE: [specific guidance if meal within 6 hours of planned activity]. POST-EXERCISE: [recommendations if within 6 hours of recent exercise]. INSULIN ADJUSTMENTS: [specific percentage reductions if applicable]",
-  "absorption_time_hours": hours_between_2_and_6,
-  "absorption_time_reasoning": "Based on [meal composition factors]. FPU IMPACT: [how FPUs affect absorption]. FIBER EFFECT: [how fiber content impacts timing]. MEAL SIZE: [how calories affect gastric emptying]. RECOMMENDED: [final hours recommendation with explanation]. IMPORTANT: Explain WHY this absorption time differs from the default 3-hour standard if it does, so the user understands the reasoning.",
+  "absorption_time_hours": hours_between_2_and_5,
+  "absorption_time_reasoning": "IMPORTANT: Loop's default absorption time is 3 hours, which works well for most meals. Only recommend a DIFFERENT value when the meal composition clearly justifies it. Use CONSERVATIVE adjustments: FPU IMPACT: High FPU (>4) adds at most +1 hour, Medium FPU (2-4) adds at most +0.5 hours, Low FPU (<2) adds nothing. FIBER EFFECT: High fiber (>8g) adds at most +0.5 hours. MEAL SIZE: Large meals (>800 cal) add at most +0.5 hours. Most mixed meals should be 3–3.5 hours. Only meals that are exceptionally high in fat AND large should approach 4.5–5 hours. RECOMMENDED: [final hours with explanation of why it differs from 3 if it does].",
   "meal_size_impact": "MEAL SIZE: [Small <400 kcal / Medium 400-800 kcal / Large >800 kcal]. GASTRIC EMPTYING: [impact on absorption timing]. DOSING MODIFICATIONS: [specific adjustments for meal size effects]",
   "individualization_factors": "PATIENT FACTORS: [Consider age, pregnancy, illness, menstrual cycle, temperature effects]. TECHNOLOGY: [Pump vs MDI considerations]. PERSONAL PATTERNS: [Recommendations for tracking individual response]",
   "safety_alerts": "[Any specific safety considerations: dawn phenomenon, gastroparesis, pregnancy, alcohol, recent hypoglycemia, current hyperglycemia, illness, temperature extremes, etc.]",
@@ -350,8 +351,8 @@ FOR MENU ITEMS:
   "insulin_timing_recommendations": "MEAL TYPE: [Simple/Complex/High Fat-Protein]. PRE-MEAL INSULIN TIMING: [specific minutes before eating]. BOLUS STRATEGY: [immediate percentage]% now, [extended percentage]% over [duration] hours if applicable. MONITORING: Check BG at [specific times] post-meal",
   "fpu_dosing_guidance": "FPU LEVEL: [Low/Medium/High] ([calculated FPUs]). ADDITIONAL INSULIN: Consider [percentage]% extra insulin over [duration] hours for protein/fat. EXTENDED BOLUS: [specific recommendations for pump users]. MDI USERS: [split dosing recommendations]",
   "exercise_considerations": "PRE-EXERCISE: [specific guidance if meal within 6 hours of planned activity]. POST-EXERCISE: [recommendations if within 6 hours of recent exercise]. INSULIN ADJUSTMENTS: [specific percentage reductions if applicable]",
-  "absorption_time_hours": hours_between_2_and_6,
-  "absorption_time_reasoning": "Based on [meal composition factors]. FPU IMPACT: [how FPUs affect absorption]. FIBER EFFECT: [how fiber content impacts timing]. MEAL SIZE: [how calories affect gastric emptying]. RECOMMENDED: [final hours recommendation with explanation]. IMPORTANT: Explain WHY this absorption time differs from the default 3-hour standard if it does, so the user understands the reasoning.",
+  "absorption_time_hours": hours_between_2_and_5,
+  "absorption_time_reasoning": "IMPORTANT: Loop's default absorption time is 3 hours, which works well for most meals. Only recommend a DIFFERENT value when the meal composition clearly justifies it. Use CONSERVATIVE adjustments: FPU IMPACT: High FPU (>4) adds at most +1 hour, Medium FPU (2-4) adds at most +0.5 hours, Low FPU (<2) adds nothing. FIBER EFFECT: High fiber (>8g) adds at most +0.5 hours. MEAL SIZE: Large meals (>800 cal) add at most +0.5 hours. Most mixed meals should be 3–3.5 hours. Only meals that are exceptionally high in fat AND large should approach 4.5–5 hours. RECOMMENDED: [final hours with explanation of why it differs from 3 if it does].",
   "meal_size_impact": "MEAL SIZE: [Small <400 kcal / Medium 400-800 kcal / Large >800 kcal]. GASTRIC EMPTYING: [impact on absorption timing]. DOSING MODIFICATIONS: [specific adjustments for meal size effects]",
   "individualization_factors": "PATIENT FACTORS: [Consider age, pregnancy, illness, menstrual cycle, temperature effects]. TECHNOLOGY: [Pump vs MDI considerations]. PERSONAL PATTERNS: [Recommendations for tracking individual response]",
   "safety_alerts": "[Any specific safety considerations: dawn phenomenon, gastroparesis, pregnancy, alcohol, recent hypoglycemia, current hyperglycemia, illness, temperature extremes, etc.]",
@@ -392,8 +393,8 @@ If menu shows "Grilled Chicken Caesar Salad", respond:
   "insulin_timing_recommendations": "MEAL TYPE: High Fat-Protein. PRE-MEAL INSULIN TIMING: 5-10 minutes before eating. BOLUS STRATEGY: 50% now, 50% extended over 3-4 hours. MONITORING: Check BG at 2 hours and 4 hours post-meal",
   "fpu_dosing_guidance": "FPU LEVEL: Medium-High (3.7 FPUs). ADDITIONAL INSULIN: Consider 15-20% extra insulin over 3-4 hours for protein conversion. EXTENDED BOLUS: Use square wave 50%/50% over 3-4 hours. MDI USERS: Consider small additional injection at 2-3 hours post-meal",
   "exercise_considerations": "PRE-EXERCISE: Ideal pre-workout meal due to sustained energy from protein/fat. POST-EXERCISE: Good recovery meal if within 2 hours of exercise. INSULIN ADJUSTMENTS: Reduce insulin by 25-30% if recent exercise",
-  "absorption_time_hours": 5,
-  "absorption_time_reasoning": "Based on low carbs (8g) but high protein/fat. FPU IMPACT: 3.7 FPUs (Medium-High) adds 3 hours to baseline. FIBER EFFECT: Low fiber minimal impact. MEAL SIZE: Medium 250 kcal adds 1 hour. RECOMMENDED: 5 hours total (2 hour baseline + 3 FPU hours + 1 size hour) to account for extended protein conversion",
+  "absorption_time_hours": 3,
+  "absorption_time_reasoning": "Staying close to Loop's 3-hour default. FPU IMPACT: 3.7 FPUs (Medium) — fat/protein slow gastric emptying slightly (+0.5 hours) but don't dramatically extend carb absorption. FIBER EFFECT: Low fiber (3g) — no meaningful impact. MEAL SIZE: Small-medium (250 kcal) — no impact. With only 8g carbs, the carb absorption itself is fast, but the moderate fat/protein content warrants a small extension. RECOMMENDED: 3 hours — the carbs absorb quickly and the fat/protein create a minor secondary glucose effect that Loop handles through its prediction algorithm.",
   "meal_size_impact": "MEAL SIZE: Medium 250 kcal. GASTRIC EMPTYING: Normal rate expected due to moderate calories and liquid content. DOSING MODIFICATIONS: No size-related adjustments needed",
   "individualization_factors": "PATIENT FACTORS: Standard adult dosing applies unless pregnancy/illness present. TECHNOLOGY: Pump users can optimize with precise extended bolus; MDI users should consider split injection. PERSONAL PATTERNS: Track 4-hour post-meal glucose to optimize protein dosing",
   "safety_alerts": "Low carb content minimizes hypoglycemia risk. High protein may cause delayed glucose rise 3-5 hours post-meal - monitor extended.",
@@ -434,8 +435,8 @@ If menu shows "Teriyaki Chicken Bowl with White Rice", respond:
   "insulin_timing_recommendations": "MEAL TYPE: Complex carbs with moderate protein. PRE-MEAL INSULIN TIMING: 10-15 minutes before eating. BOLUS STRATEGY: 70% now, 30% extended over 2-3 hours. MONITORING: Check BG at 1 hour and 3 hours post-meal",
   "fpu_dosing_guidance": "FPU LEVEL: Medium (3.4 FPUs). ADDITIONAL INSULIN: Consider 10-15% extra insulin over 2-3 hours for protein. EXTENDED BOLUS: Use dual wave 70%/30% over 2-3 hours. MDI USERS: Main bolus now, small follow-up at 2 hours if needed",
   "exercise_considerations": "PRE-EXERCISE: Good energy for cardio if consumed 1-2 hours before. POST-EXERCISE: Excellent recovery meal within 30 minutes. INSULIN ADJUSTMENTS: Reduce total insulin by 20-25% if recent exercise",
-  "absorption_time_hours": 4,
-  "absorption_time_reasoning": "Based on high carbs (35g) with medium protein/fat. FPU IMPACT: 3.4 FPUs (Medium) adds 2 hours to baseline. FIBER EFFECT: Low fiber (1.5g) minimal impact. MEAL SIZE: Medium 320 kcal adds 1 hour. RECOMMENDED: 4 hours total (3 hour baseline for complex carbs + 2 FPU hours + 1 size hour - 1 hour reduction for white rice being processed/quick-absorbing)",
+  "absorption_time_hours": 3.5,
+  "absorption_time_reasoning": "Starting from Loop's 3-hour default. FPU IMPACT: 3.4 FPUs (Medium) — moderate fat/protein slows gastric emptying slightly (+0.5 hours). FIBER EFFECT: Low fiber (1.5g) — no meaningful impact. MEAL SIZE: Small-medium (320 kcal) — no impact. White rice is high-GI and absorbs quickly, but the protein content provides a small slowing effect. RECOMMENDED: 3.5 hours — a modest increase from the default to account for the mixed meal composition.",
   "safety_alerts": "High GI rice may cause rapid BG spike - monitor closely at 1 hour. Protein may extend glucose response beyond 3 hours.",
   "visual_assessment_details": "Menu text shows 'Teriyaki Chicken Bowl with White Rice'. Cannot assess visual food qualities from menu text alone.",
   "overall_description": "Menu item text analysis. No actual food portions visible for assessment.",
@@ -474,8 +475,8 @@ If menu shows "Quinoa Bowl with Sweet Potato and Black Beans", respond:
   "insulin_timing_recommendations": "MEAL TYPE: Complex carbs with high fiber. PRE-MEAL INSULIN TIMING: 20-25 minutes before eating. BOLUS STRATEGY: 80% now, 20% extended over 2 hours. MONITORING: Check BG at 2 hours post-meal",
   "fpu_dosing_guidance": "FPU LEVEL: Low (1.6 FPUs). ADDITIONAL INSULIN: Minimal extra needed for protein/fat. EXTENDED BOLUS: Use slight tail 80%/20% over 2 hours. MDI USERS: Single injection should suffice",
   "exercise_considerations": "PRE-EXERCISE: Excellent sustained energy meal for endurance activities. POST-EXERCISE: Good recovery with complex carbs and plant protein. INSULIN ADJUSTMENTS: Reduce insulin by 15-20% if recent exercise",
-  "absorption_time_hours": 6,
-  "absorption_time_reasoning": "Based on complex carbs with high fiber and low FPUs. FPU IMPACT: 1.6 FPUs (Low) adds 1 hour to baseline. FIBER EFFECT: High fiber (8.5g) adds 2 hours due to significant gastric emptying delay. MEAL SIZE: Medium 285 kcal adds 1 hour. RECOMMENDED: 6 hours total (3 hour baseline for complex carbs + 1 FPU hour + 2 fiber hours + 1 size hour) to account for sustained release from high fiber content",
+  "absorption_time_hours": 3.5,
+  "absorption_time_reasoning": "Starting from Loop's 3-hour default. FPU IMPACT: 1.6 FPUs (Low) — minimal fat/protein, no meaningful extension. FIBER EFFECT: High fiber (8.5g) slows carb absorption modestly (+0.5 hours). MEAL SIZE: Small-medium (285 kcal) — no impact. While the high fiber and complex carbs (quinoa, sweet potato, beans) slow the glucose rise, this primarily affects the *shape* of the curve (flatter, more gradual) rather than dramatically extending total absorption duration. RECOMMENDED: 3.5 hours — a modest increase from default to account for the high fiber content slowing gastric emptying.",
   "safety_alerts": "High fiber significantly blunts glucose response - avoid over-dosing insulin. Gradual rise may delay hypoglycemia symptoms.",
   "visual_assessment_details": "Menu text shows 'Quinoa Bowl with Sweet Potato and Black Beans'. Cannot assess visual food qualities from menu text alone.",
   "overall_description": "Menu item text analysis. No actual food portions visible for assessment.",
@@ -1047,7 +1048,12 @@ class ConfigurableAIService: ObservableObject {
             \"""
             """
 
-            let result = try await AIServiceManager.shared.analyzeFoodByText(
+            // Always include the image alongside OCR text so the AI has
+            // full visual context. This prevents catastrophic failure if OCR
+            // misclassifies a food photo as a menu — the AI can still see the
+            // actual food and analyze it correctly.
+            let result = try await AIServiceManager.shared.analyzeFoodImage(
+                image,
                 using: config,
                 query: menuPrompt
             )
@@ -1274,14 +1280,18 @@ class ConfigurableAIService: ObservableObject {
                 let allText = lines.map { $0.0 }.joined(separator: "\n")
                 let avgConfidence = lines.isEmpty ? 0 : lines.map { $0.1 }.reduce(0, +) / Float(lines.count)
 
-                // Heuristic: treat as text-heavy image if OCR finds meaningful content.
-                // Even 1 high-confidence line is worth routing through text path —
-                // the cost of a false positive (text path for a food photo) is low,
-                // while the cost of a false negative (image path for a menu) is high
-                // (GPT-4o refuses to analyze text images).
-                let significantLines = lines.filter { $0.1 >= 0.3 }
-                let isMenu = (significantLines.count >= 1 && allText.count >= 10 && avgConfidence >= 0.5)
-                    || (significantLines.count >= 3 && avgConfidence >= 0.3)
+                // Heuristic: treat as text-heavy image (menu/recipe) ONLY when
+                // there is strong OCR evidence. Thresholds must be strict because
+                // food photos often contain incidental text (packaging, labels,
+                // brand names on cutting boards) and a false positive here means
+                // the image is sent alongside the OCR text to the AI — we always
+                // include the image now, but the prompt framing changes.
+                //
+                // A real menu/recipe typically has 5+ lines of readable text at
+                // high confidence. A food photo with a brand label might have 1-2.
+                let significantLines = lines.filter { $0.1 >= 0.5 }
+                let isMenu = (significantLines.count >= 5 && allText.count >= 40 && avgConfidence >= 0.7)
+                    || (significantLines.count >= 8 && avgConfidence >= 0.5)
 
                 continuation.resume(returning: OCRResult(
                     text: allText,

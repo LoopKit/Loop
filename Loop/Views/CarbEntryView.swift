@@ -22,6 +22,10 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     @State private var showHowAbsorptionTimeWorks = false
     @State private var showAddFavoriteFood = false
 
+    // FoodFinder AI absorption time (for inline "Why X hrs?" display)
+    @State private var absorptionTimeIsAIGenerated: Bool = false
+    @State private var aiAbsorptionReasoning: String? = nil
+
     // FoodFinder data for favorite food pre-population
     @State private var foodFinderFoodName: String = ""
     @State private var foodFinderImage: UIImage? = nil
@@ -124,7 +128,9 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     favoriteFoodName: $foodFinderFoodName,
                     favoriteFoodImage: $foodFinderImage,
                     restoredAnalysisResult: $viewModel.restoredAnalysisResult,
-                    restoredThumbnailID: $viewModel.restoredThumbnailID
+                    restoredThumbnailID: $viewModel.restoredThumbnailID,
+                    absorptionTimeIsAIGenerated: $absorptionTimeIsAIGenerated,
+                    aiAbsorptionReasoning: $aiAbsorptionReasoning
                 )
             }
 
@@ -138,8 +144,13 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             
             CardSectionDivider()
             
-            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
-                .padding(.bottom, 2)
+            if absorptionTimeIsAIGenerated {
+                AIAbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, isAIGenerated: true, absorptionReasoning: aiAbsorptionReasoning, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
+                    .padding(.bottom, 2)
+            } else {
+                AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
+                    .padding(.bottom, 2)
+            }
         }
         .padding(.vertical, 12)
         .padding(.horizontal)

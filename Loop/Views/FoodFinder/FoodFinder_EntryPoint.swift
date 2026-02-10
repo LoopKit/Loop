@@ -56,6 +56,12 @@ struct FoodFinder_EntryPoint: View {
     /// Thumbnail ID from the selected history record, used to restore the product image.
     @Binding var restoredThumbnailID: String?
 
+    /// Whether the current absorption time was set by AI analysis (exposed to host for row display).
+    @Binding var absorptionTimeIsAIGenerated: Bool
+
+    /// AI reasoning for the absorption time (exposed to host for inline display).
+    @Binding var aiAbsorptionReasoning: String?
+
     // MARK: - Internal State
 
     @StateObject private var searchVM: FoodFinder_SearchViewModel
@@ -94,7 +100,9 @@ struct FoodFinder_EntryPoint: View {
         favoriteFoodName: Binding<String> = .constant(""),
         favoriteFoodImage: Binding<UIImage?> = .constant(nil),
         restoredAnalysisResult: Binding<AIFoodAnalysisResult?> = .constant(nil),
-        restoredThumbnailID: Binding<String?> = .constant(nil)
+        restoredThumbnailID: Binding<String?> = .constant(nil),
+        absorptionTimeIsAIGenerated: Binding<Bool> = .constant(false),
+        aiAbsorptionReasoning: Binding<String?> = .constant(nil)
     ) {
         self._carbsQuantity = carbsQuantity
         self._foodType = foodType
@@ -108,6 +116,8 @@ struct FoodFinder_EntryPoint: View {
         self._favoriteFoodImage = favoriteFoodImage
         self._restoredAnalysisResult = restoredAnalysisResult
         self._restoredThumbnailID = restoredThumbnailID
+        self._absorptionTimeIsAIGenerated = absorptionTimeIsAIGenerated
+        self._aiAbsorptionReasoning = aiAbsorptionReasoning
 
         let initialEnabled = UserDefaults.standard.foodFinderEnabled
         self._isFoodSearchEnabled = State(initialValue: initialEnabled)
@@ -155,32 +165,6 @@ struct FoodFinder_EntryPoint: View {
                         aiAnalysisNotesSection(aiResult: aiResult)
                     }
                 }
-            }
-
-            // Absorption time reasoning (AI)
-            if let reasoning = searchVM.lastAIAnalysisResult?.absorptionTimeReasoning?.trimmingCharacters(in: .whitespacesAndNewlines),
-               !reasoning.isEmpty,
-               searchVM.absorptionTimeWasAIGenerated {
-                let hoursString = String(format: "%.1f", absorptionTime / 3600)
-                DisclosureGroup(isExpanded: $showAbsorptionReasoning) {
-                    Text(reasoning)
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                        .padding(.top, 4)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "hourglass.bottomhalf.fill")
-                            .foregroundColor(.indigo)
-                        Text("Why \(hoursString) hours?")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.indigo)
-                    }
-                }
-                .padding(8)
-                .background(Color(.systemIndigo).opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
 
             // Food Search enable row (only when disabled)
@@ -269,11 +253,15 @@ struct FoodFinder_EntryPoint: View {
             carbsQuantity = result.carbs
             foodType = result.foodType
             absorptionTime = result.absorptionTime
+            absorptionTimeIsAIGenerated = result.absorptionTimeWasAIGenerated
+            aiAbsorptionReasoning = searchVM.lastAIAnalysisResult?.absorptionTimeReasoning
             // Mirror selected product to host if binding provided
             selectedFoodProduct?.wrappedValue = searchVM.selectedFoodProduct
         }
         searchVM.onFoodCleared = {
             selectedFoodProduct?.wrappedValue = nil
+            absorptionTimeIsAIGenerated = false
+            aiAbsorptionReasoning = nil
         }
         // When the search field detects natural language (e.g. iOS keyboard dictation),
         // the ViewModel routes through AI generative search and delivers the result here.
@@ -2033,15 +2021,36 @@ struct AIAbsorptionTimePickerRow: View {
     private let validDurationRange: ClosedRange<TimeInterval>
     private let minuteStride: Int
     private let isAIGenerated: Bool
+    private let absorptionReasoning: String?
     private var showHowAbsorptionTimeWorks: Binding<Bool>?
 
-    init(absorptionTime: Binding<TimeInterval>, isFocused: Binding<Bool>, validDurationRange: ClosedRange<TimeInterval>, minuteStride: Int = 30, isAIGenerated: Bool = false, showHowAbsorptionTimeWorks: Binding<Bool>? = nil) {
+    @State private var showReasoning = false
+
+    init(absorptionTime: Binding<TimeInterval>, isFocused: Binding<Bool>, validDurationRange: ClosedRange<TimeInterval>, minuteStride: Int = 30, isAIGenerated: Bool = false, absorptionReasoning: String? = nil, showHowAbsorptionTimeWorks: Binding<Bool>? = nil) {
         self._absorptionTime = absorptionTime
         self._isFocused = isFocused
         self.validDurationRange = validDurationRange
         self.minuteStride = minuteStride
         self.isAIGenerated = isAIGenerated
+        self.absorptionReasoning = absorptionReasoning
         self.showHowAbsorptionTimeWorks = showHowAbsorptionTimeWorks
+    }
+
+    /// True when AI set a non-default absorption time (not 3 hours) and reasoning exists.
+    private var hasNonDefaultReasoning: Bool {
+        guard isAIGenerated,
+              let reasoning = absorptionReasoning?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !reasoning.isEmpty else { return false }
+        let hours = absorptionTime / 3600
+        return abs(hours - 3.0) > 0.01
+    }
+
+    private var hoursLabel: String {
+        let hours = absorptionTime / 3600
+        if hours == hours.rounded() {
+            return String(format: "%.0f", hours)
+        }
+        return String(format: "%.1f", hours)
     }
 
     var body: some View {
@@ -2049,22 +2058,7 @@ struct AIAbsorptionTimePickerRow: View {
             HStack {
                 Text("Absorption Time")
                     .foregroundColor(.primary)
-
-                if isAIGenerated {
-                    HStack(spacing: 4) {
-                        Image(systemName: "brain.head.profile")
-                            .font(.caption)
-                            .foregroundColor(.purple)
-                        Text("AI")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.blue)
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(6)
-                }
+                    .layoutPriority(1)
 
                 if showHowAbsorptionTimeWorks != nil {
                     Button(action: {
@@ -2077,18 +2071,45 @@ struct AIAbsorptionTimePickerRow: View {
                     }
                 }
 
+                if hasNonDefaultReasoning {
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            showReasoning.toggle()
+                        }
+                    }) {
+                        HStack(spacing: 3) {
+                            Text("Why \(hoursLabel) hrs?")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .multilineTextAlignment(.center)
+                            Image(systemName: showReasoning ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 8, weight: .bold))
+                        }
+                        .foregroundColor(.purple)
+                        .frame(width: 100)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.purple.opacity(0.1))
+                        .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
+
                 Spacer()
 
                 Text(durationString())
                     .foregroundColor(isAIGenerated ? .blue : Color(UIColor.secondaryLabel))
                     .fontWeight(isAIGenerated ? .medium : .regular)
+                    .layoutPriority(1)
             }
 
-            if isAIGenerated && !isFocused {
-                Text("AI suggested based on meal composition")
+            if showReasoning, let reasoning = absorptionReasoning {
+                Text(reasoning)
                     .font(.caption2)
-                    .foregroundColor(.blue)
-                    .padding(.top, 2)
+                    .foregroundColor(.secondary)
+                    .padding(.top, 4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
             if isFocused {
