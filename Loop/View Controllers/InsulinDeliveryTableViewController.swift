@@ -549,10 +549,6 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     description.append(dose.formatted)
                 }
 
-                if let raw = entry.raw {
-                    description.append("syncIdentifier: " + raw.hexadecimalString)
-                }
-
                 return description.joined(separator: "\n\n")
             })
 
