@@ -150,7 +150,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ 点按你的 CGM 和胰岛泵状态图标以查看更多信息。%2$@ 将继续尝试完成循环，但请检查你的泵和 CGM 是否存在潜在的通信问题。"
+            "value" : "%1$@ \n\n点按你的 CGM 和泵状态图标以查看更多信息。%2$@ 将继续尝试完成循环，但请注意，泵和 CGM 之间可能存在通信问题。"
           }
         }
       }
@@ -227,7 +227,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ 点按你的 CGM 和胰岛泵状态图标以查看更多信息。%2$@ 将继续尝试完成循环，但请注意你的泵和 CGM 之间可能存在的通信问题。"
+            "value" : "%1$@ \n\n点按你的 CGM 和泵状态图标以查看更多信息。%2$@ 将继续尝试完成循环，但请注意，泵和 CGM 之间可能存在通信问题。"
           }
         }
       }
@@ -2154,7 +2154,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "上次闭环是在 %1$@"
+            "value" : "上次闭环 %1$@"
           }
         }
       }
@@ -3714,6 +3714,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ de idi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是在%1$@"
           }
         }
       }

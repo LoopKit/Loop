@@ -36,26 +36,27 @@ struct LiveActivityBottomRowManagerView: View {
         }
         buttons.append(.cancel(Text(NSLocalizedString("Cancel", comment: "Button text to cancel"))))
         
-        return ActionSheet(title: Text(NSLocalizedString("Add item to bottom row", comment: "Title for Add item")), buttons: buttons)
+        return ActionSheet(title: Text(NSLocalizedString("Add item to Lock Screen / CarPlay display", comment: "Title for Add item")), buttons: buttons)
     }
     
     var body: some View {
         List {
-            ForEach($configuration, id: \.self) { item in
-                HStack {
-                    deleteButton
-                        .onTapGesture {
-                            onDelete(item.wrappedValue)
-                            isDirty = configuration != previousConfiguration
-                        }
-                    Text(item.wrappedValue.description())
-                    
-                    Spacer()
-                    editBars
+            Section(header: Text("Display up to 4 items. Display label is in parentheses.", comment: "Indicates the maximum number of items that can be displayed and how the label for each item is shortened.")) {
+                ForEach($configuration, id: \.self) { item in
+                    HStack {
+                        deleteButton
+                            .onTapGesture {
+                                onDelete(item.wrappedValue)
+                                isDirty = configuration != previousConfiguration
+                            }
+                        Text(item.wrappedValue.description())
+                        Spacer()
+                        editBars
+                    }
                 }
+                .onMove(perform: onReorder)
+                .deleteDisabled(true)
             }
-            .onMove(perform: onReorder)
-            .deleteDisabled(true)
             
             Section {
                 Button(action: onSave) {
@@ -81,7 +82,7 @@ struct LiveActivityBottomRowManagerView: View {
         }
         .actionSheet(isPresented: $showAdd, content: { addItem })
         .insetGroupedListStyle()
-        .navigationBarTitle(Text(NSLocalizedString("Bottom row", comment: "Live activity Bottom row configuration title")))
+        .navigationBarTitle(Text(NSLocalizedString("Configure Display", comment: "Title for the view to configure the lock screen display")))
     }
     
     @ViewBuilder

@@ -560,7 +560,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glucides actifs"
+            "value" : "Glucides"
           }
         },
         "he" : {
@@ -685,7 +685,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Insuline active"
+            "value" : "Insuline"
           }
         },
         "he" : {

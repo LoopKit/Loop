@@ -1700,17 +1700,24 @@ extension DeviceDataManager: DeviceSupportDelegate {
                         deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
                     }
 
+                    let submodulesInfo = BuildDetails.default.submodules
+                        .sorted(by: { $0.key < $1.key })
+                        .map { key, value in
+                            "*   \(key): \(value.branch), \(value.commitSHA)"
+                        }
+                        .joined(separator: "\n")
+
                     let report = [
                         "## Build Details",
                         "* appNameAndVersion: \(Bundle.main.localizedNameAndVersion)",
                         "* profileExpiration: \(BuildDetails.default.profileExpirationString)",
-                        "* gitRevision: \(BuildDetails.default.gitRevision ?? "N/A")",
-                        "* gitBranch: \(BuildDetails.default.gitBranch ?? "N/A")",
-                        "* workspaceGitRevision: \(BuildDetails.default.workspaceGitRevision ?? "N/A")",
-                        "* workspaceGitBranch: \(BuildDetails.default.workspaceGitBranch ?? "N/A")",
                         "* sourceRoot: \(BuildDetails.default.sourceRoot ?? "N/A")",
                         "* buildDateString: \(BuildDetails.default.buildDateString ?? "N/A")",
                         "* xcodeVersion: \(BuildDetails.default.xcodeVersion ?? "N/A")",
+                        "* Workspace branch: \(BuildDetails.default.workspaceGitBranch ?? "N/A")",
+                        "* Workspace SHA: \(BuildDetails.default.workspaceGitRevision ?? "N/A")",
+                        "* Submodule name: branch, SHA",
+                        "\(submodulesInfo)",
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
