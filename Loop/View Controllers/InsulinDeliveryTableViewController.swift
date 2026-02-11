@@ -306,7 +306,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private lazy var timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
 
-        formatter.dateStyle = .none
+        formatter.dateStyle = .short
         formatter.timeStyle = .short
 
         return formatter
@@ -550,7 +550,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 }
 
                 if let raw = entry.raw {
-                    description.append(raw.hexadecimalString)
+                    description.append("syncIdentifier: " + raw.hexadecimalString)
                 }
 
                 return description.joined(separator: "\n\n")
