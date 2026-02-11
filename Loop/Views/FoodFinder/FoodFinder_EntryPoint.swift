@@ -2071,13 +2071,20 @@ struct AIAbsorptionTimePickerRow: View {
                     }
                 }
 
+                Spacer()
+
+                Text(durationString())
+                    .foregroundColor(isAIGenerated ? .blue : Color(UIColor.secondaryLabel))
+                    .fontWeight(isAIGenerated ? .medium : .regular)
+                    .layoutPriority(1)
+
                 if hasNonDefaultReasoning {
                     Button(action: {
                         withAnimation(.easeInOut(duration: 0.25)) {
                             showReasoning.toggle()
                         }
                     }) {
-                        HStack(spacing: 3) {
+                        HStack(spacing: 2) {
                             Text("Why \(hoursLabel) hrs?")
                                 .font(.caption2)
                                 .fontWeight(.medium)
@@ -2086,21 +2093,14 @@ struct AIAbsorptionTimePickerRow: View {
                                 .font(.system(size: 8, weight: .bold))
                         }
                         .foregroundColor(.purple)
-                        .frame(width: 100)
-                        .padding(.horizontal, 6)
+                        .frame(width: 85)
+                        .padding(.horizontal, 4)
                         .padding(.vertical, 2)
                         .background(Color.purple.opacity(0.1))
                         .cornerRadius(6)
                     }
                     .buttonStyle(.plain)
                 }
-
-                Spacer()
-
-                Text(durationString())
-                    .foregroundColor(isAIGenerated ? .blue : Color(UIColor.secondaryLabel))
-                    .fontWeight(isAIGenerated ? .medium : .regular)
-                    .layoutPriority(1)
             }
 
             if showReasoning, let reasoning = absorptionReasoning {
