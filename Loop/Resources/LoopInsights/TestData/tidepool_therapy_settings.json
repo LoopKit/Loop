@@ -1,0 +1,44 @@
+{
+  "basalRateSchedule": [
+    {
+      "startTime": 0.0,
+      "value": 0.8
+    },
+    {
+      "startTime": 25200.0,
+      "value": 1.1
+    },
+    {
+      "startTime": 28800.0,
+      "value": 0.8
+    },
+    {
+      "startTime": 39600.0,
+      "value": 1
+    },
+    {
+      "startTime": 50400.0,
+      "value": 0.9
+    },
+    {
+      "startTime": 61200.0,
+      "value": 1.1
+    },
+    {
+      "startTime": 77400.0,
+      "value": 0.8
+    }
+  ],
+  "carbRatioSchedule": [
+    {
+      "startTime": 0.0,
+      "value": 4.5
+    }
+  ],
+  "insulinSensitivitySchedule": [
+    {
+      "startTime": 0.0,
+      "value": 30.0
+    }
+  ]
+}

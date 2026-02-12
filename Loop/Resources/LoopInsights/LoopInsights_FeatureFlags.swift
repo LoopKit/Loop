@@ -1,0 +1,128 @@
+//
+//  LoopInsights_FeatureFlags.swift
+//  Loop
+//
+//  Concept & design by Taylor Patterson. Coded & tested by Claude Code in February 2026.
+//  Copyright (c) 2025-2026 LoopKit Authors. All rights reserved.
+//
+
+import Foundation
+
+/// Runtime feature flags for LoopInsights. All flags are UserDefaults-backed
+/// so they can be toggled without recompilation.
+struct LoopInsights_FeatureFlags {
+
+    private enum Keys {
+        static let isEnabled = "LoopInsights_isEnabled"
+        static let developerModeEnabled = "LoopInsights_developerModeEnabled"
+        static let applyMode = "LoopInsights_applyMode"
+        static let analysisPeriod = "LoopInsights_analysisPeriod"
+        static let aiConfiguration = "LoopInsights_aiConfiguration"
+        static let developerUnlockCount = "LoopInsights_developerUnlockCount"
+        static let useTestData = "LoopInsights_useTestData"
+        static let aiPersonality = "LoopInsights_aiPersonality"
+    }
+
+    private static let defaults = UserDefaults.standard
+
+    // MARK: - Primary Feature Toggle
+
+    /// Master on/off switch for LoopInsights. Defaults to false.
+    static var isEnabled: Bool {
+        get { defaults.bool(forKey: Keys.isEnabled) }
+        set { defaults.set(newValue, forKey: Keys.isEnabled) }
+    }
+
+    // MARK: - Developer Mode (Hidden)
+
+    /// Developer-only mode that unlocks auto-apply and advanced testing options.
+    /// Activated by long-pressing the LoopInsights header 5 times.
+    /// Not visible in the public settings UI.
+    static var developerModeEnabled: Bool {
+        get { defaults.bool(forKey: Keys.developerModeEnabled) }
+        set { defaults.set(newValue, forKey: Keys.developerModeEnabled) }
+    }
+
+    /// Tracks long-press count toward developer mode activation
+    static var developerUnlockCount: Int {
+        get { defaults.integer(forKey: Keys.developerUnlockCount) }
+        set { defaults.set(newValue, forKey: Keys.developerUnlockCount) }
+    }
+
+    /// Number of long-presses required to unlock developer mode
+    static let developerUnlockThreshold = 3
+
+    /// Use test data fixtures instead of real Loop data stores (developer mode only).
+    /// When enabled, LoopInsights loads JSON fixtures from Documents/LoopInsights/ or the app bundle.
+    static var useTestData: Bool {
+        get { developerModeEnabled && defaults.bool(forKey: Keys.useTestData) }
+        set { defaults.set(newValue, forKey: Keys.useTestData) }
+    }
+
+    // MARK: - Apply Mode
+
+    /// How suggestions are applied. Defaults to manual.
+    static var applyMode: LoopInsightsApplyMode {
+        get {
+            guard let raw = defaults.string(forKey: Keys.applyMode),
+                  let mode = LoopInsightsApplyMode(rawValue: raw) else {
+                return .manual
+            }
+            // Auto-apply only available in developer mode
+            if mode == .autoApply && !developerModeEnabled {
+                return .manual
+            }
+            return mode
+        }
+        set {
+            defaults.set(newValue.rawValue, forKey: Keys.applyMode)
+        }
+    }
+
+    // MARK: - Analysis Period
+
+    /// Default analysis lookback period. Defaults to 14 days.
+    static var analysisPeriod: LoopInsightsAnalysisPeriod {
+        get {
+            let raw = defaults.integer(forKey: Keys.analysisPeriod)
+            return LoopInsightsAnalysisPeriod(rawValue: raw) ?? .fourteenDays
+        }
+        set {
+            defaults.set(newValue.rawValue, forKey: Keys.analysisPeriod)
+        }
+    }
+
+    // MARK: - AI Personality
+
+    /// Personality style for AI responses. Defaults to supportive coach.
+    static var aiPersonality: LoopInsightsAIPersonality {
+        get {
+            guard let raw = defaults.string(forKey: Keys.aiPersonality),
+                  let personality = LoopInsightsAIPersonality(rawValue: raw) else {
+                return .supportiveCoach
+            }
+            return personality
+        }
+        set {
+            defaults.set(newValue.rawValue, forKey: Keys.aiPersonality)
+        }
+    }
+
+    // MARK: - AI Configuration
+
+    /// User-configurable AI provider configuration. Persisted to UserDefaults (excluding API key).
+    static var aiConfiguration: LoopInsightsAIProviderConfiguration {
+        get {
+            guard let data = defaults.data(forKey: Keys.aiConfiguration),
+                  let config = try? JSONDecoder().decode(LoopInsightsAIProviderConfiguration.self, from: data) else {
+                return LoopInsightsAIProviderConfiguration()
+            }
+            return config
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                defaults.set(data, forKey: Keys.aiConfiguration)
+            }
+        }
+    }
+}

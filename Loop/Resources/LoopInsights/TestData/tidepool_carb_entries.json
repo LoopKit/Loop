@@ -1,0 +1,803 @@
+[
+  {
+    "startDate": "2026-01-13T19:53:42.589Z",
+    "quantity": 55,
+    "absorptionTime": 10800,
+    "syncIdentifier": "0426133705ecd612cb1c9efaf29b8495",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-14T01:40:20.663Z",
+    "quantity": 30,
+    "absorptionTime": 10800,
+    "syncIdentifier": "6901267e663c42e6f7eb654a853bfa4a",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Cheeseburger"
+  },
+  {
+    "startDate": "2026-01-14T17:48:58.533Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "7ccf997304a642f36ae06c5ac3865add",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-14T23:23:27.773Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "6444e10aa09c27615c515c5630929cd3",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf7a"
+  },
+  {
+    "startDate": "2026-01-15T00:31:53.479Z",
+    "quantity": 40,
+    "absorptionTime": 10800,
+    "syncIdentifier": "2859b169b07214e76ebe8acc0551129a",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Grilled chicken bre\u2026"
+  },
+  {
+    "startDate": "2026-01-15T19:40:30.859Z",
+    "quantity": 30,
+    "absorptionTime": 10800,
+    "syncIdentifier": "75cd27ff45a3af959f752c5ee110ec98",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83e\udd6a"
+  },
+  {
+    "startDate": "2026-01-15T23:26:48.202Z",
+    "quantity": 16,
+    "absorptionTime": 10800,
+    "syncIdentifier": "17a7b873bbece0be60dc1c9a337b96b0",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Potato Crisps"
+  },
+  {
+    "startDate": "2026-01-16T20:07:19.096Z",
+    "quantity": 60,
+    "absorptionTime": 10800,
+    "syncIdentifier": "f1d472af83cc3f1b6a853d16ee5d3fa6",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Roasted sweet potat\u2026"
+  },
+  {
+    "startDate": "2026-01-17T01:58:53.229Z",
+    "quantity": 45,
+    "absorptionTime": 10800,
+    "syncIdentifier": "30a65f0181177631c9ef123b53ec55dc",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Brown rice"
+  },
+  {
+    "startDate": "2026-01-17T17:38:30.964Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "274897ef22f6812443361052bebfbbf7",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-17T19:47:43.603Z",
+    "quantity": 16,
+    "absorptionTime": 10800,
+    "syncIdentifier": "dbe523e650d30f7b395e0d4c034eb7f3",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Potato Crisps"
+  },
+  {
+    "startDate": "2026-01-17T22:09:01.199Z",
+    "quantity": 53,
+    "absorptionTime": 10800,
+    "syncIdentifier": "f17bbc9182b411404ad52b85d811587c",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-18T20:02:18.518Z",
+    "quantity": 16,
+    "absorptionTime": 10800,
+    "syncIdentifier": "acee2deab729d174ccb47857f60efc34",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf7a"
+  },
+  {
+    "startDate": "2026-01-18T20:06:28.261Z",
+    "quantity": 40,
+    "absorptionTime": 10800,
+    "syncIdentifier": "a11dfd36352f694cf13626af45c04430",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Grilled beef steak"
+  },
+  {
+    "startDate": "2026-01-18T22:47:50.138Z",
+    "quantity": 16,
+    "absorptionTime": 10800,
+    "syncIdentifier": "fc2fafec58fed6f35513cad473622794",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Potato Crisps"
+  },
+  {
+    "startDate": "2026-01-19T01:19:40.445Z",
+    "quantity": 23,
+    "absorptionTime": 10800,
+    "syncIdentifier": "9c78587fcf5a3909dbbae2f1aa776ce8",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-19T19:26:53.731Z",
+    "quantity": 5,
+    "absorptionTime": 10800,
+    "syncIdentifier": "2fa476ff16758df641cbb7f46f5c38c2",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Cottage Cheese"
+  },
+  {
+    "startDate": "2026-01-20T01:34:39.863Z",
+    "quantity": 20,
+    "absorptionTime": 10800,
+    "syncIdentifier": "4e19eb42875628492f77d0b6716e2a89",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-20T19:34:05.724Z",
+    "quantity": 30,
+    "absorptionTime": 10800,
+    "syncIdentifier": "a030b3ff14fc12cbe93f273e8c248520",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "MEDIUM HOT COCKTAIL\u2026"
+  },
+  {
+    "startDate": "2026-01-21T00:51:55.57Z",
+    "quantity": 15,
+    "absorptionTime": 10800,
+    "syncIdentifier": "1144947bd35731b2630316b83767b583",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-21T01:40:14.873Z",
+    "quantity": 10,
+    "absorptionTime": 10800,
+    "syncIdentifier": "3857442c5dba51248a393e165fefa235",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-21T01:52:26.854Z",
+    "quantity": 25,
+    "absorptionTime": 10800,
+    "syncIdentifier": "b5fdff7729483ffb6dbc2a38290934da",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "M&M'S, CHOCOLATE CA\u2026"
+  },
+  {
+    "startDate": "2026-01-21T02:05:17.083Z",
+    "quantity": 20,
+    "absorptionTime": 10800,
+    "syncIdentifier": "47dbd4e2a2764f45a956395cee622d60",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-21T22:37:03.796Z",
+    "quantity": 5,
+    "absorptionTime": 10800,
+    "syncIdentifier": "10cf55a7ebe737f1293e8ac7af05b380",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-22T01:14:21.84Z",
+    "quantity": 10,
+    "absorptionTime": 10800,
+    "syncIdentifier": "4cb61965b6614b3fd47fc167f729fb2d",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-22T01:43:41.865Z",
+    "quantity": 50,
+    "absorptionTime": 10800,
+    "syncIdentifier": "0aaa700f89a8bbc096ad689ba3cbc03f",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-22T19:51:00.288Z",
+    "quantity": 42.5,
+    "absorptionTime": 10800,
+    "syncIdentifier": "3f9726092160ecff645ec5da12f57820",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Wegmans Shrimp Gyoza"
+  },
+  {
+    "startDate": "2026-01-23T00:59:52.041Z",
+    "quantity": 10,
+    "absorptionTime": 10800,
+    "syncIdentifier": "d59634b9c49b5a22eb030b3d1e55783c",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-23T01:59:20.4Z",
+    "quantity": 45,
+    "absorptionTime": 10800,
+    "syncIdentifier": "289e67d0c686242bdeaaa9a1dfb4731b",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Chicken Vindaloo"
+  },
+  {
+    "startDate": "2026-01-23T14:55:29.584Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "8af67c89de807be5951fc2ec99d1efc5",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-23T22:27:05.482Z",
+    "quantity": 15,
+    "absorptionTime": 10800,
+    "syncIdentifier": "3e890554c307d80eed3753bd9ae131bc",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-23T22:32:17.195Z",
+    "quantity": 10,
+    "absorptionTime": 10800,
+    "syncIdentifier": "00fa89860fa32086ab481d1264677325",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-23T22:59:49.356Z",
+    "quantity": 25,
+    "absorptionTime": 10800,
+    "syncIdentifier": "02525baf1f06e985f94128daa0783558",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Chewy Fruity Candy!"
+  },
+  {
+    "startDate": "2026-01-24T02:40:39.575Z",
+    "quantity": 25,
+    "absorptionTime": 10800,
+    "syncIdentifier": "480e1ed48efa5f4adde347c101644987",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-24T03:08:02.862Z",
+    "quantity": 30,
+    "absorptionTime": 10800,
+    "syncIdentifier": "9efc26fc96deba1802e8e9643a0dbc96",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-24T17:53:39.607Z",
+    "quantity": 21,
+    "absorptionTime": 10800,
+    "syncIdentifier": "7bd31505a1552bb9f853a4fe33d3f3cb",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Vanilla Greek Yogur\u2026"
+  },
+  {
+    "startDate": "2026-01-24T20:11:04.963Z",
+    "quantity": 21,
+    "absorptionTime": 10800,
+    "syncIdentifier": "4f70bb3133d0b157c6e1172e8d508be9",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-25T17:29:25.672Z",
+    "quantity": 21,
+    "absorptionTime": 10800,
+    "syncIdentifier": "a2aab830dfd66299846d6e43933e100a",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-25T20:25:04.961Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "1705e4e58fe81976ee94daed4d43649b",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-25T20:27:49.064Z",
+    "quantity": 9,
+    "absorptionTime": 10800,
+    "syncIdentifier": "5ee44052d5870ffbc4e3953102e6f5be",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Chopped salad with \u2026"
+  },
+  {
+    "startDate": "2026-01-25T20:42:50.966Z",
+    "quantity": 34,
+    "absorptionTime": 10800,
+    "syncIdentifier": "982958bedb90aac8ad32f018a8417ca2",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Stir-fried pork"
+  },
+  {
+    "startDate": "2026-01-25T21:45:35.435Z",
+    "quantity": 15,
+    "absorptionTime": 10800,
+    "syncIdentifier": "aa4c78b91f911626c1bc10b34fa5247b",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "peanut butter patti\u2026"
+  },
+  {
+    "startDate": "2026-01-25T22:59:13.467Z",
+    "quantity": 15,
+    "absorptionTime": 10800,
+    "syncIdentifier": "dfd019d70710eea3b8b78efd9ceff7d1",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-26T00:14:14.189Z",
+    "quantity": 7.5,
+    "absorptionTime": 10800,
+    "syncIdentifier": "bd835ee199709aca9343d71baeffef93",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-26T02:43:52.974Z",
+    "quantity": 40.2,
+    "absorptionTime": 10800,
+    "syncIdentifier": "9a5ca427ba0d8f26cb89d8477432464b",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Sliced Porridge Bre\u2026"
+  },
+  {
+    "startDate": "2026-01-26T19:38:59.512Z",
+    "quantity": 44.5,
+    "absorptionTime": 10800,
+    "syncIdentifier": "cc4ed6d6e1c7e1cbc66a81ef7c5a1969",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Stir-fried beef wit\u2026"
+  },
+  {
+    "startDate": "2026-01-26T19:52:47.898Z",
+    "quantity": 30,
+    "absorptionTime": 10800,
+    "syncIdentifier": "0494e7e8fcf89ddfd8ca8713d320ca89",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-26T23:44:33.868Z",
+    "quantity": 22,
+    "absorptionTime": 10800,
+    "syncIdentifier": "3c9f6e0b7411d9a3bd43bd4046cee304",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-27T02:16:40.488Z",
+    "quantity": 18,
+    "absorptionTime": 10800,
+    "syncIdentifier": "990b27c7666aef263ec4e58b1f553482",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-27T18:04:45.24Z",
+    "quantity": 33,
+    "absorptionTime": 10800,
+    "syncIdentifier": "53462149b22aef19ff23fe6378e6c1c9",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-27T18:37:15.995Z",
+    "quantity": 21,
+    "absorptionTime": 10800,
+    "syncIdentifier": "60bcfd46ecf83d389dcef58229fdb3f7",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-27T20:50:41.856Z",
+    "quantity": 5,
+    "absorptionTime": 10800,
+    "syncIdentifier": "5140d1d136a2c8a0829e48135f3d42d5",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-01-27T21:03:23.17Z",
+    "quantity": 22,
+    "absorptionTime": 10800,
+    "syncIdentifier": "cb748f2d245a981095a5bf69712a80ae",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-02T19:45:08.531Z",
+    "quantity": 40,
+    "absorptionTime": 10800,
+    "syncIdentifier": "bc3277a192d6df25695906f1985a6b68",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-03T02:44:28.561Z",
+    "quantity": 25,
+    "absorptionTime": 10800,
+    "syncIdentifier": "fd29720d21996e722c44cf4b1613be73",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-03T21:15:18.375Z",
+    "quantity": 15,
+    "absorptionTime": 10800,
+    "syncIdentifier": "91663cb532106f5440a6077892d2bc64",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Peanut Cocoa Crunch"
+  },
+  {
+    "startDate": "2026-02-04T01:51:28.87Z",
+    "quantity": 6,
+    "absorptionTime": 10800,
+    "syncIdentifier": "3d04f1cfcd0d44cbf774c5801e474f23",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Beetroot with cream\u2026"
+  },
+  {
+    "startDate": "2026-02-04T02:20:19.492Z",
+    "quantity": 40,
+    "absorptionTime": 10800,
+    "syncIdentifier": "f9d55b509a61b6888c7e0154b4af146c",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Grilled shrimp"
+  },
+  {
+    "startDate": "2026-02-04T03:01:14.626Z",
+    "quantity": 5,
+    "absorptionTime": 10800,
+    "syncIdentifier": "732054e93b86a3cae616b9ec581a242a",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Tuna Tartare"
+  },
+  {
+    "startDate": "2026-02-04T04:03:02.976Z",
+    "quantity": 10,
+    "absorptionTime": 10800,
+    "syncIdentifier": "5f317fb650b6b67f9d8bc9334d71be3a",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-04T18:28:51.391Z",
+    "quantity": 15,
+    "absorptionTime": 10800,
+    "syncIdentifier": "dd7e315e90e02d46c88db70fa9709b4c",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Low Fat Cottage Che\u2026"
+  },
+  {
+    "startDate": "2026-02-05T01:38:49.729Z",
+    "quantity": 30,
+    "absorptionTime": 10800,
+    "syncIdentifier": "f83c1c3e5798cd6bd4de4fade07c7166",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Cheeseburger"
+  },
+  {
+    "startDate": "2026-02-05T15:30:26.253Z",
+    "quantity": 27,
+    "absorptionTime": 10800,
+    "syncIdentifier": "9acbc436941faf1fef9fabd8f237312a",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "BANANA"
+  },
+  {
+    "startDate": "2026-02-05T20:49:13.1Z",
+    "quantity": 25,
+    "absorptionTime": 10800,
+    "syncIdentifier": "b0c5b4206bdf62ce451593aab06edfb2",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Peanut Butter Dark \u2026"
+  },
+  {
+    "startDate": "2026-02-06T00:56:11.485Z",
+    "quantity": 8,
+    "absorptionTime": 10800,
+    "syncIdentifier": "c17aced8b6ce62facb8653c146d356db",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Low Fat Cottage Che\u2026"
+  },
+  {
+    "startDate": "2026-02-06T02:28:37.174Z",
+    "quantity": 30,
+    "absorptionTime": 10800,
+    "syncIdentifier": "ffa903c7fefe2766c0230625f5641206",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-06T15:06:26.464Z",
+    "quantity": 27,
+    "absorptionTime": 10800,
+    "syncIdentifier": "1370951f76697ee3ea5c70c337c9d1c2",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-06T20:26:22.125Z",
+    "quantity": 10,
+    "absorptionTime": 10800,
+    "syncIdentifier": "b5f0f18f7592129f0502d7a018512ed6",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-06T20:30:49.972Z",
+    "quantity": 1,
+    "absorptionTime": 10800,
+    "syncIdentifier": "33974b54190a5f22e4e223a3f6edfea0",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Albacore Wild Tuna"
+  },
+  {
+    "startDate": "2026-02-06T23:55:49.278Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "076c934454413154f3ac7e230a0439d4",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf7a"
+  },
+  {
+    "startDate": "2026-02-07T00:57:05.202Z",
+    "quantity": 45,
+    "absorptionTime": 10800,
+    "syncIdentifier": "1b51202e8ab5487eb8c57e9e064a13b5",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Chocolate mousse ca\u2026"
+  },
+  {
+    "startDate": "2026-02-07T04:01:10.7Z",
+    "quantity": 10,
+    "absorptionTime": 10800,
+    "syncIdentifier": "a8be1ee2ec713cf7dd7ebd7c623e5d8a",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-07T17:21:53.536Z",
+    "quantity": 20,
+    "absorptionTime": 10800,
+    "syncIdentifier": "76f419a9dc49256cf38b5693c8c3e10d",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-07T21:22:20.181Z",
+    "quantity": 31,
+    "absorptionTime": 10800,
+    "syncIdentifier": "da8fadab348cf8b2bb81a8c0015bddcf",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-08T00:48:02.862Z",
+    "quantity": 25,
+    "absorptionTime": 10800,
+    "syncIdentifier": "3994586f98fbd00f0b45d5ac76e8bf75",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-08T03:09:23.026Z",
+    "quantity": 45,
+    "absorptionTime": 10800,
+    "syncIdentifier": "74447b9d3c61f18d19c88ef4a3650c28",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Seafood paella with\u2026"
+  },
+  {
+    "startDate": "2026-02-08T03:30:06.299Z",
+    "quantity": 20,
+    "absorptionTime": 10800,
+    "syncIdentifier": "c5412e9c367b6ccd49552243b4c9decb",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-08T19:13:56.276Z",
+    "quantity": 22,
+    "absorptionTime": 10800,
+    "syncIdentifier": "f4f081d53596a67e771a6390ff0772dd",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-09T00:40:05.606Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "0086012feaebdf0237ab2aad5a3b9e4d",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-09T01:56:06.849Z",
+    "quantity": 40,
+    "absorptionTime": 10800,
+    "syncIdentifier": "2b7ebd23d121bd7dba7d8d0694c65b1e",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "Twice-baked potato \u2026"
+  },
+  {
+    "startDate": "2026-02-09T18:47:59.105Z",
+    "quantity": 16,
+    "absorptionTime": 10800,
+    "syncIdentifier": "64547b1800d614515a19d79c7f6ee2da",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-09T20:33:32.309Z",
+    "quantity": 20,
+    "absorptionTime": 10800,
+    "syncIdentifier": "c6868d4efbfb03f7b2bbb251eaeeae46",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-10T01:19:16.768Z",
+    "quantity": 25,
+    "absorptionTime": 10800,
+    "syncIdentifier": "470c80513b267c1244aaf9f17c6d241e",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-10T15:54:30.175Z",
+    "quantity": 18,
+    "absorptionTime": 10800,
+    "syncIdentifier": "a608dc45c0c957a929c32e491d4bbce8",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-10T16:35:29.931Z",
+    "quantity": 7.5,
+    "absorptionTime": 10800,
+    "syncIdentifier": "465905bff56ff27c45c76c39a867d05d",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-10T19:46:56.912Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "23d883058c3318a2d61da5d79e893b9e",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf7a"
+  },
+  {
+    "startDate": "2026-02-10T19:47:35.71Z",
+    "quantity": 12,
+    "absorptionTime": 10800,
+    "syncIdentifier": "0df809961ed49f2e0c0271eec1c5a477",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf7a"
+  },
+  {
+    "startDate": "2026-02-10T19:51:17.315Z",
+    "quantity": 60,
+    "absorptionTime": 10800,
+    "syncIdentifier": "d7c915f12a8dba1d1ef7bcbf3ea9ea62",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  },
+  {
+    "startDate": "2026-02-10T22:05:55.627Z",
+    "quantity": 25,
+    "absorptionTime": 10800,
+    "syncIdentifier": "09a33c693308a664d9d16369e47bc16b",
+    "syncVersion": 1,
+    "createdByCurrentApp": false,
+    "foodType": "\ud83c\udf2e"
+  }
+]

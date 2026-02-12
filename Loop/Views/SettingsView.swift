@@ -305,6 +305,8 @@ extension SettingsView {
             if FeatureFlags.allowAlgorithmExperiments {
                 algorithmExperimentsSection
             }
+
+            loopInsightsSection
         }
     }
 
@@ -374,6 +376,22 @@ extension SettingsView {
                         imageView: Image("Favorite Foods Icon").renderingMode(.template).foregroundColor(carbTintColor),
                         label: "Favorite Foods",
                         descriptiveText: "Simplify Carb Entry")
+        }
+    }
+
+    private var loopInsightsSection: some View {
+        Section {
+            NavigationLink(destination: LoopInsights_SettingsView()) {
+                LargeButton(action: {},
+                            includeArrow: false,
+                            imageView: Image(systemName: "brain.head.profile")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundColor(.accentColor)
+                                .frame(width: 30),
+                            label: NSLocalizedString("LoopInsights", comment: "LoopInsights settings button"),
+                            descriptiveText: NSLocalizedString("AI-powered therapy settings analysis", comment: "LoopInsights settings descriptive text"))
+            }
         }
     }
     
