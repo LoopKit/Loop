@@ -21,6 +21,13 @@ struct LoopInsights_FeatureFlags {
         static let developerUnlockCount = "LoopInsights_developerUnlockCount"
         static let useTestData = "LoopInsights_useTestData"
         static let aiPersonality = "LoopInsights_aiPersonality"
+        static let backgroundMonitorEnabled = "LoopInsights_backgroundMonitorEnabled"
+        static let monitorFrequency = "LoopInsights_monitorFrequency"
+        static let monitorMinConfidence = "LoopInsights_monitorMinConfidence"
+        static let quietHoursEnabled = "LoopInsights_quietHoursEnabled"
+        static let quietHoursStart = "LoopInsights_quietHoursStart"
+        static let quietHoursEnd = "LoopInsights_quietHoursEnd"
+        static let notificationStyle = "LoopInsights_notificationStyle"
     }
 
     private static let defaults = UserDefaults.standard
@@ -106,6 +113,80 @@ struct LoopInsights_FeatureFlags {
         set {
             defaults.set(newValue.rawValue, forKey: Keys.aiPersonality)
         }
+    }
+
+    // MARK: - Background Monitor
+
+    /// Master toggle for background monitoring. Defaults to false.
+    static var backgroundMonitorEnabled: Bool {
+        get { defaults.bool(forKey: Keys.backgroundMonitorEnabled) }
+        set { defaults.set(newValue, forKey: Keys.backgroundMonitorEnabled) }
+    }
+
+    /// How frequently background analysis runs. Defaults to daily.
+    static var monitorFrequency: LoopInsightsMonitorFrequency {
+        get {
+            guard let raw = defaults.string(forKey: Keys.monitorFrequency),
+                  let freq = LoopInsightsMonitorFrequency(rawValue: raw) else {
+                return .daily
+            }
+            return freq
+        }
+        set { defaults.set(newValue.rawValue, forKey: Keys.monitorFrequency) }
+    }
+
+    /// Minimum confidence level for background notifications. Defaults to medium.
+    static var monitorMinConfidence: LoopInsightsConfidence {
+        get {
+            guard let raw = defaults.string(forKey: Keys.monitorMinConfidence),
+                  let conf = LoopInsightsConfidence(rawValue: raw) else {
+                return .medium
+            }
+            return conf
+        }
+        set { defaults.set(newValue.rawValue, forKey: Keys.monitorMinConfidence) }
+    }
+
+    /// Whether quiet hours are enabled. Defaults to false.
+    static var quietHoursEnabled: Bool {
+        get { defaults.bool(forKey: Keys.quietHoursEnabled) }
+        set { defaults.set(newValue, forKey: Keys.quietHoursEnabled) }
+    }
+
+    /// Quiet hours start (hour 0-23). Defaults to 22 (10 PM).
+    static var quietHoursStart: Int {
+        get {
+            let val = defaults.integer(forKey: Keys.quietHoursStart)
+            return val == 0 && !defaults.bool(forKey: Keys.quietHoursEnabled + "_startSet") ? 22 : val
+        }
+        set {
+            defaults.set(newValue, forKey: Keys.quietHoursStart)
+            defaults.set(true, forKey: Keys.quietHoursEnabled + "_startSet")
+        }
+    }
+
+    /// Quiet hours end (hour 0-23). Defaults to 7 (7 AM).
+    static var quietHoursEnd: Int {
+        get {
+            let val = defaults.integer(forKey: Keys.quietHoursEnd)
+            return val == 0 && !defaults.bool(forKey: Keys.quietHoursEnabled + "_endSet") ? 7 : val
+        }
+        set {
+            defaults.set(newValue, forKey: Keys.quietHoursEnd)
+            defaults.set(true, forKey: Keys.quietHoursEnabled + "_endSet")
+        }
+    }
+
+    /// Notification delivery style. Defaults to push.
+    static var notificationStyle: LoopInsightsNotificationStyle {
+        get {
+            guard let raw = defaults.string(forKey: Keys.notificationStyle),
+                  let style = LoopInsightsNotificationStyle(rawValue: raw) else {
+                return .push
+            }
+            return style
+        }
+        set { defaults.set(newValue.rawValue, forKey: Keys.notificationStyle) }
     }
 
     // MARK: - AI Configuration

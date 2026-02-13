@@ -673,6 +673,73 @@ enum LoopInsightsError: Error, LocalizedError {
     }
 }
 
+// MARK: - Monitor Frequency
+
+/// How often the background monitor runs AI analysis
+enum LoopInsightsMonitorFrequency: String, Codable, CaseIterable, Identifiable {
+    case sixHours = "six_hours"
+    case twelveHours = "twelve_hours"
+    case daily = "daily"
+    case weekly = "weekly"
+
+    var id: String { rawValue }
+
+    var timeInterval: TimeInterval {
+        switch self {
+        case .sixHours: return 6 * 3600
+        case .twelveHours: return 12 * 3600
+        case .daily: return 24 * 3600
+        case .weekly: return 7 * 24 * 3600
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .sixHours:
+            return NSLocalizedString("Every 6 Hours", comment: "LoopInsights monitor frequency: 6 hours")
+        case .twelveHours:
+            return NSLocalizedString("Every 12 Hours", comment: "LoopInsights monitor frequency: 12 hours")
+        case .daily:
+            return NSLocalizedString("Once Daily", comment: "LoopInsights monitor frequency: daily")
+        case .weekly:
+            return NSLocalizedString("Once Weekly", comment: "LoopInsights monitor frequency: weekly")
+        }
+    }
+}
+
+// MARK: - Notification Style
+
+/// How the background monitor delivers notifications
+enum LoopInsightsNotificationStyle: String, Codable, CaseIterable, Identifiable {
+    case banner
+    case push
+    case silent
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .banner:
+            return NSLocalizedString("In-App Banner", comment: "LoopInsights notification style: banner")
+        case .push:
+            return NSLocalizedString("Push Notification", comment: "LoopInsights notification style: push")
+        case .silent:
+            return NSLocalizedString("Silent (Badge Only)", comment: "LoopInsights notification style: silent")
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .banner:
+            return NSLocalizedString("Shows a banner inside the app when a new suggestion is found.", comment: "LoopInsights notification style desc: banner")
+        case .push:
+            return NSLocalizedString("Sends a push notification even when the app is in the background.", comment: "LoopInsights notification style desc: push")
+        case .silent:
+            return NSLocalizedString("No alert — suggestions are available when you next open LoopInsights.", comment: "LoopInsights notification style desc: silent")
+        }
+    }
+}
+
 // MARK: - Debug Log
 
 /// Captures the full prompt/response exchange for a single AI analysis call.
@@ -684,4 +751,52 @@ struct LoopInsightsDebugLog: Identifiable {
     let systemPrompt: String
     let userPrompt: String
     let rawResponse: String
+}
+
+// MARK: - Chat Message
+
+/// A single message in a LoopInsights chat conversation
+struct LoopInsightsChatMessage: Identifiable {
+    let id: UUID
+    let role: Role
+    let content: String
+    let timestamp: Date
+
+    enum Role: String {
+        case user
+        case assistant
+        case system
+    }
+
+    init(role: Role, content: String) {
+        self.id = UUID()
+        self.role = role
+        self.content = content
+        self.timestamp = Date()
+    }
+}
+
+// MARK: - Chat Session
+
+/// Manages an in-memory chat session. Conversations are not persisted
+/// across app launches — the AI always starts fresh with current data context.
+final class LoopInsightsChatSession: ObservableObject {
+    @Published private(set) var messages: [LoopInsightsChatMessage] = []
+    let sessionStarted: Date
+
+    init() {
+        self.sessionStarted = Date()
+    }
+
+    func appendMessage(_ message: LoopInsightsChatMessage) {
+        messages.append(message)
+    }
+
+    func conversationHistory() -> [(role: String, content: String)] {
+        return messages.map { ($0.role.rawValue, $0.content) }
+    }
+
+    func clear() {
+        messages.removeAll()
+    }
 }

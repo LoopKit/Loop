@@ -68,12 +68,19 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
     // MARK: - Dependencies
 
-    private let coordinator: LoopInsights_Coordinator
+    let coordinator: LoopInsights_Coordinator
     private var cancellables = Set<AnyCancellable>()
 
     /// Expose suggestion store for views that need direct access
     var suggestionStore: LoopInsights_SuggestionStore {
         coordinator.suggestionStore
+    }
+
+    /// Expose background monitor for banner overlay in DashboardView.
+    /// Returns nil if monitoring is disabled.
+    var backgroundMonitor: LoopInsights_BackgroundMonitor? {
+        guard LoopInsights_FeatureFlags.backgroundMonitorEnabled else { return nil }
+        return coordinator.backgroundMonitor
     }
 
     // MARK: - Initialization

@@ -93,6 +93,7 @@ struct LoopInsights_SettingsView: View {
                 advancedAISection
                 analysisOptionsSection
                 personalitySection
+                backgroundMonitoringSection
                 dataSection
                 if LoopInsights_FeatureFlags.developerModeEnabled {
                     developerSection
@@ -661,6 +662,41 @@ struct LoopInsights_SettingsView: View {
         }
     }
 
+    // MARK: - Background Monitoring
+
+    private var backgroundMonitoringSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "bell.badge")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("BACKGROUND MONITORING", comment: "LoopInsights background monitoring header"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                }
+
+                NavigationLink {
+                    LoopInsights_MonitorSettingsView()
+                } label: {
+                    HStack {
+                        Text(NSLocalizedString("Background Monitoring", comment: "LoopInsights background monitoring row"))
+                        Spacer()
+                        Text(LoopInsights_FeatureFlags.backgroundMonitorEnabled
+                            ? LoopInsights_FeatureFlags.monitorFrequency.displayName
+                            : NSLocalizedString("Off", comment: "LoopInsights monitoring off"))
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Text(NSLocalizedString("LoopInsights can continuously monitor your data and proactively notify you when it detects a setting change opportunity.", comment: "LoopInsights background monitoring description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
     // MARK: - Data
 
     private var dataSection: some View {
@@ -939,6 +975,9 @@ private class LoopInsights_DashboardContainer: ObservableObject {
             let provider = LoopInsights_TestDataProvider()
             coordinator = LoopInsights_Coordinator(testDataProvider: provider)
         }
+
+        // Start background monitoring if enabled
+        coordinator.startBackgroundMonitoring()
 
         let vm = LoopInsights_DashboardViewModel(coordinator: coordinator)
 

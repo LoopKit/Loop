@@ -26,6 +26,8 @@ struct LoopInsights_DashboardView: View {
 
     @State private var showingHistory = false
     @State private var showingDebugLog = false
+    @State private var showingChat = false
+    @State private var showingTrendsInsights = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
 
@@ -130,6 +132,38 @@ struct LoopInsights_DashboardView: View {
                         }
                     )
                 }
+            }
+        }
+        .sheet(isPresented: $showingChat) {
+            NavigationView {
+                LoopInsights_ChatView(
+                    viewModel: LoopInsights_ChatViewModel(coordinator: viewModel.coordinator)
+                )
+            }
+        }
+        .sheet(isPresented: $showingTrendsInsights) {
+            NavigationView {
+                LoopInsights_TrendsInsightsView(coordinator: viewModel.coordinator)
+            }
+        }
+        .overlay(alignment: .top) {
+            if let monitor = viewModel.backgroundMonitor,
+               monitor.showBanner,
+               let suggestion = monitor.latestBackgroundSuggestion {
+                notificationBanner(
+                    suggestion: suggestion,
+                    onView: {
+                        monitor.dismissBanner()
+                        viewModel.loadCurrentSettings()
+                    },
+                    onAsk: {
+                        monitor.dismissBanner()
+                        showingChat = true
+                    },
+                    onDismiss: {
+                        monitor.dismissBanner()
+                    }
+                )
             }
         }
     }
@@ -665,6 +699,30 @@ struct LoopInsights_DashboardView: View {
 
     private var navigationSection: some View {
         Section {
+            Button(action: { showingTrendsInsights = true }) {
+                HStack {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("Trends & Insights", comment: "LoopInsights trends button"))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Button(action: { showingChat = true }) {
+                HStack {
+                    Image(systemName: "bubble.left.and.bubble.right")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("Ask LoopInsights", comment: "LoopInsights chat button"))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
             Button(action: { showingHistory = true }) {
                 HStack {
                     Image(systemName: "clock.arrow.circlepath")
@@ -704,6 +762,94 @@ struct LoopInsights_DashboardView: View {
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(LoopInsights_FeatureFlags.developerModeEnabled ? .success : .warning)
         }
+    }
+
+    // MARK: - Notification Banner
+
+    @ViewBuilder
+    private func notificationBanner(
+        suggestion: LoopInsightsSuggestion,
+        onView: @escaping () -> Void,
+        onAsk: @escaping () -> Void,
+        onDismiss: @escaping () -> Void
+    ) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                Image(systemName: "brain.head.profile")
+                    .font(.title3)
+                    .foregroundColor(.white)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(NSLocalizedString("LoopInsights", comment: "LoopInsights banner title"))
+                            .font(.subheadline.weight(.bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(confidenceColor(suggestion.confidence))
+                                .frame(width: 6, height: 6)
+                            Text(suggestion.confidence.displayName)
+                                .font(.caption2.weight(.bold))
+                        }
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(8)
+                        .foregroundColor(.white)
+                    }
+
+                    Text(suggestion.summaryDescription)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.9))
+                        .lineLimit(2)
+
+                    HStack(spacing: 12) {
+                        Button(action: onView) {
+                            Text(NSLocalizedString("View", comment: "LoopInsights banner view button"))
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(.accentColor)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(Color.white)
+                                .cornerRadius(14)
+                        }
+                        .buttonStyle(.plain)
+
+                        Button(action: onAsk) {
+                            Text(NSLocalizedString("Ask", comment: "LoopInsights banner ask button"))
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(Color.white.opacity(0.25))
+                                .cornerRadius(14)
+                        }
+                        .buttonStyle(.plain)
+
+                        Button(action: onDismiss) {
+                            Text(NSLocalizedString("Dismiss", comment: "LoopInsights banner dismiss button"))
+                                .font(.caption.weight(.medium))
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        .buttonStyle(.plain)
+
+                        Spacer()
+                    }
+                    .padding(.top, 2)
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.accentColor.opacity(0.95))
+                    .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            )
+            .padding(.horizontal)
+
+            Spacer()
+        }
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 
     // MARK: - Formatters

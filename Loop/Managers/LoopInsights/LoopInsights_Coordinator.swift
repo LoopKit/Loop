@@ -27,6 +27,9 @@ final class LoopInsights_Coordinator: ObservableObject {
     let aiAnalysis: LoopInsights_AIAnalysis
     let suggestionStore: LoopInsights_SuggestionStore
 
+    /// Background monitor for proactive suggestions (lazy-initialized)
+    lazy var backgroundMonitor: LoopInsights_BackgroundMonitor = LoopInsights_BackgroundMonitor(coordinator: self)
+
     // MARK: - Data Provider Bridge
 
     private var dataProviderBridge: DataProviderBridge?
@@ -85,6 +88,22 @@ final class LoopInsights_Coordinator: ObservableObject {
 
         print("[LoopInsights] Using test data: \(provider.dataSummary)")
         return LoopInsights_Coordinator(testDataProvider: provider)
+    }
+
+    // MARK: - Background Monitoring
+
+    /// Start background monitoring if enabled and using real stores (not test data).
+    func startBackgroundMonitoring() {
+        guard dataProviderBridge != nil else {
+            print("[LoopInsights] Skipping background monitor — test data mode")
+            return
+        }
+        backgroundMonitor.start()
+    }
+
+    /// Stop background monitoring.
+    func stopBackgroundMonitoring() {
+        backgroundMonitor.stop()
     }
 
     // MARK: - Therapy Settings Write Access
