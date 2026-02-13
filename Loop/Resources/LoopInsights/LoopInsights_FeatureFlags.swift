@@ -29,6 +29,11 @@ struct LoopInsights_FeatureFlags {
         static let quietHoursEnd = "LoopInsights_quietHoursEnd"
         static let notificationStyle = "LoopInsights_notificationStyle"
         static let biometricsEnabled = "LoopInsights_biometricsEnabled"
+        static let circadianEnabled = "LoopInsights_circadianEnabled"
+        static let foodResponseEnabled = "LoopInsights_foodResponseEnabled"
+        static let caffeineTrackingEnabled = "LoopInsights_caffeineTrackingEnabled"
+        static let nightscoutImportEnabled = "LoopInsights_nightscoutImportEnabled"
+        static let agpChartEnabled = "LoopInsights_agpChartEnabled"
     }
 
     private static let defaults = UserDefaults.standard
@@ -197,6 +202,39 @@ struct LoopInsights_FeatureFlags {
     static var biometricsEnabled: Bool {
         get { defaults.bool(forKey: Keys.biometricsEnabled) }
         set { defaults.set(newValue, forKey: Keys.biometricsEnabled) }
+    }
+
+    // MARK: - Phase 5 Feature Flags
+
+    /// Enables circadian analysis, dawn phenomenon detection, negative basal awareness,
+    /// and HRV-based stress scoring. All advanced analyzers gated by one flag.
+    static var circadianEnabled: Bool {
+        get { defaults.bool(forKey: Keys.circadianEnabled) }
+        set { defaults.set(newValue, forKey: Keys.circadianEnabled) }
+    }
+
+    /// Enables food-type response pattern analysis and the Meal Insights view.
+    static var foodResponseEnabled: Bool {
+        get { defaults.bool(forKey: Keys.foodResponseEnabled) }
+        set { defaults.set(newValue, forKey: Keys.foodResponseEnabled) }
+    }
+
+    /// Enables caffeine intake tracking and the Caffeine Log view.
+    static var caffeineTrackingEnabled: Bool {
+        get { defaults.bool(forKey: Keys.caffeineTrackingEnabled) }
+        set { defaults.set(newValue, forKey: Keys.caffeineTrackingEnabled) }
+    }
+
+    /// Enables Nightscout data import as an alternative/supplemental data source.
+    static var nightscoutImportEnabled: Bool {
+        get { defaults.bool(forKey: Keys.nightscoutImportEnabled) }
+        set { defaults.set(newValue, forKey: Keys.nightscoutImportEnabled) }
+    }
+
+    /// Enables the Ambulatory Glucose Profile chart on the dashboard.
+    static var agpChartEnabled: Bool {
+        get { defaults.bool(forKey: Keys.agpChartEnabled) }
+        set { defaults.set(newValue, forKey: Keys.agpChartEnabled) }
     }
 
     // MARK: - AI Configuration

@@ -34,10 +34,11 @@ final class LoopInsights_AIAnalysis {
         settingType: LoopInsightsSettingType,
         currentSettings: LoopInsightsTherapySnapshot,
         stats: LoopInsightsAggregatedStats,
-        recentChanges: [LoopInsightsSuggestionRecord] = []
+        recentChanges: [LoopInsightsSuggestionRecord] = [],
+        supplementalContext: String? = nil
     ) async throws -> LoopInsightsAnalysisResponse {
-        let systemPrompt = buildSystemPrompt()
-        let userPrompt = buildUserPrompt(settingType: settingType, settings: currentSettings, stats: stats, recentChanges: recentChanges)
+        let systemPrompt = buildSystemPrompt(supplementalContext: supplementalContext)
+        let userPrompt = buildUserPrompt(settingType: settingType, settings: currentSettings, stats: stats, recentChanges: recentChanges, supplementalContext: supplementalContext)
 
         let timestamp = Date()
         let rawResponse = try await serviceAdapter.sendPrompt(systemPrompt, userPrompt: userPrompt)
@@ -56,7 +57,7 @@ final class LoopInsights_AIAnalysis {
 
     // MARK: - System Prompt
 
-    private func buildSystemPrompt() -> String {
+    private func buildSystemPrompt(supplementalContext: String? = nil) -> String {
         let personality = LoopInsights_FeatureFlags.aiPersonality
         return """
         You are LoopInsights, an expert-level automated insulin delivery (AID) therapy settings analyst. \
@@ -152,6 +153,22 @@ final class LoopInsights_AIAnalysis {
           setting changes. If glucose variability correlates with activity or sleep variation, \
           note this as a lifestyle factor rather than a settings problem.
 
+        ADVANCED CONTEXT — When supplemental data is provided below the user prompt:
+        - CIRCADIAN PROFILE: Use actual sleep/wake times to evaluate overnight and dawn patterns \
+          rather than fixed time windows. A dawn rise before the user's actual wake time is a true dawn \
+          phenomenon; a rise that starts after wake is likely a breakfast/activity effect.
+        - NEGATIVE BASAL: Frequent insulin suspensions (>10% of time) strongly suggest basal is too high. \
+          Overcorrection events (suspend → rebound high) indicate settings oscillation. Weight suspension \
+          patterns by hour to identify which time blocks need basal reduction.
+        - STRESS SCORE: High physiological stress (score >70) increases insulin resistance. If stress \
+          correlates with glucose variability, settings changes alone may not solve the problem — note \
+          lifestyle factors in your assessment.
+        - FOOD RESPONSE: Per-food glucose patterns help distinguish CR problems from ISF problems. If \
+          high-GI foods cause large spikes but low-GI foods are handled well, the issue is food choice, \
+          not necessarily CR settings.
+        - CAFFEINE: Active caffeine >100mg can increase insulin resistance and glucose variability. \
+          Factor caffeine timing into your assessment of glucose patterns, especially morning highs.
+
         RESPONSE FORMAT:
         Respond with valid JSON in this exact structure:
         {
@@ -187,7 +204,8 @@ final class LoopInsights_AIAnalysis {
         settingType: LoopInsightsSettingType,
         settings: LoopInsightsTherapySnapshot,
         stats: LoopInsightsAggregatedStats,
-        recentChanges: [LoopInsightsSuggestionRecord] = []
+        recentChanges: [LoopInsightsSuggestionRecord] = [],
+        supplementalContext: String? = nil
     ) -> String {
         var prompt = "Evaluate whether my \(settingType.displayName) settings need adjustment.\n\n"
 
@@ -354,8 +372,16 @@ final class LoopInsights_AIAnalysis {
             }
         }
 
+        // Phase 5: Supplemental context from advanced analyzers
+        if let supplemental = supplementalContext, !supplemental.isEmpty {
+            prompt += "\n\n## Supplemental Analysis Context\n"
+            prompt += supplemental
+            prompt += "\n"
+        }
+
         prompt += "\nAnalyze this data focusing specifically on \(settingType.displayName). "
         prompt += "Use the time-of-day analysis and algorithm workload metrics to identify actionable patterns. "
+        prompt += "If supplemental context is provided above, incorporate it into your reasoning. "
         prompt += "If the data clearly supports adjustments, propose them. If not, return empty suggestions. "
         prompt += "Respond with JSON only, no markdown formatting."
 

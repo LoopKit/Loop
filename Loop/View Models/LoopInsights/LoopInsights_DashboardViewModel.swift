@@ -66,6 +66,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     /// Whether current metrics indicate settings are already performing well
     @Published var settingsAlreadyOptimal: Bool = false
 
+    /// Glucose samples for AGP chart (populated during analysis)
+    @Published var agpGlucoseSamples: [StoredGlucoseSample] = []
+
     // MARK: - Dependencies
 
     let coordinator: LoopInsights_Coordinator
@@ -124,9 +127,20 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 let stats = try await coordinator.dataAggregator.aggregateData(period: analysisPeriod)
                 self.aggregatedStats = stats
 
+                // Fetch glucose samples for AGP chart
+                if LoopInsights_FeatureFlags.agpChartEnabled {
+                    let start = Date().addingTimeInterval(-analysisPeriod.timeInterval)
+                    if let samples = try? await coordinator.fetchGlucoseSamples(start: start, end: Date()) {
+                        self.agpGlucoseSamples = samples
+                    }
+                }
+
                 // Capture current settings
                 let snapshot = try coordinator.captureCurrentSnapshot()
                 self.currentSnapshot = snapshot
+
+                // Phase 5: Build supplemental context from advanced analyzers
+                let supplementalContext = await coordinator.buildSupplementalContext(stats: stats)
 
                 // Run AI analysis (include recent changes so AI knows data predates current settings)
                 let recentChanges = self.recentlyAppliedRecords()
@@ -134,7 +148,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                     settingType: focusSettingType,
                     currentSettings: snapshot,
                     stats: stats,
-                    recentChanges: recentChanges
+                    recentChanges: recentChanges,
+                    supplementalContext: supplementalContext
                 )
 
                 // Show patterns, score, and AI results together after analysis completes
@@ -193,8 +208,19 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 let stats = try await coordinator.dataAggregator.aggregateData(period: analysisPeriod)
                 self.aggregatedStats = stats
 
+                // Fetch glucose samples for AGP chart
+                if LoopInsights_FeatureFlags.agpChartEnabled {
+                    let start = Date().addingTimeInterval(-analysisPeriod.timeInterval)
+                    if let samples = try? await coordinator.fetchGlucoseSamples(start: start, end: Date()) {
+                        self.agpGlucoseSamples = samples
+                    }
+                }
+
                 let snapshot = try coordinator.captureCurrentSnapshot()
                 self.currentSnapshot = snapshot
+
+                // Phase 5: Build supplemental context from advanced analyzers
+                let supplementalContext = await coordinator.buildSupplementalContext(stats: stats)
 
                 // Analyze each setting type in tuning order: CR → ISF → BR
                 let recentChanges = self.recentlyAppliedRecords()
@@ -203,7 +229,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                         settingType: settingType,
                         currentSettings: snapshot,
                         stats: stats,
-                        recentChanges: recentChanges
+                        recentChanges: recentChanges,
+                        supplementalContext: supplementalContext
                     )
 
                     self.overallAssessment = response.overallAssessment

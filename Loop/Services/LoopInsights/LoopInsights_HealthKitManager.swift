@@ -25,6 +25,11 @@ final class LoopInsights_HealthKitManager: ObservableObject {
         if let sleep = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { types.insert(sleep) }
         if let energy = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) { types.insert(energy) }
         if let weight = HKQuantityType.quantityType(forIdentifier: .bodyMass) { types.insert(weight) }
+        if let caffeine = HKQuantityType.quantityType(forIdentifier: .dietaryCaffeine) { types.insert(caffeine) }
+        // Core diabetes data types (Loop writes these — we read them for longer analysis periods)
+        if let glucose = HKQuantityType.quantityType(forIdentifier: .bloodGlucose) { types.insert(glucose) }
+        if let insulin = HKQuantityType.quantityType(forIdentifier: .insulinDelivery) { types.insert(insulin) }
+        if let carbs = HKQuantityType.quantityType(forIdentifier: .dietaryCarbohydrates) { types.insert(carbs) }
         return types
     }()
 
@@ -95,7 +100,8 @@ final class LoopInsights_HealthKitManager: ObservableObject {
             steps: stepResult,
             sleep: sleepResult,
             activeEnergy: energyResult,
-            weight: weightResult
+            weight: weightResult,
+            stressScore: nil  // Computed by AdvancedAnalyzers in DataAggregator
         )
     }
 
@@ -310,6 +316,98 @@ final class LoopInsights_HealthKitManager: ObservableObject {
             latestWeight: latest,
             weightTrend: trend
         )
+    }
+
+    // MARK: - Core Diabetes Data (from HealthKit)
+
+    /// Fetch blood glucose samples from HealthKit for the given date range.
+    /// Returns (timestamp, mg/dL) tuples. Loop writes CGM data to HealthKit,
+    /// so this provides access to historical data beyond Loop's local store retention.
+    func fetchGlucoseSamples(start: Date, end: Date) async throws -> [(date: Date, mgdl: Double)] {
+        guard let glucoseType = HKQuantityType.quantityType(forIdentifier: .bloodGlucose) else { return [] }
+
+        let samples = try await querySamples(type: glucoseType, start: start, end: end)
+        let mgdlUnit = HKUnit.gramUnit(with: .milli).unitDivided(by: HKUnit.literUnit(with: .deci))
+
+        return samples.map { sample in
+            (date: sample.startDate, mgdl: sample.quantity.doubleValue(for: mgdlUnit))
+        }
+    }
+
+    /// Fetch insulin delivery samples from HealthKit for the given date range.
+    /// Loop writes all doses (basal + bolus) to HealthKit.
+    func fetchInsulinDelivery(start: Date, end: Date) async throws -> [(date: Date, units: Double, duration: TimeInterval, purpose: HKInsulinDeliveryReason?)] {
+        guard let insulinType = HKQuantityType.quantityType(forIdentifier: .insulinDelivery) else { return [] }
+
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+
+        let samples: [HKQuantitySample] = try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: insulinType,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+            ) { _, results, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: (results as? [HKQuantitySample]) ?? [])
+                }
+            }
+            healthStore.execute(query)
+        }
+
+        let unitUnit = HKUnit.internationalUnit()
+        return samples.map { sample in
+            let purpose: HKInsulinDeliveryReason?
+            if let meta = sample.metadata,
+               let reasonRaw = meta[HKMetadataKeyInsulinDeliveryReason] as? NSNumber {
+                purpose = HKInsulinDeliveryReason(rawValue: reasonRaw.intValue)
+            } else {
+                purpose = nil
+            }
+            return (
+                date: sample.startDate,
+                units: sample.quantity.doubleValue(for: unitUnit),
+                duration: sample.endDate.timeIntervalSince(sample.startDate),
+                purpose: purpose
+            )
+        }
+    }
+
+    /// Fetch dietary carbohydrate entries from HealthKit for the given date range.
+    /// Loop writes carb entries to HealthKit.
+    func fetchCarbEntries(start: Date, end: Date) async throws -> [(date: Date, grams: Double)] {
+        guard let carbType = HKQuantityType.quantityType(forIdentifier: .dietaryCarbohydrates) else { return [] }
+
+        let samples = try await querySamples(type: carbType, start: start, end: end)
+        let gramUnit = HKUnit.gram()
+
+        return samples.map { sample in
+            (date: sample.startDate, grams: sample.quantity.doubleValue(for: gramUnit))
+        }
+    }
+
+    // MARK: - Caffeine
+
+    /// Fetch dietary caffeine entries from HealthKit for the given date range.
+    /// Returns LoopInsightsCaffeineEntry objects tagged with isFromHealthKit = true.
+    func fetchCaffeineEntries(start: Date, end: Date) async throws -> [LoopInsightsCaffeineEntry] {
+        guard let caffeineType = HKQuantityType.quantityType(forIdentifier: .dietaryCaffeine) else { return [] }
+
+        let samples = try await querySamples(type: caffeineType, start: start, end: end)
+        let mgUnit = HKUnit.gramUnit(with: .milli)
+
+        return samples.map { sample in
+            let mg = sample.quantity.doubleValue(for: mgUnit)
+            let sourceName = sample.sourceRevision.source.name
+            return LoopInsightsCaffeineEntry(
+                timestamp: sample.startDate,
+                milligrams: mg,
+                source: sourceName,
+                isFromHealthKit: true
+            )
+        }
     }
 
     // MARK: - Helpers

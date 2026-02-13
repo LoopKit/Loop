@@ -28,6 +28,7 @@ final class LoopInsights_Coordinator: ObservableObject {
     let suggestionStore: LoopInsights_SuggestionStore
     let goalStore: LoopInsights_GoalStore
     let healthKitManager: LoopInsights_HealthKitManager?
+    let caffeineTracker: LoopInsights_CaffeineTracker
 
     /// Background monitor for proactive suggestions (lazy-initialized)
     lazy var backgroundMonitor: LoopInsights_BackgroundMonitor = LoopInsights_BackgroundMonitor(coordinator: self)
@@ -69,6 +70,8 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.aiAnalysis = LoopInsights_AIAnalysis()
         self.suggestionStore = LoopInsights_SuggestionStore.shared
         self.goalStore = LoopInsights_GoalStore.shared
+        self.caffeineTracker = LoopInsights_CaffeineTracker.shared
+        self.caffeineTracker.healthKitManager = hkManager
     }
 
     /// Initialize with test data fixtures (for simulator/developer mode).
@@ -82,6 +85,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.aiAnalysis = LoopInsights_AIAnalysis()
         self.suggestionStore = LoopInsights_SuggestionStore.shared
         self.goalStore = LoopInsights_GoalStore.shared
+        self.caffeineTracker = LoopInsights_CaffeineTracker.shared
     }
 
     /// Factory method: creates a Coordinator with test data if available and enabled,
@@ -113,6 +117,91 @@ final class LoopInsights_Coordinator: ObservableObject {
     /// Stop background monitoring.
     func stopBackgroundMonitoring() {
         backgroundMonitor.stop()
+    }
+
+    // MARK: - Supplemental AI Context (Phase 5)
+
+    /// Build supplemental context for AI prompt enrichment from Phase 5 analyzers.
+    /// Returns nil if no Phase 5 features are enabled.
+    func buildSupplementalContext(
+        stats: LoopInsightsAggregatedStats,
+        glucoseSamples: [StoredGlucoseSample]? = nil
+    ) async -> String? {
+        var context: [String] = []
+
+        let start = Date().addingTimeInterval(-stats.period.timeInterval)
+        let end = Date()
+
+        // Fetch glucose samples once if not provided
+        var resolvedGlucose: [StoredGlucoseSample]? = glucoseSamples
+        if resolvedGlucose == nil, let bridge = dataProviderBridge {
+            resolvedGlucose = try? await bridge.getGlucoseSamples(start: start, end: end)
+        }
+
+        // Circadian + Dawn Phenomenon + Negative Basal + Stress
+        if LoopInsights_FeatureFlags.circadianEnabled {
+            // Circadian profile from glucose + sleep data
+            if let samples = resolvedGlucose {
+                if let profile = LoopInsights_AdvancedAnalyzers.buildCircadianProfile(
+                    glucoseSamples: samples,
+                    sleepStats: stats.biometricStats?.sleep
+                ) {
+                    context.append(LoopInsights_AdvancedAnalyzers.buildCircadianPromptContext(profile))
+                }
+            }
+
+            // Negative basal stats (already computed in aggregation, just need prompt context)
+            if let negBasal = stats.insulinStats.negativeBasalStats {
+                context.append(LoopInsights_AdvancedAnalyzers.buildNegativeBasalPromptContext(negBasal))
+            }
+
+            // Stress score (already computed in aggregation)
+            if let stressScore = stats.biometricStats?.stressScore {
+                context.append(LoopInsights_AdvancedAnalyzers.buildStressPromptContext(stressScore))
+            }
+        }
+
+        // Food response patterns
+        if LoopInsights_FeatureFlags.foodResponseEnabled {
+            if let bridge = dataProviderBridge,
+               let carbEntries = try? await bridge.getCarbEntries(start: start, end: end),
+               let glucSamples = resolvedGlucose {
+                let patterns = LoopInsights_FoodResponseAnalyzer.analyzeFoodResponses(
+                    carbEntries: carbEntries,
+                    glucoseSamples: glucSamples
+                )
+                let foodCtx = LoopInsights_FoodResponseAnalyzer.buildFoodResponsePromptContext(patterns)
+                if !foodCtx.isEmpty { context.append(foodCtx) }
+            }
+        }
+
+        // Caffeine context
+        if LoopInsights_FeatureFlags.caffeineTrackingEnabled {
+            let caffeineCtx = caffeineTracker.buildCaffeinePromptContext()
+            if !caffeineCtx.isEmpty { context.append(caffeineCtx) }
+        }
+
+        guard !context.isEmpty else { return nil }
+        return context.joined(separator: "\n")
+    }
+
+    // MARK: - Raw Data Access
+
+    /// Fetch raw glucose samples for the given date range.
+    /// Tries HealthKit first for longer history, falls back to Loop stores.
+    func fetchGlucoseSamples(start: Date, end: Date) async throws -> [StoredGlucoseSample] {
+        guard let bridge = dataProviderBridge else {
+            throw LoopInsightsError.insufficientData("Data provider not available")
+        }
+        return try await bridge.getGlucoseSamples(start: start, end: end)
+    }
+
+    /// Fetch raw carb entries for the given date range.
+    func fetchCarbEntries(start: Date, end: Date) async throws -> [StoredCarbEntry] {
+        guard let bridge = dataProviderBridge else {
+            throw LoopInsightsError.insufficientData("Data provider not available")
+        }
+        return try await bridge.getCarbEntries(start: start, end: end)
     }
 
     // MARK: - Therapy Settings Write Access

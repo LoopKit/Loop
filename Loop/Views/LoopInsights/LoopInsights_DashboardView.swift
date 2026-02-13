@@ -29,6 +29,8 @@ struct LoopInsights_DashboardView: View {
     @State private var showingChat = false
     @State private var showingTrendsInsights = false
     @State private var showingGoals = false
+    @State private var showingMealInsights = false
+    @State private var showingCaffeineLog = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
 
@@ -59,6 +61,9 @@ struct LoopInsights_DashboardView: View {
             headerSection
             currentSettingsSection
             analysisSection
+            if viewModel.aggregatedStats != nil {
+                glucoseStatsCards
+            }
             if !viewModel.detectedPatterns.isEmpty {
                 detectedPatternsSection
             }
@@ -82,6 +87,7 @@ struct LoopInsights_DashboardView: View {
             }
             navigationSection
         }
+        .modifier(ListSectionSpacingModifier())
         .navigationTitle(NSLocalizedString("LoopInsights", comment: "LoopInsights dashboard title"))
         .sheet(item: $selectedRecord) { record in
             NavigationView {
@@ -155,6 +161,16 @@ struct LoopInsights_DashboardView: View {
                 LoopInsights_GoalsView(coordinator: viewModel.coordinator)
             }
         }
+        .sheet(isPresented: $showingMealInsights) {
+            NavigationView {
+                LoopInsights_MealInsightsView(coordinator: viewModel.coordinator)
+            }
+        }
+        .sheet(isPresented: $showingCaffeineLog) {
+            NavigationView {
+                LoopInsights_CaffeineLogView(tracker: viewModel.coordinator.caffeineTracker)
+            }
+        }
         .overlay(alignment: .top) {
             if let monitor = viewModel.backgroundMonitor,
                monitor.showBanner,
@@ -194,7 +210,7 @@ struct LoopInsights_DashboardView: View {
                     handleDeveloperTap()
                 }
 
-                Text(NSLocalizedString("LoopInsights analyzes your glucose, insulin, and carb data to suggest adjustments to your Basal Rates, Carb Ratios, and Insulin Sensitivity factors. Tap one of the settings, choose a lookback period, and tap Analyze to get AI-generated suggestions. All changes require your review and approval.", comment: "LoopInsights subtitle"))
+                Text(NSLocalizedString("Analyzes your glucose, insulin, and carb data to suggest Basal Rate, Carb Ratio, and ISF adjustments. Select a setting and lookback period, then tap Analyze. All changes require approval", comment: "LoopInsights subtitle"))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -204,20 +220,20 @@ struct LoopInsights_DashboardView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            .padding(.vertical, 4)
         }
     }
 
     // MARK: - Current Settings
 
     private var currentSettingsSection: some View {
-        Section(header: Text(NSLocalizedString("Tap one of your current Therapy Settings", comment: "LoopInsights current settings header"))) {
+        Section(header: Text(NSLocalizedString("Therapy Settings", comment: "LoopInsights current settings header")) ) {
             if let snapshot = viewModel.currentSnapshot {
                 settingRow(
                     type: .basalRate,
                     items: snapshot.basalRateItems,
                     unit: "U/hr"
                 )
+                .padding(.top, 4)
                 settingRow(
                     type: .carbRatio,
                     items: snapshot.carbRatioItems,
@@ -283,12 +299,33 @@ struct LoopInsights_DashboardView: View {
 
     private var analysisSection: some View {
         Section {
-            // Period picker
-            Picker(NSLocalizedString("Analysis Period", comment: "LoopInsights period picker label"), selection: analysisPeriodBinding) {
+            // Period picker — Clarity-style capsule buttons
+            HStack(spacing: 6) {
                 ForEach(LoopInsightsAnalysisPeriod.allCases) { period in
-                    Text(period.displayName).tag(period)
+                    let isSelected = viewModel.analysisPeriod == period
+                    let clarityBlue = Color(red: 74/255, green: 115/255, blue: 213/255) // #4A73D5
+                    Button {
+                        viewModel.updateAnalysisPeriod(period)
+                    } label: {
+                        Text("\(period.rawValue)")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(isSelected ? clarityBlue : Color.clear)
+                            .foregroundColor(isSelected ? .white : Color(.secondaryLabel))
+                            .overlay(
+                                Capsule()
+                                    .stroke(
+                                        isSelected ? clarityBlue : Color(.systemGray4),
+                                        lineWidth: 1.5
+                                    )
+                            )
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(.vertical, 4)
 
             // Analyze buttons
             HStack(spacing: 10) {
@@ -354,6 +391,11 @@ struct LoopInsights_DashboardView: View {
             }
             .listRowSeparator(.hidden, edges: .top)
             .padding(.bottom, 8)
+
+            // AGP Chart — shown with analysis summary when enabled
+            if LoopInsights_FeatureFlags.agpChartEnabled && !viewModel.agpGlucoseSamples.isEmpty {
+                LoopInsights_AGPChartView(glucoseSamples: viewModel.agpGlucoseSamples)
+            }
 
             if !LoopInsights_SecureStorage.hasAPIKey {
                 Text(NSLocalizedString("Configure your AI API key in LoopInsights Settings to begin analysis.", comment: "LoopInsights no API key message"))
@@ -594,6 +636,21 @@ struct LoopInsights_DashboardView: View {
         }
     }
 
+    // MARK: - Glucose Stats Cards (Clarity-style)
+
+    private var glucoseStatsCards: some View {
+        Group {
+            if let stats = viewModel.aggregatedStats {
+                Section {
+                    glucoseCard(stats: stats)
+                }
+                Section {
+                    timeInRangeCard(glucoseStats: stats.glucoseStats)
+                }
+            }
+        }
+    }
+
     // MARK: - Assessment
 
     private var assessmentSection: some View {
@@ -603,31 +660,151 @@ struct LoopInsights_DashboardView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-
-            if let stats = viewModel.aggregatedStats {
-                statsRow(label: NSLocalizedString("Time in Range (70-180)", comment: "LoopInsights TIR label with range"),
-                         value: String(format: "%.1f%%", stats.glucoseStats.timeInRange))
-                statsRow(label: NSLocalizedString("Average Glucose", comment: "LoopInsights avg glucose label"),
-                         value: String(format: "%.0f mg/dL", stats.glucoseStats.averageGlucose))
-                statsRow(label: NSLocalizedString("GMI (est. A1C)", comment: "LoopInsights GMI label"),
-                         value: String(format: "%.1f%%", stats.glucoseStats.gmi))
-                statsRow(label: NSLocalizedString("Total Daily Dose", comment: "LoopInsights TDD label"),
-                         value: String(format: "%.1f U/day", stats.insulinStats.totalDailyDose))
-                statsRow(label: NSLocalizedString("Coefficient of Variation", comment: "LoopInsights coefficient of variation label"),
-                         value: String(format: "%.1f%%", stats.glucoseStats.coefficientOfVariation))
-            }
         }
     }
 
-    private func statsRow(label: String, value: String) -> some View {
-        HStack {
+    // MARK: - Glucose Card
+
+    private func glucoseCard(stats: LoopInsightsAggregatedStats) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(NSLocalizedString("Glucose", comment: "LoopInsights glucose card title"))
+                .font(.title3.weight(.semibold))
+                .foregroundColor(.primary)
+            Divider()
+
+            // Average Glucose
+            VStack(alignment: .leading, spacing: 2) {
+                Text(NSLocalizedString("Average Glucose", comment: "LoopInsights avg glucose label"))
+                    .font(.callout)
+                    .foregroundColor(.primary)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(String(format: "%.0f", stats.glucoseStats.averageGlucose))
+                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .foregroundColor(.primary)
+                    Text(NSLocalizedString("mg/dL", comment: "LoopInsights unit mg/dL"))
+                        .font(.callout)
+                        .foregroundColor(Color(.secondaryLabel))
+                }
+            }
+
+            // Std Dev & GMI side-by-side
+            HStack(alignment: .top, spacing: 24) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(NSLocalizedString("Standard Deviation", comment: "LoopInsights std dev label"))
+                        .font(.callout)
+                        .foregroundColor(.primary)
+                    HStack(alignment: .firstTextBaseline, spacing: 3) {
+                        Text(String(format: "%.0f", stats.glucoseStats.standardDeviation))
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.primary)
+                        Text(NSLocalizedString("mg/dL", comment: "LoopInsights unit mg/dL"))
+                            .font(.caption)
+                            .foregroundColor(Color(.secondaryLabel))
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(NSLocalizedString("GMI", comment: "LoopInsights GMI label"))
+                        .font(.callout)
+                        .foregroundColor(.primary)
+                    if stats.glucoseStats.sampleCount >= 12 {
+                        HStack(alignment: .firstTextBaseline, spacing: 3) {
+                            Text(String(format: "%.1f", stats.glucoseStats.gmi))
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundColor(.primary)
+                            Text("%")
+                                .font(.caption)
+                                .foregroundColor(Color(.secondaryLabel))
+                        }
+                    } else {
+                        Text(NSLocalizedString("Not enough\ndata available", comment: "LoopInsights GMI insufficient data"))
+                            .font(.callout.weight(.semibold))
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    // MARK: - Time in Range Card
+
+    // Clarity TIR colors
+    private static let clarityVeryHigh = Color(red: 193/255, green: 79/255, blue: 12/255)   // #C14F0C — Very High
+    private static let clarityHigh = Color(red: 240/255, green: 202/255, blue: 76/255)      // #F0CA4C — High
+    private static let clarityGreen = Color(red: 116/255, green: 165/255, blue: 46/255)     // #74A52E — In Range
+    private static let clarityLow = Color(red: 211/255, green: 98/255, blue: 101/255)       // #D36265 — Low
+    private static let clarityVeryLow = Color(red: 127/255, green: 3/255, blue: 2/255)      // #7F0302 — Very Low
+
+    private func timeInRangeCard(glucoseStats g: LoopInsightsAggregatedStats.GlucoseStats) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(NSLocalizedString("Time in Range", comment: "LoopInsights TIR card title"))
+                .font(.title3.weight(.semibold))
+                .foregroundColor(.primary)
+            Divider()
+
+            HStack(alignment: .center, spacing: 14) {
+                // Stacked color bar — wide like Clarity
+                tirStackedBar(glucoseStats: g)
+                    .frame(width: 65)
+
+                // Percentage labels — lighter text
+                VStack(alignment: .leading, spacing: 5) {
+                    tirLabelRow(percent: g.timeVeryHigh, label: NSLocalizedString("Very High", comment: "LoopInsights TIR very high"), isBold: false)
+                    tirLabelRow(percent: g.timeHigh, label: NSLocalizedString("High", comment: "LoopInsights TIR high"), isBold: false)
+                    tirLabelRow(percent: g.timeInRange, label: NSLocalizedString("In Range", comment: "LoopInsights TIR in range"), isBold: true)
+                    tirLabelRow(percent: g.timeLow, label: NSLocalizedString("Low", comment: "LoopInsights TIR low"), isBold: false)
+                    tirLabelRow(percent: g.timeVeryLow, label: NSLocalizedString("Very Low", comment: "LoopInsights TIR very low"), isBold: false)
+                }
+            }
+
+            Divider()
+
+            HStack(spacing: 0) {
+                Text(NSLocalizedString("Target Range: ", comment: "LoopInsights TIR target label"))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.primary)
+                Text(NSLocalizedString("70–180 mg/dL", comment: "LoopInsights TIR target value"))
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func tirStackedBar(glucoseStats g: LoopInsightsAggregatedStats.GlucoseStats) -> some View {
+        GeometryReader { geo in
+            let totalHeight = geo.size.height
+            let zones: [(Double, Color)] = [
+                (g.timeVeryHigh, Self.clarityVeryHigh),
+                (g.timeHigh, Self.clarityHigh),
+                (g.timeInRange, Self.clarityGreen),
+                (g.timeLow, Self.clarityLow),
+                (g.timeVeryLow, Self.clarityVeryLow)
+            ]
+            VStack(spacing: 1) {
+                ForEach(Array(zones.enumerated()), id: \.offset) { _, zone in
+                    let height = max(zone.0 > 0 ? 2 : 0, totalHeight * zone.0 / 100)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(zone.1)
+                        .frame(height: height)
+                }
+            }
+        }
+        .frame(height: 130)
+    }
+
+    private func tirLabelRow(percent: Double, label: String, isBold: Bool) -> some View {
+        HStack(spacing: 4) {
+            Text(String(format: "%.0f%%", percent))
+                .font(.subheadline)
+                .fontWeight(isBold ? .bold : .regular)
+                .foregroundColor(isBold ? .primary : Color(.secondaryLabel))
+                .fixedSize(horizontal: true, vertical: false)
             Text(label)
-                .font(.caption)
-                .foregroundColor(.secondary)
-            Spacer()
-            Text(value)
-                .font(.caption)
-                .fontWeight(.medium)
+                .font(.subheadline)
+                .fontWeight(isBold ? .bold : .regular)
+                .foregroundColor(isBold ? .primary : Color(.secondaryLabel))
         }
     }
 
@@ -728,15 +905,29 @@ struct LoopInsights_DashboardView: View {
 
     private var navigationSection: some View {
         Section {
-            Button(action: { showingTrendsInsights = true }) {
+            Button(action: { showingChat = true }) {
                 HStack {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
+                    Image(systemName: "bubble.left.and.bubble.right")
                         .foregroundColor(.accentColor)
-                    Text(NSLocalizedString("Trends & Insights", comment: "LoopInsights trends button"))
+                    Text(NSLocalizedString("Ask LoopInsights", comment: "LoopInsights chat button"))
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                }
+            }
+
+            if LoopInsights_FeatureFlags.caffeineTrackingEnabled {
+                Button(action: { showingCaffeineLog = true }) {
+                    HStack {
+                        Image(systemName: "cup.and.saucer.fill")
+                            .foregroundColor(.green)
+                        Text(NSLocalizedString("Caffeine Tracker", comment: "LoopInsights caffeine button"))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
 
@@ -752,15 +943,17 @@ struct LoopInsights_DashboardView: View {
                 }
             }
 
-            Button(action: { showingChat = true }) {
-                HStack {
-                    Image(systemName: "bubble.left.and.bubble.right")
-                        .foregroundColor(.accentColor)
-                    Text(NSLocalizedString("Ask LoopInsights", comment: "LoopInsights chat button"))
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+            if LoopInsights_FeatureFlags.foodResponseEnabled {
+                Button(action: { showingMealInsights = true }) {
+                    HStack {
+                        Image(systemName: "fork.knife")
+                            .foregroundColor(.accentColor)
+                        Text(NSLocalizedString("Meal Insights", comment: "LoopInsights meal insights button"))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
 
@@ -768,6 +961,18 @@ struct LoopInsights_DashboardView: View {
                 HStack {
                     Image(systemName: "clock.arrow.circlepath")
                     Text(NSLocalizedString("Suggestion History", comment: "LoopInsights history button"))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Button(action: { showingTrendsInsights = true }) {
+                HStack {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("Trends & Insights", comment: "LoopInsights trends button"))
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
@@ -901,6 +1106,18 @@ struct LoopInsights_DashboardView: View {
         formatter.timeStyle = .short
         return formatter
     }()
+}
+
+// MARK: - iOS 17+ List Section Spacing
+
+private struct ListSectionSpacingModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            content.listSectionSpacing(10)
+        } else {
+            content
+        }
+    }
 }
 
 // MARK: - Pre-Fill Editor View

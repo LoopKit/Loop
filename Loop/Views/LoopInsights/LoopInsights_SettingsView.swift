@@ -51,6 +51,18 @@ struct LoopInsights_SettingsView: View {
     @StateObject private var healthKitManager = LoopInsights_HealthKitManager()
     @State private var isRequestingBiometricAuth = false
 
+    // Phase 5 flags
+    @State private var circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
+    @State private var foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
+    @State private var caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
+    @State private var nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
+    @State private var agpChartEnabled = LoopInsights_FeatureFlags.agpChartEnabled
+
+    // Nightscout
+    @State private var nightscoutConfig = LoopInsightsNightscoutConfig.load()
+    @State private var isTestingNightscout = false
+    @State private var nightscoutTestResult: TestResult?
+
     // Developer mode unlock
     @State private var developerTapCount = 0
     @State private var showDeveloperUnlocked = false
@@ -98,6 +110,10 @@ struct LoopInsights_SettingsView: View {
                 advancedAISection
                 analysisOptionsSection
                 biometricsSection
+                phase5FeaturesSection
+                if nightscoutImportEnabled {
+                    nightscoutSection
+                }
                 personalitySection
                 backgroundMonitoringSection
                 dataSection
@@ -116,6 +132,12 @@ struct LoopInsights_SettingsView: View {
             selectedPersonality = LoopInsights_FeatureFlags.aiPersonality
             useTestData = LoopInsights_FeatureFlags.useTestData
             biometricsEnabled = LoopInsights_FeatureFlags.biometricsEnabled
+            circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
+            foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
+            caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
+            nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
+            agpChartEnabled = LoopInsights_FeatureFlags.agpChartEnabled
+            nightscoutConfig = LoopInsightsNightscoutConfig.load()
             apiKeyText = LoopInsights_SecureStorage.loadAPIKey() ?? ""
 
             // Clear stale endpoint path if it matches a different format's default
@@ -976,6 +998,205 @@ struct LoopInsights_SettingsView: View {
         }
     }
 
+
+    // MARK: - Phase 5 Features
+
+    private var phase5FeaturesSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkle")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("ADVANCED FEATURES", comment: "LoopInsights Phase 5 features header"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                }
+
+                Toggle(NSLocalizedString("Circadian Analysis", comment: "LoopInsights circadian toggle"), isOn: $circadianEnabled)
+                    .onChange(of: circadianEnabled) { newValue in
+                        LoopInsights_FeatureFlags.circadianEnabled = newValue
+                    }
+                Text(NSLocalizedString("Enables circadian glucose profiling, dawn phenomenon detection, negative basal awareness, and HRV-based stress scoring. Enriches AI analysis with sleep/wake patterns.", comment: "LoopInsights circadian description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("Food Response Analysis", comment: "LoopInsights food response toggle"), isOn: $foodResponseEnabled)
+                    .onChange(of: foodResponseEnabled) { newValue in
+                        LoopInsights_FeatureFlags.foodResponseEnabled = newValue
+                    }
+                Text(NSLocalizedString("Analyzes glucose responses by food type. Enables Meal Insights view with meal debrief cards and pre-meal AI advisor.", comment: "LoopInsights food response description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("Caffeine Tracking", comment: "LoopInsights caffeine toggle"), isOn: $caffeineTrackingEnabled)
+                    .onChange(of: caffeineTrackingEnabled) { newValue in
+                        LoopInsights_FeatureFlags.caffeineTrackingEnabled = newValue
+                    }
+                Text(NSLocalizedString("Log caffeine intake to help the AI correlate caffeine with glucose patterns. Uses a 5.7-hour half-life decay model.", comment: "LoopInsights caffeine description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("AGP Chart", comment: "LoopInsights AGP toggle"), isOn: $agpChartEnabled)
+                    .onChange(of: agpChartEnabled) { newValue in
+                        LoopInsights_FeatureFlags.agpChartEnabled = newValue
+                    }
+                Text(NSLocalizedString("Show Ambulatory Glucose Profile chart on the dashboard with percentile bands (P10/P25/P50/P75/P90) over 24 hours.", comment: "LoopInsights AGP description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("Nightscout Import", comment: "LoopInsights nightscout toggle"), isOn: $nightscoutImportEnabled)
+                    .onChange(of: nightscoutImportEnabled) { newValue in
+                        LoopInsights_FeatureFlags.nightscoutImportEnabled = newValue
+                    }
+                Text(NSLocalizedString("Import glucose and treatment data from a Nightscout server as a supplemental data source.", comment: "LoopInsights nightscout description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Nightscout Configuration
+
+    private var nightscoutSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "cloud.fill")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("NIGHTSCOUT", comment: "LoopInsights Nightscout header"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(NSLocalizedString("Site URL", comment: "LoopInsights Nightscout URL label"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("https://your-site.herokuapp.com", text: $nightscoutConfig.siteURL)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .keyboardType(.URL)
+                        .onChange(of: nightscoutConfig.siteURL) { _ in
+                            nightscoutConfig.isConnected = false
+                            nightscoutTestResult = nil
+                            nightscoutConfig.save()
+                        }
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(NSLocalizedString("API Secret", comment: "LoopInsights Nightscout API secret label"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    SecureField(NSLocalizedString("Your API secret", comment: "LoopInsights Nightscout secret placeholder"), text: $nightscoutConfig.apiSecret)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .onChange(of: nightscoutConfig.apiSecret) { _ in
+                            nightscoutConfig.isConnected = false
+                            nightscoutTestResult = nil
+                            nightscoutConfig.save()
+                        }
+                }
+
+                // Test Connection
+                Button(action: testNightscoutConnection) {
+                    HStack(spacing: 6) {
+                        if isTestingNightscout {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .scaleEffect(0.8)
+                                .tint(.black)
+                            Text(NSLocalizedString("Testing...", comment: "LoopInsights testing nightscout"))
+                        } else {
+                            Image(systemName: "checkmark.shield")
+                            Text(NSLocalizedString("Test Connection", comment: "LoopInsights test nightscout button"))
+                        }
+                    }
+                    .font(.body.weight(.medium))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                }
+                .disabled(isTestingNightscout || nightscoutConfig.siteURL.isEmpty)
+                .opacity((isTestingNightscout || nightscoutConfig.siteURL.isEmpty) ? 0.5 : 1.0)
+                .buttonStyle(.plain)
+
+                if let result = nightscoutTestResult {
+                    switch result {
+                    case .success:
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text(NSLocalizedString("Connected to Nightscout", comment: "LoopInsights nightscout connected"))
+                                .font(.caption)
+                                .foregroundColor(.green)
+                        }
+                    case .failure(let message):
+                        HStack(alignment: .top, spacing: 4) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.red)
+                            Text(message)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    case .warning(let message):
+                        HStack(alignment: .top, spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text(message)
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+
+                Text(NSLocalizedString("Nightscout data is used as supplemental context for AI analysis. Your existing Loop data stores remain the primary source.", comment: "LoopInsights nightscout note"))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private func testNightscoutConnection() {
+        isTestingNightscout = true
+        nightscoutTestResult = nil
+
+        Task {
+            do {
+                let importer = LoopInsights_NightscoutImporter(config: nightscoutConfig)
+                let success = try await importer.testConnection()
+                await MainActor.run {
+                    nightscoutConfig.isConnected = success
+                    nightscoutConfig.save()
+                    nightscoutTestResult = success ? .success : .failure("Unknown error")
+                    isTestingNightscout = false
+                }
+            } catch {
+                await MainActor.run {
+                    nightscoutConfig.isConnected = false
+                    nightscoutConfig.save()
+                    nightscoutTestResult = .failure(error.localizedDescription)
+                    isTestingNightscout = false
+                }
+            }
+        }
+    }
 
     // MARK: - Helpers
 

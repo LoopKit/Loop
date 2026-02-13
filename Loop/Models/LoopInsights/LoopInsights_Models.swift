@@ -89,6 +89,10 @@ enum LoopInsightsPatternType: String, CaseIterable {
     case highVariability
     case consistentHighs
     case consistentLows
+    case negativeBasal
+    case highStress
+    case caffeineCorrelation
+    case foodSensitivity
 
     var displayName: String {
         switch self {
@@ -110,6 +114,14 @@ enum LoopInsightsPatternType: String, CaseIterable {
             return NSLocalizedString("Consistent Highs", comment: "LoopInsights pattern: consistent highs")
         case .consistentLows:
             return NSLocalizedString("Consistent Lows", comment: "LoopInsights pattern: consistent lows")
+        case .negativeBasal:
+            return NSLocalizedString("Frequent Suspensions", comment: "LoopInsights pattern: negative basal")
+        case .highStress:
+            return NSLocalizedString("High Stress Periods", comment: "LoopInsights pattern: high stress")
+        case .caffeineCorrelation:
+            return NSLocalizedString("Caffeine Impact", comment: "LoopInsights pattern: caffeine correlation")
+        case .foodSensitivity:
+            return NSLocalizedString("Food Sensitivity", comment: "LoopInsights pattern: food sensitivity")
         }
     }
 
@@ -124,6 +136,10 @@ enum LoopInsightsPatternType: String, CaseIterable {
         case .highVariability: return "waveform.path.ecg"
         case .consistentHighs: return "arrow.up.circle"
         case .consistentLows: return "arrow.down.to.line"
+        case .negativeBasal: return "pause.circle"
+        case .highStress: return "brain.head.profile"
+        case .caffeineCorrelation: return "cup.and.saucer.fill"
+        case .foodSensitivity: return "fork.knife"
         }
     }
 }
@@ -602,11 +618,18 @@ struct LoopInsightsAggregatedStats: Codable {
         let standardDeviation: Double         // mg/dL
         let coefficientOfVariation: Double    // percentage
         let timeInRange: Double               // percentage (70-180 mg/dL)
-        let timeBelowRange: Double            // percentage (<70 mg/dL)
-        let timeAboveRange: Double            // percentage (>180 mg/dL)
+        let timeVeryHigh: Double              // percentage (>250 mg/dL)
+        let timeHigh: Double                  // percentage (181-250 mg/dL)
+        let timeLow: Double                   // percentage (54-69 mg/dL)
+        let timeVeryLow: Double               // percentage (<54 mg/dL)
         let gmi: Double                       // Glucose Management Indicator (estimated A1C)
         let sampleCount: Int
         let hourlyAverages: [Int: Double]     // hour (0-23) → average glucose
+
+        /// Combined time below range (<70 mg/dL) — timeLow + timeVeryLow
+        var timeBelowRange: Double { timeLow + timeVeryLow }
+        /// Combined time above range (>180 mg/dL) — timeHigh + timeVeryHigh
+        var timeAboveRange: Double { timeHigh + timeVeryHigh }
     }
 
     struct InsulinStats: Codable {
@@ -615,6 +638,7 @@ struct LoopInsightsAggregatedStats: Codable {
         let bolusPercentage: Double           // percentage of TDD from bolus
         let hourlyBasalAverages: [Int: Double] // hour → average basal rate delivered
         let correctionBolusCount: Int         // number of correction boluses in period
+        let negativeBasalStats: LoopInsightsNegativeBasalStats?  // Phase 5: suspension/sub-basal stats
     }
 
     struct CarbStats: Codable {
@@ -631,6 +655,7 @@ struct LoopInsightsAggregatedStats: Codable {
         let sleep: SleepStats?
         let activeEnergy: ActiveEnergyStats?
         let weight: WeightStats?
+        let stressScore: LoopInsightsStressScore?  // Phase 5: HRV-derived stress
     }
 
     struct HeartRateStats: Codable {
