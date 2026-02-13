@@ -14,12 +14,8 @@ import HealthKit
 /// as layered SwiftUI Paths over a 24-hour x-axis. iOS 15 compatible (no Charts framework).
 struct LoopInsights_AGPChartView: View {
 
-    let glucoseSamples: [StoredGlucoseSample]
-
-    /// Computed AGP data points (48 points, every 30 min)
-    private var agpData: [LoopInsightsAGPDataPoint] {
-        Self.computeAGP(from: glucoseSamples)
-    }
+    /// P6: Accept pre-computed AGP data instead of recomputing on every view body evaluation
+    let agpData: [LoopInsightsAGPDataPoint]
 
     private let targetLow: Double = 70
     private let targetHigh: Double = 180

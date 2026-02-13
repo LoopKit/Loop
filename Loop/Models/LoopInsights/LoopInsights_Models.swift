@@ -531,15 +531,17 @@ struct LoopInsightsTimeBlock: Codable, Identifiable, Equatable {
         return ((proposedValue - currentValue) / currentValue) * 100
     }
 
-    private static func formatTime(_ seconds: TimeInterval) -> String {
-        let hours = Int(seconds) / 3600
-        let minutes = (Int(seconds) % 3600) / 60
+    private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = hours >= 12 ? "h:mm a" : "h:mm a"
+        formatter.dateFormat = "h:mm a"
+        return formatter
+    }()
+
+    private static func formatTime(_ seconds: TimeInterval) -> String {
         var calendar = Calendar.current
         calendar.timeZone = TimeZone.current
         let date = calendar.startOfDay(for: Date()).addingTimeInterval(seconds)
-        return formatter.string(from: date)
+        return timeFormatter.string(from: date)
     }
 }
 
@@ -682,6 +684,7 @@ struct LoopInsightsAggregatedStats: Codable {
 
     struct ActiveEnergyStats: Codable {
         let averageDailyCalories: Double
+        let hourlyAverages: [Int: Double]     // hour → avg kcal burned
     }
 
     struct WeightStats: Codable {

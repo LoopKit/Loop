@@ -393,8 +393,8 @@ struct LoopInsights_DashboardView: View {
             .padding(.bottom, 8)
 
             // AGP Chart — shown with analysis summary when enabled
-            if LoopInsights_FeatureFlags.agpChartEnabled && !viewModel.agpGlucoseSamples.isEmpty {
-                LoopInsights_AGPChartView(glucoseSamples: viewModel.agpGlucoseSamples)
+            if LoopInsights_FeatureFlags.agpChartEnabled && !viewModel.agpComputedData.isEmpty {
+                LoopInsights_AGPChartView(agpData: viewModel.agpComputedData)
             }
 
             if !LoopInsights_SecureStorage.hasAPIKey {

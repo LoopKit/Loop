@@ -59,8 +59,10 @@ final class LoopInsights_FoodResponseAnalyzer {
             grouped[foodType, default: []].append(entry)
         }
 
-        // Sort glucose samples by date for efficient lookup
+        // P9: Pre-convert glucose values and sort for binary search (P4)
         let sortedGlucose = glucoseSamples.sorted { $0.startDate < $1.startDate }
+        let sortedDates = sortedGlucose.map { $0.startDate }
+        let sortedValues = sortedGlucose.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
 
         var patterns: [LoopInsightsFoodResponsePattern] = []
 
@@ -79,20 +81,30 @@ final class LoopInsights_FoodResponseAnalyzer {
                 let carbs = entry.quantity.doubleValue(for: .gram())
                 carbAmounts.append(carbs)
 
-                // Get pre-meal glucose (30 min before to meal time)
-                let preMealWindow = mealDate.addingTimeInterval(-1800)...mealDate
-                let preMealSamples = sortedGlucose.filter { preMealWindow.contains($0.startDate) }
-                guard !preMealSamples.isEmpty else { continue }
-                let preMealAvg = preMealSamples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }.reduce(0, +) / Double(preMealSamples.count)
-
-                // Get post-meal glucose (0-4h after meal)
-                let postMealEnd = mealDate.addingTimeInterval(4 * 3600)
-                let postMealSamples = sortedGlucose.filter {
-                    $0.startDate > mealDate && $0.startDate <= postMealEnd
+                // P4: Binary search for pre-meal window (30 min before to meal time)
+                let preMealStart = mealDate.addingTimeInterval(-1800)
+                let preStartIdx = binarySearchFirstIndex(in: sortedDates, afterOrAt: preMealStart)
+                var preMealValues: [Double] = []
+                for i in preStartIdx..<sortedDates.count {
+                    if sortedDates[i] > mealDate { break }
+                    preMealValues.append(sortedValues[i])
                 }
-                guard postMealSamples.count >= 4 else { continue }
+                guard !preMealValues.isEmpty else { continue }
+                let preMealAvg = preMealValues.reduce(0, +) / Double(preMealValues.count)
 
-                let postValues = postMealSamples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
+                // P4: Binary search for post-meal window (0-4h after meal)
+                let postMealEnd = mealDate.addingTimeInterval(4 * 3600)
+                let postStartIdx = binarySearchFirstIndex(in: sortedDates, afterOrAt: mealDate)
+                var postValues: [Double] = []
+                var postDates: [Date] = []
+                for i in postStartIdx..<sortedDates.count {
+                    if sortedDates[i] > postMealEnd { break }
+                    if sortedDates[i] > mealDate {
+                        postValues.append(sortedValues[i])
+                        postDates.append(sortedDates[i])
+                    }
+                }
+                guard postValues.count >= 4 else { continue }
 
                 // Peak rise
                 let peak = postValues.max() ?? preMealAvg
@@ -100,34 +112,44 @@ final class LoopInsights_FoodResponseAnalyzer {
                 peakRises.append(peakRise)
 
                 // Time to peak
-                if let peakSample = postMealSamples.max(by: { $0.quantity.doubleValue(for: .milligramsPerDeciliter) < $1.quantity.doubleValue(for: .milligramsPerDeciliter) }) {
-                    let minutesToPeak = peakSample.startDate.timeIntervalSince(mealDate) / 60
+                if let peakIdx = postValues.firstIndex(of: peak) {
+                    let minutesToPeak = postDates[peakIdx].timeIntervalSince(mealDate) / 60
                     timesToPeak.append(minutesToPeak)
                 }
 
                 // AUC (trapezoidal approximation, mg/dL * hours above pre-meal)
                 var auc: Double = 0
-                for i in 1..<postMealSamples.count {
-                    let dt = postMealSamples[i].startDate.timeIntervalSince(postMealSamples[i-1].startDate) / 3600
-                    let v1 = max(0, postMealSamples[i-1].quantity.doubleValue(for: .milligramsPerDeciliter) - preMealAvg)
-                    let v2 = max(0, postMealSamples[i].quantity.doubleValue(for: .milligramsPerDeciliter) - preMealAvg)
+                for i in 1..<postValues.count {
+                    let dt = postDates[i].timeIntervalSince(postDates[i-1]) / 3600
+                    let v1 = max(0, postValues[i-1] - preMealAvg)
+                    let v2 = max(0, postValues[i] - preMealAvg)
                     auc += (v1 + v2) / 2 * dt
                 }
                 aucs.append(auc)
 
-                // 2h and 4h post-meal averages
-                let twoHourWindow = mealDate.addingTimeInterval(1.5 * 3600)...mealDate.addingTimeInterval(2.5 * 3600)
-                let twoHourSamples = postMealSamples.filter { twoHourWindow.contains($0.startDate) }
-                if !twoHourSamples.isEmpty {
-                    let avg = twoHourSamples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }.reduce(0, +) / Double(twoHourSamples.count)
-                    twoHourAvgs.append(avg)
+                // 2h and 4h post-meal averages using pre-converted values
+                let twoHourStart = mealDate.addingTimeInterval(1.5 * 3600)
+                let twoHourEnd = mealDate.addingTimeInterval(2.5 * 3600)
+                var twoHourValues: [Double] = []
+                for i in 0..<postDates.count {
+                    if postDates[i] >= twoHourStart && postDates[i] <= twoHourEnd {
+                        twoHourValues.append(postValues[i])
+                    }
+                }
+                if !twoHourValues.isEmpty {
+                    twoHourAvgs.append(twoHourValues.reduce(0, +) / Double(twoHourValues.count))
                 }
 
-                let fourHourWindow = mealDate.addingTimeInterval(3.5 * 3600)...mealDate.addingTimeInterval(4.5 * 3600)
-                let fourHourSamples = postMealSamples.filter { fourHourWindow.contains($0.startDate) }
-                if !fourHourSamples.isEmpty {
-                    let avg = fourHourSamples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }.reduce(0, +) / Double(fourHourSamples.count)
-                    fourHourAvgs.append(avg)
+                let fourHourStart = mealDate.addingTimeInterval(3.5 * 3600)
+                let fourHourEnd = mealDate.addingTimeInterval(4.5 * 3600)
+                var fourHourValues: [Double] = []
+                for i in 0..<postDates.count {
+                    if postDates[i] >= fourHourStart && postDates[i] <= fourHourEnd {
+                        fourHourValues.append(postValues[i])
+                    }
+                }
+                if !fourHourValues.isEmpty {
+                    fourHourAvgs.append(fourHourValues.reduce(0, +) / Double(fourHourValues.count))
                 }
             }
 
@@ -164,7 +186,11 @@ final class LoopInsights_FoodResponseAnalyzer {
     ) -> [LoopInsightsMealEvent] {
         let dedupedEntries = deduplicateCarbEntries(carbEntries)
         let sortedEntries = dedupedEntries.sorted { $0.startDate > $1.startDate }
+
+        // P4+P9: Pre-sort and pre-convert glucose for binary search + no repeated doubleValue
         let sortedGlucose = glucoseSamples.sorted { $0.startDate < $1.startDate }
+        let sortedDates = sortedGlucose.map { $0.startDate }
+        let sortedValues = sortedGlucose.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
 
         var events: [LoopInsightsMealEvent] = []
 
@@ -173,33 +199,50 @@ final class LoopInsights_FoodResponseAnalyzer {
             let foodType = entry.foodType ?? "Unknown"
             let carbs = entry.quantity.doubleValue(for: .gram())
 
-            // Pre-meal glucose
-            let preMealWindow = mealDate.addingTimeInterval(-1800)...mealDate
-            let preMealSamples = sortedGlucose.filter { preMealWindow.contains($0.startDate) }
-            guard !preMealSamples.isEmpty else { continue }
-            let preMealGlucose = preMealSamples.last!.quantity.doubleValue(for: .milligramsPerDeciliter)
+            // P4: Binary search for pre-meal glucose window
+            let preMealStart = mealDate.addingTimeInterval(-1800)
+            let preIdx = binarySearchFirstIndex(in: sortedDates, afterOrAt: preMealStart)
+            var lastPreMealValue: Double?
+            for i in preIdx..<sortedDates.count {
+                if sortedDates[i] > mealDate { break }
+                lastPreMealValue = sortedValues[i]
+            }
+            guard let preMealGlucose = lastPreMealValue else { continue }
 
-            // Post-meal glucose (0-4h)
+            // P4: Binary search for post-meal glucose (0-4h)
             let postEnd = mealDate.addingTimeInterval(4 * 3600)
-            let postSamples = sortedGlucose.filter { $0.startDate > mealDate && $0.startDate <= postEnd }
-            guard postSamples.count >= 4 else { continue }
+            let postIdx = binarySearchFirstIndex(in: sortedDates, afterOrAt: mealDate)
+            var postValues: [Double] = []
+            var postDates: [Date] = []
+            for i in postIdx..<sortedDates.count {
+                if sortedDates[i] > postEnd { break }
+                if sortedDates[i] > mealDate {
+                    postValues.append(sortedValues[i])
+                    postDates.append(sortedDates[i])
+                }
+            }
+            guard postValues.count >= 4 else { continue }
 
-            let postValues = postSamples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
             let peakGlucose = postValues.max() ?? preMealGlucose
 
             // 2-hour glucose
-            let twoHourWindow = mealDate.addingTimeInterval(1.5 * 3600)...mealDate.addingTimeInterval(2.5 * 3600)
-            let twoHourSamples = postSamples.filter { twoHourWindow.contains($0.startDate) }
-            let twoHourGlucose = twoHourSamples.isEmpty ? preMealGlucose :
-                twoHourSamples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }.reduce(0, +) / Double(twoHourSamples.count)
+            let twoHourStart = mealDate.addingTimeInterval(1.5 * 3600)
+            let twoHourEnd = mealDate.addingTimeInterval(2.5 * 3600)
+            var twoHourValues: [Double] = []
+            for i in 0..<postDates.count {
+                if postDates[i] >= twoHourStart && postDates[i] <= twoHourEnd {
+                    twoHourValues.append(postValues[i])
+                }
+            }
+            let twoHourGlucose = twoHourValues.isEmpty ? preMealGlucose :
+                twoHourValues.reduce(0, +) / Double(twoHourValues.count)
 
-            // Build timeline (every ~15 min)
+            // Build timeline
             var timeline: [(minutesAfter: Int, glucose: Double)] = []
             timeline.append((0, preMealGlucose))
-            for sample in postSamples {
-                let minutes = Int(sample.startDate.timeIntervalSince(mealDate) / 60)
-                let glucose = sample.quantity.doubleValue(for: .milligramsPerDeciliter)
-                timeline.append((minutes, glucose))
+            for i in 0..<postDates.count {
+                let minutes = Int(postDates[i].timeIntervalSince(mealDate) / 60)
+                timeline.append((minutes, postValues[i]))
             }
 
             events.append(LoopInsightsMealEvent(
@@ -216,6 +259,22 @@ final class LoopInsights_FoodResponseAnalyzer {
         }
 
         return events
+    }
+
+    // MARK: - Binary Search Helper
+
+    /// P4: Binary search for first index in a sorted date array at or after `date`.
+    private static func binarySearchFirstIndex(in dates: [Date], afterOrAt date: Date) -> Int {
+        var lo = 0, hi = dates.count
+        while lo < hi {
+            let mid = (lo + hi) / 2
+            if dates[mid] < date {
+                lo = mid + 1
+            } else {
+                hi = mid
+            }
+        }
+        return lo
     }
 
     // MARK: - Prompt Context

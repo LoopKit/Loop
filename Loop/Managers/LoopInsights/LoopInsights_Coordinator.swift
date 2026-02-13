@@ -123,16 +123,19 @@ final class LoopInsights_Coordinator: ObservableObject {
 
     /// Build supplemental context for AI prompt enrichment from Phase 5 analyzers.
     /// Returns nil if no Phase 5 features are enabled.
+    /// P3: Accept pre-fetched glucose + carbs to avoid duplicate data fetches.
+    /// P10: Pass hourly averages to circadian profile builder.
     func buildSupplementalContext(
         stats: LoopInsightsAggregatedStats,
-        glucoseSamples: [StoredGlucoseSample]? = nil
+        glucoseSamples: [StoredGlucoseSample]? = nil,
+        carbEntries: [StoredCarbEntry]? = nil
     ) async -> String? {
         var context: [String] = []
 
         let start = Date().addingTimeInterval(-stats.period.timeInterval)
         let end = Date()
 
-        // Fetch glucose samples once if not provided
+        // P3: Use pre-fetched glucose, fall back to bridge only if not provided
         var resolvedGlucose: [StoredGlucoseSample]? = glucoseSamples
         if resolvedGlucose == nil, let bridge = dataProviderBridge {
             resolvedGlucose = try? await bridge.getGlucoseSamples(start: start, end: end)
@@ -142,9 +145,11 @@ final class LoopInsights_Coordinator: ObservableObject {
         if LoopInsights_FeatureFlags.circadianEnabled {
             // Circadian profile from glucose + sleep data
             if let samples = resolvedGlucose {
+                // P10: Pass pre-computed hourly averages to avoid re-bucketing
                 if let profile = LoopInsights_AdvancedAnalyzers.buildCircadianProfile(
                     glucoseSamples: samples,
-                    sleepStats: stats.biometricStats?.sleep
+                    sleepStats: stats.biometricStats?.sleep,
+                    precomputedHourlyAverages: stats.glucoseStats.hourlyAverages
                 ) {
                     context.append(LoopInsights_AdvancedAnalyzers.buildCircadianPromptContext(profile))
                 }
@@ -163,11 +168,14 @@ final class LoopInsights_Coordinator: ObservableObject {
 
         // Food response patterns
         if LoopInsights_FeatureFlags.foodResponseEnabled {
-            if let bridge = dataProviderBridge,
-               let carbEntries = try? await bridge.getCarbEntries(start: start, end: end),
-               let glucSamples = resolvedGlucose {
+            // P3: Use pre-fetched carbs, fall back to bridge only if not provided
+            var resolvedCarbs: [StoredCarbEntry]? = carbEntries
+            if resolvedCarbs == nil, let bridge = dataProviderBridge {
+                resolvedCarbs = try? await bridge.getCarbEntries(start: start, end: end)
+            }
+            if let carbs = resolvedCarbs, let glucSamples = resolvedGlucose {
                 let patterns = LoopInsights_FoodResponseAnalyzer.analyzeFoodResponses(
-                    carbEntries: carbEntries,
+                    carbEntries: carbs,
                     glucoseSamples: glucSamples
                 )
                 let foodCtx = LoopInsights_FoodResponseAnalyzer.buildFoodResponsePromptContext(patterns)

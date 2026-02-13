@@ -83,13 +83,13 @@ struct LoopInsights_MealInsightsView: View {
                         HStack(spacing: 16) {
                             HStack(spacing: 4) {
                                 Circle().fill(Color.green).frame(width: 8, height: 8)
-                                Text(NSLocalizedString("Rise ≤ 50 mg/dL", comment: "LoopInsights meal legend green"))
+                                Text(NSLocalizedString("Rise is ≤ 50 mg/dL", comment: "LoopInsights meal legend green"))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
                             HStack(spacing: 4) {
                                 Circle().fill(Color.orange).frame(width: 8, height: 8)
-                                Text(NSLocalizedString("Rise > 50 mg/dL", comment: "LoopInsights meal legend orange"))
+                                Text(NSLocalizedString("Rise is > 50 mg/dL", comment: "LoopInsights meal legend orange"))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -108,14 +108,12 @@ struct LoopInsights_MealInsightsView: View {
 
     private func mealCard(_ event: LoopInsightsMealEvent) -> some View {
         VStack(alignment: .leading, spacing: 8) {
+            Text(event.foodType)
+                .font(.subheadline.weight(.semibold))
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(event.foodType)
-                        .font(.subheadline.weight(.semibold))
-                    Text(Self.dateFormatter.string(from: event.date))
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
+                Text(Self.dateFormatter.string(from: event.date))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
                 Spacer()
                 Text(String(format: "%.0fg carbs", event.carbs))
                     .font(.caption)

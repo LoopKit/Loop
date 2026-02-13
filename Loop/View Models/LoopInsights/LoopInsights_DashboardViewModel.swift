@@ -69,6 +69,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     /// Glucose samples for AGP chart (populated during analysis)
     @Published var agpGlucoseSamples: [StoredGlucoseSample] = []
 
+    /// P6: Pre-computed AGP data points — computed once when samples change, not on every view render
+    @Published var agpComputedData: [LoopInsightsAGPDataPoint] = []
+
     // MARK: - Dependencies
 
     let coordinator: LoopInsights_Coordinator
@@ -127,20 +130,24 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 let stats = try await coordinator.dataAggregator.aggregateData(period: analysisPeriod)
                 self.aggregatedStats = stats
 
-                // Fetch glucose samples for AGP chart
+                // P3+P6: Use cached glucose for AGP and pre-compute AGP data
+                let cachedGlucose = coordinator.dataAggregator.lastFetchedGlucoseSamples
+                let cachedCarbs = coordinator.dataAggregator.lastFetchedCarbEntries
                 if LoopInsights_FeatureFlags.agpChartEnabled {
-                    let start = Date().addingTimeInterval(-analysisPeriod.timeInterval)
-                    if let samples = try? await coordinator.fetchGlucoseSamples(start: start, end: Date()) {
-                        self.agpGlucoseSamples = samples
-                    }
+                    self.agpGlucoseSamples = cachedGlucose
+                    self.agpComputedData = LoopInsights_AGPChartView.computeAGP(from: cachedGlucose)
                 }
 
                 // Capture current settings
                 let snapshot = try coordinator.captureCurrentSnapshot()
                 self.currentSnapshot = snapshot
 
-                // Phase 5: Build supplemental context from advanced analyzers
-                let supplementalContext = await coordinator.buildSupplementalContext(stats: stats)
+                // P3: Pass cached glucose + carbs to avoid re-fetching in supplemental context
+                let supplementalContext = await coordinator.buildSupplementalContext(
+                    stats: stats,
+                    glucoseSamples: cachedGlucose,
+                    carbEntries: cachedCarbs
+                )
 
                 // Run AI analysis (include recent changes so AI knows data predates current settings)
                 let recentChanges = self.recentlyAppliedRecords()
@@ -208,19 +215,23 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 let stats = try await coordinator.dataAggregator.aggregateData(period: analysisPeriod)
                 self.aggregatedStats = stats
 
-                // Fetch glucose samples for AGP chart
+                // P3+P6: Use cached glucose for AGP and pre-compute AGP data
+                let cachedGlucose = coordinator.dataAggregator.lastFetchedGlucoseSamples
+                let cachedCarbs = coordinator.dataAggregator.lastFetchedCarbEntries
                 if LoopInsights_FeatureFlags.agpChartEnabled {
-                    let start = Date().addingTimeInterval(-analysisPeriod.timeInterval)
-                    if let samples = try? await coordinator.fetchGlucoseSamples(start: start, end: Date()) {
-                        self.agpGlucoseSamples = samples
-                    }
+                    self.agpGlucoseSamples = cachedGlucose
+                    self.agpComputedData = LoopInsights_AGPChartView.computeAGP(from: cachedGlucose)
                 }
 
                 let snapshot = try coordinator.captureCurrentSnapshot()
                 self.currentSnapshot = snapshot
 
-                // Phase 5: Build supplemental context from advanced analyzers
-                let supplementalContext = await coordinator.buildSupplementalContext(stats: stats)
+                // P3: Pass cached glucose + carbs to avoid re-fetching in supplemental context
+                let supplementalContext = await coordinator.buildSupplementalContext(
+                    stats: stats,
+                    glucoseSamples: cachedGlucose,
+                    carbEntries: cachedCarbs
+                )
 
                 // Analyze each setting type in tuning order: CR → ISF → BR
                 let recentChanges = self.recentlyAppliedRecords()
@@ -442,9 +453,12 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             case .basalRate: currentItems = currentSnapshot.basalRateItems
             }
 
+            // P8: Pre-sort once for all time blocks in this record
+            let sortedItems = currentItems.sorted { $0.startTime < $1.startTime }
+
             // Check if at least one proposed value still matches current settings
             for block in record.suggestion.timeBlocks {
-                let currentValue = Self.effectiveValue(at: block.startTime, in: currentItems)
+                let currentValue = Self.effectiveValue(at: block.startTime, in: sortedItems)
                 if abs(currentValue - block.proposedValue) < 0.01 {
                     return true // This change is still active
                 }
@@ -454,13 +468,13 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     }
 
     /// Find the effective value at a given time in a schedule snapshot.
+    /// P8: Expects pre-sorted items to avoid redundant sorting per call.
     private static func effectiveValue(
         at time: TimeInterval,
-        in items: [LoopInsightsTherapySnapshot.LoopInsightsScheduleItem]
+        in sortedItems: [LoopInsightsTherapySnapshot.LoopInsightsScheduleItem]
     ) -> Double {
-        let sorted = items.sorted { $0.startTime < $1.startTime }
-        var result = sorted.first?.value ?? 0
-        for item in sorted {
+        var result = sortedItems.first?.value ?? 0
+        for item in sortedItems {
             if item.startTime <= time {
                 result = item.value
             } else {

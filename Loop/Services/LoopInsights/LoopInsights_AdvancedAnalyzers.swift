@@ -19,13 +19,13 @@ final class LoopInsights_AdvancedAnalyzers {
 
     /// Build a circadian glucose profile using sleep data and glucose samples.
     /// Uses actual wake/bed times from HealthKit sleep data when available.
+    /// P10: Accept optional pre-computed hourlyAverages to avoid re-bucketing glucose
     static func buildCircadianProfile(
         glucoseSamples: [StoredGlucoseSample],
-        sleepStats: LoopInsightsAggregatedStats.SleepStats?
+        sleepStats: LoopInsightsAggregatedStats.SleepStats?,
+        precomputedHourlyAverages: [Int: Double]? = nil
     ) -> LoopInsightsCircadianProfile? {
         guard !glucoseSamples.isEmpty else { return nil }
-
-        let calendar = Calendar.current
 
         // Determine wake/bed hours from sleep data or use defaults
         let wakeHour: Int
@@ -38,31 +38,37 @@ final class LoopInsights_AdvancedAnalyzers {
             bedHour = 22
         }
 
-        // Bucket glucose by hour
-        var hourlyBuckets: [Int: [Double]] = [:]
-        for sample in glucoseSamples {
-            let hour = calendar.component(.hour, from: sample.startDate)
-            let value = sample.quantity.doubleValue(for: .milligramsPerDeciliter)
-            hourlyBuckets[hour, default: []].append(value)
-        }
-
-        let hourlyAvg: (Int) -> Double = { hour in
-            guard let vals = hourlyBuckets[hour], !vals.isEmpty else { return 0 }
-            return vals.reduce(0, +) / Double(vals.count)
+        // P10: Reuse pre-computed hourly averages when available
+        let hourlyAvg: (Int) -> Double
+        if let precomputed = precomputedHourlyAverages {
+            hourlyAvg = { hour in precomputed[hour] ?? 0 }
+        } else {
+            let calendar = Calendar.current
+            var hourlyBuckets: [Int: [Double]] = [:]
+            for sample in glucoseSamples {
+                let hour = calendar.component(.hour, from: sample.startDate)
+                let value = sample.quantity.doubleValue(for: .milligramsPerDeciliter)
+                hourlyBuckets[hour, default: []].append(value)
+            }
+            hourlyAvg = { hour in
+                guard let vals = hourlyBuckets[hour], !vals.isEmpty else { return 0 }
+                return vals.reduce(0, +) / Double(vals.count)
+            }
         }
 
         // Pre-sleep: hour before bed
         let preSleepHour = (bedHour - 1 + 24) % 24
         let preSleepAvg = hourlyAvg(preSleepHour)
 
-        // Overnight: bed to wake
-        var overnightValues: [Double] = []
+        // Overnight: bed to wake (use hourlyAvg function to work with both precomputed and bucketed data)
+        var overnightHourAvgs: [Double] = []
         var h = bedHour
         while h != wakeHour {
-            if let vals = hourlyBuckets[h] { overnightValues.append(contentsOf: vals) }
+            let avg = hourlyAvg(h)
+            if avg > 0 { overnightHourAvgs.append(avg) }
             h = (h + 1) % 24
         }
-        let overnightAvg = overnightValues.isEmpty ? 0 : overnightValues.reduce(0, +) / Double(overnightValues.count)
+        let overnightAvg = overnightHourAvgs.isEmpty ? 0 : overnightHourAvgs.reduce(0, +) / Double(overnightHourAvgs.count)
 
         // Wake glucose
         let wakeGlucose = hourlyAvg(wakeHour)
@@ -132,6 +138,12 @@ final class LoopInsights_AdvancedAnalyzers {
 
         let totalMinutes = Double(periodDays) * 24 * 60
 
+        // P8: Pre-sort schedule items once instead of per-dose
+        let sortedBasalItems = scheduledBasalItems.sorted { $0.startTime < $1.startTime }
+
+        // P5: Sort glucose samples by date for binary search overcorrection lookups
+        let sortedGlucose = glucoseSamples.sorted { $0.startDate < $1.startDate }
+
         for dose in doses {
             let durationMinutes = dose.endDate.timeIntervalSince(dose.startDate) / 60
             let hour = calendar.component(.hour, from: dose.startDate)
@@ -141,16 +153,23 @@ final class LoopInsights_AdvancedAnalyzers {
                 totalSuspensionMinutes += durationMinutes
                 hourlyDistribution[hour, default: 0] += durationMinutes
 
-                // Check for overcorrection: glucose > 180 within 2h after suspension ends
-                let checkWindow = dose.endDate...dose.endDate.addingTimeInterval(2 * 3600)
-                let reboundHigh = glucoseSamples.contains { sample in
-                    checkWindow.contains(sample.startDate) &&
-                    sample.quantity.doubleValue(for: .milligramsPerDeciliter) > 180
+                // P5: Binary search for overcorrection check instead of linear scan
+                let checkStart = dose.endDate
+                let checkEnd = dose.endDate.addingTimeInterval(2 * 3600)
+                let startIdx = Self.binarySearchFirstIndex(in: sortedGlucose, afterOrAt: checkStart)
+                var reboundHigh = false
+                for i in startIdx..<sortedGlucose.count {
+                    let sample = sortedGlucose[i]
+                    if sample.startDate > checkEnd { break }
+                    if sample.quantity.doubleValue(for: .milligramsPerDeciliter) > 180 {
+                        reboundHigh = true
+                        break
+                    }
                 }
                 if reboundHigh { overcorrectionEvents += 1 }
             } else if dose.type == .tempBasal {
                 let rate = dose.unitsPerHour
-                let scheduledRate = effectiveScheduledRate(at: dose.startDate, items: scheduledBasalItems)
+                let scheduledRate = effectiveScheduledRate(at: dose.startDate, sortedItems: sortedBasalItems)
                 if rate < scheduledRate {
                     let minutes = durationMinutes
                     subBasalMinutes += minutes
@@ -252,18 +271,18 @@ final class LoopInsights_AdvancedAnalyzers {
 
     // MARK: - Helpers
 
+    /// Find the effective scheduled rate at a given date. Expects pre-sorted items (P8).
     private static func effectiveScheduledRate(
         at date: Date,
-        items: [LoopInsightsTherapySnapshot.LoopInsightsScheduleItem]
+        sortedItems: [LoopInsightsTherapySnapshot.LoopInsightsScheduleItem]
     ) -> Double {
         let calendar = Calendar.current
         let secondsSinceMidnight = TimeInterval(
             calendar.component(.hour, from: date) * 3600 +
             calendar.component(.minute, from: date) * 60
         )
-        let sorted = items.sorted { $0.startTime < $1.startTime }
-        var result = sorted.first?.value ?? 0
-        for item in sorted {
+        var result = sortedItems.first?.value ?? 0
+        for item in sortedItems {
             if item.startTime <= secondsSinceMidnight {
                 result = item.value
             } else {
@@ -271,5 +290,22 @@ final class LoopInsights_AdvancedAnalyzers {
             }
         }
         return result
+    }
+
+    /// P5: Binary search to find the first glucose sample at or after `date` in a sorted array.
+    static func binarySearchFirstIndex(
+        in samples: [StoredGlucoseSample],
+        afterOrAt date: Date
+    ) -> Int {
+        var lo = 0, hi = samples.count
+        while lo < hi {
+            let mid = (lo + hi) / 2
+            if samples[mid].startDate < date {
+                lo = mid + 1
+            } else {
+                hi = mid
+            }
+        }
+        return lo
     }
 }

@@ -322,6 +322,44 @@ final class LoopInsights_AIAnalysis {
             if let steps = bio.steps {
                 prompt += "### Steps/Activity\n"
                 prompt += "- Average Daily Steps: \(String(format: "%.0f", steps.averageDailySteps))\n"
+                if !steps.hourlyAverages.isEmpty {
+                    // Group into time-of-day activity levels
+                    let activityPeriods: [(name: String, hours: ClosedRange<Int>)] = [
+                        ("Morning 6-10AM", 6...9), ("Midday 10AM-2PM", 10...13),
+                        ("Afternoon 2-6PM", 14...17), ("Evening 6-10PM", 18...21)
+                    ]
+                    for period in activityPeriods {
+                        let periodSteps = period.hours.compactMap { steps.hourlyAverages[$0] }
+                        if !periodSteps.isEmpty {
+                            let total = periodSteps.reduce(0, +)
+                            prompt += "- \(period.name): \(String(format: "%.0f", total)) avg steps\n"
+                        }
+                    }
+                    // Peak activity hour
+                    if let peakHour = steps.hourlyAverages.max(by: { $0.value < $1.value }) {
+                        prompt += "- Peak activity hour: \(String(format: "%02d", peakHour.key)):00 (\(String(format: "%.0f", peakHour.value)) steps)\n"
+                    }
+
+                    // Activity-glucose correlation: compare high-activity hours to glucose
+                    let glucoseHourly = stats.glucoseStats.hourlyAverages
+                    if !glucoseHourly.isEmpty {
+                        var correlations: [String] = []
+                        let avgGlucose = stats.glucoseStats.averageGlucose
+                        for (hour, stepCount) in steps.hourlyAverages where stepCount > 200 {
+                            let postActivityHour = (hour + 2) % 24
+                            if let postGlucose = glucoseHourly[postActivityHour] {
+                                let delta = postGlucose - avgGlucose
+                                if abs(delta) > 10 {
+                                    correlations.append("Activity at \(String(format: "%02d", hour)):00 → glucose \(delta > 0 ? "+" : "")\(String(format: "%.0f", delta)) mg/dL vs avg at \(String(format: "%02d", postActivityHour)):00")
+                                }
+                            }
+                        }
+                        if !correlations.isEmpty {
+                            prompt += "- **Activity-Glucose Correlations (2h lag)**:\n"
+                            for c in correlations.prefix(5) { prompt += "  - \(c)\n" }
+                        }
+                    }
+                }
             }
 
             if let sleep = bio.sleep {
@@ -334,6 +372,19 @@ final class LoopInsights_AIAnalysis {
             if let energy = bio.activeEnergy {
                 prompt += "### Active Energy\n"
                 prompt += "- Average Daily Active Calories: \(String(format: "%.0f", energy.averageDailyCalories)) kcal\n"
+                if !energy.hourlyAverages.isEmpty {
+                    let activityPeriods: [(name: String, hours: ClosedRange<Int>)] = [
+                        ("Morning 6-10AM", 6...9), ("Midday 10AM-2PM", 10...13),
+                        ("Afternoon 2-6PM", 14...17), ("Evening 6-10PM", 18...21)
+                    ]
+                    for period in activityPeriods {
+                        let periodKcal = period.hours.compactMap { energy.hourlyAverages[$0] }
+                        if !periodKcal.isEmpty {
+                            let total = periodKcal.reduce(0, +)
+                            prompt += "- \(period.name): \(String(format: "%.0f", total)) avg kcal\n"
+                        }
+                    }
+                }
             }
 
             if let weight = bio.weight {

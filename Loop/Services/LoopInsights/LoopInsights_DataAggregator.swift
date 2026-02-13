@@ -28,6 +28,10 @@ final class LoopInsights_DataAggregator {
     private weak var dataProvider: LoopInsightsDataProviderProtocol?
     private var healthKitManager: LoopInsights_HealthKitManager?
 
+    /// P3: Cached raw data from last aggregation, available for reuse (AGP chart, supplemental context)
+    private(set) var lastFetchedGlucoseSamples: [StoredGlucoseSample] = []
+    private(set) var lastFetchedCarbEntries: [StoredCarbEntry] = []
+
     init(dataProvider: LoopInsightsDataProviderProtocol, healthKitManager: LoopInsights_HealthKitManager? = nil) {
         self.dataProvider = dataProvider
         self.healthKitManager = healthKitManager
@@ -44,23 +48,37 @@ final class LoopInsights_DataAggregator {
         let endDate = Date()
         let startDate = endDate.addingTimeInterval(-period.timeInterval)
 
-        async let glucoseStats = computeGlucoseStats(provider: dataProvider, start: startDate, end: endDate)
-        async let insulinStats = computeInsulinStats(provider: dataProvider, start: startDate, end: endDate)
-        async let carbStats = computeCarbStats(provider: dataProvider, start: startDate, end: endDate)
+        // P3: Fetch all raw data in parallel — each type fetched exactly once
+        async let rawGlucose = dataProvider.getGlucoseSamples(start: startDate, end: endDate)
+        async let rawDoses = dataProvider.getNormalizedDoseEntries(start: startDate, end: endDate)
+        async let rawCarbs = dataProvider.getCarbEntries(start: startDate, end: endDate)
         async let biometrics = fetchBiometricsIfEnabled(start: startDate, end: endDate)
 
-        var resolvedInsulinStats = try await insulinStats
+        let glucoseSamples = try await rawGlucose
+        let doseEntries = try await rawDoses
+        let carbEntries = try await rawCarbs
         let resolvedBiometrics = try await biometrics
-        let resolvedGlucoseStats = try await glucoseStats
+
+        // P3: Store for external reuse (AGP chart, supplemental context)
+        self.lastFetchedGlucoseSamples = glucoseSamples
+        self.lastFetchedCarbEntries = carbEntries
+
+        // Compute stats from pre-fetched data (each may still supplement with HK data)
+        async let glucoseStatsTask = computeGlucoseStats(loopSamples: glucoseSamples, start: startDate, end: endDate)
+        async let insulinStatsTask = computeInsulinStats(loopDoses: doseEntries, start: startDate, end: endDate)
+        async let carbStatsTask = computeCarbStats(loopEntries: carbEntries, start: startDate, end: endDate)
+
+        let resolvedGlucoseStats = try await glucoseStatsTask
+        var resolvedInsulinStats = try await insulinStatsTask
+        let resolvedCarbStats = try await carbStatsTask
 
         // Phase 5: Compute negative basal stats if circadian flag is enabled
+        // P3: Reuses pre-fetched doses and glucose — no duplicate fetches
         if LoopInsights_FeatureFlags.circadianEnabled {
             do {
-                let doses = try await dataProvider.getNormalizedDoseEntries(start: startDate, end: endDate)
-                let glucoseSamples = try await dataProvider.getGlucoseSamples(start: startDate, end: endDate)
                 let snapshot = try captureTherapySnapshot()
                 let negBasal = LoopInsights_AdvancedAnalyzers.computeNegativeBasalStats(
-                    doses: doses,
+                    doses: doseEntries,
                     scheduledBasalItems: snapshot.basalRateItems,
                     periodDays: period.rawValue,
                     glucoseSamples: glucoseSamples
@@ -104,7 +122,7 @@ final class LoopInsights_DataAggregator {
             period: period,
             glucoseStats: resolvedGlucoseStats,
             insulinStats: resolvedInsulinStats,
-            carbStats: try await carbStats,
+            carbStats: resolvedCarbStats,
             biometricStats: enrichedBiometrics,
             generatedAt: Date()
         )
@@ -167,18 +185,15 @@ final class LoopInsights_DataAggregator {
 
     // MARK: - Glucose Stats
 
-    private func computeGlucoseStats(provider: LoopInsightsDataProviderProtocol, start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.GlucoseStats {
-        // First try Loop's local stores
-        var samples = try await provider.getGlucoseSamples(start: start, end: end)
-
+    /// P3: Accepts pre-fetched Loop samples to avoid duplicate fetching.
+    /// Still supplements with HealthKit data for longer periods when HK has more samples.
+    private func computeGlucoseStats(loopSamples: [StoredGlucoseSample], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.GlucoseStats {
         // Supplement with HealthKit data for longer periods or when Loop stores have gaps
         if let hkManager = healthKitManager {
             do {
                 let hkGlucose = try await hkManager.fetchGlucoseSamples(start: start, end: end)
-                // Loop writes CGM data to HealthKit, so HK always has >= Loop store data.
-                // Use HealthKit data when it has more samples (longer history).
-                if hkGlucose.count > samples.count {
-                    print("[LoopInsights] HealthKit glucose: \(hkGlucose.count) samples vs Loop store \(samples.count) — using HealthKit data")
+                if hkGlucose.count > loopSamples.count {
+                    print("[LoopInsights] HealthKit glucose: \(hkGlucose.count) samples vs Loop store \(loopSamples.count) — using HealthKit data")
                     return computeGlucoseStatsFromValues(
                         values: hkGlucose.map { (date: $0.date, mgdl: $0.mgdl) },
                         start: start, end: end
@@ -189,26 +204,28 @@ final class LoopInsights_DataAggregator {
             }
         }
 
-        guard !samples.isEmpty else {
+        guard !loopSamples.isEmpty else {
             throw LoopInsightsError.insufficientData("No glucose data available for the selected period")
         }
 
-        let glucoseValues = samples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
+        // P9: Pre-convert all glucose values once
+        let glucoseValues = loopSamples.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
         let count = Double(glucoseValues.count)
 
         let average = glucoseValues.reduce(0, +) / count
-
         let variance = glucoseValues.reduce(0) { $0 + pow($1 - average, 2) } / count
         let stdDev = sqrt(variance)
-
         let cv = (stdDev / average) * 100
 
-        // Time in range calculations — 5-zone breakdown (Clarity-style)
-        let veryHighCount = glucoseValues.filter { $0 > 250 }.count
-        let highCount = glucoseValues.filter { $0 > 180 && $0 <= 250 }.count
-        let inRangeCount = glucoseValues.filter { $0 >= 70 && $0 <= 180 }.count
-        let lowCount = glucoseValues.filter { $0 >= 54 && $0 < 70 }.count
-        let veryLowCount = glucoseValues.filter { $0 < 54 }.count
+        // P2: Single-pass 5-zone TIR counting (replaces 5 separate .filter() passes)
+        var veryHighCount = 0, highCount = 0, inRangeCount = 0, lowCount = 0, veryLowCount = 0
+        for value in glucoseValues {
+            if value > 250 { veryHighCount += 1 }
+            else if value > 180 { highCount += 1 }
+            else if value >= 70 { inRangeCount += 1 }
+            else if value >= 54 { lowCount += 1 }
+            else { veryLowCount += 1 }
+        }
 
         let tir = (Double(inRangeCount) / count) * 100
         let tvh = (Double(veryHighCount) / count) * 100
@@ -216,15 +233,14 @@ final class LoopInsights_DataAggregator {
         let tl = (Double(lowCount) / count) * 100
         let tvl = (Double(veryLowCount) / count) * 100
 
-        // GMI (Glucose Management Indicator) = 3.31 + 0.02392 × mean glucose (mg/dL)
         let gmi = 3.31 + (0.02392 * average)
 
-        // Hourly averages
+        // P9: Hourly averages using pre-converted values
         var hourlyBuckets: [Int: [Double]] = [:]
         let calendar = Calendar.current
-        for sample in samples {
+        for (i, sample) in loopSamples.enumerated() {
             let hour = calendar.component(.hour, from: sample.startDate)
-            hourlyBuckets[hour, default: []].append(sample.quantity.doubleValue(for: .milligramsPerDeciliter))
+            hourlyBuckets[hour, default: []].append(glucoseValues[i])
         }
         let hourlyAverages = hourlyBuckets.mapValues { values in
             values.reduce(0, +) / Double(values.count)
@@ -255,11 +271,15 @@ final class LoopInsights_DataAggregator {
         let stdDev = sqrt(variance)
         let cv = (stdDev / average) * 100
 
-        let veryHighCount = glucoseValues.filter { $0 > 250 }.count
-        let highCount = glucoseValues.filter { $0 > 180 && $0 <= 250 }.count
-        let inRangeCount = glucoseValues.filter { $0 >= 70 && $0 <= 180 }.count
-        let lowCount = glucoseValues.filter { $0 >= 54 && $0 < 70 }.count
-        let veryLowCount = glucoseValues.filter { $0 < 54 }.count
+        // P2: Single-pass 5-zone TIR counting
+        var veryHighCount = 0, highCount = 0, inRangeCount = 0, lowCount = 0, veryLowCount = 0
+        for value in glucoseValues {
+            if value > 250 { veryHighCount += 1 }
+            else if value > 180 { highCount += 1 }
+            else if value >= 70 { inRangeCount += 1 }
+            else if value >= 54 { lowCount += 1 }
+            else { veryLowCount += 1 }
+        }
         let tir = (Double(inRangeCount) / count) * 100
         let tvh = (Double(veryHighCount) / count) * 100
         let th = (Double(highCount) / count) * 100
@@ -292,15 +312,14 @@ final class LoopInsights_DataAggregator {
 
     // MARK: - Insulin Stats
 
-    private func computeInsulinStats(provider: LoopInsightsDataProviderProtocol, start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.InsulinStats {
-        var doses = try await provider.getNormalizedDoseEntries(start: start, end: end)
-
+    /// P3: Accepts pre-fetched Loop doses to avoid duplicate fetching.
+    private func computeInsulinStats(loopDoses: [DoseEntry], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.InsulinStats {
         // Supplement with HealthKit insulin delivery for longer periods
         if let hkManager = healthKitManager {
             do {
                 let hkInsulin = try await hkManager.fetchInsulinDelivery(start: start, end: end)
-                if hkInsulin.count > doses.count {
-                    print("[LoopInsights] HealthKit insulin: \(hkInsulin.count) entries vs Loop store \(doses.count) — using HealthKit data")
+                if hkInsulin.count > loopDoses.count {
+                    print("[LoopInsights] HealthKit insulin: \(hkInsulin.count) entries vs Loop store \(loopDoses.count) — using HealthKit data")
                     return computeInsulinStatsFromHK(hkInsulin, start: start, end: end)
                 }
             } catch {
@@ -316,7 +335,7 @@ final class LoopInsights_DataAggregator {
         var correctionCount = 0
         let calendar = Calendar.current
 
-        for dose in doses {
+        for dose in loopDoses {
             let units = dose.deliveredUnits ?? dose.programmedUnits
 
             switch dose.type {
@@ -403,15 +422,14 @@ final class LoopInsights_DataAggregator {
 
     // MARK: - Carb Stats
 
-    private func computeCarbStats(provider: LoopInsightsDataProviderProtocol, start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.CarbStats {
-        var entries = try await provider.getCarbEntries(start: start, end: end)
-
+    /// P3: Accepts pre-fetched Loop carb entries to avoid duplicate fetching.
+    private func computeCarbStats(loopEntries: [StoredCarbEntry], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.CarbStats {
         // Supplement with HealthKit carb data for longer periods
         if let hkManager = healthKitManager {
             do {
                 let hkCarbs = try await hkManager.fetchCarbEntries(start: start, end: end)
-                if hkCarbs.count > entries.count {
-                    print("[LoopInsights] HealthKit carbs: \(hkCarbs.count) entries vs Loop store \(entries.count) — using HealthKit data")
+                if hkCarbs.count > loopEntries.count {
+                    print("[LoopInsights] HealthKit carbs: \(hkCarbs.count) entries vs Loop store \(loopEntries.count) — using HealthKit data")
                     return computeCarbStatsFromHK(hkCarbs, start: start, end: end)
                 }
             } catch {
@@ -420,15 +438,15 @@ final class LoopInsights_DataAggregator {
         }
 
         let dayCount = max(1, end.timeIntervalSince(start) / (24 * 60 * 60))
-        let totalCarbs = entries.reduce(0.0) { $0 + $1.quantity.doubleValue(for: .gram()) }
+        let totalCarbs = loopEntries.reduce(0.0) { $0 + $1.quantity.doubleValue(for: .gram()) }
         let avgDaily = totalCarbs / dayCount
-        let mealCount = entries.count
+        let mealCount = loopEntries.count
         let avgPerMeal = mealCount > 0 ? totalCarbs / Double(mealCount) : 0
 
         // Hourly meal frequency
         var hourlyFrequency: [Int: Int] = [:]
         let calendar = Calendar.current
-        for entry in entries {
+        for entry in loopEntries {
             let hour = calendar.component(.hour, from: entry.startDate)
             hourlyFrequency[hour, default: 0] += 1
         }

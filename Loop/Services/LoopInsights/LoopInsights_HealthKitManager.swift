@@ -70,39 +70,53 @@ final class LoopInsights_HealthKitManager: ObservableObject {
     /// Fetch all biometric data for the given date range. Each sub-stat is optional —
     /// if a type isn't authorized or has no data, that sub-stat is nil.
     func fetchAllBiometrics(start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.BiometricStats {
-        let hrResult: LoopInsightsAggregatedStats.HeartRateStats?
-        do { hrResult = try await fetchHeartRateStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK heart rate error: \(error)"); hrResult = nil }
+        // P1: Run all 6 HealthKit queries in parallel instead of sequentially
+        async let hr = fetchHeartRateSafe(start: start, end: end)
+        async let hrv = fetchHRVSafe(start: start, end: end)
+        async let steps = fetchStepSafe(start: start, end: end)
+        async let sleep = fetchSleepSafe(start: start, end: end)
+        async let energy = fetchEnergySafe(start: start, end: end)
+        async let weight = fetchWeightSafe(start: start, end: end)
 
-        let hrvResult: LoopInsightsAggregatedStats.HRVStats?
-        do { hrvResult = try await fetchHRVStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK HRV error: \(error)"); hrvResult = nil }
-
-        let stepResult: LoopInsightsAggregatedStats.StepStats?
-        do { stepResult = try await fetchStepStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK steps error: \(error)"); stepResult = nil }
-
-        let sleepResult: LoopInsightsAggregatedStats.SleepStats?
-        do { sleepResult = try await fetchSleepStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK sleep error: \(error)"); sleepResult = nil }
-
-        let energyResult: LoopInsightsAggregatedStats.ActiveEnergyStats?
-        do { energyResult = try await fetchActiveEnergyStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK active energy error: \(error)"); energyResult = nil }
-
-        let weightResult: LoopInsightsAggregatedStats.WeightStats?
-        do { weightResult = try await fetchWeightStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK weight error: \(error)"); weightResult = nil }
-
-        return LoopInsightsAggregatedStats.BiometricStats(
-            heartRate: hrResult,
-            hrv: hrvResult,
-            steps: stepResult,
-            sleep: sleepResult,
-            activeEnergy: energyResult,
-            weight: weightResult,
+        return await LoopInsightsAggregatedStats.BiometricStats(
+            heartRate: hr,
+            hrv: hrv,
+            steps: steps,
+            sleep: sleep,
+            activeEnergy: energy,
+            weight: weight,
             stressScore: nil  // Computed by AdvancedAnalyzers in DataAggregator
         )
+    }
+
+    private func fetchHeartRateSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.HeartRateStats? {
+        do { return try await fetchHeartRateStats(start: start, end: end) }
+        catch { print("[LoopInsights] HK heart rate error: \(error)"); return nil }
+    }
+
+    private func fetchHRVSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.HRVStats? {
+        do { return try await fetchHRVStats(start: start, end: end) }
+        catch { print("[LoopInsights] HK HRV error: \(error)"); return nil }
+    }
+
+    private func fetchStepSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.StepStats? {
+        do { return try await fetchStepStats(start: start, end: end) }
+        catch { print("[LoopInsights] HK steps error: \(error)"); return nil }
+    }
+
+    private func fetchSleepSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.SleepStats? {
+        do { return try await fetchSleepStats(start: start, end: end) }
+        catch { print("[LoopInsights] HK sleep error: \(error)"); return nil }
+    }
+
+    private func fetchEnergySafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.ActiveEnergyStats? {
+        do { return try await fetchActiveEnergyStats(start: start, end: end) }
+        catch { print("[LoopInsights] HK active energy error: \(error)"); return nil }
+    }
+
+    private func fetchWeightSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.WeightStats? {
+        do { return try await fetchWeightStats(start: start, end: end) }
+        catch { print("[LoopInsights] HK weight error: \(error)"); return nil }
     }
 
     // MARK: - Heart Rate
@@ -284,16 +298,22 @@ final class LoopInsights_HealthKitManager: ObservableObject {
         let calendar = Calendar.current
 
         var dailyTotals: [String: Double] = [:]
+        var hourlyBuckets: [Int: [Double]] = [:]
         for sample in samples {
             let kcal = sample.quantity.doubleValue(for: kcalUnit)
             let dayKey = Self.dayKey(for: sample.startDate, calendar: calendar)
             dailyTotals[dayKey, default: 0] += kcal
+
+            let hour = calendar.component(.hour, from: sample.startDate)
+            hourlyBuckets[hour, default: []].append(kcal)
         }
 
         let avgDaily = dailyTotals.isEmpty ? 0 : dailyTotals.values.reduce(0, +) / Double(dailyTotals.count)
+        let hourlyAvgs = hourlyBuckets.mapValues { $0.reduce(0, +) / Double($0.count) }
 
         return LoopInsightsAggregatedStats.ActiveEnergyStats(
-            averageDailyCalories: avgDaily
+            averageDailyCalories: avgDaily,
+            hourlyAverages: hourlyAvgs
         )
     }
 
