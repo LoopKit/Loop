@@ -385,10 +385,10 @@ extension SettingsView {
             LargeButton(action: {},
                         includeArrow: false,
                         imageView: Image(systemName: "fork.knife.circle.fill")
-                            .foregroundColor(.purple)
+                            .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
                             .font(.system(size: 36)),
-                        label: NSLocalizedString("FoodFinder Settings", comment: "Title text for button to FoodFinder Settings"),
-                        descriptiveText: NSLocalizedString("Configure AI Food Analysis", comment: "Descriptive text for FoodFinder Settings"))
+                        label: NSLocalizedString("FoodFinder", comment: "Title text for button to FoodFinder Settings"),
+                        descriptiveText: NSLocalizedString("AI-powered & barcode food analysis", comment: "Descriptive text for FoodFinder Settings"))
         }
     }
 

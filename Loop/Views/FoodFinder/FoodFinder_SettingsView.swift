@@ -55,7 +55,7 @@ struct AISettingsView: View {
                 advancedSettingsSection
             }
         }
-        .navigationTitle("FoodFinder Settings")
+        .navigationTitle("FoodFinder")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             // Load API keys from Keychain
@@ -91,7 +91,7 @@ extension AISettingsView {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "fork.knife.circle.fill")
-                        .foregroundColor(.purple)
+                        .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
                     Text("FOODFINDER")
                         .font(.caption)
                         .fontWeight(.semibold)
