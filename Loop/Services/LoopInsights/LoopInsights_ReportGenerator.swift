@@ -216,7 +216,7 @@ final class LoopInsights_ReportGenerator {
                 try pdfData.write(to: tempURL)
                 return tempURL
             } catch {
-                print("[LoopInsights] Failed to write PDF: \(error)")
+                LoopInsights_FeatureFlags.log.error("Failed to write PDF: \(error)")
                 return nil
             }
         }

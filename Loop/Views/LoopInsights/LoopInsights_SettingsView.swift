@@ -770,7 +770,7 @@ struct LoopInsights_SettingsView: View {
             do {
                 try await healthKitManager.requestAuthorization()
             } catch {
-                print("[LoopInsights] HealthKit authorization error: \(error)")
+                LoopInsights_FeatureFlags.log.error("HealthKit authorization error: \(error)")
             }
             await MainActor.run {
                 isRequestingBiometricAuth = false
@@ -1240,7 +1240,11 @@ struct LoopInsights_SettingsView: View {
         if key.isEmpty {
             LoopInsights_SecureStorage.deleteAPIKey()
         } else {
-            try? LoopInsights_SecureStorage.saveAPIKey(key)
+            do {
+                try LoopInsights_SecureStorage.saveAPIKey(key)
+            } catch {
+                LoopInsights_FeatureFlags.log.error("Failed to save API key: \(error)")
+            }
         }
         saveConfiguration()
     }
@@ -1252,7 +1256,11 @@ struct LoopInsights_SettingsView: View {
         testResult = nil
 
         // Save key and config first
-        try? LoopInsights_SecureStorage.saveAPIKey(apiKeyText)
+        do {
+            try LoopInsights_SecureStorage.saveAPIKey(apiKeyText)
+        } catch {
+            LoopInsights_FeatureFlags.log.error("Failed to save API key for test: \(error)")
+        }
         saveConfiguration()
 
         Task {

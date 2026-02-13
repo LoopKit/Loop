@@ -869,3 +869,22 @@ final class LoopInsightsChatSession: ObservableObject {
         messages.removeAll()
     }
 }
+
+// MARK: - Binary Search Utility
+
+extension Array {
+    /// Binary search for the first index in a sorted array where `keyPath` is at or after `date`.
+    /// The array must be sorted by the key in ascending order.
+    func loopInsights_firstIndex(afterOrAt date: Date, by dateExtractor: (Element) -> Date) -> Int {
+        var lo = 0, hi = count
+        while lo < hi {
+            let mid = (lo + hi) / 2
+            if dateExtractor(self[mid]) < date {
+                lo = mid + 1
+            } else {
+                hi = mid
+            }
+        }
+        return lo
+    }
+}

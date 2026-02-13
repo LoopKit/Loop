@@ -50,7 +50,7 @@ final class LoopInsights_CaffeineTracker: ObservableObject {
                 self.rebuildMergedEntries()
             }
         } catch {
-            print("[LoopInsights] Failed to fetch HealthKit caffeine: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to fetch HealthKit caffeine: \(error)")
         }
     }
 

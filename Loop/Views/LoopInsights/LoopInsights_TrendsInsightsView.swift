@@ -599,8 +599,11 @@ private final class TrendsViewModel: ObservableObject {
                 cachedGeneratedAt[currentTab] = Date()
 
                 // Build a summary prompt
+                var snapshot: LoopInsightsTherapySnapshot?
+                do { snapshot = try coordinator.captureCurrentSnapshot() }
+                catch { LoopInsights_FeatureFlags.log.error("Trends: failed to capture snapshot: \(error)") }
                 let therapyContext = LoopInsights_ChatViewModel.buildTherapyContext(
-                    snapshot: try? coordinator.captureCurrentSnapshot(),
+                    snapshot: snapshot,
                     stats: stats
                 )
 

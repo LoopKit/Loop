@@ -66,11 +66,11 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     /// Whether current metrics indicate settings are already performing well
     @Published var settingsAlreadyOptimal: Bool = false
 
-    /// Glucose samples for AGP chart (populated during analysis)
-    @Published var agpGlucoseSamples: [StoredGlucoseSample] = []
-
     /// P6: Pre-computed AGP data points — computed once when samples change, not on every view render
     @Published var agpComputedData: [LoopInsightsAGPDataPoint] = []
+
+    /// True when the analysis period is 14 days (standard AGP 24-hour overlay mode)
+    var isAGPMode: Bool { analysisPeriod == .fourteenDays }
 
     // MARK: - Dependencies
 
@@ -112,7 +112,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
         do {
             currentSnapshot = try coordinator.captureCurrentSnapshot()
         } catch {
-            print("[LoopInsights] Failed to capture therapy snapshot: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to capture therapy snapshot: \(error)")
         }
     }
 
@@ -130,12 +130,15 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 let stats = try await coordinator.dataAggregator.aggregateData(period: analysisPeriod)
                 self.aggregatedStats = stats
 
-                // P3+P6: Use cached glucose for AGP and pre-compute AGP data
-                let cachedGlucose = coordinator.dataAggregator.lastFetchedGlucoseSamples
+                // P3+P6: Use cached data for chart and supplemental context
                 let cachedCarbs = coordinator.dataAggregator.lastFetchedCarbEntries
                 if LoopInsights_FeatureFlags.agpChartEnabled {
-                    self.agpGlucoseSamples = cachedGlucose
-                    self.agpComputedData = LoopInsights_AGPChartView.computeAGP(from: cachedGlucose)
+                    let glucoseForChart = coordinator.dataAggregator.lastGlucoseForAGP
+                    if isAGPMode {
+                        self.agpComputedData = LoopInsights_AGPChartView.computeStandardAGP(from: glucoseForChart)
+                    } else {
+                        self.agpComputedData = LoopInsights_AGPChartView.computeProfile(from: glucoseForChart)
+                    }
                 }
 
                 // Capture current settings
@@ -145,7 +148,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 // P3: Pass cached glucose + carbs to avoid re-fetching in supplemental context
                 let supplementalContext = await coordinator.buildSupplementalContext(
                     stats: stats,
-                    glucoseSamples: cachedGlucose,
+                    glucoseSamples: coordinator.dataAggregator.lastFetchedGlucoseSamples,
                     carbEntries: cachedCarbs
                 )
 
@@ -215,12 +218,15 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 let stats = try await coordinator.dataAggregator.aggregateData(period: analysisPeriod)
                 self.aggregatedStats = stats
 
-                // P3+P6: Use cached glucose for AGP and pre-compute AGP data
-                let cachedGlucose = coordinator.dataAggregator.lastFetchedGlucoseSamples
+                // P3+P6: Use cached data for chart and supplemental context
                 let cachedCarbs = coordinator.dataAggregator.lastFetchedCarbEntries
                 if LoopInsights_FeatureFlags.agpChartEnabled {
-                    self.agpGlucoseSamples = cachedGlucose
-                    self.agpComputedData = LoopInsights_AGPChartView.computeAGP(from: cachedGlucose)
+                    let glucoseForChart = coordinator.dataAggregator.lastGlucoseForAGP
+                    if isAGPMode {
+                        self.agpComputedData = LoopInsights_AGPChartView.computeStandardAGP(from: glucoseForChart)
+                    } else {
+                        self.agpComputedData = LoopInsights_AGPChartView.computeProfile(from: glucoseForChart)
+                    }
                 }
 
                 let snapshot = try coordinator.captureCurrentSnapshot()
@@ -229,7 +235,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 // P3: Pass cached glucose + carbs to avoid re-fetching in supplemental context
                 let supplementalContext = await coordinator.buildSupplementalContext(
                     stats: stats,
-                    glucoseSamples: cachedGlucose,
+                    glucoseSamples: coordinator.dataAggregator.lastFetchedGlucoseSamples,
                     carbEntries: cachedCarbs
                 )
 
@@ -395,7 +401,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     func revertSuggestion(_ record: LoopInsightsSuggestionRecord) -> Bool {
         guard record.status.isRevertable else { return false }
         guard let snapshotBefore = record.settingsSnapshotBefore else {
-            print("[LoopInsights] Cannot revert: no pre-apply snapshot stored")
+            LoopInsights_FeatureFlags.log.error("Cannot revert: no pre-apply snapshot stored")
             return false
         }
 
@@ -422,6 +428,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     func updateAnalysisPeriod(_ period: LoopInsightsAnalysisPeriod) {
         analysisPeriod = period
         LoopInsights_FeatureFlags.analysisPeriod = period
+        // Clear stale chart data so labels don't show a mismatched date range
+        agpComputedData = []
     }
 
     /// The most recent AI debug log (system prompt, user prompt, raw response).

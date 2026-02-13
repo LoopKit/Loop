@@ -67,10 +67,13 @@ final class LoopInsights_ChatViewModel: ObservableObject {
 
         Task { @MainActor in
             do {
-                let snapshot = try? coordinator.captureCurrentSnapshot()
-                let stats = try? await coordinator.dataAggregator.aggregateData(
-                    period: LoopInsights_FeatureFlags.analysisPeriod
-                )
+                var snapshot: LoopInsightsTherapySnapshot?
+                do { snapshot = try coordinator.captureCurrentSnapshot() }
+                catch { LoopInsights_FeatureFlags.log.error("Chat: failed to capture snapshot: \(error)") }
+
+                var stats: LoopInsightsAggregatedStats?
+                do { stats = try await coordinator.dataAggregator.aggregateData(period: LoopInsights_FeatureFlags.analysisPeriod) }
+                catch { LoopInsights_FeatureFlags.log.error("Chat: failed to aggregate data: \(error)") }
                 let context = Self.buildTherapyContext(snapshot: snapshot, stats: stats)
 
                 let history = session.conversationHistory().dropLast().map { ($0.role, $0.content) }

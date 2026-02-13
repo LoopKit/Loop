@@ -477,9 +477,15 @@ private final class GoalsViewModel: ObservableObject {
 
     private func updateGoalCurrentValues(coordinator: LoopInsights_Coordinator) {
         Task { @MainActor in
-            guard let stats = try? await coordinator.dataAggregator.aggregateData(
-                period: LoopInsights_FeatureFlags.analysisPeriod
-            ) else { return }
+            let stats: LoopInsightsAggregatedStats
+            do {
+                stats = try await coordinator.dataAggregator.aggregateData(
+                    period: LoopInsights_FeatureFlags.analysisPeriod
+                )
+            } catch {
+                LoopInsights_FeatureFlags.log.error("Goals: failed to aggregate data for goal updates: \(error)")
+                return
+            }
 
             for goal in goals {
                 let current: Double
@@ -537,7 +543,9 @@ private final class GoalsViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 let stats = try await coordinator.dataAggregator.aggregateData(period: .thirtyDays)
-                let snapshot = try? coordinator.captureCurrentSnapshot()
+                var snapshot: LoopInsightsTherapySnapshot?
+                do { snapshot = try coordinator.captureCurrentSnapshot() }
+                catch { LoopInsights_FeatureFlags.log.error("Goals: failed to capture snapshot for patterns: \(error)") }
                 let context = LoopInsights_ChatViewModel.buildTherapyContext(
                     snapshot: snapshot,
                     stats: stats
@@ -588,9 +596,9 @@ private final class GoalsViewModel: ObservableObject {
         isGeneratingReport = true
 
         Task { @MainActor in
-            let stats = try? await coordinator.dataAggregator.aggregateData(
-                period: LoopInsights_FeatureFlags.analysisPeriod
-            )
+            var stats: LoopInsightsAggregatedStats?
+            do { stats = try await coordinator.dataAggregator.aggregateData(period: LoopInsights_FeatureFlags.analysisPeriod) }
+            catch { LoopInsights_FeatureFlags.log.error("Goals: failed to aggregate data for report: \(error)") }
 
             let html = LoopInsights_ReportGenerator.generateHTML(
                 stats: stats,
