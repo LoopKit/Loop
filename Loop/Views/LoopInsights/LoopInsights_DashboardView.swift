@@ -28,6 +28,7 @@ struct LoopInsights_DashboardView: View {
     @State private var showingDebugLog = false
     @State private var showingChat = false
     @State private var showingTrendsInsights = false
+    @State private var showingGoals = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
 
@@ -144,6 +145,11 @@ struct LoopInsights_DashboardView: View {
         .sheet(isPresented: $showingTrendsInsights) {
             NavigationView {
                 LoopInsights_TrendsInsightsView(coordinator: viewModel.coordinator)
+            }
+        }
+        .sheet(isPresented: $showingGoals) {
+            NavigationView {
+                LoopInsights_GoalsView(coordinator: viewModel.coordinator)
             }
         }
         .overlay(alignment: .top) {
@@ -704,6 +710,18 @@ struct LoopInsights_DashboardView: View {
                     Image(systemName: "chart.line.uptrend.xyaxis")
                         .foregroundColor(.accentColor)
                     Text(NSLocalizedString("Trends & Insights", comment: "LoopInsights trends button"))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Button(action: { showingGoals = true }) {
+                HStack {
+                    Image(systemName: "target")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("Goals & Patterns", comment: "LoopInsights goals button"))
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)

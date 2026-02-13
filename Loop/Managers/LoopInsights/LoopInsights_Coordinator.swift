@@ -26,6 +26,7 @@ final class LoopInsights_Coordinator: ObservableObject {
     let dataAggregator: LoopInsights_DataAggregator
     let aiAnalysis: LoopInsights_AIAnalysis
     let suggestionStore: LoopInsights_SuggestionStore
+    let goalStore: LoopInsights_GoalStore
 
     /// Background monitor for proactive suggestions (lazy-initialized)
     lazy var backgroundMonitor: LoopInsights_BackgroundMonitor = LoopInsights_BackgroundMonitor(coordinator: self)
@@ -62,6 +63,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.dataAggregator = LoopInsights_DataAggregator(dataProvider: bridge)
         self.aiAnalysis = LoopInsights_AIAnalysis()
         self.suggestionStore = LoopInsights_SuggestionStore.shared
+        self.goalStore = LoopInsights_GoalStore.shared
     }
 
     /// Initialize with test data fixtures (for simulator/developer mode).
@@ -73,6 +75,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.dataAggregator = LoopInsights_DataAggregator(dataProvider: testDataProvider)
         self.aiAnalysis = LoopInsights_AIAnalysis()
         self.suggestionStore = LoopInsights_SuggestionStore.shared
+        self.goalStore = LoopInsights_GoalStore.shared
     }
 
     /// Factory method: creates a Coordinator with test data if available and enabled,
