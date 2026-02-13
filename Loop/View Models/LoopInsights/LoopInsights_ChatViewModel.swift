@@ -207,6 +207,37 @@ final class LoopInsights_ChatViewModel: ObservableObject {
                     }
                 }
             }
+
+            if let bio = stats.biometricStats {
+                context += "\nBIOMETRIC DATA:\n"
+
+                if let hr = bio.heartRate {
+                    context += "  Resting HR: \(String(format: "%.0f", hr.averageRestingHR)) bpm\n"
+                    context += "  Active HR: \(String(format: "%.0f", hr.averageActiveHR)) bpm\n"
+                }
+
+                if let hrv = bio.hrv {
+                    context += "  HRV (SDNN): \(String(format: "%.1f", hrv.averageSDNN)) ms (trend: \(hrv.trend >= 0 ? "+" : "")\(String(format: "%.1f", hrv.trend)))\n"
+                }
+
+                if let steps = bio.steps {
+                    context += "  Avg Daily Steps: \(String(format: "%.0f", steps.averageDailySteps))\n"
+                }
+
+                if let sleep = bio.sleep {
+                    context += "  Avg Sleep: \(String(format: "%.1f", sleep.averageDurationHours)) hrs/night\n"
+                    context += "  Avg Bedtime: \(Self.formatTimeFromSeconds(sleep.averageBedtime))\n"
+                    context += "  Avg Wake: \(Self.formatTimeFromSeconds(sleep.averageWakeTime))\n"
+                }
+
+                if let energy = bio.activeEnergy {
+                    context += "  Avg Active Calories: \(String(format: "%.0f", energy.averageDailyCalories)) kcal/day\n"
+                }
+
+                if let weight = bio.weight {
+                    context += "  Weight: \(String(format: "%.1f", weight.latestWeight)) kg (trend: \(weight.weightTrend >= 0 ? "+" : "")\(String(format: "%.1f", weight.weightTrend)) kg)\n"
+                }
+            }
         }
 
         if context.isEmpty {
@@ -223,5 +254,14 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         calendar.timeZone = TimeZone.current
         let date = calendar.startOfDay(for: Date()).addingTimeInterval(seconds)
         return formatter.string(from: date)
+    }
+
+    private static func formatTimeFromSeconds(_ seconds: Double) -> String {
+        let totalSeconds = Int(seconds)
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let period = hours >= 12 ? "PM" : "AM"
+        let displayHour = hours == 0 ? 12 : (hours > 12 ? hours - 12 : hours)
+        return String(format: "%d:%02d %@", displayHour, minutes, period)
     }
 }

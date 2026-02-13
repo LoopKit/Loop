@@ -46,6 +46,11 @@ struct LoopInsights_SettingsView: View {
     // Data
     @State private var showingClearHistory = false
 
+    // Biometrics
+    @State private var biometricsEnabled = LoopInsights_FeatureFlags.biometricsEnabled
+    @StateObject private var healthKitManager = LoopInsights_HealthKitManager()
+    @State private var isRequestingBiometricAuth = false
+
     // Developer mode unlock
     @State private var developerTapCount = 0
     @State private var showDeveloperUnlocked = false
@@ -92,6 +97,7 @@ struct LoopInsights_SettingsView: View {
                 aiConfigSection
                 advancedAISection
                 analysisOptionsSection
+                biometricsSection
                 personalitySection
                 backgroundMonitoringSection
                 dataSection
@@ -109,6 +115,7 @@ struct LoopInsights_SettingsView: View {
             selectedApplyMode = LoopInsights_FeatureFlags.applyMode
             selectedPersonality = LoopInsights_FeatureFlags.aiPersonality
             useTestData = LoopInsights_FeatureFlags.useTestData
+            biometricsEnabled = LoopInsights_FeatureFlags.biometricsEnabled
             apiKeyText = LoopInsights_SecureStorage.loadAPIKey() ?? ""
 
             // Clear stale endpoint path if it matches a different format's default
@@ -626,6 +633,125 @@ struct LoopInsights_SettingsView: View {
                 Text(selectedApplyMode.description)
                     .font(.caption)
                     .foregroundColor(selectedApplyMode == .autoApply ? .orange : .secondary)
+            }
+        }
+    }
+
+    // MARK: - Biometrics
+
+    private var biometricsSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "heart.text.square")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("BIOMETRICS", comment: "LoopInsights biometrics header"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                }
+
+                Toggle(NSLocalizedString("Include Biometric Data", comment: "LoopInsights biometrics toggle"), isOn: $biometricsEnabled)
+                    .onChange(of: biometricsEnabled) { newValue in
+                        LoopInsights_FeatureFlags.biometricsEnabled = newValue
+                        if newValue && !healthKitManager.authorizationRequested {
+                            requestBiometricAuthorization()
+                        }
+                    }
+
+                Text(NSLocalizedString("When enabled, LoopInsights includes heart rate, HRV, steps, sleep, active energy, and weight data in AI analysis. This helps the AI correlate lifestyle factors with glucose patterns.", comment: "LoopInsights biometrics description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                if biometricsEnabled {
+                    if !LoopInsights_HealthKitManager.isHealthDataAvailable {
+                        HStack(spacing: 4) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.red)
+                            Text(NSLocalizedString("HealthKit is not available on this device.", comment: "LoopInsights HealthKit not available"))
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    } else {
+                        // Authorization button (show when not yet requested)
+                        if !healthKitManager.authorizationRequested {
+                            Button(action: requestBiometricAuthorization) {
+                                HStack(spacing: 6) {
+                                    if isRequestingBiometricAuth {
+                                        ProgressView()
+                                            .progressViewStyle(.circular)
+                                            .scaleEffect(0.8)
+                                    } else {
+                                        Image(systemName: "heart.circle")
+                                    }
+                                    Text(NSLocalizedString("Authorize HealthKit Access", comment: "LoopInsights authorize HealthKit button"))
+                                }
+                                .font(.body.weight(.medium))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(Color.pink)
+                                .cornerRadius(10)
+                            }
+                            .disabled(isRequestingBiometricAuth)
+                            .buttonStyle(.plain)
+                        } else {
+                            // Authorization sheet was shown — we can't see read permission status
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text(NSLocalizedString("HealthKit permissions configured", comment: "LoopInsights HealthKit permissions configured"))
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
+                        }
+
+                        // Biometric types list (two columns)
+                        HStack(alignment: .top, spacing: 16) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                biometricTypeLabel("Heart Rate", icon: "heart.fill")
+                                biometricTypeLabel("HRV", icon: "waveform.path.ecg")
+                                biometricTypeLabel("Steps", icon: "figure.walk")
+                            }
+                            VStack(alignment: .leading, spacing: 6) {
+                                biometricTypeLabel("Sleep", icon: "bed.double.fill")
+                                biometricTypeLabel("Energy", icon: "flame.fill")
+                                biometricTypeLabel("Weight", icon: "scalemass.fill")
+                            }
+                        }
+
+                        Text(NSLocalizedString("Biometric data is read-only and never leaves your device except as part of AI analysis prompts. Manage permissions in Settings > Health > Loop.", comment: "LoopInsights biometrics privacy note"))
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private func biometricTypeLabel(_ name: String, icon: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .foregroundColor(.pink)
+                .font(.caption)
+                .frame(width: 16)
+            Text(name)
+                .font(.caption)
+                .foregroundColor(.primary)
+        }
+    }
+
+    private func requestBiometricAuthorization() {
+        isRequestingBiometricAuth = true
+        Task {
+            do {
+                try await healthKitManager.requestAuthorization()
+            } catch {
+                print("[LoopInsights] HealthKit authorization error: \(error)")
+            }
+            await MainActor.run {
+                isRequestingBiometricAuth = false
             }
         }
     }

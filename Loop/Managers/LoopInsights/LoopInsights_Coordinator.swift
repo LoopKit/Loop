@@ -27,6 +27,7 @@ final class LoopInsights_Coordinator: ObservableObject {
     let aiAnalysis: LoopInsights_AIAnalysis
     let suggestionStore: LoopInsights_SuggestionStore
     let goalStore: LoopInsights_GoalStore
+    let healthKitManager: LoopInsights_HealthKitManager?
 
     /// Background monitor for proactive suggestions (lazy-initialized)
     lazy var backgroundMonitor: LoopInsights_BackgroundMonitor = LoopInsights_BackgroundMonitor(coordinator: self)
@@ -60,7 +61,11 @@ final class LoopInsights_Coordinator: ObservableObject {
         )
         self.dataProviderBridge = bridge
         self.settingsWriter = settingsWriter
-        self.dataAggregator = LoopInsights_DataAggregator(dataProvider: bridge)
+
+        let hkManager: LoopInsights_HealthKitManager? = LoopInsights_FeatureFlags.biometricsEnabled
+            ? LoopInsights_HealthKitManager() : nil
+        self.healthKitManager = hkManager
+        self.dataAggregator = LoopInsights_DataAggregator(dataProvider: bridge, healthKitManager: hkManager)
         self.aiAnalysis = LoopInsights_AIAnalysis()
         self.suggestionStore = LoopInsights_SuggestionStore.shared
         self.goalStore = LoopInsights_GoalStore.shared
@@ -72,6 +77,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.testDataProvider = testDataProvider
         self.dataProviderBridge = nil
         self.settingsWriter = nil
+        self.healthKitManager = nil
         self.dataAggregator = LoopInsights_DataAggregator(dataProvider: testDataProvider)
         self.aiAnalysis = LoopInsights_AIAnalysis()
         self.suggestionStore = LoopInsights_SuggestionStore.shared

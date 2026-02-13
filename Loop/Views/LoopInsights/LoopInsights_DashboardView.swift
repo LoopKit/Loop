@@ -77,6 +77,9 @@ struct LoopInsights_DashboardView: View {
             if !viewModel.pendingSuggestions.isEmpty {
                 pendingSuggestionsSection
             }
+            if viewModel.pendingSuggestions.isEmpty && viewModel.analysisResponse != nil && !viewModel.isAnalyzing {
+                noChangesSection
+            }
             navigationSection
         }
         .navigationTitle(NSLocalizedString("LoopInsights", comment: "LoopInsights dashboard title"))
@@ -568,6 +571,26 @@ struct LoopInsights_DashboardView: View {
                 }
                 .padding(.vertical, 2)
             }
+        }
+    }
+
+    // MARK: - No Changes
+
+    private var noChangesSection: some View {
+        Section {
+            VStack(spacing: 10) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.green)
+                Text(NSLocalizedString("No Recommended Changes", comment: "LoopInsights no changes title"))
+                    .font(.headline)
+                Text(NSLocalizedString("Your current therapy settings look good based on the available data. Check back after more data has been generated for a fresh analysis.", comment: "LoopInsights no changes description"))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
         }
     }
 

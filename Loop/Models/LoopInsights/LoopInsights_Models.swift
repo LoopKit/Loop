@@ -594,6 +594,7 @@ struct LoopInsightsAggregatedStats: Codable {
     let glucoseStats: GlucoseStats
     let insulinStats: InsulinStats
     let carbStats: CarbStats
+    let biometricStats: BiometricStats?
     let generatedAt: Date
 
     struct GlucoseStats: Codable {
@@ -621,6 +622,46 @@ struct LoopInsightsAggregatedStats: Codable {
         let mealCount: Int                    // total meals logged
         let averageCarbsPerMeal: Double       // grams/meal
         let hourlyMealFrequency: [Int: Int]   // hour → number of meals at that hour
+    }
+
+    struct BiometricStats: Codable {
+        let heartRate: HeartRateStats?
+        let hrv: HRVStats?
+        let steps: StepStats?
+        let sleep: SleepStats?
+        let activeEnergy: ActiveEnergyStats?
+        let weight: WeightStats?
+    }
+
+    struct HeartRateStats: Codable {
+        let averageRestingHR: Double          // bpm
+        let averageActiveHR: Double           // bpm
+        let hourlyAverages: [Int: Double]     // hour → avg bpm
+    }
+
+    struct HRVStats: Codable {
+        let averageSDNN: Double               // ms
+        let trend: Double                     // positive = improving
+    }
+
+    struct StepStats: Codable {
+        let averageDailySteps: Double
+        let hourlyAverages: [Int: Double]     // hour → avg steps
+    }
+
+    struct SleepStats: Codable {
+        let averageDurationHours: Double
+        let averageBedtime: Double            // seconds since midnight
+        let averageWakeTime: Double           // seconds since midnight
+    }
+
+    struct ActiveEnergyStats: Codable {
+        let averageDailyCalories: Double
+    }
+
+    struct WeightStats: Codable {
+        let latestWeight: Double              // kg
+        let weightTrend: Double               // kg change over period
     }
 }
 

@@ -132,6 +132,26 @@ final class LoopInsights_AIAnalysis {
         3. If time below range is >4%, prioritize safety (raise ISF or lower basal before anything else).
         4. Suggestions are advisory only — the user and their healthcare provider make final decisions.
 
+        BIOMETRIC CONTEXT — When biometric data is provided:
+        - HEART RATE: Elevated resting HR or HR spikes can indicate stress, illness, caffeine, or \
+          exercise — all affect insulin sensitivity. Morning HR acceleration may indicate caffeine \
+          intake or dawn cortisol surge. A sudden sustained HR increase could signal illness (reduce \
+          insulin sensitivity expectation).
+        - HRV: Lower HRV indicates higher physiological stress. Declining HRV trend may predict \
+          increased insulin resistance. Use HRV context to temper or strengthen confidence in \
+          setting change recommendations.
+        - STEPS/ACTIVITY: High activity days often increase insulin sensitivity (lower ISF, lower \
+          basal may be appropriate). Sedentary days may require the opposite. Look for patterns \
+          between activity levels and glucose outcomes.
+        - SLEEP: Poor sleep or short duration often increases insulin resistance the following day. \
+          Late bedtimes or irregular schedules correlate with variable glucose patterns. Note sleep \
+          timing when assessing overnight glucose behavior.
+        - WEIGHT: Weight trends affect total daily dose requirements. A gaining trend may require \
+          increased basal/bolus; a losing trend may require decreases.
+        - CORRELATION: Cross-reference biometric patterns with glucose patterns before suggesting \
+          setting changes. If glucose variability correlates with activity or sleep variation, \
+          note this as a lifestyle factor rather than a settings problem.
+
         RESPONSE FORMAT:
         Respond with valid JSON in this exact structure:
         {
@@ -182,8 +202,8 @@ final class LoopInsights_AIAnalysis {
             prompt += "The historical data below was collected BEFORE these changes took effect. "
             prompt += "Do NOT suggest further changes to values that were already adjusted — the data does not yet reflect the new settings.\n\n"
             for change in relevantChanges {
-                let ago = Int(Date().timeIntervalSince(change.resolvedAt ?? change.createdAt) / 60)
-                prompt += "- Applied \(ago) minute(s) ago: "
+                let agoText = formatDuration(Date().timeIntervalSince(change.resolvedAt ?? change.createdAt))
+                prompt += "- Applied \(agoText) ago: "
                 for block in change.suggestion.timeBlocks {
                     prompt += "\(formatTime(block.startTime))–\(formatTime(block.endTime)): \(String(format: "%.1f", block.currentValue)) → \(String(format: "%.1f", block.proposedValue)). "
                 }
@@ -258,6 +278,52 @@ final class LoopInsights_AIAnalysis {
         prompt += "- Average Daily Carbs: \(String(format: "%.0f", stats.carbStats.averageDailyCarbs)) g/day\n"
         prompt += "- Meals Logged: \(stats.carbStats.mealCount)\n"
         prompt += "- Average Carbs per Meal: \(String(format: "%.0f", stats.carbStats.averageCarbsPerMeal)) g\n"
+
+        // Biometric stats (if available)
+        if let bio = stats.biometricStats {
+            prompt += "\n## Biometric Context\n"
+
+            if let hr = bio.heartRate {
+                prompt += "### Heart Rate\n"
+                prompt += "- Average Resting HR: \(String(format: "%.0f", hr.averageRestingHR)) bpm\n"
+                prompt += "- Average Active HR: \(String(format: "%.0f", hr.averageActiveHR)) bpm\n"
+                if !hr.hourlyAverages.isEmpty {
+                    prompt += "- Hourly HR averages: "
+                    let sorted = hr.hourlyAverages.sorted { $0.key < $1.key }
+                    prompt += sorted.map { "\(String(format: "%02d", $0.key)):00=\(String(format: "%.0f", $0.value))" }.joined(separator: ", ")
+                    prompt += "\n"
+                }
+            }
+
+            if let hrv = bio.hrv {
+                prompt += "### HRV (Heart Rate Variability)\n"
+                prompt += "- Average SDNN: \(String(format: "%.1f", hrv.averageSDNN)) ms\n"
+                prompt += "- Trend: \(hrv.trend >= 0 ? "+" : "")\(String(format: "%.1f", hrv.trend)) ms (\(hrv.trend >= 0 ? "improving" : "declining"))\n"
+            }
+
+            if let steps = bio.steps {
+                prompt += "### Steps/Activity\n"
+                prompt += "- Average Daily Steps: \(String(format: "%.0f", steps.averageDailySteps))\n"
+            }
+
+            if let sleep = bio.sleep {
+                prompt += "### Sleep\n"
+                prompt += "- Average Duration: \(String(format: "%.1f", sleep.averageDurationHours)) hours/night\n"
+                prompt += "- Average Bedtime: \(formatTimeFromSeconds(sleep.averageBedtime))\n"
+                prompt += "- Average Wake Time: \(formatTimeFromSeconds(sleep.averageWakeTime))\n"
+            }
+
+            if let energy = bio.activeEnergy {
+                prompt += "### Active Energy\n"
+                prompt += "- Average Daily Active Calories: \(String(format: "%.0f", energy.averageDailyCalories)) kcal\n"
+            }
+
+            if let weight = bio.weight {
+                prompt += "### Weight\n"
+                prompt += "- Latest Weight: \(String(format: "%.1f", weight.latestWeight)) kg (\(String(format: "%.1f", weight.latestWeight * 2.205)) lbs)\n"
+                prompt += "- Weight Trend: \(weight.weightTrend >= 0 ? "+" : "")\(String(format: "%.1f", weight.weightTrend)) kg over period\n"
+            }
+        }
 
         // Computed: time-of-day glucose analysis
         prompt += "\n## Time-of-Day Analysis (computed from hourly averages)\n"
@@ -428,6 +494,36 @@ final class LoopInsights_AIAnalysis {
     private func formatTime(_ seconds: TimeInterval) -> String {
         let hours = Int(seconds) / 3600
         let minutes = (Int(seconds) % 3600) / 60
+        let period = hours >= 12 ? "PM" : "AM"
+        let displayHour = hours == 0 ? 12 : (hours > 12 ? hours - 12 : hours)
+        return String(format: "%d:%02d %@", displayHour, minutes, period)
+    }
+
+    private func formatDuration(_ interval: TimeInterval) -> String {
+        let totalMinutes = Int(interval) / 60
+        if totalMinutes < 60 {
+            return "\(totalMinutes) minute\(totalMinutes == 1 ? "" : "s")"
+        }
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+        if hours < 24 {
+            if minutes == 0 {
+                return "\(hours) hour\(hours == 1 ? "" : "s")"
+            }
+            return "\(hours) hour\(hours == 1 ? "" : "s") \(minutes) minute\(minutes == 1 ? "" : "s")"
+        }
+        let days = hours / 24
+        let remainingHours = hours % 24
+        if remainingHours == 0 {
+            return "\(days) day\(days == 1 ? "" : "s")"
+        }
+        return "\(days) day\(days == 1 ? "" : "s") \(remainingHours) hour\(remainingHours == 1 ? "" : "s")"
+    }
+
+    private func formatTimeFromSeconds(_ seconds: Double) -> String {
+        let totalSeconds = Int(seconds)
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
         let period = hours >= 12 ? "PM" : "AM"
         let displayHour = hours == 0 ? 12 : (hours > 12 ? hours - 12 : hours)
         return String(format: "%d:%02d %@", displayHour, minutes, period)

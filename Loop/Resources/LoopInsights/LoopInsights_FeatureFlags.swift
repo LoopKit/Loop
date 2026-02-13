@@ -28,6 +28,7 @@ struct LoopInsights_FeatureFlags {
         static let quietHoursStart = "LoopInsights_quietHoursStart"
         static let quietHoursEnd = "LoopInsights_quietHoursEnd"
         static let notificationStyle = "LoopInsights_notificationStyle"
+        static let biometricsEnabled = "LoopInsights_biometricsEnabled"
     }
 
     private static let defaults = UserDefaults.standard
@@ -187,6 +188,15 @@ struct LoopInsights_FeatureFlags {
             return style
         }
         set { defaults.set(newValue.rawValue, forKey: Keys.notificationStyle) }
+    }
+
+    // MARK: - Biometrics
+
+    /// Whether HealthKit biometric data (HR, HRV, steps, sleep, energy, weight)
+    /// is included in AI analysis. Defaults to false.
+    static var biometricsEnabled: Bool {
+        get { defaults.bool(forKey: Keys.biometricsEnabled) }
+        set { defaults.set(newValue, forKey: Keys.biometricsEnabled) }
     }
 
     // MARK: - AI Configuration

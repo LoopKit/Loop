@@ -26,9 +26,11 @@ protocol LoopInsightsDataProviderProtocol: AnyObject {
 final class LoopInsights_DataAggregator {
 
     private weak var dataProvider: LoopInsightsDataProviderProtocol?
+    private var healthKitManager: LoopInsights_HealthKitManager?
 
-    init(dataProvider: LoopInsightsDataProviderProtocol) {
+    init(dataProvider: LoopInsightsDataProviderProtocol, healthKitManager: LoopInsights_HealthKitManager? = nil) {
         self.dataProvider = dataProvider
+        self.healthKitManager = healthKitManager
     }
 
     // MARK: - Public API
@@ -45,12 +47,14 @@ final class LoopInsights_DataAggregator {
         async let glucoseStats = computeGlucoseStats(provider: dataProvider, start: startDate, end: endDate)
         async let insulinStats = computeInsulinStats(provider: dataProvider, start: startDate, end: endDate)
         async let carbStats = computeCarbStats(provider: dataProvider, start: startDate, end: endDate)
+        async let biometrics = fetchBiometricsIfEnabled(start: startDate, end: endDate)
 
         return LoopInsightsAggregatedStats(
             period: period,
             glucoseStats: try await glucoseStats,
             insulinStats: try await insulinStats,
             carbStats: try await carbStats,
+            biometricStats: try await biometrics,
             generatedAt: Date()
         )
     }
@@ -81,6 +85,33 @@ final class LoopInsights_DataAggregator {
             carbRatioItems: crItems,
             capturedAt: Date()
         )
+    }
+
+    // MARK: - Biometrics
+
+    private func fetchBiometricsIfEnabled(start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.BiometricStats? {
+        guard LoopInsights_FeatureFlags.biometricsEnabled else {
+            print("[LoopInsights] Biometrics: flag is disabled, skipping")
+            return nil
+        }
+        // Use the injected manager, or create one on the fly. This handles the case
+        // where the Coordinator was created before biometrics was enabled.
+        let manager = healthKitManager ?? LoopInsights_HealthKitManager()
+        print("[LoopInsights] Biometrics: fetching from HealthKit (start: \(start), end: \(end))")
+        do {
+            let result = try await manager.fetchAllBiometrics(start: start, end: end)
+            print("[LoopInsights] Biometrics: HR=\(result.heartRate != nil), HRV=\(result.hrv != nil), steps=\(result.steps != nil), sleep=\(result.sleep != nil), energy=\(result.activeEnergy != nil), weight=\(result.weight != nil)")
+            // If every sub-stat is nil, return nil so the AI prompt doesn't get an empty section
+            if result.heartRate == nil && result.hrv == nil && result.steps == nil &&
+               result.sleep == nil && result.activeEnergy == nil && result.weight == nil {
+                print("[LoopInsights] Biometrics: all sub-stats nil — no HealthKit data available")
+                return nil
+            }
+            return result
+        } catch {
+            print("[LoopInsights] Biometrics: fetch error — \(error)")
+            return nil
+        }
     }
 
     // MARK: - Glucose Stats

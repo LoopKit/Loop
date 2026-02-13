@@ -614,6 +614,7 @@
 		8D65F67A3D5AE1576364C287 /* LoopInsights_GoalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0065F6CA2B051676FEE0B7D5 /* LoopInsights_GoalStore.swift */; };
 		2BD98847D48B412626D8AFDF /* LoopInsights_GoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49486DDC8FCBA7675B005E62 /* LoopInsights_GoalsView.swift */; };
 		1AD80F425B1DA688EBAC6653 /* LoopInsights_ReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91CA9C204385601A795C4DF2 /* LoopInsights_ReportGenerator.swift */; };
+		4F318965F55EC7E03D840A9C /* LoopInsights_HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F042788E3C9B3B77B4B55BB2 /* LoopInsights_HealthKitManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1461,6 +1462,7 @@
 		0065F6CA2B051676FEE0B7D5 /* LoopInsights_GoalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_GoalStore.swift; sourceTree = "<group>"; };
 		49486DDC8FCBA7675B005E62 /* LoopInsights_GoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_GoalsView.swift; sourceTree = "<group>"; };
 		91CA9C204385601A795C4DF2 /* LoopInsights_ReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_ReportGenerator.swift; sourceTree = "<group>"; };
+		F042788E3C9B3B77B4B55BB2 /* LoopInsights_HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_HealthKitManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2771,6 +2773,7 @@
 				186598BBCF20AF6BFDA7C65E /* LoopInsights_SuggestionStore.swift */,
 				0065F6CA2B051676FEE0B7D5 /* LoopInsights_GoalStore.swift */,
 				91CA9C204385601A795C4DF2 /* LoopInsights_ReportGenerator.swift */,
+				F042788E3C9B3B77B4B55BB2 /* LoopInsights_HealthKitManager.swift */,
 			);
 			path = LoopInsights;
 			sourceTree = "<group>";
@@ -3748,6 +3751,7 @@
 				8D65F67A3D5AE1576364C287 /* LoopInsights_GoalStore.swift in Sources */,
 				2BD98847D48B412626D8AFDF /* LoopInsights_GoalsView.swift in Sources */,
 				1AD80F425B1DA688EBAC6653 /* LoopInsights_ReportGenerator.swift in Sources */,
+				4F318965F55EC7E03D840A9C /* LoopInsights_HealthKitManager.swift in Sources */,
 							8D0F376E7E338ECB93EE03E0 /* LoopInsights_TrendsInsightsView.swift in Sources */,
 );
 			runOnlyForDeploymentPostprocessing = 0;
