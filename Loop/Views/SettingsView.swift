@@ -298,6 +298,8 @@ extension SettingsView {
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
             }
 
+            loopInsightsSection
+
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
@@ -305,8 +307,6 @@ extension SettingsView {
             if FeatureFlags.allowAlgorithmExperiments {
                 algorithmExperimentsSection
             }
-
-            loopInsightsSection
         }
     }
 
@@ -381,7 +381,7 @@ extension SettingsView {
 
     private var loopInsightsSection: some View {
         Section {
-            NavigationLink(destination: LoopInsights_SettingsView()) {
+            NavigationLink(destination: LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
                 LargeButton(action: {},
                             includeArrow: false,
                             imageView: Image(systemName: "brain.head.profile")

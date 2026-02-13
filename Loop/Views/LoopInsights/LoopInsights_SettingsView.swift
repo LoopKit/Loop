@@ -8,12 +8,17 @@
 
 import SwiftUI
 import Combine
+import LoopKit
 
 /// LoopInsights settings and configuration view.
 /// Accessible from Loop's main SettingsView via NavigationLink.
 struct LoopInsights_SettingsView: View {
 
     @Environment(\.openURL) var openURL
+
+    /// Real data store references passed from Loop's SettingsView (type-erased).
+    /// When nil, falls back to test data (simulator / preview).
+    var dataStoresProvider: (() -> Any?)?
 
     @State private var isEnabled = LoopInsights_FeatureFlags.isEnabled
     @State private var selectedPeriod = LoopInsights_FeatureFlags.analysisPeriod
@@ -61,7 +66,8 @@ struct LoopInsights_SettingsView: View {
         }
     }
 
-    init() {
+    init(dataStoresProvider: (() -> Any?)? = nil) {
+        self.dataStoresProvider = dataStoresProvider
         let config = LoopInsights_FeatureFlags.aiConfiguration
         _baseURL = State(initialValue: config.baseURL)
         _model = State(initialValue: config.model)
@@ -96,6 +102,12 @@ struct LoopInsights_SettingsView: View {
         .navigationTitle(NSLocalizedString("LoopInsights Settings", comment: "LoopInsights settings title"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
+            // Re-sync @State from persisted values on every appearance
+            isEnabled = LoopInsights_FeatureFlags.isEnabled
+            selectedPeriod = LoopInsights_FeatureFlags.analysisPeriod
+            selectedApplyMode = LoopInsights_FeatureFlags.applyMode
+            selectedPersonality = LoopInsights_FeatureFlags.aiPersonality
+            useTestData = LoopInsights_FeatureFlags.useTestData
             apiKeyText = LoopInsights_SecureStorage.loadAPIKey() ?? ""
 
             // Clear stale endpoint path if it matches a different format's default
@@ -128,7 +140,7 @@ struct LoopInsights_SettingsView: View {
         }
         .sheet(isPresented: $showTestDashboard) {
             NavigationView {
-                LoopInsights_TestDashboardWrapper()
+                LoopInsights_TestDashboardWrapper(dataStoresProvider: dataStoresProvider)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
                             Button(NSLocalizedString("Done", comment: "Done button")) {
@@ -192,22 +204,23 @@ struct LoopInsights_SettingsView: View {
                     }
 
                     Button(action: { showTestDashboard = true }) {
-                        HStack {
+                        HStack(spacing: 10) {
                             Image(systemName: "chart.line.uptrend.xyaxis")
-                                .foregroundColor(.accentColor)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(NSLocalizedString("Open Dashboard", comment: "LoopInsights open dashboard button"))
-                                    .fontWeight(.medium)
-                                Text(NSLocalizedString("View therapy settings, run AI analysis, and manage suggestions", comment: "LoopInsights dashboard description"))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
+                                .font(.title3)
+                            Text(NSLocalizedString("Open Dashboard", comment: "LoopInsights open dashboard button"))
+                                .fontWeight(.semibold)
                             Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            Image(systemName: "arrow.right")
+                                .font(.subheadline.weight(.semibold))
                         }
+                        .foregroundColor(.white)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                        .background(Color.green)
+                        .cornerRadius(10)
                     }
+                    .buttonStyle(.plain)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
             }
         }
@@ -582,20 +595,36 @@ struct LoopInsights_SettingsView: View {
                     ? LoopInsightsApplyMode.allCases
                     : LoopInsightsApplyMode.publicModes
 
-                Picker(NSLocalizedString("When applying suggestions", comment: "LoopInsights apply mode picker"), selection: $selectedApplyMode) {
-                    ForEach(availableModes) { mode in
-                        Text(mode.displayName)
-                            .foregroundColor(mode == .autoApply ? .orange : .primary)
-                            .tag(mode)
+                HStack {
+                    Text(NSLocalizedString("When applying suggestions", comment: "LoopInsights apply mode picker"))
+                    Spacer()
+                    Menu {
+                        ForEach(availableModes) { mode in
+                            Button(action: {
+                                selectedApplyMode = mode
+                                LoopInsights_FeatureFlags.applyMode = mode
+                            }) {
+                                if mode == selectedApplyMode {
+                                    Label(mode == .autoApply ? "\(mode.displayName) \u{26A0}\u{FE0F}" : mode.displayName, systemImage: "checkmark")
+                                } else {
+                                    Text(mode == .autoApply ? "\(mode.displayName) \u{26A0}\u{FE0F}" : mode.displayName)
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(selectedApplyMode.displayName)
+                                .foregroundColor(selectedApplyMode == .autoApply ? .orange : .accentColor)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption2)
+                                .foregroundColor(selectedApplyMode == .autoApply ? .orange : .accentColor)
+                        }
                     }
-                }
-                .onChange(of: selectedApplyMode) { newValue in
-                    LoopInsights_FeatureFlags.applyMode = newValue
                 }
 
                 Text(selectedApplyMode.description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(selectedApplyMode == .autoApply ? .orange : .secondary)
             }
         }
     }
@@ -620,6 +649,7 @@ struct LoopInsights_SettingsView: View {
                         Text(personality.displayName).tag(personality)
                     }
                 }
+                .pickerStyle(.menu)
                 .onChange(of: selectedPersonality) { newValue in
                     LoopInsights_FeatureFlags.aiPersonality = newValue
                 }
@@ -651,18 +681,11 @@ struct LoopInsights_SettingsView: View {
                     Spacer()
                     Text("\(LoopInsights_SuggestionStore.shared.allRecords.count)")
                         .foregroundColor(.secondary)
-                }
-
-                Button(role: .destructive, action: { showingClearHistory = true }) {
-                    HStack {
+                    Button(role: .destructive, action: { showingClearHistory = true }) {
                         Image(systemName: "trash")
-                        Text(NSLocalizedString("Clear Suggestion History", comment: "LoopInsights clear history button"))
+                            .font(.caption)
                     }
                 }
-
-                Text(NSLocalizedString("All past AI suggestions, including applied, dismissed, and expired records.", comment: "LoopInsights history description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
         }
     }
@@ -891,11 +914,32 @@ private class LoopInsights_DashboardContainer: ObservableObject {
     @Published var renderTrigger: Int = 0
     private var vmCancellable: AnyCancellable?
 
-    func initializeIfNeeded() {
+    func initializeIfNeeded(dataStoresProvider: (() -> Any?)? = nil) {
         guard viewModel == nil else { return }
 
-        let provider = LoopInsights_TestDataProvider()
-        let coordinator = LoopInsights_Coordinator(testDataProvider: provider)
+        let coordinator: LoopInsights_Coordinator
+
+        // Developer mode: test data takes priority
+        if let testCoordinator = LoopInsights_Coordinator.withTestDataIfAvailable() {
+            coordinator = testCoordinator
+        }
+        // Real data stores from Loop (cast from type-erased tuple)
+        else if let any = dataStoresProvider?(),
+                let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, LoopInsightsSettingsWriter) {
+            coordinator = LoopInsights_Coordinator(
+                glucoseStore: stores.0,
+                doseStore: stores.1,
+                carbStore: stores.2,
+                settingsProvider: stores.3,
+                settingsWriter: stores.4
+            )
+        }
+        // Fallback: test data provider (simulator with no real stores)
+        else {
+            let provider = LoopInsights_TestDataProvider()
+            coordinator = LoopInsights_Coordinator(testDataProvider: provider)
+        }
+
         let vm = LoopInsights_DashboardViewModel(coordinator: coordinator)
 
         // Forward ViewModel's objectWillChange → increment renderTrigger
@@ -918,6 +962,7 @@ private class LoopInsights_DashboardContainer: ObservableObject {
 /// the DashboardView once the ViewModel is ready.
 private struct LoopInsights_TestDashboardWrapper: View {
     @StateObject private var container = LoopInsights_DashboardContainer()
+    var dataStoresProvider: (() -> Any?)?
 
     var body: some View {
         Group {
@@ -929,14 +974,14 @@ private struct LoopInsights_TestDashboardWrapper: View {
             } else {
                 VStack(spacing: 12) {
                     ProgressView()
-                    Text(NSLocalizedString("Loading test data...", comment: "LoopInsights loading test data"))
+                    Text(NSLocalizedString("Loading data...", comment: "LoopInsights loading data"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
         }
         .onAppear {
-            container.initializeIfNeeded()
+            container.initializeIfNeeded(dataStoresProvider: dataStoresProvider)
         }
     }
 }

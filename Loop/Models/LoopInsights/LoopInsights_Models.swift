@@ -14,9 +14,9 @@ import HealthKit
 
 /// The three therapy settings LoopInsights can analyze and suggest changes for
 enum LoopInsightsSettingType: String, Codable, CaseIterable, Identifiable {
+    case basalRate = "basal_rate"
     case carbRatio = "carb_ratio"
     case insulinSensitivity = "insulin_sensitivity"
-    case basalRate = "basal_rate"
 
     var id: String { rawValue }
 
@@ -376,7 +376,7 @@ struct LoopInsightsAIProviderConfiguration: Codable, Equatable {
         apiKeyHeader: String? = nil,
         apiKeyPrefix: String? = nil,
         maxTokens: Int = 4096,
-        temperature: Double = 0.3,
+        temperature: Double = 0.0,
         apiVersion: String? = nil,
         organizationID: String? = nil,
         apiKey: String = ""
@@ -671,4 +671,17 @@ enum LoopInsightsError: Error, LocalizedError {
             return String(format: NSLocalizedString("Keychain Error: %@", comment: "LoopInsights error: keychain"), message)
         }
     }
+}
+
+// MARK: - Debug Log
+
+/// Captures the full prompt/response exchange for a single AI analysis call.
+/// Used in developer mode to inspect what's being sent to the AI provider.
+struct LoopInsightsDebugLog: Identifiable {
+    let id = UUID()
+    let timestamp: Date
+    let settingType: LoopInsightsSettingType
+    let systemPrompt: String
+    let userPrompt: String
+    let rawResponse: String
 }

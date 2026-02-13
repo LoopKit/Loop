@@ -1640,6 +1640,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceManager,
+                                          loopInsightsDataStores: { [weak self] in
+                                              guard let dm = self?.deviceManager else { return nil }
+                                              let writer: LoopInsightsSettingsWriter = { mutate in
+                                                  dm.loopManager.mutateSettings(mutate)
+                                              }
+                                              return (dm.glucoseStore, dm.doseStore, dm.carbStore, dm.settingsManager, writer)
+                                          },
                                           delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)

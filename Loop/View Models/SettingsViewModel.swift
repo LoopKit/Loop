@@ -79,6 +79,7 @@ public class SettingsViewModel: ObservableObject {
     let sensitivityOverridesEnabled: Bool
     let isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
+    let loopInsightsDataStores: () -> Any?
 
     @Published var isClosedLoopAllowed: Bool
 
@@ -120,6 +121,7 @@ public class SettingsViewModel: ObservableObject {
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
+                loopInsightsDataStores: @escaping () -> Any? = { nil },
                 delegate: SettingsViewModelDelegate?
     ) {
         self.alertPermissionsChecker = alertPermissionsChecker
@@ -137,6 +139,7 @@ public class SettingsViewModel: ObservableObject {
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
+        self.loopInsightsDataStores = loopInsightsDataStores
         self.delegate = delegate
 
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)

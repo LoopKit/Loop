@@ -15,6 +15,7 @@ struct LoopInsights_SuggestionDetailView: View {
     let record: LoopInsightsSuggestionRecord
     let onApply: () -> Void
     let onDismiss: () -> Void
+    var onRevert: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
 
@@ -144,14 +145,16 @@ struct LoopInsights_SuggestionDetailView: View {
             }) {
                 HStack {
                     Spacer()
-                    Image(systemName: "checkmark.circle.fill")
                     Text(NSLocalizedString("Apply Suggestion", comment: "LoopInsights apply suggestion button"))
                         .fontWeight(.semibold)
                     Spacer()
                 }
-                .padding(.vertical, 4)
+                .foregroundColor(.white)
+                .padding(.vertical, 10)
+                .background(Color.green)
+                .cornerRadius(10)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.plain)
             .listRowBackground(Color.clear)
 
             Button(action: {
@@ -160,13 +163,16 @@ struct LoopInsights_SuggestionDetailView: View {
             }) {
                 HStack {
                     Spacer()
-                    Image(systemName: "xmark.circle")
                     Text(NSLocalizedString("Dismiss Suggestion", comment: "LoopInsights dismiss suggestion button"))
+                        .fontWeight(.semibold)
                     Spacer()
                 }
-                .padding(.vertical, 4)
+                .foregroundColor(.white)
+                .padding(.vertical, 10)
+                .background(Color.red)
+                .cornerRadius(10)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
             .listRowBackground(Color.clear)
         }
     }
@@ -196,6 +202,27 @@ struct LoopInsights_SuggestionDetailView: View {
                     Text(mode.displayName)
                         .fontWeight(.medium)
                 }
+            }
+
+            // Revert button for applied/auto-applied records
+            if record.status.isRevertable, record.settingsSnapshotBefore != nil, let onRevert = onRevert {
+                Button(action: {
+                    onRevert()
+                    dismiss()
+                }) {
+                    HStack {
+                        Spacer()
+                        Text(NSLocalizedString("Revert Changes", comment: "LoopInsights revert button"))
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .background(Color.orange)
+                    .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                .listRowBackground(Color.clear)
             }
         }
     }
@@ -227,6 +254,7 @@ struct LoopInsights_SuggestionDetailView: View {
         case .applied: return .green
         case .dismissed: return .gray
         case .autoApplied: return .orange
+        case .reverted: return .purple
         }
     }
 

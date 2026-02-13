@@ -80,6 +80,13 @@ final class LoopInsights_SuggestionStore: ObservableObject {
         saveRecords()
     }
 
+    /// Mark a record as reverted (settings restored to pre-apply state)
+    func markReverted(recordID: UUID) {
+        guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
+        records[index].markReverted()
+        saveRecords()
+    }
+
     /// Dismiss all pending records
     func dismissAllPending() {
         for index in records.indices where records[index].status == .pending {

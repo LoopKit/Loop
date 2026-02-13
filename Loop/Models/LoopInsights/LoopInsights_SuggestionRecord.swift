@@ -16,6 +16,7 @@ enum LoopInsightsSuggestionStatus: String, Codable {
     case applied = "applied"
     case dismissed = "dismissed"
     case autoApplied = "auto_applied"
+    case reverted = "reverted"
 
     var displayName: String {
         switch self {
@@ -27,6 +28,8 @@ enum LoopInsightsSuggestionStatus: String, Codable {
             return NSLocalizedString("Dismissed", comment: "LoopInsights suggestion status: user dismissed")
         case .autoApplied:
             return NSLocalizedString("Auto-Applied", comment: "LoopInsights suggestion status: automatically applied")
+        case .reverted:
+            return NSLocalizedString("Reverted", comment: "LoopInsights suggestion status: changes reverted")
         }
     }
 
@@ -36,13 +39,21 @@ enum LoopInsightsSuggestionStatus: String, Codable {
         case .applied: return "checkmark.circle.fill"
         case .dismissed: return "xmark.circle"
         case .autoApplied: return "bolt.circle.fill"
+        case .reverted: return "arrow.uturn.backward.circle.fill"
         }
     }
 
     var isResolved: Bool {
         switch self {
         case .pending: return false
-        case .applied, .dismissed, .autoApplied: return true
+        case .applied, .dismissed, .autoApplied, .reverted: return true
+        }
+    }
+
+    var isRevertable: Bool {
+        switch self {
+        case .applied, .autoApplied: return true
+        case .pending, .dismissed, .reverted: return false
         }
     }
 }
@@ -81,6 +92,11 @@ struct LoopInsightsSuggestionRecord: Codable, Identifiable, Equatable {
 
     mutating func markDismissed() {
         self.status = .dismissed
+        self.resolvedAt = Date()
+    }
+
+    mutating func markReverted() {
+        self.status = .reverted
         self.resolvedAt = Date()
     }
 

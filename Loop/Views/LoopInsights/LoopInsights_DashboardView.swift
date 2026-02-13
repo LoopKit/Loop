@@ -25,6 +25,7 @@ struct LoopInsights_DashboardView: View {
     var renderTrigger: Int = 0
 
     @State private var showingHistory = false
+    @State private var showingDebugLog = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
 
@@ -43,6 +44,13 @@ struct LoopInsights_DashboardView: View {
         )
     }
 
+    private var showingPreFillEditorBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.showingPreFillEditor },
+            set: { viewModel.showingPreFillEditor = $0 }
+        )
+    }
+
     var body: some View {
         List {
             headerSection
@@ -53,6 +61,15 @@ struct LoopInsights_DashboardView: View {
             }
             if viewModel.overallAssessment != nil {
                 assessmentSection
+            }
+            if viewModel.settingsScoreBreakdown != nil {
+                settingsScoreSection
+            }
+            if viewModel.settingsAlreadyOptimal && !viewModel.pendingSuggestions.isEmpty {
+                optimalWarningBanner
+            }
+            if !viewModel.autoAppliedSuggestions.isEmpty {
+                autoAppliedSection
             }
             if !viewModel.pendingSuggestions.isEmpty {
                 pendingSuggestionsSection
@@ -71,7 +88,17 @@ struct LoopInsights_DashboardView: View {
         }
         .sheet(isPresented: $showingHistory) {
             NavigationView {
-                LoopInsights_SuggestionHistoryView(store: viewModel.suggestionStore)
+                LoopInsights_SuggestionHistoryView(
+                    store: viewModel.suggestionStore,
+                    onRevert: { record in viewModel.revertSuggestion(record) }
+                )
+            }
+        }
+        .sheet(isPresented: $showingDebugLog) {
+            if let log = viewModel.lastDebugLog {
+                NavigationView {
+                    LoopInsights_DebugLogView(log: log)
+                }
             }
         }
         .alert(
@@ -89,6 +116,21 @@ struct LoopInsights_DashboardView: View {
                 "This will modify your therapy settings. You are responsible for reviewing and verifying all changes. AI suggestions are advisory and may not be appropriate for your situation. Consult your healthcare provider for significant therapy adjustments.",
                 comment: "LoopInsights apply disclaimer"
             ))
+        }
+        .sheet(isPresented: showingPreFillEditorBinding) {
+            if let record = viewModel.recordToApply {
+                NavigationView {
+                    LoopInsights_PreFillEditorView(
+                        record: record,
+                        onApply: { editedBlocks in
+                            viewModel.applyEditedSuggestion(editedBlocks: editedBlocks)
+                        },
+                        onCancel: {
+                            viewModel.cancelApply()
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -126,8 +168,13 @@ struct LoopInsights_DashboardView: View {
     // MARK: - Current Settings
 
     private var currentSettingsSection: some View {
-        Section(header: Text(NSLocalizedString("Pick from your Current Therapy Settings", comment: "LoopInsights current settings header"))) {
+        Section(header: Text(NSLocalizedString("Tap one of your current Therapy Settings", comment: "LoopInsights current settings header"))) {
             if let snapshot = viewModel.currentSnapshot {
+                settingRow(
+                    type: .basalRate,
+                    items: snapshot.basalRateItems,
+                    unit: "U/hr"
+                )
                 settingRow(
                     type: .carbRatio,
                     items: snapshot.carbRatioItems,
@@ -137,11 +184,6 @@ struct LoopInsights_DashboardView: View {
                     type: .insulinSensitivity,
                     items: snapshot.insulinSensitivityItems,
                     unit: "mg/dL/U"
-                )
-                settingRow(
-                    type: .basalRate,
-                    items: snapshot.basalRateItems,
-                    unit: "U/hr"
                 )
                 HStack(spacing: 16) {
                     legendDot(color: .gray, label: NSLocalizedString("Not analyzed", comment: "LoopInsights legend: not analyzed"))
@@ -205,34 +247,70 @@ struct LoopInsights_DashboardView: View {
                 }
             }
 
-            // Analyze button
-            Button(action: { viewModel.runAnalysis() }) {
-                HStack {
-                    Spacer()
-                    if viewModel.isAnalyzing {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                            .tint(.white)
-                            .padding(.trailing, 8)
-                        Text(NSLocalizedString("Analyzing...", comment: "LoopInsights analyzing"))
-                    } else {
-                        Image(systemName: "sparkles")
-                        Text(String(format: NSLocalizedString("Analyze %@", comment: "LoopInsights analyze button"), viewModel.focusSettingType.abbreviation))
+            // Analyze buttons
+            HStack(spacing: 10) {
+                Button(action: { viewModel.runAnalysis() }) {
+                    HStack {
+                        Spacer()
+                        if viewModel.isAnalyzing && !viewModel.isAnalyzingAll {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .tint(.white)
+                                .scaleEffect(0.8)
+                            Text(NSLocalizedString("Analyzing...", comment: "LoopInsights analyzing"))
+                        } else {
+                            Image(systemName: "sparkles")
+                            Text(String(format: NSLocalizedString("Analyze %@", comment: "LoopInsights analyze button"), viewModel.focusSettingType.abbreviation))
+                        }
+                        Spacer()
                     }
-                    Spacer()
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .background(
+                        (viewModel.isAnalyzing || !LoopInsights_SecureStorage.hasAPIKey)
+                            ? Color(red: 0.2, green: 0.6, blue: 0.2)
+                            : Color.green
+                    )
+                    .cornerRadius(10)
                 }
-                .font(.body.weight(.medium))
-                .foregroundColor(.white)
-                .padding(.vertical, 10)
-                .background(
-                    (viewModel.isAnalyzing || !LoopInsights_SecureStorage.hasAPIKey)
-                        ? Color(red: 0.2, green: 0.6, blue: 0.2)
-                        : Color.green
-                )
-                .cornerRadius(10)
+                .buttonStyle(.plain)
+                .disabled(viewModel.isAnalyzing || !LoopInsights_SecureStorage.hasAPIKey)
+
+                Text(NSLocalizedString("or", comment: "LoopInsights or separator"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Button(action: { viewModel.runAnalysisAll() }) {
+                    HStack {
+                        Spacer()
+                        if viewModel.isAnalyzingAll {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .tint(.white)
+                                .scaleEffect(0.8)
+                            Text(NSLocalizedString("Analyzing...", comment: "LoopInsights analyzing all"))
+                        } else {
+                            Image(systemName: "sparkles")
+                            Text(NSLocalizedString("Analyze All", comment: "LoopInsights analyze all button"))
+                        }
+                        Spacer()
+                    }
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .background(
+                        (viewModel.isAnalyzing || !LoopInsights_SecureStorage.hasAPIKey)
+                            ? Color(red: 0.2, green: 0.6, blue: 0.2)
+                            : Color.green
+                    )
+                    .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                .disabled(viewModel.isAnalyzing || !LoopInsights_SecureStorage.hasAPIKey)
             }
-            .buttonStyle(.plain)
-            .disabled(viewModel.isAnalyzing || !LoopInsights_SecureStorage.hasAPIKey)
+            .listRowSeparator(.hidden, edges: .top)
+            .padding(.bottom, 8)
 
             if !LoopInsights_SecureStorage.hasAPIKey {
                 Text(NSLocalizedString("Configure your AI API key in LoopInsights Settings to begin analysis.", comment: "LoopInsights no API key message"))
@@ -244,6 +322,44 @@ struct LoopInsights_DashboardView: View {
                 Text(error.localizedDescription)
                     .font(.caption)
                     .foregroundColor(.red)
+            }
+        }
+    }
+
+    // MARK: - Auto-Applied Notification
+
+    private var autoAppliedSection: some View {
+        Section(header: Text(NSLocalizedString("AUTO-APPLIED CHANGES", comment: "LoopInsights auto-applied section header"))) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .foregroundColor(.green)
+                    Text(NSLocalizedString("The following changes were automatically applied to your therapy settings:", comment: "LoopInsights auto-applied description"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                ForEach(viewModel.autoAppliedSuggestions) { suggestion in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(suggestion.settingType.displayName)
+                            .font(.subheadline.weight(.semibold))
+                        ForEach(suggestion.timeBlocks) { block in
+                            HStack {
+                                Text(block.timeRangeFormatted)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(String(format: "%.1f → %.1f", block.currentValue, block.proposedValue))
+                                    .font(.caption.weight(.medium))
+                                    .foregroundColor(.green)
+                                Text(String(format: "(%+.0f%%)", block.changePercent))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
             }
         }
     }
@@ -261,15 +377,19 @@ struct LoopInsights_DashboardView: View {
         }) {
             ForEach(viewModel.pendingSuggestions) { record in
                 suggestionCard(record)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 4)
             }
             HStack(spacing: 16) {
                 Text(NSLocalizedString("Confidence Level:", comment: "LoopInsights confidence legend label"))
-                legendDot(color: .blue, label: NSLocalizedString("High", comment: "LoopInsights legend: high"))
+                legendDot(color: .green, label: NSLocalizedString("High", comment: "LoopInsights legend: high"))
                 legendDot(color: .orange, label: NSLocalizedString("Medium", comment: "LoopInsights legend: medium"))
                 legendDot(color: .yellow, label: NSLocalizedString("Low", comment: "LoopInsights legend: low"))
             }
             .font(.caption2)
             .foregroundColor(.secondary)
+            .listRowSeparator(.hidden, edges: .top)
         }
     }
 
@@ -307,18 +427,26 @@ struct LoopInsights_DashboardView: View {
                 // Quick action buttons
                 HStack {
                     Button(action: { viewModel.applySuggestion(record) }) {
-                        Label(NSLocalizedString("Apply", comment: "LoopInsights apply"), systemImage: "checkmark.circle")
-                            .font(.caption)
+                        Text(NSLocalizedString("Apply", comment: "LoopInsights apply"))
+                            .font(.caption.weight(.medium))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.green)
+                            .cornerRadius(8)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
+                    .buttonStyle(.plain)
 
                     Button(action: { viewModel.dismissSuggestion(record) }) {
-                        Label(NSLocalizedString("Dismiss", comment: "LoopInsights dismiss"), systemImage: "xmark.circle")
-                            .font(.caption)
+                        Text(NSLocalizedString("Dismiss", comment: "LoopInsights dismiss"))
+                            .font(.caption.weight(.medium))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.red)
+                            .cornerRadius(8)
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    .buttonStyle(.plain)
 
                     Spacer()
 
@@ -336,21 +464,25 @@ struct LoopInsights_DashboardView: View {
     }
 
     private func confidenceBadge(_ confidence: LoopInsightsConfidence) -> some View {
-        Text(confidence.displayName)
-            .font(.caption2)
-            .fontWeight(.medium)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(confidenceColor(confidence).opacity(0.2))
-            .foregroundColor(confidenceColor(confidence))
-            .cornerRadius(4)
+        HStack(spacing: 4) {
+            Circle()
+                .fill(confidenceColor(confidence))
+                .frame(width: 8, height: 8)
+            Text(confidence.displayName)
+                .font(.caption.weight(.bold))
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(confidenceColor(confidence).opacity(0.15))
+        .foregroundColor(confidenceColor(confidence))
+        .cornerRadius(6)
     }
 
     private func confidenceColor(_ confidence: LoopInsightsConfidence) -> Color {
         switch confidence {
         case .low: return .yellow
         case .medium: return .orange
-        case .high: return .blue
+        case .high: return .green
         }
     }
 
@@ -410,7 +542,7 @@ struct LoopInsights_DashboardView: View {
             }
 
             if let stats = viewModel.aggregatedStats {
-                statsRow(label: NSLocalizedString("Time in Range", comment: "LoopInsights TIR label"),
+                statsRow(label: NSLocalizedString("Time in Range (70-180)", comment: "LoopInsights TIR label with range"),
                          value: String(format: "%.1f%%", stats.glucoseStats.timeInRange))
                 statsRow(label: NSLocalizedString("Average Glucose", comment: "LoopInsights avg glucose label"),
                          value: String(format: "%.0f mg/dL", stats.glucoseStats.averageGlucose))
@@ -418,7 +550,7 @@ struct LoopInsights_DashboardView: View {
                          value: String(format: "%.1f%%", stats.glucoseStats.gmi))
                 statsRow(label: NSLocalizedString("Total Daily Dose", comment: "LoopInsights TDD label"),
                          value: String(format: "%.1f U/day", stats.insulinStats.totalDailyDose))
-                statsRow(label: NSLocalizedString("CV", comment: "LoopInsights CV label"),
+                statsRow(label: NSLocalizedString("Coefficient of Variation", comment: "LoopInsights coefficient of variation label"),
                          value: String(format: "%.1f%%", stats.glucoseStats.coefficientOfVariation))
             }
         }
@@ -436,6 +568,99 @@ struct LoopInsights_DashboardView: View {
         }
     }
 
+    // MARK: - Settings Score
+
+    private var settingsScoreSection: some View {
+        Section(header: Text(NSLocalizedString("SETTINGS SCORE", comment: "LoopInsights settings score header"))) {
+            if let breakdown = viewModel.settingsScoreBreakdown {
+                HStack(alignment: .center) {
+                    // Grade circle
+                    ZStack {
+                        Circle()
+                            .stroke(breakdown.gradeColor.opacity(0.3), lineWidth: 6)
+                            .frame(width: 60, height: 60)
+                        Circle()
+                            .trim(from: 0, to: Double(breakdown.total) / 100)
+                            .stroke(breakdown.gradeColor, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                            .frame(width: 60, height: 60)
+                            .rotationEffect(.degrees(-90))
+                        VStack(spacing: 0) {
+                            Text(breakdown.grade)
+                                .font(.title2.weight(.bold))
+                                .foregroundColor(breakdown.gradeColor)
+                            Text("\(breakdown.total)")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.trailing, 12)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(breakdown.summary)
+                            .font(.subheadline.weight(.medium))
+                        VStack(alignment: .leading, spacing: 2) {
+                            scoreBar(label: "TIR", score: breakdown.tirScore, max: 40, color: breakdown.tirScore >= 32 ? .green : .orange)
+                            scoreBar(label: "Safety", score: breakdown.belowRangeScore, max: 25, color: breakdown.belowRangeScore >= 20 ? .green : .red)
+                            scoreBar(label: "Stability", score: breakdown.cvScore, max: 20, color: breakdown.cvScore >= 15 ? .green : .orange)
+                            scoreBar(label: "GMI", score: breakdown.gmiScore, max: 15, color: breakdown.gmiScore >= 12 ? .green : .orange)
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+
+    private func scoreBar(label: String, score: Int, max: Int, color: Color) -> some View {
+        HStack {
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .fixedSize()
+                .frame(width: 52, alignment: .leading)
+                .padding(.trailing, 6)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.secondary.opacity(0.2))
+                        .frame(height: 4)
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(color)
+                        .frame(width: geo.size.width * CGFloat(score) / CGFloat(max), height: 4)
+                }
+            }
+            .frame(height: 4)
+            Text("\(score)/\(max)")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .fixedSize()
+                .frame(width: 36, alignment: .trailing)
+                .padding(.leading, 6)
+        }
+    }
+
+    // MARK: - Optimal Warning
+
+    private var optimalWarningBanner: some View {
+        Section {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.shield.fill")
+                    .foregroundColor(.green)
+                    .font(.title3)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(NSLocalizedString("Your settings are already performing well", comment: "LoopInsights optimal warning title"))
+                        .font(.subheadline.weight(.medium))
+                    Text(NSLocalizedString("TIR >85% with low hypoglycemia risk. The suggestions below are minor refinements — apply with caution.", comment: "LoopInsights optimal warning detail"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
     // MARK: - Navigation
 
     private var navigationSection: some View {
@@ -448,6 +673,21 @@ struct LoopInsights_DashboardView: View {
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                }
+            }
+
+            // Debug log (developer mode only)
+            if LoopInsights_FeatureFlags.developerModeEnabled, viewModel.lastDebugLog != nil {
+                Button(action: { showingDebugLog = true }) {
+                    HStack {
+                        Image(systemName: "doc.text.magnifyingglass")
+                        Text(NSLocalizedString("View Last Analysis Log", comment: "LoopInsights debug log button"))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .foregroundColor(.orange)
                 }
             }
         }
@@ -472,6 +712,243 @@ struct LoopInsights_DashboardView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .short
+        return formatter
+    }()
+}
+
+// MARK: - Pre-Fill Editor View
+
+/// Editor that shows proposed therapy changes with editable values.
+/// The user can adjust proposed values before applying.
+struct LoopInsights_PreFillEditorView: View {
+    let record: LoopInsightsSuggestionRecord
+    let onApply: ([LoopInsightsTimeBlock]) -> Void
+    let onCancel: () -> Void
+
+    @State private var editedValues: [UUID: Double] = [:]
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        List {
+            Section(header: Text(record.suggestion.settingType.displayName)) {
+                Text(NSLocalizedString("Review and adjust the proposed values below before applying.", comment: "LoopInsights pre-fill editor instructions"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Section(header: Text(NSLocalizedString("PROPOSED CHANGES", comment: "LoopInsights pre-fill editor changes header"))) {
+                ForEach(record.suggestion.timeBlocks) { block in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(block.timeRangeFormatted)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(NSLocalizedString("Current", comment: "LoopInsights pre-fill current label"))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                Text(String(format: "%.1f", block.currentValue))
+                                    .font(.body.weight(.medium))
+                            }
+
+                            Image(systemName: "arrow.right")
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 8)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(NSLocalizedString("Proposed", comment: "LoopInsights pre-fill proposed label"))
+                                    .font(.caption2)
+                                    .foregroundColor(.green)
+                                TextField(
+                                    "",
+                                    value: Binding(
+                                        get: { editedValues[block.id] ?? block.proposedValue },
+                                        set: { editedValues[block.id] = $0 }
+                                    ),
+                                    format: .number
+                                )
+                                .font(.body.weight(.semibold))
+                                .foregroundColor(.green)
+                                .textFieldStyle(.roundedBorder)
+                                .keyboardType(.decimalPad)
+                                .frame(width: 80)
+                            }
+
+                            Spacer()
+
+                            let editedVal = editedValues[block.id] ?? block.proposedValue
+                            let pct = block.currentValue != 0
+                                ? ((editedVal - block.currentValue) / block.currentValue) * 100
+                                : 0
+                            Text(String(format: "(%+.0f%%)", pct))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+
+            Section(header: Text(NSLocalizedString("AI REASONING", comment: "LoopInsights pre-fill reasoning header"))) {
+                Text(record.suggestion.reasoning)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Section {
+                Button(action: {
+                    let editedBlocks = record.suggestion.timeBlocks.map { block in
+                        LoopInsightsTimeBlock(
+                            startTime: block.startTime,
+                            endTime: block.endTime,
+                            currentValue: block.currentValue,
+                            proposedValue: editedValues[block.id] ?? block.proposedValue
+                        )
+                    }
+                    onApply(editedBlocks)
+                    dismiss()
+                }) {
+                    HStack {
+                        Spacer()
+                        Text(NSLocalizedString("Apply Changes", comment: "LoopInsights pre-fill apply button"))
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .background(Color.green)
+                    .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                .listRowBackground(Color.clear)
+
+                Button(action: {
+                    onCancel()
+                    dismiss()
+                }) {
+                    HStack {
+                        Spacer()
+                        Text(NSLocalizedString("Cancel", comment: "LoopInsights pre-fill cancel button"))
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .background(Color.red)
+                    .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                .listRowBackground(Color.clear)
+            }
+        }
+        .navigationTitle(NSLocalizedString("Review Changes", comment: "LoopInsights pre-fill editor title"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Debug Log View
+
+/// Developer-only view that shows the full AI prompt/response exchange.
+/// Useful for diagnosing unexpected AI behavior.
+struct LoopInsights_DebugLogView: View {
+    let log: LoopInsightsDebugLog
+    @State private var copied = false
+    @Environment(\.dismiss) private var dismiss
+
+    private var fullLogText: String {
+        """
+        === LoopInsights Analysis Debug Log ===
+        Setting Type: \(log.settingType.displayName)
+        Timestamp: \(Self.dateFormatter.string(from: log.timestamp))
+
+        === SYSTEM PROMPT ===
+        \(log.systemPrompt)
+
+        === USER PROMPT ===
+        \(log.userPrompt)
+
+        === RAW AI RESPONSE ===
+        \(log.rawResponse)
+        """
+    }
+
+    var body: some View {
+        List {
+            Section {
+                Button(action: {
+                    UIPasteboard.general.string = fullLogText
+                    copied = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
+                }) {
+                    HStack {
+                        Spacer()
+                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                        Text(copied ? "Copied" : "Copy Full Log")
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .background(copied ? Color.green : Color.orange)
+                    .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                .listRowBackground(Color.clear)
+            }
+
+            Section(header: Text("Analysis Info")) {
+                HStack {
+                    Text("Setting Type")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(log.settingType.displayName)
+                }
+                HStack {
+                    Text("Timestamp")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(Self.dateFormatter.string(from: log.timestamp))
+                        .font(.caption)
+                }
+            }
+
+            Section(header: Text("System Prompt")) {
+                Text(log.systemPrompt)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .textSelection(.enabled)
+            }
+
+            Section(header: Text("User Prompt")) {
+                Text(log.userPrompt)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .textSelection(.enabled)
+            }
+
+            Section(header: Text("Raw AI Response")) {
+                Text(log.rawResponse)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .textSelection(.enabled)
+            }
+        }
+        .navigationTitle("Analysis Debug Log")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(NSLocalizedString("Done", comment: "Done button")) {
+                    dismiss()
+                }
+            }
+        }
+    }
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .medium
         return formatter
     }()
 }

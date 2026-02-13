@@ -13,7 +13,10 @@ import SwiftUI
 struct LoopInsights_SuggestionHistoryView: View {
 
     @ObservedObject var store: LoopInsights_SuggestionStore
+    let onRevert: ((LoopInsightsSuggestionRecord) -> Bool)?
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
+    @State private var showingRevertConfirmation = false
+    @State private var recordToRevert: LoopInsightsSuggestionRecord?
     @State private var filterStatus: FilterOption = .all
     @Environment(\.dismiss) private var dismiss
 
@@ -22,6 +25,7 @@ struct LoopInsights_SuggestionHistoryView: View {
         case applied = "Applied"
         case dismissed = "Dismissed"
         case autoApplied = "Auto-Applied"
+        case reverted = "Reverted"
 
         var id: String { rawValue }
     }
@@ -49,9 +53,32 @@ struct LoopInsights_SuggestionHistoryView: View {
                 LoopInsights_SuggestionDetailView(
                     record: record,
                     onApply: {},
-                    onDismiss: {}
+                    onDismiss: {},
+                    onRevert: record.status.isRevertable && record.settingsSnapshotBefore != nil ? {
+                        recordToRevert = record
+                        showingRevertConfirmation = true
+                    } : nil
                 )
             }
+        }
+        .alert(
+            NSLocalizedString("Revert Changes?", comment: "LoopInsights revert confirmation title"),
+            isPresented: $showingRevertConfirmation
+        ) {
+            Button(NSLocalizedString("Revert", comment: "LoopInsights revert button"), role: .destructive) {
+                if let record = recordToRevert {
+                    let _ = onRevert?(record)
+                }
+                recordToRevert = nil
+            }
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {
+                recordToRevert = nil
+            }
+        } message: {
+            Text(NSLocalizedString(
+                "This will restore your therapy settings to the values they had before this suggestion was applied.",
+                comment: "LoopInsights revert confirmation message"
+            ))
         }
     }
 
@@ -115,6 +142,19 @@ struct LoopInsights_SuggestionHistoryView: View {
 
             Spacer()
 
+            // Revert button for applied/auto-applied records
+            if record.status.isRevertable, record.settingsSnapshotBefore != nil, onRevert != nil {
+                Button(action: {
+                    recordToRevert = record
+                    showingRevertConfirmation = true
+                }) {
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+                .buttonStyle(.plain)
+            }
+
             Image(systemName: "chevron.right")
                 .font(.caption2)
                 .foregroundColor(.secondary)
@@ -155,6 +195,8 @@ struct LoopInsights_SuggestionHistoryView: View {
             return allRecords.filter { $0.status == .dismissed }
         case .autoApplied:
             return allRecords.filter { $0.status == .autoApplied }
+        case .reverted:
+            return allRecords.filter { $0.status == .reverted }
         }
     }
 
@@ -164,6 +206,7 @@ struct LoopInsights_SuggestionHistoryView: View {
         case .applied: return .green
         case .dismissed: return .gray
         case .autoApplied: return .orange
+        case .reverted: return .purple
         }
     }
 

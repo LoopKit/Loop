@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 /// Builds structured prompts from aggregated data and current therapy settings,
 /// sends them to the AI provider via AIServiceAdapter, and parses the structured
@@ -18,6 +19,10 @@ final class LoopInsights_AIAnalysis {
 
     private let serviceAdapter: LoopInsights_AIServiceAdapter
 
+    /// Debug log of the most recent analysis (developer mode only).
+    /// Contains the system prompt, user prompt, and raw AI response.
+    @Published private(set) var lastDebugLog: LoopInsightsDebugLog?
+
     init(serviceAdapter: LoopInsights_AIServiceAdapter = .shared) {
         self.serviceAdapter = serviceAdapter
     }
@@ -28,12 +33,23 @@ final class LoopInsights_AIAnalysis {
     func analyze(
         settingType: LoopInsightsSettingType,
         currentSettings: LoopInsightsTherapySnapshot,
-        stats: LoopInsightsAggregatedStats
+        stats: LoopInsightsAggregatedStats,
+        recentChanges: [LoopInsightsSuggestionRecord] = []
     ) async throws -> LoopInsightsAnalysisResponse {
         let systemPrompt = buildSystemPrompt()
-        let userPrompt = buildUserPrompt(settingType: settingType, settings: currentSettings, stats: stats)
+        let userPrompt = buildUserPrompt(settingType: settingType, settings: currentSettings, stats: stats, recentChanges: recentChanges)
 
+        let timestamp = Date()
         let rawResponse = try await serviceAdapter.sendPrompt(systemPrompt, userPrompt: userPrompt)
+
+        // Capture debug log
+        lastDebugLog = LoopInsightsDebugLog(
+            timestamp: timestamp,
+            settingType: settingType,
+            systemPrompt: systemPrompt,
+            userPrompt: userPrompt,
+            rawResponse: rawResponse
+        )
 
         return try parseResponse(rawResponse: rawResponse, settingType: settingType, period: stats.period)
     }
@@ -43,27 +59,81 @@ final class LoopInsights_AIAnalysis {
     private func buildSystemPrompt() -> String {
         let personality = LoopInsights_FeatureFlags.aiPersonality
         return """
-        You are LoopInsights, an AI therapy settings advisor for people using insulin pump therapy \
-        with automated insulin delivery (AID) systems. Your role is to analyze glucose, insulin, and \
-        carbohydrate data to suggest therapy setting adjustments that improve Time in Range (TIR).
+        You are LoopInsights, an expert-level automated insulin delivery (AID) therapy settings analyst. \
+        You think like a top endocrinologist who specializes in insulin pump optimization. You analyze \
+        glucose, insulin, and carbohydrate data to determine whether therapy settings need adjustment.
 
         \(personality.promptInstruction)
 
-        CRITICAL SAFETY RULES:
-        1. Never suggest changes larger than 20% from current values in a single adjustment.
-        2. Always suggest conservative changes — it's better to under-adjust than over-adjust.
-        3. Focus on one setting type at a time (Carb Ratio OR Insulin Sensitivity OR Basal Rate).
-        4. Consider time-of-day patterns — different hours may need different adjustments.
-        5. Flag any concerning patterns (frequent lows, extreme highs) prominently.
-        6. Your suggestions are advisory only — the user makes the final decision.
+        YOUR MANDATE: Be analytically rigorous. Every recommendation must be backed by specific numbers \
+        from the data. If the data does not justify a change, return zero suggestions — that is the \
+        correct response when settings are working. You are not here to impress or people-please. \
+        You are here to find real problems and propose precise fixes.
 
-        TUNING ORDER (one at a time):
-        1. Carb Ratio (CR) — adjust first, as incorrect CR causes the most post-meal variability
-        2. Insulin Sensitivity Factor (ISF) — adjust second, affects correction doses
-        3. Basal Rate (BR) — adjust last, as basal changes affect the entire 24-hour profile
+        CLINICAL REASONING FRAMEWORK — How AID settings interact:
+        - BASAL RATE: Controls glucose during fasting periods. Analyze overnight (12AM-6AM) and \
+          between-meal trends. In AID systems, the algorithm adjusts delivery around this baseline. \
+          KEY SIGNAL: If the AID algorithm is constantly delivering corrections (high correction bolus \
+          count) or if fasting glucose drifts up/down consistently, basal is likely wrong. \
+          A basal/bolus split far from 50/50 is a strong signal — high bolus % (>60%) with many \
+          corrections usually means basal is too low and the algorithm is compensating with corrections.
+        - INSULIN SENSITIVITY FACTOR (ISF): Controls how much 1 unit of insulin lowers glucose. \
+          Analyze correction effectiveness — are corrections bringing glucose back to target? \
+          KEY SIGNAL: If glucose stays high for hours after meals/corrections (hourly averages >150 \
+          during 10AM-2PM or 7PM-10PM), ISF may be too high (insulin isn't strong enough). If glucose \
+          drops too fast or goes low after corrections, ISF may be too low.
+        - CARB RATIO (CR): Controls how much insulin is given per gram of carbs at meals. \
+          Analyze post-meal glucose behavior. KEY SIGNAL: If glucose spikes >50 mg/dL after meals \
+          (compare pre-meal hour to 1-2 hours post-meal in hourly averages), CR may be too high \
+          (not enough insulin per carb). If glucose drops after meals, CR may be too low.
+
+        PATTERN RECOGNITION — What to look for:
+        1. TIME-OF-DAY PATTERNS: Compare hourly averages across the day. Different periods may need \
+           different settings. Common periods: overnight (12AM-6AM), morning (6AM-10AM), midday \
+           (10AM-2PM), afternoon (2PM-6PM), evening (6PM-10PM), late night (10PM-12AM).
+        2. AID ALGORITHM WORKLOAD: High correction bolus count means the algorithm is fighting the \
+           settings. Calculate corrections per day (count / days in period). >3/day is elevated, \
+           >5/day is a red flag that settings need work.
+        3. BASAL/BOLUS RATIO: In well-tuned AID, expect roughly 40-60% basal. <30% basal almost \
+           always means basal rate is too low. >70% basal may mean basal is too high.
+        4. GLUCOSE TRENDS: Look at the slope of hourly averages. A consistent rise over 3+ hours \
+           during fasting = basal too low. A consistent drop = basal too high.
+        5. HIGH TIR DOES NOT MEAN PERFECT SETTINGS: If TIR is 90% but the algorithm is issuing 7 \
+           corrections/day to achieve that, the settings are suboptimal — the algorithm is doing \
+           heavy lifting to compensate. Better settings = same TIR with fewer corrections.
+
+        CROSS-SETTING INTERACTIONS — You are given all three settings for context:
+        - BR and ISF are tightly coupled: if basal is too low, the algorithm compensates with \
+          frequent corrections using ISF. Changing ISF without considering BR can mask the real problem.
+        - CR and ISF interact at meals: CR determines the meal bolus, ISF determines corrections. \
+          If post-meal highs are followed by effective corrections, the issue is CR (not enough up front), \
+          not ISF. If corrections aren't bringing glucose down, the issue is ISF.
+        - The CR/ISF ratio should be roughly consistent across time periods. Large deviations suggest \
+          one of the two needs adjustment.
+        - When analyzing one setting, note in your reasoning if a different setting might be the \
+          actual root cause. For example: "Midday highs could be addressed by lowering CR or ISF, \
+          but the high correction count suggests basal is the primary issue."
+        - Only propose changes to the SPECIFIC setting being analyzed. Use cross-setting context \
+          to inform your reasoning and confidence level, not to change other settings.
+
+        DECISION CRITERIA — Only suggest a change when ALL of these apply:
+        1. The data shows a clear, sustained pattern (not noise or one-off events).
+        2. The pattern is attributable to the specific setting type being analyzed.
+        3. The proposed change would meaningfully improve outcomes based on the data.
+        4. The change does not increase hypoglycemia risk.
+
+        IMPORTANT: Good TIR (>80%) with high algorithm workload (many corrections, skewed basal/bolus \
+        ratio) STILL warrants setting changes. The goal is good TIR with MINIMAL algorithm intervention. \
+        Only skip recommendations when TIR is good AND corrections are low AND basal/bolus is balanced.
+
+        SAFETY RULES:
+        1. Never suggest changes larger than 20% from current values.
+        2. Conservative changes only — under-adjust rather than over-adjust.
+        3. If time below range is >4%, prioritize safety (raise ISF or lower basal before anything else).
+        4. Suggestions are advisory only — the user and their healthcare provider make final decisions.
 
         RESPONSE FORMAT:
-        You MUST respond with valid JSON in this exact structure:
+        Respond with valid JSON in this exact structure:
         {
             "suggestions": [
                 {
@@ -75,16 +145,19 @@ final class LoopInsights_AIAnalysis {
                             "proposed_value": 11.0
                         }
                     ],
-                    "reasoning": "Explanation of why this change is recommended",
+                    "reasoning": "Specific data-backed explanation citing exact numbers that justify this change",
                     "confidence": "low|medium|high"
                 }
             ],
-            "overall_assessment": "Brief summary of the analysis findings",
+            "overall_assessment": "Factual summary including: algorithm workload assessment, time-of-day pattern summary, and what the basal/bolus ratio tells us",
             "next_recommended_focus": "carb_ratio|insulin_sensitivity|basal_rate|null"
         }
 
+        If NO changes are warranted, return: { "suggestions": [], "overall_assessment": "...", "next_recommended_focus": null }
+        Only return empty suggestions when TIR is good AND algorithm workload is low AND no time-of-day patterns exist.
+
         Time blocks use seconds since midnight (0 = 12:00 AM, 21600 = 6:00 AM, 43200 = 12:00 PM, etc.)
-        Only suggest changes for time blocks where adjustment is warranted. If a time block is fine, omit it.
+        Combine all time blocks for the same setting type into a single suggestion. Do NOT return separate suggestions for the same setting — use multiple time_blocks within one suggestion.
         """
     }
 
@@ -93,31 +166,52 @@ final class LoopInsights_AIAnalysis {
     private func buildUserPrompt(
         settingType: LoopInsightsSettingType,
         settings: LoopInsightsTherapySnapshot,
-        stats: LoopInsightsAggregatedStats
+        stats: LoopInsightsAggregatedStats,
+        recentChanges: [LoopInsightsSuggestionRecord] = []
     ) -> String {
-        var prompt = "Analyze my \(settingType.displayName) settings and suggest adjustments.\n\n"
+        var prompt = "Evaluate whether my \(settingType.displayName) settings need adjustment.\n\n"
 
-        // Current settings
-        prompt += "## Current \(settingType.displayName) Schedule\n"
-        let items: [LoopInsightsTherapySnapshot.LoopInsightsScheduleItem]
-        let unit: String
-
-        switch settingType {
-        case .carbRatio:
-            items = settings.carbRatioItems
-            unit = "g/U"
-        case .insulinSensitivity:
-            items = settings.insulinSensitivityItems
-            unit = "mg/dL per U"
-        case .basalRate:
-            items = settings.basalRateItems
-            unit = "U/hr"
+        // Include recent LoopInsights-applied changes so the AI knows data predates current settings
+        let relevantChanges = recentChanges.filter {
+            ($0.status == .applied || $0.status == .autoApplied) &&
+            $0.suggestion.settingType == settingType
+        }
+        if !relevantChanges.isEmpty {
+            prompt += "## IMPORTANT: Recent Settings Changes\n"
+            prompt += "The following changes were JUST applied to these settings based on a previous analysis of this same data. "
+            prompt += "The historical data below was collected BEFORE these changes took effect. "
+            prompt += "Do NOT suggest further changes to values that were already adjusted — the data does not yet reflect the new settings.\n\n"
+            for change in relevantChanges {
+                let ago = Int(Date().timeIntervalSince(change.resolvedAt ?? change.createdAt) / 60)
+                prompt += "- Applied \(ago) minute(s) ago: "
+                for block in change.suggestion.timeBlocks {
+                    prompt += "\(formatTime(block.startTime))–\(formatTime(block.endTime)): \(String(format: "%.1f", block.currentValue)) → \(String(format: "%.1f", block.proposedValue)). "
+                }
+                prompt += "\n"
+            }
+            prompt += "\n"
         }
 
-        for item in items {
-            let timeStr = formatTime(item.startTime)
-            prompt += "- \(timeStr): \(String(format: "%.1f", item.value)) \(unit)\n"
+        // All three therapy settings — AI needs full context to reason about interactions
+        prompt += "## All Current Therapy Settings\n"
+        prompt += "You are analyzing **\(settingType.displayName)** specifically, but consider how all three settings interact.\n\n"
+
+        prompt += "### Basal Rate Schedule\(settingType == .basalRate ? " ← ANALYZING THIS" : "")\n"
+        for item in settings.basalRateItems {
+            prompt += "- \(formatTime(item.startTime)): \(String(format: "%.2f", item.value)) U/hr\n"
         }
+
+        prompt += "\n### Insulin Sensitivity Factor Schedule\(settingType == .insulinSensitivity ? " ← ANALYZING THIS" : "")\n"
+        for item in settings.insulinSensitivityItems {
+            prompt += "- \(formatTime(item.startTime)): \(String(format: "%.1f", item.value)) mg/dL per U\n"
+        }
+
+        prompt += "\n### Carb Ratio Schedule\(settingType == .carbRatio ? " ← ANALYZING THIS" : "")\n"
+        for item in settings.carbRatioItems {
+            prompt += "- \(formatTime(item.startTime)): \(String(format: "%.1f", item.value)) g/U\n"
+        }
+
+        prompt += "\n"
 
         // Glucose stats
         prompt += "\n## Glucose Statistics (\(stats.period.displayName))\n"
@@ -144,13 +238,59 @@ final class LoopInsights_AIAnalysis {
         prompt += "- Basal: \(String(format: "%.0f", stats.insulinStats.basalPercentage))% / Bolus: \(String(format: "%.0f", stats.insulinStats.bolusPercentage))%\n"
         prompt += "- Correction Boluses: \(stats.insulinStats.correctionBolusCount) in period\n"
 
+        // Computed: corrections per day and basal/bolus assessment
+        let days = max(1, stats.period.rawValue)
+        let correctionsPerDay = Double(stats.insulinStats.correctionBolusCount) / Double(days)
+        prompt += "- Corrections per Day: \(String(format: "%.1f", correctionsPerDay))\n"
+        if correctionsPerDay > 5 {
+            prompt += "  ** RED FLAG: >5 corrections/day means the AID algorithm is heavily compensating for suboptimal settings **\n"
+        } else if correctionsPerDay > 3 {
+            prompt += "  ** ELEVATED: >3 corrections/day suggests the algorithm is working harder than ideal **\n"
+        }
+        if stats.insulinStats.basalPercentage < 30 {
+            prompt += "  ** RED FLAG: Basal is only \(String(format: "%.0f", stats.insulinStats.basalPercentage))% of TDD — strongly suggests basal rate is too low **\n"
+        } else if stats.insulinStats.basalPercentage < 40 {
+            prompt += "  ** NOTE: Basal is \(String(format: "%.0f", stats.insulinStats.basalPercentage))% of TDD — lower than the ideal 40-60% range **\n"
+        }
+
         // Carb stats
         prompt += "\n## Carbohydrate Statistics\n"
         prompt += "- Average Daily Carbs: \(String(format: "%.0f", stats.carbStats.averageDailyCarbs)) g/day\n"
         prompt += "- Meals Logged: \(stats.carbStats.mealCount)\n"
         prompt += "- Average Carbs per Meal: \(String(format: "%.0f", stats.carbStats.averageCarbsPerMeal)) g\n"
 
-        prompt += "\nPlease analyze this data and suggest adjustments to my \(settingType.displayName) settings. "
+        // Computed: time-of-day glucose analysis
+        prompt += "\n## Time-of-Day Analysis (computed from hourly averages)\n"
+        let g = stats.glucoseStats
+        let periods: [(name: String, hours: ClosedRange<Int>)] = [
+            ("Overnight (12AM-6AM)", 0...5),
+            ("Morning (6AM-10AM)", 6...9),
+            ("Midday (10AM-2PM)", 10...13),
+            ("Afternoon (2PM-6PM)", 14...17),
+            ("Evening (6PM-10PM)", 18...21),
+            ("Late Night (10PM-12AM)", 22...23)
+        ]
+        for period in periods {
+            let hourlyValues = period.hours.compactMap { g.hourlyAverages[$0] }
+            guard !hourlyValues.isEmpty else { continue }
+            let avg = hourlyValues.reduce(0, +) / Double(hourlyValues.count)
+            let min = hourlyValues.min() ?? avg
+            let max = hourlyValues.max() ?? avg
+            let trend = (hourlyValues.last ?? avg) - (hourlyValues.first ?? avg)
+            prompt += "- \(period.name): avg \(String(format: "%.0f", avg)) mg/dL, "
+            prompt += "range \(String(format: "%.0f", min))-\(String(format: "%.0f", max)), "
+            prompt += "trend \(trend >= 0 ? "+" : "")\(String(format: "%.0f", trend)) mg/dL\n"
+            if avg > 150 {
+                prompt += "  ** ELEVATED: Average glucose in this period is above 150 mg/dL **\n"
+            }
+            if abs(trend) > 30 {
+                prompt += "  ** SIGNIFICANT DRIFT: \(trend > 0 ? "Rising" : "Falling") \(String(format: "%.0f", abs(trend))) mg/dL across this period **\n"
+            }
+        }
+
+        prompt += "\nAnalyze this data focusing specifically on \(settingType.displayName). "
+        prompt += "Use the time-of-day analysis and algorithm workload metrics to identify actionable patterns. "
+        prompt += "If the data clearly supports adjustments, propose them. If not, return empty suggestions. "
         prompt += "Respond with JSON only, no markdown formatting."
 
         return prompt
@@ -214,6 +354,10 @@ final class LoopInsights_AIAnalysis {
             suggestions.append(suggestion)
         }
 
+        // Merge multiple suggestions into one (all share the same setting type
+        // within a single analysis call, so separate entries are just LLM inconsistency)
+        let merged = mergeSuggestions(suggestions, settingType: settingType, period: period)
+
         let overallAssessment = json["overall_assessment"] as? String ?? "Analysis complete."
 
         var nextFocus: LoopInsightsSettingType? = nil
@@ -222,11 +366,39 @@ final class LoopInsights_AIAnalysis {
         }
 
         return LoopInsightsAnalysisResponse(
-            suggestions: suggestions,
+            suggestions: merged,
             overallAssessment: overallAssessment,
             nextRecommendedFocus: nextFocus,
             rawResponse: rawResponse
         )
+    }
+
+    // MARK: - Merge
+
+    /// Consolidate multiple suggestions (same setting type) into a single suggestion
+    /// with all time blocks combined. Takes the highest confidence and joins reasoning.
+    private func mergeSuggestions(
+        _ suggestions: [LoopInsightsSuggestion],
+        settingType: LoopInsightsSettingType,
+        period: LoopInsightsAnalysisPeriod
+    ) -> [LoopInsightsSuggestion] {
+        guard suggestions.count > 1 else { return suggestions }
+
+        let allBlocks = suggestions.flatMap { $0.timeBlocks }
+            .sorted { $0.startTime < $1.startTime }
+        let highestConfidence = suggestions.map { $0.confidence }.max() ?? .low
+        let combinedReasoning = suggestions.map { $0.reasoning }.joined(separator: " ")
+
+        let merged = LoopInsightsSuggestion(
+            id: UUID(),
+            settingType: settingType,
+            timeBlocks: allBlocks,
+            reasoning: combinedReasoning,
+            confidence: highestConfidence,
+            analysisPeriod: period,
+            createdAt: Date()
+        )
+        return [merged]
     }
 
     // MARK: - Helpers

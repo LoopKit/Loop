@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 import LoopKit
+import SwiftUI
 
 /// Main view model for the LoopInsights Dashboard. Orchestrates data aggregation,
 /// AI analysis, and suggestion state management.
@@ -20,6 +21,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
     /// Current analysis state
     @Published var isAnalyzing = false
+    @Published var isAnalyzingAll = false
     @Published var analysisError: LoopInsightsError?
     @Published var lastAnalysisDate: Date?
 
@@ -34,13 +36,14 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     @Published var pendingSuggestions: [LoopInsightsSuggestionRecord] = []
 
     /// Selected setting type for analysis focus
-    @Published var focusSettingType: LoopInsightsSettingType = .carbRatio
+    @Published var focusSettingType: LoopInsightsSettingType = .basalRate
 
     /// Analysis period
     @Published var analysisPeriod: LoopInsightsAnalysisPeriod
 
     /// Apply mode confirmation state
     @Published var showingApplyConfirmation = false
+    @Published var showingPreFillEditor = false
     @Published var recordToApply: LoopInsightsSuggestionRecord?
 
     /// Aggregated stats (for display)
@@ -52,6 +55,16 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
     /// Detected glucose/insulin patterns from aggregated data
     @Published var detectedPatterns: [LoopInsightsDetectedPattern] = []
+
+    /// Suggestions that were just auto-applied (for notification display)
+    @Published var autoAppliedSuggestions: [LoopInsightsSuggestion] = []
+
+    /// Settings score (0-100) based on objective metrics
+    @Published var settingsScore: Int?
+    @Published var settingsScoreBreakdown: SettingsScoreBreakdown?
+
+    /// Whether current metrics indicate settings are already performing well
+    @Published var settingsAlreadyOptimal: Bool = false
 
     // MARK: - Dependencies
 
@@ -96,6 +109,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
         isAnalyzing = true
         analysisError = nil
+        autoAppliedSuggestions = []
 
         Task { @MainActor in
             do {
@@ -103,20 +117,22 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 let stats = try await coordinator.dataAggregator.aggregateData(period: analysisPeriod)
                 self.aggregatedStats = stats
 
-                // Detect patterns from aggregated stats
-                self.detectedPatterns = Self.detectPatterns(from: stats)
-
                 // Capture current settings
                 let snapshot = try coordinator.captureCurrentSnapshot()
                 self.currentSnapshot = snapshot
 
-                // Run AI analysis
+                // Run AI analysis (include recent changes so AI knows data predates current settings)
+                let recentChanges = self.recentlyAppliedRecords()
                 let response = try await coordinator.aiAnalysis.analyze(
                     settingType: focusSettingType,
                     currentSettings: snapshot,
-                    stats: stats
+                    stats: stats,
+                    recentChanges: recentChanges
                 )
 
+                // Show patterns, score, and AI results together after analysis completes
+                self.detectedPatterns = Self.detectPatterns(from: stats)
+                self.updateSettingsScore()
                 self.analysisResponse = response
                 self.overallAssessment = response.overallAssessment
                 self.lastAnalysisDate = Date()
@@ -132,10 +148,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 // Add new suggestions as pending records
                 let _ = coordinator.suggestionStore.addSuggestions(response.suggestions)
 
-                // If next focus is recommended, update
-                if let nextFocus = response.nextRecommendedFocus {
-                    self.focusSettingType = nextFocus
-                }
+                // Note: nextRecommendedFocus from AI is intentionally ignored
+                // for single-analysis — keep focus on what the user selected.
 
                 // Auto-apply if developer mode + auto-apply enabled
                 if LoopInsights_FeatureFlags.developerModeEnabled &&
@@ -153,6 +167,73 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             } catch {
                 self.analysisError = .aiProviderError(error.localizedDescription)
                 self.isAnalyzing = false
+            }
+        }
+    }
+
+    /// Run AI analysis for all three setting types sequentially
+    func runAnalysisAll() {
+        guard !isAnalyzing else { return }
+
+        isAnalyzing = true
+        isAnalyzingAll = true
+        analysisError = nil
+        autoAppliedSuggestions = []
+
+        Task { @MainActor in
+            do {
+                // Aggregate data once for all analyses
+                let stats = try await coordinator.dataAggregator.aggregateData(period: analysisPeriod)
+                self.aggregatedStats = stats
+
+                let snapshot = try coordinator.captureCurrentSnapshot()
+                self.currentSnapshot = snapshot
+
+                // Analyze each setting type in tuning order: CR → ISF → BR
+                let recentChanges = self.recentlyAppliedRecords()
+                for settingType in LoopInsightsSettingType.allCases {
+                    let response = try await coordinator.aiAnalysis.analyze(
+                        settingType: settingType,
+                        currentSettings: snapshot,
+                        stats: stats,
+                        recentChanges: recentChanges
+                    )
+
+                    self.overallAssessment = response.overallAssessment
+                    self.analyzedSettingTypes.insert(settingType)
+
+                    // Dismiss existing pending suggestions for this type
+                    for record in pendingSuggestions where record.suggestion.settingType == settingType {
+                        coordinator.suggestionStore.markDismissed(recordID: record.id)
+                    }
+
+                    let _ = coordinator.suggestionStore.addSuggestions(response.suggestions)
+
+                    // Auto-apply if developer mode + auto-apply enabled
+                    if LoopInsights_FeatureFlags.developerModeEnabled &&
+                       LoopInsights_FeatureFlags.applyMode == .autoApply {
+                        for suggestion in response.suggestions where suggestion.confidence >= .high {
+                            await autoApplySuggestion(suggestion)
+                        }
+                    }
+                }
+
+                // Show patterns and score after all analyses complete
+                self.detectedPatterns = Self.detectPatterns(from: stats)
+                self.updateSettingsScore()
+
+                self.lastAnalysisDate = Date()
+                self.isAnalyzing = false
+                self.isAnalyzingAll = false
+
+            } catch let error as LoopInsightsError {
+                self.analysisError = error
+                self.isAnalyzing = false
+                self.isAnalyzingAll = false
+            } catch {
+                self.analysisError = .aiProviderError(error.localizedDescription)
+                self.isAnalyzing = false
+                self.isAnalyzingAll = false
             }
         }
     }
@@ -178,10 +259,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             showingApplyConfirmation = true
 
         case .preFill:
-            // Navigate to editor with pre-filled values
-            // For Phase 1, fall back to one-tap behavior with confirmation
+            // Open editor pre-filled with proposed values for user review
             recordToApply = record
-            showingApplyConfirmation = true
+            showingPreFillEditor = true
 
         case .autoApply:
             // This path is only available in developer mode
@@ -197,13 +277,16 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
         let snapshotBefore = try? coordinator.captureCurrentSnapshot()
 
-        // TODO: Phase 1 — implement actual settings write via SettingsManager
-        // For now, mark as applied and log
+        // Write the therapy settings changes to Loop
+        coordinator.applyTherapyChanges(suggestion: record.suggestion)
+
+        let snapshotAfter = try? coordinator.captureCurrentSnapshot()
+
         coordinator.suggestionStore.markApplied(
             recordID: record.id,
             mode: LoopInsights_FeatureFlags.applyMode,
             snapshotBefore: snapshotBefore,
-            snapshotAfter: nil
+            snapshotAfter: snapshotAfter
         )
 
         recordToApply = nil
@@ -215,6 +298,40 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     func cancelApply() {
         recordToApply = nil
         showingApplyConfirmation = false
+        showingPreFillEditor = false
+    }
+
+    /// Apply with user-edited values from the pre-fill editor
+    func applyEditedSuggestion(editedBlocks: [LoopInsightsTimeBlock]) {
+        guard let record = recordToApply else { return }
+
+        let snapshotBefore = try? coordinator.captureCurrentSnapshot()
+
+        // Build a modified suggestion with the user's edited values
+        let editedSuggestion = LoopInsightsSuggestion(
+            id: record.suggestion.id,
+            settingType: record.suggestion.settingType,
+            timeBlocks: editedBlocks,
+            reasoning: record.suggestion.reasoning,
+            confidence: record.suggestion.confidence,
+            analysisPeriod: record.suggestion.analysisPeriod,
+            createdAt: record.suggestion.createdAt
+        )
+
+        coordinator.applyTherapyChanges(suggestion: editedSuggestion)
+
+        let snapshotAfter = try? coordinator.captureCurrentSnapshot()
+
+        coordinator.suggestionStore.markApplied(
+            recordID: record.id,
+            mode: .preFill,
+            snapshotBefore: snapshotBefore,
+            snapshotAfter: snapshotAfter
+        )
+
+        recordToApply = nil
+        showingPreFillEditor = false
+        loadCurrentSettings()
     }
 
     /// Dismiss a suggestion
@@ -225,6 +342,24 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     /// Dismiss all pending suggestions
     func dismissAllPending() {
         coordinator.suggestionStore.dismissAllPending()
+    }
+
+    /// Revert a previously applied suggestion by restoring the pre-apply snapshot.
+    /// Returns true if the revert succeeded.
+    @discardableResult
+    func revertSuggestion(_ record: LoopInsightsSuggestionRecord) -> Bool {
+        guard record.status.isRevertable else { return false }
+        guard let snapshotBefore = record.settingsSnapshotBefore else {
+            print("[LoopInsights] Cannot revert: no pre-apply snapshot stored")
+            return false
+        }
+
+        let success = coordinator.revertToSnapshot(snapshotBefore)
+        if success {
+            coordinator.suggestionStore.markReverted(recordID: record.id)
+            loadCurrentSettings()
+        }
+        return success
     }
 
     /// Returns the analysis status for a setting type (used for color indicators)
@@ -244,23 +379,82 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
         LoopInsights_FeatureFlags.analysisPeriod = period
     }
 
+    /// The most recent AI debug log (system prompt, user prompt, raw response).
+    /// Available in developer mode for troubleshooting.
+    var lastDebugLog: LoopInsightsDebugLog? {
+        coordinator.aiAnalysis.lastDebugLog
+    }
+
+    /// Get records that were applied/auto-applied within the last 24 hours
+    /// AND whose changes are still reflected in the current settings.
+    /// If the user manually reverted settings, those records are excluded.
+    private func recentlyAppliedRecords() -> [LoopInsightsSuggestionRecord] {
+        let cutoff = Date().addingTimeInterval(-24 * 3600)
+        guard let currentSnapshot = currentSnapshot else { return [] }
+
+        return coordinator.suggestionStore.allRecords.filter { record in
+            guard (record.status == .applied || record.status == .autoApplied),
+                  (record.resolvedAt ?? record.createdAt) > cutoff else {
+                return false
+            }
+
+            // Verify the proposed changes are still in effect by comparing
+            // against current settings. If the user manually reverted, the
+            // current values won't match the proposed values.
+            let currentItems: [LoopInsightsTherapySnapshot.LoopInsightsScheduleItem]
+            switch record.suggestion.settingType {
+            case .carbRatio: currentItems = currentSnapshot.carbRatioItems
+            case .insulinSensitivity: currentItems = currentSnapshot.insulinSensitivityItems
+            case .basalRate: currentItems = currentSnapshot.basalRateItems
+            }
+
+            // Check if at least one proposed value still matches current settings
+            for block in record.suggestion.timeBlocks {
+                let currentValue = Self.effectiveValue(at: block.startTime, in: currentItems)
+                if abs(currentValue - block.proposedValue) < 0.01 {
+                    return true // This change is still active
+                }
+            }
+            return false // None of the proposed values match — change was reverted
+        }
+    }
+
+    /// Find the effective value at a given time in a schedule snapshot.
+    private static func effectiveValue(
+        at time: TimeInterval,
+        in items: [LoopInsightsTherapySnapshot.LoopInsightsScheduleItem]
+    ) -> Double {
+        let sorted = items.sorted { $0.startTime < $1.startTime }
+        var result = sorted.first?.value ?? 0
+        for item in sorted {
+            if item.startTime <= time {
+                result = item.value
+            } else {
+                break
+            }
+        }
+        return result
+    }
+
     // MARK: - Private
 
     private func autoApplySuggestion(_ suggestion: LoopInsightsSuggestion) async {
         let snapshotBefore = try? coordinator.captureCurrentSnapshot()
 
-        // TODO: Implement actual settings write
-        // For now, just log the auto-apply intent
-        print("[LoopInsights] Auto-applying suggestion: \(suggestion.summaryDescription)")
+        coordinator.applyTherapyChanges(suggestion: suggestion)
+
+        let snapshotAfter = try? coordinator.captureCurrentSnapshot()
 
         if let record = coordinator.suggestionStore.pendingRecords.first(where: { $0.suggestion.id == suggestion.id }) {
             coordinator.suggestionStore.markApplied(
                 recordID: record.id,
                 mode: .autoApply,
                 snapshotBefore: snapshotBefore,
-                snapshotAfter: nil
+                snapshotAfter: snapshotAfter
             )
         }
+
+        autoAppliedSuggestions.append(suggestion)
     }
 
     // MARK: - Pattern Detection
@@ -403,5 +597,96 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
         // Sort: high severity first
         return patterns.sorted { $0.severity > $1.severity }
+    }
+
+    // MARK: - Settings Score
+
+    struct SettingsScoreBreakdown {
+        let tirScore: Int        // 0-40 points
+        let belowRangeScore: Int // 0-25 points
+        let cvScore: Int         // 0-20 points
+        let gmiScore: Int        // 0-15 points
+        let total: Int           // 0-100
+
+        var grade: String {
+            switch total {
+            case 90...100: return "A"
+            case 80..<90: return "B"
+            case 70..<80: return "C"
+            case 60..<70: return "D"
+            default: return "F"
+            }
+        }
+
+        var gradeColor: Color {
+            switch total {
+            case 90...100: return .green
+            case 80..<90: return .blue
+            case 70..<80: return .yellow
+            case 60..<70: return .orange
+            default: return .red
+            }
+        }
+
+        var summary: String {
+            switch total {
+            case 90...100: return NSLocalizedString("Excellent — your settings are well-optimized", comment: "LoopInsights score: excellent")
+            case 80..<90: return NSLocalizedString("Good — minor improvements possible", comment: "LoopInsights score: good")
+            case 70..<80: return NSLocalizedString("Fair — some adjustments recommended", comment: "LoopInsights score: fair")
+            case 60..<70: return NSLocalizedString("Needs attention — settings adjustments likely needed", comment: "LoopInsights score: needs attention")
+            default: return NSLocalizedString("Review recommended — significant adjustments may help", comment: "LoopInsights score: review")
+            }
+        }
+    }
+
+    /// Calculate an objective settings score from glucose metrics.
+    /// Based on international consensus targets (ADA/AACE).
+    static func calculateSettingsScore(from stats: LoopInsightsAggregatedStats.GlucoseStats) -> SettingsScoreBreakdown {
+        // TIR score: 40 points max. Target >70% (ADA consensus)
+        // 90%+ = 40, 80% = 32, 70% = 24, <50% = 0
+        let tirScore: Int
+        if stats.timeInRange >= 90 { tirScore = 40 }
+        else if stats.timeInRange >= 70 { tirScore = Int(((stats.timeInRange - 50) / 40) * 40) }
+        else if stats.timeInRange >= 50 { tirScore = Int(((stats.timeInRange - 50) / 20) * 16) }
+        else { tirScore = 0 }
+
+        // Below range score: 25 points max. Target <4% (ADA consensus)
+        // <1% = 25, <4% = 20, <8% = 10, >8% = 0
+        let belowRangeScore: Int
+        if stats.timeBelowRange < 1 { belowRangeScore = 25 }
+        else if stats.timeBelowRange < 4 { belowRangeScore = 20 }
+        else if stats.timeBelowRange < 8 { belowRangeScore = Int(25 - (stats.timeBelowRange * 2.5)) }
+        else { belowRangeScore = 0 }
+
+        // CV score: 20 points max. Target <36% (ADA consensus)
+        // <30% = 20, <36% = 15, <45% = 8, >45% = 0
+        let cvScore: Int
+        if stats.coefficientOfVariation < 30 { cvScore = 20 }
+        else if stats.coefficientOfVariation < 36 { cvScore = 15 }
+        else if stats.coefficientOfVariation < 45 { cvScore = 8 }
+        else { cvScore = 0 }
+
+        // GMI score: 15 points max. Target <7.0% (ADA)
+        // <6.5% = 15, <7.0% = 12, <7.5% = 8, <8.0% = 4, >8% = 0
+        let gmiScore: Int
+        if stats.gmi < 6.5 { gmiScore = 15 }
+        else if stats.gmi < 7.0 { gmiScore = 12 }
+        else if stats.gmi < 7.5 { gmiScore = 8 }
+        else if stats.gmi < 8.0 { gmiScore = 4 }
+        else { gmiScore = 0 }
+
+        let total = max(0, min(100, tirScore + belowRangeScore + cvScore + gmiScore))
+        return SettingsScoreBreakdown(tirScore: tirScore, belowRangeScore: belowRangeScore, cvScore: cvScore, gmiScore: gmiScore, total: total)
+    }
+
+    /// Update the settings score from current aggregated stats.
+    func updateSettingsScore() {
+        guard let stats = aggregatedStats else { return }
+        let breakdown = Self.calculateSettingsScore(from: stats.glucoseStats)
+        settingsScore = breakdown.total
+        settingsScoreBreakdown = breakdown
+
+        // Flag if settings are already performing well
+        settingsAlreadyOptimal = stats.glucoseStats.timeInRange > 85 && stats.glucoseStats.timeBelowRange < 4
     }
 }

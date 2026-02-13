@@ -114,9 +114,11 @@ struct LoopInsights_FeatureFlags {
     static var aiConfiguration: LoopInsightsAIProviderConfiguration {
         get {
             guard let data = defaults.data(forKey: Keys.aiConfiguration),
-                  let config = try? JSONDecoder().decode(LoopInsightsAIProviderConfiguration.self, from: data) else {
+                  var config = try? JSONDecoder().decode(LoopInsightsAIProviderConfiguration.self, from: data) else {
                 return LoopInsightsAIProviderConfiguration()
             }
+            // Always enforce temperature=0 for deterministic analysis
+            config.temperature = 0.0
             return config
         }
         set {
