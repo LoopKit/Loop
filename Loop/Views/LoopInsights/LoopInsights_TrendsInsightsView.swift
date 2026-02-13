@@ -37,9 +37,16 @@ struct LoopInsights_TrendsInsightsView: View {
                 tabContent
             }
         }
-        .navigationTitle(NSLocalizedString("Trends & Insights", comment: "LoopInsights trends title"))
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.loadIfNeeded(coordinator: coordinator)
+        }
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(NSLocalizedString("Trends & Insights", comment: "LoopInsights trends title"))
+                    .font(.headline)
+                    .foregroundColor(.white)
+            }
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark.circle.fill")
@@ -55,9 +62,6 @@ struct LoopInsights_TrendsInsightsView: View {
                     .disabled(viewModel.isLoading)
                 }
             }
-        }
-        .onAppear {
-            viewModel.loadIfNeeded(coordinator: coordinator)
         }
         .sheet(isPresented: $showingChat) {
             NavigationView {
@@ -238,12 +242,12 @@ struct LoopInsights_TrendsInsightsView: View {
                     .foregroundColor(.purple.opacity(0.8))
                 Text(NSLocalizedString("Summary", comment: "LoopInsights trends summary header"))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.white)
             }
 
             Text(summary)
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.78))
+                .foregroundColor(.white)
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -262,7 +266,7 @@ struct LoopInsights_TrendsInsightsView: View {
                     .foregroundColor(.yellow.opacity(0.8))
                 Text(NSLocalizedString("Highlights", comment: "LoopInsights trends highlights header"))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.white)
             }
 
             ForEach(highlights.indices, id: \.self) { index in
@@ -271,7 +275,7 @@ struct LoopInsights_TrendsInsightsView: View {
                         .foregroundColor(.purple.opacity(0.8))
                     Text(highlights[index])
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.78))
+                        .foregroundColor(.white)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -354,18 +358,18 @@ struct LoopInsights_TrendsInsightsView: View {
                     .foregroundColor(.purple.opacity(0.8))
                 Text(title)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.white)
             }
 
             ForEach(rows.indices, id: \.self) { index in
                 HStack {
                     Text(rows[index].0)
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.55))
+                        .foregroundColor(.white.opacity(0.7))
                     Spacer()
                     Text(rows[index].1)
                         .font(.caption.weight(.medium))
-                        .foregroundColor(.white.opacity(0.85))
+                        .foregroundColor(.white)
                 }
                 if index < rows.count - 1 {
                     Divider()

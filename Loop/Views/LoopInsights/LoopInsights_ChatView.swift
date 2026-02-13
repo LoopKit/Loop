@@ -64,7 +64,7 @@ struct LoopInsights_ChatView: View {
             let appearance = UINavigationBarAppearance()
             appearance.configureWithOpaqueBackground()
             appearance.backgroundColor = UIColor(red: 0.06, green: 0.07, blue: 0.15, alpha: 1)
-            appearance.titleTextAttributes = [.foregroundColor: UIColor.white.withAlphaComponent(0.9)]
+            appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
             UINavigationBar.appearance().standardAppearance = appearance
             UINavigationBar.appearance().scrollEdgeAppearance = appearance
         }
@@ -78,7 +78,7 @@ struct LoopInsights_ChatView: View {
             ToolbarItem(placement: .principal) {
                 Text(NSLocalizedString("Ask LoopInsights", comment: "LoopInsights chat title"))
                     .font(.headline)
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.white)
             }
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
