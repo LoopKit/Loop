@@ -28,9 +28,12 @@ final class LoopInsights_DataAggregator {
     private weak var dataProvider: LoopInsightsDataProviderProtocol?
     private var healthKitManager: LoopInsights_HealthKitManager?
 
-    /// P3: Cached raw data from last aggregation, available for reuse (AGP chart, supplemental context)
+    /// P3: Cached raw data from last aggregation, available for reuse (supplemental context)
     private(set) var lastFetchedGlucoseSamples: [StoredGlucoseSample] = []
     private(set) var lastFetchedCarbEntries: [StoredCarbEntry] = []
+
+    /// Best available glucose data for AGP chart (Loop store or HealthKit, whichever has more samples for the period)
+    private(set) var lastGlucoseForAGP: [(date: Date, mgdl: Double)] = []
 
     init(dataProvider: LoopInsightsDataProviderProtocol, healthKitManager: LoopInsights_HealthKitManager? = nil) {
         self.dataProvider = dataProvider
@@ -59,9 +62,13 @@ final class LoopInsights_DataAggregator {
         let carbEntries = try await rawCarbs
         let resolvedBiometrics = try await biometrics
 
-        // P3: Store for external reuse (AGP chart, supplemental context)
+        // P3: Store for external reuse (supplemental context)
         self.lastFetchedGlucoseSamples = glucoseSamples
         self.lastFetchedCarbEntries = carbEntries
+        // Initial AGP cache from Loop store; computeGlucoseStats may upgrade to HealthKit if HK has more
+        self.lastGlucoseForAGP = glucoseSamples.map {
+            (date: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter))
+        }
 
         // Compute stats from pre-fetched data (each may still supplement with HK data)
         async let glucoseStatsTask = computeGlucoseStats(loopSamples: glucoseSamples, start: startDate, end: endDate)
@@ -91,9 +98,9 @@ final class LoopInsights_DataAggregator {
                     correctionBolusCount: resolvedInsulinStats.correctionBolusCount,
                     negativeBasalStats: negBasal
                 )
-                print("[LoopInsights] Phase 5: Negative basal stats computed — \(negBasal.suspensionCount) suspensions")
+                LoopInsights_FeatureFlags.log.debug("Phase 5: Negative basal stats computed — \(negBasal.suspensionCount) suspensions")
             } catch {
-                print("[LoopInsights] Phase 5: Negative basal stats error — \(error)")
+                LoopInsights_FeatureFlags.log.error("Phase 5: Negative basal stats error — \(error)")
             }
         }
 
@@ -114,7 +121,7 @@ final class LoopInsights_DataAggregator {
                     weight: bio.weight,
                     stressScore: stressScore
                 )
-                print("[LoopInsights] Phase 5: Stress score computed — \(String(format: "%.0f", stressScore!.overallScore))/100")
+                LoopInsights_FeatureFlags.log.debug("Phase 5: Stress score computed — \(String(format: "%.0f", stressScore!.overallScore))/100")
             }
         }
 
@@ -160,25 +167,25 @@ final class LoopInsights_DataAggregator {
 
     private func fetchBiometricsIfEnabled(start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.BiometricStats? {
         guard LoopInsights_FeatureFlags.biometricsEnabled else {
-            print("[LoopInsights] Biometrics: flag is disabled, skipping")
+            LoopInsights_FeatureFlags.log.debug("Biometrics: flag is disabled, skipping")
             return nil
         }
         // Use the injected manager, or create one on the fly. This handles the case
         // where the Coordinator was created before biometrics was enabled.
         let manager = healthKitManager ?? LoopInsights_HealthKitManager()
-        print("[LoopInsights] Biometrics: fetching from HealthKit (start: \(start), end: \(end))")
+        LoopInsights_FeatureFlags.log.debug("Biometrics: fetching from HealthKit (start: \(start), end: \(end))")
         do {
             let result = try await manager.fetchAllBiometrics(start: start, end: end)
-            print("[LoopInsights] Biometrics: HR=\(result.heartRate != nil), HRV=\(result.hrv != nil), steps=\(result.steps != nil), sleep=\(result.sleep != nil), energy=\(result.activeEnergy != nil), weight=\(result.weight != nil)")
+            LoopInsights_FeatureFlags.log.debug("Biometrics: HR=\(result.heartRate != nil), HRV=\(result.hrv != nil), steps=\(result.steps != nil), sleep=\(result.sleep != nil), energy=\(result.activeEnergy != nil), weight=\(result.weight != nil)")
             // If every sub-stat is nil, return nil so the AI prompt doesn't get an empty section
             if result.heartRate == nil && result.hrv == nil && result.steps == nil &&
                result.sleep == nil && result.activeEnergy == nil && result.weight == nil {
-                print("[LoopInsights] Biometrics: all sub-stats nil — no HealthKit data available")
+                LoopInsights_FeatureFlags.log.debug("Biometrics: all sub-stats nil — no HealthKit data available")
                 return nil
             }
             return result
         } catch {
-            print("[LoopInsights] Biometrics: fetch error — \(error)")
+            LoopInsights_FeatureFlags.log.error("Biometrics: fetch error — \(error)")
             return nil
         }
     }
@@ -193,14 +200,16 @@ final class LoopInsights_DataAggregator {
             do {
                 let hkGlucose = try await hkManager.fetchGlucoseSamples(start: start, end: end)
                 if hkGlucose.count > loopSamples.count {
-                    print("[LoopInsights] HealthKit glucose: \(hkGlucose.count) samples vs Loop store \(loopSamples.count) — using HealthKit data")
+                    LoopInsights_FeatureFlags.log.debug("HealthKit glucose: \(hkGlucose.count) samples vs Loop store \(loopSamples.count) — using HealthKit data")
+                    let hkValues = hkGlucose.map { (date: $0.date, mgdl: $0.mgdl) }
+                    self.lastGlucoseForAGP = hkValues
                     return computeGlucoseStatsFromValues(
-                        values: hkGlucose.map { (date: $0.date, mgdl: $0.mgdl) },
+                        values: hkValues,
                         start: start, end: end
                     )
                 }
             } catch {
-                print("[LoopInsights] HealthKit glucose fetch error (continuing with Loop store data): \(error)")
+                LoopInsights_FeatureFlags.log.error("HealthKit glucose fetch error (continuing with Loop store data): \(error)")
             }
         }
 
@@ -319,11 +328,11 @@ final class LoopInsights_DataAggregator {
             do {
                 let hkInsulin = try await hkManager.fetchInsulinDelivery(start: start, end: end)
                 if hkInsulin.count > loopDoses.count {
-                    print("[LoopInsights] HealthKit insulin: \(hkInsulin.count) entries vs Loop store \(loopDoses.count) — using HealthKit data")
+                    LoopInsights_FeatureFlags.log.debug("HealthKit insulin: \(hkInsulin.count) entries vs Loop store \(loopDoses.count) — using HealthKit data")
                     return computeInsulinStatsFromHK(hkInsulin, start: start, end: end)
                 }
             } catch {
-                print("[LoopInsights] HealthKit insulin fetch error (continuing with Loop store data): \(error)")
+                LoopInsights_FeatureFlags.log.error("HealthKit insulin fetch error (continuing with Loop store data): \(error)")
             }
         }
 
@@ -429,11 +438,11 @@ final class LoopInsights_DataAggregator {
             do {
                 let hkCarbs = try await hkManager.fetchCarbEntries(start: start, end: end)
                 if hkCarbs.count > loopEntries.count {
-                    print("[LoopInsights] HealthKit carbs: \(hkCarbs.count) entries vs Loop store \(loopEntries.count) — using HealthKit data")
+                    LoopInsights_FeatureFlags.log.debug("HealthKit carbs: \(hkCarbs.count) entries vs Loop store \(loopEntries.count) — using HealthKit data")
                     return computeCarbStatsFromHK(hkCarbs, start: start, end: end)
                 }
             } catch {
-                print("[LoopInsights] HealthKit carbs fetch error (continuing with Loop store data): \(error)")
+                LoopInsights_FeatureFlags.log.error("HealthKit carbs fetch error (continuing with Loop store data): \(error)")
             }
         }
 

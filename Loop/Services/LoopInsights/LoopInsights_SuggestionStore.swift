@@ -118,7 +118,7 @@ final class LoopInsights_SuggestionStore: ObservableObject {
         do {
             records = try decoder.decode([LoopInsightsSuggestionRecord].self, from: data)
         } catch {
-            print("[LoopInsights] Failed to decode suggestion history: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to decode suggestion history: \(error)")
             records = []
         }
     }
@@ -128,7 +128,7 @@ final class LoopInsights_SuggestionStore: ObservableObject {
             let data = try encoder.encode(records)
             defaults.set(data, forKey: Self.storageKey)
         } catch {
-            print("[LoopInsights] Failed to encode suggestion history: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to encode suggestion history: \(error)")
         }
     }
 }

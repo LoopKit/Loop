@@ -83,7 +83,7 @@ final class LoopInsights_FoodResponseAnalyzer {
 
                 // P4: Binary search for pre-meal window (30 min before to meal time)
                 let preMealStart = mealDate.addingTimeInterval(-1800)
-                let preStartIdx = binarySearchFirstIndex(in: sortedDates, afterOrAt: preMealStart)
+                let preStartIdx = sortedDates.loopInsights_firstIndex(afterOrAt: preMealStart) { $0 }
                 var preMealValues: [Double] = []
                 for i in preStartIdx..<sortedDates.count {
                     if sortedDates[i] > mealDate { break }
@@ -94,7 +94,7 @@ final class LoopInsights_FoodResponseAnalyzer {
 
                 // P4: Binary search for post-meal window (0-4h after meal)
                 let postMealEnd = mealDate.addingTimeInterval(4 * 3600)
-                let postStartIdx = binarySearchFirstIndex(in: sortedDates, afterOrAt: mealDate)
+                let postStartIdx = sortedDates.loopInsights_firstIndex(afterOrAt: mealDate) { $0 }
                 var postValues: [Double] = []
                 var postDates: [Date] = []
                 for i in postStartIdx..<sortedDates.count {
@@ -201,7 +201,7 @@ final class LoopInsights_FoodResponseAnalyzer {
 
             // P4: Binary search for pre-meal glucose window
             let preMealStart = mealDate.addingTimeInterval(-1800)
-            let preIdx = binarySearchFirstIndex(in: sortedDates, afterOrAt: preMealStart)
+            let preIdx = sortedDates.loopInsights_firstIndex(afterOrAt: preMealStart) { $0 }
             var lastPreMealValue: Double?
             for i in preIdx..<sortedDates.count {
                 if sortedDates[i] > mealDate { break }
@@ -211,7 +211,7 @@ final class LoopInsights_FoodResponseAnalyzer {
 
             // P4: Binary search for post-meal glucose (0-4h)
             let postEnd = mealDate.addingTimeInterval(4 * 3600)
-            let postIdx = binarySearchFirstIndex(in: sortedDates, afterOrAt: mealDate)
+            let postIdx = sortedDates.loopInsights_firstIndex(afterOrAt: mealDate) { $0 }
             var postValues: [Double] = []
             var postDates: [Date] = []
             for i in postIdx..<sortedDates.count {
@@ -259,22 +259,6 @@ final class LoopInsights_FoodResponseAnalyzer {
         }
 
         return events
-    }
-
-    // MARK: - Binary Search Helper
-
-    /// P4: Binary search for first index in a sorted date array at or after `date`.
-    private static func binarySearchFirstIndex(in dates: [Date], afterOrAt date: Date) -> Int {
-        var lo = 0, hi = dates.count
-        while lo < hi {
-            let mid = (lo + hi) / 2
-            if dates[mid] < date {
-                lo = mid + 1
-            } else {
-                hi = mid
-            }
-        }
-        return lo
     }
 
     // MARK: - Prompt Context

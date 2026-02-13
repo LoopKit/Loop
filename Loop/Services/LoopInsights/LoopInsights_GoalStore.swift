@@ -324,7 +324,7 @@ final class LoopInsights_GoalStore: ObservableObject {
         do {
             goals = try decoder.decode([LoopInsightsGoal].self, from: data)
         } catch {
-            print("[LoopInsights] Failed to decode goals: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to decode goals: \(error)")
             goals = []
         }
     }
@@ -334,7 +334,7 @@ final class LoopInsights_GoalStore: ObservableObject {
             let data = try encoder.encode(goals)
             defaults.set(data, forKey: Self.goalsKey)
         } catch {
-            print("[LoopInsights] Failed to encode goals: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to encode goals: \(error)")
         }
     }
 
@@ -346,7 +346,7 @@ final class LoopInsights_GoalStore: ObservableObject {
         do {
             reflections = try decoder.decode([LoopInsightsReflection].self, from: data)
         } catch {
-            print("[LoopInsights] Failed to decode reflections: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to decode reflections: \(error)")
             reflections = []
         }
     }
@@ -356,7 +356,7 @@ final class LoopInsights_GoalStore: ObservableObject {
             let data = try encoder.encode(reflections)
             defaults.set(data, forKey: Self.reflectionsKey)
         } catch {
-            print("[LoopInsights] Failed to encode reflections: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to encode reflections: \(error)")
         }
     }
 
@@ -368,7 +368,7 @@ final class LoopInsights_GoalStore: ObservableObject {
         do {
             cachedPatterns = try decoder.decode([LoopInsightsCachedPattern].self, from: data)
         } catch {
-            print("[LoopInsights] Failed to decode cached patterns: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to decode cached patterns: \(error)")
             cachedPatterns = []
         }
     }
@@ -378,7 +378,7 @@ final class LoopInsights_GoalStore: ObservableObject {
             let data = try encoder.encode(cachedPatterns)
             defaults.set(data, forKey: Self.patternsKey)
         } catch {
-            print("[LoopInsights] Failed to encode cached patterns: \(error)")
+            LoopInsights_FeatureFlags.log.error("Failed to encode cached patterns: \(error)")
         }
     }
 }

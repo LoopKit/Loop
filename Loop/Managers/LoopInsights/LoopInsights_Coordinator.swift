@@ -95,11 +95,11 @@ final class LoopInsights_Coordinator: ObservableObject {
 
         let provider = LoopInsights_TestDataProvider()
         guard provider.hasTestData else {
-            print("[LoopInsights] Test data mode enabled but no fixtures found")
+            LoopInsights_FeatureFlags.log.info("Test data mode enabled but no fixtures found")
             return nil
         }
 
-        print("[LoopInsights] Using test data: \(provider.dataSummary)")
+        LoopInsights_FeatureFlags.log.info("Using test data: \(provider.dataSummary)")
         return LoopInsights_Coordinator(testDataProvider: provider)
     }
 
@@ -108,7 +108,7 @@ final class LoopInsights_Coordinator: ObservableObject {
     /// Start background monitoring if enabled and using real stores (not test data).
     func startBackgroundMonitoring() {
         guard dataProviderBridge != nil else {
-            print("[LoopInsights] Skipping background monitor — test data mode")
+            LoopInsights_FeatureFlags.log.debug("Skipping background monitor — test data mode")
             return
         }
         backgroundMonitor.start()
@@ -138,7 +138,8 @@ final class LoopInsights_Coordinator: ObservableObject {
         // P3: Use pre-fetched glucose, fall back to bridge only if not provided
         var resolvedGlucose: [StoredGlucoseSample]? = glucoseSamples
         if resolvedGlucose == nil, let bridge = dataProviderBridge {
-            resolvedGlucose = try? await bridge.getGlucoseSamples(start: start, end: end)
+            do { resolvedGlucose = try await bridge.getGlucoseSamples(start: start, end: end) }
+            catch { LoopInsights_FeatureFlags.log.error("Supplemental context: glucose fetch failed: \(error)") }
         }
 
         // Circadian + Dawn Phenomenon + Negative Basal + Stress
@@ -171,7 +172,8 @@ final class LoopInsights_Coordinator: ObservableObject {
             // P3: Use pre-fetched carbs, fall back to bridge only if not provided
             var resolvedCarbs: [StoredCarbEntry]? = carbEntries
             if resolvedCarbs == nil, let bridge = dataProviderBridge {
-                resolvedCarbs = try? await bridge.getCarbEntries(start: start, end: end)
+                do { resolvedCarbs = try await bridge.getCarbEntries(start: start, end: end) }
+                catch { LoopInsights_FeatureFlags.log.error("Supplemental context: carbs fetch failed: \(error)") }
             }
             if let carbs = resolvedCarbs, let glucSamples = resolvedGlucose {
                 let patterns = LoopInsights_FoodResponseAnalyzer.analyzeFoodResponses(
@@ -224,7 +226,7 @@ final class LoopInsights_Coordinator: ObservableObject {
     @discardableResult
     func applyTherapyChanges(suggestion: LoopInsightsSuggestion) -> Bool {
         guard let writer = settingsWriter else {
-            print("[LoopInsights] Cannot apply: no settings writer available (test data mode?)")
+            LoopInsights_FeatureFlags.log.error("Cannot apply: no settings writer available (test data mode?)")
             return false
         }
 
@@ -256,7 +258,7 @@ final class LoopInsights_Coordinator: ObservableObject {
             }
         }
 
-        print("[LoopInsights] Applied \(suggestion.settingType.displayName) changes: \(blocks.count) time block(s)")
+        LoopInsights_FeatureFlags.log.info("Applied \(suggestion.settingType.displayName) changes: \(blocks.count) time block(s)")
         return true
     }
 
@@ -266,7 +268,7 @@ final class LoopInsights_Coordinator: ObservableObject {
     @discardableResult
     func revertToSnapshot(_ snapshot: LoopInsightsTherapySnapshot) -> Bool {
         guard let writer = settingsWriter else {
-            print("[LoopInsights] Cannot revert: no settings writer available")
+            LoopInsights_FeatureFlags.log.error("Cannot revert: no settings writer available")
             return false
         }
 
@@ -305,7 +307,7 @@ final class LoopInsights_Coordinator: ObservableObject {
             }
         }
 
-        print("[LoopInsights] Reverted settings to previous snapshot")
+        LoopInsights_FeatureFlags.log.info("Reverted settings to previous snapshot")
         return true
     }
 

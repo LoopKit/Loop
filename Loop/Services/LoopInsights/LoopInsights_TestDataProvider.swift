@@ -131,9 +131,9 @@ final class LoopInsights_TestDataProvider: LoopInsightsDataProviderProtocol {
         if let data = Self.loadFixtureData(for: FixtureFile.glucose) {
             do {
                 glucoseSamples = try decoder.decode([StoredGlucoseSample].self, from: data)
-                print("[LoopInsights TestData] Loaded \(glucoseSamples.count) glucose samples")
+                LoopInsights_FeatureFlags.log.debug("TestData: Loaded \(self.glucoseSamples.count) glucose samples")
             } catch {
-                print("[LoopInsights TestData] Failed to decode glucose: \(error)")
+                LoopInsights_FeatureFlags.log.error("TestData: Failed to decode glucose: \(error)")
             }
         }
 
@@ -142,9 +142,9 @@ final class LoopInsights_TestDataProvider: LoopInsightsDataProviderProtocol {
             let sanitizedData = Self.sanitizeDoseJSON(data)
             do {
                 doseEntries = try decoder.decode([DoseEntry].self, from: sanitizedData)
-                print("[LoopInsights TestData] Loaded \(doseEntries.count) dose entries")
+                LoopInsights_FeatureFlags.log.debug("TestData: Loaded \(self.doseEntries.count) dose entries")
             } catch {
-                print("[LoopInsights TestData] Failed to decode doses: \(error)")
+                LoopInsights_FeatureFlags.log.error("TestData: Failed to decode doses: \(error)")
             }
         }
 
@@ -152,9 +152,9 @@ final class LoopInsights_TestDataProvider: LoopInsightsDataProviderProtocol {
         if let data = Self.loadFixtureData(for: FixtureFile.carbs) {
             do {
                 carbEntries = try decoder.decode([StoredCarbEntry].self, from: data)
-                print("[LoopInsights TestData] Loaded \(carbEntries.count) carb entries")
+                LoopInsights_FeatureFlags.log.debug("TestData: Loaded \(self.carbEntries.count) carb entries")
             } catch {
-                print("[LoopInsights TestData] Failed to decode carbs: \(error)")
+                LoopInsights_FeatureFlags.log.error("TestData: Failed to decode carbs: \(error)")
             }
         }
 
@@ -167,7 +167,7 @@ final class LoopInsights_TestDataProvider: LoopInsightsDataProviderProtocol {
     /// Parse the Tidepool therapy settings JSON and construct a StoredSettings instance.
     private func loadTherapySettings(data: Data) {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            print("[LoopInsights TestData] Failed to parse therapy settings JSON")
+            LoopInsights_FeatureFlags.log.error("TestData: Failed to parse therapy settings JSON")
             return
         }
 
@@ -217,7 +217,7 @@ final class LoopInsights_TestDataProvider: LoopInsightsDataProviderProtocol {
             insulinSensitivitySchedule: isfSchedule,
             carbRatioSchedule: crSchedule
         )
-        print("[LoopInsights TestData] Loaded therapy settings (basal: \(basalSchedule?.items.count ?? 0), ISF: \(isfSchedule?.items.count ?? 0), CR: \(crSchedule?.items.count ?? 0))")
+        LoopInsights_FeatureFlags.log.debug("TestData: Loaded therapy settings (basal: \(basalSchedule?.items.count ?? 0), ISF: \(isfSchedule?.items.count ?? 0), CR: \(crSchedule?.items.count ?? 0))")
     }
 
     // MARK: - Dose JSON Sanitization
@@ -264,10 +264,10 @@ final class LoopInsights_TestDataProvider: LoopInsightsDataProviderProtocol {
     /// Load raw Data from a fixture file.
     private static func loadFixtureData(for filename: String) -> Data? {
         guard let url = resolveFixturePath(for: filename) else {
-            print("[LoopInsights TestData] Fixture not found: \(filename)")
+            LoopInsights_FeatureFlags.log.error("TestData: Fixture not found: \(filename)")
             return nil
         }
-        print("[LoopInsights TestData] Loading: \(url.lastPathComponent) from \(url.deletingLastPathComponent().lastPathComponent)/")
+        LoopInsights_FeatureFlags.log.debug("TestData: Loading \(url.lastPathComponent) from \(url.deletingLastPathComponent().lastPathComponent)/")
         return try? Data(contentsOf: url)
     }
 

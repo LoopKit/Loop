@@ -156,7 +156,7 @@ final class LoopInsights_AdvancedAnalyzers {
                 // P5: Binary search for overcorrection check instead of linear scan
                 let checkStart = dose.endDate
                 let checkEnd = dose.endDate.addingTimeInterval(2 * 3600)
-                let startIdx = Self.binarySearchFirstIndex(in: sortedGlucose, afterOrAt: checkStart)
+                let startIdx = sortedGlucose.loopInsights_firstIndex(afterOrAt: checkStart) { $0.startDate }
                 var reboundHigh = false
                 for i in startIdx..<sortedGlucose.count {
                     let sample = sortedGlucose[i]
@@ -292,20 +292,4 @@ final class LoopInsights_AdvancedAnalyzers {
         return result
     }
 
-    /// P5: Binary search to find the first glucose sample at or after `date` in a sorted array.
-    static func binarySearchFirstIndex(
-        in samples: [StoredGlucoseSample],
-        afterOrAt date: Date
-    ) -> Int {
-        var lo = 0, hi = samples.count
-        while lo < hi {
-            let mid = (lo + hi) / 2
-            if samples[mid].startDate < date {
-                lo = mid + 1
-            } else {
-                hi = mid
-            }
-        }
-        return lo
-    }
 }

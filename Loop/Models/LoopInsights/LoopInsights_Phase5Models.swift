@@ -222,9 +222,9 @@ struct LoopInsightsNightscoutTreatment: Codable {
 
 // MARK: - AGP Data Point
 
-/// A single time point in an Ambulatory Glucose Profile
+/// A single time-window in a glucose profile chart spanning the analysis period.
 struct LoopInsightsAGPDataPoint {
-    let minuteOfDay: Int     // 0-1439
+    let date: Date           // Bucket midpoint
     let p10: Double          // 10th percentile mg/dL
     let p25: Double          // 25th percentile mg/dL
     let p50: Double          // 50th (median) mg/dL

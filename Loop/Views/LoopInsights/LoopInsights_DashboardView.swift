@@ -394,7 +394,7 @@ struct LoopInsights_DashboardView: View {
 
             // AGP Chart — shown with analysis summary when enabled
             if LoopInsights_FeatureFlags.agpChartEnabled && !viewModel.agpComputedData.isEmpty {
-                LoopInsights_AGPChartView(agpData: viewModel.agpComputedData)
+                LoopInsights_AGPChartView(agpData: viewModel.agpComputedData, isAGPMode: viewModel.isAGPMode)
             }
 
             if !LoopInsights_SecureStorage.hasAPIKey {

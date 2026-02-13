@@ -9,6 +9,7 @@
 import Foundation
 import UserNotifications
 import Combine
+import os.log
 
 /// Monitors Loop's completion cycle and periodically runs AI analysis
 /// to proactively detect therapy setting adjustment opportunities.
@@ -54,7 +55,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
     func start() {
         guard loopCompletedObserver == nil else { return }
         guard LoopInsights_FeatureFlags.backgroundMonitorEnabled else {
-            print("[LoopInsights Monitor] Background monitoring is disabled")
+            LoopInsights_FeatureFlags.log.info("Background monitoring is disabled")
             return
         }
 
@@ -66,7 +67,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
             self?.handleLoopCompleted()
         }
 
-        print("[LoopInsights Monitor] Started — frequency: \(LoopInsights_FeatureFlags.monitorFrequency.displayName)")
+        LoopInsights_FeatureFlags.log.info("Monitor started — frequency: \(LoopInsights_FeatureFlags.monitorFrequency.displayName)")
     }
 
     /// Stop observing and cancel any pending work.
@@ -75,7 +76,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
             NotificationCenter.default.removeObserver(observer)
             loopCompletedObserver = nil
         }
-        print("[LoopInsights Monitor] Stopped")
+        LoopInsights_FeatureFlags.log.info("Monitor stopped")
     }
 
     /// Restart the monitor (e.g. after settings change).
@@ -136,7 +137,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
     // MARK: - Background Analysis
 
     private func runBackgroundAnalysis() async {
-        print("[LoopInsights Monitor] Running background analysis...")
+        LoopInsights_FeatureFlags.log.debug("Running background analysis...")
 
         do {
             let period = LoopInsights_FeatureFlags.analysisPeriod
@@ -163,7 +164,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
             UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: Self.lastAnalysisKey)
 
             guard !newSuggestions.isEmpty else {
-                print("[LoopInsights Monitor] No new suggestions found")
+                LoopInsights_FeatureFlags.log.debug("No new suggestions found")
                 return
             }
 
@@ -177,7 +178,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
             }
 
             guard !genuinelyNew.isEmpty else {
-                print("[LoopInsights Monitor] Suggestions match existing pending — no notification needed")
+                LoopInsights_FeatureFlags.log.debug("Suggestions match existing pending — no notification needed")
                 return
             }
 
@@ -188,7 +189,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
             await deliverNotification(for: genuinelyNew)
 
         } catch {
-            print("[LoopInsights Monitor] Analysis failed: \(error.localizedDescription)")
+            LoopInsights_FeatureFlags.log.error("Background analysis failed: \(error.localizedDescription)")
         }
     }
 
@@ -199,7 +200,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
 
         // Check quiet hours — still store suggestions but suppress notifications
         if isInQuietHours() {
-            print("[LoopInsights Monitor] Quiet hours active — suppressing notification")
+            LoopInsights_FeatureFlags.log.info("Quiet hours active — suppressing notification")
             return
         }
 
@@ -212,7 +213,7 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
             await deliverPushNotification(suggestions: suggestions)
         case .silent:
             // No notification — suggestions are available in the store
-            print("[LoopInsights Monitor] Silent mode — \(suggestions.count) suggestion(s) stored")
+            LoopInsights_FeatureFlags.log.debug("Silent mode — \(suggestions.count) suggestion(s) stored")
         }
     }
 
@@ -251,9 +252,9 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
 
         do {
             try await UNUserNotificationCenter.current().add(request)
-            print("[LoopInsights Monitor] Push notification sent for \(suggestions.count) suggestion(s)")
+            LoopInsights_FeatureFlags.log.info("Push notification sent for \(suggestions.count) suggestion(s)")
         } catch {
-            print("[LoopInsights Monitor] Failed to send notification: \(error.localizedDescription)")
+            LoopInsights_FeatureFlags.log.error("Failed to send notification: \(error.localizedDescription)")
         }
     }
 

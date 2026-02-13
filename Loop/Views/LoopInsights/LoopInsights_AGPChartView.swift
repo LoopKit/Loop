@@ -7,15 +7,23 @@
 //
 
 import SwiftUI
-import LoopKit
-import HealthKit
 
-/// Ambulatory Glucose Profile chart: renders percentile bands (p10/p25/p50/p75/p90)
-/// as layered SwiftUI Paths over a 24-hour x-axis. iOS 15 compatible (no Charts framework).
+/// Dual-mode glucose chart:
+/// - **AGP mode** (14-day lookback): Standard Ambulatory Glucose Profile — all days overlaid
+///   into a single 24-hour view with percentile bands. Matches the IDC/AGP spec.
+/// - **Profile mode** (all other periods): Glucose Profile — percentile bands spanning the
+///   full analysis period with date-based X-axis.
+/// iOS 15 compatible (no Charts framework).
 struct LoopInsights_AGPChartView: View {
 
-    /// P6: Accept pre-computed AGP data instead of recomputing on every view body evaluation
+    /// P6: Accept pre-computed data instead of recomputing on every view body evaluation
     let agpData: [LoopInsightsAGPDataPoint]
+
+    /// When true, renders as a standard 24-hour AGP overlay with hour labels.
+    let isAGPMode: Bool
+
+    @State private var showingAGPInfo = false
+    @State private var showingProfileInfo = false
 
     private let targetLow: Double = 70
     private let targetHigh: Double = 180
@@ -26,13 +34,40 @@ struct LoopInsights_AGPChartView: View {
     private let topMargin: Double = 8
     private let bottomMargin: Double = 16
 
+    /// Date range derived from the data
+    private var startDate: Date { agpData.first?.date ?? Date() }
+    private var endDate: Date { agpData.last?.date ?? Date() }
+    private var totalDuration: TimeInterval { max(1, endDate.timeIntervalSince(startDate)) }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(NSLocalizedString("Ambulatory Glucose Profile", comment: "LoopInsights AGP chart title"))
-                .font(.subheadline.weight(.semibold))
+            // Title — AGP mode gets the proper name + info button
+            if isAGPMode {
+                HStack(spacing: 4) {
+                    Text(NSLocalizedString("Ambulatory Glucose Profile", comment: "LoopInsights AGP chart title"))
+                        .font(.subheadline.weight(.semibold))
+                    Button(action: { showingAGPInfo = true }) {
+                        Image(systemName: "info.circle")
+                            .font(.caption)
+                            .foregroundColor(.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                }
+            } else {
+                HStack(spacing: 4) {
+                    Text(NSLocalizedString("Glucose Profile", comment: "LoopInsights glucose profile chart title"))
+                        .font(.subheadline.weight(.semibold))
+                    Button(action: { showingProfileInfo = true }) {
+                        Image(systemName: "info.circle")
+                            .font(.caption)
+                            .foregroundColor(.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
 
             if agpData.isEmpty {
-                Text(NSLocalizedString("Not enough data for AGP chart", comment: "LoopInsights AGP no data"))
+                Text(NSLocalizedString("Not enough data for glucose profile", comment: "LoopInsights AGP no data"))
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -71,9 +106,27 @@ struct LoopInsights_AGPChartView: View {
                 }
                 .frame(height: 180)
 
+                Spacer().frame(height: 6)
+
                 // Legend
                 legendView
             }
+        }
+        .alert(
+            NSLocalizedString("Ambulatory Glucose Profile", comment: "LoopInsights AGP info alert title"),
+            isPresented: $showingAGPInfo
+        ) {
+            Button(NSLocalizedString("OK", comment: "OK button")) {}
+        } message: {
+            Text(NSLocalizedString("AGP is a standardized reporting format developed by the International Diabetes Center. It overlays 14 days of CGM data into a single 24-hour view, displaying the median (P50), interquartile range (P25\u{2013}P75), and 10th/90th percentile bands.\n\nThis format lets you and your clinician spot recurring daily patterns \u{2014} like dawn phenomenon or post-meal spikes \u{2014} at a glance, using the same visual language across institutions.", comment: "LoopInsights AGP info alert message"))
+        }
+        .alert(
+            NSLocalizedString("Glucose Profile", comment: "LoopInsights glucose profile info alert title"),
+            isPresented: $showingProfileInfo
+        ) {
+            Button(NSLocalizedString("OK", comment: "OK button")) {}
+        } message: {
+            Text(NSLocalizedString("Glucose Profile displays your CGM data across the selected time period using percentile bands.\n\nThe median line (P50) shows your typical glucose at each point in time. The shaded bands show the interquartile range (P25\u{2013}P75) and the 10th/90th percentile spread, giving you a sense of variability.\n\nFor a standardized Ambulatory Glucose Profile (AGP) \u{2014} which overlays all days into a single 24-hour view \u{2014} select the 14-day lookback period.", comment: "LoopInsights glucose profile info alert message"))
         }
     }
 
@@ -101,7 +154,6 @@ struct LoopInsights_AGPChartView: View {
 
     // MARK: - Chart Components
 
-    /// Target range as a proper Path that fills the correct Y band
     private func targetRangePath(width: Double, height: Double) -> Path {
         let plotLeft = leftMargin
         let plotRight = width - rightMargin
@@ -118,7 +170,6 @@ struct LoopInsights_AGPChartView: View {
         return path
     }
 
-    /// Dashed grid lines at 70 and 180
     private func targetGridLines(width: Double, height: Double) -> some View {
         let plotLeft = leftMargin
         let plotRight = width - rightMargin
@@ -150,20 +201,18 @@ struct LoopInsights_AGPChartView: View {
         var path = Path()
         guard !data.isEmpty else { return path }
 
-        // Upper line (left to right)
-        let firstX = xPosition(for: data[0].minuteOfDay, width: width)
+        let firstX = xPosition(for: data[0].date, width: width)
         let firstUpperY = yPosition(for: data[0][keyPath: upperKey], height: height)
         path.move(to: CGPoint(x: firstX, y: firstUpperY))
 
         for point in data.dropFirst() {
-            let x = xPosition(for: point.minuteOfDay, width: width)
+            let x = xPosition(for: point.date, width: width)
             let y = yPosition(for: point[keyPath: upperKey], height: height)
             path.addLine(to: CGPoint(x: x, y: y))
         }
 
-        // Lower line (right to left)
         for point in data.reversed() {
-            let x = xPosition(for: point.minuteOfDay, width: width)
+            let x = xPosition(for: point.date, width: width)
             let y = yPosition(for: point[keyPath: lowerKey], height: height)
             path.addLine(to: CGPoint(x: x, y: y))
         }
@@ -177,13 +226,13 @@ struct LoopInsights_AGPChartView: View {
         guard let first = data.first else { return path }
 
         path.move(to: CGPoint(
-            x: xPosition(for: first.minuteOfDay, width: width),
+            x: xPosition(for: first.date, width: width),
             y: yPosition(for: first.p50, height: height)
         ))
 
         for point in data.dropFirst() {
             path.addLine(to: CGPoint(
-                x: xPosition(for: point.minuteOfDay, width: width),
+                x: xPosition(for: point.date, width: width),
                 y: yPosition(for: point.p50, height: height)
             ))
         }
@@ -192,14 +241,19 @@ struct LoopInsights_AGPChartView: View {
     }
 
     private func xAxisLabels(width: Double, height: Double) -> some View {
-        let hours = [0, 3, 6, 9, 12, 15, 18, 21]
+        let labels: [(date: Date, text: String)]
+        if isAGPMode {
+            labels = Self.generateAGPHourLabels(start: startDate, end: endDate)
+        } else {
+            labels = Self.generateDateLabels(start: startDate, end: endDate)
+        }
         return ZStack {
-            ForEach(hours, id: \.self) { hour in
-                let x = xPosition(for: hour * 60, width: width)
-                Text(formatHour(hour))
+            ForEach(Array(labels.enumerated()), id: \.offset) { _, label in
+                let x = xPosition(for: label.date, width: width)
+                Text(label.text)
                     .font(.system(size: 8))
                     .foregroundColor(.secondary)
-                    .position(x: x, y: height - 4)
+                    .position(x: x, y: height - 20)
             }
         }
     }
@@ -230,19 +284,68 @@ struct LoopInsights_AGPChartView: View {
 
     // MARK: - Coordinate Mapping
 
-    private func xPosition(for minuteOfDay: Int, width: Double) -> Double {
+    private func xPosition(for date: Date, width: Double) -> Double {
         let plotWidth = width - leftMargin - rightMargin
-        return leftMargin + (Double(minuteOfDay) / 1440.0) * plotWidth
+        let offset = date.timeIntervalSince(startDate)
+        let fraction = offset / totalDuration
+        return leftMargin + fraction * plotWidth
     }
 
     private func yPosition(for glucose: Double, height: Double) -> Double {
         let plotHeight = height - topMargin - bottomMargin
         let clamped = max(chartMinY, min(chartMaxY, glucose))
         let fraction = (clamped - chartMinY) / (chartMaxY - chartMinY)
-        return topMargin + (1 - fraction) * plotHeight  // Inverted Y axis
+        return topMargin + (1 - fraction) * plotHeight
     }
 
-    private func formatHour(_ hour: Int) -> String {
+    // MARK: - X-Axis Label Generation
+
+    /// Hour labels for AGP mode (24-hour overlay): 12a, 3a, 6a, … 9p
+    private static func generateAGPHourLabels(start: Date, end: Date) -> [(date: Date, text: String)] {
+        let duration = end.timeIntervalSince(start)
+        guard duration > 0 else { return [] }
+
+        let hours = [0, 3, 6, 9, 12, 15, 18, 21]
+        return hours.map { hour in
+            let fraction = Double(hour) / 24.0
+            let date = start.addingTimeInterval(fraction * duration)
+            return (date: date, text: formatHour(hour))
+        }
+    }
+
+    /// Date labels for profile mode (multi-day time series)
+    private static func generateDateLabels(start: Date, end: Date) -> [(date: Date, text: String)] {
+        let duration = end.timeIntervalSince(start)
+        guard duration > 0 else { return [] }
+
+        let days = duration / 86400
+        let labelCount: Int
+        let formatter = DateFormatter()
+
+        if days <= 4 {
+            labelCount = 7
+            formatter.dateFormat = "E ha"
+        } else if days <= 10 {
+            labelCount = 7
+            formatter.dateFormat = "E M/d"
+        } else if days <= 45 {
+            labelCount = 6
+            formatter.dateFormat = "M/d"
+        } else {
+            labelCount = 6
+            formatter.dateFormat = "M/d"
+        }
+
+        var labels: [(date: Date, text: String)] = []
+        for i in 0...labelCount {
+            let fraction = Double(i) / Double(labelCount)
+            let date = start.addingTimeInterval(fraction * duration)
+            labels.append((date: date, text: formatter.string(from: date)))
+        }
+        return labels
+    }
+
+    private static func formatHour(_ hour: Int) -> String {
         let h = hour % 24
         if h == 0 { return "12a" }
         if h < 12 { return "\(h)a" }
@@ -250,42 +353,85 @@ struct LoopInsights_AGPChartView: View {
         return "\(h - 12)p"
     }
 
-    // MARK: - AGP Computation
+    // MARK: - Computation
 
-    /// Compute AGP data: 48 time points (every 30 min), each with percentiles
-    static func computeAGP(from samples: [StoredGlucoseSample]) -> [LoopInsightsAGPDataPoint] {
+    /// Compute standard AGP: overlay all days into a single 24-hour profile with 48 × 30-minute buckets.
+    /// Used when the lookback period is 14 days.
+    static func computeStandardAGP(from samples: [(date: Date, mgdl: Double)]) -> [LoopInsightsAGPDataPoint] {
         guard !samples.isEmpty else { return [] }
 
         let calendar = Calendar.current
+        // Reference day: midnight of the earliest sample's date
+        let refDay = calendar.startOfDay(for: samples.min(by: { $0.date < $1.date })!.date)
 
-        // Bucket samples by 30-minute windows
-        var buckets: [Int: [Double]] = [:]  // minuteOfDay → glucose values
+        var buckets: [Int: [Double]] = [:]
         for sample in samples {
-            let hour = calendar.component(.hour, from: sample.startDate)
-            let minute = calendar.component(.minute, from: sample.startDate)
+            let hour = calendar.component(.hour, from: sample.date)
+            let minute = calendar.component(.minute, from: sample.date)
             let minuteOfDay = hour * 60 + minute
-            let bucket = (minuteOfDay / 30) * 30  // Round to nearest 30-min
-            buckets[bucket, default: []].append(
-                sample.quantity.doubleValue(for: .milligramsPerDeciliter)
-            )
+            let bucket = (minuteOfDay / 30) * 30
+            buckets[bucket, default: []].append(sample.mgdl)
         }
 
         var dataPoints: [LoopInsightsAGPDataPoint] = []
         for minuteOfDay in stride(from: 0, to: 1440, by: 30) {
             guard let values = buckets[minuteOfDay], values.count >= 3 else { continue }
-            let sorted = values.sorted()
-            let count = sorted.count
+            let s = values.sorted()
+            let count = s.count
+            let date = refDay.addingTimeInterval(Double(minuteOfDay) * 60 + 15 * 60) // bucket midpoint
 
             dataPoints.append(LoopInsightsAGPDataPoint(
-                minuteOfDay: minuteOfDay,
-                p10: sorted[max(0, Int(Double(count) * 0.1))],
-                p25: sorted[max(0, Int(Double(count) * 0.25))],
-                p50: sorted[count / 2],
-                p75: sorted[min(count - 1, Int(Double(count) * 0.75))],
-                p90: sorted[min(count - 1, Int(Double(count) * 0.9))]
+                date: date,
+                p10: s[max(0, Int(Double(count) * 0.1))],
+                p25: s[max(0, Int(Double(count) * 0.25))],
+                p50: s[count / 2],
+                p75: s[min(count - 1, Int(Double(count) * 0.75))],
+                p90: s[min(count - 1, Int(Double(count) * 0.9))]
             ))
         }
 
-        return dataPoints.sorted { $0.minuteOfDay < $1.minuteOfDay }
+        return dataPoints.sorted { $0.date < $1.date }
+    }
+
+    /// Compute glucose profile: ~48 time-window buckets spanning the full sample period.
+    /// Used for all lookback periods except 14 days.
+    static func computeProfile(from samples: [(date: Date, mgdl: Double)]) -> [LoopInsightsAGPDataPoint] {
+        guard samples.count >= 3 else { return [] }
+
+        let sorted = samples.sorted { $0.date < $1.date }
+        guard let first = sorted.first, let last = sorted.last else { return [] }
+
+        let totalDuration = last.date.timeIntervalSince(first.date)
+        guard totalDuration > 0 else { return [] }
+
+        let bucketCount = 48
+        let bucketDuration = totalDuration / Double(bucketCount)
+
+        var buckets: [[Double]] = Array(repeating: [], count: bucketCount)
+        for sample in sorted {
+            let offset = sample.date.timeIntervalSince(first.date)
+            let index = min(Int(offset / bucketDuration), bucketCount - 1)
+            buckets[index].append(sample.mgdl)
+        }
+
+        var dataPoints: [LoopInsightsAGPDataPoint] = []
+        for i in 0..<bucketCount {
+            let values = buckets[i]
+            guard values.count >= 3 else { continue }
+            let s = values.sorted()
+            let count = s.count
+            let midDate = first.date.addingTimeInterval((Double(i) + 0.5) * bucketDuration)
+
+            dataPoints.append(LoopInsightsAGPDataPoint(
+                date: midDate,
+                p10: s[max(0, Int(Double(count) * 0.1))],
+                p25: s[max(0, Int(Double(count) * 0.25))],
+                p50: s[count / 2],
+                p75: s[min(count - 1, Int(Double(count) * 0.75))],
+                p90: s[min(count - 1, Int(Double(count) * 0.9))]
+            ))
+        }
+
+        return dataPoints
     }
 }

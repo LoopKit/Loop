@@ -89,34 +89,33 @@ final class LoopInsights_HealthKitManager: ObservableObject {
         )
     }
 
+    private func safeFetch<T>(_ label: String, _ fetch: () async throws -> T?) async -> T? {
+        do { return try await fetch() }
+        catch { LoopInsights_FeatureFlags.log.error("HK \(label) error: \(error)"); return nil }
+    }
+
     private func fetchHeartRateSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.HeartRateStats? {
-        do { return try await fetchHeartRateStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK heart rate error: \(error)"); return nil }
+        await safeFetch("heart rate") { try await fetchHeartRateStats(start: start, end: end) }
     }
 
     private func fetchHRVSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.HRVStats? {
-        do { return try await fetchHRVStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK HRV error: \(error)"); return nil }
+        await safeFetch("HRV") { try await fetchHRVStats(start: start, end: end) }
     }
 
     private func fetchStepSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.StepStats? {
-        do { return try await fetchStepStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK steps error: \(error)"); return nil }
+        await safeFetch("steps") { try await fetchStepStats(start: start, end: end) }
     }
 
     private func fetchSleepSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.SleepStats? {
-        do { return try await fetchSleepStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK sleep error: \(error)"); return nil }
+        await safeFetch("sleep") { try await fetchSleepStats(start: start, end: end) }
     }
 
     private func fetchEnergySafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.ActiveEnergyStats? {
-        do { return try await fetchActiveEnergyStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK active energy error: \(error)"); return nil }
+        await safeFetch("active energy") { try await fetchActiveEnergyStats(start: start, end: end) }
     }
 
     private func fetchWeightSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.WeightStats? {
-        do { return try await fetchWeightStats(start: start, end: end) }
-        catch { print("[LoopInsights] HK weight error: \(error)"); return nil }
+        await safeFetch("weight") { try await fetchWeightStats(start: start, end: end) }
     }
 
     // MARK: - Heart Rate

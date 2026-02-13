@@ -7,10 +7,14 @@
 //
 
 import Foundation
+import os.log
 
 /// Runtime feature flags for LoopInsights. All flags are UserDefaults-backed
 /// so they can be toggled without recompilation.
 struct LoopInsights_FeatureFlags {
+
+    /// Shared logger for all LoopInsights subsystems
+    static let log = Logger(subsystem: "com.loopkit.Loop.LoopInsights", category: "LoopInsights")
 
     private enum Keys {
         static let isEnabled = "LoopInsights_isEnabled"
