@@ -189,7 +189,7 @@ struct LoopInsights_SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "brain.head.profile")
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                     Text("LOOPINSIGHTS")
                         .font(.caption)
                         .fontWeight(.semibold)

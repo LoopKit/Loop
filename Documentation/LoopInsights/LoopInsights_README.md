@@ -116,6 +116,158 @@ API key is stored in iOS Keychain and shared with FoodFinder (same Keychain entr
 - User always sees disclaimer when applying changes
 - Feature flag defaults to OFF
 
+## Test Data
+
+LoopInsights includes a **Test Data mode** (developer-only) that loads JSON fixture files instead of reading from Loop's live data stores. This is useful for development, demos, and for users who want to evaluate the feature without waiting for real data accumulation.
+
+### How Test Data Works
+
+`LoopInsights_TestDataProvider` looks for fixture files in two locations (checked in order):
+
+1. **App Documents** — `Documents/LoopInsights/` on the device (no rebuild needed)
+2. **App Bundle** — `Resources/LoopInsights/TestData/` (requires rebuild)
+
+Expected fixture filenames:
+- `tidepool_glucose_samples.json` — CGM glucose readings (`StoredGlucoseSample` format)
+- `tidepool_dose_entries.json` — Insulin deliveries (`DoseEntry` format)
+- `tidepool_carb_entries.json` — Carb entries (`StoredCarbEntry` format)
+- `tidepool_therapy_settings.json` — Therapy settings (optional, custom format)
+
+### Enabling Test Data Mode
+
+1. Open **Settings > LoopInsights**
+2. Long-press the LoopInsights header **3 times** to unlock Developer Mode
+3. Scroll to the Developer section
+4. Toggle **"Use Test Data Fixtures"** on
+5. Open the Dashboard and run an analysis
+
+### Generating Test Data from Tidepool
+
+A Python script (`pull_tidepool_data.py`) is included to pull real diabetes data from a Tidepool account and convert it into the fixture format LoopInsights expects.
+
+**Prerequisites:**
+```bash
+pip3 install requests
+```
+
+**Usage:**
+```bash
+# Pull 14 days of data (default)
+python3 pull_tidepool_data.py --email **YOUR_TIDEPOOL_EMAIL** --password **YOUR_TIDEPOOL_PASSWORD**
+
+# Pull 90 days for longer-range analysis testing
+python3 pull_tidepool_data.py --email **YOUR_EMAIL** --password **YOUR_PASSWORD** --days 90
+
+# Pull data and auto-copy to the iOS Simulator's Documents/LoopInsights/
+python3 pull_tidepool_data.py --email **YOUR_EMAIL** --password **YOUR_PASSWORD** --simulator
+
+# Specify a custom output directory
+python3 pull_tidepool_data.py --email **YOUR_EMAIL** --password **YOUR_PASSWORD** --output /path/to/output
+```
+
+**What the script does:**
+1. Authenticates with the Tidepool API (`api.tidepool.org`)
+2. Pulls CGM glucose (cbg), insulin doses (basal + bolus), carb entries (wizard + food), and pump settings
+3. Converts Tidepool's data format to Loop's native JSON format
+4. Saves four fixture files to `LoopWorkspace/Loop/Loop/Resources/LoopInsights/TestData/`
+5. With `--simulator`, copies the fixtures into the most recent iOS Simulator's `Documents/LoopInsights/` directory
+
+**After running the script:**
+1. Build and run Loop in the Simulator (or on-device if you placed files in the app's Documents)
+2. Enable LoopInsights in Settings
+3. Unlock Developer Mode (5x long-press on header)
+4. Enable "Use Test Data Fixtures"
+5. Open the Dashboard and tap Analyze
+
+### Creating Test Data Manually
+
+If you don't have a Tidepool account, you can create fixture files manually. Each file is a JSON array.
+
+**Glucose samples** (`tidepool_glucose_samples.json`):
+```json
+[
+  {
+    "startDate": "2026-02-01T08:00:00Z",
+    "quantity": 120.0,
+    "provenanceIdentifier": "com.test",
+    "syncIdentifier": "sample-001",
+    "syncVersion": 1,
+    "isDisplayOnly": false,
+    "wasUserEntered": false
+  }
+]
+```
+
+**Dose entries** (`tidepool_dose_entries.json`):
+```json
+[
+  {
+    "type": "tempBasal",
+    "startDate": "2026-02-01T08:00:00Z",
+    "endDate": "2026-02-01T08:30:00Z",
+    "value": 0.85,
+    "unit": "U/hour",
+    "automatic": true
+  },
+  {
+    "type": "bolus",
+    "startDate": "2026-02-01T12:00:00Z",
+    "endDate": "2026-02-01T12:01:00Z",
+    "value": 3.5,
+    "unit": "U",
+    "isMutable": false
+  }
+]
+```
+
+**Carb entries** (`tidepool_carb_entries.json`):
+```json
+[
+  {
+    "startDate": "2026-02-01T12:00:00Z",
+    "quantity": 45,
+    "absorptionTime": 10800,
+    "syncIdentifier": "carb-001",
+    "syncVersion": 1,
+    "createdByCurrentApp": false
+  }
+]
+```
+
+**Therapy settings** (`tidepool_therapy_settings.json`, optional):
+```json
+{
+  "basalRateSchedule": [
+    {"startTime": 0, "value": 0.8},
+    {"startTime": 21600, "value": 0.9},
+    {"startTime": 43200, "value": 0.75}
+  ],
+  "insulinSensitivitySchedule": [
+    {"startTime": 0, "value": 45},
+    {"startTime": 21600, "value": 40},
+    {"startTime": 43200, "value": 50}
+  ],
+  "carbRatioSchedule": [
+    {"startTime": 0, "value": 10},
+    {"startTime": 21600, "value": 8},
+    {"startTime": 43200, "value": 12}
+  ]
+}
+```
+
+> **Note:** `startTime` values are in seconds from midnight (e.g., 21600 = 6:00 AM, 43200 = 12:00 PM).
+
+### Loading Fixtures on a Physical Device
+
+To load test data on a physical device without rebuilding:
+
+1. Connect the device to your Mac
+2. Open Finder > select the device > Files tab
+3. Drag-and-drop the four JSON files into the **Loop** app's Documents folder, inside a `LoopInsights` subfolder
+4. Enable Test Data mode in LoopInsights Developer settings
+
+The `TestDataProvider` checks `Documents/LoopInsights/` first, so user-provided files always take priority over bundled fixtures.
+
 ## Portability
 
 - All code in `LoopInsights/` subdirectories with `LoopInsights_` prefix

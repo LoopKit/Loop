@@ -387,7 +387,7 @@ extension SettingsView {
                             imageView: Image(systemName: "brain.head.profile")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .foregroundColor(.accentColor)
+                                .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                                 .frame(width: 30),
                             label: NSLocalizedString("LoopInsights", comment: "LoopInsights settings button"),
                             descriptiveText: NSLocalizedString("AI-powered therapy settings analysis", comment: "LoopInsights settings descriptive text"))
