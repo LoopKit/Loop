@@ -68,6 +68,112 @@ enum LoopInsightsSettingStatus {
     case hasSuggestions   // Orange — has pending suggestions
 }
 
+// MARK: - Safety Guardrails
+
+/// Absolute and recommended clinical bounds for therapy settings.
+/// Mirrors LoopKit's `Guardrail+Settings.swift` as self-contained constants
+/// so LoopInsights can validate without importing LoopKit guardrail types.
+struct LoopInsights_SafetyGuardrails {
+
+    /// Classification of a value relative to guardrail bounds
+    enum Classification {
+        case withinRecommended
+        case belowRecommended
+        case aboveRecommended
+        case belowAbsolute
+        case aboveAbsolute
+    }
+
+    // -- Carb Ratio (g/U) --
+    static let crRecommendedMin: Double = 4.0
+    static let crRecommendedMax: Double = 28.0
+    static let crAbsoluteMin: Double = 2.0
+    static let crAbsoluteMax: Double = 150.0
+
+    // -- Insulin Sensitivity Factor (mg/dL per U) --
+    static let isfRecommendedMin: Double = 16.0
+    static let isfRecommendedMax: Double = 400.0
+    static let isfAbsoluteMin: Double = 10.0
+    static let isfAbsoluteMax: Double = 500.0
+
+    // -- Basal Rate (U/hr) --
+    static let basalRecommendedMin: Double = 0.05
+    static let basalRecommendedMax: Double = 10.0
+    static let basalAbsoluteMin: Double = 0.05
+    static let basalAbsoluteMax: Double = 30.0
+
+    /// Maximum allowed percentage change per analysis step (backstop)
+    static let maxChangePercent: Double = 25.0
+
+    /// Classify a value against the guardrail bounds for a setting type
+    static func classify(value: Double, settingType: LoopInsightsSettingType) -> Classification {
+        let (recMin, recMax, absMin, absMax) = bounds(for: settingType)
+
+        if value < absMin { return .belowAbsolute }
+        if value > absMax { return .aboveAbsolute }
+        if value < recMin { return .belowRecommended }
+        if value > recMax { return .aboveRecommended }
+        return .withinRecommended
+    }
+
+    /// Human-readable warning string, or nil if value is within recommended range
+    static func warningMessage(value: Double, settingType: LoopInsightsSettingType) -> String? {
+        let classification = classify(value: value, settingType: settingType)
+        let (recMin, recMax, absMin, absMax) = bounds(for: settingType)
+        let unit = settingType.unitDescription
+        let name = settingType.displayName
+
+        switch classification {
+        case .withinRecommended:
+            return nil
+        case .belowAbsolute:
+            return String(
+                format: NSLocalizedString(
+                    "%@ value %.1f %@ is below the absolute minimum (%.1f %@). This value cannot be applied.",
+                    comment: "LoopInsights guardrail: below absolute"
+                ),
+                name, value, unit, absMin, unit
+            )
+        case .aboveAbsolute:
+            return String(
+                format: NSLocalizedString(
+                    "%@ value %.1f %@ exceeds the absolute maximum (%.1f %@). This value cannot be applied.",
+                    comment: "LoopInsights guardrail: above absolute"
+                ),
+                name, value, unit, absMax, unit
+            )
+        case .belowRecommended:
+            return String(
+                format: NSLocalizedString(
+                    "%@ value %.1f %@ is below the recommended minimum (%.1f %@). Consult your healthcare provider before applying.",
+                    comment: "LoopInsights guardrail: below recommended"
+                ),
+                name, value, unit, recMin, unit
+            )
+        case .aboveRecommended:
+            return String(
+                format: NSLocalizedString(
+                    "%@ value %.1f %@ exceeds the recommended maximum (%.1f %@). Consult your healthcare provider before applying.",
+                    comment: "LoopInsights guardrail: above recommended"
+                ),
+                name, value, unit, recMax, unit
+            )
+        }
+    }
+
+    /// Returns (recommendedMin, recommendedMax, absoluteMin, absoluteMax) for a setting type
+    private static func bounds(for settingType: LoopInsightsSettingType) -> (Double, Double, Double, Double) {
+        switch settingType {
+        case .carbRatio:
+            return (crRecommendedMin, crRecommendedMax, crAbsoluteMin, crAbsoluteMax)
+        case .insulinSensitivity:
+            return (isfRecommendedMin, isfRecommendedMax, isfAbsoluteMin, isfAbsoluteMax)
+        case .basalRate:
+            return (basalRecommendedMin, basalRecommendedMax, basalAbsoluteMin, basalAbsoluteMax)
+        }
+    }
+}
+
 // MARK: - Detected Pattern
 
 /// A glucose/insulin pattern detected from aggregated data
@@ -574,6 +680,31 @@ struct LoopInsightsSuggestion: Codable, Identifiable, Equatable {
                 settingType.abbreviation,
                 timeBlocks.count
             )
+        }
+    }
+
+    // MARK: - Guardrail Computed Properties
+
+    /// Warning strings for any proposed values outside recommended bounds
+    var guardrailWarnings: [String] {
+        timeBlocks.compactMap { block in
+            LoopInsights_SafetyGuardrails.warningMessage(value: block.proposedValue, settingType: settingType)
+        }
+    }
+
+    /// True if any proposed value falls outside the recommended range
+    var hasGuardrailWarning: Bool {
+        timeBlocks.contains { block in
+            let c = LoopInsights_SafetyGuardrails.classify(value: block.proposedValue, settingType: settingType)
+            return c != .withinRecommended
+        }
+    }
+
+    /// True if any proposed value falls outside the absolute bounds (hard block)
+    var hasAbsoluteViolation: Bool {
+        timeBlocks.contains { block in
+            let c = LoopInsights_SafetyGuardrails.classify(value: block.proposedValue, settingType: settingType)
+            return c == .belowAbsolute || c == .aboveAbsolute
         }
     }
 

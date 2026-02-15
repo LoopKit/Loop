@@ -23,6 +23,9 @@ struct LoopInsights_SuggestionDetailView: View {
         List {
             headerSection
             reasoningSection
+            if record.suggestion.hasGuardrailWarning {
+                guardrailWarningSection
+            }
             timeBlocksSection
             if record.status == .pending {
                 actionsSection
@@ -109,7 +112,7 @@ struct LoopInsights_SuggestionDetailView: View {
                             Text(String(format: "%.1f %@", block.proposedValue, record.suggestion.settingType.unitDescription))
                                 .font(.body)
                                 .fontWeight(.bold)
-                                .foregroundColor(block.proposedValue > block.currentValue ? .orange : .blue)
+                                .foregroundColor(proposedValueColor(for: block))
                         }
                     }
 
@@ -227,7 +230,58 @@ struct LoopInsights_SuggestionDetailView: View {
         }
     }
 
+    // MARK: - Guardrail Warning
+
+    private var guardrailWarningSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                        .font(.title3)
+                    Text(NSLocalizedString("Safety Warning", comment: "LoopInsights guardrail warning title"))
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.orange)
+                }
+
+                ForEach(record.suggestion.guardrailWarnings, id: \.self) { warning in
+                    Text(warning)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                if record.suggestion.hasAbsoluteViolation {
+                    Text(NSLocalizedString("One or more values are outside safe clinical bounds and cannot be applied.", comment: "LoopInsights guardrail absolute block message"))
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.red)
+                } else {
+                    Text(NSLocalizedString("These values are outside the typical recommended range. Consult your healthcare provider before applying.", comment: "LoopInsights guardrail consult message"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
     // MARK: - Helpers
+
+    /// Color for a proposed value based on guardrail classification
+    private func proposedValueColor(for block: LoopInsightsTimeBlock) -> Color {
+        let classification = LoopInsights_SafetyGuardrails.classify(
+            value: block.proposedValue, settingType: record.suggestion.settingType
+        )
+        switch classification {
+        case .belowAbsolute, .aboveAbsolute:
+            return .red
+        case .belowRecommended, .aboveRecommended:
+            return .orange
+        case .withinRecommended:
+            return block.proposedValue > block.currentValue ? .orange : .blue
+        }
+    }
 
     private var confidenceBadge: some View {
         Text(record.suggestion.confidence.displayName)

@@ -66,10 +66,12 @@ final class LoopInsights_AIAnalysis {
 
         \(personality.promptInstruction)
 
-        YOUR MANDATE: Be analytically rigorous. Every recommendation must be backed by specific numbers \
-        from the data. If the data does not justify a change, return zero suggestions — that is the \
-        correct response when settings are working. You are not here to impress or people-please. \
-        You are here to find real problems and propose precise fixes.
+        YOUR MANDATE: Be analytically rigorous. You have this person's REAL data — their actual \
+        glucose readings, insulin delivery, carb logs, and pump settings. Every recommendation must \
+        cite specific numbers from THEIR data, not generic clinical wisdom. If the data does not \
+        justify a change, return zero suggestions — that is the correct response when settings are \
+        working. You are not here to impress or people-please. You are here to find real problems \
+        in THIS person's data and propose precise fixes grounded in THEIR numbers.
 
         CLINICAL REASONING FRAMEWORK — How AID settings interact:
         - BASAL RATE: Controls glucose during fasting periods. Analyze overnight (12AM-6AM) and \
@@ -99,7 +101,7 @@ final class LoopInsights_AIAnalysis {
            always means basal rate is too low. >70% basal may mean basal is too high.
         4. GLUCOSE TRENDS: Look at the slope of hourly averages. A consistent rise over 3+ hours \
            during fasting = basal too low. A consistent drop = basal too high.
-        5. HIGH TIR DOES NOT MEAN PERFECT SETTINGS: If TIR is 90% but the algorithm is issuing 7 \
+        5. HIGH TIR DOES NOT MEAN PERFECT SETTINGS: If TIR is 90% but the algorithm is issuing 10 \
            corrections/day to achieve that, the settings are suboptimal — the algorithm is doing \
            heavy lifting to compensate. Better settings = same TIR with fewer corrections.
 
@@ -128,10 +130,18 @@ final class LoopInsights_AIAnalysis {
         Only skip recommendations when TIR is good AND corrections are low AND basal/bolus is balanced.
 
         SAFETY RULES:
-        1. Never suggest changes larger than 20% from current values.
+        1. Never suggest changes larger than 20% from current values in a single step.
         2. Conservative changes only — under-adjust rather than over-adjust.
         3. If time below range is >4%, prioritize safety (raise ISF or lower basal before anything else).
         4. Suggestions are advisory only — the user and their healthcare provider make final decisions.
+        5. ABSOLUTE CLINICAL BOUNDS — proposed values MUST stay within these ranges. Clamp to bound if needed:
+           - Carb Ratio: 2.0–150.0 g/U (recommended 4.0–28.0)
+           - ISF: 10.0–500.0 mg/dL/U (recommended 16.0–400.0)
+           - Basal Rate: 0.05–30.0 U/hr (recommended 0.05–10.0)
+           Values outside the recommended range should only be proposed with LOW confidence and explicit justification.
+        6. CUMULATIVE CHANGE AWARENESS: If recent settings changes are listed above, do NOT stack \
+           additional changes on top. Settings changes need time (3-7 days minimum) to show effect in the data. \
+           If the data predates a recent change, recommend waiting for new data before adjusting further.
 
         BIOMETRIC CONTEXT — When biometric data is provided:
         - HEART RATE: Elevated resting HR or HR spikes can indicate stress, illness, caffeine, or \
@@ -485,10 +495,46 @@ final class LoopInsights_AIAnalysis {
 
             guard !timeBlocks.isEmpty else { continue }
 
+            // Post-parse safety validation: reject blocks outside absolute bounds
+            // and enforce max change percentage as a code-level backstop
+            let validatedBlocks = timeBlocks.filter { block in
+                let classification = LoopInsights_SafetyGuardrails.classify(
+                    value: block.proposedValue, settingType: settingType
+                )
+
+                // Hard reject: values outside absolute bounds
+                if classification == .belowAbsolute || classification == .aboveAbsolute {
+                    LoopInsights_FeatureFlags.log.error(
+                        "Guardrail REJECTED: \(settingType.displayName) proposed \(block.proposedValue) at \(block.startTimeFormatted) — outside absolute bounds"
+                    )
+                    return false
+                }
+
+                // Warn (but pass through): values outside recommended bounds
+                if classification != .withinRecommended {
+                    LoopInsights_FeatureFlags.log.default(
+                        "Guardrail WARNING: \(settingType.displayName) proposed \(block.proposedValue) at \(block.startTimeFormatted) — outside recommended range"
+                    )
+                }
+
+                // Backstop: reject blocks with >25% change from current
+                let changePercent = abs(block.changePercent)
+                if changePercent > LoopInsights_SafetyGuardrails.maxChangePercent {
+                    LoopInsights_FeatureFlags.log.error(
+                        "Guardrail REJECTED: \(settingType.displayName) proposed \(String(format: "%.1f", block.proposedValue)) at \(block.startTimeFormatted) — \(String(format: "%.0f", changePercent))%% change exceeds \(String(format: "%.0f", LoopInsights_SafetyGuardrails.maxChangePercent))%% limit"
+                    )
+                    return false
+                }
+
+                return true
+            }
+
+            guard !validatedBlocks.isEmpty else { continue }
+
             let suggestion = LoopInsightsSuggestion(
                 id: UUID(),
                 settingType: settingType,
-                timeBlocks: timeBlocks,
+                timeBlocks: validatedBlocks,
                 reasoning: reasoning,
                 confidence: confidence,
                 analysisPeriod: period,

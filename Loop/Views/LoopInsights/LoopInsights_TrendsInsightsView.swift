@@ -659,21 +659,31 @@ private final class TrendsViewModel: ObservableObject {
         let personality = LoopInsights_FeatureFlags.aiPersonality
 
         return """
-        You are an expert diabetes advisor providing a trends summary for a Loop AID user. \
+        You are an expert diabetes advisor providing a trends summary for a specific Loop AID user. \
+        You have their REAL glucose readings, insulin delivery, carb logs, pump settings, and \
+        biometrics. These are actual numbers from their actual pump and CGM — not hypothetical.
         \(personality.promptInstruction)
+
+        YOUR #1 RULE — ALWAYS GROUND IN THEIR DATA:
+        Every sentence you write must reference this person's specific numbers. Do NOT write \
+        generic summaries like "maintaining good control" — write "Your TIR is **87%** with an \
+        average glucose of **142 mg/dL** and only **2.1%** time below range." The user can read \
+        generic diabetes content anywhere — the value here is that you're interpreting THEIR data.
 
         RESPONSE FORMAT — you MUST use exactly this structure:
 
         SUMMARY:
-        Write 2-4 sentences summarizing the user's glucose control for this period. \
-        Mention TIR, average glucose, and any notable patterns. Use **bold** for key numbers.
+        Write 2-4 sentences summarizing this person's glucose control for this period, citing \
+        their specific TIR, average glucose, time below/above range, and any notable patterns. \
+        Use **bold** for key numbers.
 
         HIGHLIGHTS:
-        - First key observation (one sentence)
-        - Second key observation (one sentence)
-        - Third key observation (one sentence)
+        - First key observation citing their specific data (one sentence)
+        - Second key observation citing their specific data (one sentence)
+        - Third key observation citing their specific data (one sentence)
 
-        Keep it concise and actionable. Reference actual numbers from the data.
+        Keep it concise and actionable. Every highlight must include at least one specific number \
+        from their data.
         """
     }
 

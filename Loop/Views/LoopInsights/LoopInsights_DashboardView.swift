@@ -114,20 +114,23 @@ struct LoopInsights_DashboardView: View {
             }
         }
         .alert(
-            NSLocalizedString("Apply Suggestion", comment: "LoopInsights apply confirmation title"),
+            applyAlertTitle,
             isPresented: showingApplyConfirmationBinding
         ) {
-            Button(NSLocalizedString("Apply", comment: "LoopInsights apply button"), role: .destructive) {
-                viewModel.confirmApply()
-            }
-            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {
-                viewModel.cancelApply()
+            if let record = viewModel.recordToApply, record.suggestion.hasAbsoluteViolation {
+                Button(NSLocalizedString("OK", comment: "OK button"), role: .cancel) {
+                    viewModel.cancelApply()
+                }
+            } else {
+                Button(NSLocalizedString("Apply", comment: "LoopInsights apply button"), role: .destructive) {
+                    viewModel.confirmApply()
+                }
+                Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {
+                    viewModel.cancelApply()
+                }
             }
         } message: {
-            Text(NSLocalizedString(
-                "This will modify your therapy settings. You are responsible for reviewing and verifying all changes. AI suggestions are advisory and may not be appropriate for your situation. Consult your healthcare provider for significant therapy adjustments.",
-                comment: "LoopInsights apply disclaimer"
-            ))
+            Text(applyAlertMessage)
         }
         .sheet(isPresented: showingPreFillEditorBinding) {
             if let record = viewModel.recordToApply {
@@ -489,6 +492,11 @@ struct LoopInsights_DashboardView: View {
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
                     Spacer()
+                    if record.suggestion.hasGuardrailWarning {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                    }
                     confidenceBadge(record.suggestion.confidence)
                 }
 
@@ -569,6 +577,44 @@ struct LoopInsights_DashboardView: View {
         case .medium: return .orange
         case .high: return .green
         }
+    }
+
+    // MARK: - Guardrail Alert Helpers
+
+    private var applyAlertTitle: String {
+        guard let record = viewModel.recordToApply else {
+            return NSLocalizedString("Apply Suggestion", comment: "LoopInsights apply confirmation title")
+        }
+        if record.suggestion.hasAbsoluteViolation {
+            return NSLocalizedString("Cannot Apply", comment: "LoopInsights apply blocked title")
+        }
+        if record.suggestion.hasGuardrailWarning {
+            return NSLocalizedString("Safety Warning", comment: "LoopInsights apply safety warning title")
+        }
+        return NSLocalizedString("Apply Suggestion", comment: "LoopInsights apply confirmation title")
+    }
+
+    private var applyAlertMessage: String {
+        let disclaimer = NSLocalizedString(
+            "This will modify your therapy settings. You are responsible for reviewing and verifying all changes. AI suggestions are advisory and may not be appropriate for your situation. Consult your healthcare provider for significant therapy adjustments.",
+            comment: "LoopInsights apply disclaimer"
+        )
+        guard let record = viewModel.recordToApply else { return disclaimer }
+
+        if record.suggestion.hasAbsoluteViolation {
+            let warnings = record.suggestion.guardrailWarnings.joined(separator: "\n")
+            return warnings + "\n\n" + NSLocalizedString(
+                "One or more proposed values are outside safe clinical bounds. This suggestion cannot be applied.",
+                comment: "LoopInsights apply absolute block message"
+            )
+        }
+
+        if record.suggestion.hasGuardrailWarning {
+            let warnings = record.suggestion.guardrailWarnings.joined(separator: "\n")
+            return warnings + "\n\n" + disclaimer
+        }
+
+        return disclaimer
     }
 
     private func settingStatusColor(_ status: LoopInsightsSettingStatus) -> Color {
