@@ -32,6 +32,11 @@ public struct FavoriteFoodDetailView: View {
     public var body: some View {
         if let food {
             List {
+                // FoodFinder integration — thumbnail display
+                if FoodFinder_FeatureFlags.isEnabled {
+                    FoodFinder_FavoriteThumbnail(food: food)
+                }
+
                 Section("Information") {
                     VStack(spacing: 16) {
                         let rows: [(field: String, value: String)] = [
@@ -45,8 +50,22 @@ public struct FavoriteFoodDetailView: View {
                                 Text(row.field)
                                     .font(.subheadline)
                                 Spacer()
-                                Text(row.value)
-                                    .font(.subheadline)
+                                if row.field == String(localized: "Food Type", comment: "Label for food type entry on add favorite food screen"),
+                                   FoodFinder_FeatureFlags.isEnabled,
+                                   let thumb = FoodFinder_FavoritesHelper.thumbnail(for: food) {
+                                    Image(uiImage: thumb)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 32, height: 32)
+                                        .cornerRadius(6)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                        )
+                                } else {
+                                    Text(row.value)
+                                        .font(.subheadline)
+                                }
                             }
                         }
                     }

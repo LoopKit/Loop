@@ -300,6 +300,8 @@ extension SettingsView {
 
             loopInsightsSection
 
+            foodFinderSettingsRow
+
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
@@ -394,7 +396,20 @@ extension SettingsView {
             }
         }
     }
-    
+
+    // FoodFinder — single settings insertion point
+    private var foodFinderSettingsRow: some View {
+        NavigationLink(destination: AISettingsView()) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "fork.knife.circle.fill")
+                            .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
+                            .font(.system(size: 36)),
+                        label: NSLocalizedString("FoodFinder", comment: "Title text for button to FoodFinder Settings"),
+                        descriptiveText: NSLocalizedString("AI-powered & barcode food analysis", comment: "Descriptive text for FoodFinder Settings"))
+        }
+    }
+
     private var cgmChoices: [ActionSheet.Button] {
         var result = viewModel.cgmManagerSettingsViewModel.availableDevices
             .sorted(by: {$0.localizedTitle < $1.localizedTitle})

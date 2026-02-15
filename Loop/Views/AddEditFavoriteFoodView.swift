@@ -27,8 +27,8 @@ struct AddEditFavoriteFoodView: View {
     }
     
     /// Initializer for presenting the `AddEditFavoriteFoodView` prepopulated from the `CarbEntryView`
-    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, onSave: @escaping (NewFavoriteFood) -> Void) {
-        self._viewModel = StateObject(wrappedValue: AddEditFavoriteFoodViewModel(carbsQuantity: carbsQuantity, foodType: foodType, absorptionTime: absorptionTime, onSave: onSave))
+    init(carbsQuantity: Double?, foodType: String, absorptionTime: TimeInterval, name: String = "", thumbnailImage: UIImage? = nil, onSave: @escaping (NewFavoriteFood) -> Void) {
+        self._viewModel = StateObject(wrappedValue: AddEditFavoriteFoodViewModel(carbsQuantity: carbsQuantity, foodType: foodType, absorptionTime: absorptionTime, name: name, thumbnailImage: thumbnailImage, onSave: onSave))
     }
     
     var body: some View {
@@ -88,11 +88,22 @@ struct AddEditFavoriteFoodView: View {
     
     private var card: some View {
         VStack(spacing: 10) {
+            // Thumbnail from AI camera capture
+            if let thumb = viewModel.thumbnailImage {
+                Image(uiImage: thumb)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 120)
+                    .clipped()
+                    .cornerRadius(8)
+                    .padding(.bottom, 4)
+            }
+
             let nameFocused: Binding<Bool> = Binding(get: { expandedRow == .name }, set: { expandedRow = $0 ? .name : nil })
             let carbQuantityFocused: Binding<Bool> = Binding(get: { expandedRow == .carbQuantity }, set: { expandedRow = $0 ? .carbQuantity : nil })
             let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
             let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
-            
+
             TextFieldRow(text: $viewModel.name, isFocused: nameFocused, title: String(localized: "Name", comment: "Label for name row on add favorite food screen"), placeholder: String(localized: "Apple", comment: "Default name on add favorite food screen"))
             
             CardSectionDivider()
