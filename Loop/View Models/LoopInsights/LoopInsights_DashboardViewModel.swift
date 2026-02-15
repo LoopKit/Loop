@@ -326,6 +326,14 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     func confirmApply() {
         guard let record = recordToApply else { return }
 
+        // Hard block: cannot apply if any proposed value is outside absolute bounds
+        if record.suggestion.hasAbsoluteViolation {
+            LoopInsights_FeatureFlags.log.error("confirmApply BLOCKED: suggestion has absolute guardrail violation")
+            recordToApply = nil
+            showingApplyConfirmation = false
+            return
+        }
+
         let snapshotBefore = try? coordinator.captureCurrentSnapshot()
 
         // Write the therapy settings changes to Loop
@@ -355,6 +363,20 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     /// Apply with user-edited values from the pre-fill editor
     func applyEditedSuggestion(editedBlocks: [LoopInsightsTimeBlock]) {
         guard let record = recordToApply else { return }
+
+        // Validate edited blocks against absolute bounds
+        let settingType = record.suggestion.settingType
+        for block in editedBlocks {
+            let classification = LoopInsights_SafetyGuardrails.classify(
+                value: block.proposedValue, settingType: settingType
+            )
+            if classification == .belowAbsolute || classification == .aboveAbsolute {
+                LoopInsights_FeatureFlags.log.error("applyEditedSuggestion BLOCKED: edited value \(block.proposedValue) outside absolute bounds for \(settingType.displayName)")
+                recordToApply = nil
+                showingPreFillEditor = false
+                return
+            }
+        }
 
         let snapshotBefore = try? coordinator.captureCurrentSnapshot()
 
@@ -495,6 +517,12 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     // MARK: - Private
 
     private func autoApplySuggestion(_ suggestion: LoopInsightsSuggestion) async {
+        // Stricter for automated changes: block if ANY value is outside recommended range
+        if suggestion.hasGuardrailWarning {
+            LoopInsights_FeatureFlags.log.error("autoApply BLOCKED: suggestion for \(suggestion.settingType.displayName) has guardrail warning — requires manual review")
+            return
+        }
+
         let snapshotBefore = try? coordinator.captureCurrentSnapshot()
 
         coordinator.applyTherapyChanges(suggestion: suggestion)
