@@ -512,7 +512,7 @@ final class LoopInsights_AIAnalysis {
 
                 // Warn (but pass through): values outside recommended bounds
                 if classification != .withinRecommended {
-                    LoopInsights_FeatureFlags.log.default(
+                    LoopInsights_FeatureFlags.log.warning(
                         "Guardrail WARNING: \(settingType.displayName) proposed \(block.proposedValue) at \(block.startTimeFormatted) — outside recommended range"
                     )
                 }
