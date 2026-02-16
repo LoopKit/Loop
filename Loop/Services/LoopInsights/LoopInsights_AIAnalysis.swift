@@ -179,6 +179,20 @@ final class LoopInsights_AIAnalysis {
         - CAFFEINE: Active caffeine >100mg can increase insulin resistance and glucose variability. \
           Factor caffeine timing into your assessment of glucose patterns, especially morning highs.
 
+        INSULIN TYPE CONTEXT — When insulin type data is provided:
+        - RAPID-ACTING (Novolog/Humalog/Apidra): Onset ~15 min, peak activity ~75 min, duration ~6 hrs. \
+          Standard absorption profile. Post-meal glucose should begin dropping within 60-90 min of bolus. \
+          Pre-bolusing 15-20 min before meals is effective. Corrections take 2-3 hrs to fully resolve.
+        - ULTRA-RAPID (Fiasp/Lyumjev): Onset ~2-5 min, peak activity ~55 min, duration ~6 hrs. \
+          Faster onset and earlier peak means: \
+          Post-meal spikes should be smaller — if spike is still large, CR is more likely the issue (not timing). \
+          Corrections resolve faster (~1.5-2 hrs) — if glucose stays high after correction, ISF is likely too high. \
+          Less tail stacking risk — basal adjustments can be slightly more aggressive per time block. \
+          Pre-bolusing is less critical — a large spike despite on-time bolusing strongly suggests weak CR.
+        - Use insulin type to distinguish TIMING issues from DOSING issues. A Novolog user with post-meal \
+          spikes that resolve by hour 3 may need more pre-bolus time, not a CR change. A Fiasp user with \
+          the same pattern likely needs a CR adjustment since Fiasp should already be active.
+
         RESPONSE FORMAT:
         Respond with valid JSON in this exact structure:
         {
@@ -257,6 +271,11 @@ final class LoopInsights_AIAnalysis {
         prompt += "\n### Carb Ratio Schedule\(settingType == .carbRatio ? " ← ANALYZING THIS" : "")\n"
         for item in settings.carbRatioItems {
             prompt += "- \(formatTime(item.startTime)): \(String(format: "%.1f", item.value)) g/U\n"
+        }
+
+        if let insulinType = settings.insulinTypeName {
+            prompt += "\n### Insulin Type\n"
+            prompt += "- Currently using: \(insulinType)\n"
         }
 
         prompt += "\n"
