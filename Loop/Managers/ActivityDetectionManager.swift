@@ -366,11 +366,13 @@ class ActivityDetectionManager {
 
             let additionalSteps = currentSteps - stepsAtThreshold
 
-            // Require a walking pace of at least 20 steps/minute during the
-            // confirmation window. This filters out incidental steps (fidgeting,
-            // walking to the kitchen) while catching even slow walks.
-            // For 120s window: need 40 additional steps. For 30s: need 15.
-            let minAdditionalSteps = max(15, Int(timerInterval / 60.0 * 20.0))
+            // Require a walking pace of at least 30 steps/minute based on
+            // ACTUAL elapsed time (not configured interval). iOS often delays
+            // timers when backgrounded, so actual elapsed can be 2-3x longer.
+            // Using actual elapsed prevents casual household steps from passing
+            // during extended timer delays.
+            // For 120s actual: need 60. For 293s actual: need 146.
+            let minAdditionalSteps = max(15, Int(elapsed / 60.0 * 30.0))
 
             if additionalSteps >= minAdditionalSteps {
                 // Steps are accumulating at a walking pace — confirm the activity
@@ -405,7 +407,7 @@ class ActivityDetectionManager {
                     additionalSteps,
                     minAdditionalSteps
                 )
-                self.fileLog.log("REJECTED \(activity.displayName) - only \(additionalSteps) additional steps (need >= \(minAdditionalSteps))")
+                self.fileLog.log("REJECTED \(activity.displayName) - only \(additionalSteps) additional steps in \(String(format: "%.0f", elapsed))s (need >= \(minAdditionalSteps) at 30 steps/min)")
 
                 self.stateQueue.sync {
                     self._stepThresholdReachedTime = nil
