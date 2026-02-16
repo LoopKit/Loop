@@ -205,26 +205,32 @@ class ActivityDetectionManager {
     private func processPedometerUpdate(totalSteps: Int) {
         fileLog.log("Processing pedometer: \(totalSteps) steps (threshold: \(stepThreshold))")
 
-        let (shouldStartTimer, alreadyConfirmed) = stateQueue.sync { () -> (Bool, Bool) in
+        let (shouldStartTimer, alreadyConfirmed, stepsChanged) = stateQueue.sync { () -> (Bool, Bool, Bool) in
+            let previousSteps = _totalSteps
             _totalSteps = totalSteps
+            let changed = totalSteps != previousSteps
 
-            // Already confirmed — nothing to do
+            // Already confirmed — only care if steps actually changed
             guard _currentActivity == nil else {
-                return (false, true)
+                return (false, true, changed)
             }
 
             // Check if we just crossed the step threshold
             if totalSteps >= stepThreshold && _stepThresholdReachedTime == nil {
                 _stepThresholdReachedTime = Date()
-                return (true, false)
+                return (true, false, changed)
             }
 
-            return (false, false)
+            return (false, false, changed)
         }
 
         if alreadyConfirmed {
-            // Steps still coming - restart the stop timer
-            startActivityStopTimer()
+            // Only restart the stop timer when new steps actually come in.
+            // Pedometer fires callbacks every ~2.5s even with unchanged count —
+            // restarting on every callback prevents the stop timer from ever expiring.
+            if stepsChanged {
+                startActivityStopTimer()
+            }
             return
         }
 
