@@ -155,10 +155,13 @@ final class LoopInsights_DataAggregator {
             LoopInsightsTherapySnapshot.LoopInsightsScheduleItem(startTime: $0.startTime, value: $0.value)
         } ?? []
 
+        let insulinTypeName = settings.insulinType?.title
+
         return LoopInsightsTherapySnapshot(
             basalRateItems: basalItems,
             insulinSensitivityItems: isfItems,
             carbRatioItems: crItems,
+            insulinTypeName: insulinTypeName,
             capturedAt: Date()
         )
     }

@@ -720,6 +720,7 @@ struct LoopInsightsTherapySnapshot: Codable {
     let basalRateItems: [LoopInsightsScheduleItem]
     let insulinSensitivityItems: [LoopInsightsScheduleItem]
     let carbRatioItems: [LoopInsightsScheduleItem]
+    let insulinTypeName: String?
     let capturedAt: Date
 
     struct LoopInsightsScheduleItem: Codable, Identifiable {
