@@ -302,6 +302,7 @@ extension SettingsView {
 
             foodFinderSettingsRow
 
+
             NavigationLink(destination: AutoPresetsSettingsView()) {
                 LargeButton(
                     action: {},
