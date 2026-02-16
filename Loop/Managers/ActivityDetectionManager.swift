@@ -360,8 +360,14 @@ class ActivityDetectionManager {
 
             let additionalSteps = currentSteps - stepsAtThreshold
 
-            if additionalSteps > 5 {
-                // Steps are still accumulating — confirm the activity
+            // Require a walking pace of at least 20 steps/minute during the
+            // confirmation window. This filters out incidental steps (fidgeting,
+            // walking to the kitchen) while catching even slow walks.
+            // For 120s window: need 40 additional steps. For 30s: need 15.
+            let minAdditionalSteps = max(15, Int(timerInterval / 60.0 * 20.0))
+
+            if additionalSteps >= minAdditionalSteps {
+                // Steps are accumulating at a walking pace — confirm the activity
                 let activityType = self.stateQueue.sync { self._detectedActivityType } ?? activity
 
                 os_log(
@@ -386,12 +392,14 @@ class ActivityDetectionManager {
             } else {
                 // Not enough additional steps — user may have stopped
                 os_log(
-                    "%{public}@ confirmation failed - only %{public}d additional steps since threshold (need > 5)",
+                    "%{public}@ confirmation failed - only %{public}d additional steps since threshold (need >= %{public}d)",
                     log: self.log,
                     type: .debug,
                     activity.displayName,
-                    additionalSteps
+                    additionalSteps,
+                    minAdditionalSteps
                 )
+                self.fileLog.log("REJECTED \(activity.displayName) - only \(additionalSteps) additional steps (need >= \(minAdditionalSteps))")
 
                 self.stateQueue.sync {
                     self._stepThresholdReachedTime = nil
