@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import Combine
 
 /// Tracks alcohol intake with linear metabolism model and delayed hypoglycemia risk.
 /// Entries are persisted to UserDefaults. Uses ~1 standard drink/hour linear metabolism.
