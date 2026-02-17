@@ -53,6 +53,8 @@ class ActivityDetectionManager {
     private var _stepThresholdReachedTime: Date?
     private var _pedometerStartTime: Date?
     private var _totalSteps: Int = 0
+    private var _lastStepChangeTime: Date?
+    private var _lastClassifierTime: Date?
 
     private var isMonitoring: Bool {
         get { stateQueue.sync { _isMonitoring } }
@@ -162,6 +164,8 @@ class ActivityDetectionManager {
             _stepThresholdReachedTime = nil
             _pedometerStartTime = nil
             _totalSteps = 0
+            _lastStepChangeTime = nil
+            _lastClassifierTime = nil
         }
 
         os_log("Stopped activity detection monitoring", log: log, type: .info)
@@ -175,6 +179,7 @@ class ActivityDetectionManager {
             _pedometerStartTime = startDate
             _totalSteps = 0
             _stepThresholdReachedTime = nil
+            _lastStepChangeTime = nil
         }
 
         fileLog.log("Pedometer started from: \(startDate)")
@@ -209,6 +214,11 @@ class ActivityDetectionManager {
             let previousSteps = _totalSteps
             _totalSteps = totalSteps
             let changed = totalSteps != previousSteps
+
+            // Track when steps last changed (for recency check at confirmation)
+            if changed {
+                _lastStepChangeTime = Date()
+            }
 
             // Already confirmed — only care if steps actually changed
             guard _currentActivity == nil else {
@@ -291,6 +301,7 @@ class ActivityDetectionManager {
             if let type = type {
                 self.stateQueue.sync {
                     self._detectedActivityType = type
+                    self._lastClassifierTime = Date()
                 }
             } else {
                 // Non-target activity detected — may need to trigger stop
@@ -360,8 +371,8 @@ class ActivityDetectionManager {
             }
 
             // Check if steps increased since the threshold was reached
-            let (currentSteps, thresholdTime) = self.stateQueue.sync { () -> (Int, Date?) in
-                return (self._totalSteps, self._stepThresholdReachedTime)
+            let (currentSteps, thresholdTime, lastStepTime, classifierType, classifierTime) = self.stateQueue.sync { () -> (Int, Date?, Date?, AutoPresetActivityType?, Date?) in
+                return (self._totalSteps, self._stepThresholdReachedTime, self._lastStepChangeTime, self._detectedActivityType, self._lastClassifierTime)
             }
 
             let additionalSteps = currentSteps - stepsAtThreshold
@@ -374,9 +385,44 @@ class ActivityDetectionManager {
             // For 120s actual: need 60. For 293s actual: need 146.
             let minAdditionalSteps = max(15, Int(elapsed / 60.0 * 30.0))
 
-            if additionalSteps >= minAdditionalSteps {
+            // Recency check: user must still be actively walking when the timer fires.
+            // If the last step change was more than 30 seconds ago, the user stopped
+            // walking before the confirmation window ended — reject even if total
+            // steps were sufficient (prevents "walk 1 min, sit 1 min" false positives).
+            let stepRecencyLimit: TimeInterval = 30
+            let now = Date()
+            let stepIsRecent: Bool
+            if let lastStep = lastStepTime {
+                let sinceLast = now.timeIntervalSince(lastStep)
+                stepIsRecent = sinceLast <= stepRecencyLimit
+                self.fileLog.log("Recency check: last step change \(String(format: "%.1f", sinceLast))s ago (limit: \(stepRecencyLimit)s) → \(stepIsRecent ? "PASS" : "FAIL")")
+            } else {
+                stepIsRecent = false
+                self.fileLog.log("Recency check: no step changes recorded → FAIL")
+            }
+
+            // Classifier check: when Require High Confidence is ON, CoreMotion's
+            // activity classifier must have recently confirmed the activity type
+            // (at high confidence only). This prevents step-count-only confirmation
+            // when the device isn't confident the user is actually walking/running.
+            let classifierConfirmed: Bool
+            if self.requireHighConfidence {
+                let classifierRecencyLimit: TimeInterval = 60
+                if let cType = classifierType, let cTime = classifierTime {
+                    let sinceClassifier = now.timeIntervalSince(cTime)
+                    classifierConfirmed = sinceClassifier <= classifierRecencyLimit
+                    self.fileLog.log("Classifier check (high confidence required): \(cType.displayName) confirmed \(String(format: "%.1f", sinceClassifier))s ago (limit: \(classifierRecencyLimit)s) → \(classifierConfirmed ? "PASS" : "FAIL")")
+                } else {
+                    classifierConfirmed = false
+                    self.fileLog.log("Classifier check (high confidence required): no classifier data → FAIL")
+                }
+            } else {
+                classifierConfirmed = true // not required when toggle is off
+            }
+
+            if additionalSteps >= minAdditionalSteps && stepIsRecent && classifierConfirmed {
                 // Steps are accumulating at a walking pace — confirm the activity
-                let activityType = self.stateQueue.sync { self._detectedActivityType } ?? activity
+                let activityType = classifierType ?? activity
 
                 os_log(
                     "%{public}@ confirmed after %.1fs - %{public}d total steps (%{public}d additional since threshold)",
@@ -398,16 +444,23 @@ class ActivityDetectionManager {
                 // Start the stop timer - will fire if no more steps come in
                 self.startActivityStopTimer()
             } else {
-                // Not enough additional steps — user may have stopped
+                // Not enough additional steps, user stopped, or classifier didn't confirm
+                let reason: String
+                if !stepIsRecent {
+                    reason = "user stopped walking before timer fired"
+                } else if !classifierConfirmed {
+                    reason = "CoreMotion classifier did not confirm activity at high confidence"
+                } else {
+                    reason = "only \(additionalSteps) additional steps (need >= \(minAdditionalSteps))"
+                }
                 os_log(
-                    "%{public}@ confirmation failed - only %{public}d additional steps since threshold (need >= %{public}d)",
+                    "%{public}@ confirmation failed - %{public}@",
                     log: self.log,
                     type: .debug,
                     activity.displayName,
-                    additionalSteps,
-                    minAdditionalSteps
+                    reason
                 )
-                self.fileLog.log("REJECTED \(activity.displayName) - only \(additionalSteps) additional steps in \(String(format: "%.0f", elapsed))s (need >= \(minAdditionalSteps) at 30 steps/min)")
+                self.fileLog.log("REJECTED \(activity.displayName) - \(reason) in \(String(format: "%.0f", elapsed))s")
 
                 self.stateQueue.sync {
                     self._stepThresholdReachedTime = nil
@@ -435,8 +488,6 @@ class ActivityDetectionManager {
             _activityStopTimer = nil
         }
 
-        let stepsAtStopStart = stateQueue.sync { _totalSteps }
-
         let newTimer = Timer(timeInterval: activityStopInterval, repeats: false) { [weak self] timer in
             guard let self = self else {
                 timer.invalidate()
@@ -448,48 +499,31 @@ class ActivityDetectionManager {
                 return
             }
 
-            // Check if steps increased during the stop interval
-            let currentSteps = self.stateQueue.sync { self._totalSteps }
-            let additionalSteps = currentSteps - stepsAtStopStart
+            // This timer only fires after activityStopInterval seconds of no step changes,
+            // because every step change restarts it (see processPedometerUpdate).
+            // If we get here, the user has stopped walking.
+            let activityToStop = self.stateQueue.sync { () -> AutoPresetActivityType? in
+                let activity = self._currentActivity
+                self._currentActivity = nil
+                self._stepThresholdReachedTime = nil
+                self._activityStopTimer = nil
+                return activity
+            }
 
-            if additionalSteps > 10 {
-                // User resumed walking — cancel the stop
+            if let activity = activityToStop {
+                self.delegate?.activityDetectionDidStop(activity)
                 os_log(
-                    "Stop cancelled - %{public}d steps detected during stop interval",
+                    "%{public}@ stopped after %.0fs of inactivity",
                     log: self.log,
                     type: .info,
-                    additionalSteps
+                    activity.displayName,
+                    self.activityStopInterval
                 )
-                self.fileLog.log("Stop cancelled - \(additionalSteps) steps during stop interval, continuing activity")
-                self.stateQueue.sync {
-                    self._activityStopTimer = nil
-                }
-            } else {
-                // User has stopped — deactivate
-                let activityToStop = self.stateQueue.sync { () -> AutoPresetActivityType? in
-                    let activity = self._currentActivity
-                    self._currentActivity = nil
-                    self._stepThresholdReachedTime = nil
-                    self._activityStopTimer = nil
-                    return activity
-                }
-
-                if let activity = activityToStop {
-                    self.delegate?.activityDetectionDidStop(activity)
-                    os_log(
-                        "%{public}@ stopped after %.0fs of inactivity (%{public}d steps)",
-                        log: self.log,
-                        type: .info,
-                        activity.displayName,
-                        self.activityStopInterval,
-                        additionalSteps
-                    )
-                    self.fileLog.log("DEACTIVATED \(activity.displayName) after \(self.activityStopInterval)s stop interval (\(additionalSteps) steps)")
-                }
-
-                // Reset pedometer for next detection cycle
-                self.resetPedometer()
+                self.fileLog.log("DEACTIVATED \(activity.displayName) after \(self.activityStopInterval)s of no steps")
             }
+
+            // Reset pedometer for next detection cycle
+            self.resetPedometer()
 
             timer.invalidate()
         }
@@ -518,6 +552,7 @@ class ActivityDetectionManager {
             _totalSteps = 0
             _stepThresholdReachedTime = nil
             _pedometerStartTime = nil
+            _lastStepChangeTime = nil
         }
 
         // Restart pedometer for next detection cycle
