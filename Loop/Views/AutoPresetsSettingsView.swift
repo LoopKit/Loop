@@ -206,20 +206,23 @@ struct AutoPresetsSettingsView: View {
             }
             .padding(.vertical, 4)
 
-            Toggle(isOn: Binding(
-                get: { coordinator.settings.requireHighConfidence },
-                set: { value in
-                    coordinator.updateSettings { $0.requireHighConfidence = value }
-                }
-            )) {
-                VStack(alignment: .leading) {
-                    Text("Require High Confidence")
-                        .font(.headline)
-                    Text("Only activate preset when motion is detected with high confidence. More strict but may miss some activity.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
+            // High Confidence toggle hidden — CoreMotion's classifier is too
+            // slow/unreliable to gate confirmation. Step-based checks (rate +
+            // recency) are sufficient. Backend code remains for future use.
+            // Toggle(isOn: Binding(
+            //     get: { coordinator.settings.requireHighConfidence },
+            //     set: { value in
+            //         coordinator.updateSettings { $0.requireHighConfidence = value }
+            //     }
+            // )) {
+            //     VStack(alignment: .leading) {
+            //         Text("Require High Confidence")
+            //             .font(.headline)
+            //         Text("Only activate preset when motion is detected with high confidence. More strict but may miss some activity.")
+            //             .font(.caption)
+            //             .foregroundColor(.secondary)
+            //     }
+            // }
         }
     }
 
