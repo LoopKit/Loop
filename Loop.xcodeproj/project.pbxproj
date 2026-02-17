@@ -623,6 +623,8 @@
 		51352D31C402E3F02651F5D2 /* LoopInsights_AGPChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B71CC769321E323ACED2E8EC /* LoopInsights_AGPChartView.swift */; };
 		230C0B8EE9C8E341C7D3C395 /* LoopInsights_MealInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C47D229ABCAB8F4394631D /* LoopInsights_MealInsightsView.swift */; };
 		4CC0E7120DEF811F7D268665 /* LoopInsights_CaffeineLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DB299AD493553DA6E1A02B /* LoopInsights_CaffeineLogView.swift */; };
+		08484BF38BCF05D6013FC659 /* LoopInsights_AlcoholTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */; };
+		5750459159D6F9324C3CC23F /* LoopInsights_AlcoholLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1479,6 +1481,8 @@
 		B71CC769321E323ACED2E8EC /* LoopInsights_AGPChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AGPChartView.swift; sourceTree = "<group>"; };
 		D9C47D229ABCAB8F4394631D /* LoopInsights_MealInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealInsightsView.swift; sourceTree = "<group>"; };
 		50DB299AD493553DA6E1A02B /* LoopInsights_CaffeineLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_CaffeineLogView.swift; sourceTree = "<group>"; };
+		BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholTracker.swift; sourceTree = "<group>"; };
+		6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholLogView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2770,6 +2774,7 @@
 				B71CC769321E323ACED2E8EC /* LoopInsights_AGPChartView.swift */,
 				D9C47D229ABCAB8F4394631D /* LoopInsights_MealInsightsView.swift */,
 				50DB299AD493553DA6E1A02B /* LoopInsights_CaffeineLogView.swift */,
+				6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */,
 			);
 			path = LoopInsights;
 			sourceTree = "<group>";
@@ -2798,6 +2803,7 @@
 				4C86CC2627D9F765D1343AE0 /* LoopInsights_FoodResponseAnalyzer.swift */,
 				B3C90FF4FDA0C10D7AA5F0AF /* LoopInsights_CaffeineTracker.swift */,
 				0A8AD126B8E7A33598AE1087 /* LoopInsights_NightscoutImporter.swift */,
+				BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */,
 			);
 			path = LoopInsights;
 			sourceTree = "<group>";
@@ -3785,6 +3791,8 @@
 				51352D31C402E3F02651F5D2 /* LoopInsights_AGPChartView.swift in Sources */,
 				230C0B8EE9C8E341C7D3C395 /* LoopInsights_MealInsightsView.swift in Sources */,
 				4CC0E7120DEF811F7D268665 /* LoopInsights_CaffeineLogView.swift in Sources */,
+				08484BF38BCF05D6013FC659 /* LoopInsights_AlcoholTracker.swift in Sources */,
+				5750459159D6F9324C3CC23F /* LoopInsights_AlcoholLogView.swift in Sources */,
 );
 			runOnlyForDeploymentPostprocessing = 0;
 		};

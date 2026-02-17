@@ -29,6 +29,7 @@ final class LoopInsights_Coordinator: ObservableObject {
     let goalStore: LoopInsights_GoalStore
     let healthKitManager: LoopInsights_HealthKitManager?
     let caffeineTracker: LoopInsights_CaffeineTracker
+    let alcoholTracker: LoopInsights_AlcoholTracker
 
     /// Background monitor for proactive suggestions (lazy-initialized)
     lazy var backgroundMonitor: LoopInsights_BackgroundMonitor = LoopInsights_BackgroundMonitor(coordinator: self)
@@ -72,6 +73,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.goalStore = LoopInsights_GoalStore.shared
         self.caffeineTracker = LoopInsights_CaffeineTracker.shared
         self.caffeineTracker.healthKitManager = hkManager
+        self.alcoholTracker = LoopInsights_AlcoholTracker.shared
     }
 
     /// Initialize with test data fixtures (for simulator/developer mode).
@@ -86,6 +88,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.suggestionStore = LoopInsights_SuggestionStore.shared
         self.goalStore = LoopInsights_GoalStore.shared
         self.caffeineTracker = LoopInsights_CaffeineTracker.shared
+        self.alcoholTracker = LoopInsights_AlcoholTracker.shared
     }
 
     /// Factory method: creates a Coordinator with test data if available and enabled,
@@ -189,6 +192,12 @@ final class LoopInsights_Coordinator: ObservableObject {
         if LoopInsights_FeatureFlags.caffeineTrackingEnabled {
             let caffeineCtx = caffeineTracker.buildCaffeinePromptContext()
             if !caffeineCtx.isEmpty { context.append(caffeineCtx) }
+        }
+
+        // Alcohol context
+        if LoopInsights_FeatureFlags.alcoholTrackingEnabled {
+            let alcoholCtx = alcoholTracker.buildAlcoholPromptContext()
+            if !alcoholCtx.isEmpty { context.append(alcoholCtx) }
         }
 
         guard !context.isEmpty else { return nil }

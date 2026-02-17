@@ -76,6 +76,9 @@ final class LoopInsights_AIAnalysis {
         CLINICAL REASONING FRAMEWORK — How AID settings interact:
         - BASAL RATE: Controls glucose during fasting periods. Analyze overnight (12AM-6AM) and \
           between-meal trends. In AID systems, the algorithm adjusts delivery around this baseline. \
+          ⚠️ HIGHEST RISK SETTING — basal delivers insulin 24/7, including overnight when the user \
+          is asleep. A basal rate set too high can cause severe nocturnal hypoglycemia. Always err on \
+          the side of under-adjustment. \
           KEY SIGNAL: If the AID algorithm is constantly delivering corrections (high correction bolus \
           count) or if fasting glucose drifts up/down consistently, basal is likely wrong. \
           A basal/bolus split far from 50/50 is a strong signal — high bolus % (>60%) with many \
@@ -130,7 +133,9 @@ final class LoopInsights_AIAnalysis {
         Only skip recommendations when TIR is good AND corrections are low AND basal/bolus is balanced.
 
         SAFETY RULES:
-        1. Never suggest changes larger than 20% from current values in a single step.
+        1. Never suggest CR or ISF changes larger than 20% from current values in a single step. \
+           For BASAL RATE, never suggest changes larger than 10% — basal delivers insulin continuously \
+           and small changes compound over hours, especially overnight.
         2. Conservative changes only — under-adjust rather than over-adjust.
         3. If time below range is >4%, prioritize safety (raise ISF or lower basal before anything else).
         4. Suggestions are advisory only — the user and their healthcare provider make final decisions.
@@ -142,6 +147,24 @@ final class LoopInsights_AIAnalysis {
         6. CUMULATIVE CHANGE AWARENESS: If recent settings changes are listed above, do NOT stack \
            additional changes on top. Settings changes need time (3-7 days minimum) to show effect in the data. \
            If the data predates a recent change, recommend waiting for new data before adjusting further.
+
+        BASAL RATE SAFETY — CRITICAL:
+        Basal rate changes carry the HIGHEST RISK of all three therapy settings. Unlike CR (which only \
+        affects mealtimes) or ISF (which only affects corrections), basal insulin delivers CONTINUOUSLY — \
+        including overnight while the user is asleep and cannot respond to a low. Excessive basal can cause \
+        severe nocturnal hypoglycemia. Follow these rules strictly when analyzing basal rate:
+        1. Maximum 10% change per time block. Even if the data shows a strong signal, limit basal changes \
+           to 10% increments. It is always safer to make two small changes over two analysis cycles than one \
+           large change that risks overnight lows.
+        2. OVERNIGHT PERIODS (10PM–6AM) require EXTRA conservatism. If suggesting a basal INCREASE for any \
+           time block that overlaps overnight hours, explicitly warn about nighttime low risk in your reasoning. \
+           Prefer smaller increases (5–7%) for overnight blocks.
+        3. If time below range is >2% (not just >4%), seriously consider whether basal is already too high \
+           before suggesting ANY basal increase. Nighttime lows are dangerous and often go undetected.
+        4. If the data shows frequent insulin suspensions or negative basal events, this is a STRONG signal \
+           that basal is already too high — do NOT increase it regardless of other signals.
+        5. Always include a safety note in your reasoning when suggesting basal changes, reminding the user \
+           that basal changes affect overnight glucose and should be monitored closely for 3–5 days.
 
         BIOMETRIC CONTEXT — When biometric data is provided:
         - HEART RATE: Elevated resting HR or HR spikes can indicate stress, illness, caffeine, or \
@@ -178,6 +201,22 @@ final class LoopInsights_AIAnalysis {
           not necessarily CR settings.
         - CAFFEINE: Active caffeine >100mg can increase insulin resistance and glucose variability. \
           Factor caffeine timing into your assessment of glucose patterns, especially morning highs.
+        - ALCOHOL: Alcohol SUPPRESSES hepatic gluconeogenesis, causing DELAYED HYPOGLYCEMIA 4-24 hours \
+          after consumption, peaking at 8-12 hours. This is the OPPOSITE of caffeine's effect. \
+          The liver metabolizes ~1 standard drink per hour. During metabolism, glucose production drops ~45%. \
+          CRITICAL OVERNIGHT RISK: Evening drinking causes peak hypo risk during sleep (2AM-10AM). \
+          The AID algorithm can suspend basal but cannot remove IOB already delivered. \
+          Dose-dependent: 1-2 drinks = mild suppression, 20% basal reduction recommended overnight. \
+          3-4 drinks = moderate, higher targets + 20-30% basal reduction. \
+          5+ drinks = severe, up to 24h duration, 30-50% basal reduction. \
+          AVOID AGGRESSIVE CORRECTIONS after drinking — post-meal highs from carb-containing drinks \
+          will self-correct as gluconeogenesis suppression kicks in. Over-correcting causes stacking. \
+          When analyzing settings with active alcohol context: \
+          Do NOT recommend basal INCREASES if drinking occurred in the last 24 hours. \
+          High glucose immediately after drinking is transient — not a settings problem. \
+          Low glucose 8-16 hours after drinking is alcohol-induced — not necessarily a settings problem. \
+          If the analysis period contains significant alcohol intake, note this as a confounding factor \
+          and REDUCE confidence in all settings change recommendations.
 
         INSULIN TYPE CONTEXT — When insulin type data is provided:
         - RAPID-ACTING (Novolog/Humalog/Apidra): Onset ~15 min, peak activity ~75 min, duration ~6 hrs. \
@@ -463,6 +502,16 @@ final class LoopInsights_AIAnalysis {
         prompt += "Use the time-of-day analysis and algorithm workload metrics to identify actionable patterns. "
         prompt += "If supplemental context is provided above, incorporate it into your reasoning. "
         prompt += "If the data clearly supports adjustments, propose them. If not, return empty suggestions. "
+
+        if settingType == .basalRate {
+            prompt += "\n\n⚠️ BASAL RATE REMINDER: Basal rate is the highest-risk setting to change. "
+            prompt += "It delivers insulin continuously, including overnight when the user is asleep. "
+            prompt += "Limit all proposed changes to ≤10% per time block. For overnight blocks (10PM–6AM), "
+            prompt += "prefer even smaller changes (5–7%). If suggesting any basal increase, you MUST include "
+            prompt += "a warning about monitoring for nighttime lows in your reasoning. "
+            prompt += "If time below range is >2%, strongly consider whether basal is already too high.\n"
+        }
+
         prompt += "Respond with JSON only, no markdown formatting."
 
         return prompt
@@ -536,11 +585,14 @@ final class LoopInsights_AIAnalysis {
                     )
                 }
 
-                // Backstop: reject blocks with >25% change from current
+                // Backstop: reject blocks exceeding max change (15% for basal, 25% for CR/ISF)
                 let changePercent = abs(block.changePercent)
-                if changePercent > LoopInsights_SafetyGuardrails.maxChangePercent {
+                let maxAllowed = settingType == .basalRate
+                    ? LoopInsights_SafetyGuardrails.maxBasalChangePercent
+                    : LoopInsights_SafetyGuardrails.maxChangePercent
+                if changePercent > maxAllowed {
                     LoopInsights_FeatureFlags.log.error(
-                        "Guardrail REJECTED: \(settingType.displayName) proposed \(String(format: "%.1f", block.proposedValue)) at \(block.startTimeFormatted) — \(String(format: "%.0f", changePercent))%% change exceeds \(String(format: "%.0f", LoopInsights_SafetyGuardrails.maxChangePercent))%% limit"
+                        "Guardrail REJECTED: \(settingType.displayName) proposed \(String(format: "%.1f", block.proposedValue)) at \(block.startTimeFormatted) — \(String(format: "%.0f", changePercent))%% change exceeds \(String(format: "%.0f", maxAllowed))%% limit"
                     )
                     return false
                 }
