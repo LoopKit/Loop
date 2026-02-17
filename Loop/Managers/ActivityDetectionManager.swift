@@ -385,17 +385,21 @@ class ActivityDetectionManager {
             // For 120s actual: need 60. For 293s actual: need 146.
             let minAdditionalSteps = max(15, Int(elapsed / 60.0 * 30.0))
 
-            // Recency check: user must still be actively walking when the timer fires.
-            // If the last step change was more than 30 seconds ago, the user stopped
-            // walking before the confirmation window ended — reject even if total
-            // steps were sufficient (prevents "walk 1 min, sit 1 min" false positives).
-            let stepRecencyLimit: TimeInterval = 30
+            // Recency check: user must have been walking recently.
+            // Base limit: 30s — if the timer fires on time, user must still be
+            // actively stepping. But iOS often backgrounds the app, delaying the
+            // timer by 2-5x. A 60s timer can fire at 293s. The user may have
+            // walked for 3 minutes (exceeding CAT) but stopped before the delayed
+            // timer fires. Adding the timer delay to the recency limit ensures
+            // the user isn't penalized for iOS backgrounding delays.
+            let timerDelay = max(0, elapsed - timerInterval)
+            let stepRecencyLimit: TimeInterval = 30 + timerDelay
             let now = Date()
             let stepIsRecent: Bool
             if let lastStep = lastStepTime {
                 let sinceLast = now.timeIntervalSince(lastStep)
                 stepIsRecent = sinceLast <= stepRecencyLimit
-                self.fileLog.log("Recency check: last step change \(String(format: "%.1f", sinceLast))s ago (limit: \(stepRecencyLimit)s) → \(stepIsRecent ? "PASS" : "FAIL")")
+                self.fileLog.log("Recency check: last step change \(String(format: "%.1f", sinceLast))s ago (limit: \(String(format: "%.0f", stepRecencyLimit))s = 30s base + \(String(format: "%.0f", timerDelay))s timer delay) → \(stepIsRecent ? "PASS" : "FAIL")")
             } else {
                 stepIsRecent = false
                 self.fileLog.log("Recency check: no step changes recorded → FAIL")
