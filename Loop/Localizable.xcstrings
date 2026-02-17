@@ -1115,14 +1115,58 @@
         }
       }
     },
-    "%@.": {
-      "comment": "Appends a full-stop to a statement",
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@."
+    "%@ value %.1f %@ exceeds the absolute maximum (%.1f %@). This value cannot be applied." : {
+      "comment" : "LoopInsights guardrail: above absolute",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ value %2$.1f %3$@ exceeds the absolute maximum (%4$.1f %5$@). This value cannot be applied."
+          }
+        }
+      }
+    },
+    "%@ value %.1f %@ exceeds the recommended maximum (%.1f %@). Consult your healthcare provider before applying." : {
+      "comment" : "LoopInsights guardrail: above recommended",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ value %2$.1f %3$@ exceeds the recommended maximum (%4$.1f %5$@). Consult your healthcare provider before applying."
+          }
+        }
+      }
+    },
+    "%@ value %.1f %@ is below the absolute minimum (%.1f %@). This value cannot be applied." : {
+      "comment" : "LoopInsights guardrail: below absolute",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ value %2$.1f %3$@ is below the absolute minimum (%4$.1f %5$@). This value cannot be applied."
+          }
+        }
+      }
+    },
+    "%@ value %.1f %@ is below the recommended minimum (%.1f %@). Consult your healthcare provider before applying." : {
+      "comment" : "LoopInsights guardrail: below recommended",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ value %2$.1f %3$@ is below the recommended minimum (%4$.1f %5$@). Consult your healthcare provider before applying."
+          }
+        }
+      }
+    },
+    "%@." : {
+      "comment" : "Appends a full-stop to a statement",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@."
           }
         },
         "da": {
@@ -3311,8 +3355,11 @@
         }
       }
     },
-    "3 Days": {
-      "comment": "LoopInsights analysis period: 3 days"
+    "⚠️ Basal Rate changes carry higher risk than other settings. Basal insulin delivers continuously — including overnight while you sleep. Changes that are too aggressive can cause severe low blood sugar (hypoglycemia), especially at night. Monitor your glucose closely for 3–5 days after applying this change." : {
+      "comment" : "LoopInsights basal rate safety warning"
+    },
+    "3 Days" : {
+      "comment" : "LoopInsights analysis period: 3 days"
     },
     "7 Days": {
       "comment": "LoopInsights analysis period: 7 days"
@@ -3445,8 +3492,8 @@
         }
       }
     },
-    "24h Total": {
-      "comment": "LoopInsights caffeine 24h total"
+    "24h Total" : {
+      "comment" : "LoopInsights alcohol 24h total\nLoopInsights caffeine 24h total"
     },
     "30 Days": {
       "comment": "LoopInsights analysis period: 30 days"
@@ -5472,8 +5519,8 @@
         }
       }
     },
-    "Add Entry": {
-      "comment": "LoopInsights caffeine add entry"
+    "Add Entry" : {
+      "comment" : "LoopInsights alcohol add entry\nLoopInsights caffeine add entry"
     },
     "Add Goal": {
       "comment": "LoopInsights add goal title"
@@ -5985,13 +6032,22 @@
     "AI-powered therapy settings analysis": {
       "comment": "LoopInsights settings descriptive text"
     },
-    "Alert Management": {
-      "comment": "Alert Permissions button text\nTitle of alert management screen",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Administration af advarsler"
+    "Alcohol suppresses liver glucose production, causing delayed low blood sugar 4-24 hours after drinking." : {
+      "comment" : "LoopInsights alcohol risk description"
+    },
+    "Alcohol Tracker" : {
+      "comment" : "LoopInsights alcohol button\nLoopInsights alcohol title"
+    },
+    "Alcohol Tracking" : {
+      "comment" : "LoopInsights alcohol toggle"
+    },
+    "Alert Management" : {
+      "comment" : "Alert Permissions button text\nTitle of alert management screen",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administration af advarsler"
           }
         },
         "de": {
@@ -10542,13 +10598,16 @@
         }
       }
     },
-    "Carb effects": {
-      "comment": "Details for missing data error when carb effects are missing",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تأثيرات الكارب"
+    "Cannot Apply" : {
+      "comment" : "LoopInsights apply blocked title"
+    },
+    "Carb effects" : {
+      "comment" : "Details for missing data error when carb effects are missing",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تأثيرات الكارب"
           }
         },
         "da": {
@@ -14584,11 +14643,14 @@
         }
       }
     },
-    "Custom Caffeine Entry": {
-      "comment": "LoopInsights custom caffeine header"
+    "Custom Alcohol Entry" : {
+      "comment" : "LoopInsights custom alcohol header"
     },
-    "Custom Entry": {
-      "comment": "LoopInsights caffeine custom entry"
+    "Custom Caffeine Entry" : {
+      "comment" : "LoopInsights custom caffeine header"
+    },
+    "Custom Entry" : {
+      "comment" : "LoopInsights alcohol custom entry\nLoopInsights caffeine custom entry"
     },
     "Custom Goal": {
       "comment": "LoopInsights goal type: custom"
@@ -15619,8 +15681,8 @@
         }
       }
     },
-    "Delete Entry": {
-      "comment": "LoopInsights delete caffeine entry"
+    "Delete Entry" : {
+      "comment" : "LoopInsights delete alcohol entry\nLoopInsights delete caffeine entry"
     },
     "Delete Food": {
       "localizations": {
@@ -17033,8 +17095,12 @@
         }
       }
     },
-    "Dry Wit": {
-      "comment": "LoopInsights personality: dry wit"
+    "drinks" : {
+      "comment" : "A unit of measurement for alcohol consumption.",
+      "isCommentAutoGenerated" : true
+    },
+    "Dry Wit" : {
+      "comment" : "LoopInsights personality: dry wit"
     },
     "Duration exceeds: %1$.1f hours": {
       "comment": "Override error description: duration exceed max (1: max duration in hours).",
@@ -17127,8 +17193,11 @@
     "Edit Caffeine": {
       "comment": "LoopInsights edit caffeine title"
     },
-    "Edit Entry": {
-      "comment": "LoopInsights edit caffeine header"
+    "Edit Drink" : {
+      "comment" : "LoopInsights edit alcohol title"
+    },
+    "Edit Entry" : {
+      "comment" : "LoopInsights edit alcohol header\nLoopInsights edit caffeine header"
     },
     "Enable\nBluetooth": {
       "comment": "Message to the user to enable bluetooth",
@@ -18304,8 +18373,14 @@
         }
       }
     },
-    "Estimated Caffeine Level": {
-      "comment": "LoopInsights caffeine level label"
+    "Est. Clear" : {
+      "comment" : "LoopInsights alcohol est clear"
+    },
+    "Estimated Alcohol Level" : {
+      "comment" : "LoopInsights alcohol level label"
+    },
+    "Estimated Caffeine Level" : {
+      "comment" : "LoopInsights caffeine level label"
     },
     "Event History": {
       "comment": "Segmented button title for insulin delivery log event history",
@@ -21149,8 +21224,8 @@
     "HealthKit permissions configured": {
       "comment": "LoopInsights HealthKit permissions configured"
     },
-    "High": {
-      "comment": "LoopInsights TIR high\nLoopInsights confidence: high\nLoopInsights legend: high"
+    "High" : {
+      "comment" : "LoopInsights TIR high\nLoopInsights alcohol risk high\nLoopInsights confidence: high\nLoopInsights legend: high"
     },
     "High Glucose": {
       "localizations": {
@@ -21204,8 +21279,11 @@
         }
       }
     },
-    "High Only": {
-      "comment": "LoopInsights confidence filter: high only"
+    "High Hypoglycemia Risk" : {
+      "comment" : "LoopInsights alcohol high risk title"
+    },
+    "High Only" : {
+      "comment" : "LoopInsights confidence filter: high only"
     },
     "High Stress Periods": {
       "comment": "LoopInsights pattern: high stress"
@@ -21472,13 +21550,16 @@
       "comment": "A placeholder text for the URL of a user's Nightscout site.",
       "isCommentAutoGenerated": true
     },
-    "If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered and non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App.": {
-      "comment": "Focus modes descriptive text (1: app name)",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hvis iOS-fokustilstand er slået TIL, og Slå lyden fra-advarsler er slået fra, leveres kritiske advarsler stadig, og ikke-kritiske advarsler slås fra, indtil %1$@ føjes til hver fokustilstand som en tilladt app."
+    "Hypo Risk" : {
+      "comment" : "LoopInsights alcohol hypo risk"
+    },
+    "If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered and non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App." : {
+      "comment" : "Focus modes descriptive text (1: app name)",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvis iOS-fokustilstand er slået TIL, og Slå lyden fra-advarsler er slået fra, leveres kritiske advarsler stadig, og ikke-kritiske advarsler slås fra, indtil %1$@ føjes til hver fokustilstand som en tilladt app."
           }
         },
         "de": {
@@ -24467,8 +24548,11 @@
       "comment": "The title of a section in the live activity settings view, related to lock screen, dynamic island, or carplay.",
       "isCommentAutoGenerated": true
     },
-    "Log caffeine intake to help the AI correlate caffeine with glucose patterns. Uses a 5.7-hour half-life decay model.": {
-      "comment": "LoopInsights caffeine description"
+    "Log alcohol intake to help the AI account for delayed hypoglycemia risk. Tracks standard drinks with linear metabolism." : {
+      "comment" : "LoopInsights alcohol description"
+    },
+    "Log caffeine intake to help the AI correlate caffeine with glucose patterns. Uses a 5.7-hour half-life decay model." : {
+      "comment" : "LoopInsights caffeine description"
     },
     "Log Dose": {
       "comment": "Button text to log a dose\nTitle for dose logging screen",
@@ -25561,8 +25645,8 @@
     "LoopInsights Settings": {
       "comment": "LoopInsights settings title"
     },
-    "Low": {
-      "comment": "LoopInsights TIR low\nLoopInsights confidence: low\nLoopInsights legend: low"
+    "Low" : {
+      "comment" : "LoopInsights TIR low\nLoopInsights alcohol risk low\nLoopInsights confidence: low\nLoopInsights legend: low"
     },
     "Low Glucose": {
       "comment": "Title for bolus screen warning when glucose is below glucose warning limit.\nTitle for bolus screen warning when glucose is below suspend threshold, but a bolus is recommended",
@@ -25647,13 +25731,16 @@
         }
       }
     },
-    "Manage Permissions in Settings": {
-      "comment": "Manage Permissions in Settings button text",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Administrer tilladelser i Indstillinger"
+    "Low Hypoglycemia Risk" : {
+      "comment" : "LoopInsights alcohol low risk title"
+    },
+    "Manage Permissions in Settings" : {
+      "comment" : "Manage Permissions in Settings button text",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administrer tilladelser i Indstillinger"
           }
         },
         "de": {
@@ -26813,13 +26900,19 @@
     "Model": {
       "comment": "LoopInsights model label"
     },
-    "Momentum effects": {
-      "comment": "Details for missing data error when momentum effects are missing",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تأثيرات النشاط"
+    "Moderate" : {
+      "comment" : "LoopInsights alcohol risk moderate"
+    },
+    "Moderate Hypoglycemia Risk" : {
+      "comment" : "LoopInsights alcohol moderate risk title"
+    },
+    "Momentum effects" : {
+      "comment" : "Details for missing data error when momentum effects are missing",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تأثيرات النشاط"
           }
         },
         "da": {
@@ -26932,8 +27025,11 @@
         }
       }
     },
-    "Monthly": {
-      "comment": "LoopInsights trends tab: monthly"
+    "Monitor glucose closely, especially overnight." : {
+      "comment" : "LoopInsights alcohol high risk warning"
+    },
+    "Monthly" : {
+      "comment" : "LoopInsights trends tab: monthly"
     },
     "More Info": {
       "comment": "Text for more info action on notification of upcoming TestFlight expiration\nText for more info action on notification of upcoming profile expiration",
@@ -27699,8 +27795,11 @@
     "Nightscout Import": {
       "comment": "LoopInsights nightscout toggle"
     },
-    "No alert — suggestions are available when you next open LoopInsights.": {
-      "comment": "LoopInsights notification style desc: silent"
+    "No alcohol entries yet. Tap a preset above to log intake." : {
+      "comment" : "LoopInsights no alcohol entries"
+    },
+    "No alert — suggestions are available when you next open LoopInsights." : {
+      "comment" : "LoopInsights notification style desc: silent"
     },
     "No alerts or alarms will sound while muted. Select how long you would you like to mute for.": {
       "comment": "Message for mute alert duration selection action sheet",
@@ -28539,13 +28638,13 @@
         }
       }
     },
-    "None": {
-      "comment": "Indicates no analysis history record is selected\nIndicates no favorite food is selected",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None"
+    "None" : {
+      "comment" : "Indicates no favorite food is selected\nLoopInsights alcohol risk none",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
           }
         },
         "cs": {
@@ -29632,8 +29731,14 @@
     "Once Weekly": {
       "comment": "LoopInsights monitor frequency: weekly"
     },
-    "One-Tap Apply": {
-      "comment": "LoopInsights apply mode: apply with confirmation"
+    "One or more proposed values are outside safe clinical bounds. This suggestion cannot be applied." : {
+      "comment" : "LoopInsights apply absolute block message"
+    },
+    "One or more values are outside safe clinical bounds and cannot be applied." : {
+      "comment" : "LoopInsights guardrail absolute block message"
+    },
+    "One-Tap Apply" : {
+      "comment" : "LoopInsights apply mode: apply with confirmation"
     },
     "Only notify for high confidence suggestions. Fewer notifications, but only the most impactful changes.": {
       "comment": "LoopInsights monitor confidence: high only desc"
@@ -32420,8 +32525,8 @@
         }
       }
     },
-    "Quick Add": {
-      "comment": "LoopInsights caffeine quick add header"
+    "Quick Add" : {
+      "comment" : "LoopInsights alcohol quick add header\nLoopInsights caffeine quick add header"
     },
     "QUIET HOURS": {
       "comment": "LoopInsights monitor quiet hours header"
@@ -32691,8 +32796,8 @@
     "Rebound Highs": {
       "comment": "LoopInsights pattern: rebound highs"
     },
-    "Recent Entries": {
-      "comment": "LoopInsights caffeine recent entries"
+    "Recent Entries" : {
+      "comment" : "LoopInsights alcohol recent entries\nLoopInsights caffeine recent entries"
     },
     "Recent Meals": {
       "comment": "LoopInsights meal tab: recent"
@@ -33884,19 +33989,25 @@
     "Rise: %+.0f mg/dL": {
       "comment": "LoopInsights meal glucose rise"
     },
-    "Rolling lookback period for automated AI-based suggestions - how far back do you want LoopInsights to look when analyzing your glucose, insulin, and carb data?": {
-      "comment": "LoopInsights analysis period description"
+    "Risk window until %@." : {
+      "comment" : "LoopInsights alcohol risk window"
+    },
+    "Rolling lookback period for automated AI-based suggestions - how far back do you want LoopInsights to look when analyzing your glucose, insulin, and carb data?" : {
+      "comment" : "LoopInsights analysis period description"
     },
     "Run an analysis from the LoopInsights Dashboard to generate your first suggestions.": {
       "comment": "LoopInsights empty history message"
     },
-    "Save": {
-      "comment": "Save goal",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gem"
+    "Safety Warning" : {
+      "comment" : "LoopInsights apply safety warning title\nLoopInsights guardrail warning title"
+    },
+    "Save" : {
+      "comment" : "Save goal",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gem"
           }
         },
         "de": {
@@ -34031,8 +34142,8 @@
         }
       }
     },
-    "Save Changes": {
-      "comment": "LoopInsights save caffeine edit"
+    "Save Changes" : {
+      "comment" : "LoopInsights save alcohol edit\nLoopInsights save caffeine edit"
     },
     "Save without Bolusing": {
       "comment": "Button text to save carbs and/or manual glucose entry without a bolus",
@@ -35291,13 +35402,19 @@
     "Standard Deviation": {
       "comment": "LoopInsights std dev label"
     },
-    "Start time is out of range: %@": {
-      "comment": "Carb error description: invalid start time is out of range.",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starttidspunktet er uden for området: %@"
+    "Standard Drinks" : {
+      "comment" : "LoopInsights alcohol amount"
+    },
+    "Standard Drinks (e.g. 1.5)" : {
+      "comment" : "LoopInsights alcohol amount placeholder"
+    },
+    "Start time is out of range: %@" : {
+      "comment" : "Carb error description: invalid start time is out of range.",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starttidspunktet er uden for området: %@"
           }
         },
         "de": {
@@ -37791,8 +37908,11 @@
         }
       }
     },
-    "Thinking...": {
-      "comment": "LoopInsights chat: AI thinking"
+    "These values are outside the typical recommended range. Consult your healthcare provider before applying." : {
+      "comment" : "LoopInsights guardrail consult message"
+    },
+    "Thinking..." : {
+      "comment" : "LoopInsights chat: AI thinking"
     },
     "This option only applies when Loop's Dosing Strategy is set to Automatic Bolus.": {
       "comment": "String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus",
@@ -37865,8 +37985,8 @@
     "This will restore your therapy settings to the values they had before this suggestion was applied.": {
       "comment": "LoopInsights revert confirmation message"
     },
-    "Time": {
-      "comment": "LoopInsights caffeine time"
+    "Time" : {
+      "comment" : "LoopInsights alcohol time\nLoopInsights caffeine time"
     },
     "Time in Range": {
       "comment": "LoopInsights TIR card title\nLoopInsights goal type: TIR target"
@@ -38329,13 +38449,19 @@
         }
       }
     },
-    "U": {
-      "comment": "The short unit display string for international units of insulin",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "وحدة"
+    "Type" : {
+      "comment" : "LoopInsights alcohol source"
+    },
+    "Type (e.g. Margarita)" : {
+      "comment" : "LoopInsights alcohol source placeholder"
+    },
+    "U" : {
+      "comment" : "The short unit display string for international units of insulin",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وحدة"
           }
         },
         "da": {

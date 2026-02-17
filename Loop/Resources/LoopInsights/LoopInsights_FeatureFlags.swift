@@ -36,6 +36,7 @@ struct LoopInsights_FeatureFlags {
         static let circadianEnabled = "LoopInsights_circadianEnabled"
         static let foodResponseEnabled = "LoopInsights_foodResponseEnabled"
         static let caffeineTrackingEnabled = "LoopInsights_caffeineTrackingEnabled"
+        static let alcoholTrackingEnabled = "LoopInsights_alcoholTrackingEnabled"
         static let nightscoutImportEnabled = "LoopInsights_nightscoutImportEnabled"
         static let agpChartEnabled = "LoopInsights_agpChartEnabled"
     }
@@ -227,6 +228,12 @@ struct LoopInsights_FeatureFlags {
     static var caffeineTrackingEnabled: Bool {
         get { defaults.bool(forKey: Keys.caffeineTrackingEnabled) }
         set { defaults.set(newValue, forKey: Keys.caffeineTrackingEnabled) }
+    }
+
+    /// Enables alcohol intake tracking and the Alcohol Log view.
+    static var alcoholTrackingEnabled: Bool {
+        get { defaults.bool(forKey: Keys.alcoholTrackingEnabled) }
+        set { defaults.set(newValue, forKey: Keys.alcoholTrackingEnabled) }
     }
 
     /// Enables Nightscout data import as an alternative/supplemental data source.

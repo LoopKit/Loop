@@ -105,6 +105,10 @@ struct LoopInsights_SafetyGuardrails {
     /// Maximum allowed percentage change per analysis step (backstop)
     static let maxChangePercent: Double = 25.0
 
+    /// Stricter limit for basal rate — basal delivers insulin continuously (including overnight)
+    /// so changes compound over hours and carry higher hypoglycemia risk than CR or ISF changes.
+    static let maxBasalChangePercent: Double = 15.0
+
     /// Classify a value against the guardrail bounds for a setting type
     static func classify(value: Double, settingType: LoopInsightsSettingType) -> Classification {
         let (recMin, recMax, absMin, absMax) = bounds(for: settingType)

@@ -31,6 +31,7 @@ struct LoopInsights_DashboardView: View {
     @State private var showingGoals = false
     @State private var showingMealInsights = false
     @State private var showingCaffeineLog = false
+    @State private var showingAlcoholLog = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
 
@@ -172,6 +173,11 @@ struct LoopInsights_DashboardView: View {
         .sheet(isPresented: $showingCaffeineLog) {
             NavigationView {
                 LoopInsights_CaffeineLogView(tracker: viewModel.coordinator.caffeineTracker)
+            }
+        }
+        .sheet(isPresented: $showingAlcoholLog) {
+            NavigationView {
+                LoopInsights_AlcoholLogView(tracker: viewModel.coordinator.alcoholTracker)
             }
         }
         .overlay(alignment: .top) {
@@ -609,12 +615,22 @@ struct LoopInsights_DashboardView: View {
             )
         }
 
+        var message = ""
+
         if record.suggestion.hasGuardrailWarning {
             let warnings = record.suggestion.guardrailWarnings.joined(separator: "\n")
-            return warnings + "\n\n" + disclaimer
+            message += warnings + "\n\n"
         }
 
-        return disclaimer
+        if record.suggestion.settingType == .basalRate {
+            message += NSLocalizedString(
+                "⚠️ Basal Rate changes carry higher risk than other settings. Basal insulin delivers continuously — including overnight while you sleep. Changes that are too aggressive can cause severe low blood sugar (hypoglycemia), especially at night. Monitor your glucose closely for 3–5 days after applying this change.",
+                comment: "LoopInsights basal rate safety warning"
+            ) + "\n\n"
+        }
+
+        message += disclaimer
+        return message
     }
 
     private func settingStatusColor(_ status: LoopInsightsSettingStatus) -> Color {
@@ -960,6 +976,20 @@ struct LoopInsights_DashboardView: View {
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                }
+            }
+
+            if LoopInsights_FeatureFlags.alcoholTrackingEnabled {
+                Button(action: { showingAlcoholLog = true }) {
+                    HStack {
+                        Image(systemName: "wineglass.fill")
+                            .foregroundColor(.orange)
+                        Text(NSLocalizedString("Alcohol Tracker", comment: "LoopInsights alcohol button"))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
 

@@ -55,6 +55,7 @@ struct LoopInsights_SettingsView: View {
     @State private var circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
     @State private var foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
     @State private var caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
+    @State private var alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
     @State private var nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
     @State private var agpChartEnabled = LoopInsights_FeatureFlags.agpChartEnabled
 
@@ -135,6 +136,7 @@ struct LoopInsights_SettingsView: View {
             circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
             foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
             caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
+            alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
             nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
             agpChartEnabled = LoopInsights_FeatureFlags.agpChartEnabled
             nightscoutConfig = LoopInsightsNightscoutConfig.load()
@@ -1039,6 +1041,16 @@ struct LoopInsights_SettingsView: View {
                         LoopInsights_FeatureFlags.caffeineTrackingEnabled = newValue
                     }
                 Text(NSLocalizedString("Log caffeine intake to help the AI correlate caffeine with glucose patterns. Uses a 5.7-hour half-life decay model.", comment: "LoopInsights caffeine description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("Alcohol Tracking", comment: "LoopInsights alcohol toggle"), isOn: $alcoholTrackingEnabled)
+                    .onChange(of: alcoholTrackingEnabled) { newValue in
+                        LoopInsights_FeatureFlags.alcoholTrackingEnabled = newValue
+                    }
+                Text(NSLocalizedString("Log alcohol intake to help the AI account for delayed hypoglycemia risk. Tracks standard drinks with linear metabolism.", comment: "LoopInsights alcohol description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
 
