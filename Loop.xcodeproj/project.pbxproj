@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B9D78BD57F35DBCFEC65530D /* AutoPresets_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B2D28F4F6C8955AB18A98C /* AutoPresets_Coordinator.swift */; };
+		BACF15F57C2B75D78B797778 /* AutoPresets_Delegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D17206C8109E75D64068F3D1 /* AutoPresets_Delegate.swift */; };
+		B1F90AD96E591453CF003AC2 /* AutoPresets_Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */; };
+		211A65C85F6FEC59ED083F2D /* AutoPresets_Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */; };
+		0556C20E91536D540ED3D91E /* AutoPresets_ActivityDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */; };
+		FFF05E4789A2D06526EB0A24 /* AutoPresets_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */; };
+		232E357E321361C66498FEEA /* AutoPresets_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */; };
+		13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */; };
 		1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
@@ -758,6 +766,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		31B2D28F4F6C8955AB18A98C /* AutoPresets_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Coordinator.swift; sourceTree = "<group>"; };
+		D17206C8109E75D64068F3D1 /* AutoPresets_Delegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Delegate.swift; sourceTree = "<group>"; };
+		F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Logger.swift; sourceTree = "<group>"; };
+		1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Storage.swift; sourceTree = "<group>"; };
+		58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_ActivityDetectionManager.swift; sourceTree = "<group>"; };
+		177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_SettingsView.swift; sourceTree = "<group>"; };
+		2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Models.swift; sourceTree = "<group>"; };
+		593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_FeatureFlags.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFavoriteFoodViewModel.swift; sourceTree = "<group>"; };
@@ -1520,6 +1536,50 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7B0AE0D9D2D919C6882C0799 /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				31B2D28F4F6C8955AB18A98C /* AutoPresets_Coordinator.swift */,
+				D17206C8109E75D64068F3D1 /* AutoPresets_Delegate.swift */,
+				F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */,
+				1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */,
+				58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		E018293E3B1A901519B37E05 /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		137AA12EFF968E58FEC07BF3 /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		F37727DBE886D7AF624C93AE /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		6D8BAA86B3F7DFB7735A618B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F37727DBE886D7AF624C93AE /* AutoPresets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		14B1736128AED9EC006CCD7C /* Loop Widget Extension */ = {
 			isa = PBXGroup;
 			children = (
@@ -1656,7 +1716,8 @@
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
+
+				137AA12EFF968E58FEC07BF3 /* AutoPresets */,				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
 				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
@@ -1722,7 +1783,8 @@
 		43776F8E1B8022E90074EA36 /* Loop */ = {
 			isa = PBXGroup;
 			children = (
-				C16DA84022E8E104008624C2 /* Plugins */,
+
+				6D8BAA86B3F7DFB7735A618B /* Resources */,				C16DA84022E8E104008624C2 /* Plugins */,
 				B66D1F322E6A5D6600471149 /* Localizable.xcstrings */,
 				B66D1F382E6A5D6600471149 /* InfoPlist.xcstrings */,
 				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
@@ -1960,7 +2022,8 @@
 		43F5C2CF1B92A2ED003EB13D /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				1452F4AA2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift */,
+
+				E018293E3B1A901519B37E05 /* AutoPresets */,				1452F4AA2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift */,
 				B4001CED28CBBC82002FB414 /* AlertManagementView.swift */,
 				897A5A9524C2175B00C4E71D /* BolusEntryView.swift */,
 				C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */,
@@ -2001,7 +2064,8 @@
 		43F5C2E41B93C5D4003EB13D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				B42D124228D371C400E43D22 /* AlertMuter.swift */,
+
+				7B0AE0D9D2D919C6882C0799 /* AutoPresets */,				B42D124228D371C400E43D22 /* AlertMuter.swift */,
 				1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */,
 				439897361CD2F80600223065 /* AnalyticsServicesManager.swift */,
 				B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */,
@@ -3378,7 +3442,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
+
+				B9D78BD57F35DBCFEC65530D /* AutoPresets_Coordinator.swift in Sources */,
+				BACF15F57C2B75D78B797778 /* AutoPresets_Delegate.swift in Sources */,
+				B1F90AD96E591453CF003AC2 /* AutoPresets_Logger.swift in Sources */,
+				211A65C85F6FEC59ED083F2D /* AutoPresets_Storage.swift in Sources */,
+				0556C20E91536D540ED3D91E /* AutoPresets_ActivityDetectionManager.swift in Sources */,
+				FFF05E4789A2D06526EB0A24 /* AutoPresets_SettingsView.swift in Sources */,
+				232E357E321361C66498FEEA /* AutoPresets_Models.swift in Sources */,
+				13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */,				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
 				897A5A9624C2175B00C4E71D /* BolusEntryView.swift in Sources */,
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
 				A9A056B324B93C62007CF06D /* CriticalEventLogExportView.swift in Sources */,
