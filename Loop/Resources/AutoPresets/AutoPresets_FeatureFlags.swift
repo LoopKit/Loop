@@ -20,12 +20,7 @@ enum AutoPresets_FeatureFlags {
     /// Controls whether AutoPresets appears in Settings.
     /// Defaults to false; legacy migration sets true for existing users.
     static var isEnabled: Bool {
-        get {
-            if UserDefaults.standard.object(forKey: Keys.autoPresetsEnabled) == nil {
-                return true
-            }
-            return UserDefaults.standard.bool(forKey: Keys.autoPresetsEnabled)
-        }
+        get { UserDefaults.standard.bool(forKey: Keys.autoPresetsEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Keys.autoPresetsEnabled) }
     }
 }
