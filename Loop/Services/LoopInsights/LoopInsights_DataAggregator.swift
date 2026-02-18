@@ -48,34 +48,19 @@ final class LoopInsights_DataAggregator {
             throw LoopInsightsError.insufficientData("Data provider not available")
         }
 
-        let aggregateStart = CFAbsoluteTimeGetCurrent()
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: STARTED (period: \(period.displayName))")
-
         let endDate = Date()
         let startDate = endDate.addingTimeInterval(-period.timeInterval)
 
         // P3: Fetch all raw data in parallel — each type fetched exactly once
-        let fetchStart = CFAbsoluteTimeGetCurrent()
         async let rawGlucose = dataProvider.getGlucoseSamples(start: startDate, end: endDate)
         async let rawDoses = dataProvider.getNormalizedDoseEntries(start: startDate, end: endDate)
         async let rawCarbs = dataProvider.getCarbEntries(start: startDate, end: endDate)
         async let biometrics = fetchBiometricsIfEnabled(start: startDate, end: endDate)
 
         let glucoseSamples = try await rawGlucose
-        let t1 = CFAbsoluteTimeGetCurrent()
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: glucose fetched (\(glucoseSamples.count) samples) at +\(String(format: "%.2f", t1 - fetchStart))s")
-
         let doseEntries = try await rawDoses
-        let t2 = CFAbsoluteTimeGetCurrent()
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: doses fetched (\(doseEntries.count) entries) at +\(String(format: "%.2f", t2 - fetchStart))s")
-
         let carbEntries = try await rawCarbs
-        let t3 = CFAbsoluteTimeGetCurrent()
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: carbs fetched (\(carbEntries.count) entries) at +\(String(format: "%.2f", t3 - fetchStart))s")
-
         let resolvedBiometrics = try await biometrics
-        let t4 = CFAbsoluteTimeGetCurrent()
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: biometrics fetched at +\(String(format: "%.2f", t4 - fetchStart))s (total fetch phase: \(String(format: "%.2f", t4 - fetchStart))s)")
 
         // P3: Store for external reuse (supplemental context)
         self.lastFetchedGlucoseSamples = glucoseSamples
@@ -86,22 +71,13 @@ final class LoopInsights_DataAggregator {
         }
 
         // Compute stats from pre-fetched data (each may still supplement with HK data)
-        let computeStart = CFAbsoluteTimeGetCurrent()
         async let glucoseStatsTask = computeGlucoseStats(loopSamples: glucoseSamples, start: startDate, end: endDate)
         async let insulinStatsTask = computeInsulinStats(loopDoses: doseEntries, start: startDate, end: endDate)
         async let carbStatsTask = computeCarbStats(loopEntries: carbEntries, start: startDate, end: endDate)
 
         let resolvedGlucoseStats = try await glucoseStatsTask
-        let t5 = CFAbsoluteTimeGetCurrent()
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: glucoseStats computed at +\(String(format: "%.2f", t5 - computeStart))s")
-
         var resolvedInsulinStats = try await insulinStatsTask
-        let t6 = CFAbsoluteTimeGetCurrent()
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: insulinStats computed at +\(String(format: "%.2f", t6 - computeStart))s")
-
         let resolvedCarbStats = try await carbStatsTask
-        let t7 = CFAbsoluteTimeGetCurrent()
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: carbStats computed at +\(String(format: "%.2f", t7 - computeStart))s (total compute phase: \(String(format: "%.2f", t7 - computeStart))s)")
 
         // Phase 5: Compute negative basal stats if circadian flag is enabled
         // P3: Reuses pre-fetched doses and glucose — no duplicate fetches
@@ -149,7 +125,7 @@ final class LoopInsights_DataAggregator {
             }
         }
 
-        let result = LoopInsightsAggregatedStats(
+        return LoopInsightsAggregatedStats(
             period: period,
             glucoseStats: resolvedGlucoseStats,
             insulinStats: resolvedInsulinStats,
@@ -157,8 +133,6 @@ final class LoopInsights_DataAggregator {
             biometricStats: enrichedBiometrics,
             generatedAt: Date()
         )
-        LoopInsights_FeatureFlags.log.debug("⏱ aggregateData: DONE in \(String(format: "%.2f", CFAbsoluteTimeGetCurrent() - aggregateStart))s total")
-        return result
     }
 
     /// Capture a snapshot of current therapy settings
