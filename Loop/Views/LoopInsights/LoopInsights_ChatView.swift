@@ -15,6 +15,7 @@ struct LoopInsights_ChatView: View {
     @ObservedObject var viewModel: LoopInsights_ChatViewModel
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isInputFocused: Bool
+    @State private var previousInputText = ""
 
     var body: some View {
         ZStack {
@@ -223,8 +224,9 @@ struct LoopInsights_ChatView: View {
                 viewModel.sendMessage()
             }
             .tint(.purple)
-            .onChange(of: viewModel.inputText) { oldValue, newValue in
-                viewModel.handleTextChange(oldValue: oldValue, newValue: newValue)
+            .onChange(of: viewModel.inputText) { newValue in
+                viewModel.handleTextChange(oldValue: previousInputText, newValue: newValue)
+                previousInputText = newValue
             }
 
             if viewModel.isSpeaking {

@@ -26,7 +26,7 @@ final class LoopInsights_VoiceService: NSObject, ObservableObject {
     func speak(_ text: String) {
         synthesizer.stopSpeaking(at: .immediate)
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: Locale.current.language.languageCode?.identifier ?? "en")
+        utterance.voice = AVSpeechSynthesisVoice(language: Locale.current.languageCode ?? "en")
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
         isSpeaking = true
         synthesizer.speak(utterance)
