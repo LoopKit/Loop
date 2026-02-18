@@ -69,6 +69,7 @@ struct LoopInsights_ChatView: View {
             UINavigationBar.appearance().scrollEdgeAppearance = appearance
         }
         .onDisappear {
+            viewModel.stopSpeaking()
             let appearance = UINavigationBarAppearance()
             appearance.configureWithDefaultBackground()
             UINavigationBar.appearance().standardAppearance = appearance
@@ -105,16 +106,32 @@ struct LoopInsights_ChatView: View {
         return HStack {
             if isUser { Spacer(minLength: 60) }
 
-            Text(message.content)
-                .font(.subheadline)
-                .foregroundColor(isUser ? .white : .white.opacity(0.9))
-                .textSelection(.enabled)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(isUser ? Color.purple.opacity(0.6) : Color.white.opacity(0.08))
-                )
+            VStack(alignment: isUser ? .trailing : .leading, spacing: 4) {
+                Text(message.content)
+                    .font(.subheadline)
+                    .foregroundColor(isUser ? .white : .white.opacity(0.9))
+                    .textSelection(.enabled)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(isUser ? Color.purple.opacity(0.6) : Color.white.opacity(0.08))
+                    )
+
+                if !isUser && message.voiceInitiated {
+                    Button(action: { viewModel.voiceService.speak(message.content) }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "speaker.wave.2.fill")
+                                .font(.caption2)
+                            Text(NSLocalizedString("Listen", comment: "LoopInsights chat: replay TTS"))
+                                .font(.caption2)
+                        }
+                        .foregroundColor(.purple.opacity(0.7))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.leading, 6)
+                }
+            }
 
             if !isUser { Spacer(minLength: 60) }
         }
@@ -206,17 +223,28 @@ struct LoopInsights_ChatView: View {
                 viewModel.sendMessage()
             }
             .tint(.purple)
-
-            Button(action: { viewModel.sendMessage() }) {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.title3)
-                    .foregroundColor(
-                        viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
-                            ? .white.opacity(0.2)
-                            : .purple
-                    )
+            .onChange(of: viewModel.inputText) { oldValue, newValue in
+                viewModel.handleTextChange(oldValue: oldValue, newValue: newValue)
             }
-            .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
+
+            if viewModel.isSpeaking {
+                Button(action: { viewModel.stopSpeaking() }) {
+                    Image(systemName: "stop.fill")
+                        .font(.title3)
+                        .foregroundColor(.red)
+                }
+            } else {
+                Button(action: { viewModel.sendMessage() }) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(
+                            viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
+                                ? .white.opacity(0.2)
+                                : .purple
+                        )
+                }
+                .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
+            }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
