@@ -625,6 +625,7 @@
 		4CC0E7120DEF811F7D268665 /* LoopInsights_CaffeineLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DB299AD493553DA6E1A02B /* LoopInsights_CaffeineLogView.swift */; };
 		08484BF38BCF05D6013FC659 /* LoopInsights_AlcoholTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */; };
 		5750459159D6F9324C3CC23F /* LoopInsights_AlcoholLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */; };
+		C43D60BE7EB18127C94178B9 /* LoopInsights_VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1483,6 +1484,7 @@
 		50DB299AD493553DA6E1A02B /* LoopInsights_CaffeineLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_CaffeineLogView.swift; sourceTree = "<group>"; };
 		BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholTracker.swift; sourceTree = "<group>"; };
 		6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholLogView.swift; sourceTree = "<group>"; };
+		C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_VoiceService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2804,6 +2806,7 @@
 				B3C90FF4FDA0C10D7AA5F0AF /* LoopInsights_CaffeineTracker.swift */,
 				0A8AD126B8E7A33598AE1087 /* LoopInsights_NightscoutImporter.swift */,
 				BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */,
+				C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */,
 			);
 			path = LoopInsights;
 			sourceTree = "<group>";
@@ -3793,6 +3796,7 @@
 				4CC0E7120DEF811F7D268665 /* LoopInsights_CaffeineLogView.swift in Sources */,
 				08484BF38BCF05D6013FC659 /* LoopInsights_AlcoholTracker.swift in Sources */,
 				5750459159D6F9324C3CC23F /* LoopInsights_AlcoholLogView.swift in Sources */,
+				C43D60BE7EB18127C94178B9 /* LoopInsights_VoiceService.swift in Sources */,
 );
 			runOnlyForDeploymentPostprocessing = 0;
 		};

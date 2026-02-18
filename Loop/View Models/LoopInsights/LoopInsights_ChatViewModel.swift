@@ -20,12 +20,16 @@ final class LoopInsights_ChatViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var inputText = ""
     @Published var errorMessage: String?
+    @Published var isSpeaking = false
 
     // MARK: - Dependencies
 
     private let session: LoopInsightsChatSession
     private let coordinator: LoopInsights_Coordinator
     private let serviceAdapter: LoopInsights_AIServiceAdapter
+    let voiceService = LoopInsights_VoiceService()
+    private var pendingVoiceMessage = false
+    private var autoSendTimer: DispatchWorkItem?
     private var cancellables = Set<AnyCancellable>()
 
     /// Pre-built quick-ask suggestions shown when the conversation is empty
@@ -48,6 +52,10 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         session.$messages
             .receive(on: DispatchQueue.main)
             .assign(to: &$messages)
+
+        voiceService.$isSpeaking
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$isSpeaking)
     }
 
     // MARK: - Actions
@@ -57,10 +65,16 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isLoading else { return }
 
+        let isVoice = pendingVoiceMessage
+        pendingVoiceMessage = false
+        autoSendTimer?.cancel()
+        autoSendTimer = nil
+
         inputText = ""
         errorMessage = nil
+        voiceService.stopSpeaking()
 
-        let userMessage = LoopInsightsChatMessage(role: .user, content: text)
+        let userMessage = LoopInsightsChatMessage(role: .user, content: text, voiceInitiated: isVoice)
         session.appendMessage(userMessage)
 
         isLoading = true
@@ -83,10 +97,14 @@ final class LoopInsights_ChatViewModel: ObservableObject {
 
                 let response = try await serviceAdapter.sendPrompt(systemPrompt, userPrompt: userPrompt)
 
-                let aiMessage = LoopInsightsChatMessage(role: .assistant, content: response)
+                let aiMessage = LoopInsightsChatMessage(role: .assistant, content: response, voiceInitiated: isVoice)
                 session.appendMessage(aiMessage)
 
                 isLoading = false
+
+                if isVoice {
+                    voiceService.speak(response)
+                }
 
             } catch {
                 errorMessage = error.localizedDescription
@@ -101,8 +119,35 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         sendMessage()
     }
 
+    /// Called from the view's `.onChange(of: inputText)` to detect dictation vs typing
+    func handleTextChange(oldValue: String, newValue: String) {
+        let changeSize = newValue.count - oldValue.count
+        let isAppend = newValue.hasPrefix(oldValue) || oldValue.isEmpty
+
+        if isAppend && changeSize >= 4 {
+            pendingVoiceMessage = true
+        } else if changeSize == 1 || changeSize == -1 {
+            pendingVoiceMessage = false
+        }
+
+        autoSendTimer?.cancel()
+        if pendingVoiceMessage && !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let timer = DispatchWorkItem { [weak self] in
+                self?.sendMessage()
+            }
+            autoSendTimer = timer
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: timer)
+        }
+    }
+
+    /// Stop any active TTS playback
+    func stopSpeaking() {
+        voiceService.stopSpeaking()
+    }
+
     /// Clear the conversation and start fresh
     func clearConversation() {
+        voiceService.stopSpeaking()
         session.clear()
         errorMessage = nil
     }

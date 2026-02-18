@@ -966,6 +966,7 @@ struct LoopInsightsChatMessage: Identifiable {
     let role: Role
     let content: String
     let timestamp: Date
+    let voiceInitiated: Bool
 
     enum Role: String {
         case user
@@ -973,11 +974,12 @@ struct LoopInsightsChatMessage: Identifiable {
         case system
     }
 
-    init(role: Role, content: String) {
+    init(role: Role, content: String, voiceInitiated: Bool = false) {
         self.id = UUID()
         self.role = role
         self.content = content
         self.timestamp = Date()
+        self.voiceInitiated = voiceInitiated
     }
 }
 
