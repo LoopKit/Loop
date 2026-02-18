@@ -68,25 +68,16 @@ final class LoopInsights_ChatViewModel: ObservableObject {
     /// Pre-fetch and cache therapy context in the background on chat open
     private func prefetchTherapyContext() {
         Task { @MainActor in
-            let prefetchStart = CFAbsoluteTimeGetCurrent()
-            LoopInsights_FeatureFlags.log.debug("⏱ Chat prefetch: STARTED (period: \(LoopInsights_FeatureFlags.analysisPeriod.displayName))")
-
             var snapshot: LoopInsightsTherapySnapshot?
-            let t0 = CFAbsoluteTimeGetCurrent()
             do { snapshot = try coordinator.captureCurrentSnapshot() }
             catch { LoopInsights_FeatureFlags.log.error("Chat prefetch: snapshot failed: \(error)") }
-            LoopInsights_FeatureFlags.log.debug("⏱ Chat prefetch: snapshot took \(String(format: "%.2f", CFAbsoluteTimeGetCurrent() - t0))s")
 
             var stats: LoopInsightsAggregatedStats?
-            let t1 = CFAbsoluteTimeGetCurrent()
             do { stats = try await coordinator.dataAggregator.aggregateData(period: LoopInsights_FeatureFlags.analysisPeriod) }
             catch { LoopInsights_FeatureFlags.log.error("Chat prefetch: aggregate failed: \(error)") }
-            LoopInsights_FeatureFlags.log.debug("⏱ Chat prefetch: aggregateData took \(String(format: "%.2f", CFAbsoluteTimeGetCurrent() - t1))s")
 
             cachedTherapyContext = Self.buildTherapyContext(snapshot: snapshot, stats: stats)
             cacheTimestamp = Date()
-
-            LoopInsights_FeatureFlags.log.debug("⏱ Chat prefetch: DONE in \(String(format: "%.2f", CFAbsoluteTimeGetCurrent() - prefetchStart))s total")
         }
     }
 
