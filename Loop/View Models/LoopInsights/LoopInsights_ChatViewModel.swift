@@ -32,6 +32,10 @@ final class LoopInsights_ChatViewModel: ObservableObject {
     private var autoSendTimer: DispatchWorkItem?
     private var cancellables = Set<AnyCancellable>()
 
+    /// Cached therapy context built during pre-fetch — reused across messages
+    private var cachedTherapyContext: String?
+    private var cacheTimestamp: Date?
+
     /// Pre-built quick-ask suggestions shown when the conversation is empty
     let quickAskSuggestions: [String] = [
         NSLocalizedString("Why am I high overnight?", comment: "LoopInsights quick ask: overnight highs"),
@@ -56,6 +60,25 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         voiceService.$isSpeaking
             .receive(on: DispatchQueue.main)
             .assign(to: &$isSpeaking)
+
+        // Pre-fetch therapy data so the first message sends instantly
+        prefetchTherapyContext()
+    }
+
+    /// Pre-fetch and cache therapy context in the background on chat open
+    private func prefetchTherapyContext() {
+        Task { @MainActor in
+            var snapshot: LoopInsightsTherapySnapshot?
+            do { snapshot = try coordinator.captureCurrentSnapshot() }
+            catch { LoopInsights_FeatureFlags.log.error("Chat prefetch: snapshot failed: \(error)") }
+
+            var stats: LoopInsightsAggregatedStats?
+            do { stats = try await coordinator.dataAggregator.aggregateData(period: LoopInsights_FeatureFlags.analysisPeriod) }
+            catch { LoopInsights_FeatureFlags.log.error("Chat prefetch: aggregate failed: \(error)") }
+
+            cachedTherapyContext = Self.buildTherapyContext(snapshot: snapshot, stats: stats)
+            cacheTimestamp = Date()
+        }
     }
 
     // MARK: - Actions
@@ -81,14 +104,24 @@ final class LoopInsights_ChatViewModel: ObservableObject {
 
         Task { @MainActor in
             do {
-                var snapshot: LoopInsightsTherapySnapshot?
-                do { snapshot = try coordinator.captureCurrentSnapshot() }
-                catch { LoopInsights_FeatureFlags.log.error("Chat: failed to capture snapshot: \(error)") }
+                // Use cached context if fresh (< 5 min), otherwise re-fetch
+                let context: String
+                if let cached = cachedTherapyContext,
+                   let ts = cacheTimestamp,
+                   Date().timeIntervalSince(ts) < 300 {
+                    context = cached
+                } else {
+                    var snapshot: LoopInsightsTherapySnapshot?
+                    do { snapshot = try coordinator.captureCurrentSnapshot() }
+                    catch { LoopInsights_FeatureFlags.log.error("Chat: failed to capture snapshot: \(error)") }
 
-                var stats: LoopInsightsAggregatedStats?
-                do { stats = try await coordinator.dataAggregator.aggregateData(period: LoopInsights_FeatureFlags.analysisPeriod) }
-                catch { LoopInsights_FeatureFlags.log.error("Chat: failed to aggregate data: \(error)") }
-                let context = Self.buildTherapyContext(snapshot: snapshot, stats: stats)
+                    var stats: LoopInsightsAggregatedStats?
+                    do { stats = try await coordinator.dataAggregator.aggregateData(period: LoopInsights_FeatureFlags.analysisPeriod) }
+                    catch { LoopInsights_FeatureFlags.log.error("Chat: failed to aggregate data: \(error)") }
+                    context = Self.buildTherapyContext(snapshot: snapshot, stats: stats)
+                    cachedTherapyContext = context
+                    cacheTimestamp = Date()
+                }
 
                 let history = session.conversationHistory().dropLast().map { ($0.role, $0.content) }
 
