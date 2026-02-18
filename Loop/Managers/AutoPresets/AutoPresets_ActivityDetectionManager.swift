@@ -1,8 +1,11 @@
 //
-//  ActivityDetectionManager.swift
+//  AutoPresets_ActivityDetectionManager.swift
 //  Loop
 //
-//  Created for Loop AutoPresets Feature
+//  AutoPresets — CoreMotion-based activity detection for auto-preset activation.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import CoreMotion
@@ -12,10 +15,10 @@ import os.log
 // MARK: - Internal Delegate Protocol
 
 /// Internal protocol for activity detection callbacks
-protocol ActivityDetectionDelegate: AnyObject {
-    func activityDetectionDidConfirm(_ activity: AutoPresetActivityType)
-    func activityDetectionDidStop(_ activity: AutoPresetActivityType)
-    func activityDetectionDidEncounterError(_ error: AutoPresetDetectionError)
+protocol AutoPresets_ActivityDetectionDelegate: AnyObject {
+    func activityDetectionDidConfirm(_ activity: AutoPresetsActivityType)
+    func activityDetectionDidStop(_ activity: AutoPresetsActivityType)
+    func activityDetectionDidEncounterError(_ error: AutoPresetsDetectionError)
 }
 
 // MARK: - Activity Detection Manager
@@ -28,7 +31,7 @@ protocol ActivityDetectionDelegate: AnyObject {
 /// 3. Activity classifier determines type (walking vs running) for preset selection
 /// 4. When timer fires → query pedometer for additional steps since threshold
 /// 5. If steps still accumulating → confirm activity and notify delegate
-class ActivityDetectionManager {
+class AutoPresets_ActivityDetectionManager {
 
     // MARK: - Constants
 
@@ -38,18 +41,18 @@ class ActivityDetectionManager {
     // MARK: - Properties
 
     private let log = OSLog(subsystem: "com.loopkit.Loop.AutoPresets", category: "ActivityDetection")
-    private let fileLog = AutoPresetsLogger.shared
+    private let fileLog = AutoPresets_Logger.shared
     private let stateQueue = DispatchQueue(label: "com.loopkit.AutoPresets.ActivityDetection.state", qos: .utility)
 
-    weak var delegate: ActivityDetectionDelegate?
+    weak var delegate: AutoPresets_ActivityDetectionDelegate?
 
     private let pedometer = CMPedometer()
     private let motionActivityManager = CMMotionActivityManager()
 
     // Thread-safe state variables
     private var _isMonitoring = false
-    private var _currentActivity: AutoPresetActivityType?
-    private var _detectedActivityType: AutoPresetActivityType?
+    private var _currentActivity: AutoPresetsActivityType?
+    private var _detectedActivityType: AutoPresetsActivityType?
     private var _stepThresholdReachedTime: Date?
     private var _pedometerStartTime: Date?
     private var _totalSteps: Int = 0
@@ -61,14 +64,14 @@ class ActivityDetectionManager {
         set { stateQueue.sync { _isMonitoring = newValue } }
     }
 
-    private var currentActivity: AutoPresetActivityType? {
+    private var currentActivity: AutoPresetsActivityType? {
         get { stateQueue.sync { _currentActivity } }
         set { stateQueue.sync { _currentActivity = newValue } }
     }
 
     // MARK: - Configuration
 
-    var supportedActivities: Set<AutoPresetActivityType> = [.walking]
+    var supportedActivities: Set<AutoPresetsActivityType> = [.walking]
     var activityStopInterval: TimeInterval = 300
     var continuousActivityTime: TimeInterval = 30
     var requireHighConfidence: Bool = false
@@ -79,7 +82,7 @@ class ActivityDetectionManager {
 
     // MARK: - Public Properties
 
-    var detectedActivity: AutoPresetActivityType? {
+    var detectedActivity: AutoPresetsActivityType? {
         currentActivity
     }
 
@@ -90,11 +93,11 @@ class ActivityDetectionManager {
     // MARK: - Initialization
 
     init() {
-        os_log("ActivityDetectionManager initialized", log: log, type: .debug)
+        os_log("AutoPresets_ActivityDetectionManager initialized", log: log, type: .debug)
     }
 
     deinit {
-        os_log("ActivityDetectionManager deinitializing", log: log, type: .debug)
+        os_log("AutoPresets_ActivityDetectionManager deinitializing", log: log, type: .debug)
         stopMonitoring()
         cleanupTimers()
     }
@@ -235,9 +238,6 @@ class ActivityDetectionManager {
         }
 
         if alreadyConfirmed {
-            // Only restart the stop timer when new steps actually come in.
-            // Pedometer fires callbacks every ~2.5s even with unchanged count —
-            // restarting on every callback prevents the stop timer from ever expiring.
             if stepsChanged {
                 startActivityStopTimer()
             }
@@ -287,7 +287,7 @@ class ActivityDetectionManager {
             guard acceptable else { return }
 
             // Determine activity type
-            var type: AutoPresetActivityType?
+            var type: AutoPresetsActivityType?
             if self.supportedActivities.contains(.walking), activity.walking,
                !activity.automotive, !activity.cycling
             {
@@ -330,7 +330,7 @@ class ActivityDetectionManager {
 
     // MARK: - Continuous Activity Timer (Phase 2: Sustained Activity Check)
 
-    private func startContinuousActivityTimer(for activity: AutoPresetActivityType) {
+    private func startContinuousActivityTimer(for activity: AutoPresetsActivityType) {
         os_log(
             "Starting continuous activity timer with interval: %.0fs (setting value: %.0fs)",
             log: log,
@@ -371,27 +371,14 @@ class ActivityDetectionManager {
             }
 
             // Check if steps increased since the threshold was reached
-            let (currentSteps, thresholdTime, lastStepTime, classifierType, classifierTime) = self.stateQueue.sync { () -> (Int, Date?, Date?, AutoPresetActivityType?, Date?) in
+            let (currentSteps, thresholdTime, lastStepTime, classifierType, classifierTime) = self.stateQueue.sync { () -> (Int, Date?, Date?, AutoPresetsActivityType?, Date?) in
                 return (self._totalSteps, self._stepThresholdReachedTime, self._lastStepChangeTime, self._detectedActivityType, self._lastClassifierTime)
             }
 
             let additionalSteps = currentSteps - stepsAtThreshold
 
-            // Require a walking pace of at least 30 steps/minute based on
-            // ACTUAL elapsed time (not configured interval). iOS often delays
-            // timers when backgrounded, so actual elapsed can be 2-3x longer.
-            // Using actual elapsed prevents casual household steps from passing
-            // during extended timer delays.
-            // For 120s actual: need 60. For 293s actual: need 146.
             let minAdditionalSteps = max(15, Int(elapsed / 60.0 * 30.0))
 
-            // Recency check: user must have been walking recently.
-            // Base limit: 30s — if the timer fires on time, user must still be
-            // actively stepping. But iOS often backgrounds the app, delaying the
-            // timer by 2-5x. A 60s timer can fire at 293s. The user may have
-            // walked for 3 minutes (exceeding CAT) but stopped before the delayed
-            // timer fires. Adding the timer delay to the recency limit ensures
-            // the user isn't penalized for iOS backgrounding delays.
             let timerDelay = max(0, elapsed - timerInterval)
             let stepRecencyLimit: TimeInterval = 30 + timerDelay
             let now = Date()
@@ -405,10 +392,6 @@ class ActivityDetectionManager {
                 self.fileLog.log("Recency check: no step changes recorded → FAIL")
             }
 
-            // Classifier check: when Require High Confidence is ON, CoreMotion's
-            // activity classifier must have recently confirmed the activity type
-            // (at high confidence only). This prevents step-count-only confirmation
-            // when the device isn't confident the user is actually walking/running.
             let classifierConfirmed: Bool
             if self.requireHighConfidence {
                 let classifierRecencyLimit: TimeInterval = 60
@@ -421,11 +404,10 @@ class ActivityDetectionManager {
                     self.fileLog.log("Classifier check (high confidence required): no classifier data → FAIL")
                 }
             } else {
-                classifierConfirmed = true // not required when toggle is off
+                classifierConfirmed = true
             }
 
             if additionalSteps >= minAdditionalSteps && stepIsRecent && classifierConfirmed {
-                // Steps are accumulating at a walking pace — confirm the activity
                 let activityType = classifierType ?? activity
 
                 os_log(
@@ -445,10 +427,8 @@ class ActivityDetectionManager {
                 }
                 self.delegate?.activityDetectionDidConfirm(activityType)
 
-                // Start the stop timer - will fire if no more steps come in
                 self.startActivityStopTimer()
             } else {
-                // Not enough additional steps, user stopped, or classifier didn't confirm
                 let reason: String
                 if !stepIsRecent {
                     reason = "user stopped walking before timer fired"
@@ -471,7 +451,6 @@ class ActivityDetectionManager {
                     self._continuousActivityTimer = nil
                 }
 
-                // Reset pedometer to start fresh
                 self.resetPedometer()
             }
 
@@ -503,10 +482,7 @@ class ActivityDetectionManager {
                 return
             }
 
-            // This timer only fires after activityStopInterval seconds of no step changes,
-            // because every step change restarts it (see processPedometerUpdate).
-            // If we get here, the user has stopped walking.
-            let activityToStop = self.stateQueue.sync { () -> AutoPresetActivityType? in
+            let activityToStop = self.stateQueue.sync { () -> AutoPresetsActivityType? in
                 let activity = self._currentActivity
                 self._currentActivity = nil
                 self._stepThresholdReachedTime = nil
@@ -526,7 +502,6 @@ class ActivityDetectionManager {
                 self.fileLog.log("DEACTIVATED \(activity.displayName) after \(self.activityStopInterval)s of no steps")
             }
 
-            // Reset pedometer for next detection cycle
             self.resetPedometer()
 
             timer.invalidate()

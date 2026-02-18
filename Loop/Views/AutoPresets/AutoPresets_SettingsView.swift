@@ -1,8 +1,11 @@
 //
-//  AutoPresetsSettingsView.swift
+//  AutoPresets_SettingsView.swift
 //  Loop
 //
-//  Created for Loop AutoPresets Feature
+//  AutoPresets — Settings UI for configuring activity-based preset automation.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import LoopKit
@@ -11,8 +14,8 @@ import UIKit
 
 // MARK: - Main Settings View
 
-struct AutoPresetsSettingsView: View {
-    @ObservedObject private var coordinator = AutoPresetsCoordinator.shared
+struct AutoPresets_SettingsView: View {
+    @ObservedObject private var coordinator = AutoPresets_Coordinator.shared
     @State private var showingErrorAlert = false
     @State private var errorMessage = ""
     @State private var showingDebugLogs = false
@@ -38,7 +41,7 @@ struct AutoPresetsSettingsView: View {
             Text(errorMessage)
         }
         .sheet(isPresented: $showingDebugLogs) {
-            DebugLogsView(isPresented: $showingDebugLogs)
+            AutoPresets_DebugLogsView(isPresented: $showingDebugLogs)
         }
     }
 
@@ -85,7 +88,7 @@ struct AutoPresetsSettingsView: View {
     // MARK: - Activity Type Sections
 
     private var activityTypeSections: some View {
-        ForEach(AutoPresetActivityType.allCases, id: \.self) { activityType in
+        ForEach(AutoPresetsActivityType.allCases, id: \.self) { activityType in
             Section {
                 activityTypeRow(for: activityType)
 
@@ -96,7 +99,7 @@ struct AutoPresetsSettingsView: View {
         }
     }
 
-    private func activityTypeRow(for activityType: AutoPresetActivityType) -> some View {
+    private func activityTypeRow(for activityType: AutoPresetsActivityType) -> some View {
         HStack {
             Image(systemName: activityType.systemImageName)
                 .foregroundColor(coordinator.settings.supportedActivityTypes.contains(activityType) ? .blue : .secondary)
@@ -120,7 +123,7 @@ struct AutoPresetsSettingsView: View {
         }
     }
 
-    private func presetSelectionView(for activityType: AutoPresetActivityType) -> some View {
+    private func presetSelectionView(for activityType: AutoPresetsActivityType) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Select your preset for \(activityType.displayName)")
                 .font(.subheadline)
@@ -270,7 +273,7 @@ struct AutoPresetsSettingsView: View {
 
             if coordinator.settings.debugLoggingEnabled {
                 Button {
-                    let logs = AutoPresetsLogger.shared.getLogContents()
+                    let logs = AutoPresets_Logger.shared.getLogContents()
                     UIPasteboard.general.string = logs
                     debugLogsCopied = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -297,7 +300,7 @@ struct AutoPresetsSettingsView: View {
                 }
 
                 Button(role: debugLogsCleared ? .cancel : .destructive) {
-                    AutoPresetsLogger.shared.clearLogs()
+                    AutoPresets_Logger.shared.clearLogs()
                     debugLogsCleared = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         debugLogsCleared = false
@@ -313,7 +316,7 @@ struct AutoPresetsSettingsView: View {
         }
     }
 
-    private func activityLogRow(for logEntry: AutoPresetLogEntry) -> some View {
+    private func activityLogRow(for logEntry: AutoPresetsLogEntry) -> some View {
         HStack {
             Image(systemName: logEntry.event.iconName)
                 .foregroundColor(colorForEvent(logEntry.event))
@@ -361,7 +364,7 @@ struct AutoPresetsSettingsView: View {
 
     // MARK: - Helper Methods
 
-    private func activityToggleBinding(for activityType: AutoPresetActivityType) -> Binding<Bool> {
+    private func activityToggleBinding(for activityType: AutoPresetsActivityType) -> Binding<Bool> {
         Binding(
             get: { coordinator.settings.supportedActivityTypes.contains(activityType) },
             set: { enabled in
@@ -382,7 +385,7 @@ struct AutoPresetsSettingsView: View {
         )
     }
 
-    private func toggleActivityType(_ activityType: AutoPresetActivityType) {
+    private func toggleActivityType(_ activityType: AutoPresetsActivityType) {
         let currentlyEnabled = coordinator.settings.supportedActivityTypes.contains(activityType)
 
         if !currentlyEnabled {
@@ -401,7 +404,7 @@ struct AutoPresetsSettingsView: View {
         }
     }
 
-    private func colorForEvent(_ event: AutoPresetLogEvent) -> Color {
+    private func colorForEvent(_ event: AutoPresetsLogEvent) -> Color {
         switch event {
         case .presetActivated: return .blue
         case .presetDeactivated: return .blue
@@ -410,7 +413,7 @@ struct AutoPresetsSettingsView: View {
         }
     }
 
-    private func findMatchingActivationEntry(for deactivationEntry: AutoPresetLogEntry) -> AutoPresetLogEntry? {
+    private func findMatchingActivationEntry(for deactivationEntry: AutoPresetsLogEntry) -> AutoPresetsLogEntry? {
         guard deactivationEntry.event == .presetDeactivated else { return nil }
 
         return coordinator.settings.recentActivityLog.first { entry in
@@ -479,7 +482,7 @@ struct AutoPresetsSettingsView: View {
 
 // MARK: - Debug Logs View
 
-struct DebugLogsView: View {
+struct AutoPresets_DebugLogsView: View {
     @Binding var isPresented: Bool
     @State private var logContents: String = ""
 
@@ -502,15 +505,15 @@ struct DebugLogsView: View {
             }
         }
         .onAppear {
-            logContents = AutoPresetsLogger.shared.getLogContents()
+            logContents = AutoPresets_Logger.shared.getLogContents()
         }
     }
 }
 
 // MARK: - Icon View
 
-struct AutoPresetsIconView: View {
-    @ObservedObject private var coordinator = AutoPresetsCoordinator.shared
+struct AutoPresets_IconView: View {
+    @ObservedObject private var coordinator = AutoPresets_Coordinator.shared
     @State private var isAnimating = false
 
     var body: some View {
@@ -538,10 +541,10 @@ struct AutoPresetsIconView: View {
 // MARK: - Preview
 
 #if DEBUG
-struct AutoPresetsSettingsView_Previews: PreviewProvider {
+struct AutoPresets_SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            AutoPresetsSettingsView()
+            AutoPresets_SettingsView()
         }
     }
 }

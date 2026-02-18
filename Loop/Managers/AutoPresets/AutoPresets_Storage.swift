@@ -1,15 +1,18 @@
 //
-//  AutoPresetsStorage.swift
+//  AutoPresets_Storage.swift
 //  Loop
 //
-//  Created for Loop AutoPresets Feature
+//  AutoPresets — Isolated persistence using its own UserDefaults suite.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation
 import os.log
 
 /// Isolated persistence for AutoPresets using its own UserDefaults suite
-public class AutoPresetsStorage {
+public class AutoPresets_Storage {
 
     private let log = OSLog(subsystem: "com.loopkit.Loop.AutoPresets", category: "Storage")
 
@@ -59,7 +62,7 @@ public class AutoPresetsStorage {
     // MARK: - Activity Log
 
     /// Add a log entry to the activity log
-    public func addLogEntry(_ entry: AutoPresetLogEntry) {
+    public func addLogEntry(_ entry: AutoPresetsLogEntry) {
         updateSettings { settings in
             settings.recentActivityLog.insert(entry, at: 0)
             if settings.recentActivityLog.count > 20 {
@@ -77,11 +80,11 @@ public class AutoPresetsStorage {
 
     /// Add a log entry with parameters
     public func addLogEntry(
-        event: AutoPresetLogEvent,
-        activityType: AutoPresetActivityType? = nil,
+        event: AutoPresetsLogEvent,
+        activityType: AutoPresetsActivityType? = nil,
         presetName: String? = nil
     ) {
-        let entry = AutoPresetLogEntry(
+        let entry = AutoPresetsLogEntry(
             date: Date(),
             event: event,
             activityType: activityType,
@@ -114,18 +117,16 @@ public class AutoPresetsStorage {
         let activityPresetsMap = legacyDefaults.dictionary(forKey: "com.loopkit.Loop.activityPresets") as? [String: String] ?? [:]
 
         // Migrate activity log
-        var migratedLog: [AutoPresetLogEntry] = []
+        var migratedLog: [AutoPresetsLogEntry] = []
         if let logData = legacyDefaults.data(forKey: "com.loopkit.Loop.recentWalkingActivityLog") {
-            // Try to decode legacy log format and convert
-            // Note: Legacy format used different types, so we need to handle conversion
             if let legacyEntries = try? JSONDecoder().decode([LegacyLogEntry].self, from: logData) {
                 migratedLog = legacyEntries.compactMap { legacy in
                     guard let event = convertLegacyEvent(legacy.event) else { return nil }
-                    return AutoPresetLogEntry(
+                    return AutoPresetsLogEntry(
                         id: UUID(),
                         date: legacy.date,
                         event: event,
-                        activityType: legacy.activityType.flatMap { AutoPresetActivityType(rawValue: $0) },
+                        activityType: legacy.activityType.flatMap { AutoPresetsActivityType(rawValue: $0) },
                         presetName: legacy.presetName
                     )
                 }
@@ -133,7 +134,7 @@ public class AutoPresetsStorage {
         }
 
         // Convert supported types
-        let supportedTypes = Set(supportedTypesRaw.compactMap { AutoPresetActivityType(rawValue: $0) })
+        let supportedTypes = Set(supportedTypesRaw.compactMap { AutoPresetsActivityType(rawValue: $0) })
 
         // Create new settings
         var newSettings = AutoPresetsSettings()
@@ -148,6 +149,11 @@ public class AutoPresetsStorage {
         // Save to new suite
         settings = newSettings
         didMigrateFromLegacy = true
+
+        // If user had AutoPresets enabled previously, enable the feature flag
+        if isEnabled {
+            AutoPresets_FeatureFlags.isEnabled = true
+        }
 
         os_log(
             "Migrated AutoPresets settings - enabled: %{public}@, activities: %{public}@, presets: %{public}@, continuous activity time: %.0fs, stop: %.0fs",
@@ -181,7 +187,7 @@ public class AutoPresetsStorage {
     }
 
     /// Convert legacy event string to new enum
-    private func convertLegacyEvent(_ legacyEvent: String) -> AutoPresetLogEvent? {
+    private func convertLegacyEvent(_ legacyEvent: String) -> AutoPresetsLogEvent? {
         switch legacyEvent {
         case "featureEnabled": return .featureEnabled
         case "featureDisabled": return .featureDisabled

@@ -2862,7 +2862,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Preprandial"
+            "value" : "Înainte de masă"
           }
         },
         "ru" : {
@@ -3910,7 +3910,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rotiți pentru a confirma bolusul"
+            "value" : "Rotiți coroana digitală pentru bolus"
           }
         },
         "ru" : {

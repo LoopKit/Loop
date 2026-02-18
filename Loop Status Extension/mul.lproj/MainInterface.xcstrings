@@ -43,7 +43,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glucides actifs"
+            "value" : "Éventuellement 92 mg/dL"
           }
         },
         "he" : {
@@ -91,7 +91,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carbohidrați activi"
+            "value" : "Eventual 92 mg/dL"
           }
         },
         "ru" : {
@@ -330,7 +330,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Insulină activă"
+            "value" : "IOB 1.0 U"
           }
         },
         "ru" : {

@@ -287,6 +287,12 @@
             "value" : "The app uses NFC to pair with diabetes devices."
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'application utilise la NFC pour se connecter aux dispositifs de traitement du diabète."
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",

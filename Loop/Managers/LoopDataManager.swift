@@ -128,7 +128,7 @@ final class LoopDataManager {
         self.trustedTimeOffset = trustedTimeOffset
 
         // Set up AutoPresets coordinator delegate
-        AutoPresetsCoordinator.shared.delegate = self
+        AutoPresets_Coordinator.shared.delegate = self
 
         if #available(iOS 16.2, *) {
             self.liveActivityManager = LiveActivityManager(
@@ -2618,11 +2618,11 @@ extension LoopDataManager: ServicesManagerDelegate {
 
 }
 
-// MARK: - AutoPresetsDelegate
+// MARK: - AutoPresets_Delegate
 
-extension LoopDataManager: AutoPresetsDelegate {
+extension LoopDataManager: AutoPresets_Delegate {
 
-    func autoPresets(_ coordinator: AutoPresetsCoordinator,
+    func autoPresets(_ coordinator: AutoPresets_Coordinator,
                      shouldActivatePreset preset: TemporaryScheduleOverridePreset) {
         logger.default("AutoPresets activating preset: %{public}@", preset.name)
 
@@ -2631,7 +2631,7 @@ extension LoopDataManager: AutoPresetsDelegate {
         }
     }
 
-    func autoPresets(_ coordinator: AutoPresetsCoordinator,
+    func autoPresets(_ coordinator: AutoPresets_Coordinator,
                      shouldDeactivatePreset preset: TemporaryScheduleOverridePreset) {
         guard let currentOverride = settings.scheduleOverride,
               case let .preset(currentPreset) = currentOverride.context,
@@ -2647,11 +2647,11 @@ extension LoopDataManager: AutoPresetsDelegate {
         }
     }
 
-    func autoPresetsAvailablePresets(_ coordinator: AutoPresetsCoordinator) -> [TemporaryScheduleOverridePreset] {
+    func autoPresetsAvailablePresets(_ coordinator: AutoPresets_Coordinator) -> [TemporaryScheduleOverridePreset] {
         settings.overridePresets
     }
 
-    func autoPresetsCurrentOverride(_ coordinator: AutoPresetsCoordinator) -> TemporaryScheduleOverride? {
+    func autoPresetsCurrentOverride(_ coordinator: AutoPresets_Coordinator) -> TemporaryScheduleOverride? {
         settings.scheduleOverride
     }
 }

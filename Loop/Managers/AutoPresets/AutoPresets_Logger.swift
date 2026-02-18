@@ -1,19 +1,22 @@
 //
-//  AutoPresetsLogger.swift
+//  AutoPresets_Logger.swift
 //  Loop
 //
-//  Created for Loop AutoPresets Feature
+//  AutoPresets — Simple file-based logger for debugging.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation
 
 /// Simple file-based logger for AutoPresets debugging
 /// Logs are written to Documents/AutoPresetsLog.txt
-public class AutoPresetsLogger {
+public class AutoPresets_Logger {
 
     // MARK: - Singleton
 
-    public static let shared = AutoPresetsLogger()
+    public static let shared = AutoPresets_Logger()
 
     // MARK: - Properties
 
@@ -42,7 +45,7 @@ public class AutoPresetsLogger {
 
     /// Whether debug logging is enabled (checked from settings)
     public var isEnabled: Bool {
-        AutoPresetsStorage().settings.debugLoggingEnabled
+        AutoPresets_Storage().settings.debugLoggingEnabled
     }
 
     /// Log a message with timestamp (only if debug logging is enabled)

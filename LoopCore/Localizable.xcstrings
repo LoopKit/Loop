@@ -137,6 +137,18 @@
             "value" : "Aktive Kohlenhydrate"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucides actifs"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbohidrați activi"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -146,7 +158,15 @@
       }
     },
     "Active Carbohydrates (COB)" : {
-      "comment" : "Description for the Carbohydrates On Board selection for the Live Activity configuration"
+      "comment" : "Description for the Carbohydrates On Board selection for the Live Activity configuration",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbohidrați activi (COB)"
+          }
+        }
+      }
     },
     "Active Carbs" : {
       "comment" : "Name of the \"Active Carbs\" option in the Live Activity settings.",
@@ -157,6 +177,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktive KH"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucides actifs"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbohidrați activi"
           }
         },
         "zh-Hans" : {
@@ -178,6 +210,18 @@
             "value" : "Aktives Insulin"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insuline active"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insulină activă"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -187,10 +231,26 @@
       }
     },
     "Active Insulin (IOB)" : {
-      "comment" : "Description for the Insulin On Board selection for the Live Activity configuration"
+      "comment" : "Description for the Insulin On Board selection for the Live Activity configuration",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insulină activă (IOB)"
+          }
+        }
+      }
     },
     "at" : {
-      "comment" : "Label used for the Updated time value in the Live Activity view"
+      "comment" : "Label used for the Updated time value in the Live Activity view",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "la"
+          }
+        }
+      }
     },
     "Automatic Bolus" : {
       "comment" : "Title string for automatic bolus dosing strategy",
@@ -290,6 +350,18 @@
             "value" : "Basal"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basal"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bazală"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -299,7 +371,15 @@
       }
     },
     "COB" : {
-      "comment" : "Label used for the Carbohydrates On Board value in the Live Activity view"
+      "comment" : "Label used for the Carbohydrates On Board value in the Live Activity view",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COB"
+          }
+        }
+      }
     },
     "Current BG" : {
       "comment" : "Label not shown in the Live Activity view",
@@ -308,6 +388,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktueller BZ"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glycémie actuelle"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glicemie curentă"
           }
         },
         "zh-Hans" : {
@@ -329,6 +421,18 @@
             "value" : "Aktueller Blutzucker"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glycémie actuelle"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glicemia curentă"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -338,7 +442,15 @@
       }
     },
     "Current Glucose (Value and Arrow)" : {
-      "comment" : "Description for the Current Glucose selection for the Live Activity configuration"
+      "comment" : "Description for the Current Glucose selection for the Live Activity configuration",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glicemia curentă (Valoare și tendință)"
+          }
+        }
+      }
     },
     "Delta" : {
       "comment" : "Label used for the Delta Glucose in the Live Activity view",
@@ -348,11 +460,31 @@
             "state" : "translated",
             "value" : "Delta"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta"
+          }
         }
       }
     },
     "Delta Glucose (Delta)" : {
-      "comment" : "Description for the Delta Glucose selection for the Live Activity configuration"
+      "comment" : "Description for the Delta Glucose selection for the Live Activity configuration",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta glicemie (Delta)"
+          }
+        }
+      }
     },
     "Eventual BG" : {
       "comment" : "Label used for the Forecasted Glucose in the Live Activity view",
@@ -361,6 +493,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Progn. BZ"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glycémie éventuelle"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glicemia eventuală"
           }
         },
         "zh-Hans" : {
@@ -382,6 +526,18 @@
             "value" : "Zukünftig"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Éventuellement"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În cele din urmă"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -391,7 +547,15 @@
       }
     },
     "Forecasted Glucose (Eventual BG)" : {
-      "comment" : "Description for the Forecasted Glucose selection for the Live Activity configuration"
+      "comment" : "Description for the Forecasted Glucose selection for the Live Activity configuration",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glicemie prognozată (glicemie eventuală)"
+          }
+        }
+      }
     },
     "In which mode do you want to render the Live Activity" : {
       "comment" : "Description of a setting that allows the user to choose between a large or small display of the Live Activity.",
@@ -403,6 +567,18 @@
             "value" : "In welchem Modus soll die Live-Aktivität angezeigt werden"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans quel mode voulez-vous afficher les Activités en direct"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În ce mod doriți să redați activitatea live"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -412,7 +588,15 @@
       }
     },
     "IOB" : {
-      "comment" : "Label used for the Insulin On Board value in the Live Activity view"
+      "comment" : "Label used for the Insulin On Board value in the Live Activity view",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IOB"
+          }
+        }
+      }
     },
     "Large" : {
       "comment" : "Name of the \"Large\" Live Activity mode.",
@@ -425,6 +609,18 @@
             "value" : "Groß"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grand"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mare"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -434,13 +630,37 @@
       }
     },
     "Plot and Row" : {
-      "comment" : "Short name to choose the Lock Screen display including the the plot"
+      "comment" : "Short name to choose the Lock Screen display including the the plot",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parcelă și rând"
+          }
+        }
+      }
     },
     "Relative Basal Rate (Basal)" : {
-      "comment" : "Description for the Basal Rate plot selection for the Live Activity configuration"
+      "comment" : "Description for the Basal Rate plot selection for the Live Activity configuration",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rată bazală relativă (bazală)"
+          }
+        }
+      }
     },
     "Row Only" : {
-      "comment" : "Short name to choose the Lock Screen display without the plot"
+      "comment" : "Short name to choose the Lock Screen display without the plot",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doar rând"
+          }
+        }
+      }
     },
     "Small" : {
       "comment" : "Name of the \"Small\" Live Activity mode.",
@@ -451,6 +671,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klein"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petit"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mic"
           }
         },
         "zh-Hans" : {
@@ -560,11 +792,31 @@
             "state" : "translated",
             "value" : "Aktualisiert"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis à jour"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizat"
+          }
         }
       }
     },
     "Updated (at)" : {
-      "comment" : "Description for the Updated time selection for the Live Activity configuration"
+      "comment" : "Description for the Updated time selection for the Live Activity configuration",
+      "localizations" : {
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizat (la)"
+          }
+        }
+      }
     },
     "Updated at" : {
       "comment" : "Label for the date and time when the last update was made.",
@@ -575,6 +827,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktualisiert um"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis à jour à"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizat la"
           }
         },
         "zh-Hans" : {

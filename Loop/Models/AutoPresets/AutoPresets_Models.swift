@@ -1,8 +1,11 @@
 //
-//  AutoPresetsModels.swift
+//  AutoPresets_Models.swift
 //  Loop
 //
-//  Created for Loop AutoPresets Feature
+//  AutoPresets — Data models for activity types, settings, log entries, and errors.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Foundation
@@ -10,7 +13,7 @@ import Foundation
 // MARK: - Activity Types
 
 /// Supported activity types for auto-preset activation
-public enum AutoPresetActivityType: String, Codable, CaseIterable, Hashable {
+public enum AutoPresetsActivityType: String, Codable, CaseIterable, Hashable {
     case walking
     case running
 
@@ -32,7 +35,7 @@ public enum AutoPresetActivityType: String, Codable, CaseIterable, Hashable {
 // MARK: - Activity Log Events
 
 /// Events that can be logged in the activity log
-public enum AutoPresetLogEvent: String, Codable {
+public enum AutoPresetsLogEvent: String, Codable {
     case featureEnabled
     case featureDisabled
     case presetActivated
@@ -60,18 +63,18 @@ public enum AutoPresetLogEvent: String, Codable {
 // MARK: - Activity Log Entry
 
 /// A single entry in the activity log
-public struct AutoPresetLogEntry: Codable, Identifiable, Equatable {
+public struct AutoPresetsLogEntry: Codable, Identifiable, Equatable {
     public let id: UUID
     public let date: Date
-    public let event: AutoPresetLogEvent
-    public let activityType: AutoPresetActivityType?
+    public let event: AutoPresetsLogEvent
+    public let activityType: AutoPresetsActivityType?
     public let presetName: String?
 
     public init(
         id: UUID = UUID(),
         date: Date = Date(),
-        event: AutoPresetLogEvent,
-        activityType: AutoPresetActivityType? = nil,
+        event: AutoPresetsLogEvent,
+        activityType: AutoPresetsActivityType? = nil,
         presetName: String? = nil
     ) {
         self.id = id
@@ -90,7 +93,7 @@ public struct AutoPresetsSettings: Codable, Equatable {
     public var isEnabled: Bool
 
     /// Which activity types are being monitored
-    public var supportedActivityTypes: Set<AutoPresetActivityType>
+    public var supportedActivityTypes: Set<AutoPresetsActivityType>
 
     /// Mapping of activity type to preset UUID
     public var activityPresets: [String: String]  // [ActivityType.rawValue: PresetUUID.uuidString]
@@ -108,17 +111,17 @@ public struct AutoPresetsSettings: Codable, Equatable {
     public var debugLoggingEnabled: Bool
 
     /// Recent activity log entries
-    public var recentActivityLog: [AutoPresetLogEntry]
+    public var recentActivityLog: [AutoPresetsLogEntry]
 
     public init(
         isEnabled: Bool = false,
-        supportedActivityTypes: Set<AutoPresetActivityType> = [.walking],
+        supportedActivityTypes: Set<AutoPresetsActivityType> = [.walking],
         activityPresets: [String: String] = [:],
         stopInterval: TimeInterval = 300,
         continuousActivityTime: TimeInterval = 30,
         requireHighConfidence: Bool = false,
         debugLoggingEnabled: Bool = false,
-        recentActivityLog: [AutoPresetLogEntry] = []
+        recentActivityLog: [AutoPresetsLogEntry] = []
     ) {
         self.isEnabled = isEnabled
         self.supportedActivityTypes = supportedActivityTypes
@@ -137,12 +140,12 @@ public struct AutoPresetsSettings: Codable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         isEnabled = (try? container.decode(Bool.self, forKey: .isEnabled)) ?? false
-        supportedActivityTypes = (try? container.decode(Set<AutoPresetActivityType>.self, forKey: .supportedActivityTypes)) ?? [.walking]
+        supportedActivityTypes = (try? container.decode(Set<AutoPresetsActivityType>.self, forKey: .supportedActivityTypes)) ?? [.walking]
         activityPresets = (try? container.decode([String: String].self, forKey: .activityPresets)) ?? [:]
         stopInterval = (try? container.decode(TimeInterval.self, forKey: .stopInterval)) ?? 300
         requireHighConfidence = (try? container.decode(Bool.self, forKey: .requireHighConfidence)) ?? false
         debugLoggingEnabled = (try? container.decode(Bool.self, forKey: .debugLoggingEnabled)) ?? false
-        recentActivityLog = (try? container.decode([AutoPresetLogEntry].self, forKey: .recentActivityLog)) ?? []
+        recentActivityLog = (try? container.decode([AutoPresetsLogEntry].self, forKey: .recentActivityLog)) ?? []
 
         // Try new key first, fall back to legacy key
         if let value = try? container.decode(TimeInterval.self, forKey: .continuousActivityTime) {
@@ -182,13 +185,13 @@ public struct AutoPresetsSettings: Codable, Equatable {
     // MARK: - Helper Methods
 
     /// Get the preset UUID for an activity type
-    public func presetId(for activity: AutoPresetActivityType) -> UUID? {
+    public func presetId(for activity: AutoPresetsActivityType) -> UUID? {
         guard let uuidString = activityPresets[activity.rawValue] else { return nil }
         return UUID(uuidString: uuidString)
     }
 
     /// Set the preset UUID for an activity type
-    public mutating func setPresetId(_ presetId: UUID?, for activity: AutoPresetActivityType) {
+    public mutating func setPresetId(_ presetId: UUID?, for activity: AutoPresetsActivityType) {
         if let presetId = presetId {
             activityPresets[activity.rawValue] = presetId.uuidString
         } else {
@@ -207,7 +210,7 @@ public struct AutoPresetsSettings: Codable, Equatable {
 // MARK: - Detection Errors
 
 /// Errors that can occur during activity detection
-public enum AutoPresetDetectionError: Error {
+public enum AutoPresetsDetectionError: Error {
     case motionNotAvailable
     case permissionDenied
     case configurationError(String)

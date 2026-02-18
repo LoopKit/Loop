@@ -1,8 +1,11 @@
 //
-//  AutoPresetsCoordinator.swift
+//  AutoPresets_Coordinator.swift
 //  Loop
 //
-//  Created for Loop AutoPresets Feature
+//  AutoPresets — Main entry point. Coordinates activity detection and preset activation.
+//
+//  Idea by Taylor Patterson. Coded by Claude Code.
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
 import Combine
@@ -14,29 +17,29 @@ import os.log
 
 /// Main entry point for AutoPresets feature
 /// Coordinates activity detection and preset activation with minimal coupling to Loop
-public class AutoPresetsCoordinator: ObservableObject {
+public class AutoPresets_Coordinator: ObservableObject {
 
     // MARK: - Singleton
 
-    public static let shared = AutoPresetsCoordinator()
+    public static let shared = AutoPresets_Coordinator()
 
     // MARK: - Published Properties
 
     @Published public private(set) var isMonitoring: Bool = false
-    @Published public private(set) var currentDetectedActivity: AutoPresetActivityType?
-    @Published public private(set) var lastError: AutoPresetDetectionError?
+    @Published public private(set) var currentDetectedActivity: AutoPresetsActivityType?
+    @Published public private(set) var lastError: AutoPresetsDetectionError?
 
     // MARK: - Private Properties
 
     private let log = OSLog(subsystem: "com.loopkit.Loop.AutoPresets", category: "Coordinator")
-    private let storage = AutoPresetsStorage()
-    private let activityDetectionManager = ActivityDetectionManager()
+    private let storage = AutoPresets_Storage()
+    private let activityDetectionManager = AutoPresets_ActivityDetectionManager()
 
     // Debounce/guard properties to prevent rapid restarts
     private var isUpdatingSettings = false
     private var pendingRestart: DispatchWorkItem?
 
-    public weak var delegate: AutoPresetsDelegate? {
+    public weak var delegate: AutoPresets_Delegate? {
         didSet {
             // Start monitoring when delegate is set (if not already running)
             if delegate != nil && !isMonitoring {
@@ -82,7 +85,7 @@ public class AutoPresetsCoordinator: ObservableObject {
         storage.migrateFromLegacyIfNeeded()
 
         // Note: Monitoring starts when delegate is set (see delegate didSet)
-        os_log("AutoPresetsCoordinator initialized", log: log, type: .debug)
+        os_log("AutoPresets_Coordinator initialized", log: log, type: .debug)
     }
 
     // MARK: - Public Methods
@@ -112,7 +115,7 @@ public class AutoPresetsCoordinator: ObservableObject {
     }
 
     /// Get the preset for an activity type
-    public func preset(for activity: AutoPresetActivityType) -> TemporaryScheduleOverridePreset? {
+    public func preset(for activity: AutoPresetsActivityType) -> TemporaryScheduleOverridePreset? {
         guard let presetId = settings.presetId(for: activity),
               let delegate = delegate
         else {
@@ -123,7 +126,7 @@ public class AutoPresetsCoordinator: ObservableObject {
     }
 
     /// Set the preset for an activity type
-    public func setPreset(_ preset: TemporaryScheduleOverridePreset?, for activity: AutoPresetActivityType) {
+    public func setPreset(_ preset: TemporaryScheduleOverridePreset?, for activity: AutoPresetsActivityType) {
         objectWillChange.send()
         storage.updateSettings { settings in
             settings.setPresetId(preset?.id, for: activity)
@@ -208,11 +211,11 @@ public class AutoPresetsCoordinator: ObservableObject {
         activityDetectionManager.requireHighConfidence = currentSettings.requireHighConfidence
     }
 
-    private func logEvent(_ event: AutoPresetLogEvent, activity: AutoPresetActivityType? = nil, presetName: String? = nil) {
+    private func logEvent(_ event: AutoPresetsLogEvent, activity: AutoPresetsActivityType? = nil, presetName: String? = nil) {
         storage.addLogEntry(event: event, activityType: activity, presetName: presetName)
     }
 
-    private func activatePreset(for activity: AutoPresetActivityType) {
+    private func activatePreset(for activity: AutoPresetsActivityType) {
         guard let preset = preset(for: activity) else {
             os_log(
                 "No preset configured for %{public}@",
@@ -246,7 +249,7 @@ public class AutoPresetsCoordinator: ObservableObject {
         )
     }
 
-    private func deactivatePreset(for activity: AutoPresetActivityType) {
+    private func deactivatePreset(for activity: AutoPresetsActivityType) {
         guard let presetId = activatedPresetId,
               let preset = availablePresets().first(where: { $0.id == presetId })
         else {
@@ -273,11 +276,11 @@ public class AutoPresetsCoordinator: ObservableObject {
     }
 }
 
-// MARK: - ActivityDetectionDelegate
+// MARK: - AutoPresets_ActivityDetectionDelegate
 
-extension AutoPresetsCoordinator: ActivityDetectionDelegate {
+extension AutoPresets_Coordinator: AutoPresets_ActivityDetectionDelegate {
 
-    func activityDetectionDidConfirm(_ activity: AutoPresetActivityType) {
+    func activityDetectionDidConfirm(_ activity: AutoPresetsActivityType) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
@@ -286,7 +289,7 @@ extension AutoPresetsCoordinator: ActivityDetectionDelegate {
         }
     }
 
-    func activityDetectionDidStop(_ activity: AutoPresetActivityType) {
+    func activityDetectionDidStop(_ activity: AutoPresetsActivityType) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
@@ -295,7 +298,7 @@ extension AutoPresetsCoordinator: ActivityDetectionDelegate {
         }
     }
 
-    func activityDetectionDidEncounterError(_ error: AutoPresetDetectionError) {
+    func activityDetectionDidEncounterError(_ error: AutoPresetsDetectionError) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
@@ -306,9 +309,6 @@ extension AutoPresetsCoordinator: ActivityDetectionDelegate {
                 type: .error,
                 error.localizedDescription
             )
-
-            // Note: We intentionally do NOT disable the feature on errors
-            // The user's preference should be preserved
         }
     }
 }

@@ -442,6 +442,18 @@
             "state" : "new",
             "value" : "%1$@%2$@"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@%2$@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@%2$@"
+          }
         }
       }
     },
@@ -451,6 +463,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@IE"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@U"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@U"
           }
         }
       }
@@ -587,6 +611,18 @@
             "state" : "translated",
             "value" : "Farbe"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couleur"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Culoare"
+          }
         }
       }
     },
@@ -596,6 +632,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Datum"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data"
           }
         }
       }
@@ -725,6 +773,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ende"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fin"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Închidere"
           }
         }
       }
@@ -938,6 +998,18 @@
             "value" : "Blutzuckerspiegel"
           }
         },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niveau de glycémie"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nivelul glicemiei"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -952,6 +1024,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zielbereich"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plage de glycémie"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intervalul glicemic"
           }
         },
         "zh-Hans" : {
@@ -1015,7 +1099,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extensie stare Loop"
+            "value" : "Widgetul de stare Loop"
           }
         },
         "ru" : {
@@ -1290,6 +1374,18 @@
             "state" : "translated",
             "value" : "Öffne die App, um das Widget zu aktualisieren"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrez l'application pour mettre à jour le widget"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deschide aplicația pentru a actualiza widgetul"
+          }
         }
       }
     },
@@ -1299,6 +1395,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voreinstellung"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulation du préréglage"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suprascriere presetare"
           }
         }
       }
@@ -1511,6 +1619,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Start"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pornește"
           }
         }
       }
