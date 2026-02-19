@@ -44,10 +44,12 @@ enum FoodFinder_AnalysisHistoryStore {
     // MARK: - Record
 
     /// Append a new analysis record to the stored history.
+    /// Also archives the record permanently for long-term LoopInsights analysis.
     static func record(_ record: FoodFinder_AnalysisRecord) {
         var records = allRecords()
         records.append(record)
         save(records)
+        MealArchive.archive(record)
         #if DEBUG
         print("FoodFinder: Recorded analysis history — total: \(records.count)")
         #endif
@@ -117,5 +119,59 @@ extension FoodFinder_AnalysisHistoryStore: MealDataProvider {
         allRecords()
             .filter { $0.date >= startDate && $0.date <= endDate }
             .sorted { $0.date > $1.date }
+    }
+}
+
+// MARK: - Long-Term Meal Archive
+//
+// Permanent archive of all meal analysis records for LoopInsights data mining.
+// Unlike the 7-day analysis history (UserDefaults), this archive persists
+// indefinitely as a JSON file on disk. Used for:
+//   • Long-term AI carb estimation accuracy tracking
+//   • Nutritional glucose response correlation (high-fat vs low-fat, etc.)
+//   • Food pattern trend analysis across months
+//   • Data mining for personalized meal insights
+
+enum MealArchive {
+
+    private static let filename = "FoodFinder_MealArchive.json"
+
+    private static var archiveURL: URL {
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
+        let dir = appSupport.appendingPathComponent("LoopInsights")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent(filename)
+    }
+
+    /// Archive a single record (append to the JSON file on disk).
+    /// Deduplicates by ID to avoid storing the same meal twice.
+    static func archive(_ record: FoodFinder_AnalysisRecord) {
+        var existing = loadAll()
+        guard !existing.contains(where: { $0.id == record.id }) else { return }
+        existing.append(record)
+        saveAll(existing)
+    }
+
+    /// Load all archived records within a date range.
+    static func meals(from startDate: Date, to endDate: Date) -> [FoodFinder_AnalysisRecord] {
+        loadAll()
+            .filter { $0.date >= startDate && $0.date <= endDate }
+            .sorted { $0.date > $1.date }
+    }
+
+    /// Load the complete archive (all time).
+    static func loadAll() -> [FoodFinder_AnalysisRecord] {
+        guard FileManager.default.fileExists(atPath: archiveURL.path) else { return [] }
+        guard let data = try? Data(contentsOf: archiveURL) else { return [] }
+        return (try? JSONDecoder().decode([FoodFinder_AnalysisRecord].self, from: data)) ?? []
+    }
+
+    /// Total archived meal count.
+    static var count: Int { loadAll().count }
+
+    private static func saveAll(_ records: [FoodFinder_AnalysisRecord]) {
+        guard let data = try? JSONEncoder().encode(records) else { return }
+        try? data.write(to: archiveURL, options: .atomic)
     }
 }

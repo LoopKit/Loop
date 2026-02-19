@@ -200,10 +200,22 @@ final class LoopInsights_Coordinator: ObservableObject {
             if !alcoholCtx.isEmpty { context.append(alcoholCtx) }
         }
 
-        // FoodFinder meal history
+        // FoodFinder meal history + nutritional glucose correlation
         if FoodFinder_FeatureFlags.isEnabled {
             let foodCtx = Self.buildFoodFinderPromptContext(start: start, end: end)
             if !foodCtx.isEmpty { context.append(foodCtx) }
+
+            // Correlate FoodFinder nutritional profiles with glucose spikes
+            if let glucSamples = resolvedGlucose {
+                let archiveMeals = MealArchive.meals(from: start, to: end)
+                if !archiveMeals.isEmpty {
+                    let nutritionCtx = LoopInsights_FoodResponseAnalyzer.analyzeNutritionalCorrelations(
+                        meals: archiveMeals,
+                        glucoseSamples: glucSamples
+                    )
+                    if !nutritionCtx.isEmpty { context.append(nutritionCtx) }
+                }
+            }
         }
 
         // Nightscout supplemental data
@@ -219,36 +231,75 @@ final class LoopInsights_Coordinator: ObservableObject {
     // MARK: - FoodFinder Context
 
     /// Build prompt context from FoodFinder meal analysis history.
-    /// Includes AI carb estimates vs actual entries — the most valuable signal
-    /// for carb ratio tuning recommendations.
+    /// Reads from the long-term archive for full history. Includes per-item
+    /// nutritional detail (protein, fat, fiber, calories) and AI accuracy stats.
     private static func buildFoodFinderPromptContext(start: Date, end: Date) -> String {
-        let meals = FoodFinder_AnalysisHistoryStore.meals(from: start, to: end)
+        // Read from long-term archive first, fall back to 7-day store
+        var meals = MealArchive.meals(from: start, to: end)
+        if meals.isEmpty {
+            meals = FoodFinder_AnalysisHistoryStore.meals(from: start, to: end)
+        }
         guard !meals.isEmpty else { return "" }
 
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .short
 
-        var lines: [String] = ["FOODFINDER MEAL HISTORY (\(meals.count) meals):"]
+        let archiveTotal = MealArchive.count
+        var lines: [String] = ["FOODFINDER MEAL HISTORY (\(meals.count) meals in period, \(archiveTotal) total archived):"]
 
-        // Per-meal summary (most recent 20 to keep context size reasonable)
-        for meal in meals.prefix(20) {
+        // Per-meal detail (most recent 15 to keep prompt size reasonable)
+        for meal in meals.prefix(15) {
             var line = "  \(formatter.string(from: meal.date)): \(meal.name)"
-            line += " — \(String(format: "%.0f", meal.carbsGrams))g carbs entered"
+            line += " — \(String(format: "%.0f", meal.carbsGrams))g carbs"
 
+            // Full nutritional profile from AI analysis
+            if let result = meal.analysisResult {
+                var macros: [String] = []
+                if let protein = result.totalProtein, protein > 0 {
+                    macros.append("\(String(format: "%.0f", protein))g protein")
+                }
+                if let fat = result.totalFat, fat > 0 {
+                    macros.append("\(String(format: "%.0f", fat))g fat")
+                }
+                if let fiber = result.totalFiber, fiber > 0 {
+                    macros.append("\(String(format: "%.0f", fiber))g fiber")
+                }
+                if let cal = result.totalCalories, cal > 0 {
+                    macros.append("\(String(format: "%.0f", cal)) cal")
+                }
+                if !macros.isEmpty {
+                    line += " (\(macros.joined(separator: ", ")))"
+                }
+                if let absorb = result.absorptionTimeHours {
+                    line += " ~\(String(format: "%.1f", absorb))h absorption"
+                }
+            }
+
+            // AI vs user carb delta
             if let aiCarbs = meal.originalAICarbs {
                 let delta = meal.carbsGrams - aiCarbs
-                line += ", AI estimated \(String(format: "%.0f", aiCarbs))g"
+                line += " | AI: \(String(format: "%.0f", aiCarbs))g"
                 if abs(delta) > 1 {
                     line += " (user \(delta > 0 ? "+" : "")\(String(format: "%.0f", delta))g)"
                 }
             }
 
             if let confidence = meal.aiConfidencePercent {
-                line += " [\(confidence)% confidence]"
+                line += " [\(confidence)%]"
             }
 
             lines.append(line)
+
+            // Per-item breakdown for multi-item meals (compact)
+            if let items = meal.analysisResult?.foodItemsDetailed, items.count > 1 {
+                for item in items {
+                    var itemLine = "    · \(item.name): \(String(format: "%.0f", item.carbohydrates))g carbs"
+                    if let fat = item.fat, fat > 0 { itemLine += ", \(String(format: "%.0f", fat))g fat" }
+                    if let protein = item.protein, protein > 0 { itemLine += ", \(String(format: "%.0f", protein))g protein" }
+                    lines.append(itemLine)
+                }
+            }
         }
 
         // Aggregate AI accuracy stats
@@ -263,9 +314,16 @@ final class LoopInsights_Coordinator: ObservableObject {
             let underCount = deltas.filter { $0 < -2 }.count
             let accurateCount = deltas.filter { abs($0) <= 2 }.count
 
-            lines.append("  AI Accuracy Summary:")
-            lines.append("    Avg user adjustment: \(avgDelta >= 0 ? "+" : "")\(String(format: "%.1f", avgDelta))g")
-            lines.append("    Accurate (±2g): \(accurateCount)/\(mealsWithAI.count), User added carbs: \(overCount), User reduced carbs: \(underCount)")
+            lines.append("  AI Accuracy: avg adjustment \(avgDelta >= 0 ? "+" : "")\(String(format: "%.1f", avgDelta))g, accurate ±2g: \(accurateCount)/\(mealsWithAI.count), user added: \(overCount), user reduced: \(underCount)")
+        }
+
+        // Nutritional composition summary
+        let mealsWithNutrition = meals.filter { $0.analysisResult?.totalFat != nil }
+        if mealsWithNutrition.count >= 3 {
+            let avgFat = mealsWithNutrition.compactMap { $0.analysisResult?.totalFat }.reduce(0, +) / Double(mealsWithNutrition.count)
+            let avgProtein = mealsWithNutrition.compactMap { $0.analysisResult?.totalProtein }.reduce(0, +) / Double(mealsWithNutrition.count)
+            let avgFiber = mealsWithNutrition.compactMap { $0.analysisResult?.totalFiber }.reduce(0, +) / Double(mealsWithNutrition.count)
+            lines.append("  Avg meal composition: \(String(format: "%.0f", avgFat))g fat, \(String(format: "%.0f", avgProtein))g protein, \(String(format: "%.0f", avgFiber))g fiber")
         }
 
         return lines.joined(separator: "\n")
