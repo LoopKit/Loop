@@ -134,18 +134,18 @@ struct LoopInsightsCaffeinePreset: Identifiable {
     let id = UUID()
     let name: String
     let milligrams: Double
-    let icon: String                     // SF Symbol name
+    let icon: String                     // Emoji icon
 
     static let defaults: [LoopInsightsCaffeinePreset] = [
         // Left column                                          // Right column
-        LoopInsightsCaffeinePreset(name: "Coffee (sm)", milligrams: 95, icon: "cup.and.saucer.fill"),
-        LoopInsightsCaffeinePreset(name: "Tea (Green)", milligrams: 28, icon: "leaf.fill"),
-        LoopInsightsCaffeinePreset(name: "Coffee (med)", milligrams: 142, icon: "cup.and.saucer.fill"),
-        LoopInsightsCaffeinePreset(name: "Tea (Black)", milligrams: 47, icon: "leaf.fill"),
-        LoopInsightsCaffeinePreset(name: "Coffee (lg)", milligrams: 190, icon: "cup.and.saucer.fill"),
-        LoopInsightsCaffeinePreset(name: "Cola", milligrams: 34, icon: "drop.fill"),
-        LoopInsightsCaffeinePreset(name: "Espresso", milligrams: 63, icon: "cup.and.saucer.fill"),
-        LoopInsightsCaffeinePreset(name: "Energy Drink", milligrams: 80, icon: "bolt.fill"),
+        LoopInsightsCaffeinePreset(name: "Coffee (sm)", milligrams: 95, icon: "☕"),
+        LoopInsightsCaffeinePreset(name: "Tea (Green)", milligrams: 28, icon: "🍵"),
+        LoopInsightsCaffeinePreset(name: "Coffee (med)", milligrams: 142, icon: "☕"),
+        LoopInsightsCaffeinePreset(name: "Tea (Black)", milligrams: 47, icon: "🍵"),
+        LoopInsightsCaffeinePreset(name: "Coffee (lg)", milligrams: 190, icon: "☕"),
+        LoopInsightsCaffeinePreset(name: "Cola", milligrams: 34, icon: "🥤"),
+        LoopInsightsCaffeinePreset(name: "Espresso", milligrams: 63, icon: "🫘"),
+        LoopInsightsCaffeinePreset(name: "Energy Drink", milligrams: 80, icon: "⚡"),
     ]
 }
 
@@ -174,6 +174,7 @@ enum LoopInsightsAlcoholHypoRisk: String, Codable {
 /// Current alcohol state computed from entries with linear metabolism
 struct LoopInsightsAlcoholState: Codable {
     let currentAlcoholLevel: Double      // Estimated standard drinks remaining
+    let peakLevelToday: Double           // Highest alcohol level reached today
     let estimatedClearTime: Date?        // When alcohol will be fully metabolized
     let hypoRiskLevel: LoopInsightsAlcoholHypoRisk
     let hypoRiskWindowEnd: Date?         // End of delayed hypoglycemia risk window
@@ -187,18 +188,18 @@ struct LoopInsightsAlcoholPreset: Identifiable {
     let id = UUID()
     let name: String
     let standardDrinks: Double
-    let icon: String                     // SF Symbol name
+    let icon: String                     // Emoji icon
 
     static let defaults: [LoopInsightsAlcoholPreset] = [
         // Left column                                          // Right column
-        LoopInsightsAlcoholPreset(name: "Beer (Light)",     standardDrinks: 1.0, icon: "mug.fill"),
-        LoopInsightsAlcoholPreset(name: "Wine (White)",     standardDrinks: 1.0, icon: "wineglass.fill"),
-        LoopInsightsAlcoholPreset(name: "Beer (Regular)",   standardDrinks: 1.0, icon: "mug.fill"),
-        LoopInsightsAlcoholPreset(name: "Spirits (neat)",   standardDrinks: 1.5, icon: "drop.fill"),
-        LoopInsightsAlcoholPreset(name: "Beer (Craft/IPA)", standardDrinks: 1.5, icon: "mug.fill"),
-        LoopInsightsAlcoholPreset(name: "Mixed Drink",      standardDrinks: 1.5, icon: "waterbottle.fill"),
-        LoopInsightsAlcoholPreset(name: "Wine (Red)",       standardDrinks: 1.0, icon: "wineglass.fill"),
-        LoopInsightsAlcoholPreset(name: "Cocktail",         standardDrinks: 2.0, icon: "cup.and.saucer.fill"),
+        LoopInsightsAlcoholPreset(name: "Beer (Light)",     standardDrinks: 1.0, icon: "🍺"),
+        LoopInsightsAlcoholPreset(name: "Wine (White)",     standardDrinks: 1.0, icon: "🍷"),
+        LoopInsightsAlcoholPreset(name: "Beer (Regular)",   standardDrinks: 1.0, icon: "🍺"),
+        LoopInsightsAlcoholPreset(name: "Spirits (neat)",   standardDrinks: 1.5, icon: "🥃"),
+        LoopInsightsAlcoholPreset(name: "Beer (Craft/IPA)", standardDrinks: 1.5, icon: "🍻"),
+        LoopInsightsAlcoholPreset(name: "Mixed Drink",      standardDrinks: 1.5, icon: "🍹"),
+        LoopInsightsAlcoholPreset(name: "Wine (Red)",       standardDrinks: 1.0, icon: "🍷"),
+        LoopInsightsAlcoholPreset(name: "Cocktail",         standardDrinks: 2.0, icon: "🍸"),
     ]
 }
 

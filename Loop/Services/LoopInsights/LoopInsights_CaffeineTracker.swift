@@ -86,6 +86,12 @@ final class LoopInsights_CaffeineTracker: ObservableObject {
         rebuildMergedEntries()
     }
 
+    /// Remove all manual entries
+    func clearAllEntries() {
+        saveManualEntries([])
+        rebuildMergedEntries()
+    }
+
     /// Update an existing manual entry
     func updateEntry(id: UUID, milligrams: Double, source: String, timestamp: Date) {
         var manual = loadManualEntries()
