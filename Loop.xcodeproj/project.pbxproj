@@ -1565,6 +1565,12 @@
 		BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholTracker.swift; sourceTree = "<group>"; };
 		6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholLogView.swift; sourceTree = "<group>"; };
 		C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_VoiceService.swift; sourceTree = "<group>"; };
+		7D4A2E67CD7E5A4EDFC30932 /* LoopInsights_MealDebriefModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefModels.swift; sourceTree = "<group>"; };
+		98D9E86D766B4072B4FF2C64 /* LoopInsights_MealDebriefService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefService.swift; sourceTree = "<group>"; };
+		4BF2D36066BDBA09E965A0F0 /* LoopInsights_PreMealAdvisorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_PreMealAdvisorService.swift; sourceTree = "<group>"; };
+		05DC3A641F2F36C6A51953D6 /* LoopInsights_MealInsightsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealInsightsViewModel.swift; sourceTree = "<group>"; };
+		4705B24EF9A41FF18208064E /* LoopInsights_MealDebriefCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefCard.swift; sourceTree = "<group>"; };
+		3E6840708C1AB09AB159E796 /* LoopInsights_PreMealAdvisorCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_PreMealAdvisorCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
