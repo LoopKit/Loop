@@ -223,6 +223,124 @@ final class LoopInsights_Coordinator: ObservableObject {
         return try await bridge.getCarbEntries(start: start, end: end)
     }
 
+    // MARK: - Live Loop Status for Chat
+
+    /// Build a live status context string for the chat, pulling IOB, COB, active
+    /// overrides, predicted glucose, and loop freshness from existing read-only sources.
+    /// Zero changes to Loop core files — reads from protocol methods and UserDefaults.
+    func buildLiveStatusContext() async -> String? {
+        var parts: [String] = []
+
+        // IOB
+        if let bridge = dataProviderBridge {
+            do {
+                let iob = try await bridge.getInsulinOnBoard()
+                parts.append("  IOB (Insulin On Board): \(String(format: "%.2f", iob.value)) U")
+            } catch {
+                LoopInsights_FeatureFlags.log.error("Live status: IOB fetch failed: \(error)")
+            }
+
+            // COB
+            do {
+                let cob = try await bridge.getCarbsOnBoard()
+                parts.append("  COB (Carbs On Board): \(String(format: "%.0f", cob.quantity.doubleValue(for: .gram()))) g")
+            } catch {
+                LoopInsights_FeatureFlags.log.error("Live status: COB fetch failed: \(error)")
+            }
+        }
+
+        // Active overrides + dosing strategy from settings
+        if let bridge = dataProviderBridge {
+            let settings = bridge.settingsProvider.latestSettings
+
+            let loopMode = settings.dosingEnabled ? "Closed Loop" : "Open Loop"
+            let strategy: String
+            switch settings.automaticDosingStrategy {
+            case .tempBasalOnly:
+                strategy = "Temp Basal Only"
+            case .automaticBolus:
+                strategy = "Automatic Bolus"
+            default:
+                strategy = "Unknown"
+            }
+            parts.append("  Loop Mode: \(loopMode) (\(strategy))")
+
+            if let override = settings.scheduleOverride, override.isActive() {
+                var overrideDesc = "  Active Override:"
+                switch override.context {
+                case .preset(let preset):
+                    overrideDesc += " \(preset.name)"
+                case .legacyWorkout:
+                    overrideDesc += " Workout"
+                case .custom:
+                    overrideDesc += " Custom"
+                case .preMeal:
+                    overrideDesc += " Pre-Meal"
+                }
+                if let factor = override.settings.insulinNeedsScaleFactor {
+                    overrideDesc += " (insulin needs \(String(format: "%.0f", factor * 100))%)"
+                }
+                if let range = override.settings.targetRange {
+                    let low = range.lowerBound.doubleValue(for: .milligramsPerDeciliter)
+                    let high = range.upperBound.doubleValue(for: .milligramsPerDeciliter)
+                    overrideDesc += " target \(String(format: "%.0f", low))-\(String(format: "%.0f", high)) mg/dL"
+                }
+                let remaining = override.scheduledEndDate.timeIntervalSinceNow
+                if remaining.isFinite && remaining > 0 {
+                    let mins = Int(remaining / 60)
+                    overrideDesc += " (\(mins / 60)h \(mins % 60)m remaining)"
+                } else if override.duration.isInfinite {
+                    overrideDesc += " (indefinite)"
+                }
+                parts.append(overrideDesc)
+            }
+
+            if let preMeal = settings.preMealOverride, preMeal.isActive() {
+                parts.append("  Pre-Meal Override: Active")
+            }
+        }
+
+        // Predicted glucose + loop freshness from StatusExtensionContext (UserDefaults)
+        if let statusCtx = UserDefaults.appGroup?.statusExtensionContext {
+            if let lastLoop = statusCtx.lastLoopCompleted {
+                let minsAgo = Int(Date().timeIntervalSince(lastLoop) / 60)
+                parts.append("  Last Loop: \(minsAgo) min ago")
+            }
+
+            if let netBasal = statusCtx.netBasal {
+                parts.append("  Current Delivery: \(String(format: "%.2f", netBasal.rate)) U/hr (\(String(format: "%.0f", netBasal.percentage))% of scheduled)")
+            }
+
+            if let predicted = statusCtx.predictedGlucose {
+                let samples = predicted.samples
+                if let first = samples.first, let last = samples.last, samples.count >= 2 {
+                    let formatter = DateFormatter()
+                    formatter.timeStyle = .short
+                    let current = String(format: "%.0f", first.value)
+                    let predicted30 = samples.count > 6 ? String(format: "%.0f", samples[6].value) : nil
+                    let predictedEnd = String(format: "%.0f", last.value)
+                    var predLine = "  Predicted Glucose: \(current) now"
+                    if let p30 = predicted30 {
+                        predLine += " → \(p30) in 30 min"
+                    }
+                    predLine += " → \(predictedEnd) at \(formatter.string(from: last.startDate))"
+                    parts.append(predLine)
+                }
+            }
+
+            if let battery = statusCtx.batteryPercentage {
+                parts.append("  Pump Battery: \(String(format: "%.0f", battery * 100))%")
+            }
+
+            if let reservoir = statusCtx.reservoirCapacity {
+                parts.append("  Reservoir: \(String(format: "%.0f", reservoir)) U remaining")
+            }
+        }
+
+        guard !parts.isEmpty else { return nil }
+        return "LIVE LOOP STATUS:\n" + parts.joined(separator: "\n")
+    }
+
     // MARK: - Therapy Settings Write Access
 
     /// Capture a snapshot of the current therapy settings
@@ -438,5 +556,31 @@ private final class DataProviderBridge: LoopInsightsDataProviderProtocol {
 
     func getLatestStoredSettings() -> StoredSettings {
         return settingsProvider.latestSettings
+    }
+
+    func getInsulinOnBoard() async throws -> InsulinValue {
+        return try await withCheckedThrowingContinuation { continuation in
+            doseStore.insulinOnBoard(at: Date()) { result in
+                switch result {
+                case .success(let value):
+                    continuation.resume(returning: value)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    func getCarbsOnBoard() async throws -> CarbValue {
+        return try await withCheckedThrowingContinuation { continuation in
+            carbStore.carbsOnBoard(at: Date(), effectVelocities: nil) { result in
+                switch result {
+                case .success(let value):
+                    continuation.resume(returning: value)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 }

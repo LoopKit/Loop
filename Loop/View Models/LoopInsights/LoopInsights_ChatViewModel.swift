@@ -133,6 +133,11 @@ final class LoopInsights_ChatViewModel: ObservableObject {
                     context += "\n\n" + supplemental
                 }
 
+                // Live loop status: IOB, COB, overrides, predicted glucose, loop freshness
+                if let liveStatus = await coordinator.buildLiveStatusContext() {
+                    context += "\n\n" + liveStatus
+                }
+
                 // Always fetch fresh real-time glucose (not cached)
                 let realtimeCtx = await fetchRealtimeGlucoseContext()
                 if !realtimeCtx.isEmpty {
