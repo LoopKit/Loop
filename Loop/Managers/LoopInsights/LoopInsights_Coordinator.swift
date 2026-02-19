@@ -218,6 +218,12 @@ final class LoopInsights_Coordinator: ObservableObject {
             }
         }
 
+        // Menstrual cycle context (if user tracks in Apple Health)
+        if let menstrualStats = stats.biometricStats?.menstrualCycle {
+            let menstrualCtx = LoopInsights_AdvancedAnalyzers.buildMenstrualCyclePromptContext(menstrualStats)
+            if !menstrualCtx.isEmpty { context.append(menstrualCtx) }
+        }
+
         // Nightscout supplemental data
         if LoopInsights_FeatureFlags.nightscoutImportEnabled {
             let nsCtx = await buildNightscoutPromptContext(start: start, end: end)

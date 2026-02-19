@@ -275,6 +275,32 @@ struct LoopInsightsNightscoutTreatment: Codable {
     }
 }
 
+// MARK: - Menstrual Cycle
+
+/// Estimated menstrual cycle phase derived from Apple Health Cycle Tracker data.
+/// Phases have well-documented effects on insulin sensitivity:
+///   • Follicular (post-period → ovulation): typically best insulin sensitivity
+///   • Luteal (post-ovulation → period): progesterone rises → insulin resistance increases
+///   • Menstrual (period): insulin sensitivity returns toward baseline
+enum LoopInsightsMenstrualPhase: String, Codable {
+    case menstrual       // Day 1-5: active period
+    case follicular      // Day 6-13: estrogen rising, good sensitivity
+    case ovulatory       // Day 14-16: peak estrogen, LH surge
+    case luteal          // Day 17-28: progesterone dominant, insulin resistance
+    case unknown         // Insufficient data to determine phase
+}
+
+/// Menstrual cycle statistics from Apple Health Cycle Tracker.
+/// Used by LoopInsights to contextualize insulin needs with hormonal phase.
+struct LoopInsightsMenstrualCycleStats: Codable {
+    let currentPhase: LoopInsightsMenstrualPhase
+    let currentCycleDay: Int?              // Day within current cycle (1-based)
+    let averageCycleLength: Double?        // Days, averaged across recent cycles
+    let lastFlowStartDate: Date?           // Most recent period start
+    let flowDaysInLookback: Int            // Number of days with flow in the analysis period
+    let dataAvailable: Bool                // Whether any menstrual data was found
+}
+
 // MARK: - AGP Data Point
 
 /// A single time-window in a glucose profile chart spanning the analysis period.

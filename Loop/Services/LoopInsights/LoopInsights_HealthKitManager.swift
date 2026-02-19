@@ -26,6 +26,9 @@ final class LoopInsights_HealthKitManager: ObservableObject {
         if let energy = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) { types.insert(energy) }
         if let weight = HKQuantityType.quantityType(forIdentifier: .bodyMass) { types.insert(weight) }
         if let caffeine = HKQuantityType.quantityType(forIdentifier: .dietaryCaffeine) { types.insert(caffeine) }
+        // Menstrual cycle data from Apple Health Cycle Tracker
+        if let menstrualFlow = HKObjectType.categoryType(forIdentifier: .menstrualFlow) { types.insert(menstrualFlow) }
+        if let ovulation = HKObjectType.categoryType(forIdentifier: .ovulationTestResult) { types.insert(ovulation) }
         // Core diabetes data types (Loop writes these — we read them for longer analysis periods)
         if let glucose = HKQuantityType.quantityType(forIdentifier: .bloodGlucose) { types.insert(glucose) }
         if let insulin = HKQuantityType.quantityType(forIdentifier: .insulinDelivery) { types.insert(insulin) }
@@ -77,6 +80,7 @@ final class LoopInsights_HealthKitManager: ObservableObject {
         async let sleep = fetchSleepSafe(start: start, end: end)
         async let energy = fetchEnergySafe(start: start, end: end)
         async let weight = fetchWeightSafe(start: start, end: end)
+        async let menstrual = fetchMenstrualCycleSafe(start: start, end: end)
 
         return await LoopInsightsAggregatedStats.BiometricStats(
             heartRate: hr,
@@ -85,7 +89,8 @@ final class LoopInsights_HealthKitManager: ObservableObject {
             sleep: sleep,
             activeEnergy: energy,
             weight: weight,
-            stressScore: nil  // Computed by AdvancedAnalyzers in DataAggregator
+            stressScore: nil,  // Computed by AdvancedAnalyzers in DataAggregator
+            menstrualCycle: menstrual
         )
     }
 
@@ -116,6 +121,10 @@ final class LoopInsights_HealthKitManager: ObservableObject {
 
     private func fetchWeightSafe(start: Date, end: Date) async -> LoopInsightsAggregatedStats.WeightStats? {
         await safeFetch("weight") { try await fetchWeightStats(start: start, end: end) }
+    }
+
+    private func fetchMenstrualCycleSafe(start: Date, end: Date) async -> LoopInsightsMenstrualCycleStats? {
+        await safeFetch("menstrual cycle") { try await fetchMenstrualCycleStats(start: start, end: end) }
     }
 
     // MARK: - Heart Rate
@@ -405,6 +414,123 @@ final class LoopInsights_HealthKitManager: ObservableObject {
         return samples.map { sample in
             (date: sample.startDate, grams: sample.quantity.doubleValue(for: gramUnit))
         }
+    }
+
+    // MARK: - Menstrual Cycle
+
+    /// Fetch menstrual cycle data from Apple Health Cycle Tracker.
+    /// Uses HKCategorySample queries for menstrualFlow to determine cycle phase,
+    /// cycle length, and current cycle day. Returns nil if no data is found
+    /// (user doesn't track cycles or hasn't granted access).
+    private func fetchMenstrualCycleStats(start: Date, end: Date) async throws -> LoopInsightsMenstrualCycleStats? {
+        guard let flowType = HKObjectType.categoryType(forIdentifier: .menstrualFlow) else { return nil }
+
+        // Query flow samples — use a wider window (90 days back) to estimate cycle length
+        let extendedStart = Date().addingTimeInterval(-90 * 86400)
+        let predicate = HKQuery.predicateForSamples(withStart: extendedStart, end: end, options: .strictStartDate)
+
+        let samples: [HKCategorySample] = try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: flowType,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+            ) { _, results, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: (results as? [HKCategorySample]) ?? [])
+                }
+            }
+            healthStore.execute(query)
+        }
+
+        guard !samples.isEmpty else {
+            return LoopInsightsMenstrualCycleStats(
+                currentPhase: .unknown, currentCycleDay: nil, averageCycleLength: nil,
+                lastFlowStartDate: nil, flowDaysInLookback: 0, dataAvailable: false
+            )
+        }
+
+        let calendar = Calendar.current
+
+        // Group flow samples by day to find period start dates
+        var flowDays: Set<String> = []
+        var flowDates: [Date] = []
+        for sample in samples {
+            let dayKey = Self.dayKey(for: sample.startDate, calendar: calendar)
+            if flowDays.insert(dayKey).inserted {
+                flowDates.append(calendar.startOfDay(for: sample.startDate))
+            }
+        }
+        flowDates.sort()
+
+        // Identify period start dates (first flow day after a gap of 14+ days)
+        var periodStarts: [Date] = []
+        if let first = flowDates.first {
+            periodStarts.append(first)
+        }
+        for i in 1..<flowDates.count {
+            let gap = flowDates[i].timeIntervalSince(flowDates[i - 1])
+            if gap > 14 * 86400 {
+                // New period — gap too large to be consecutive flow days
+                periodStarts.append(flowDates[i])
+            }
+        }
+
+        // Average cycle length from consecutive period starts
+        var cycleLengths: [Double] = []
+        for i in 1..<periodStarts.count {
+            let length = periodStarts[i].timeIntervalSince(periodStarts[i - 1]) / 86400
+            if length >= 18 && length <= 45 {  // Filter physiologically plausible cycles
+                cycleLengths.append(length)
+            }
+        }
+        let avgCycleLength = cycleLengths.isEmpty ? nil : cycleLengths.reduce(0, +) / Double(cycleLengths.count)
+
+        // Most recent period start
+        let lastPeriodStart = periodStarts.last
+
+        // Current cycle day (days since last period start + 1)
+        let currentCycleDay: Int?
+        if let lastStart = lastPeriodStart {
+            let daysSincePeriod = Int(Date().timeIntervalSince(lastStart) / 86400) + 1
+            currentCycleDay = daysSincePeriod
+        } else {
+            currentCycleDay = nil
+        }
+
+        // Estimate current phase from cycle day
+        let phase: LoopInsightsMenstrualPhase
+        let cycleLen = avgCycleLength ?? 28.0
+        if let day = currentCycleDay {
+            if day <= 5 {
+                phase = .menstrual
+            } else if day <= Int(cycleLen * 0.46) {  // ~day 13 of 28
+                phase = .follicular
+            } else if day <= Int(cycleLen * 0.57) {  // ~day 16 of 28
+                phase = .ovulatory
+            } else if Double(day) <= cycleLen {
+                phase = .luteal
+            } else {
+                // Past expected cycle length — could be late period or irregular
+                phase = .luteal  // Default to luteal since that's what happens pre-period
+            }
+        } else {
+            phase = .unknown
+        }
+
+        // Count flow days within the analysis lookback period
+        let lookbackFlowDays = flowDates.filter { $0 >= start && $0 <= end }.count
+
+        return LoopInsightsMenstrualCycleStats(
+            currentPhase: phase,
+            currentCycleDay: currentCycleDay,
+            averageCycleLength: avgCycleLength,
+            lastFlowStartDate: lastPeriodStart,
+            flowDaysInLookback: lookbackFlowDays,
+            dataAvailable: true
+        )
     }
 
     // MARK: - Caffeine
