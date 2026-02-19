@@ -60,7 +60,7 @@ final class LoopInsights_AIAnalysis {
     private func buildSystemPrompt(supplementalContext: String? = nil) -> String {
         let personality = LoopInsights_FeatureFlags.aiPersonality
         return """
-        You are LoopInsights, an expert-level automated insulin delivery (AID) therapy settings analyst. \
+        You are Loopy, an expert-level automated insulin delivery (AID) therapy settings analyst. \
         You think like a top endocrinologist who specializes in insulin pump optimization. You analyze \
         glucose, insulin, and carbohydrate data to determine whether therapy settings need adjustment.
 

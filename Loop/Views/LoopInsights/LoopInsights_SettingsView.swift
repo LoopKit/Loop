@@ -616,7 +616,7 @@ struct LoopInsights_SettingsView: View {
                     LoopInsights_FeatureFlags.analysisPeriod = newValue
                 }
 
-                Text(NSLocalizedString("Rolling lookback period for automated AI-based suggestions and Ask LoopInsights Chatbot - how far back do you want LoopInsights to look when analyzing your glucose, insulin, and carb data?", comment: "LoopInsights analysis period description"))
+                Text(NSLocalizedString("Rolling lookback period for automated AI-based suggestions and Ask Loopy Chatbot - how far back do you want LoopInsights to look when analyzing your glucose, insulin, and carb data?", comment: "LoopInsights analysis period description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
 
