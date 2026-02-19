@@ -397,6 +397,14 @@ final class LoopInsights_ChatViewModel: ObservableObject {
                 if let weight = bio.weight {
                     context += "  Weight: \(String(format: "%.1f", weight.latestWeight)) kg (trend: \(weight.weightTrend >= 0 ? "+" : "")\(String(format: "%.1f", weight.weightTrend)) kg)\n"
                 }
+
+                if let menstrual = bio.menstrualCycle, menstrual.dataAvailable {
+                    context += "  Menstrual Phase: \(menstrual.currentPhase.rawValue)"
+                    if let day = menstrual.currentCycleDay {
+                        context += " (cycle day \(day))"
+                    }
+                    context += "\n"
+                }
             }
         }
 

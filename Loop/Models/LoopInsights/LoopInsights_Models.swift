@@ -794,6 +794,7 @@ struct LoopInsightsAggregatedStats: Codable {
         let activeEnergy: ActiveEnergyStats?
         let weight: WeightStats?
         let stressScore: LoopInsightsStressScore?  // Phase 5: HRV-derived stress
+        let menstrualCycle: LoopInsightsMenstrualCycleStats?  // Phase 5: hormonal context
     }
 
     struct HeartRateStats: Codable {

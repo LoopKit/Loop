@@ -119,7 +119,8 @@ final class LoopInsights_DataAggregator {
                     sleep: bio.sleep,
                     activeEnergy: bio.activeEnergy,
                     weight: bio.weight,
-                    stressScore: stressScore
+                    stressScore: stressScore,
+                    menstrualCycle: bio.menstrualCycle
                 )
                 if let score = stressScore {
                     LoopInsights_FeatureFlags.log.debug("Phase 5: Stress score computed — \(String(format: "%.0f", score.overallScore))/100")

@@ -460,6 +460,21 @@ final class LoopInsights_AIAnalysis {
                 prompt += "- Latest Weight: \(String(format: "%.1f", weight.latestWeight)) kg (\(String(format: "%.1f", weight.latestWeight * 2.205)) lbs)\n"
                 prompt += "- Weight Trend: \(weight.weightTrend >= 0 ? "+" : "")\(String(format: "%.1f", weight.weightTrend)) kg over period\n"
             }
+
+            if let menstrual = bio.menstrualCycle, menstrual.dataAvailable {
+                prompt += "### Menstrual Cycle\n"
+                prompt += "- Current Phase: \(menstrual.currentPhase.rawValue)\n"
+                if let day = menstrual.currentCycleDay {
+                    prompt += "- Cycle Day: \(day)\n"
+                }
+                if let avgLength = menstrual.averageCycleLength {
+                    prompt += "- Average Cycle Length: \(String(format: "%.0f", avgLength)) days\n"
+                }
+                if menstrual.flowDaysInLookback > 0 {
+                    prompt += "- Flow Days in Period: \(menstrual.flowDaysInLookback)\n"
+                }
+                prompt += "- Note: Luteal phase typically increases insulin resistance 15-30%. Consider hormonal impact before recommending permanent settings changes.\n"
+            }
         }
 
         // Computed: time-of-day glucose analysis

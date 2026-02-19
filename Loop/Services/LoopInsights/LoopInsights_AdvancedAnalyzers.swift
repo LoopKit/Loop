@@ -269,6 +269,63 @@ final class LoopInsights_AdvancedAnalyzers {
         return ctx
     }
 
+    // MARK: - Menstrual Cycle Context
+
+    /// Build prompt context from menstrual cycle data. Returns empty string if no data.
+    static func buildMenstrualCyclePromptContext(_ stats: LoopInsightsMenstrualCycleStats) -> String {
+        guard stats.dataAvailable else { return "" }
+
+        var ctx = "## Menstrual Cycle (from Apple Health Cycle Tracker)\n"
+
+        let phaseDescription: String
+        let insulinImpact: String
+        switch stats.currentPhase {
+        case .menstrual:
+            phaseDescription = "Menstrual (active period)"
+            insulinImpact = "Insulin sensitivity returning toward baseline. Some may need less insulin."
+        case .follicular:
+            phaseDescription = "Follicular (post-period, pre-ovulation)"
+            insulinImpact = "Typically best insulin sensitivity of the cycle. May need less insulin."
+        case .ovulatory:
+            phaseDescription = "Ovulatory (around ovulation)"
+            insulinImpact = "Transition period. Insulin sensitivity starting to decline."
+        case .luteal:
+            phaseDescription = "Luteal (post-ovulation, pre-period)"
+            insulinImpact = "Progesterone rises → increased insulin resistance. May need 15-30% more insulin. Watch for unexplained highs."
+        case .unknown:
+            phaseDescription = "Unknown"
+            insulinImpact = "Insufficient data to determine hormonal impact."
+        }
+
+        ctx += "- Current phase: \(phaseDescription)\n"
+
+        if let day = stats.currentCycleDay {
+            ctx += "- Cycle day: \(day)\n"
+        }
+
+        if let avgLength = stats.averageCycleLength {
+            ctx += "- Average cycle length: \(String(format: "%.0f", avgLength)) days\n"
+        }
+
+        if let lastStart = stats.lastFlowStartDate {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .short
+            ctx += "- Last period started: \(formatter.string(from: lastStart))\n"
+        }
+
+        if stats.flowDaysInLookback > 0 {
+            ctx += "- Flow days in analysis period: \(stats.flowDaysInLookback)\n"
+        }
+
+        ctx += "- Hormonal impact on insulin: \(insulinImpact)\n"
+
+        if stats.currentPhase == .luteal {
+            ctx += "** LUTEAL PHASE: Expect increased insulin resistance. If BG is running higher than usual, hormonal changes are a likely factor before adjusting long-term settings. **\n"
+        }
+
+        return ctx
+    }
+
     // MARK: - Helpers
 
     /// Find the effective scheduled rate at a given date. Expects pre-sorted items (P8).
