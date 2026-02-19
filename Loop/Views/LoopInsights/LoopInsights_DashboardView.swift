@@ -969,9 +969,8 @@ struct LoopInsights_DashboardView: View {
         Section {
             Button(action: { showingChat = true }) {
                 HStack {
-                    Image(systemName: "bubble.left.and.bubble.right")
-                        .foregroundColor(.accentColor)
-                    Text(NSLocalizedString("Ask LoopInsights", comment: "LoopInsights chat button"))
+                    Text("🌀")
+                    Text(NSLocalizedString("Ask Loopy", comment: "LoopInsights chat button"))
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)

@@ -394,7 +394,7 @@ struct LoopInsights_TrendsInsightsView: View {
                 .font(.system(size: 48))
                 .foregroundColor(.purple.opacity(0.5))
 
-            Text(NSLocalizedString("Chat with your AI Advisor", comment: "LoopInsights trends advisor title"))
+            Text(NSLocalizedString("Chat with Loopy", comment: "LoopInsights trends advisor title"))
                 .font(.headline)
                 .foregroundColor(.white.opacity(0.9))
 

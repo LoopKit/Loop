@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-/// Minimal Q&A interface for Ask LoopInsights.
+/// Minimal Q&A interface for Ask Loopy.
 /// Quick answers only — just the facts.
 struct LoopInsights_ChatView: View {
 
@@ -78,7 +78,7 @@ struct LoopInsights_ChatView: View {
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(NSLocalizedString("Ask LoopInsights", comment: "LoopInsights chat title"))
+                Text("🌀 " + NSLocalizedString("Ask Loopy", comment: "LoopInsights chat title"))
                     .font(.headline)
                     .foregroundColor(.white)
             }
