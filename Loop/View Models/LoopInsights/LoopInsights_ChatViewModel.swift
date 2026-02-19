@@ -235,6 +235,9 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         - For settings changes: current value → suggested value → why, in one line.
         - Never fabricate numbers. Only reference what's in the data below.
         - If no data is available, just say so briefly.
+        - NEVER give unsolicited praise, encouragement, or reassurance. No "Great job!", \
+          "You're doing well!", "Keep it up!" or similar. Just answer the question. \
+          If they ask how they're doing, then evaluate honestly. Otherwise, skip it entirely.
 
         DATA:
         \(therapyContext)
