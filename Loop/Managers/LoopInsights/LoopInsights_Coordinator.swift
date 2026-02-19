@@ -200,8 +200,159 @@ final class LoopInsights_Coordinator: ObservableObject {
             if !alcoholCtx.isEmpty { context.append(alcoholCtx) }
         }
 
+        // FoodFinder meal history
+        if FoodFinder_FeatureFlags.isEnabled {
+            let foodCtx = Self.buildFoodFinderPromptContext(start: start, end: end)
+            if !foodCtx.isEmpty { context.append(foodCtx) }
+        }
+
+        // Nightscout supplemental data
+        if LoopInsights_FeatureFlags.nightscoutImportEnabled {
+            let nsCtx = await buildNightscoutPromptContext(start: start, end: end)
+            if !nsCtx.isEmpty { context.append(nsCtx) }
+        }
+
         guard !context.isEmpty else { return nil }
         return context.joined(separator: "\n")
+    }
+
+    // MARK: - FoodFinder Context
+
+    /// Build prompt context from FoodFinder meal analysis history.
+    /// Includes AI carb estimates vs actual entries — the most valuable signal
+    /// for carb ratio tuning recommendations.
+    private static func buildFoodFinderPromptContext(start: Date, end: Date) -> String {
+        let meals = FoodFinder_AnalysisHistoryStore.meals(from: start, to: end)
+        guard !meals.isEmpty else { return "" }
+
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+
+        var lines: [String] = ["FOODFINDER MEAL HISTORY (\(meals.count) meals):"]
+
+        // Per-meal summary (most recent 20 to keep context size reasonable)
+        for meal in meals.prefix(20) {
+            var line = "  \(formatter.string(from: meal.date)): \(meal.name)"
+            line += " — \(String(format: "%.0f", meal.carbsGrams))g carbs entered"
+
+            if let aiCarbs = meal.originalAICarbs {
+                let delta = meal.carbsGrams - aiCarbs
+                line += ", AI estimated \(String(format: "%.0f", aiCarbs))g"
+                if abs(delta) > 1 {
+                    line += " (user \(delta > 0 ? "+" : "")\(String(format: "%.0f", delta))g)"
+                }
+            }
+
+            if let confidence = meal.aiConfidencePercent {
+                line += " [\(confidence)% confidence]"
+            }
+
+            lines.append(line)
+        }
+
+        // Aggregate AI accuracy stats
+        let mealsWithAI = meals.filter { $0.originalAICarbs != nil }
+        if mealsWithAI.count >= 3 {
+            let deltas = mealsWithAI.compactMap { meal -> Double? in
+                guard let aiCarbs = meal.originalAICarbs else { return nil }
+                return meal.carbsGrams - aiCarbs
+            }
+            let avgDelta = deltas.reduce(0, +) / Double(deltas.count)
+            let overCount = deltas.filter { $0 > 2 }.count
+            let underCount = deltas.filter { $0 < -2 }.count
+            let accurateCount = deltas.filter { abs($0) <= 2 }.count
+
+            lines.append("  AI Accuracy Summary:")
+            lines.append("    Avg user adjustment: \(avgDelta >= 0 ? "+" : "")\(String(format: "%.1f", avgDelta))g")
+            lines.append("    Accurate (±2g): \(accurateCount)/\(mealsWithAI.count), User added carbs: \(overCount), User reduced carbs: \(underCount)")
+        }
+
+        return lines.joined(separator: "\n")
+    }
+
+    // MARK: - Nightscout Context
+
+    /// Cached Nightscout import result to avoid repeated network calls
+    private static var cachedNightscoutResult: LoopInsightsNightscoutImportResult?
+    private static var nightscoutCacheTimestamp: Date?
+
+    /// Build prompt context from Nightscout data. Uses a 5-minute cache to
+    /// avoid hammering the server on every chat message.
+    private func buildNightscoutPromptContext(start: Date, end: Date) async -> String {
+        let config = LoopInsightsNightscoutConfig.load()
+        guard config.isConnected, !config.siteURL.isEmpty else { return "" }
+
+        // Use cached result if fresh (< 5 min)
+        let result: LoopInsightsNightscoutImportResult
+        if let cached = Self.cachedNightscoutResult,
+           let ts = Self.nightscoutCacheTimestamp,
+           Date().timeIntervalSince(ts) < 300 {
+            result = cached
+        } else {
+            let importer = LoopInsights_NightscoutImporter(config: config)
+            do {
+                result = try await importer.importData(start: start, end: end)
+                Self.cachedNightscoutResult = result
+                Self.nightscoutCacheTimestamp = Date()
+            } catch {
+                LoopInsights_FeatureFlags.log.error("Nightscout import for context failed: \(error)")
+                return ""
+            }
+        }
+
+        guard result.entryCount > 0 || result.treatmentCount > 0 else { return "" }
+
+        var lines: [String] = ["NIGHTSCOUT DATA (\(result.summary)):"]
+
+        // Recent glucose from Nightscout (last 12 hours, sampled every ~30 min)
+        let twelveHoursAgo = Date().addingTimeInterval(-12 * 3600)
+        let recentGlucose = result.glucoseReadings
+            .filter { $0.date >= twelveHoursAgo }
+            .sorted { $0.date < $1.date }
+
+        if !recentGlucose.isEmpty {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            lines.append("  Recent Glucose (Nightscout):")
+            var lastShown: Date?
+            for reading in recentGlucose {
+                if let prev = lastShown, reading.date.timeIntervalSince(prev) < 25 * 60 { continue }
+                lines.append("    \(formatter.string(from: reading.date)): \(String(format: "%.0f", reading.mgdl)) mg/dL")
+                lastShown = reading.date
+            }
+        }
+
+        // Recent treatments
+        let recentCarbs = result.carbEntries
+            .filter { $0.date >= twelveHoursAgo }
+            .sorted { $0.date > $1.date }
+
+        if !recentCarbs.isEmpty {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            lines.append("  Recent Meals (Nightscout):")
+            for entry in recentCarbs.prefix(10) {
+                var line = "    \(formatter.string(from: entry.date)): \(String(format: "%.0f", entry.grams))g carbs"
+                if let foodType = entry.foodType { line += " (\(foodType))" }
+                lines.append(line)
+            }
+        }
+
+        let recentBoluses = result.bolusEntries
+            .filter { $0.date >= twelveHoursAgo }
+            .sorted { $0.date > $1.date }
+
+        if !recentBoluses.isEmpty {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            lines.append("  Recent Boluses (Nightscout):")
+            for bolus in recentBoluses.prefix(10) {
+                lines.append("    \(formatter.string(from: bolus.date)): \(String(format: "%.1f", bolus.units)) U")
+            }
+        }
+
+        return lines.joined(separator: "\n")
     }
 
     // MARK: - Raw Data Access
