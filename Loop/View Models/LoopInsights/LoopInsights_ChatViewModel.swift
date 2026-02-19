@@ -34,6 +34,7 @@ final class LoopInsights_ChatViewModel: ObservableObject {
 
     /// Cached therapy context built during pre-fetch — reused across messages
     private var cachedTherapyContext: String?
+    private var cachedStats: LoopInsightsAggregatedStats?
     private var cacheTimestamp: Date?
 
     /// Pre-built quick-ask suggestions shown when the conversation is empty
@@ -77,6 +78,7 @@ final class LoopInsights_ChatViewModel: ObservableObject {
             catch { LoopInsights_FeatureFlags.log.error("Chat prefetch: aggregate failed: \(error)") }
 
             cachedTherapyContext = Self.buildTherapyContext(snapshot: snapshot, stats: stats)
+            cachedStats = stats
             cacheTimestamp = Date()
         }
     }
@@ -120,7 +122,15 @@ final class LoopInsights_ChatViewModel: ObservableObject {
                     catch { LoopInsights_FeatureFlags.log.error("Chat: failed to aggregate data: \(error)") }
                     context = Self.buildTherapyContext(snapshot: snapshot, stats: stats)
                     cachedTherapyContext = context
+                    cachedStats = stats
                     cacheTimestamp = Date()
+                }
+
+                // Supplemental context: caffeine, alcohol, circadian, food response, stress
+                // Fetched fresh every message since caffeine/alcohol levels change in real-time
+                if let stats = cachedStats,
+                   let supplemental = await coordinator.buildSupplementalContext(stats: stats) {
+                    context += "\n\n" + supplemental
                 }
 
                 // Always fetch fresh real-time glucose (not cached)
