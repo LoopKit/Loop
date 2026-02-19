@@ -54,6 +54,8 @@ struct LoopInsights_SettingsView: View {
     // Phase 5 flags
     @State private var circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
     @State private var foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
+    @State private var mealDebriefEnabled = LoopInsights_FeatureFlags.mealDebriefEnabled
+    @State private var preMealAdvisorEnabled = LoopInsights_FeatureFlags.preMealAdvisorEnabled
     @State private var caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
     @State private var alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
     @State private var nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
@@ -135,6 +137,8 @@ struct LoopInsights_SettingsView: View {
             biometricsEnabled = LoopInsights_FeatureFlags.biometricsEnabled
             circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
             foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
+            mealDebriefEnabled = LoopInsights_FeatureFlags.mealDebriefEnabled
+            preMealAdvisorEnabled = LoopInsights_FeatureFlags.preMealAdvisorEnabled
             caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
             alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
             nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
@@ -1033,6 +1037,28 @@ struct LoopInsights_SettingsView: View {
                 Text(NSLocalizedString("Analyzes glucose responses by food type. Enables Meal Insights view with meal debrief cards and pre-meal AI advisor.", comment: "LoopInsights food response description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
+
+                if foodResponseEnabled {
+                    Divider()
+
+                    Toggle(NSLocalizedString("AI Meal Debrief", comment: "LoopInsights meal debrief toggle"), isOn: $mealDebriefEnabled)
+                        .onChange(of: mealDebriefEnabled) { newValue in
+                            LoopInsights_FeatureFlags.mealDebriefEnabled = newValue
+                        }
+                    Text(NSLocalizedString("Captures Loop's predicted glucose at meal time, then generates AI analysis comparing predicted vs actual response. Tap any meal card after 2 hours to see the debrief.", comment: "LoopInsights meal debrief description"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Divider()
+
+                    Toggle(NSLocalizedString("Pre-Meal Advisor", comment: "LoopInsights pre-meal advisor toggle"), isOn: $preMealAdvisorEnabled)
+                        .onChange(of: preMealAdvisorEnabled) { newValue in
+                            LoopInsights_FeatureFlags.preMealAdvisorEnabled = newValue
+                        }
+                    Text(NSLocalizedString("Shows historical glucose patterns and AI-powered advice when you identify a food you've eaten before in FoodFinder.", comment: "LoopInsights pre-meal advisor description"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
 
                 Divider()
 

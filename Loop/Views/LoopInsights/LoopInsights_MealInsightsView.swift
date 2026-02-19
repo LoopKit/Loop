@@ -11,20 +11,20 @@ import LoopKit
 import HealthKit
 
 /// Combined Meal Debrief + Pre-Meal Advisor view.
-/// "Recent Meals" tab shows meals with glucose response cards.
+/// "Recent Meals" tab shows meals with glucose response cards and expandable AI debriefs.
 /// "Pre-Meal Advice" tab lets user pick a food type and see historical pattern + AI advice.
 struct LoopInsights_MealInsightsView: View {
 
     let coordinator: LoopInsights_Coordinator
 
+    @StateObject private var viewModel: LoopInsights_MealInsightsViewModel
     @State private var selectedTab = 0
-    @State private var mealEvents: [LoopInsightsMealEvent] = []
-    @State private var foodPatterns: [LoopInsightsFoodResponsePattern] = []
-    @State private var isLoading = true
-    @State private var selectedPattern: LoopInsightsFoodResponsePattern?
-    @State private var aiAdvice: String?
-    @State private var isLoadingAdvice = false
     @Environment(\.dismiss) private var dismiss
+
+    init(coordinator: LoopInsights_Coordinator) {
+        self.coordinator = coordinator
+        _viewModel = StateObject(wrappedValue: LoopInsights_MealInsightsViewModel(coordinator: coordinator))
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,7 +35,7 @@ struct LoopInsights_MealInsightsView: View {
             .pickerStyle(.segmented)
             .padding()
 
-            if isLoading {
+            if viewModel.isLoading {
                 Spacer()
                 ProgressView()
                 Text(NSLocalizedString("Analyzing meal data...", comment: "LoopInsights meals loading"))
@@ -58,7 +58,7 @@ struct LoopInsights_MealInsightsView: View {
             }
         }
         .task {
-            await loadMealData()
+            await viewModel.loadMealData()
         }
     }
 
@@ -66,7 +66,7 @@ struct LoopInsights_MealInsightsView: View {
 
     private var recentMealsTab: some View {
         Group {
-            if mealEvents.isEmpty {
+            if viewModel.mealEvents.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "fork.knife")
                         .font(.system(size: 40))
@@ -83,7 +83,7 @@ struct LoopInsights_MealInsightsView: View {
                         HStack(spacing: 16) {
                             HStack(spacing: 4) {
                                 Circle().fill(Color.green).frame(width: 8, height: 8)
-                                Text(NSLocalizedString("Rise is ≤ 50 mg/dL", comment: "LoopInsights meal legend green"))
+                                Text(NSLocalizedString("Rise is \u{2264} 50 mg/dL", comment: "LoopInsights meal legend green"))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -96,7 +96,7 @@ struct LoopInsights_MealInsightsView: View {
                             Spacer()
                         }
 
-                        ForEach(mealEvents) { event in
+                        ForEach(viewModel.mealEvents) { event in
                             mealCard(event)
                         }
                     }
@@ -155,6 +155,25 @@ struct LoopInsights_MealInsightsView: View {
                     .font(.caption)
                     .foregroundColor(rise > 50 ? .orange : .green)
             }
+
+            // AI Meal Debrief section (expandable)
+            if LoopInsights_FeatureFlags.mealDebriefEnabled {
+                let readiness = viewModel.debriefReadiness(for: event)
+                if case .featureDisabled = readiness {
+                    // Don't show anything
+                } else {
+                    Divider()
+                    LoopInsights_MealDebriefCard(
+                        event: event,
+                        readiness: readiness,
+                        debrief: viewModel.debriefResults[event.id.uuidString],
+                        isLoading: viewModel.debriefLoadingIDs.contains(event.id.uuidString),
+                        errorMessage: viewModel.debriefErrors[event.id.uuidString],
+                        isExpanded: viewModel.expandedDebriefID == event.id.uuidString,
+                        onToggle: { viewModel.toggleDebrief(for: event) }
+                    )
+                }
+            }
         }
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
@@ -184,7 +203,7 @@ struct LoopInsights_MealInsightsView: View {
     private var preMealAdviceTab: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if foodPatterns.isEmpty {
+                if viewModel.foodPatterns.isEmpty {
                     Text(NSLocalizedString("No food-type patterns available. Log meals with food types to see patterns.", comment: "LoopInsights no food patterns"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -195,11 +214,11 @@ struct LoopInsights_MealInsightsView: View {
                         .foregroundColor(.secondary)
                         .padding(.horizontal)
 
-                    ForEach(foodPatterns) { pattern in
+                    ForEach(viewModel.foodPatterns) { pattern in
                         foodPatternCard(pattern)
                     }
 
-                    if let advice = aiAdvice {
+                    if let advice = viewModel.aiAdvice {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 6) {
                                 Image(systemName: "sparkles")
@@ -224,8 +243,7 @@ struct LoopInsights_MealInsightsView: View {
 
     private func foodPatternCard(_ pattern: LoopInsightsFoodResponsePattern) -> some View {
         Button(action: {
-            selectedPattern = pattern
-            requestAdvice(for: pattern)
+            viewModel.requestAdvice(for: pattern)
         }) {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
@@ -236,7 +254,7 @@ struct LoopInsights_MealInsightsView: View {
                     Text(String(format: "%d meals", pattern.mealCount))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    if selectedPattern?.id == pattern.id {
+                    if viewModel.selectedPattern?.id == pattern.id {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.accentColor)
                     }
@@ -267,7 +285,7 @@ struct LoopInsights_MealInsightsView: View {
                     }
                 }
 
-                if isLoadingAdvice && selectedPattern?.id == pattern.id {
+                if viewModel.isLoadingAdvice && viewModel.selectedPattern?.id == pattern.id {
                     HStack {
                         ProgressView()
                             .scaleEffect(0.7)
@@ -280,84 +298,17 @@ struct LoopInsights_MealInsightsView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(selectedPattern?.id == pattern.id
+                    .fill(viewModel.selectedPattern?.id == pattern.id
                         ? Color.accentColor.opacity(0.08)
                         : Color(.secondarySystemGroupedBackground))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(selectedPattern?.id == pattern.id ? Color.accentColor.opacity(0.3) : Color.clear, lineWidth: 1)
+                    .stroke(viewModel.selectedPattern?.id == pattern.id ? Color.accentColor.opacity(0.3) : Color.clear, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
         .padding(.horizontal)
-    }
-
-    // MARK: - Data Loading
-
-    private func loadMealData() async {
-        let period = LoopInsights_FeatureFlags.analysisPeriod
-        let endDate = Date()
-        let startDate = endDate.addingTimeInterval(-period.timeInterval)
-
-        do {
-            let carbEntries = try await coordinator.fetchCarbEntries(start: startDate, end: endDate)
-            let glucoseSamples = try await coordinator.fetchGlucoseSamples(start: startDate, end: endDate)
-
-            let events = LoopInsights_FoodResponseAnalyzer.buildRecentMealEvents(
-                carbEntries: carbEntries,
-                glucoseSamples: glucoseSamples
-            )
-            let patterns = LoopInsights_FoodResponseAnalyzer.analyzeFoodResponses(
-                carbEntries: carbEntries,
-                glucoseSamples: glucoseSamples
-            )
-
-            await MainActor.run {
-                self.mealEvents = events
-                self.foodPatterns = patterns
-                self.isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                self.isLoading = false
-            }
-        }
-    }
-
-    private func requestAdvice(for pattern: LoopInsightsFoodResponsePattern) {
-        isLoadingAdvice = true
-        aiAdvice = nil
-
-        let prompt = """
-        Based on my glucose response pattern for \(pattern.foodType):
-        - Average carbs: \(String(format: "%.0f", pattern.averageCarbsPerMeal))g per meal
-        - Peak glucose rise: \(String(format: "%.0f", pattern.peakGlucoseRise)) mg/dL
-        - Time to peak: \(String(format: "%.0f", pattern.timeToPeakMinutes)) minutes
-        - 2h post-meal average: \(String(format: "%.0f", pattern.twoHourPostMealAvg)) mg/dL
-        - 4h post-meal average: \(String(format: "%.0f", pattern.fourHourPostMealAvg)) mg/dL
-
-        Give me brief, practical advice for managing this food. Include: timing of pre-bolus, \
-        any carb ratio considerations, and alternative strategies. Keep it under 4 sentences.
-        """
-
-        Task {
-            do {
-                let response = try await LoopInsights_AIServiceAdapter.shared.sendPrompt(
-                    "You are a diabetes meal advisor. Be concise and practical.",
-                    userPrompt: prompt
-                )
-                await MainActor.run {
-                    self.aiAdvice = response
-                    self.isLoadingAdvice = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.aiAdvice = "Unable to get advice: \(error.localizedDescription)"
-                    self.isLoadingAdvice = false
-                }
-            }
-        }
     }
 
     // MARK: - Formatters

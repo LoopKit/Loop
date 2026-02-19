@@ -78,6 +78,10 @@ struct FoodFinder_EntryPoint: View {
     /// Kept lightweight — only names are needed for the heart-button check.
     @State private var favoriteFoods: [StoredFavoriteFood] = []
 
+    // MARK: - Pre-Meal Advisor State
+    @State private var preMealAdvice: LoopInsights_PreMealAdvice?
+    @State private var preMealAdviceDismissed = false
+
     enum Row: Hashable {
         case detailedFoodBreakdown, advancedAnalysis
     }
@@ -164,6 +168,16 @@ struct FoodFinder_EntryPoint: View {
                     if let aiResult = searchVM.lastAIAnalysisResult {
                         aiAnalysisNotesSection(aiResult: aiResult)
                     }
+
+                    // Pre-Meal Advisor card (LoopInsights integration)
+                    if let advice = preMealAdvice, !preMealAdviceDismissed {
+                        LoopInsights_PreMealAdvisorCard(
+                            advice: advice,
+                            onDismiss: { preMealAdviceDismissed = true }
+                        )
+                        .padding(.horizontal, 4)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
                 }
             }
 
@@ -194,6 +208,29 @@ struct FoodFinder_EntryPoint: View {
             // Clear after consuming so the next selection triggers a fresh change
             DispatchQueue.main.async {
                 restoredAnalysisResult = nil
+            }
+        }
+        .onChange(of: foodType) { newFoodType in
+            // Pre-Meal Advisor: check for historical patterns when food type changes
+            preMealAdviceDismissed = false
+            guard LoopInsights_FeatureFlags.isEnabled,
+                  LoopInsights_FeatureFlags.preMealAdvisorEnabled,
+                  !newFoodType.isEmpty else {
+                preMealAdvice = nil
+                return
+            }
+            let service = LoopInsights_PreMealAdvisorService.shared
+            if let advice = service.checkForAdvice(foodType: newFoodType) {
+                preMealAdvice = advice
+                // Async: enhance with AI advice
+                Task {
+                    let enhanced = await service.requestAIAdvice(for: advice)
+                    await MainActor.run {
+                        preMealAdvice = enhanced
+                    }
+                }
+            } else {
+                preMealAdvice = nil
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
