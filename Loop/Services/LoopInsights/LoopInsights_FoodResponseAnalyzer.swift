@@ -280,4 +280,154 @@ final class LoopInsights_FoodResponseAnalyzer {
         }
         return ctx
     }
+
+    // MARK: - Nutritional Glucose Correlation
+
+    /// Correlate FoodFinder meal records (with full nutritional detail) against
+    /// glucose data to discover how macronutrient composition affects BG response.
+    /// Groups meals by nutritional profile (high-fat vs low-fat, etc.) and compares
+    /// average glucose spikes between groups.
+    static func analyzeNutritionalCorrelations(
+        meals: [FoodFinder_AnalysisRecord],
+        glucoseSamples: [StoredGlucoseSample]
+    ) -> String {
+        // Only analyze meals with full nutritional data
+        let mealsWithNutrition = meals.filter { meal in
+            guard let result = meal.analysisResult else { return false }
+            return result.totalFat != nil && result.totalProtein != nil && meal.carbsGrams > 0
+        }
+        guard mealsWithNutrition.count >= 4 else { return "" }
+
+        // Pre-sort glucose for binary search
+        let sortedGlucose = glucoseSamples.sorted { $0.startDate < $1.startDate }
+        let sortedDates = sortedGlucose.map { $0.startDate }
+        let sortedValues = sortedGlucose.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
+
+        guard !sortedDates.isEmpty else { return "" }
+
+        // Calculate glucose spike for each meal
+        struct MealSpike {
+            let meal: FoodFinder_AnalysisRecord
+            let peakRise: Double       // mg/dL above pre-meal
+            let timeToPeak: Double     // minutes
+            let fatPerCarb: Double     // fat grams per carb gram
+            let proteinPerCarb: Double // protein grams per carb gram
+            let fiberPerCarb: Double   // fiber grams per carb gram
+        }
+
+        var spikes: [MealSpike] = []
+
+        for meal in mealsWithNutrition {
+            guard let result = meal.analysisResult,
+                  let fat = result.totalFat,
+                  let protein = result.totalProtein else { continue }
+            let fiber = result.totalFiber ?? 0
+
+            let mealDate = meal.date
+
+            // Pre-meal glucose (30 min before)
+            let preMealStart = mealDate.addingTimeInterval(-1800)
+            let preIdx = sortedDates.loopInsights_firstIndex(afterOrAt: preMealStart) { $0 }
+            var preMealValues: [Double] = []
+            for i in preIdx..<sortedDates.count {
+                if sortedDates[i] > mealDate { break }
+                preMealValues.append(sortedValues[i])
+            }
+            guard !preMealValues.isEmpty else { continue }
+            let preMealAvg = preMealValues.reduce(0, +) / Double(preMealValues.count)
+
+            // Post-meal glucose (0-4h)
+            let postEnd = mealDate.addingTimeInterval(4 * 3600)
+            let postIdx = sortedDates.loopInsights_firstIndex(afterOrAt: mealDate) { $0 }
+            var postValues: [Double] = []
+            var postDates: [Date] = []
+            for i in postIdx..<sortedDates.count {
+                if sortedDates[i] > postEnd { break }
+                if sortedDates[i] > mealDate {
+                    postValues.append(sortedValues[i])
+                    postDates.append(sortedDates[i])
+                }
+            }
+            guard postValues.count >= 4 else { continue }
+
+            let peak = postValues.max() ?? preMealAvg
+            let peakRise = peak - preMealAvg
+            var timeToPeak: Double = 60
+            if let peakIdx = postValues.firstIndex(of: peak) {
+                timeToPeak = postDates[peakIdx].timeIntervalSince(mealDate) / 60
+            }
+
+            spikes.append(MealSpike(
+                meal: meal,
+                peakRise: peakRise,
+                timeToPeak: timeToPeak,
+                fatPerCarb: fat / meal.carbsGrams,
+                proteinPerCarb: protein / meal.carbsGrams,
+                fiberPerCarb: fiber / meal.carbsGrams
+            ))
+        }
+
+        guard spikes.count >= 4 else { return "" }
+
+        var lines: [String] = ["NUTRITIONAL GLUCOSE CORRELATIONS (\(spikes.count) meals analyzed):"]
+
+        let avgSpike: ([MealSpike]) -> Double = { group in
+            group.isEmpty ? 0 : group.map { $0.peakRise }.reduce(0, +) / Double(group.count)
+        }
+        let avgTime: ([MealSpike]) -> Double = { group in
+            group.isEmpty ? 0 : group.map { $0.timeToPeak }.reduce(0, +) / Double(group.count)
+        }
+
+        // Fat analysis: high-fat (>0.5g fat per g carb) vs low-fat (<0.2g)
+        let highFat = spikes.filter { $0.fatPerCarb > 0.5 }
+        let lowFat = spikes.filter { $0.fatPerCarb < 0.2 }
+        if highFat.count >= 2 && lowFat.count >= 2 {
+            let hfSpike = avgSpike(highFat)
+            let lfSpike = avgSpike(lowFat)
+            let hfTime = avgTime(highFat)
+            let lfTime = avgTime(lowFat)
+            lines.append("  Fat Impact:")
+            lines.append("    High-fat meals (\(highFat.count)): avg spike \(String(format: "%.0f", hfSpike)) mg/dL, peak at \(String(format: "%.0f", hfTime)) min")
+            lines.append("    Low-fat meals (\(lowFat.count)): avg spike \(String(format: "%.0f", lfSpike)) mg/dL, peak at \(String(format: "%.0f", lfTime)) min")
+            if hfTime > lfTime + 15 {
+                lines.append("    → High-fat meals delay glucose peak by ~\(String(format: "%.0f", hfTime - lfTime)) min")
+            }
+        }
+
+        // Protein analysis: high-protein (>0.5g protein per g carb) vs low-protein
+        let highProtein = spikes.filter { $0.proteinPerCarb > 0.5 }
+        let lowProtein = spikes.filter { $0.proteinPerCarb < 0.2 }
+        if highProtein.count >= 2 && lowProtein.count >= 2 {
+            let hpSpike = avgSpike(highProtein)
+            let lpSpike = avgSpike(lowProtein)
+            lines.append("  Protein Impact:")
+            lines.append("    High-protein meals (\(highProtein.count)): avg spike \(String(format: "%.0f", hpSpike)) mg/dL")
+            lines.append("    Low-protein meals (\(lowProtein.count)): avg spike \(String(format: "%.0f", lpSpike)) mg/dL")
+        }
+
+        // Fiber analysis: high-fiber (>0.15g fiber per g carb) vs low-fiber
+        let highFiber = spikes.filter { $0.fiberPerCarb > 0.15 }
+        let lowFiber = spikes.filter { $0.fiberPerCarb < 0.05 }
+        if highFiber.count >= 2 && lowFiber.count >= 2 {
+            let hfibSpike = avgSpike(highFiber)
+            let lfibSpike = avgSpike(lowFiber)
+            lines.append("  Fiber Impact:")
+            lines.append("    High-fiber meals (\(highFiber.count)): avg spike \(String(format: "%.0f", hfibSpike)) mg/dL")
+            lines.append("    Low-fiber meals (\(lowFiber.count)): avg spike \(String(format: "%.0f", lfibSpike)) mg/dL")
+            if lfibSpike > hfibSpike + 10 {
+                lines.append("    → Fiber reduces glucose spike by ~\(String(format: "%.0f", lfibSpike - hfibSpike)) mg/dL on average")
+            }
+        }
+
+        // Top 3 highest-spike meals
+        let sorted = spikes.sorted { $0.peakRise > $1.peakRise }
+        lines.append("  Biggest Spikes:")
+        for spike in sorted.prefix(3) {
+            let fat = spike.meal.analysisResult?.totalFat ?? 0
+            let protein = spike.meal.analysisResult?.totalProtein ?? 0
+            lines.append("    \(spike.meal.name): +\(String(format: "%.0f", spike.peakRise)) mg/dL (\(String(format: "%.0f", spike.meal.carbsGrams))g carbs, \(String(format: "%.0f", fat))g fat, \(String(format: "%.0f", protein))g protein)")
+        }
+
+        return lines.joined(separator: "\n")
+    }
 }
