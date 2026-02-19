@@ -105,7 +105,7 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 // Use cached context if fresh (< 5 min), otherwise re-fetch
-                let context: String
+                var context: String
                 if let cached = cachedTherapyContext,
                    let ts = cacheTimestamp,
                    Date().timeIntervalSince(ts) < 300 {
@@ -121,6 +121,12 @@ final class LoopInsights_ChatViewModel: ObservableObject {
                     context = Self.buildTherapyContext(snapshot: snapshot, stats: stats)
                     cachedTherapyContext = context
                     cacheTimestamp = Date()
+                }
+
+                // Always fetch fresh real-time glucose (not cached)
+                let realtimeCtx = await fetchRealtimeGlucoseContext()
+                if !realtimeCtx.isEmpty {
+                    context = realtimeCtx + "\n" + context
                 }
 
                 let history = session.conversationHistory().dropLast().map { ($0.role, $0.content) }
@@ -152,24 +158,31 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         sendMessage()
     }
 
-    /// Called from the view's `.onChange(of: inputText)` to detect dictation vs typing
+    /// Called from the view's `.onChange(of: inputText)` to detect dictation vs typing.
+    /// Dictation inserts multi-character bursts. Once detected, stays in voice mode
+    /// until the message is sent or the field is cleared. Auto-sends after 1.5s of
+    /// no further text changes.
     func handleTextChange(oldValue: String, newValue: String) {
         let changeSize = newValue.count - oldValue.count
-        let isAppend = newValue.hasPrefix(oldValue) || oldValue.isEmpty
 
-        if isAppend && changeSize >= 4 {
+        // Detect dictation: 3+ characters appended at once (dictation burst)
+        if changeSize >= 3 {
             pendingVoiceMessage = true
-        } else if changeSize == 1 || changeSize == -1 {
+        }
+
+        // Only cancel voice mode on explicit clear (backspace to empty or full clear)
+        if newValue.isEmpty {
             pendingVoiceMessage = false
         }
 
+        // Reset the auto-send timer on every change
         autoSendTimer?.cancel()
         if pendingVoiceMessage && !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let timer = DispatchWorkItem { [weak self] in
                 self?.sendMessage()
             }
             autoSendTimer = timer
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: timer)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute: timer)
         }
     }
 
@@ -229,6 +242,54 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         }
         prompt += "User: \(message)"
         return prompt
+    }
+
+    // MARK: - Real-Time Glucose
+
+    /// Fetch the most recent glucose readings (last 3 hours) fresh on every message.
+    /// This gives Loopy access to the user's current blood sugar and recent trend.
+    private func fetchRealtimeGlucoseContext() async -> String {
+        let now = Date()
+        let threeHoursAgo = now.addingTimeInterval(-3 * 3600)
+
+        var samples: [(date: Date, value: Double)] = []
+        do {
+            let rawSamples = try await coordinator.fetchGlucoseSamples(start: threeHoursAgo, end: now)
+            samples = rawSamples.map { (date: $0.startDate, value: $0.quantity.doubleValue(for: .milligramsPerDeciliter)) }
+        } catch {
+            LoopInsights_FeatureFlags.log.error("Chat: failed to fetch real-time glucose: \(error)")
+        }
+
+        guard !samples.isEmpty else { return "" }
+
+        let sorted = samples.sorted { $0.date < $1.date }
+        let latest = sorted.last!
+        let minutesAgo = Int(now.timeIntervalSince(latest.date) / 60)
+
+        var ctx = "CURRENT GLUCOSE (REAL-TIME):\n"
+        ctx += "  Latest Reading: \(String(format: "%.0f", latest.value)) mg/dL (\(minutesAgo) min ago)\n"
+
+        // Trend from last 30 min
+        let thirtyMinAgo = now.addingTimeInterval(-30 * 60)
+        let recentSamples = sorted.filter { $0.date >= thirtyMinAgo }
+        if recentSamples.count >= 2, let first = recentSamples.first, let last = recentSamples.last {
+            let delta = last.value - first.value
+            let direction = delta > 5 ? "rising" : (delta < -5 ? "falling" : "stable")
+            ctx += "  30-min Trend: \(direction) (\(delta >= 0 ? "+" : "")\(String(format: "%.0f", delta)) mg/dL)\n"
+        }
+
+        // Last 3 hours of readings (sampled every ~30 min for brevity)
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        ctx += "  Recent Readings:\n"
+        var lastShown: Date?
+        for sample in sorted {
+            if let prev = lastShown, sample.date.timeIntervalSince(prev) < 25 * 60 { continue }
+            ctx += "    \(formatter.string(from: sample.date)): \(String(format: "%.0f", sample.value)) mg/dL\n"
+            lastShown = sample.date
+        }
+
+        return ctx
     }
 
     // MARK: - Therapy Context
