@@ -121,7 +121,9 @@ final class LoopInsights_DataAggregator {
                     weight: bio.weight,
                     stressScore: stressScore
                 )
-                LoopInsights_FeatureFlags.log.debug("Phase 5: Stress score computed — \(String(format: "%.0f", stressScore!.overallScore))/100")
+                if let score = stressScore {
+                    LoopInsights_FeatureFlags.log.debug("Phase 5: Stress score computed — \(String(format: "%.0f", score.overallScore))/100")
+                }
             }
         }
 

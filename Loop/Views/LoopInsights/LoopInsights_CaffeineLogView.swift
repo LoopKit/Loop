@@ -11,6 +11,42 @@ import SwiftUI
 /// Brand color for all caffeine UI
 private let caffeineGreen = Color.green
 
+/// Info tips shown via (i) buttons in the caffeine tracker UI.
+private enum CaffeineInfoTip: String, Identifiable {
+    case estimatedLevel
+    case totalLast24h
+    case todaysPeak
+    case lastIntake
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .estimatedLevel:
+            return NSLocalizedString("Estimated Caffeine Level", comment: "CaffeineInfoTip estimated level title")
+        case .totalLast24h:
+            return NSLocalizedString("24h Total", comment: "CaffeineInfoTip 24h total title")
+        case .todaysPeak:
+            return NSLocalizedString("Today's Peak", comment: "CaffeineInfoTip today peak title")
+        case .lastIntake:
+            return NSLocalizedString("Last Intake", comment: "CaffeineInfoTip last intake title")
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .estimatedLevel:
+            return NSLocalizedString("The estimated milligrams of caffeine currently in your system. Caffeine has a half-life of about 5.7 hours, meaning half of what you consume is eliminated roughly every 6 hours.", comment: "CaffeineInfoTip estimated level message")
+        case .totalLast24h:
+            return NSLocalizedString("The total milligrams of caffeine consumed in the last 24 hours from all sources. The FDA considers 400 mg/day a safe amount for most adults.", comment: "CaffeineInfoTip 24h total message")
+        case .todaysPeak:
+            return NSLocalizedString("The highest caffeine level your body reached today. High peak levels can amplify effects on blood sugar, heart rate, and sleep quality.", comment: "CaffeineInfoTip today peak message")
+        case .lastIntake:
+            return NSLocalizedString("When you last consumed caffeine. Caffeine consumed within 6 hours of bedtime can disrupt sleep and affect overnight glucose control.", comment: "CaffeineInfoTip last intake message")
+        }
+    }
+}
+
 /// Caffeine logging UI: shows current level gauge, quick-add presets, and entry log.
 struct LoopInsights_CaffeineLogView: View {
 
@@ -22,6 +58,8 @@ struct LoopInsights_CaffeineLogView: View {
     @State private var editMg: String = ""
     @State private var editSource: String = ""
     @State private var editTimestamp: Date = Date()
+    @State private var showingClearConfirmation = false
+    @State private var activeInfo: CaffeineInfoTip?
     @Environment(\.dismiss) private var dismiss
 
     private var currentState: LoopInsightsCaffeineState {
@@ -62,7 +100,7 @@ struct LoopInsights_CaffeineLogView: View {
                 // Level gauge
                 ZStack {
                     Circle()
-                        .stroke(caffeineGreen.opacity(0.2), lineWidth: 8)
+                        .stroke(gaugeColor(currentState.currentLevelMg).opacity(0.2), lineWidth: 8)
                         .frame(width: 100, height: 100)
 
                     let level = min(currentState.currentLevelMg, 400)
@@ -82,9 +120,7 @@ struct LoopInsights_CaffeineLogView: View {
                     }
                 }
 
-                Text(NSLocalizedString("Estimated Caffeine Level", comment: "LoopInsights caffeine level label"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                infoLabel(NSLocalizedString("Estimated Caffeine Level", comment: "LoopInsights caffeine level label"), tip: .estimatedLevel)
 
                 if currentState.entriesLast24h > 0 {
                     HStack(spacing: 16) {
@@ -92,26 +128,20 @@ struct LoopInsights_CaffeineLogView: View {
                             Text(String(format: "%.0f mg", currentState.totalMgLast24h))
                                 .font(.caption.weight(.semibold))
                                 .foregroundColor(caffeineGreen)
-                            Text(NSLocalizedString("24h Total", comment: "LoopInsights caffeine 24h total"))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                            infoLabel(NSLocalizedString("24h Total", comment: "LoopInsights caffeine 24h total"), tip: .totalLast24h)
                         }
                         VStack(spacing: 2) {
                             Text(String(format: "%.0f mg", currentState.peakLevelToday))
                                 .font(.caption.weight(.semibold))
                                 .foregroundColor(caffeineGreen)
-                            Text(NSLocalizedString("Today's Peak", comment: "LoopInsights caffeine today peak"))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                            infoLabel(NSLocalizedString("Today's Peak", comment: "LoopInsights caffeine today peak"), tip: .todaysPeak)
                         }
                         if let lastTime = currentState.lastIntakeTime {
                             VStack(spacing: 2) {
                                 Text(Self.timeFormatter.string(from: lastTime))
                                     .font(.caption.weight(.semibold))
                                     .foregroundColor(caffeineGreen)
-                                Text(NSLocalizedString("Last Intake", comment: "LoopInsights caffeine last intake"))
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                infoLabel(NSLocalizedString("Last Intake", comment: "LoopInsights caffeine last intake"), tip: .lastIntake)
                             }
                         }
                     }
@@ -119,7 +149,28 @@ struct LoopInsights_CaffeineLogView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
+            .alert(item: $activeInfo) { tip in
+                Alert(
+                    title: Text(tip.title),
+                    message: Text(tip.message),
+                    dismissButton: .default(Text(NSLocalizedString("OK", comment: "OK button")))
+                )
+            }
         }
+    }
+
+    private func infoLabel(_ text: String, tip: CaffeineInfoTip) -> some View {
+        Button(action: { activeInfo = tip }) {
+            HStack(spacing: 3) {
+                Text(text)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Image(systemName: "info.circle")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Quick Add
@@ -135,9 +186,8 @@ struct LoopInsights_CaffeineLogView: View {
                         tracker.logCaffeine(milligrams: preset.milligrams, source: preset.name)
                     }) {
                         HStack(spacing: 6) {
-                            Image(systemName: preset.icon)
+                            Text(preset.icon)
                                 .font(.caption)
-                                .foregroundColor(caffeineGreen)
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(preset.name)
                                     .font(.caption)
@@ -248,12 +298,31 @@ struct LoopInsights_CaffeineLogView: View {
                 }
                 .onDelete { indexSet in
                     let entriesToDelete = indexSet.compactMap { idx -> LoopInsightsCaffeineEntry? in
+                        guard idx < tracker.entries.count else { return nil }
                         let entry = tracker.entries[idx]
                         return entry.isFromHealthKit ? nil : entry
                     }
                     for entry in entriesToDelete {
                         tracker.removeEntry(entry)
                     }
+                }
+
+                Button(role: .destructive, action: {
+                    showingClearConfirmation = true
+                }) {
+                    HStack {
+                        Spacer()
+                        Text(NSLocalizedString("Clear All Entries", comment: "LoopInsights clear all caffeine entries"))
+                        Spacer()
+                    }
+                }
+                .alert(NSLocalizedString("Clear All Entries?", comment: "LoopInsights clear all caffeine alert title"), isPresented: $showingClearConfirmation) {
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+                    Button(NSLocalizedString("Clear All", comment: "LoopInsights clear all confirm"), role: .destructive) {
+                        tracker.clearAllEntries()
+                    }
+                } message: {
+                    Text(NSLocalizedString("This will remove all manual caffeine entries. HealthKit entries will remain. This cannot be undone.", comment: "LoopInsights clear all caffeine alert message"))
                 }
             }
         }
@@ -328,11 +397,14 @@ struct LoopInsights_CaffeineLogView: View {
 
     // MARK: - Helpers
 
-    /// Gauge color: green base with orange/red for high levels
+    /// Gauge color: green → yellow → orange → red → dark red
     private func gaugeColor(_ mg: Double) -> Color {
-        if mg < 150 { return caffeineGreen }
-        if mg < 250 { return .orange }
-        return .red
+        if mg <= 0 { return .green }
+        if mg < 100 { return .green }
+        if mg < 200 { return .yellow }
+        if mg < 300 { return .orange }
+        if mg < 400 { return .red }
+        return Color(red: 0.7, green: 0.0, blue: 0.0) // dark red
     }
 
     private static let timeFormatter: DateFormatter = {

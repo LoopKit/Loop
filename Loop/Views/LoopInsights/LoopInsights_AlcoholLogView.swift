@@ -13,6 +13,42 @@ import SwiftUI
 /// Brand color for all alcohol UI
 private let alcoholAmber = Color.orange
 
+/// Info tips shown via (i) buttons in the alcohol tracker UI.
+private enum AlcoholInfoTip: String, Identifiable {
+    case estimatedLevel
+    case todaysPeak
+    case hypoRisk
+    case estClear
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .estimatedLevel:
+            return NSLocalizedString("Estimated Alcohol Level", comment: "AlcoholInfoTip estimated level title")
+        case .todaysPeak:
+            return NSLocalizedString("Today's Peak", comment: "AlcoholInfoTip today peak title")
+        case .hypoRisk:
+            return NSLocalizedString("Hypo Risk", comment: "AlcoholInfoTip hypo risk title")
+        case .estClear:
+            return NSLocalizedString("Estimated Clear Time", comment: "AlcoholInfoTip est clear title")
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .estimatedLevel:
+            return NSLocalizedString("The number of standard drinks estimated to still be in your system. Your liver metabolizes about 1 standard drink per hour. This number decreases over time as your body processes the alcohol.", comment: "AlcoholInfoTip estimated level message")
+        case .todaysPeak:
+            return NSLocalizedString("The highest alcohol level your body reached today. This is the most drinks in your system at any one time, which matters more for impairment and hypo risk than total drinks consumed.", comment: "AlcoholInfoTip today peak message")
+        case .hypoRisk:
+            return NSLocalizedString("Alcohol suppresses your liver's ability to produce glucose, which can cause delayed low blood sugar 4–24 hours after drinking. Risk is highest 8–12 hours after your last drink. The level is based on how much you drank and when.", comment: "AlcoholInfoTip hypo risk message")
+        case .estClear:
+            return NSLocalizedString("The estimated time when all alcohol will be metabolized from your system, based on a rate of about 1 standard drink per hour. Hypo risk may persist for hours after this time.", comment: "AlcoholInfoTip est clear message")
+        }
+    }
+}
+
 /// Alcohol logging UI: shows current level gauge, hypo risk banner, quick-add presets, and entry log.
 struct LoopInsights_AlcoholLogView: View {
 
@@ -24,6 +60,8 @@ struct LoopInsights_AlcoholLogView: View {
     @State private var editDrinks: String = ""
     @State private var editSource: String = ""
     @State private var editTimestamp: Date = Date()
+    @State private var activeInfo: AlcoholInfoTip?
+    @State private var showingClearConfirmation = false
     @Environment(\.dismiss) private var dismiss
 
     private var currentState: LoopInsightsAlcoholState {
@@ -64,7 +102,7 @@ struct LoopInsights_AlcoholLogView: View {
                 // Level gauge
                 ZStack {
                     Circle()
-                        .stroke(alcoholAmber.opacity(0.2), lineWidth: 8)
+                        .stroke(gaugeColor(currentState.currentAlcoholLevel).opacity(0.2), lineWidth: 8)
                         .frame(width: 100, height: 100)
 
                     let level = min(currentState.currentAlcoholLevel, 5)
@@ -84,36 +122,28 @@ struct LoopInsights_AlcoholLogView: View {
                     }
                 }
 
-                Text(NSLocalizedString("Estimated Alcohol Level", comment: "LoopInsights alcohol level label"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                infoLabel(NSLocalizedString("Estimated Alcohol Level", comment: "LoopInsights alcohol level label"), tip: .estimatedLevel)
 
                 if currentState.entriesLast24h > 0 {
                     HStack(spacing: 16) {
                         VStack(spacing: 2) {
-                            Text(String(format: "%.1f", currentState.totalDrinksLast24h))
+                            Text(String(format: "%.1f", currentState.peakLevelToday))
                                 .font(.caption.weight(.semibold))
                                 .foregroundColor(alcoholAmber)
-                            Text(NSLocalizedString("24h Total", comment: "LoopInsights alcohol 24h total"))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                            infoLabel(NSLocalizedString("Today's Peak", comment: "LoopInsights alcohol today peak"), tip: .todaysPeak)
                         }
                         VStack(spacing: 2) {
                             Text(riskDisplayText(currentState.hypoRiskLevel))
                                 .font(.caption.weight(.semibold))
                                 .foregroundColor(riskColor(currentState.hypoRiskLevel))
-                            Text(NSLocalizedString("Hypo Risk", comment: "LoopInsights alcohol hypo risk"))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                            infoLabel(NSLocalizedString("Hypo Risk", comment: "LoopInsights alcohol hypo risk"), tip: .hypoRisk)
                         }
                         if let clearTime = currentState.estimatedClearTime {
                             VStack(spacing: 2) {
                                 Text(Self.timeFormatter.string(from: clearTime))
                                     .font(.caption.weight(.semibold))
                                     .foregroundColor(alcoholAmber)
-                                Text(NSLocalizedString("Est. Clear", comment: "LoopInsights alcohol est clear"))
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                infoLabel(NSLocalizedString("Est. Clear", comment: "LoopInsights alcohol est clear"), tip: .estClear)
                             }
                         }
                     }
@@ -121,7 +151,28 @@ struct LoopInsights_AlcoholLogView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
+            .alert(item: $activeInfo) { tip in
+                Alert(
+                    title: Text(tip.title),
+                    message: Text(tip.message),
+                    dismissButton: .default(Text(NSLocalizedString("OK", comment: "OK button")))
+                )
+            }
         }
+    }
+
+    private func infoLabel(_ text: String, tip: AlcoholInfoTip) -> some View {
+        Button(action: { activeInfo = tip }) {
+            HStack(spacing: 3) {
+                Text(text)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Image(systemName: "info.circle")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Hypo Risk Banner
@@ -158,9 +209,8 @@ struct LoopInsights_AlcoholLogView: View {
                         tracker.logAlcohol(standardDrinks: preset.standardDrinks, source: preset.name)
                     }) {
                         HStack(spacing: 6) {
-                            Image(systemName: preset.icon)
+                            Text(preset.icon)
                                 .font(.caption)
-                                .foregroundColor(alcoholAmber)
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(preset.name)
                                     .font(.caption)
@@ -269,6 +319,24 @@ struct LoopInsights_AlcoholLogView: View {
                         tracker.removeEntry(entry)
                     }
                 }
+
+                Button(role: .destructive, action: {
+                    showingClearConfirmation = true
+                }) {
+                    HStack {
+                        Spacer()
+                        Text(NSLocalizedString("Clear All Entries", comment: "LoopInsights clear all alcohol entries"))
+                        Spacer()
+                    }
+                }
+                .alert(NSLocalizedString("Clear All Entries?", comment: "LoopInsights clear all alcohol alert title"), isPresented: $showingClearConfirmation) {
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+                    Button(NSLocalizedString("Clear All", comment: "LoopInsights clear all confirm"), role: .destructive) {
+                        tracker.clearAllEntries()
+                    }
+                } message: {
+                    Text(NSLocalizedString("This will remove all alcohol entries. This cannot be undone.", comment: "LoopInsights clear all alcohol alert message"))
+                }
             }
         }
     }
@@ -342,11 +410,14 @@ struct LoopInsights_AlcoholLogView: View {
 
     // MARK: - Helpers
 
-    /// Gauge color: amber base with red for high levels
+    /// Gauge color: green → yellow → orange → red → dark red
     private func gaugeColor(_ drinks: Double) -> Color {
-        if drinks < 2 { return alcoholAmber }
-        if drinks < 4 { return Color(red: 0.9, green: 0.5, blue: 0.1) }
-        return .red
+        if drinks <= 0 { return .green }
+        if drinks < 1 { return .green }
+        if drinks < 2 { return .yellow }
+        if drinks < 3 { return .orange }
+        if drinks < 4 { return .red }
+        return Color(red: 0.7, green: 0.0, blue: 0.0) // dark red
     }
 
     /// Risk level display text

@@ -102,7 +102,8 @@ final class LoopInsights_TestDataProvider: LoopInsightsDataProviderProtocol {
 
     /// Returns the Documents/LoopInsights/ directory path (creates it if needed).
     static var documentsDirectory: URL {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSHomeDirectory())
         let dir = docs.appendingPathComponent("LoopInsights", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
