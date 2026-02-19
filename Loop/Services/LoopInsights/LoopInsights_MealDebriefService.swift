@@ -268,7 +268,7 @@ final class LoopInsights_MealDebriefService {
 
 // MARK: - Debrief Readiness
 
-enum LoopInsights_DebriefReadiness {
+enum LoopInsights_DebriefReadiness: Equatable {
     case featureDisabled
     case noSnapshot                       // No prediction was captured at meal time
     case tooRecent(minutesRemaining: Int) // Meal is <2h old
