@@ -1020,6 +1020,36 @@ struct LoopInsights_SettingsView: View {
                         .textCase(.uppercase)
                 }
 
+                Toggle(NSLocalizedString("AGP Chart", comment: "LoopInsights AGP toggle"), isOn: $agpChartEnabled)
+                    .onChange(of: agpChartEnabled) { newValue in
+                        LoopInsights_FeatureFlags.agpChartEnabled = newValue
+                    }
+                Text(NSLocalizedString("Show Ambulatory Glucose Profile chart on the dashboard with percentile bands (P10/P25/P50/P75/P90) over 24 hours.", comment: "LoopInsights AGP description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("Alcohol Tracking", comment: "LoopInsights alcohol toggle"), isOn: $alcoholTrackingEnabled)
+                    .onChange(of: alcoholTrackingEnabled) { newValue in
+                        LoopInsights_FeatureFlags.alcoholTrackingEnabled = newValue
+                    }
+                Text(NSLocalizedString("Log alcohol intake to help the AI account for delayed hypoglycemia risk. Tracks standard drinks with linear metabolism.", comment: "LoopInsights alcohol description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("Caffeine Tracking", comment: "LoopInsights caffeine toggle"), isOn: $caffeineTrackingEnabled)
+                    .onChange(of: caffeineTrackingEnabled) { newValue in
+                        LoopInsights_FeatureFlags.caffeineTrackingEnabled = newValue
+                    }
+                Text(NSLocalizedString("Log caffeine intake to help the AI correlate caffeine with glucose patterns. Uses a 5.7-hour half-life decay model.", comment: "LoopInsights caffeine description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
                 Toggle(NSLocalizedString("Circadian Analysis", comment: "LoopInsights circadian toggle"), isOn: $circadianEnabled)
                     .onChange(of: circadianEnabled) { newValue in
                         LoopInsights_FeatureFlags.circadianEnabled = newValue
@@ -1059,36 +1089,6 @@ struct LoopInsights_SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-
-                Divider()
-
-                Toggle(NSLocalizedString("Caffeine Tracking", comment: "LoopInsights caffeine toggle"), isOn: $caffeineTrackingEnabled)
-                    .onChange(of: caffeineTrackingEnabled) { newValue in
-                        LoopInsights_FeatureFlags.caffeineTrackingEnabled = newValue
-                    }
-                Text(NSLocalizedString("Log caffeine intake to help the AI correlate caffeine with glucose patterns. Uses a 5.7-hour half-life decay model.", comment: "LoopInsights caffeine description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                Divider()
-
-                Toggle(NSLocalizedString("Alcohol Tracking", comment: "LoopInsights alcohol toggle"), isOn: $alcoholTrackingEnabled)
-                    .onChange(of: alcoholTrackingEnabled) { newValue in
-                        LoopInsights_FeatureFlags.alcoholTrackingEnabled = newValue
-                    }
-                Text(NSLocalizedString("Log alcohol intake to help the AI account for delayed hypoglycemia risk. Tracks standard drinks with linear metabolism.", comment: "LoopInsights alcohol description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                Divider()
-
-                Toggle(NSLocalizedString("AGP Chart", comment: "LoopInsights AGP toggle"), isOn: $agpChartEnabled)
-                    .onChange(of: agpChartEnabled) { newValue in
-                        LoopInsights_FeatureFlags.agpChartEnabled = newValue
-                    }
-                Text(NSLocalizedString("Show Ambulatory Glucose Profile chart on the dashboard with percentile bands (P10/P25/P50/P75/P90) over 24 hours.", comment: "LoopInsights AGP description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
 
                 Divider()
 
