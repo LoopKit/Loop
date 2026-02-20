@@ -78,6 +78,10 @@ struct FoodFinder_EntryPoint: View {
     /// Kept lightweight — only names are needed for the heart-button check.
     @State private var favoriteFoods: [StoredFavoriteFood] = []
 
+    /// Tracks which product ID has already been recorded to MealArchive
+    /// to prevent duplicate entries from repeated onNutritionApplied callbacks.
+    @State private var recordedProductID: String?
+
     enum Row: Hashable {
         case detailedFoodBreakdown, advancedAnalysis
     }
@@ -257,9 +261,13 @@ struct FoodFinder_EntryPoint: View {
             aiAbsorptionReasoning = searchVM.lastAIAnalysisResult?.absorptionTimeReasoning
             // Mirror selected product to host if binding provided
             selectedFoodProduct?.wrappedValue = searchVM.selectedFoodProduct
-            // Record barcode/text-search products to MealArchive (AI products are recorded separately)
+            // Record barcode/text-search products to MealArchive once per product selection.
+            // onNutritionApplied fires on every serving/exclusion change, so guard with
+            // recordedProductID to avoid creating duplicate archive entries.
             if let product = searchVM.selectedFoodProduct,
-               product.dataSource == .barcodeScan || product.dataSource == .textSearch {
+               product.dataSource == .barcodeScan || product.dataSource == .textSearch,
+               recordedProductID != product.id {
+                recordedProductID = product.id
                 recordBarcodeProduct(product)
             }
         }
@@ -267,6 +275,7 @@ struct FoodFinder_EntryPoint: View {
             selectedFoodProduct?.wrappedValue = nil
             absorptionTimeIsAIGenerated = false
             aiAbsorptionReasoning = nil
+            recordedProductID = nil
         }
         // When the search field detects natural language (e.g. iOS keyboard dictation),
         // the ViewModel routes through AI generative search and delivers the result here.
