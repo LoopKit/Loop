@@ -1196,6 +1196,8 @@ extension FoodFinder_EntryPoint {
 
     /// Record a barcode or text-search product to the history store and MealArchive.
     /// Downloads the product image (if available) and saves it as a thumbnail.
+    /// Converts OpenFoodFacts nutriments into AIFoodAnalysisResult so that
+    /// LoopInsights can display and analyze the full nutritional breakdown.
     private func recordBarcodeProduct(_ product: OpenFoodFactsProduct) {
         let productName = product.displayName
         let carbs = carbsQuantity ?? product.carbsPerServing ?? product.nutriments.carbohydrates
@@ -1203,6 +1205,52 @@ extension FoodFinder_EntryPoint {
         let currentAbsorptionTime = absorptionTime
         let analysisType: FoodFinder_AnalysisRecord.AnalysisType =
             product.dataSource == .barcodeScan ? .barcode : .dictation
+
+        // Build a minimal AIFoodAnalysisResult from OpenFoodFacts nutriments
+        let foodItem = FoodItemAnalysis(
+            name: productName,
+            portionEstimate: product.servingSize ?? "1 serving",
+            usdaServingSize: product.servingSize,
+            servingMultiplier: 1.0,
+            preparationMethod: nil,
+            visualCues: nil,
+            carbohydrates: carbs,
+            calories: product.caloriesPerServing,
+            fat: product.fatPerServing,
+            fiber: product.fiberPerServing,
+            protein: product.proteinPerServing,
+            assessmentNotes: nil,
+            absorptionTimeHours: nil
+        )
+        let analysisResult = AIFoodAnalysisResult(
+            imageType: nil,
+            foodItemsDetailed: [foodItem],
+            overallDescription: productName,
+            confidence: .medium,
+            numericConfidence: nil,
+            totalFoodPortions: 1,
+            totalUsdaServings: 1.0,
+            totalCarbohydrates: carbs,
+            totalProtein: product.proteinPerServing,
+            totalFat: product.fatPerServing,
+            totalFiber: product.fiberPerServing,
+            totalCalories: product.caloriesPerServing,
+            portionAssessmentMethod: "Database lookup",
+            diabetesConsiderations: nil,
+            visualAssessmentDetails: nil,
+            notes: nil,
+            originalServings: 1.0,
+            fatProteinUnits: nil,
+            netCarbsAdjustment: nil,
+            insulinTimingRecommendations: nil,
+            fpuDosingGuidance: nil,
+            exerciseConsiderations: nil,
+            absorptionTimeHours: nil,
+            absorptionTimeReasoning: nil,
+            mealSizeImpact: nil,
+            individualizationFactors: nil,
+            safetyAlerts: nil
+        )
 
         Task {
             // Download and save product thumbnail
@@ -1225,7 +1273,7 @@ extension FoodFinder_EntryPoint {
                     analysisType: analysisType,
                     date: Date(),
                     thumbnailID: thumbID,
-                    analysisResult: nil,
+                    analysisResult: analysisResult,
                     originalAICarbs: nil,
                     aiConfidencePercent: nil
                 )
