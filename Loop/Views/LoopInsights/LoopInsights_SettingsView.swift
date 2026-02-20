@@ -54,6 +54,8 @@ struct LoopInsights_SettingsView: View {
     // Phase 5 flags
     @State private var circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
     @State private var foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
+    @State private var mealDebriefEnabled = LoopInsights_FeatureFlags.mealDebriefEnabled
+    @State private var preMealAdvisorEnabled = LoopInsights_FeatureFlags.preMealAdvisorEnabled
     @State private var caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
     @State private var alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
     @State private var nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
@@ -135,6 +137,8 @@ struct LoopInsights_SettingsView: View {
             biometricsEnabled = LoopInsights_FeatureFlags.biometricsEnabled
             circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
             foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
+            mealDebriefEnabled = LoopInsights_FeatureFlags.mealDebriefEnabled
+            preMealAdvisorEnabled = LoopInsights_FeatureFlags.preMealAdvisorEnabled
             caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
             alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
             nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
@@ -616,7 +620,7 @@ struct LoopInsights_SettingsView: View {
                     LoopInsights_FeatureFlags.analysisPeriod = newValue
                 }
 
-                Text(NSLocalizedString("Rolling lookback period for automated AI-based suggestions and Ask Loopy Chatbot - how far back do you want LoopInsights to look when analyzing your glucose, insulin, and carb data?", comment: "LoopInsights analysis period description"))
+                Text(NSLocalizedString("Rolling lookback period for automated AI-based suggestions and Ask Loopy Chatbot - how far back do you want LoopInsights to look when analyzing your glucose, insulin, and carb data?", comment: "LoopInsights Loopy analysis period description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
 
@@ -1016,6 +1020,36 @@ struct LoopInsights_SettingsView: View {
                         .textCase(.uppercase)
                 }
 
+                Toggle(NSLocalizedString("AGP Chart", comment: "LoopInsights AGP toggle"), isOn: $agpChartEnabled)
+                    .onChange(of: agpChartEnabled) { newValue in
+                        LoopInsights_FeatureFlags.agpChartEnabled = newValue
+                    }
+                Text(NSLocalizedString("Show Ambulatory Glucose Profile chart on the dashboard with percentile bands (P10/P25/P50/P75/P90) over 24 hours.", comment: "LoopInsights AGP description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("Alcohol Tracking", comment: "LoopInsights alcohol toggle"), isOn: $alcoholTrackingEnabled)
+                    .onChange(of: alcoholTrackingEnabled) { newValue in
+                        LoopInsights_FeatureFlags.alcoholTrackingEnabled = newValue
+                    }
+                Text(NSLocalizedString("Log alcohol intake to help the AI account for delayed hypoglycemia risk. Tracks standard drinks with linear metabolism.", comment: "LoopInsights alcohol description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                Toggle(NSLocalizedString("Caffeine Tracking", comment: "LoopInsights caffeine toggle"), isOn: $caffeineTrackingEnabled)
+                    .onChange(of: caffeineTrackingEnabled) { newValue in
+                        LoopInsights_FeatureFlags.caffeineTrackingEnabled = newValue
+                    }
+                Text(NSLocalizedString("Log caffeine intake to help the AI correlate caffeine with glucose patterns. Uses a 5.7-hour half-life decay model.", comment: "LoopInsights caffeine description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
                 Toggle(NSLocalizedString("Circadian Analysis", comment: "LoopInsights circadian toggle"), isOn: $circadianEnabled)
                     .onChange(of: circadianEnabled) { newValue in
                         LoopInsights_FeatureFlags.circadianEnabled = newValue
@@ -1034,35 +1068,27 @@ struct LoopInsights_SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Divider()
+                if foodResponseEnabled {
+                    Divider()
 
-                Toggle(NSLocalizedString("Caffeine Tracking", comment: "LoopInsights caffeine toggle"), isOn: $caffeineTrackingEnabled)
-                    .onChange(of: caffeineTrackingEnabled) { newValue in
-                        LoopInsights_FeatureFlags.caffeineTrackingEnabled = newValue
-                    }
-                Text(NSLocalizedString("Log caffeine intake to help the AI correlate caffeine with glucose patterns. Uses a 5.7-hour half-life decay model.", comment: "LoopInsights caffeine description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    Toggle(NSLocalizedString("AI Meal Debrief", comment: "LoopInsights meal debrief toggle"), isOn: $mealDebriefEnabled)
+                        .onChange(of: mealDebriefEnabled) { newValue in
+                            LoopInsights_FeatureFlags.mealDebriefEnabled = newValue
+                        }
+                    Text(NSLocalizedString("Captures Loop's predicted glucose at meal time, then generates AI analysis comparing predicted vs actual response. Tap any meal card after 2 hours to see the debrief.", comment: "LoopInsights meal debrief description"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
 
-                Divider()
+                    Divider()
 
-                Toggle(NSLocalizedString("Alcohol Tracking", comment: "LoopInsights alcohol toggle"), isOn: $alcoholTrackingEnabled)
-                    .onChange(of: alcoholTrackingEnabled) { newValue in
-                        LoopInsights_FeatureFlags.alcoholTrackingEnabled = newValue
-                    }
-                Text(NSLocalizedString("Log alcohol intake to help the AI account for delayed hypoglycemia risk. Tracks standard drinks with linear metabolism.", comment: "LoopInsights alcohol description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                Divider()
-
-                Toggle(NSLocalizedString("AGP Chart", comment: "LoopInsights AGP toggle"), isOn: $agpChartEnabled)
-                    .onChange(of: agpChartEnabled) { newValue in
-                        LoopInsights_FeatureFlags.agpChartEnabled = newValue
-                    }
-                Text(NSLocalizedString("Show Ambulatory Glucose Profile chart on the dashboard with percentile bands (P10/P25/P50/P75/P90) over 24 hours.", comment: "LoopInsights AGP description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    Toggle(NSLocalizedString("Pre-Meal Advisor", comment: "LoopInsights pre-meal advisor toggle"), isOn: $preMealAdvisorEnabled)
+                        .onChange(of: preMealAdvisorEnabled) { newValue in
+                            LoopInsights_FeatureFlags.preMealAdvisorEnabled = newValue
+                        }
+                    Text(NSLocalizedString("Shows historical glucose patterns and AI-powered advice when you identify a food you've eaten before in FoodFinder.", comment: "LoopInsights pre-meal advisor description"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
 
                 Divider()
 

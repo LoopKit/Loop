@@ -39,6 +39,8 @@ struct LoopInsights_FeatureFlags {
         static let alcoholTrackingEnabled = "LoopInsights_alcoholTrackingEnabled"
         static let nightscoutImportEnabled = "LoopInsights_nightscoutImportEnabled"
         static let agpChartEnabled = "LoopInsights_agpChartEnabled"
+        static let mealDebriefEnabled = "LoopInsights_mealDebriefEnabled"
+        static let preMealAdvisorEnabled = "LoopInsights_preMealAdvisorEnabled"
     }
 
     private static let defaults = UserDefaults.standard
@@ -246,6 +248,22 @@ struct LoopInsights_FeatureFlags {
     static var agpChartEnabled: Bool {
         get { defaults.bool(forKey: Keys.agpChartEnabled) }
         set { defaults.set(newValue, forKey: Keys.agpChartEnabled) }
+    }
+
+    /// Enables AI Meal Debrief — captures Loop's predicted glucose at meal time,
+    /// then generates AI analysis comparing predicted vs actual response.
+    /// Requires foodResponseEnabled. Defaults to false.
+    static var mealDebriefEnabled: Bool {
+        get { defaults.bool(forKey: Keys.mealDebriefEnabled) }
+        set { defaults.set(newValue, forKey: Keys.mealDebriefEnabled) }
+    }
+
+    /// Enables AI Pre-Meal Advisor — shows historical glucose patterns and AI advice
+    /// when the user identifies a familiar food type in CarbEntryView.
+    /// Requires foodResponseEnabled. Defaults to false.
+    static var preMealAdvisorEnabled: Bool {
+        get { defaults.bool(forKey: Keys.preMealAdvisorEnabled) }
+        set { defaults.set(newValue, forKey: Keys.preMealAdvisorEnabled) }
     }
 
     // MARK: - AI Configuration

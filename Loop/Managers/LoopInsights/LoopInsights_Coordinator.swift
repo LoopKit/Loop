@@ -30,9 +30,14 @@ final class LoopInsights_Coordinator: ObservableObject {
     let healthKitManager: LoopInsights_HealthKitManager?
     let caffeineTracker: LoopInsights_CaffeineTracker
     let alcoholTracker: LoopInsights_AlcoholTracker
+    let mealDebriefService: LoopInsights_MealDebriefService
+    let preMealAdvisorService: LoopInsights_PreMealAdvisorService
 
     /// Background monitor for proactive suggestions (lazy-initialized)
     lazy var backgroundMonitor: LoopInsights_BackgroundMonitor = LoopInsights_BackgroundMonitor(coordinator: self)
+
+    /// Observation token for meal-logged notifications
+    private var mealLoggedObserver: NSObjectProtocol?
 
     // MARK: - Data Provider Bridge
 
@@ -74,6 +79,10 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.caffeineTracker = LoopInsights_CaffeineTracker.shared
         self.caffeineTracker.healthKitManager = hkManager
         self.alcoholTracker = LoopInsights_AlcoholTracker.shared
+        self.mealDebriefService = LoopInsights_MealDebriefService.shared
+        self.preMealAdvisorService = LoopInsights_PreMealAdvisorService.shared
+        observeMealLogged()
+        pruneStaleData()
     }
 
     /// Initialize with test data fixtures (for simulator/developer mode).
@@ -89,6 +98,10 @@ final class LoopInsights_Coordinator: ObservableObject {
         self.goalStore = LoopInsights_GoalStore.shared
         self.caffeineTracker = LoopInsights_CaffeineTracker.shared
         self.alcoholTracker = LoopInsights_AlcoholTracker.shared
+        self.mealDebriefService = LoopInsights_MealDebriefService.shared
+        self.preMealAdvisorService = LoopInsights_PreMealAdvisorService.shared
+        observeMealLogged()
+        pruneStaleData()
     }
 
     /// Factory method: creates a Coordinator with test data if available and enabled,
@@ -104,6 +117,33 @@ final class LoopInsights_Coordinator: ObservableObject {
 
         LoopInsights_FeatureFlags.log.info("Using test data: \(provider.dataSummary)")
         return LoopInsights_Coordinator(testDataProvider: provider)
+    }
+
+    // MARK: - Meal Logged Observer
+
+    /// Prune stale prediction snapshots and debriefs (>90 days).
+    /// Called once on Coordinator init.
+    private func pruneStaleData() {
+        LoopInsights_PredictionSnapshotStore.pruneStale()
+        LoopInsights_MealDebriefCache.pruneStale()
+    }
+
+    /// Observe FoodFinder meal-logged notifications to capture prediction snapshots.
+    private func observeMealLogged() {
+        mealLoggedObserver = NotificationCenter.default.addObserver(
+            forName: .foodFinderMealLogged,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let mealRecordID = notification.userInfo?["recordID"] as? String else { return }
+            self?.mealDebriefService.capturePredictionSnapshot(mealRecordID: mealRecordID)
+        }
+    }
+
+    deinit {
+        if let observer = mealLoggedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     // MARK: - Background Monitoring
@@ -200,6 +240,12 @@ final class LoopInsights_Coordinator: ObservableObject {
             if !alcoholCtx.isEmpty { context.append(alcoholCtx) }
         }
 
+        // Meal debrief context (recent AI debriefs for Loopy)
+        if LoopInsights_FeatureFlags.mealDebriefEnabled {
+            let debriefCtx = Self.buildMealDebriefPromptContext()
+            if !debriefCtx.isEmpty { context.append(debriefCtx) }
+        }
+
         // FoodFinder meal history + nutritional glucose correlation
         if FoodFinder_FeatureFlags.isEnabled {
             let foodCtx = Self.buildFoodFinderPromptContext(start: start, end: end)
@@ -232,6 +278,40 @@ final class LoopInsights_Coordinator: ObservableObject {
 
         guard !context.isEmpty else { return nil }
         return context.joined(separator: "\n")
+    }
+
+    // MARK: - Meal Debrief Context
+
+    /// Build prompt context from recent AI meal debriefs.
+    /// Includes effective carbs estimates and key learnings from the last 10 debriefs.
+    private static func buildMealDebriefPromptContext() -> String {
+        let debriefs = LoopInsights_MealDebriefCache.loadAll()
+            .sorted { $0.generatedAt > $1.generatedAt }
+        guard !debriefs.isEmpty else { return "" }
+
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+
+        var lines: [String] = ["MEAL DEBRIEF HISTORY (\(debriefs.count) debriefs):"]
+
+        for debrief in debriefs.prefix(10) {
+            // Look up the meal name from archive
+            let mealName = MealArchive.loadAll().first { $0.id == debrief.mealRecordID }?.name ?? "Unknown meal"
+            var line = "  \(formatter.string(from: debrief.generatedAt)): \(mealName)"
+            if let effective = debrief.effectiveCarbsEstimate {
+                line += " — effective ~\(String(format: "%.0f", effective))g"
+            }
+            if let predPeak = debrief.predictedPeakGlucose, let actPeak = debrief.actualPeakGlucose {
+                line += " (predicted peak \(String(format: "%.0f", predPeak)), actual \(String(format: "%.0f", actPeak)))"
+            }
+            lines.append(line)
+            for learning in debrief.learnings.prefix(2) {
+                lines.append("    - \(learning)")
+            }
+        }
+
+        return lines.joined(separator: "\n")
     }
 
     // MARK: - FoodFinder Context

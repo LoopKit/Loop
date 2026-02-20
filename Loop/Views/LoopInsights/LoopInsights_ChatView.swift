@@ -78,7 +78,7 @@ struct LoopInsights_ChatView: View {
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("🌀 " + NSLocalizedString("Ask Loopy", comment: "LoopInsights chat title"))
+                Text("🌀 " + NSLocalizedString("Ask Loopy!", comment: "LoopInsights Loopy chat title"))
                     .font(.headline)
                     .foregroundColor(.white)
             }
