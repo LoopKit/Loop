@@ -167,11 +167,24 @@ enum MealArchive {
             .sorted { $0.date > $1.date }
     }
 
-    /// Load the complete archive (all time).
+    /// Load the complete archive (all time), deduplicating by date+carbs proximity.
+    /// Keeps the first record in each cluster (which has the earliest write and
+    /// typically the most complete data). This collapses duplicates that were
+    /// created before the write-side guard was added.
     static func loadAll() -> [FoodFinder_AnalysisRecord] {
         guard FileManager.default.fileExists(atPath: archiveURL.path) else { return [] }
         guard let data = try? Data(contentsOf: archiveURL) else { return [] }
-        return (try? JSONDecoder().decode([FoodFinder_AnalysisRecord].self, from: data)) ?? []
+        let raw = (try? JSONDecoder().decode([FoodFinder_AnalysisRecord].self, from: data)) ?? []
+        var seen: [(date: Date, carbs: Double)] = []
+        return raw.filter { record in
+            let isDup = seen.contains { existing in
+                abs(existing.date.timeIntervalSince(record.date)) < 300 &&
+                abs(existing.carbs - record.carbsGrams) < 1
+            }
+            guard !isDup else { return false }
+            seen.append((record.date, record.carbsGrams))
+            return true
+        }
     }
 
     /// Total archived meal count.
