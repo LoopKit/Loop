@@ -1028,6 +1028,18 @@ struct LoopInsights_SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
+                if foodResponseEnabled {
+                    Divider()
+
+                    Toggle(NSLocalizedString("AI Meal Debrief", comment: "LoopInsights meal debrief toggle"), isOn: $mealDebriefEnabled)
+                        .onChange(of: mealDebriefEnabled) { newValue in
+                            LoopInsights_FeatureFlags.mealDebriefEnabled = newValue
+                        }
+                    Text(NSLocalizedString("Captures Loop's predicted glucose at meal time, then generates AI analysis comparing predicted vs actual response. Tap any meal card after 2 hours to see the debrief.", comment: "LoopInsights meal debrief description"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
                 Divider()
 
                 Toggle(NSLocalizedString("Alcohol Tracking", comment: "LoopInsights alcohol toggle"), isOn: $alcoholTrackingEnabled)
@@ -1068,17 +1080,17 @@ struct LoopInsights_SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
+                Divider()
+
+                Toggle(NSLocalizedString("Nightscout Import", comment: "LoopInsights nightscout toggle"), isOn: $nightscoutImportEnabled)
+                    .onChange(of: nightscoutImportEnabled) { newValue in
+                        LoopInsights_FeatureFlags.nightscoutImportEnabled = newValue
+                    }
+                Text(NSLocalizedString("Import glucose and treatment data from a Nightscout server as a supplemental data source.", comment: "LoopInsights nightscout description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
                 if foodResponseEnabled {
-                    Divider()
-
-                    Toggle(NSLocalizedString("AI Meal Debrief", comment: "LoopInsights meal debrief toggle"), isOn: $mealDebriefEnabled)
-                        .onChange(of: mealDebriefEnabled) { newValue in
-                            LoopInsights_FeatureFlags.mealDebriefEnabled = newValue
-                        }
-                    Text(NSLocalizedString("Captures Loop's predicted glucose at meal time, then generates AI analysis comparing predicted vs actual response. Tap any meal card after 2 hours to see the debrief.", comment: "LoopInsights meal debrief description"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
                     Divider()
 
                     Toggle(NSLocalizedString("Pre-Meal Advisor", comment: "LoopInsights pre-meal advisor toggle"), isOn: $preMealAdvisorEnabled)
@@ -1089,16 +1101,6 @@ struct LoopInsights_SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-
-                Divider()
-
-                Toggle(NSLocalizedString("Nightscout Import", comment: "LoopInsights nightscout toggle"), isOn: $nightscoutImportEnabled)
-                    .onChange(of: nightscoutImportEnabled) { newValue in
-                        LoopInsights_FeatureFlags.nightscoutImportEnabled = newValue
-                    }
-                Text(NSLocalizedString("Import glucose and treatment data from a Nightscout server as a supplemental data source.", comment: "LoopInsights nightscout description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
         }
     }
