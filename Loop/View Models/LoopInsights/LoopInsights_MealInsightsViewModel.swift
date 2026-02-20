@@ -65,13 +65,14 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
             // Load FoodFinder MealArchive to get thumbnails + meals without glucose data
             let archiveMeals = MealArchive.meals(from: startDate, to: endDate)
 
-            // Enrich glucose-matched events with thumbnail from MealArchive
+            // Enrich glucose-matched events with thumbnail + nutrition from MealArchive
             let glucoseMatchedEvents = rawGlucoseEvents.map { event -> LoopInsightsMealEvent in
                 let matchingRecord = archiveMeals.first { record in
                     abs(record.date.timeIntervalSince(event.date)) < 300 &&
                     record.foodType == event.foodType
                 }
-                guard let record = matchingRecord, record.thumbnailID != nil else { return event }
+                guard let record = matchingRecord else { return event }
+                let result = record.analysisResult
                 return LoopInsightsMealEvent(
                     date: event.date,
                     foodType: event.foodType,
@@ -81,7 +82,11 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                     twoHourGlucose: event.twoHourGlucose,
                     glucoseTimeline: event.glucoseTimeline,
                     archiveRecordID: record.id,
-                    thumbnailID: record.thumbnailID
+                    thumbnailID: record.thumbnailID,
+                    totalProtein: result?.totalProtein,
+                    totalFat: result?.totalFat,
+                    totalFiber: result?.totalFiber,
+                    totalCalories: result?.totalCalories
                 )
             }
 
@@ -93,18 +98,34 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                 }
                 guard !isDuplicate else { return nil }
 
+                let result = record.analysisResult
                 return LoopInsightsMealEvent(
                     date: record.date,
                     foodType: record.foodType,
                     carbs: record.carbsGrams,
                     archiveRecordID: record.id,
-                    thumbnailID: record.thumbnailID
+                    thumbnailID: record.thumbnailID,
+                    totalProtein: result?.totalProtein,
+                    totalFat: result?.totalFat,
+                    totalFiber: result?.totalFiber,
+                    totalCalories: result?.totalCalories
                 )
             }
 
-            // Merge and sort by date (most recent first)
-            self.mealEvents = (glucoseMatchedEvents + archiveEvents)
-                .sorted { $0.date > $1.date }
+            // Merge, deduplicate, and sort by date (most recent first).
+            // Dedup by date proximity (5 min) + foodType — keeps the version with more data.
+            let merged = (glucoseMatchedEvents + archiveEvents).sorted { $0.date > $1.date }
+            var seen: [(date: Date, foodType: String)] = []
+            let deduplicated = merged.filter { event in
+                let isDup = seen.contains { existing in
+                    abs(existing.date.timeIntervalSince(event.date)) < 300 &&
+                    existing.foodType == event.foodType
+                }
+                guard !isDup else { return false }
+                seen.append((event.date, event.foodType))
+                return true
+            }
+            self.mealEvents = deduplicated
             self.foodPatterns = patterns
             self.isLoading = false
         } catch {

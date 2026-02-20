@@ -67,13 +67,26 @@ struct LoopInsightsMealEvent: Identifiable {
     let archiveRecordID: String?         // FoodFinder_AnalysisRecord.id if from MealArchive
     let thumbnailID: String?             // FavoriteFoodImageStore thumbnail ID
 
+    // Nutritional data from FoodFinder analysis (nil if not available)
+    let totalProtein: Double?            // grams
+    let totalFat: Double?                // grams
+    let totalFiber: Double?              // grams
+    let totalCalories: Double?           // kcal
+
     /// Whether this event has matched glucose data
     var hasGlucoseData: Bool { preMealGlucose != nil }
+
+    /// Whether this event has nutritional breakdown beyond carbs
+    var hasNutritionalData: Bool {
+        totalProtein != nil || totalFat != nil || totalFiber != nil || totalCalories != nil
+    }
 
     init(date: Date, foodType: String, carbs: Double, preMealGlucose: Double? = nil,
          peakGlucose: Double? = nil, twoHourGlucose: Double? = nil,
          glucoseTimeline: [(minutesAfter: Int, glucose: Double)] = [],
-         archiveRecordID: String? = nil, thumbnailID: String? = nil) {
+         archiveRecordID: String? = nil, thumbnailID: String? = nil,
+         totalProtein: Double? = nil, totalFat: Double? = nil,
+         totalFiber: Double? = nil, totalCalories: Double? = nil) {
         self.id = UUID()
         self.date = date
         self.foodType = foodType
@@ -84,6 +97,10 @@ struct LoopInsightsMealEvent: Identifiable {
         self.glucoseTimeline = glucoseTimeline
         self.archiveRecordID = archiveRecordID
         self.thumbnailID = thumbnailID
+        self.totalProtein = totalProtein
+        self.totalFat = totalFat
+        self.totalFiber = totalFiber
+        self.totalCalories = totalCalories
     }
 }
 

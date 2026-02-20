@@ -145,10 +145,17 @@ enum MealArchive {
     }
 
     /// Archive a single record (append to the JSON file on disk).
-    /// Deduplicates by ID to avoid storing the same meal twice.
+    /// Deduplicates by ID and by date+foodType proximity to avoid storing the same meal twice.
     static func archive(_ record: FoodFinder_AnalysisRecord) {
         var existing = loadAll()
+        // Skip if exact ID match
         guard !existing.contains(where: { $0.id == record.id }) else { return }
+        // Skip if another record with same foodType exists within 5 minutes
+        let isDuplicate = existing.contains { other in
+            abs(other.date.timeIntervalSince(record.date)) < 300 &&
+            other.foodType == record.foodType
+        }
+        guard !isDuplicate else { return }
         existing.append(record)
         saveAll(existing)
     }
