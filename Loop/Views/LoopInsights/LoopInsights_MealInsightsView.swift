@@ -139,6 +139,25 @@ struct LoopInsights_MealInsightsView: View {
                 }
             }
 
+            // Nutritional breakdown (when available from FoodFinder analysis)
+            if event.hasNutritionalData {
+                HStack(spacing: 12) {
+                    if let protein = event.totalProtein {
+                        nutrientLabel("P", value: protein, unit: "g")
+                    }
+                    if let fat = event.totalFat {
+                        nutrientLabel("F", value: fat, unit: "g")
+                    }
+                    if let fiber = event.totalFiber {
+                        nutrientLabel("Fb", value: fiber, unit: "g")
+                    }
+                    if let cal = event.totalCalories {
+                        nutrientLabel("Cal", value: cal, unit: "")
+                    }
+                    Spacer()
+                }
+            }
+
             if event.hasGlucoseData,
                let preMeal = event.preMealGlucose,
                let peak = event.peakGlucose,
@@ -223,6 +242,17 @@ struct LoopInsights_MealInsightsView: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
+    }
+
+    private func nutrientLabel(_ label: String, value: Double, unit: String) -> some View {
+        HStack(spacing: 2) {
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Text(String(format: "%.0f%@", value, unit))
+                .font(.caption2.weight(.medium))
+                .foregroundColor(.primary)
+        }
     }
 
     private func glucoseStatPill(label: String, value: String, color: Color) -> some View {
