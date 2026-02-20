@@ -294,6 +294,11 @@ struct FoodFinder_EntryPoint: View {
             aiAbsorptionReasoning = searchVM.lastAIAnalysisResult?.absorptionTimeReasoning
             // Mirror selected product to host if binding provided
             selectedFoodProduct?.wrappedValue = searchVM.selectedFoodProduct
+            // Record barcode/text-search products to MealArchive (AI products are recorded separately)
+            if let product = searchVM.selectedFoodProduct,
+               product.dataSource == .barcodeScan || product.dataSource == .textSearch {
+                recordBarcodeProduct(product)
+            }
         }
         searchVM.onFoodCleared = {
             selectedFoodProduct?.wrappedValue = nil
@@ -1187,6 +1192,52 @@ extension FoodFinder_EntryPoint {
             object: nil,
             userInfo: ["recordID": record.id]
         )
+    }
+
+    /// Record a barcode or text-search product to the history store and MealArchive.
+    /// Downloads the product image (if available) and saves it as a thumbnail.
+    private func recordBarcodeProduct(_ product: OpenFoodFactsProduct) {
+        let productName = product.displayName
+        let carbs = carbsQuantity ?? product.carbsPerServing ?? product.nutriments.carbohydrates
+        let currentFoodType = foodType
+        let currentAbsorptionTime = absorptionTime
+        let analysisType: FoodFinder_AnalysisRecord.AnalysisType =
+            product.dataSource == .barcodeScan ? .barcode : .dictation
+
+        Task {
+            // Download and save product thumbnail
+            var thumbID: String? = nil
+            let urlString = product.imageThumbURL ?? product.imageFrontSmallURL
+                ?? product.imageFrontURL ?? product.imageURL
+            if let urlString, !urlString.isEmpty, let url = URL(string: urlString) {
+                if let image = await ImageDownloader.fetchThumbnail(from: url, maxDimension: 300) {
+                    thumbID = FavoriteFoodImageStore.saveThumbnail(from: image)
+                }
+            }
+
+            await MainActor.run {
+                let record = FoodFinder_AnalysisRecord(
+                    id: UUID().uuidString,
+                    name: productName,
+                    carbsGrams: carbs,
+                    foodType: currentFoodType,
+                    absorptionTime: currentAbsorptionTime,
+                    analysisType: analysisType,
+                    date: Date(),
+                    thumbnailID: thumbID,
+                    analysisResult: nil,
+                    originalAICarbs: nil,
+                    aiConfidencePercent: nil
+                )
+                FoodFinder_AnalysisHistoryStore.record(record)
+
+                NotificationCenter.default.post(
+                    name: .foodFinderMealLogged,
+                    object: nil,
+                    userInfo: ["recordID": record.id]
+                )
+            }
+        }
     }
 
     /// Convert AI analysis result to OpenFoodFactsProduct for integration with existing workflow

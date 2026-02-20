@@ -53,7 +53,7 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
             let carbEntries = try await coordinator.fetchCarbEntries(start: startDate, end: endDate)
             let glucoseSamples = try await coordinator.fetchGlucoseSamples(start: startDate, end: endDate)
 
-            let events = LoopInsights_FoodResponseAnalyzer.buildRecentMealEvents(
+            let rawGlucoseEvents = LoopInsights_FoodResponseAnalyzer.buildRecentMealEvents(
                 carbEntries: carbEntries,
                 glucoseSamples: glucoseSamples
             )
@@ -62,7 +62,49 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                 glucoseSamples: glucoseSamples
             )
 
-            self.mealEvents = events
+            // Load FoodFinder MealArchive to get thumbnails + meals without glucose data
+            let archiveMeals = MealArchive.meals(from: startDate, to: endDate)
+
+            // Enrich glucose-matched events with thumbnail from MealArchive
+            let glucoseMatchedEvents = rawGlucoseEvents.map { event -> LoopInsightsMealEvent in
+                let matchingRecord = archiveMeals.first { record in
+                    abs(record.date.timeIntervalSince(event.date)) < 300 &&
+                    record.foodType == event.foodType
+                }
+                guard let record = matchingRecord, record.thumbnailID != nil else { return event }
+                return LoopInsightsMealEvent(
+                    date: event.date,
+                    foodType: event.foodType,
+                    carbs: event.carbs,
+                    preMealGlucose: event.preMealGlucose,
+                    peakGlucose: event.peakGlucose,
+                    twoHourGlucose: event.twoHourGlucose,
+                    glucoseTimeline: event.glucoseTimeline,
+                    archiveRecordID: record.id,
+                    thumbnailID: record.thumbnailID
+                )
+            }
+
+            // Archive-only meals (no glucose match yet)
+            let archiveEvents = archiveMeals.compactMap { record -> LoopInsightsMealEvent? in
+                let isDuplicate = glucoseMatchedEvents.contains { event in
+                    abs(event.date.timeIntervalSince(record.date)) < 300 &&
+                    event.foodType == record.foodType
+                }
+                guard !isDuplicate else { return nil }
+
+                return LoopInsightsMealEvent(
+                    date: record.date,
+                    foodType: record.foodType,
+                    carbs: record.carbsGrams,
+                    archiveRecordID: record.id,
+                    thumbnailID: record.thumbnailID
+                )
+            }
+
+            // Merge and sort by date (most recent first)
+            self.mealEvents = (glucoseMatchedEvents + archiveEvents)
+                .sorted { $0.date > $1.date }
             self.foodPatterns = patterns
             self.isLoading = false
         } catch {
@@ -162,8 +204,12 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
 
     // MARK: - Helpers
 
-    /// Find the MealArchive record that matches this meal event by date proximity and foodType.
+    /// Find the MealArchive record that matches this meal event.
+    /// Uses archiveRecordID if available, otherwise falls back to date proximity + foodType.
     private func findArchiveRecord(for event: LoopInsightsMealEvent) -> FoodFinder_AnalysisRecord? {
+        if let recordID = event.archiveRecordID {
+            return MealArchive.loadAll().first { $0.id == recordID }
+        }
         let windowStart = event.date.addingTimeInterval(-300) // 5 min tolerance
         let windowEnd = event.date.addingTimeInterval(300)
         let candidates = MealArchive.meals(from: windowStart, to: windowEnd)

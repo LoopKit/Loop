@@ -298,10 +298,6 @@ extension SettingsView {
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
             }
 
-            loopInsightsSection
-
-            foodFinderSettingsRow
-
             NavigationLink(destination: AutoPresets_SettingsView()) {
                 LargeButton(
                     action: {},
@@ -311,6 +307,10 @@ extension SettingsView {
                     descriptiveText: NSLocalizedString("Automate your presets during motion", comment: "Descriptive text for Auto-Apply Presets")
                 )
             }
+
+            foodFinderSettingsRow
+
+            loopInsightsSection
 
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view

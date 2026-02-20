@@ -43,5 +43,6 @@ struct FoodFinder_AnalysisRecord: Codable, Identifiable, Equatable {
     enum AnalysisType: String, Codable {
         case image
         case dictation
+        case barcode
     }
 }

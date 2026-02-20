@@ -71,9 +71,11 @@ struct LoopInsights_MealInsightsView: View {
                     Image(systemName: "fork.knife")
                         .font(.system(size: 40))
                         .foregroundColor(.secondary)
-                    Text(NSLocalizedString("No recent meals with glucose data found", comment: "LoopInsights no meals"))
+                    Text(NSLocalizedString("No recent meals found. Log meals with FoodFinder or carb entries to see them here.", comment: "LoopInsights no meals"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -108,56 +110,99 @@ struct LoopInsights_MealInsightsView: View {
 
     private func mealCard(_ event: LoopInsightsMealEvent) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(event.foodType)
-                .font(.subheadline.weight(.semibold))
-            HStack {
-                Text(Self.dateFormatter.string(from: event.date))
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text(String(format: "%.0fg carbs", event.carbs))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(event.foodType)
+                        .font(.subheadline.weight(.semibold))
+                    HStack {
+                        Text(Self.dateFormatter.string(from: event.date))
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(String(format: "%.0fg carbs", event.carbs))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                if let thumbID = event.thumbnailID,
+                   let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 48, height: 48)
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color(.systemGray4), lineWidth: 0.5)
+                        )
+                }
             }
 
-            // Glucose response summary
-            HStack(spacing: 16) {
-                glucoseStatPill(
-                    label: NSLocalizedString("Pre", comment: "LoopInsights meal pre-meal label"),
-                    value: String(format: "%.0f", event.preMealGlucose),
-                    color: glucoseColor(event.preMealGlucose)
-                )
-                Image(systemName: "arrow.right")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                glucoseStatPill(
-                    label: NSLocalizedString("Peak", comment: "LoopInsights meal peak label"),
-                    value: String(format: "%.0f", event.peakGlucose),
-                    color: glucoseColor(event.peakGlucose)
-                )
-                Image(systemName: "arrow.right")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                glucoseStatPill(
-                    label: "2h",
-                    value: String(format: "%.0f", event.twoHourGlucose),
-                    color: glucoseColor(event.twoHourGlucose)
-                )
-            }
+            if event.hasGlucoseData,
+               let preMeal = event.preMealGlucose,
+               let peak = event.peakGlucose,
+               let twoHour = event.twoHourGlucose {
+                // Glucose response summary
+                HStack(spacing: 16) {
+                    glucoseStatPill(
+                        label: NSLocalizedString("Pre", comment: "LoopInsights meal pre-meal label"),
+                        value: String(format: "%.0f", preMeal),
+                        color: glucoseColor(preMeal)
+                    )
+                    Image(systemName: "arrow.right")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    glucoseStatPill(
+                        label: NSLocalizedString("Peak", comment: "LoopInsights meal peak label"),
+                        value: String(format: "%.0f", peak),
+                        color: glucoseColor(peak)
+                    )
+                    Image(systemName: "arrow.right")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    glucoseStatPill(
+                        label: "2h",
+                        value: String(format: "%.0f", twoHour),
+                        color: glucoseColor(twoHour)
+                    )
+                }
 
-            // Rise indicator
-            let rise = event.peakGlucose - event.preMealGlucose
-            HStack(spacing: 4) {
-                Image(systemName: rise > 50 ? "arrow.up.circle.fill" : "arrow.up.circle")
-                    .foregroundColor(rise > 50 ? .orange : .green)
-                    .font(.caption)
-                Text(String(format: NSLocalizedString("Rise: %+.0f mg/dL", comment: "LoopInsights meal glucose rise"), rise))
-                    .font(.caption)
-                    .foregroundColor(rise > 50 ? .orange : .green)
+                // Rise indicator
+                let rise = peak - preMeal
+                HStack(spacing: 4) {
+                    Image(systemName: rise > 50 ? "arrow.up.circle.fill" : "arrow.up.circle")
+                        .foregroundColor(rise > 50 ? .orange : .green)
+                        .font(.caption)
+                    Text(String(format: NSLocalizedString("Rise: %+.0f mg/dL", comment: "LoopInsights meal glucose rise"), rise))
+                        .font(.caption)
+                        .foregroundColor(rise > 50 ? .orange : .green)
+                }
+            } else {
+                // No glucose data yet
+                HStack(spacing: 6) {
+                    let hoursAgo = Date().timeIntervalSince(event.date) / 3600
+                    if hoursAgo < 4 {
+                        Image(systemName: "clock")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(NSLocalizedString("Glucose response data collecting...", comment: "LoopInsights meal waiting for glucose"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Image(systemName: "waveform.path.ecg")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(NSLocalizedString("No glucose data matched", comment: "LoopInsights meal no glucose data"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.vertical, 4)
             }
 
             // AI Meal Debrief section (expandable)
-            if LoopInsights_FeatureFlags.mealDebriefEnabled {
+            if LoopInsights_FeatureFlags.mealDebriefEnabled && event.hasGlucoseData {
                 let readiness = viewModel.debriefReadiness(for: event)
                 if case .featureDisabled = readiness {
                     // Don't show anything

@@ -970,7 +970,7 @@ struct LoopInsights_DashboardView: View {
             Button(action: { showingChat = true }) {
                 HStack {
                     Text("🌀")
-                    Text(NSLocalizedString("Ask Loopy", comment: "LoopInsights chat button"))
+                    Text(NSLocalizedString("Ask Loopy!", comment: "LoopInsights Loopy chat button"))
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)

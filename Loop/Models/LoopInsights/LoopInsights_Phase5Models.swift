@@ -53,20 +53,27 @@ struct LoopInsightsFoodResponsePattern: Identifiable, Codable {
     }
 }
 
-/// A single meal event with matched glucose response for debrief
+/// A single meal event with optional glucose response for debrief.
+/// Meals from MealArchive may not yet have glucose data matched.
 struct LoopInsightsMealEvent: Identifiable {
     let id: UUID
     let date: Date
     let foodType: String
     let carbs: Double                    // grams
-    let preMealGlucose: Double           // mg/dL
-    let peakGlucose: Double              // mg/dL
-    let twoHourGlucose: Double           // mg/dL
+    let preMealGlucose: Double?          // mg/dL — nil if no glucose data matched
+    let peakGlucose: Double?             // mg/dL
+    let twoHourGlucose: Double?          // mg/dL
     let glucoseTimeline: [(minutesAfter: Int, glucose: Double)]
+    let archiveRecordID: String?         // FoodFinder_AnalysisRecord.id if from MealArchive
+    let thumbnailID: String?             // FavoriteFoodImageStore thumbnail ID
 
-    init(date: Date, foodType: String, carbs: Double, preMealGlucose: Double,
-         peakGlucose: Double, twoHourGlucose: Double,
-         glucoseTimeline: [(minutesAfter: Int, glucose: Double)]) {
+    /// Whether this event has matched glucose data
+    var hasGlucoseData: Bool { preMealGlucose != nil }
+
+    init(date: Date, foodType: String, carbs: Double, preMealGlucose: Double? = nil,
+         peakGlucose: Double? = nil, twoHourGlucose: Double? = nil,
+         glucoseTimeline: [(minutesAfter: Int, glucose: Double)] = [],
+         archiveRecordID: String? = nil, thumbnailID: String? = nil) {
         self.id = UUID()
         self.date = date
         self.foodType = foodType
@@ -75,6 +82,8 @@ struct LoopInsightsMealEvent: Identifiable {
         self.peakGlucose = peakGlucose
         self.twoHourGlucose = twoHourGlucose
         self.glucoseTimeline = glucoseTimeline
+        self.archiveRecordID = archiveRecordID
+        self.thumbnailID = thumbnailID
     }
 }
 
