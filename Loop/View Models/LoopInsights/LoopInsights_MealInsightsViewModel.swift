@@ -53,7 +53,8 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
             let carbEntries = try await coordinator.fetchCarbEntries(start: startDate, end: endDate)
             let glucoseSamples = try await coordinator.fetchGlucoseSamples(start: startDate, end: endDate)
 
-            let rawGlucoseEvents = LoopInsights_FoodResponseAnalyzer.buildRecentMealEvents(
+            // Glucose events from carb entries (used for glucose timeline matching only)
+            let glucoseEvents = LoopInsights_FoodResponseAnalyzer.buildRecentMealEvents(
                 carbEntries: carbEntries,
                 glucoseSamples: glucoseSamples
             )
@@ -62,70 +63,68 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                 glucoseSamples: glucoseSamples
             )
 
-            // Load FoodFinder MealArchive to get thumbnails + meals without glucose data
+            // --- Archive-first approach ---
+            // MealArchive is the single source of truth for FoodFinder meals.
+            // It has the real food name, thumbnail, and nutritional data.
+            // We attach glucose data to archive records by date+carbs matching,
+            // then add carb-only entries (non-FoodFinder meals) separately.
+
             let archiveMeals = MealArchive.meals(from: startDate, to: endDate)
+            var consumedGlucoseEventIndices = Set<Int>()
+            var events: [LoopInsightsMealEvent] = []
 
-            // Enrich glucose-matched events with thumbnail + nutrition from MealArchive
-            let glucoseMatchedEvents = rawGlucoseEvents.map { event -> LoopInsightsMealEvent in
-                let matchingRecord = archiveMeals.first { record in
-                    abs(record.date.timeIntervalSince(event.date)) < 300 &&
-                    record.foodType == event.foodType
-                }
-                guard let record = matchingRecord else { return event }
+            // 1. Build events from archive records, attaching glucose data when available
+            for record in archiveMeals {
                 let result = record.analysisResult
-                return LoopInsightsMealEvent(
-                    date: event.date,
-                    foodType: event.foodType,
-                    carbs: event.carbs,
-                    preMealGlucose: event.preMealGlucose,
-                    peakGlucose: event.peakGlucose,
-                    twoHourGlucose: event.twoHourGlucose,
-                    glucoseTimeline: event.glucoseTimeline,
-                    archiveRecordID: record.id,
-                    thumbnailID: record.thumbnailID,
-                    totalProtein: result?.totalProtein,
-                    totalFat: result?.totalFat,
-                    totalFiber: result?.totalFiber,
-                    totalCalories: result?.totalCalories
-                )
-            }
 
-            // Archive-only meals (no glucose match yet)
-            let archiveEvents = archiveMeals.compactMap { record -> LoopInsightsMealEvent? in
-                let isDuplicate = glucoseMatchedEvents.contains { event in
-                    abs(event.date.timeIntervalSince(record.date)) < 300 &&
-                    event.foodType == record.foodType
+                // Find the glucose event that matches this archive record
+                let matchIdx = glucoseEvents.indices.first { idx in
+                    !consumedGlucoseEventIndices.contains(idx) &&
+                    abs(glucoseEvents[idx].date.timeIntervalSince(record.date)) < 300 &&
+                    abs(glucoseEvents[idx].carbs - record.carbsGrams) < 1
                 }
-                guard !isDuplicate else { return nil }
 
-                let result = record.analysisResult
-                return LoopInsightsMealEvent(
-                    date: record.date,
-                    foodType: record.foodType,
-                    carbs: record.carbsGrams,
-                    archiveRecordID: record.id,
-                    thumbnailID: record.thumbnailID,
-                    totalProtein: result?.totalProtein,
-                    totalFat: result?.totalFat,
-                    totalFiber: result?.totalFiber,
-                    totalCalories: result?.totalCalories
-                )
-            }
-
-            // Merge, deduplicate, and sort by date (most recent first).
-            // Dedup by date proximity (5 min) + foodType — keeps the version with more data.
-            let merged = (glucoseMatchedEvents + archiveEvents).sorted { $0.date > $1.date }
-            var seen: [(date: Date, foodType: String)] = []
-            let deduplicated = merged.filter { event in
-                let isDup = seen.contains { existing in
-                    abs(existing.date.timeIntervalSince(event.date)) < 300 &&
-                    existing.foodType == event.foodType
+                if let idx = matchIdx {
+                    consumedGlucoseEventIndices.insert(idx)
+                    let ge = glucoseEvents[idx]
+                    events.append(LoopInsightsMealEvent(
+                        date: ge.date,
+                        foodType: record.foodType,
+                        carbs: ge.carbs,
+                        preMealGlucose: ge.preMealGlucose,
+                        peakGlucose: ge.peakGlucose,
+                        twoHourGlucose: ge.twoHourGlucose,
+                        glucoseTimeline: ge.glucoseTimeline,
+                        archiveRecordID: record.id,
+                        thumbnailID: record.thumbnailID,
+                        totalProtein: result?.totalProtein,
+                        totalFat: result?.totalFat,
+                        totalFiber: result?.totalFiber,
+                        totalCalories: result?.totalCalories
+                    ))
+                } else {
+                    // No glucose match yet — show archive record without glucose data
+                    events.append(LoopInsightsMealEvent(
+                        date: record.date,
+                        foodType: record.foodType,
+                        carbs: record.carbsGrams,
+                        archiveRecordID: record.id,
+                        thumbnailID: record.thumbnailID,
+                        totalProtein: result?.totalProtein,
+                        totalFat: result?.totalFat,
+                        totalFiber: result?.totalFiber,
+                        totalCalories: result?.totalCalories
+                    ))
                 }
-                guard !isDup else { return false }
-                seen.append((event.date, event.foodType))
-                return true
             }
-            self.mealEvents = deduplicated
+
+            // 2. Add remaining glucose events that didn't match any archive record
+            //    (these are manual carb entries without FoodFinder)
+            for (idx, ge) in glucoseEvents.enumerated() where !consumedGlucoseEventIndices.contains(idx) {
+                events.append(ge)
+            }
+
+            self.mealEvents = events.sorted { $0.date > $1.date }
             self.foodPatterns = patterns
             self.isLoading = false
         } catch {
@@ -226,7 +225,7 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
     // MARK: - Helpers
 
     /// Find the MealArchive record that matches this meal event.
-    /// Uses archiveRecordID if available, otherwise falls back to date proximity + foodType.
+    /// Uses archiveRecordID if available, otherwise falls back to date + carb proximity.
     private func findArchiveRecord(for event: LoopInsightsMealEvent) -> FoodFinder_AnalysisRecord? {
         if let recordID = event.archiveRecordID {
             return MealArchive.loadAll().first { $0.id == recordID }
@@ -234,7 +233,7 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
         let windowStart = event.date.addingTimeInterval(-300) // 5 min tolerance
         let windowEnd = event.date.addingTimeInterval(300)
         let candidates = MealArchive.meals(from: windowStart, to: windowEnd)
-        return candidates.first { $0.foodType == event.foodType }
+        return candidates.first { abs($0.carbsGrams - event.carbs) < 1 }
             ?? candidates.first // Fall back to closest match
     }
 }
