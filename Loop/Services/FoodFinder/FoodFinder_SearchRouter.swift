@@ -105,7 +105,8 @@ class FoodSearchRouter {
     /// using a placeholder image with the user's description as context.
     func analyzeFoodByDescription(_ description: String) async throws -> AIFoodAnalysisResult {
         let basePrompt = getAnalysisPrompt()
-        let voiceContext = "\(basePrompt)\n\nThe user described their food verbally: \"\(description)\". There is no photo — analyze the food based solely on this text description. Provide the same detailed nutritional analysis you would for a food photo."
+        let locationContext = FoodFinder_LocationService.shared.locationContextForPrompt()
+        let voiceContext = "\(basePrompt)\(locationContext)\n\nThe user described their food verbally: \"\(description)\". There is no photo — analyze the food based solely on this text description. Provide the same detailed nutritional analysis you would for a food photo."
 
         log.info("🎙️ Routing voice/generative search '%{public}@' to configured BYO provider", description)
 

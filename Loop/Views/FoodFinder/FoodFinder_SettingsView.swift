@@ -18,6 +18,7 @@ struct AISettingsView: View {
     // Feature toggles
     @AppStorage("com.loopkit.Loop.foodSearchEnabled") private var foodSearchEnabled: Bool = false
     @AppStorage("com.loopkit.Loop.advancedDosingRecommendationsEnabled") private var advancedDosingRecommendationsEnabled: Bool = false
+    @AppStorage("com.loopkit.Loop.locationTaggingEnabled") private var locationTaggingEnabled: Bool = false
     @AppStorage("com.loopkit.Loop.analysisHistoryRetentionDays") private var retentionDays: Int = 7
 
     // AI configuration (non-secret settings)
@@ -137,6 +138,11 @@ extension AISettingsView {
                     Divider()
                     Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled)
                     Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations. Prolongs analysis.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Divider()
+                    Toggle("Location Tagging", isOn: $locationTaggingEnabled)
+                    Text("Tag meals with where you ate. Helps the AI identify restaurant menu items for more accurate carb estimates. Location data stays on your device.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

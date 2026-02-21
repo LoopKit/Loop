@@ -63,6 +63,8 @@
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera is used to scan barcodes of devices.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>FoodFinder uses your location to tag meals with where you ate. This helps identify how different restaurants affect your glucose. Location data stays on your device.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Face ID is used to authenticate insulin bolus and to save changes to therapy settings.</string>
 	<key>NSHealthShareUsageDescription</key>

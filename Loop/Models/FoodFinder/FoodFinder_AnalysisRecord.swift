@@ -40,6 +40,15 @@ struct FoodFinder_AnalysisRecord: Codable, Identifiable, Equatable {
     /// The confidence percentage the AI reported (nil for legacy records).
     let aiConfidencePercent: Int?
 
+    /// GPS latitude at time of analysis (nil if location tagging disabled or unavailable).
+    let latitude: Double?
+
+    /// GPS longitude at time of analysis (nil if location tagging disabled or unavailable).
+    let longitude: Double?
+
+    /// Reverse-geocoded venue name (e.g. "McDonald's") at time of analysis.
+    let locationName: String?
+
     enum AnalysisType: String, Codable {
         case image
         case dictation
