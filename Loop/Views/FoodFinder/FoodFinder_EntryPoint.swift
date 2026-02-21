@@ -1156,14 +1156,6 @@ extension FoodFinder_EntryPoint {
             aiConfidencePercent: confidence
         )
         FoodFinder_AnalysisHistoryStore.record(record)
-
-        // Broadcast for LoopInsights or any future observer.
-        // userInfo contains the record ID so listeners can look it up.
-        NotificationCenter.default.post(
-            name: .foodFinderMealLogged,
-            object: nil,
-            userInfo: ["recordID": record.id]
-        )
     }
 
     /// Record a barcode or text-search product to the history store and MealArchive.
@@ -1250,12 +1242,6 @@ extension FoodFinder_EntryPoint {
                     aiConfidencePercent: nil
                 )
                 FoodFinder_AnalysisHistoryStore.record(record)
-
-                NotificationCenter.default.post(
-                    name: .foodFinderMealLogged,
-                    object: nil,
-                    userInfo: ["recordID": record.id]
-                )
             }
         }
     }
