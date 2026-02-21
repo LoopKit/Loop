@@ -190,7 +190,9 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         // ISF schedule switches at 09:00, dose is given at ~5:39.
         // This means that 37.03/45 of a unit dose is given at ISF 45, and then the remainder is at 55
         let weight = 37.033308318741156 / 45.0
-        return weight + (1 - weight) * 45.0 / 55
+        return weight + (1 - weight) * 45.0 / 55 // 0.9678113467 (works for temp basal)
+        
+        // but for some reason when doing manual bolus, the right answer is: 45.0 / 46.770375929168637 = 0.9621474941
     }
     
     func testHighAndStable() {
