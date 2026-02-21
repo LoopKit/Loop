@@ -124,6 +124,27 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                 events.append(ge)
             }
 
+            // 3. Add remaining CarbStore entries not yet represented.
+            //    Catches manual carb entries that lacked sufficient glucose data
+            //    for buildRecentMealEvents() but should still appear in the meal list.
+            for entry in carbEntries {
+                let entryDate = entry.startDate
+                let entryCarbs = entry.quantity.doubleValue(for: .gram())
+                guard entryCarbs > 0 else { continue }
+
+                let alreadyRepresented = events.contains { event in
+                    abs(event.date.timeIntervalSince(entryDate)) < 300 &&
+                    abs(event.carbs - entryCarbs) < 1
+                }
+                guard !alreadyRepresented else { continue }
+
+                events.append(LoopInsightsMealEvent(
+                    date: entryDate,
+                    foodType: entry.foodType ?? "Unknown",
+                    carbs: entryCarbs
+                ))
+            }
+
             self.mealEvents = events.sorted { $0.date > $1.date }
             self.foodPatterns = patterns
             self.isLoading = false
