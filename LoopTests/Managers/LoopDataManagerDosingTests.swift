@@ -186,6 +186,13 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(1.40, recommendedTempBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
     
+    func getDosageRatioForHighAndStable() -> Double {
+        // ISF schedule switches at 09:00, dose is given at ~5:39
+        // this means that 37.03/45 is given at 45, and then the remainder is at 55.
+        let weight =  37.033308318741156 / 45.0
+        return weight + (1 - weight) * 45.0 / 55
+    }
+    
     func testHighAndStable() {
         setUp(for: .highAndStable)
         let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_stable_predicted_glucose")
@@ -209,8 +216,10 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
             XCTAssertEqual(expected.startDate, calculated.startDate)
             XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
         }
+        
+        // ISF changes from
 
-        XCTAssertEqual(4.63, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
+        XCTAssertEqual(getDosageRatioForHighAndStable() * 4.63, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
     
     func testHighAndFalling() {
@@ -442,7 +451,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.55, duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: getDosageRatioForHighAndStable() * 4.55, duration: .minutes(30)))
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         if dosingDecisionStore.dosingDecisions.count == 1 {
@@ -466,7 +475,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.55, duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: getDosageRatioForHighAndStable() * 4.55, duration: .minutes(30)))
         XCTAssertNil(delegate.recommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "loop")
@@ -485,7 +494,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
             exp.fulfill()
         }
         wait(for: [exp], timeout: 100000.0)
-        XCTAssertEqual(recommendedBolus!.amount, 1.82, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.amount, getDosageRatioForHighAndStable() * 1.82, accuracy: 0.01)
     }
 
     func testLoopGetStateRecommendsManualBolusWithMomentum() {
