@@ -163,7 +163,10 @@ final class CarbEntryViewModel: ObservableObject {
         guard updatedCarbEntry != nil else {
             return
         }
-        
+
+        // User confirmed they're eating — archive to MealArchive for LoopInsights
+        FoodFinder_AnalysisHistoryStore.confirmMeal()
+
         validateInputAndContinue()
     }
     

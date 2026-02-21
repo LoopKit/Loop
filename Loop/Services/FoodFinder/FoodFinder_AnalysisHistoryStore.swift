@@ -43,15 +43,37 @@ enum FoodFinder_AnalysisHistoryStore {
 
     // MARK: - Record
 
-    /// Append a new analysis record to the stored history.
-    /// Also archives the record permanently for long-term LoopInsights analysis.
+    /// Append a new analysis record to the short-term analysis history (for re-entry).
+    /// Does NOT archive to MealArchive — call `confirmMeal()` for that after the
+    /// user commits to eating by continuing to the bolus screen.
     static func record(_ record: FoodFinder_AnalysisRecord) {
         var records = allRecords()
         records.append(record)
         save(records)
-        MealArchive.archive(record)
+        pendingRecord = record
         #if DEBUG
         print("FoodFinder: Recorded analysis history — total: \(records.count)")
+        #endif
+    }
+
+    // MARK: - Meal Confirmation
+
+    /// The most recently analyzed record, waiting for user to confirm the meal.
+    static var pendingRecord: FoodFinder_AnalysisRecord?
+
+    /// Called when the user confirms they are eating (continues to bolus).
+    /// Archives the pending record to MealArchive and posts the notification.
+    static func confirmMeal() {
+        guard let record = pendingRecord else { return }
+        pendingRecord = nil
+        MealArchive.archive(record)
+        NotificationCenter.default.post(
+            name: .foodFinderMealLogged,
+            object: nil,
+            userInfo: ["recordID": record.id]
+        )
+        #if DEBUG
+        print("FoodFinder: Confirmed meal → archived to MealArchive: \(record.name)")
         #endif
     }
 
