@@ -73,8 +73,23 @@ struct LoopInsightsMealEvent: Identifiable {
     let totalFiber: Double?              // grams
     let totalCalories: Double?           // kcal
 
+    // Insulin dosing data (nil if no bolus matched within time window)
+    let bolusUnits: Double?              // total bolus units matched to this meal
+    let bolusDate: Date?                 // timestamp of the primary (largest) bolus
+    let automaticBolus: Double?          // portion from automatic/closed-loop dosing
+    let manualBolus: Double?             // portion from manual user bolus
+
     /// Whether this event has matched glucose data
     var hasGlucoseData: Bool { preMealGlucose != nil }
+
+    /// Whether this event has insulin dosing data
+    var hasDoseData: Bool { bolusUnits != nil && bolusUnits! > 0 }
+
+    /// Effective carb ratio achieved: carbs / bolusUnits
+    var effectiveCarbRatio: Double? {
+        guard let units = bolusUnits, units > 0, carbs > 0 else { return nil }
+        return carbs / units
+    }
 
     /// Whether this event has nutritional breakdown beyond carbs
     var hasNutritionalData: Bool {
@@ -86,7 +101,9 @@ struct LoopInsightsMealEvent: Identifiable {
          glucoseTimeline: [(minutesAfter: Int, glucose: Double)] = [],
          archiveRecordID: String? = nil, thumbnailID: String? = nil,
          totalProtein: Double? = nil, totalFat: Double? = nil,
-         totalFiber: Double? = nil, totalCalories: Double? = nil) {
+         totalFiber: Double? = nil, totalCalories: Double? = nil,
+         bolusUnits: Double? = nil, bolusDate: Date? = nil,
+         automaticBolus: Double? = nil, manualBolus: Double? = nil) {
         self.id = UUID()
         self.date = date
         self.foodType = foodType
@@ -101,6 +118,10 @@ struct LoopInsightsMealEvent: Identifiable {
         self.totalFat = totalFat
         self.totalFiber = totalFiber
         self.totalCalories = totalCalories
+        self.bolusUnits = bolusUnits
+        self.bolusDate = bolusDate
+        self.automaticBolus = automaticBolus
+        self.manualBolus = manualBolus
     }
 }
 

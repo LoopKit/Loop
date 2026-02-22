@@ -158,6 +158,34 @@ struct LoopInsights_MealInsightsView: View {
                 }
             }
 
+            // Insulin dosing row
+            if event.hasDoseData, let units = event.bolusUnits {
+                HStack(spacing: 6) {
+                    Image(systemName: "syringe")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+
+                    if let manual = event.manualBolus, let auto = event.automaticBolus, manual > 0, auto > 0 {
+                        Text(String(format: "%.1fU manual + %.1fU auto", manual, auto))
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    } else {
+                        Text(String(format: "%.1fU bolused", units))
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+
+                    if let cr = event.effectiveCarbRatio {
+                        Text("·")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(String(format: "CR %.0f:1", cr))
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+
             if event.hasGlucoseData,
                let preMeal = event.preMealGlucose,
                let peak = event.peakGlucose,
@@ -196,6 +224,15 @@ struct LoopInsights_MealInsightsView: View {
                     Text(String(format: NSLocalizedString("Rise: %+.0f mg/dL", comment: "LoopInsights meal glucose rise"), rise))
                         .font(.caption)
                         .foregroundColor(rise > 50 ? .orange : .green)
+
+                    if event.hasDoseData, let units = event.bolusUnits, units > 0 {
+                        Text("·")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(String(format: "%.1f mg/dL per unit", rise / units))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             } else {
                 // No glucose data yet

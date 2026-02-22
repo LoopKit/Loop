@@ -510,6 +510,14 @@ final class LoopInsights_Coordinator: ObservableObject {
         return try await bridge.getGlucoseSamples(start: start, end: end)
     }
 
+    /// Fetch normalized dose entries for the given date range.
+    func fetchDoseEntries(start: Date, end: Date) async throws -> [DoseEntry] {
+        guard let bridge = dataProviderBridge else {
+            throw LoopInsightsError.insufficientData("Data provider not available")
+        }
+        return try await bridge.getNormalizedDoseEntries(start: start, end: end)
+    }
+
     /// Fetch raw carb entries for the given date range.
     func fetchCarbEntries(start: Date, end: Date) async throws -> [StoredCarbEntry] {
         guard let bridge = dataProviderBridge else {

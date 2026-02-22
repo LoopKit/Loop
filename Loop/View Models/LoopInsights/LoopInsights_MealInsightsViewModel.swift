@@ -53,6 +53,10 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
             let carbEntries = try await coordinator.fetchCarbEntries(start: startDate, end: endDate)
             let glucoseSamples = try await coordinator.fetchGlucoseSamples(start: startDate, end: endDate)
 
+            // Fetch dose entries and filter to boluses for meal matching
+            let doseEntries = (try? await coordinator.fetchDoseEntries(start: startDate, end: endDate)) ?? []
+            let bolusEntries = doseEntries.filter { $0.type == .bolus }
+
             // Glucose events from carb entries (used for glucose timeline matching only)
             let glucoseEvents = LoopInsights_FoodResponseAnalyzer.buildRecentMealEvents(
                 carbEntries: carbEntries,
@@ -84,6 +88,8 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                     abs(glucoseEvents[idx].carbs - record.carbsGrams) < 1
                 }
 
+                let dose = Self.matchBoluses(for: record.date, from: bolusEntries)
+
                 if let idx = matchIdx {
                     consumedGlucoseEventIndices.insert(idx)
                     let ge = glucoseEvents[idx]
@@ -100,7 +106,11 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                         totalProtein: result?.totalProtein,
                         totalFat: result?.totalFat,
                         totalFiber: result?.totalFiber,
-                        totalCalories: result?.totalCalories
+                        totalCalories: result?.totalCalories,
+                        bolusUnits: dose.total > 0 ? dose.total : nil,
+                        bolusDate: dose.primaryDate,
+                        automaticBolus: dose.automatic > 0 ? dose.automatic : nil,
+                        manualBolus: dose.manual > 0 ? dose.manual : nil
                     ))
                 } else {
                     // No glucose match yet — show archive record without glucose data
@@ -113,7 +123,11 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                         totalProtein: result?.totalProtein,
                         totalFat: result?.totalFat,
                         totalFiber: result?.totalFiber,
-                        totalCalories: result?.totalCalories
+                        totalCalories: result?.totalCalories,
+                        bolusUnits: dose.total > 0 ? dose.total : nil,
+                        bolusDate: dose.primaryDate,
+                        automaticBolus: dose.automatic > 0 ? dose.automatic : nil,
+                        manualBolus: dose.manual > 0 ? dose.manual : nil
                     ))
                 }
             }
@@ -121,7 +135,26 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
             // 2. Add remaining glucose events that didn't match any archive record
             //    (these are manual carb entries without FoodFinder)
             for (idx, ge) in glucoseEvents.enumerated() where !consumedGlucoseEventIndices.contains(idx) {
-                events.append(ge)
+                let dose = Self.matchBoluses(for: ge.date, from: bolusEntries)
+                events.append(LoopInsightsMealEvent(
+                    date: ge.date,
+                    foodType: ge.foodType,
+                    carbs: ge.carbs,
+                    preMealGlucose: ge.preMealGlucose,
+                    peakGlucose: ge.peakGlucose,
+                    twoHourGlucose: ge.twoHourGlucose,
+                    glucoseTimeline: ge.glucoseTimeline,
+                    archiveRecordID: ge.archiveRecordID,
+                    thumbnailID: ge.thumbnailID,
+                    totalProtein: ge.totalProtein,
+                    totalFat: ge.totalFat,
+                    totalFiber: ge.totalFiber,
+                    totalCalories: ge.totalCalories,
+                    bolusUnits: dose.total > 0 ? dose.total : nil,
+                    bolusDate: dose.primaryDate,
+                    automaticBolus: dose.automatic > 0 ? dose.automatic : nil,
+                    manualBolus: dose.manual > 0 ? dose.manual : nil
+                ))
             }
 
             // 3. Add remaining CarbStore entries not yet represented.
@@ -138,10 +171,15 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
                 }
                 guard !alreadyRepresented else { continue }
 
+                let dose = Self.matchBoluses(for: entryDate, from: bolusEntries)
                 events.append(LoopInsightsMealEvent(
                     date: entryDate,
                     foodType: entry.foodType ?? "Unknown",
-                    carbs: entryCarbs
+                    carbs: entryCarbs,
+                    bolusUnits: dose.total > 0 ? dose.total : nil,
+                    bolusDate: dose.primaryDate,
+                    automaticBolus: dose.automatic > 0 ? dose.automatic : nil,
+                    manualBolus: dose.manual > 0 ? dose.manual : nil
                 ))
             }
 
@@ -151,6 +189,49 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
         } catch {
             self.isLoading = false
         }
+    }
+
+    // MARK: - Bolus Matching
+
+    /// Match bolus entries to a meal by timestamp proximity.
+    /// Window: -5 min (pre-bolus) to +15 min (delayed bolus) of the meal date.
+    /// Returns total units split by manual vs automatic, plus the primary bolus date.
+    private static func matchBoluses(
+        for mealDate: Date,
+        from boluses: [DoseEntry]
+    ) -> (total: Double, manual: Double, automatic: Double, primaryDate: Date?) {
+        let windowStart = mealDate.addingTimeInterval(-5 * 60)   // 5 min before
+        let windowEnd = mealDate.addingTimeInterval(15 * 60)     // 15 min after
+
+        let matched = boluses.filter { bolus in
+            bolus.startDate >= windowStart && bolus.startDate <= windowEnd
+        }
+
+        guard !matched.isEmpty else { return (0, 0, 0, nil) }
+
+        var totalUnits: Double = 0
+        var manualUnits: Double = 0
+        var automaticUnits: Double = 0
+        var largestUnits: Double = 0
+        var primaryDate: Date?
+
+        for bolus in matched {
+            let units = bolus.deliveredUnits ?? bolus.programmedUnits
+            totalUnits += units
+
+            if bolus.automatic == true {
+                automaticUnits += units
+            } else {
+                manualUnits += units
+            }
+
+            if units > largestUnits {
+                largestUnits = units
+                primaryDate = bolus.startDate
+            }
+        }
+
+        return (totalUnits, manualUnits, automaticUnits, primaryDate)
     }
 
     // MARK: - Debrief
