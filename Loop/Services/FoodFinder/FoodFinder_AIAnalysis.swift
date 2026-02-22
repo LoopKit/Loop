@@ -1093,8 +1093,8 @@ class ConfigurableAIService: ObservableObject {
         telemetryCallback?("🤖 Connecting to \(config.name)...")
 
         let prompt = getAnalysisPrompt() + FoodFinder_LocationService.shared.locationContextForPrompt()
-        let result = try await AIServiceManager.shared.analyzeFoodImage(
-            pre.resizedImage,
+        let result = try await AIServiceManager.shared.analyzeFoodImagePreencoded(
+            base64: pre.base64,
             using: config,
             query: prompt
         )
