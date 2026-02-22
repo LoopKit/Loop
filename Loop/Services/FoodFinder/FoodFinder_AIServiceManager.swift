@@ -67,6 +67,37 @@ final class AIServiceManager {
         return try parseResponse(data: data, config: configuration)
     }
 
+    /// Analyze a food image that has already been pre-encoded (cropped, resized, JPEG-compressed).
+    /// Skips the internal `prepareImageForAnalysis` pipeline to avoid double-processing.
+    /// Used by `ConfigurableAIService` which pre-encodes images via `preencodeImageForProviders`.
+    func analyzeFoodImagePreencoded(
+        base64: String,
+        using configuration: AIProviderConfiguration,
+        query: String = ""
+    ) async throws -> AIFoodAnalysisResult {
+        guard !configuration.apiKey.isEmpty else {
+            throw AIFoodAnalysisError.noApiKey
+        }
+
+        var adjustedConfig = configuration
+        adjustedConfig.maxTokens = max(configuration.maxTokens, 4096)
+
+        var request = try buildRequest(config: adjustedConfig, prompt: query, imageBase64: base64)
+
+        let isAdvanced = UserDefaults.standard.advancedDosingRecommendationsEnabled
+        request.timeoutInterval = isAdvanced ? 120 : 60
+
+        let requestStart = Date()
+        let (data, response) = try await executeRequest(request)
+        let requestDuration = Date().timeIntervalSince(requestStart)
+
+        log.default("AI request (preencoded) completed in %.1f seconds (%d bytes)", requestDuration, data.count)
+
+        try validateHTTPResponse(response, data: data)
+
+        return try parseResponse(data: data, config: configuration)
+    }
+
     /// Text-only food analysis (no image). Used for voice/dictation searches.
     func analyzeFoodByText(
         using configuration: AIProviderConfiguration,

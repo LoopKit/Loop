@@ -1034,8 +1034,9 @@ class ConfigurableAIService: ObservableObject {
             telemetryCallback?("🤖 Analyzing menu text with \(config.name)...")
 
             let basePrompt = getAnalysisPrompt()
+            let locationContext = FoodFinder_LocationService.shared.locationContextForPrompt()
             let menuPrompt = """
-            \(basePrompt)
+            \(basePrompt)\(locationContext)
 
             The following text was extracted via OCR from a photo of a menu, recipe, or food label. \
             Analyze these food items and provide detailed nutritional information. \
@@ -1091,9 +1092,9 @@ class ConfigurableAIService: ObservableObject {
 
         telemetryCallback?("🤖 Connecting to \(config.name)...")
 
-        let prompt = getAnalysisPrompt()
-        let result = try await AIServiceManager.shared.analyzeFoodImage(
-            pre.resizedImage,
+        let prompt = getAnalysisPrompt() + FoodFinder_LocationService.shared.locationContextForPrompt()
+        let result = try await AIServiceManager.shared.analyzeFoodImagePreencoded(
+            base64: pre.base64,
             using: config,
             query: prompt
         )

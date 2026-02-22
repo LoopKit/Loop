@@ -22,6 +22,12 @@ enum FoodFinder_FeatureFlags {
         get { UserDefaults.standard.bool(forKey: Keys.foodSearchEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Keys.foodSearchEnabled) }
     }
+
+    /// Location tagging — captures venue-level GPS when FoodFinder opens.
+    static var locationTaggingEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: Keys.locationTaggingEnabled) }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.locationTaggingEnabled) }
+    }
 }
 
 // MARK: - UserDefaults Keys
@@ -50,6 +56,9 @@ extension FoodFinder_FeatureFlags {
         // Analysis History
         static let analysisHistory                  = "com.loopkit.Loop.analysisHistory"
         static let analysisHistoryRetentionDays     = "com.loopkit.Loop.analysisHistoryRetentionDays"
+
+        // Location tagging
+        static let locationTaggingEnabled            = "com.loopkit.Loop.locationTaggingEnabled"
 
         // Migration tracking
         static let byoMigrationComplete             = "com.loopkit.Loop.byoMigrationComplete"
@@ -138,6 +147,13 @@ extension UserDefaults {
                 try? FoodFinder_SecureStorage.saveUSDAKey(newValue)
             }
         }
+    }
+
+    // MARK: Location Tagging
+
+    var foodFinder_locationTaggingEnabled: Bool {
+        get { bool(forKey: FoodFinder_FeatureFlags.Keys.locationTaggingEnabled) }
+        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.locationTaggingEnabled) }
     }
 
     // MARK: Analysis History

@@ -185,6 +185,7 @@ struct FoodFinder_EntryPoint: View {
             loadFavoriteFoods()
             wireSearchVMCallbacks()
             searchVM.setupObservers()
+            FoodFinder_LocationService.shared.requestLocationIfEnabled()
         }
         .onChange(of: restoredAnalysisResult) { newResult in
             guard let result = newResult else { return }
@@ -1142,6 +1143,7 @@ extension FoodFinder_EntryPoint {
             }
         }()
 
+        let locService = FoodFinder_LocationService.shared
         let record = FoodFinder_AnalysisRecord(
             id: UUID().uuidString,
             name: name,
@@ -1153,7 +1155,10 @@ extension FoodFinder_EntryPoint {
             thumbnailID: thumbID,
             analysisResult: result,
             originalAICarbs: aiCarbs,
-            aiConfidencePercent: confidence
+            aiConfidencePercent: confidence,
+            latitude: locService.latitude,
+            longitude: locService.longitude,
+            locationName: locService.locationName
         )
         FoodFinder_AnalysisHistoryStore.record(record)
     }
@@ -1228,6 +1233,7 @@ extension FoodFinder_EntryPoint {
             }
 
             await MainActor.run {
+                let locService = FoodFinder_LocationService.shared
                 let record = FoodFinder_AnalysisRecord(
                     id: UUID().uuidString,
                     name: productName,
@@ -1239,7 +1245,10 @@ extension FoodFinder_EntryPoint {
                     thumbnailID: thumbID,
                     analysisResult: analysisResult,
                     originalAICarbs: nil,
-                    aiConfidencePercent: nil
+                    aiConfidencePercent: nil,
+                    latitude: locService.latitude,
+                    longitude: locService.longitude,
+                    locationName: locService.locationName
                 )
                 FoodFinder_AnalysisHistoryStore.record(record)
             }
