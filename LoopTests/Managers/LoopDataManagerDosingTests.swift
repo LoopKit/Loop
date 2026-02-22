@@ -188,11 +188,14 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     
     func getDosageRatioForHighAndStable() -> Double {
         // ISF schedule switches at 09:00, dose is given at ~5:39.
-        // This means that 37.03/45 of a unit dose is given at ISF 45, and then the remainder is at 55
-        let weight = 37.033308318741156 / 45.0
-        return weight + (1 - weight) * 45.0 / 55 // 0.9678113467 (works for temp basal)
-        
-        // but for some reason when doing manual bolus, the right answer is: 45.0 / 46.770375929168637 = 0.9621474941
+        // This means that 36.39/45 of a unit dose is given at ISF 45, and then the remainder is at 55
+        let weight = 36.393359243966223 / 45.0
+        return weight + (1 - weight) * 45.0 / 55
+    }
+    
+    func getDosageForHighAndStableTempBasal(_ value: Double) -> Double {
+        // the scheduled basal is 1 U/hr, therefore this part should not be adjusted
+        return 1.0 + getDosageRatioForHighAndStable() * (value - 1.0)
     }
     
     func testHighAndStable() {
@@ -221,7 +224,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         
         // ISF changes from
 
-        XCTAssertEqual(getDosageRatioForHighAndStable() * 4.63, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
+        XCTAssertEqual(getDosageForHighAndStableTempBasal(4.63), recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
     
     func testHighAndFalling() {
@@ -453,7 +456,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: delegate.roundBasalRate(unitsPerHour: getDosageRatioForHighAndStable() * 4.55), duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: delegate.roundBasalRate(unitsPerHour: getDosageForHighAndStableTempBasal(4.57)), duration: .minutes(30)))
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         if dosingDecisionStore.dosingDecisions.count == 1 {
@@ -477,7 +480,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: delegate.roundBasalRate( unitsPerHour: getDosageRatioForHighAndStable() * 4.55), duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: delegate.roundBasalRate( unitsPerHour: getDosageForHighAndStableTempBasal(4.57)), duration: .minutes(30)))
         XCTAssertNil(delegate.recommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "loop")
