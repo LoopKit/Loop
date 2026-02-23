@@ -256,10 +256,6 @@ struct LoopInsights_SuggestionDetailView: View {
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.red)
-                } else {
-                    Text(NSLocalizedString("These values are outside the typical recommended range. Consult your healthcare provider before applying.", comment: "LoopInsights guardrail consult message"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
             }
             .padding(.vertical, 4)
